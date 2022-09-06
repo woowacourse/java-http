@@ -10,13 +10,16 @@ public class IndexHandler implements Handler {
 
     private static final String INDEX_RESOURCE_PATH = "/index.html";
 
+    private final HttpRequest httpRequest;
+
     public IndexHandler(final HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
     }
 
     @Override
     public String getResponse() {
         String responseBody = FileReader.getFile(INDEX_RESOURCE_PATH, getClass());
-        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.OK, ContentType.HTML, responseBody);
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, responseBody);
         return httpResponse.getResponse();
     }
 }

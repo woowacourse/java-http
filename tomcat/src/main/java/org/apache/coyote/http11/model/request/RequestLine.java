@@ -12,23 +12,28 @@ public class RequestLine {
     private static final int QUERY_PARAM_VALUE_INDEX = 1;
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_TARGET_INDEX = 1;
+    private static final int REQUEST_VERSION_INDEX = 2;
 
     private final Method method;
     private final String target;
     private final Map<String, String> params;
+    private final String version;
 
-    private RequestLine(final Method method, final String target, final Map<String, String> params) {
+    public RequestLine(final Method method, final String target, final Map<String, String> params,
+                       final String version) {
         this.method = method;
         this.target = target;
         this.params = params;
+        this.version = version;
     }
 
-    public static RequestLine of(final String requestLine) {
+    public static RequestLine from(final String requestLine) {
         String[] splitRequestLine = requestLine.split(" ");
         Method method = Method.findMethod(splitRequestLine[METHOD_INDEX]);
         String target = createTarget(splitRequestLine[REQUEST_TARGET_INDEX]);
+        String version = splitRequestLine[REQUEST_VERSION_INDEX];
         Map<String, String> params = createParams(splitRequestLine[REQUEST_TARGET_INDEX]);
-        return new RequestLine(method, target, params);
+        return new RequestLine(method, target, params, version);
     }
 
     private static String createTarget(final String input) {
@@ -74,5 +79,9 @@ public class RequestLine {
 
     public boolean matchTarget(final String input) {
         return this.target.equals(input);
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

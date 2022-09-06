@@ -24,15 +24,16 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(final ResponseStatusCode statusCode, final ContentType contentType,
-                                  final String body) {
+    public static HttpResponse of(final ResponseStatusCode statusCode, final String version,
+                                  final ContentType contentType, final String body) {
         Map<String, String> headers = initHeaders(contentType, body);
-        return new HttpResponse(ResponseLine.of(statusCode), headers, body);
+        return new HttpResponse(ResponseLine.of(statusCode, version), headers, body);
     }
 
-    public static HttpResponse of(final ResponseStatusCode statusCode, final ContentType contentType) {
+    public static HttpResponse of(final ResponseStatusCode statusCode, final String version,
+                                  final ContentType contentType) {
         Map<String, String> headers = initHeaders(contentType, "");
-        return new HttpResponse(ResponseLine.of(statusCode), headers, "");
+        return new HttpResponse(ResponseLine.of(statusCode, version), headers, "");
     }
 
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {

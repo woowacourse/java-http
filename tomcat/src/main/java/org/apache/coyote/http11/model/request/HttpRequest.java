@@ -21,7 +21,7 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader reader) {
         try {
-            RequestLine requestLine = RequestLine.of(reader.readLine());
+            RequestLine requestLine = RequestLine.from(reader.readLine());
             RequestHeader headers = createHeaders(reader);
             RequestBody body = createBody(reader, headers.getContentLength());
             return new HttpRequest(requestLine, headers, body);
@@ -63,5 +63,9 @@ public class HttpRequest {
 
     public boolean matchTarget(final String input) {
         return requestLine.matchTarget(input);
+    }
+
+    public String getVersion() {
+        return requestLine.getVersion();
     }
 }

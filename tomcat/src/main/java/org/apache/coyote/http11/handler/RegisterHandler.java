@@ -10,7 +10,7 @@ import org.apache.coyote.http11.model.response.ContentType;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.ResponseStatusCode;
 
-public class RegisterHandler implements Handler{
+public class RegisterHandler implements Handler {
 
     private static final String REGISTER_RESOURCE_PATH = "/register.html";
     private static final String INDEX_RESOURCE_PATH = "/index.html";
@@ -35,19 +35,19 @@ public class RegisterHandler implements Handler{
         if (httpRequest.matchRequestMethod(Method.POST)) {
             return doPost();
         }
-        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(), ContentType.HTML);
         response.addLocationHeader(NOT_FOUND_RESOURCE_PATH);
         return response;
     }
 
     private HttpResponse doGet() {
-        return HttpResponse.of(ResponseStatusCode.OK, ContentType.HTML,
+        return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML,
                 FileReader.getFile(REGISTER_RESOURCE_PATH, getClass()));
     }
 
     private HttpResponse doPost() {
         saveUser(httpRequest.getBody());
-        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(), ContentType.HTML);
         response.addLocationHeader(INDEX_RESOURCE_PATH);
         return response;
     }

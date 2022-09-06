@@ -39,12 +39,13 @@ public class LoginHandler implements Handler {
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
         if (SessionManager.findSession(httpRequest.getCookieKey())) {
-            HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+            HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(),
+                    ContentType.HTML);
             response.addLocationHeader(INDEX_RESOURCE_PATH);
             return response;
 
         }
-        return HttpResponse.of(ResponseStatusCode.OK, ContentType.HTML,
+        return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML,
                 FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
     }
 
@@ -56,7 +57,8 @@ public class LoginHandler implements Handler {
             return successResponse(maybeUser.get());
         }
 
-        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.UNAUTHORIZED, ContentType.HTML);
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.UNAUTHORIZED, httpRequest.getVersion(),
+                ContentType.HTML);
         httpResponse.addLocationHeader(UNAUTHORIZED_RESOURCE_PATH);
         return httpResponse;
     }
@@ -66,7 +68,8 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse successResponse(final User user) {
-        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(),
+                ContentType.HTML);
         Cookie cookie = new Cookie();
         SessionManager.add(cookie.getCookieToString(), new Session("user", user));
         httpResponse.addCookie(cookie);

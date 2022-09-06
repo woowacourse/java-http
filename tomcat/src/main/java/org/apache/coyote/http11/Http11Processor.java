@@ -22,9 +22,12 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.badrequest.AlreadyRegisterAccountException;
 import org.apache.coyote.http11.exception.badrequest.BadRequestException;
+import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
 import org.apache.coyote.http11.exception.notfound.NotFoundUrlException;
 import org.apache.coyote.http11.exception.unauthorised.LoginFailException;
@@ -93,18 +96,34 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (httpRequest.getUrl().equals("/login")) {
             if (httpRequest.getHttpMethod() == GET) {
-                final String responseBody = loadFile("/login.html");
-                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-                return new HttpResponse.Builder()
-                        .statusCode(OK)
-                        .headers(httpHeaders)
-                        .body(responseBody)
-                        .build();
+                try {
+                    final HttpCookie httpCookie = httpRequest.getHttpCookie();
+                    final SessionManager sessionManager = new SessionManager();
+                    sessionManager.findSession(httpCookie.getCookieValue(JSESSIONID));
+                    final HttpHeaders httpHeaders = new HttpHeaders()
+                            .addHeader(LOCATION, "/index.html");
+                    return new HttpResponse.Builder()
+                            .statusCode(FOUND)
+                            .headers(httpHeaders)
+                            .build();
+                } catch (NotExistHeaderException | LoginFailException exception) {
+                    final String responseBody = loadFile("/login.html");
+                    final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                    return new HttpResponse.Builder()
+                            .statusCode(OK)
+                            .headers(httpHeaders)
+                            .body(responseBody)
+                            .build();
+                }
             }
             if (httpRequest.getHttpMethod() == POST) {
                 final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
-                validateLogin(httpRequestBody);
+                final User user = login(httpRequestBody);
                 final UUID id = UUID.randomUUID();
+                final SessionManager sessionManager = new SessionManager();
+                final Session session = new Session(id.toString());
+                session.setAttribute("user", user);
+                sessionManager.add(session);
                 final HttpHeaders httpHeaders = new HttpHeaders()
                         .addHeader(SET_COOKIE, JSESSIONID + "=" + id)
                         .addHeader(LOCATION, "/index.html");
@@ -139,13 +158,14 @@ public class Http11Processor implements Runnable, Processor {
         throw new NotFoundUrlException();
     }
 
-    private void validateLogin(final HttpRequestBody httpRequestBody) {
+    private User login(final HttpRequestBody httpRequestBody) {
         final String account = httpRequestBody.getBodyValue("account");
         final String password = httpRequestBody.getBodyValue("password");
         final User user = findRegisteredUser(account);
         if (!user.checkPassword(password)) {
             throw new LoginFailException();
         }
+        return user;
     }
 
     private User findRegisteredUser(final String account) {

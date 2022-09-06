@@ -71,6 +71,10 @@ public class HttpRequest {
         return url;
     }
 
+    public HttpCookie getHttpCookie() {
+        return this.httpHeaders.getHttpCookie();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 
 public class HttpHeaders {
 
@@ -64,12 +65,15 @@ public class HttpHeaders {
     }
 
     public String getValue(final HttpHeader httpHeader) {
+        if (headers.isEmpty() || !headers.containsKey(httpHeader)) {
+            throw new NotExistHeaderException();
+        }
         return this.headers.get(httpHeader);
     }
 
     public HttpCookie getHttpCookie() {
         if (headers.isEmpty() || !headers.containsKey(COOKIE)) {
-            return new HttpCookie("");
+            throw new NotExistHeaderException();
         }
         return new HttpCookie(this.headers.get(COOKIE));
     }

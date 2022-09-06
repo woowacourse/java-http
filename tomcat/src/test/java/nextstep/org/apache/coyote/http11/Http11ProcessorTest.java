@@ -9,9 +9,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -128,8 +131,8 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /login 요청, login.html을 보여준다.")
-    void loginRequestWithoutQueryString() throws IOException {
+    @DisplayName("GET /login 요청, Cookie 값 없음 : login.html을 보여준다.")
+    void loginRequestWithoutCookie() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -157,7 +160,66 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: Status 302, index.html 반환, Cookie 설정")
+    @DisplayName("GET /login 요청, Cookie 값 있지만 해당 세션이 없음 : login.html을 보여준다.")
+    void loginRequestWithWrongCookie() throws IOException {
+        // given
+        final SessionManager sessionManager = new SessionManager();
+        final Session session = new Session("sessionId");
+        sessionManager.add(session);
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */*",
+                "Cookie: JSESSIONID=invalid ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + content.length + " \r\n" +
+                "\r\n" +
+                new String(content);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET /login 요청, 이미 로그인한 상태: Status 302, index.html 반환")
+    void loginRequestWhenAlreadyLogin() {
+        // given
+        final SessionManager sessionManager = new SessionManager();
+        final Session session = new Session("sessionId");
+        sessionManager.add(session);
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */*",
+                "Cookie: JSESSIONID=sessionId ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n";
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: Status 302, Set-Cookie, index.html 반환")
     void loginRequestAndSuccessLogin() {
         // given
         final String httpRequest = String.join("\r\n",
@@ -179,6 +241,39 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).contains(
                 List.of("HTTP/1.1 302 Found", "Set-Cookie: JSESSIONID=", "Location: /index.html"));
+    }
+
+    @Test
+    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: 세션을 저장한다.")
+    void saveSessionAfterSuccessLogin() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        final SessionManager sessionManager = new SessionManager();
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        final String[] response = output.split("\r\n");
+        final String setCookieHeader = Arrays.stream(response)
+                .filter(line -> line.startsWith("Set-Cookie: JSESSIONID="))
+                .findFirst()
+                .get()
+                .stripTrailing();
+        final String[] parameterAndValue = setCookieHeader.split("=");
+        final String sessionId = parameterAndValue[1];
+        assertThat(sessionManager.findSession(sessionId)).isNotNull();
     }
 
     @Test

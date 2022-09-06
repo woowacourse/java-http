@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.session.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

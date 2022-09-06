@@ -16,6 +16,8 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;

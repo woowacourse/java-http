@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HeaderKeys;
 import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.common.HttpMessageDelimiter;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.apache.coyote.http11.response.header.StatusLine;

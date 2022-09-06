@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class HttpCookie {
 
+    private static final String COOKIE_NAME = "JSESSIONID";
     private final UUID value;
 
     public HttpCookie() {
@@ -11,6 +12,6 @@ public class HttpCookie {
     }
 
     public String getCookie() {
-        return "JSESSIONID" + "=" + value.toString();
+        return COOKIE_NAME + "=" + value.toString();
     }
 }

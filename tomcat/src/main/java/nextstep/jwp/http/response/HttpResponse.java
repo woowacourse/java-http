@@ -30,20 +30,8 @@ public class HttpResponse {
         httpHeaders.addValue(LOCATION, location);
     }
 
-    public void setStatus(final String status) {
-        this.statusCode = StatusCode.valueOf(status);
-    }
-
-    public void setContentType(final String contentType) {
-        this.httpHeaders.addValue(CONTENT_TYPE, contentType);
-    }
-
     public void setContentLength(final int contentLength) {
         this.httpHeaders.addValue(CONTENT_LENGTH, String.valueOf(contentLength));
-    }
-
-    public void setLocation(final String location) {
-        this.httpHeaders.addValue(LOCATION, location);
     }
 
     public void setResponseBody(final String responseBody) {

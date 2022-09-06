@@ -17,13 +17,14 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String UNAUTHORIZED_ERROR_PAGE_URL = "./401.html";
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
         super.doGet(request, response);
 
         if (SessionManager.hasSession(request.getCookie())) {
-            response.sendRedirect("./index.html");
+            response.sendRedirect(INDEX_PAGE_URL);
         }
     }
 
@@ -42,7 +43,7 @@ public class LoginController extends AbstractController {
         User user = findUser(account);
 
         if (!user.checkPassword(password)) {
-            response.sendRedirect("./401.html");
+            response.sendRedirect(UNAUTHORIZED_ERROR_PAGE_URL);
             return;
         }
         registerUserCookieToSession(response, user);

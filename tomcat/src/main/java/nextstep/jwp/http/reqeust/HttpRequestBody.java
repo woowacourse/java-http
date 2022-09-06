@@ -9,6 +9,7 @@ public class HttpRequestBody {
 
     private static final String BODY_CONNECTOR = "&";
     private static final String BODY_SEPARATOR = "=";
+    private static final String EMPTY_REQUEST_BODY = " ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -26,7 +27,7 @@ public class HttpRequestBody {
 
     private String requestBody(final BufferedReader bufferReader, final String contentLength) throws IOException {
         if (contentLength == null) {
-            return " ";
+            return EMPTY_REQUEST_BODY;
         }
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];

@@ -8,6 +8,8 @@ import nextstep.jwp.http.HttpHeader;
 
 public class HttpRequest {
 
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final HttpRequestLine httpRequestLine;
     private final HttpHeader httpHeaders;
     private final HttpRequestBody httpRequestBody;
@@ -15,7 +17,7 @@ public class HttpRequest {
     public HttpRequest(final BufferedReader bufferReader) throws IOException {
         this.httpRequestLine = HttpRequestLine.from(bufferReader.readLine());
         this.httpHeaders = new HttpHeader(bufferReader);
-        this.httpRequestBody = new HttpRequestBody(bufferReader, httpHeaders.getValues("Content-Length"));
+        this.httpRequestBody = new HttpRequestBody(bufferReader, httpHeaders.getValues(CONTENT_LENGTH));
     }
 
     public String findContentType() {

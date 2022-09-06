@@ -8,6 +8,11 @@ import nextstep.jwp.io.ClassPathResource;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String HTML_EXTENSION = ".html";
+    private static final String FILE_EXTENSION_START = ".";
+
+    protected static final String INDEX_PAGE_URL = "./index.html";
+
     @Override
     public void service(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
@@ -34,12 +39,12 @@ public abstract class AbstractController implements Controller {
 
         response.setContentLength(responseBody.getBytes().length);
         response.setResponseBody(responseBody);
-        response.sendRedirect("./index.html");
+        response.sendRedirect(INDEX_PAGE_URL);
     }
 
     private String resourcePath(final String path) {
-        if (!path.contains(".")) {
-            return path + ".html";
+        if (!path.contains(FILE_EXTENSION_START)) {
+            return path + HTML_EXTENSION;
         }
         return path;
     }

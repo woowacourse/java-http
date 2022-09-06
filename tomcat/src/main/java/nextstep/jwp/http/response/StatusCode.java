@@ -3,8 +3,7 @@ package nextstep.jwp.http.response;
 public enum StatusCode {
 
     OK("200", "OK"),
-    FOUND("302", "FOUND"),
-    UNAUTHORIZED("401", "UNAUTHORIZED");
+    FOUND("302", "FOUND");
 
     private final String code;
     private final String message;

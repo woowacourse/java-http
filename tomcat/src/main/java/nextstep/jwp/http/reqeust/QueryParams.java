@@ -28,12 +28,4 @@ public class QueryParams {
             this.values.put(value[KEY_INDEX], value[VALUE_INDEX]);
         }
     }
-
-    public boolean isNotEmpty() {
-        return !values.isEmpty();
-    }
-
-    public Map<String, String> getValues() {
-        return values;
-    }
 }

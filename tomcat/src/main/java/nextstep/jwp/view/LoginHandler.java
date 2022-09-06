@@ -22,7 +22,7 @@ public class LoginHandler implements Function<Request, Response> {
         final Optional<User> user = findUser(request);
 
         String locationUrl = "/index";
-        String responseBody = ResourceGenerator.getStaticResource("/index");
+        String responseBody = "";
         Status statusCode = Status.FOUND;
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             locationUrl = "/401";

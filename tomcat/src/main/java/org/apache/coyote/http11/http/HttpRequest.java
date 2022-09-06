@@ -3,6 +3,7 @@ package org.apache.coyote.http11.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.coyote.http11.http.domain.Headers;
+import org.apache.coyote.http11.http.domain.HttpMethod;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.http.domain.RequestLine;
 
@@ -27,6 +28,10 @@ public class HttpRequest {
         } catch (IOException e) {
             throw new IllegalArgumentException("HttpRequest creation failed.");
         }
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
     }
 
     public RequestLine getRequestLine() {

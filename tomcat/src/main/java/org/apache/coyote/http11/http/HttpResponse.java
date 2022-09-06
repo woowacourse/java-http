@@ -7,6 +7,7 @@ import org.apache.coyote.http11.http.domain.HttpVersion;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.http.domain.StatusCode;
 import org.apache.coyote.http11.http.domain.StatusLine;
+import org.apache.coyote.http11.util.FileReader;
 
 public class HttpResponse {
 
@@ -25,6 +26,34 @@ public class HttpResponse {
                 new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK),
                 Headers.builder()
                         .contentType(contentType)
+                        .contentLength(messageBody.length()),
+                messageBody);
+    }
+
+    public static HttpResponse methodNotAllowed() {
+        MessageBody messageBody = new MessageBody(FileReader.read("405.html"));
+        return new HttpResponse(
+                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.METHOD_NOT_ALLOWED),
+                Headers.builder()
+                        .contentType(ContentType.TEXT_HTML)
+                        .contentLength(messageBody.length()),
+                messageBody);
+    }
+
+    public static HttpResponse found() {
+        return new HttpResponse(
+                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND),
+                Headers.builder()
+                        .location("/index.html"),
+                new MessageBody(""));
+    }
+
+    public static HttpResponse unauthorized() {
+        MessageBody messageBody = new MessageBody(FileReader.read("401.html"));
+        return new HttpResponse(
+                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.UNAUTHORIZED),
+                Headers.builder()
+                        .contentType(ContentType.TEXT_HTML)
                         .contentLength(messageBody.length()),
                 messageBody);
     }

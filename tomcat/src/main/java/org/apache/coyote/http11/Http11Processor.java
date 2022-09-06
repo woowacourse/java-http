@@ -12,6 +12,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpHeaders;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.QueryParams;
@@ -62,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
         String requestBody = parseRequestBody(bufferedReader, httpHeaders);
 
-        return HttpRequest.from(requestLine, httpHeaders, requestBody);
+        return HttpRequest.of(requestLine, httpHeaders, requestBody);
     }
 
     private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
@@ -85,14 +86,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handle(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
-        QueryParams queryParams = httpRequest.getQueryParams();
-        if ("/".equals(path)) {
+        if (httpRequest.matches("/", HttpMethod.GET)) {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_PLAIN, "Hello world!");
         }
-        if ("/login".equals(path)) {
-            return login(queryParams);
+        if (httpRequest.matches("/login", HttpMethod.GET)) {
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource("/login.html")));
         }
-        if (httpRequest.equals(ContentType.TEXT_PLAIN)) {
+        if (httpRequest.matches("/login", HttpMethod.POST)) {
+            return login(httpRequest.getFormData());
+        }
+        if (httpRequest.matches(ContentType.TEXT_PLAIN)) {
             String filePath =
                 path + FILE_EXTENSION_SEPARATOR + ContentType.TEXT_HTML.getFileExtension();
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
@@ -102,10 +106,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse login(QueryParams queryParams) {
-        if (queryParams.count() == 0) {
-            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
-                FileUtils.readFile(getResource("/login.html")));
-        }
         if (LoginHandler.canLogin(queryParams)) {
             return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
                 FileUtils.readFile(getResource("/index.html")));

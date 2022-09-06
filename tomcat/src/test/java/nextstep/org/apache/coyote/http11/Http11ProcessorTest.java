@@ -1,15 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -54,9 +53,29 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login_Cookie() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        String response = socket.output();
+        assertThat(response.contains("Set-Cookie: JESSIONID="));
     }
 }

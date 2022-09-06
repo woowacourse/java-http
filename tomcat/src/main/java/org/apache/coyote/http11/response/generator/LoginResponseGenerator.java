@@ -7,6 +7,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.header.Cookies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ public class LoginResponseGenerator implements ResponseGenerator {
     private static final String PASSWORD_KEY = "password";
     private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final String LOGIN_FAILURE_REDIRECT_URI = "http://localhost:8080/401.html";
+    private static final String JSESSION_COOKIE_KEY = "JSESSIONID";
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {
@@ -31,17 +33,24 @@ public class LoginResponseGenerator implements ResponseGenerator {
         String password = httpRequest.getParamValueOf(PASSWORD_KEY);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent()) {
-            return responseAfterPasswordCheck(user.get(), password);
+        if (isInvalidUserInfo(user, password)) {
+            return HttpResponse.found(LOGIN_FAILURE_REDIRECT_URI);
         }
-        return HttpResponse.found(LOGIN_FAILURE_REDIRECT_URI);
+        return getSuccessResponse(user.get(), httpRequest);
     }
 
-    private HttpResponse responseAfterPasswordCheck(User user, String password) {
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
-            return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI);
+    private boolean isInvalidUserInfo(Optional<User> user, String password) {
+        return user.isEmpty() ||
+                !user.get()
+                        .checkPassword(password);
+    }
+
+    private HttpResponse getSuccessResponse(User user, HttpRequest httpRequest) {
+        log.info(user.toString());
+
+        if (!httpRequest.hasCookieOf(JSESSION_COOKIE_KEY)) {
+            return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI, Cookies.fromResponse(JSESSION_COOKIE_KEY));
         }
-        return HttpResponse.found(LOGIN_FAILURE_REDIRECT_URI);
+        return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI);
     }
 }

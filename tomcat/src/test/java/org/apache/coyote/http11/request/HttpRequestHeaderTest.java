@@ -38,13 +38,13 @@ class HttpRequestHeaderTest {
         );
     }
 
-    @DisplayName("Cookie 헤더가 존재하는지 반환한다.")
+    @DisplayName("Name에 해당하는 Cookie 헤더가 존재하는지 반환한다.")
     @ParameterizedTest
     @MethodSource("provideRequestLinesAndExpectedCookieExistence")
     void hasCookie(List<String> requestHeaders, boolean expected) {
         HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(requestHeaders);
 
-        boolean actual = httpRequestHeader.hasCookie();
+        boolean actual = httpRequestHeader.hasCookieOf("JSESSIONID");
 
         assertThat(actual).isEqualTo(expected);
     }

@@ -39,6 +39,10 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
             String response = getResponse(httpRequest);
+
+            //if (httpRequest.hasRequestPathOf("/login")) {
+            //    System.out.println(response);
+            //}
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

@@ -1,18 +1,20 @@
 package org.apache.coyote.http11.web.response;
 
-import static org.apache.coyote.http11.support.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.support.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.support.HttpHeader.*;
 import static org.apache.coyote.http11.support.HttpMime.TEXT_HTML;
 
+import org.apache.coyote.http11.support.HttpCookie;
 import org.apache.coyote.http11.support.HttpHeader;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpStatus;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class HttpResponse {
 
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
+    private static final String EMPTY_BODY = "";
 
     private final HttpStatus httpStatus;
     private final HttpHeaders httpHeaders;
@@ -27,11 +29,18 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    private void initializeHeaders(final HttpHeaders httpHeaders, final String responseBody) {
-        if (!httpHeaders.existsContentType()) {
-            httpHeaders.put(CONTENT_TYPE, TEXT_HTML.getValue());
-        }
-        httpHeaders.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+    public static HttpResponse sendRedirectWithCookie(final String uri, final HttpCookie httpCookie) {
+        final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+        httpHeaders.put(LOCATION, uri);
+        httpHeaders.put(SET_COOKIE, httpCookie.format());
+
+        return new HttpResponse(HttpStatus.FOUND, httpHeaders, EMPTY_BODY);
+    }
+    public static HttpResponse sendRedirect(final String uri) {
+        final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+        httpHeaders.put(LOCATION, uri);
+
+        return new HttpResponse(HttpStatus.FOUND, httpHeaders, EMPTY_BODY);
     }
 
     public String format() {
@@ -43,6 +52,13 @@ public class HttpResponse {
                 .append(responseBody);
 
         return stringBuilder.toString();
+    }
+
+    private void initializeHeaders(final HttpHeaders httpHeaders, final String responseBody) {
+        if (!httpHeaders.existsContentType()) {
+            httpHeaders.put(CONTENT_TYPE, TEXT_HTML.getValue());
+        }
+        httpHeaders.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
     }
 
     private StringBuilder formatHeader() {

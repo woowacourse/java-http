@@ -14,7 +14,7 @@ public class RequestMapping {
     public Controller getController(HttpRequest request) {
         return controllers.stream()
                 .filter(controller -> controller.canHandle(request))
-                .findFirst()
+                .findAny()
                 .orElse(new DefaultController());
     }
 }

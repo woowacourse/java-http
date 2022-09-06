@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.HttpController;
+import org.apache.coyote.http11.controller.DefaultController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -20,11 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Controller controller;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.controller = new HttpController();
+        this.requestMapping = new RequestMapping(List.of(new LoginController(), new DefaultController()));
     }
 
     @Override
@@ -40,6 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.ofRequestLine(requestLine);
             HttpResponse httpResponse = new HttpResponse();
 
+            Controller controller = requestMapping.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
             String response = generateResponse(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
@@ -51,8 +56,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateResponse(final HttpRequest httpRequest,
                                     final HttpResponse httpResponse) throws IOException {
-        controller.service(httpRequest, httpResponse);
-
         return String.join("\r\n",
                 httpResponse.getStatusLine().getValue(),
                 httpRequest.getContentType(),

@@ -18,12 +18,13 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueries() {
-        int index = getResource().indexOf("?");
-        String queryString = getResource().substring(index + 1);
+        int index = getPath().indexOf("?");
+        String queryString = getPath().substring(index + 1);
         String[] keyValues = queryString.split("&");
 
         Map<String, String> queryMap = new HashMap<>();
         for (String keyValue : keyValues) {
+            String[] tmp = keyValue.split("=");
             String key = keyValue.split("=")[0];
             String value = keyValue.split("=")[1];
             queryMap.put(key, value);
@@ -52,6 +53,6 @@ public class HttpRequest {
     }
 
     public boolean hasQueryString() {
-        return getResource().contains("?");
+        return getPath().contains("?");
     }
 }

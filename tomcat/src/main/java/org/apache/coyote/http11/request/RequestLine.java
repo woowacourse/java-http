@@ -40,10 +40,11 @@ public class RequestLine {
     }
 
     public String getContentType() {
-        if (path.contains("/css")) {
+        System.out.println("###" + path + " " + method + " " + protocolVersion);
+        if (path.contains(".css")) {
             return CONTENT_TYPE + "text/css;" + CHARSET_UTF_8;
         }
-        if (path.contains("/js")) {
+        if (path.contains(".js")) {
             return CONTENT_TYPE + "text/js;" + CHARSET_UTF_8;
         }
         return CONTENT_TYPE + "text/html;" + CHARSET_UTF_8;

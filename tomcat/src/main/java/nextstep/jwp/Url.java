@@ -55,7 +55,7 @@ public enum Url {
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        if (!user.checkPassword(password)) {
+        if (user.checkPassword(password)) {
             log.info(user.toString());
             return true;
         }

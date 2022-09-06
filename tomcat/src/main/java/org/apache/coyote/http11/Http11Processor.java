@@ -8,9 +8,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestGenerator;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,8 @@ import java.util.Map;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final DispatcherServlet DISPATCHER_SERVLET = DispatcherServlet.getInstance();
+
+    private static final ServletContainer SERVLET_CONTAINER = ServletContainer.init();
 
     private final Socket connection;
 
@@ -43,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest httpRequest = HttpRequestGenerator.createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = DISPATCHER_SERVLET.doDispatch(httpRequest);
+            final HttpResponse httpResponse = SERVLET_CONTAINER.service(httpRequest);
             final String responseMessage = httpResponse.toMessage();
 
             printQueries(httpRequest);

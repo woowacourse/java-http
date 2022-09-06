@@ -1,8 +1,6 @@
 package nextstep.jwp.controller;
 
-import org.springframework.web.servlet.mvc.Controller;
-
-public class UserController implements Controller {
+public class UserController{
 
     private static final UserController USER_CONTROLLER = new UserController();
 

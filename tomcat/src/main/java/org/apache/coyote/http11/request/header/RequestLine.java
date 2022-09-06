@@ -30,6 +30,10 @@ public class RequestLine {
         );
     }
 
+    public Method getMethod() {
+        return method;
+    }
+
     public String getUrl() {
         return resource.getUrl();
     }

@@ -22,4 +22,8 @@ public enum Method {
             throw new IllegalArgumentException(String.format("존재하지 않는 HTTP Method 입니다. [%s]", method));
         }
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
 }

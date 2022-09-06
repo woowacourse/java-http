@@ -17,7 +17,6 @@ public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     public static HttpResponse handle(HttpRequest request, HttpResponse response) throws IOException {
         QueryString queryString = request.queryString();
@@ -26,10 +25,12 @@ public class LoginController {
         }
         if (isValidUser(queryString.get("account"), queryString.get("password"))) {
             response.setStatus(HttpStatus.FOUND);
-            return StaticHandler.handle(INDEX_PAGE, response);
+            response.setHeader("Location", "/index.html");
+            return response;
         }
-        response.setStatus(HttpStatus.UNAUTHORIZED);
-        return StaticHandler.handle(UNAUTHORIZED_PAGE, response);
+        response.setStatus(HttpStatus.FOUND);
+        response.setHeader("Location", "/401.html");
+        return response;
     }
 
     private static Boolean isValidUser(String account, String password) {

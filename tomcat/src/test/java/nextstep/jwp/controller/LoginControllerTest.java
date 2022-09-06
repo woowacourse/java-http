@@ -39,7 +39,7 @@ public class LoginControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getBody()).isEqualTo(indexPage);
+        assertThat(response.getHeader("Location")).isEqualTo("/index.html");
     }
 
     @DisplayName("로그인에 실패하면 401, 401.html을 응답한다.")

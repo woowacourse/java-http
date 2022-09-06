@@ -57,4 +57,8 @@ public class HttpResponse {
     public void setStatus(HttpStatus status) {
         this.status = status;
     }
+
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
 }

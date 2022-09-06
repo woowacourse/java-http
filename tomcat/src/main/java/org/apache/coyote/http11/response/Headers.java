@@ -27,4 +27,8 @@ public class Headers {
         }
         return responseValue.toString();
     }
+
+    public String get(String key) {
+        return this.value.get(key);
+    }
 }

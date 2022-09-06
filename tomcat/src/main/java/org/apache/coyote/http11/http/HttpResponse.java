@@ -40,21 +40,10 @@ public class HttpResponse {
                 messageBody);
     }
 
-    public static HttpResponse found() {
+    public static HttpResponse found(final Headers headers, final MessageBody messageBody) {
         return new HttpResponse(
                 new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND),
-                Headers.builder()
-                        .location("/index.html"),
-                new MessageBody(""));
-    }
-
-    public static HttpResponse unauthorized() {
-        MessageBody messageBody = new MessageBody(FileReader.read("401.html"));
-        return new HttpResponse(
-                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.UNAUTHORIZED),
-                Headers.builder()
-                        .contentType(ContentType.TEXT_HTML)
-                        .contentLength(messageBody.length()),
+                headers,
                 messageBody);
     }
 

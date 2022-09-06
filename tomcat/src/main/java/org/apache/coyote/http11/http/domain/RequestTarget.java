@@ -69,4 +69,9 @@ public class RequestTarget {
     public Map<String, String> getQueryParameters() {
         return queryParameters;
     }
+
+    @Override
+    public String toString() {
+        return uri + "?" + queryParameters;
+    }
 }

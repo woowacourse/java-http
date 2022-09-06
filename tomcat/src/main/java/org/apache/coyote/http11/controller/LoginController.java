@@ -7,6 +7,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
+import org.apache.coyote.http11.http.domain.Headers;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
@@ -17,25 +18,44 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
-        Map<String, String> queryParameters = httpRequest.getRequestLine()
-                .getRequestTarget()
-                .getQueryParameters();
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("User not found."));
-        if (user.checkPassword(password)) {
-            log.info("User : {}", user);
-            return HttpResponse.found();
-        }
-        return HttpResponse.unauthorized();
-    }
-
-    @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
+        if (httpRequest.hasQueryString()) {
+            return inquireUser(httpRequest);
+        }
         String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
         String responseBody = FileReader.read(uri + ".html");
         return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+    }
+
+    private HttpResponse inquireUser(final HttpRequest httpRequest) {
+        try {
+            Map<String, String> queryParameters = httpRequest.getRequestLine()
+                    .getRequestTarget()
+                    .getQueryParameters();
+            String account = queryParameters.get("account");
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new NotFoundException("User not found."));
+            String password = queryParameters.get("password");
+            return login(user, password);
+        } catch (NotFoundException e) {
+            return HttpResponse.found(
+                    Headers.builder()
+                            .location("/401.html"),
+                    new MessageBody(""));
+        }
+    }
+
+    private HttpResponse login(final User user, final String password) {
+        if (user.checkPassword(password)) {
+            log.info("User : {}", user);
+            return HttpResponse.found(
+                    Headers.builder()
+                            .location("/index.html"),
+                    new MessageBody(""));
+        }
+        return HttpResponse.found(
+                Headers.builder()
+                        .location("/401.html"),
+                new MessageBody(""));
     }
 }

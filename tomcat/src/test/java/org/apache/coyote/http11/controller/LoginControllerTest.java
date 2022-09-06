@@ -15,7 +15,32 @@ import support.BufferedReaderFactory;
 class LoginControllerTest {
 
     @Test
-    void handle() {
+    void page() {
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        Controller controller = new LoginController();
+        BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+
+        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusLine().getStatusLine())
+                        .isEqualTo("HTTP/1.1 200 OK "),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type"))
+                        .contains(ContentType.TEXT_HTML.getValue()),
+                () -> assertThat(httpResponse.getMessageBody().getValue())
+                        .isEqualTo(new String(Files.readAllBytes(new File(
+                                getClass().getClassLoader().getResource("static/login.html").getFile()).toPath())))
+        );
+    }
+
+    @Test
+    void login() {
         String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -29,12 +54,54 @@ class LoginControllerTest {
         HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
 
         assertAll(
-                () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),
-                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(
-                        ContentType.TEXT_HTML.getValue()),
-                () -> assertThat(httpResponse.getMessageBody().getValue()).isEqualTo(new String(
-                        Files.readAllBytes(new File(
-                                getClass().getClassLoader().getResource("static/login.html").getFile()).toPath())))
+                () -> assertThat(httpResponse.getStatusLine().getStatusLine())
+                        .isEqualTo("HTTP/1.1 302 Found "),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Location"))
+                        .isEqualTo("/index.html")
+        );
+    }
+
+    @Test
+    void wrongPassword() {
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wroing HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        Controller controller = new LoginController();
+        BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+
+        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusLine().getStatusLine())
+                        .isEqualTo("HTTP/1.1 302 Found "),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Location"))
+                        .isEqualTo("/401.html")
+        );
+    }
+
+    @Test
+    void wrongUserId() {
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=fufu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        Controller controller = new LoginController();
+        BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+
+        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusLine().getStatusLine())
+                        .isEqualTo("HTTP/1.1 302 Found "),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Location"))
+                        .isEqualTo("/401.html")
         );
     }
 }

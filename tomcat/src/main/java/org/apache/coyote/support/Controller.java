@@ -1,9 +1,12 @@
 package org.apache.coyote.support;
 
+import static org.apache.coyote.http11.model.ContentType.TEXT_HTML_CHARSET_UTF_8;
+
 import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.LoginController;
 import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpRequest;
 import org.apache.coyote.http11.request.model.HttpRequestUri;
 
@@ -15,16 +18,16 @@ public class Controller {
         this.httpRequest = httpRequest;
     }
 
-    public HttpResponse execute() {
+    public HttpResponse get() {
         HttpRequestUri uri = httpRequest.getUri();
         if (uri.getValue().equals("/")) {
             HomeController controller = new HomeController();
             return controller.index(httpRequest);
         }
 
-        if (isLogin(uri.getValue())) {
-            LoginController loginController = new LoginController();
-            return loginController.login(httpRequest);
+        if (uri.getValue().equals("/login.html")) {
+            BasicController basicController = new BasicController();
+            return basicController.execute(httpRequest);
         }
 
         if (uri.isBasicContentType()) {
@@ -32,14 +35,15 @@ public class Controller {
             return basicController.execute(httpRequest);
         }
 
-        throw new BadRequestException(uri.getValue());
+        return HttpResponse.builder()
+                .version(httpRequest.getVersion())
+                .status(HttpStatus.OK.getValue())
+                .headers("Content-Type: " + TEXT_HTML_CHARSET_UTF_8.getValue())
+                .build();
     }
 
-    private boolean isLogin(final String uri) {
-        if (uri.contains("?")) {
-            String requestUri = uri.substring(0, uri.indexOf("?"));
-            return requestUri.equals("/login");
-        }
-        return false;
+    public HttpResponse post() {
+        LoginController controller = new LoginController();
+        return controller.login(httpRequest);
     }
 }

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class HttpRequestHandlerTest {
+public class HttpRequestUtilsTest {
 
     @Nested
     @DisplayName("http 요청을 받아 httpRequest 객체를 생성한다.")
@@ -34,7 +34,7 @@ class HttpRequestHandlerTest {
             Socket socket = new StubSocket(request);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(bufferedReader);
+            HttpRequest httpRequest = HttpRequestUtils.newHttpRequest(bufferedReader);
 
             assertAll(
                     () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
@@ -55,7 +55,7 @@ class HttpRequestHandlerTest {
 
             Socket socket = new StubSocket(request);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(bufferedReader);
+            HttpRequest httpRequest = HttpRequestUtils.newHttpRequest(bufferedReader);
             HttpHeaders headers = httpRequest.getHeaders();
 
             assertAll(
@@ -63,6 +63,28 @@ class HttpRequestHandlerTest {
                     () -> assertThat(headers.getValue("Connection")).isEqualTo("keep-alive")
             );
         }
-    }
 
+        @Test
+        @DisplayName("요청의 요청 본문을 가져온다.")
+        void body() throws IOException {
+            String requestBody = "{\n"
+                    + "\"account\" : \"gugu\",\n"
+                    + "\"password\" : \"password\"\n"
+                    + "}";
+            String request = "POST /index.html HTTP/1.1\n"
+                    + "Host: localhost:8080\n"
+                    + "Content-Length: " + requestBody.getBytes().length + "\n"
+                    + "Connection: keep-alive\n"
+                    + "Accept: */*\n"
+                    + "\n"
+                    + requestBody;
+
+            Socket socket = new StubSocket(request);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            HttpRequest httpRequest = HttpRequestUtils.newHttpRequest(bufferedReader);
+            String body = httpRequest.getBody();
+
+            assertThat(body).isEqualTo(requestBody);
+        }
+    }
 }

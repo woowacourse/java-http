@@ -4,12 +4,14 @@ import org.apache.coyote.http11.request.HttpHeaders;
 
 public class HttpRequest {
 
-    private final HttpRequestStartLine startLine;
+    private final HttpRequestLine startLine;
     private final HttpHeaders headers;
+    private final String body;
 
-    public HttpRequest(final HttpRequestStartLine httpRequestStartLine, final HttpHeaders headers) {
+    public HttpRequest(final HttpRequestLine httpRequestStartLine, final HttpHeaders headers, final String body) {
         this.startLine = httpRequestStartLine;
         this.headers = headers;
+        this.body = body;
     }
 
     public boolean isEqualToMethod(final HttpMethod httpMethod) {
@@ -38,5 +40,9 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

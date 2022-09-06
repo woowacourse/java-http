@@ -1,15 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -117,14 +116,15 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
+        String requestBody = "account=gugu&password=password";
+        String request = "POST /index.html HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Content-Length: " + requestBody.getBytes().length + "\n"
+                + "Connection: keep-alive\n"
+                + "Accept: */*\n"
+                + "\n"
+                + requestBody;
+        final var socket = new StubSocket(request);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -141,14 +141,15 @@ class Http11ProcessorTest {
     @Test
     void login_fail() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=pass HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
+        String requestBody = "account=gugu&password=pass";
+        String request = "POST /index.html HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Content-Length: " + requestBody.getBytes().length + "\n"
+                + "Connection: keep-alive\n"
+                + "Accept: */*\n"
+                + "\n"
+                + requestBody;
+        final var socket = new StubSocket(request);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when

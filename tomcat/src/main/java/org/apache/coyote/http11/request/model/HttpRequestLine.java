@@ -1,18 +1,18 @@
 package org.apache.coyote.http11.request.model;
 
-public class HttpRequestStartLine {
+public class HttpRequestLine {
 
     private final HttpMethod method;
     private final HttpRequestUri uri;
     private final HttpVersion version;
 
-    public HttpRequestStartLine(final HttpMethod method, final HttpRequestUri uri, final HttpVersion version) {
+    public HttpRequestLine(final HttpMethod method, final HttpRequestUri uri, final HttpVersion version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
     }
 
-    public HttpRequestStartLine(final String method, final String uri, final String version) {
+    public HttpRequestLine(final String method, final String uri, final String version) {
         this(HttpMethod.of(method), HttpRequestUri.of(uri), HttpVersion.of(version));
     }
 

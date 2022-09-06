@@ -1,16 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.text.MessageFormat;
-import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.exception.MethodNotAllowedException;
-import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpMethod;
 import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.request.model.HttpRequestUri;
-import org.apache.coyote.http11.request.model.HttpVersion;
 import org.apache.coyote.support.Controller;
-import org.apache.coyote.util.FileUtils;
 
 public class WebClient {
 
@@ -20,6 +14,9 @@ public class WebClient {
         if (httpRequest.isEqualToMethod(HttpMethod.GET)) {
             return doGet(httpRequest);
         }
+        if (httpRequest.isEqualToMethod(HttpMethod.POST)) {
+            return doPost(httpRequest);
+        }
         throw new MethodNotAllowedException(MessageFormat.format("not allowed : {0}", httpRequest.getMethod()));
     }
 
@@ -27,13 +24,18 @@ public class WebClient {
         Controller controller = new Controller(httpRequest);
 
         if (httpRequest.isEqualToUri(INDEX_URI)) {
-            return controller.execute();
+            return controller.get();
         }
 
         if (httpRequest.isQueryString()) {
-            return controller.execute();
+            return controller.get();
         }
 
-        return controller.execute();
+        return controller.get();
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
+        Controller controller = new Controller(httpRequest);
+        return controller.post();
     }
 }

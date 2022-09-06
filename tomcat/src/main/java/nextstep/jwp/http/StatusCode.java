@@ -28,7 +28,7 @@ public enum StatusCode {
         return StatusCode.OK;
     }
 
-    public String getStatus() {
+    public String writeStatus() {
         return String.format(STATUS_FORMAT, this.statusCode, this.reason);
     }
 }

@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import java.util.List;
 import nextstep.jwp.utils.FileUtils;
+import org.apache.session.SessionManager;
 
 public class HttpRequest {
 
@@ -74,8 +75,11 @@ public class HttpRequest {
         return QueryParams.empty();
     }
 
-    public Cookie getCookie() {
-        return httpHeaders.parseCookie();
+    public boolean isLoggedInUser(SessionManager sessionManager) {
+        return httpHeaders.getCookie()
+            .getJSessionId()
+            .filter(sessionManager::contains)
+            .isPresent();
     }
 
     public String getPath() {

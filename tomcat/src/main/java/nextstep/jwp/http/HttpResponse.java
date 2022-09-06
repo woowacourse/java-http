@@ -8,23 +8,25 @@ public class HttpResponse {
     private final HttpStatus httpStatus;
     private final ContentType contentType;
     private final Location location;
+    private final HttpCookie httpCookie;
     private final String responseBody;
 
     public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final ContentType contentType,
-                        final Location location, final String responseBody) {
+                        final Location location, final HttpCookie httpCookie, final String responseBody) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.contentType = contentType;
         this.location = location;
+        this.httpCookie = httpCookie;
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse ok(final HttpVersion httpVersion, final String responseBody) {
-        return new HttpResponse(httpVersion, HttpStatus.OK, ContentType.TEXT_HTML, Location.empty(), responseBody);
+    public static HttpResponse ok(final HttpVersion httpVersion, final HttpCookie httpCookie, final String responseBody) {
+        return new HttpResponse(httpVersion, HttpStatus.OK, ContentType.TEXT_HTML, Location.empty(), httpCookie, responseBody);
     }
 
-    public static HttpResponse found(final HttpVersion httpVersion, final Location location) {
-        return new HttpResponse(httpVersion, HttpStatus.FOUND, ContentType.APPLICATION_JSON, location, EMPTY_BODY);
+    public static HttpResponse found(final HttpVersion httpVersion, final HttpCookie httpCookie, final Location location) {
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, ContentType.APPLICATION_JSON, location, httpCookie, EMPTY_BODY);
     }
 
     public byte[] httpResponse() {

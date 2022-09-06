@@ -12,6 +12,7 @@ import nextstep.jwp.handler.HttpRequestHandler;
 import nextstep.jwp.handler.LoginRequestHandler;
 import nextstep.jwp.handler.RegisterRequestHandler;
 import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
 import nextstep.jwp.http.HttpRequestHeaders;
@@ -113,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
-        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, Location.empty(), responseBody);
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, Location.empty(), HttpCookie.empty(), responseBody);
     }
 
     private boolean isLoginRequest(final String path) {

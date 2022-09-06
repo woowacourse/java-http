@@ -1,6 +1,7 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
@@ -34,7 +35,7 @@ public class RegisterRequestHandler implements HttpRequestHandler {
     @Override
     public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, responseBody);
+        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
     }
 
     @Override
@@ -44,6 +45,6 @@ public class RegisterRequestHandler implements HttpRequestHandler {
         String email = httpRequestBody.getValue("email");
         String password = httpRequestBody.getValue("password");
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.found(httpVersion, new Location("/index.html"));
+        return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html"));
     }
 }

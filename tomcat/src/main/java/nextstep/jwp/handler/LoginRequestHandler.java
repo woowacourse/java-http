@@ -2,6 +2,7 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
@@ -33,7 +34,7 @@ public class LoginRequestHandler implements HttpRequestHandler {
     @Override
     public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, responseBody);
+        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
     }
 
     @Override
@@ -44,8 +45,8 @@ public class LoginRequestHandler implements HttpRequestHandler {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
         if (user.checkPassword(password)) {
-            return HttpResponse.found(httpVersion, new Location("/index.html"));
+            return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html"));
         }
-        return HttpResponse.found(httpVersion, new Location("/401.html"));
+        return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/401.html"));
     }
 }

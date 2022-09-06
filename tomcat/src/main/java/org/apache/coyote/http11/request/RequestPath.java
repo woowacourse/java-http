@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.util.StringUtils.SPACE;
 public class RequestPath {
 
     private static final int RESOURCE_INDEX = 1;
-    private static final String LOGIN_REQUEST = "/login";
     private static final String QUERY_STRING_PREFIX = "?";
     private static final String REQUEST_FILE_PATH_QUERY_STRING_DELIMITER = "\\?";
     private static final int REQUEST_PATH_INDEX = 0;
@@ -27,10 +26,6 @@ public class RequestPath {
 
     public String getValue() {
         return value;
-    }
-
-    public boolean containsLoginPath() {
-        return value.equals(LOGIN_REQUEST);
     }
 
     public boolean contains(String value) {

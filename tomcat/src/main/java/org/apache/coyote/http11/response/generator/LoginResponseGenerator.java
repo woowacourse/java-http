@@ -7,8 +7,12 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginResponseGenerator implements ResponseGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginResponseGenerator.class);
 
     private static final String LOGIN_REQUEST = "/login";
     private static final String ACCOUNT_KEY = "account";
@@ -35,6 +39,7 @@ public class LoginResponseGenerator implements ResponseGenerator {
 
     private HttpResponse responseAfterPasswordCheck(User user, String password) {
         if (user.checkPassword(password)) {
+            log.info(user.toString());
             return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI);
         }
         return HttpResponse.found(LOGIN_FAILURE_REDIRECT_URI);

@@ -55,10 +55,6 @@ public class HttpRequest {
         return requestPath.getValue();
     }
 
-    public boolean isLoginRequest() {
-        return requestPath.containsLoginPath() && httpMethod.isPost();
-    }
-
     public boolean hasRequestPathIncluding(String value) {
         return requestPath.contains(value);
     }

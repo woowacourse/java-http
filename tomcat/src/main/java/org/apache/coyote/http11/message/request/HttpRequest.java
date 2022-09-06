@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.request.body.RequestBody;
 import org.apache.coyote.http11.message.request.header.Cookie;
@@ -14,6 +16,8 @@ import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
 public class HttpRequest {
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final RequestLine requestLine;
     private final Headers headers;
@@ -73,8 +77,27 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public Cookie getCookie() {
-        return headers.getCookie();
+    public Session createSession() {
+        final Session session = new Session();
+        SESSION_MANAGER.add(session);
+        return session;
+    }
+
+    public Optional<Object> getSessionAttribute(final String name) {
+        final Session session = getSession();
+        if (session == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(session.getAttribute(name));
+    }
+
+    private Session getSession() {
+        final Cookie cookie = headers.getCookie();
+        final Optional<String> jSessionId = cookie.getJSessionId();
+        if (jSessionId.isEmpty()) {
+            return null;
+        }
+        return SESSION_MANAGER.findSession(jSessionId.get());
     }
 
     public QueryParams getUriQueryParams() {

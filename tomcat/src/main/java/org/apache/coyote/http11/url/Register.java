@@ -16,17 +16,17 @@ public class Register extends Url {
     }
 
     @Override
-    public Http11Response getResponse(HttpHeaders httpHeaders) {
-        return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
-
-    }
-
-    @Override
-    public Http11Response postResponse(HttpHeaders httpHeaders, String requestBody) {
-        HttpRequest joinData = UrlParser.extractRequest(requestBody);
-        User user = new User(joinData.get("account"), joinData.get("password"), joinData.get("email"));
-        InMemoryUserRepository.save(user);
-        log.info("save user: {}", user);
-        return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"));
+    public Http11Response getResource(HttpHeaders httpHeaders, String requestBody) {
+        if (HttpMethod.GET.equals(getHttpMethod())) {
+            return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
+        }
+        if (HttpMethod.POST.equals(getHttpMethod())) {
+            HttpRequest joinData = UrlParser.extractRequest(requestBody);
+            User user = new User(joinData.get("account"), joinData.get("password"), joinData.get("email"));
+            InMemoryUserRepository.save(user);
+            log.info("save user: {}", user);
+            return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"));
+        }
+        throw new IllegalArgumentException("Register에 해당하는 HTTP Method가 아닙니다. : " + getHttpMethod());
     }
 }

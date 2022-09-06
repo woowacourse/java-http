@@ -24,13 +24,9 @@ public abstract class Url {
         int index = path.indexOf(".");
         if (index == -1) {
             this.path = path + "." + TEXT_HTML.getExtension();
-
         }
     }
-
-    public abstract Http11Response getResponse(HttpHeaders httpHeaders);
-
-    public abstract Http11Response postResponse(HttpHeaders httpHeaders, String requestBody);
+    public abstract Http11Response getResource(HttpHeaders httpHeaders, String requestBody);
 
     public String getPath() {
         return path;

@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import java.io.IOException;
-import org.apache.coyote.http11.request.HttpHeaders;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.url.Url;
 
 public class Http11Response {
 
@@ -17,20 +14,17 @@ public class Http11Response {
         this.resource = resource;
     }
 
-    public static Http11Response extract(final Url url, final HttpHeaders httpHeaders,
-                                         final String requestBody) throws IOException {
-        if (url.getHttpMethod().equals(HttpMethod.GET)) {
-            return url.getResponse(httpHeaders);
-        }
-        return url.postResponse(httpHeaders, requestBody);
+    public String toResponse() throws IOException {
+        return createResponse(httpStatus, contentType, resource);
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
+    private String createResponse(HttpStatus httpStatus, String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getName() + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     public String getResource() {

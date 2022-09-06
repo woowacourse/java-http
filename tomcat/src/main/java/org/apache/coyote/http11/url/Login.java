@@ -21,22 +21,24 @@ public class Login extends Url {
     }
 
     @Override
-    public Http11Response getResponse(HttpHeaders httpHeaders) {
-        return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
-    }
+    public Http11Response getResource(HttpHeaders httpHeaders, String requestBody) {
+        if (HttpMethod.GET.equals(getHttpMethod())) {
+            return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
+        }
 
-    @Override
-    public Http11Response postResponse(HttpHeaders httpHeaders, String requestBody) {
-        HttpRequest request = UrlParser.extractRequest(requestBody);
-        User user = InMemoryUserRepository.findByAccount(request.get("account"))
-                .orElse(null);
-        if (Objects.isNull(user)) {
+        if (HttpMethod.POST.equals(getHttpMethod())) {
+            HttpRequest request = UrlParser.extractRequest(requestBody);
+            User user = InMemoryUserRepository.findByAccount(request.get("account"))
+                    .orElse(null);
+            if (Objects.isNull(user)) {
+                return new Http11Response(getPath(), HttpStatus.UNAUTHORIZED, IOUtils.readResourceFile("/401.html"));
+            }
+            if (user.checkPassword(request.get("password"))) {
+                return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"));
+            }
+            log.info("user : {}", user);
             return new Http11Response(getPath(), HttpStatus.UNAUTHORIZED, IOUtils.readResourceFile("/401.html"));
         }
-        if (user.checkPassword(request.get("password"))) {
-            return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"));
-        }
-        log.info("user : {}", user);
-        return new Http11Response(getPath(), HttpStatus.UNAUTHORIZED, IOUtils.readResourceFile("/401.html"));
+        throw new IllegalArgumentException("Login에 해당하는 HTTP Method가 아닙니다. : " + getHttpMethod());
     }
 }

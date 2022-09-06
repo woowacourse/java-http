@@ -13,12 +13,13 @@ public class HomePage extends Url {
     }
 
     @Override
-    public Http11Response getResponse(HttpHeaders httpHeaders) {
-        return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
-    }
-
-    @Override
-    public Http11Response postResponse(HttpHeaders httpHeaders, String requestBody) {
-        throw new IllegalArgumentException("HomePage에는 POST요청이 들어올 수 없습니다.");
+    public Http11Response getResource(HttpHeaders httpHeaders, String requestBody) {
+        if (HttpMethod.GET.equals(getHttpMethod())) {
+            return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
+        }
+        if (HttpMethod.POST.equals(getHttpMethod())) {
+            throw new IllegalArgumentException("HomePage에는 POST요청이 들어올 수 없습니다.");
+        }
+        throw new IllegalArgumentException("HomePage에 해당하는 HTTP Method가 아닙니다. : " + getHttpMethod());
     }
 }

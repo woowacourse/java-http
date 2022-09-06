@@ -9,7 +9,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
 import org.apache.coyote.http11.utils.UrlParser;
@@ -42,15 +41,12 @@ public class Http11Processor implements Runnable, Processor {
             String uri = UrlParser.extractUri(request);
             HttpMethod httpMethod = UrlParser.extractMethod(request);
             HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
+            String requestBody = extractRequestBody(bufferedReader, httpHeaders, httpMethod);
 
             Url url = HandlerMapping.from(uri, httpMethod);
 
-            String requestBody = extractRequestBody(bufferedReader, httpHeaders, url);
-            Http11Response responseBody = Http11Response.extract(url, httpHeaders, requestBody);
-
-            final var response = createResponse(responseBody.getHttpStatus(), responseBody.getContentType(),
-                    responseBody.getResource());
-
+            Http11Response resource = url.getResource(httpHeaders, requestBody);
+            String response = resource.toResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -58,10 +54,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, Url url)
+
+    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, HttpMethod httpMethod)
             throws IOException {
         String requestBody = "";
-        if (url.getHttpMethod().equals(HttpMethod.POST)) {
+        if (httpMethod.equals(HttpMethod.POST)) {
             int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
@@ -71,12 +68,4 @@ public class Http11Processor implements Runnable, Processor {
         return requestBody;
     }
 
-    private String createResponse(HttpStatus httpStatus, String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getName() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
 }

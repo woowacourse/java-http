@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.jwp;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nextstep.jwp.exception.NotFoundException;
+import org.apache.coyote.http11.Http11Response;
 
 public enum Url {
 

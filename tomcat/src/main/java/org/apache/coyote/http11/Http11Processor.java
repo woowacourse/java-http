@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Url.LOGIN;
+import static nextstep.jwp.Url.LOGIN;
 
 import java.io.IOException;
 import java.net.Socket;
+import nextstep.jwp.Url;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;

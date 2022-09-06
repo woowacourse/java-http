@@ -43,4 +43,10 @@ public class HttpHeaders {
         return get(CONTENT_TYPE_HEADER).stream()
             .anyMatch(it -> it.equals(contentType));
     }
+
+    public int getContentLength() {
+        return get(CONTENT_LENGTH_HEADER)
+            .map(Integer::parseInt)
+            .orElse(ZERO_CONTENT_LENGTH);
+    }
 }

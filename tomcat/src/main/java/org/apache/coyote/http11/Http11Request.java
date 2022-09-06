@@ -9,7 +9,7 @@ import nextstep.jwp.exception.MethodNotAllowedException;
 
 public class Http11Request {
 
-    private static final List<String> ALLOWED_METHODS = List.of("GET");
+    private static final List<String> ALLOWED_METHODS = List.of("GET", "POST");
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_URL_INDEX = 1;
 

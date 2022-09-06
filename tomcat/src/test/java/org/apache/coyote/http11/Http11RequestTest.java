@@ -9,10 +9,10 @@ import support.StubSocket;
 
 class Http11RequestTest {
 
-    @DisplayName("GET 메서드가 아니면 예외를 반환한다.")
+    @DisplayName("허용된 메서드가 아니면 예외를 반환한다.")
     @Test
     void notAllowedMethod() {
-        final String httpRequest = getHttp11RequestContent("POST", "/index.html");
+        final String httpRequest = getHttp11RequestContent("ABC", "/index.html");
         final StubSocket socket = new StubSocket(httpRequest);
 
         assertThatThrownBy(() -> Http11Request.of(socket.getInputStream()))

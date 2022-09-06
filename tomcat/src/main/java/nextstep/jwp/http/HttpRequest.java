@@ -66,6 +66,13 @@ public class HttpRequest {
         return FileUtils.extractFileExtension(path);
     }
 
+    public QueryParams getFormData() {
+        if (httpHeaders.matchesContentType("application/x-www-form-urlencoded")) {
+            return QueryParams.from(requestBody);
+        }
+        return QueryParams.empty();
+    }
+
     public String getPath() {
         return path;
     }

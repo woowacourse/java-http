@@ -132,7 +132,8 @@ public class Http11Processor implements Runnable, Processor {
             if (user.get().checkPassword(requestBody.getValue("password"))) {
                 return new HttpResponse().addProtocol(httpRequest.getRequestLine().getProtocol())
                         .addStatus(HttpStatus.FOUND)
-                        .addLocation("/index.html");
+                        .addLocation("/index.html")
+                        .addCookie("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
             }
         }
         return new HttpResponse().addProtocol(httpRequest.getRequestLine().getProtocol())

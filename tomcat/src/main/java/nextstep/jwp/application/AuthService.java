@@ -45,17 +45,14 @@ public class AuthService {
         }
     }
 
-    public void login(final String requestBody) {
+    public User login(final String requestBody) {
         QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
-        validateLogin(queryParams);
-    }
-
-    private void validateLogin(final QueryParams queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         validateLoginFormat(account, password);
         User user = findUser(account);
         checkPassword(password, user);
+        return user;
     }
 
     private void validateLoginFormat(final String account, final String password) {

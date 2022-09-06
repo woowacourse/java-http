@@ -7,7 +7,7 @@ import nextstep.jwp.http.HttpResponse;
 public abstract class AbstractHttpRequestHandler implements HttpRequestHandler {
 
     @Override
-    public HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
+    public final HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
         if (httpRequest.isGetMethod()) {
             return handleHttpGetRequest(httpRequest);
         }

@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_LENGTH;
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_TYPE;
 import static nextstep.jwp.http.common.HttpHeaders.LOCATION;
+import static nextstep.jwp.http.common.HttpHeaders.SET_COOKIE;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import nextstep.jwp.http.common.ContentType;
+import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpStatus;
 
@@ -63,8 +65,23 @@ public class HttpResponse {
         this.responseBody = new ResponseBody(new String(responseBody));
     }
 
+    public void addCookie(final HttpCookie httpCookie) {
+        httpHeaders.addSetCookie(httpCookie);
+    }
+
     @Override
     public String toString() {
+        if (httpHeaders.isExistSetCookie()) {
+            String response = String.join("\r\n",
+                "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,
+                "Set-Cookie: " + httpHeaders.getHeader(SET_COOKIE),
+                "Content-Type: " + httpHeaders.getHeader(CONTENT_TYPE) + CHARSET_UTF_8,
+                "Content-Length: " + responseBody.getValue().getBytes().length + BLANK,
+                EMPTY,
+                responseBody.getValue());
+
+            return response;
+        }
         String response = String.join("\r\n",
             "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,
             "Content-Type: " + httpHeaders.getHeader(CONTENT_TYPE) + CHARSET_UTF_8,

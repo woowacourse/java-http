@@ -35,14 +35,6 @@ public class HttpRequest {
         }
     }
 
-    public String findQueryValue(final String key) {
-        return requestLine.findQueryValue(key);
-    }
-
-    public boolean containsQuery() {
-        return requestLine.containsQuery();
-    }
-
     public boolean isPostMethod() {
         return requestLine.isPostMethod();
     }

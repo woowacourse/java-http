@@ -31,7 +31,7 @@ public class RequestBody {
     private static RequestBody readBody(final BufferedReader bufferedReader, final RequestHeaders requestHeaders)
             throws IOException {
         if (bufferedReader.ready()) {
-            final int contentLength = Integer.parseInt(requestHeaders.findField("Content-Length"));
+            final int contentLength = Integer.parseInt((String) requestHeaders.findField("Content-Length"));
             final char[] contents = new char[contentLength];
             bufferedReader.read(contents, 0, contentLength);
 

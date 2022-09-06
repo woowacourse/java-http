@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String HTTP_VERSION = "HTTP/1.1 ";
+
     private final Logger log;
     private final Socket connection;
     private final UserService userService;
@@ -77,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         final StatusCode statusCode = StatusCode.FOUND;
         try {
             userService.login(httpRequest);
-            return createRedirectResponse(statusCode, "/index.html");
+            return createLoginSuccessResponse(statusCode);
         } catch (final IllegalArgumentException e) {
             return createRedirectResponse(statusCode, "/401.html");
         }
@@ -109,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(final StatusCode statusCode, final ContentType contentType,
                                   final String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
+                HTTP_VERSION + statusCode + " ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -118,8 +120,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createRedirectResponse(final StatusCode statusCode, final String location) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.toString() + " ",
+                HTTP_VERSION + statusCode.toString() + " ",
                 "Location: " + location + " ",
+                "");
+    }
+
+    private String createLoginSuccessResponse(final StatusCode statusCode) {
+        return String.join("\r\n",
+                HTTP_VERSION + statusCode.toString() + " ",
+                "Location: /index.html" + " ",
+                "Set-Cookie: JSESSIONID=" + HttpCookie.generate() + " ",
                 "");
     }
 }

@@ -15,5 +15,6 @@
   - [x] 회원 가입 요청 시 `POST`를 사용하여 요청을 보낸다.
   - [x] 회원 가입 완료 시 `index.html`로 리다이렉트한다.
   - [x] 로그인 요청 시 `POST`를 사용하여 요청을 보낸다.
-- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 `Set-Cookie`가 존재한다.
+- [x] 로그인에 성공하면 HTTP Reponse의 헤더에 `Set-Cookie`가 존재한다.
+  - [x] HTTP Response Header에 `Set-Cookie`를 반환한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 `JSESSIONID` 값이 저장된다.

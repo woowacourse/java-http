@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import org.apache.coyote.http11.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,9 @@ public class RequestHeaders {
     private static final Logger log = LoggerFactory.getLogger(RequestHeaders.class);
     private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
 
-    private final Map<String, String> headers;
+    private final Map<String, Object> headers;
 
-    private RequestHeaders(final Map<String, String> headers) {
+    private RequestHeaders(final Map<String, Object> headers) {
         this.headers = headers;
     }
 
@@ -30,8 +31,8 @@ public class RequestHeaders {
         }
     }
 
-    private static Map<String, String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+    private static Map<String, Object> parseHeaders(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, Object> headers = new HashMap<>();
 
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
@@ -44,9 +45,14 @@ public class RequestHeaders {
         return headers;
     }
 
-    private static void addHeader(final Map<String, String> headers, final String line) {
+    private static void addHeader(final Map<String, Object> headers, final String line) {
         final String[] field = line.split(": ");
         validateFieldLength(field);
+        if (field[0].equals("Cookie")) {
+            final HttpCookie httpCookie = HttpCookie.from(field[1]);
+            headers.put("Cookie", httpCookie);
+            return;
+        }
         headers.put(field[0], field[1].trim());
     }
 
@@ -56,12 +62,12 @@ public class RequestHeaders {
         }
     }
 
-    public String findField(final String fieldName) {
+    public Object findField(final String fieldName) {
         return Optional.ofNullable(headers.get(fieldName))
                 .orElseThrow(() -> new NoSuchElementException("Header Field에 key 값이 존재하지 않습니다."));
     }
 
-    public Map<String, String> getHeaders() {
+    public Map<String, Object> getHeaders() {
         return headers;
     }
 }

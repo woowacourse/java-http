@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Cookies implements HttpResponseHeader {
+public class Cookie implements HttpResponseHeader {
 
     private static final String RESPONSE_HEADER_KEY = "Set-Cookie: ";
     private static final String COOKIE_DELIMITER = "; ";
@@ -15,33 +15,33 @@ public class Cookies implements HttpResponseHeader {
     private static final int COOKIE_NAME_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
 
-    private static Cookies EMPTY = new Cookies(new HashMap<>());
+    private static Cookie EMPTY = new Cookie(new HashMap<>());
 
-    public static Cookies empty() {
+    public static Cookie empty() {
         return EMPTY;
     }
 
     private final Map<String, String> values;
 
-    public Cookies(Map<String, String> values) {
+    public Cookie(Map<String, String> values) {
         this.values = values;
     }
 
-    public static Cookies fromResponse(String cookieName) {
+    public static Cookie fromResponse(String cookieName) {
         Map<String, String> generated = new ConcurrentHashMap<>();
         UUID uuid = UUID.randomUUID();
         generated.put(cookieName, uuid.toString());
-        return new Cookies(generated);
+        return new Cookie(generated);
     }
 
-    public static Cookies fromRequest(String cookieHeaderValue) {
+    public static Cookie fromRequest(String cookieHeaderValue) {
         String[] cookieValues = cookieHeaderValue.split(COOKIE_DELIMITER);
         Map<String, String> cookies = new ConcurrentHashMap<>();
         for (String cookie : cookieValues) {
             String[] cookieNameAndValue = cookie.split(COOKIE_KEY_VALUE_DELIMITER);
             cookies.put(cookieNameAndValue[COOKIE_NAME_INDEX], cookieNameAndValue[COOKIE_VALUE_INDEX]);
         }
-        return new Cookies(cookies);
+        return new Cookie(cookies);
     }
 
     @Override

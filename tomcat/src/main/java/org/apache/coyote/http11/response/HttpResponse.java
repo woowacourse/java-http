@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.util.StringUtils.NEW_LINE;
 
 import org.apache.coyote.http11.response.header.ContentLength;
 import org.apache.coyote.http11.response.header.ContentType;
-import org.apache.coyote.http11.response.header.Cookies;
+import org.apache.coyote.http11.response.header.Cookie;
 import org.apache.coyote.http11.response.header.HttpStatusCode;
 import org.apache.coyote.http11.response.header.Location;
 
@@ -49,10 +49,10 @@ public class HttpResponse {
         );
     }
 
-    public static HttpResponse found(String redirectUri, Cookies cookies) {
+    public static HttpResponse found(String redirectUri, Cookie cookie) {
         return new HttpResponse(
                 FOUND,
-                ResponseHeaders.from(new Location(redirectUri), cookies),
+                ResponseHeaders.from(new Location(redirectUri), cookie),
                 ResponseBody.None()
         );
     }

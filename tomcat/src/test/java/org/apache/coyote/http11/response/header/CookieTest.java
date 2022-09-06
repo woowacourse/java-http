@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class CookiesTest {
+class CookieTest {
 
     @DisplayName("name에 해당하는 Cookie가 존재하는지 반환한다.")
     @ParameterizedTest
     @CsvSource({"JSESSIONID, true", "KKKKSESSIONID, false"})
     void containsCookieOf(String cookieName, boolean expected) {
-        Cookies cookies = Cookies.fromRequest("JSESSIONID=asdafasdasdasfasf; TMPSESSIONID=asdasdasadas");
+        Cookie cookie = Cookie.fromRequest("JSESSIONID=asdafasdasdasfasf; TMPSESSIONID=asdasdasadas");
 
-        boolean actual = cookies.containsCookieOf(cookieName);
+        boolean actual = cookie.containsCookieOf(cookieName);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -24,10 +24,10 @@ class CookiesTest {
     @DisplayName("쿠키를 헤더포맷으로 반환한다.")
     @Test
     void toHeaderFormat() {
-        Cookies cookies = Cookies.fromResponse("JSESSIONID");
+        Cookie cookie = Cookie.fromResponse("JSESSIONID");
 
-        boolean contains = cookies.containsCookieOf("JSESSIONID");
-        String headerFormat = cookies.toHeaderFormat();
+        boolean contains = cookie.containsCookieOf("JSESSIONID");
+        String headerFormat = cookie.toHeaderFormat();
 
         assertAll(
                 () -> assertThat(contains).isTrue(),

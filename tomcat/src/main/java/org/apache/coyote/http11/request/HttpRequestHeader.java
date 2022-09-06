@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.http11.response.header.Cookies;
+import org.apache.coyote.http11.response.header.Cookie;
 
 public class HttpRequestHeader {
 
@@ -14,11 +14,11 @@ public class HttpRequestHeader {
     private static final String COOKIE_KEY = "Cookie";
 
     private final Map<String, String> values;
-    private final Cookies cookies;
+    private final Cookie cookie;
 
-    public HttpRequestHeader(Map<String, String> values, Cookies cookies) {
+    public HttpRequestHeader(Map<String, String> values, Cookie cookie) {
         this.values = values;
-        this.cookies = cookies;
+        this.cookie = cookie;
     }
 
     public static HttpRequestHeader from(List<String> requestHeaderLines) {
@@ -30,12 +30,12 @@ public class HttpRequestHeader {
         return new HttpRequestHeader(headers, parseCookieHeaderIfExists(headers));
     }
 
-    private static Cookies parseCookieHeaderIfExists(Map<String, String> headers) {
+    private static Cookie parseCookieHeaderIfExists(Map<String, String> headers) {
         if (headers.containsKey(COOKIE_KEY)) {
             String cookieValues = headers.get(COOKIE_KEY);
-            return Cookies.fromRequest(cookieValues);
+            return Cookie.fromRequest(cookieValues);
         }
-        return Cookies.empty();
+        return Cookie.empty();
     }
 
     public boolean hasContentLength() {
@@ -49,6 +49,6 @@ public class HttpRequestHeader {
     }
 
     public boolean hasCookieOf(String cookieName) {
-        return cookies.containsCookieOf(cookieName);
+        return cookie.containsCookieOf(cookieName);
     }
 }

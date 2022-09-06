@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -16,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -47,33 +44,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = SERVLET_CONTAINER.service(httpRequest);
             final String responseMessage = httpResponse.toMessage();
 
-            printQueries(httpRequest);
-
             outputStream.write(responseMessage.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void printQueries(final HttpRequest httpRequest) {
-        final Map<String, String> queries = httpRequest.getQueries();
-        if (queries.isEmpty()) {
-            return;
-        }
-        final User user = findUser(queries);
-        log.info("user : {}", user);
-    }
-
-    private static User findUser(final Map<String, String> queries) {
-        final IllegalArgumentException illegalLoginException = new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다.");
-
-        final User user = InMemoryUserRepository.findByAccount(queries.get("account"))
-            .orElseThrow(() -> illegalLoginException);
-
-        if (!user.checkPassword(queries.get("password"))) {
-            throw illegalLoginException;
-        }
-        return user;
     }
 }

@@ -6,7 +6,11 @@ import org.apache.coyote.http11.common.HttpMessageDelimiter;
 
 public enum StatusCode {
 
-    OK(200, "OK")
+    OK(200, "OK"),
+
+    FOUND(302, "Found"),
+
+    UNAUTHORIZED(401, "Unauthorized"),
     ;
 
     private final int code;

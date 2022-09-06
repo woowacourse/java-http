@@ -40,4 +40,8 @@ public class RequestHeaders {
     public boolean existsJSessionId() {
         return this.cookie.existsJSessionId();
     }
+
+    public String getJSessionId() {
+        return this.cookie.get("JSESSIONID");
+    }
 }

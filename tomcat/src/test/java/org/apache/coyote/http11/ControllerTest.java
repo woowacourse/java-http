@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
-import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.ResourceNotFoundException;
-import nextstep.jwp.exception.UserNotFoundException;
-import org.apache.coyote.http11.request.QueryParameters;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;

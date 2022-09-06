@@ -124,28 +124,4 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
-
-    @Test
-    void request_body로_들어온_계정_정보가_일치할_경우_print한다() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + "account=gugu&password=password".getBytes().length,
-                "Cookie: JSESSIONID=eden ",
-                "",
-                "account=gugu&password=password");
-
-        final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-
-        // when
-        processor.run();
-
-        // then
-        assertThat(outContent.toString()).contains(" 로그인 성공! 아이디: gugu");
-    }
 }

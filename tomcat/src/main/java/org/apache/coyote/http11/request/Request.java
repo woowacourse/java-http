@@ -2,15 +2,19 @@ package org.apache.coyote.http11.request;
 
 public class Request {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
+
     private final StartLine startLine;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
+    private final Session session;
 
     public Request(StartLine startLine, RequestHeaders requestHeaders,
                    RequestBody requestBody) {
         this.startLine = startLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
+        this.session = SESSION_MANAGER.findSession(requestHeaders.getJSessionId());
     }
 
     public HttpMethod getHttpMethod() {
@@ -35,5 +39,9 @@ public class Request {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

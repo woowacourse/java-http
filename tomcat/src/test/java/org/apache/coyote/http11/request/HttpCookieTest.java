@@ -22,22 +22,4 @@ class HttpCookieTest {
         // then
         assertThat(httpCookie.get("edenCookie")).isEqualTo("eden");
     }
-
-    @ParameterizedTest
-    @MethodSource("provideJSessionId")
-    void JSESSIONID가_있는지_확인한다(String rawCookies, boolean expected) {
-        // given
-        HttpCookie httpCookie = HttpCookie.of(rawCookies);
-
-        // then
-        assertThat(httpCookie.existsJSessionId()).isEqualTo(expected);
-    }
-
-    public static Stream<Arguments> provideJSessionId() {
-        return Stream.of(
-                Arguments.of("JSESSIONID=eden-id", true),
-                Arguments.of("edenCookie=eden", false)
-        );
-    }
-
 }

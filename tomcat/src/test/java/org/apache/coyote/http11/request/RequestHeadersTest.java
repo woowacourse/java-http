@@ -40,25 +40,4 @@ class RequestHeadersTest {
         // then
         assertThat(requestHeaders.getContentLength()).isZero();
     }
-
-    @ParameterizedTest
-    @MethodSource("provideJSessionId")
-    void JSESSIONID가_있는지_확인한다(List<String> inputHeaders, boolean expected) {
-        // given
-
-        //when
-        RequestHeaders requestHeaders = RequestHeaders.of(inputHeaders);
-
-        // then
-        assertThat(requestHeaders.existsJSessionId()).isEqualTo(expected);
-    }
-
-    public static Stream<Arguments> provideJSessionId() {
-        return Stream.of(
-                Arguments.of(List.of("Eden: eden", "Cookie: JSESSIONID=eden"), true),
-                Arguments.of(List.of("Eden: eden", "Cookie: No-JSESSIONID=eden"), false),
-                Arguments.of(List.of("Eden: eden"), false),
-                Arguments.of(List.of("JSESSIONID: eden"), false)
-        );
-    }
 }

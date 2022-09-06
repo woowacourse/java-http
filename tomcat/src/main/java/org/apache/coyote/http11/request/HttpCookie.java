@@ -1,34 +1,56 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 public class HttpCookie {
 
-    private final Map<String, String> values;
-
-    private HttpCookie(Map<String, String> values) {
-        this.values = values;
-    }
+    private static final Map<String, String> VALUES = new HashMap<>();
+    private static boolean DOES_NEED_TO_SET_COOKIE = false;
 
     public static HttpCookie of(String rawCookies) {
         String[] splitCookies = rawCookies.split("; ");
-        return new HttpCookie(Arrays.stream(splitCookies)
-                .map(splitCookie -> splitCookie.split("="))
-                .collect(Collectors.toMap(value -> value[0], value -> value[1].trim())));
+        for (String splitCookie : splitCookies) {
+            String[] cookieKeyValue = splitCookie.split("=");
+            VALUES.put(cookieKeyValue[0], cookieKeyValue[1]);
+        }
+        if (!VALUES.containsKey("JSESSIONID")) {
+            String jSessionId = String.valueOf(UUID.randomUUID());
+            VALUES.put("JSESSIONID", jSessionId);
+            SessionManager.addSession(new Session(jSessionId));
+            DOES_NEED_TO_SET_COOKIE = true;
+            return new HttpCookie();
+        }
+        DOES_NEED_TO_SET_COOKIE = false;
+        return new HttpCookie();
     }
 
     public static HttpCookie emptyCookie() {
-        return new HttpCookie(Collections.emptyMap());
+        String jSessionId = String.valueOf(UUID.randomUUID());
+        VALUES.put("JSESSIONID", jSessionId);
+        SessionManager.addSession(new Session(jSessionId));
+        DOES_NEED_TO_SET_COOKIE = true;
+        return new HttpCookie();
+    }
+
+    public static boolean doesNeedToSetJSessionIdCookie() {
+        return DOES_NEED_TO_SET_COOKIE;
+    }
+
+    public static void completeSetJSessionIdCookie() {
+        DOES_NEED_TO_SET_COOKIE = false;
     }
 
     public boolean existsJSessionId() {
-        return values.containsKey("JSESSIONID");
+        return VALUES.containsKey("JSESSIONID");
+    }
+
+    public static String ofJSessionId() {
+        return VALUES.get("JSESSIONID");
     }
 
     public String get(String name) {
-        return values.get(name);
+        return VALUES.get(name);
     }
 }

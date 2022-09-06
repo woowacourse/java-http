@@ -16,6 +16,7 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Path;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.Session;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
@@ -64,21 +65,29 @@ public enum Controller {
     }
 
     private static ResponseEntity loginGet(Object object) {
+        Request request = (Request) object;
+        Session session = request.getSession();
+        if (session == null) {
+            return ResponseEntity.body("login.html");
+        }
+        if (session.getAttribute("user") != null) {
+            return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
+        }
         return ResponseEntity.body("login.html");
     }
 
     private static ResponseEntity loginPost(Object o) {
         Request request = (Request) o;
-        RequestBody requestBody = request.getRequestBody();
         try {
-            validateUser(requestBody);
+            validateUser(request);
         } catch (UserNotFoundException | AuthenticationException | InvalidRequestException e) {
             return ResponseEntity.body("redirect:401.html").status(HttpStatus.REDIRECT);
         }
         return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }
 
-    private static void validateUser(RequestBody requestBody) {
+    private static void validateUser(Request request) {
+        RequestBody requestBody = request.getRequestBody();
         if (requestBody.isEmpty()) {
             throw new InvalidRequestException();
         }
@@ -87,6 +96,8 @@ public enum Controller {
         if (!user.checkPassword(requestBody.get("password"))) {
             throw new AuthenticationException();
         }
+        Session session = request.getSession();
+        session.setAttribute("user", user);
         log.info(String.format("로그인 성공! 아이디: %s", user.getAccount()));
     }
 
@@ -97,10 +108,14 @@ public enum Controller {
     private static ResponseEntity registerPost(Object o) {
         Request request = (Request) o;
         RequestBody requestBody = request.getRequestBody();
+        saveUser(requestBody);
+        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
+    }
+
+    private static void saveUser(RequestBody requestBody) {
         String account = requestBody.get("account");
         String email = requestBody.get("email");
         String password = requestBody.get("password");
         InMemoryUserRepository.save(new User(account, password, email));
-        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }
 }

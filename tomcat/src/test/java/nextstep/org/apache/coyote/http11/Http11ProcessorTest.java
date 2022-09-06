@@ -135,12 +135,12 @@ class Http11ProcessorTest {
         final Http11Processor processor = new Http11Processor(socket);
 
         // when & then
-        assertThatThrownBy(() -> processor.run())
+        assertThatThrownBy(processor::run)
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void 없는_파일은_호출할_수_없다() throws IOException {
+    void 없는_파일은_호출할_수_없다() {
         //given
         final String httpRequest = String.join("\r\n",
                 "GET /invalidFile.html HTTP/1.1 ",
@@ -157,14 +157,13 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
+                "HTTP/1.1 302 Found ",
+                "Location: /404.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: 0 ",
                 "",
-                responseBody);
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -216,13 +215,24 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        processor.run();
+
+        // then
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /401.html ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() throws IOException {
+    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() {
         //given
         final String body = "account=gugu&password=invalidPassword";
         final String httpRequest = String.join("\r\n",
@@ -241,15 +251,13 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         var expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
+                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: 0 ",
                 "",
-                responseBody);
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -276,7 +284,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인_요청_시_password를_보내지_않으면_401_html을_응답한다() throws IOException {
+    void 로그인_요청_시_password를_보내지_않으면_401_html을_응답한다() {
         //given
         final String body = "account=gugu&password=";
         final String invalidRequestMessage = String.join("\r\n",
@@ -295,15 +303,13 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         var expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
+                "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: 0 ",
                 "",
-                responseBody);
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

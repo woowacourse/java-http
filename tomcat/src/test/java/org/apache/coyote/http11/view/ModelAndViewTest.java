@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.handler.ApiHandler.ApiHandlerResponse;
@@ -32,7 +33,21 @@ class ModelAndViewTest {
     }
 
     @Test
-    void ApiHandlerResponse를_전달받았을_때_FOUND가_아니고_body에_빈_값이_존재하면_ApiHandlerResponse내부_값을_그대로_사용한다()
+    void ApiHandlerResponse를_전달받았을_때_ErrorCode를_가지고있다면_FOUND상태와_ErrorCodeHtml파일을_반환한다()
+            throws IOException {
+        // given
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.NOT_FOUND, new HashMap<>(), "", ContentType.HTML);
+
+        // when
+        ModelAndView modelAndView = ModelAndView.of(response);
+
+        // then
+        assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
+                .containsExactly(HttpStatus.FOUND, new Headers(Map.of("Location", "/404.html ")), "", ContentType.HTML);
+    }
+
+    @Test
+    void ApiHandlerResponse를_전달받았을_때_상태가_FOUND나_Error가_아니고_body에_빈_값이_존재하면_ApiHandlerResponse내부_값을_그대로_사용한다()
             throws IOException {
         // given
         ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "", ContentType.HTML);
@@ -47,7 +62,7 @@ class ModelAndViewTest {
 
 
     @Test
-    void ApiHandlerResponse를_전달받았을_때_FOUND가_아니고_body에_파일이_존재하지않으면_ApiHandlerResponse내부_값을_그대로_사용한다()
+    void ApiHandlerResponse를_전달받았을_때_FOUND나_Error가_아니고_body에_파일이_존재하지않으면_ApiHandlerResponse내부_값을_그대로_사용한다()
             throws IOException {
         // given
         ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "hello world!", ContentType.HTML);
@@ -61,7 +76,7 @@ class ModelAndViewTest {
     }
 
     @Test
-    void ApiHandlerResponse를_전달받았을_때_FOUND가_아니고_body에_파일이_존재하면_파일을_읽어온다() throws IOException {
+    void ApiHandlerResponse를_전달받았을_때_FOUND나_Error가_아니고_body에_파일이_존재하면_파일을_읽어온다() throws IOException {
         // given
         ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "/index.html", ContentType.HTML);
 
@@ -86,7 +101,7 @@ class ModelAndViewTest {
 
         // then
         assertThat(modelAndView).usingRecursiveComparison()
-                .isEqualTo(ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html")));
+                .isEqualTo(ModelAndView.of(new FileHandlerResponse(HttpStatus.FOUND, "/404.html ")));
     }
 
     @Test
@@ -99,7 +114,7 @@ class ModelAndViewTest {
 
         // then
         assertThat(modelAndView).usingRecursiveComparison()
-                .isEqualTo(ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html")));
+                .isEqualTo(ModelAndView.of(new FileHandlerResponse(HttpStatus.FOUND, "/404.html ")));
     }
 
     @Test

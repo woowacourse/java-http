@@ -6,9 +6,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import org.apache.coyote.http11.httpmessage.ContentType;
+import java.util.Map;
 import org.apache.coyote.http11.handler.ApiHandler.ApiHandlerResponse;
 import org.apache.coyote.http11.handler.FileHandler.FileHandlerResponse;
+import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Headers;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 
@@ -37,35 +38,53 @@ public class ModelAndView {
 
     private static ModelAndView getApiHandlerResponse(ApiHandlerResponse response) throws IOException {
         HttpStatus httpStatus = response.getHttpStatus();
-        Headers responseHeaders = response.getHeaders();
+        Headers headers = response.getHeaders();
         String responseBody = response.getBody();
         ContentType contentType = response.getContentType();
 
-        if (httpStatus.isFound() || responseBody.isBlank()) {
-            return new ModelAndView(httpStatus, responseHeaders, responseBody, contentType);
+        if (httpStatus.isFound()) {
+            return new ModelAndView(httpStatus, headers, responseBody, contentType);
+        }
+
+        if (httpStatus.isError()) {
+            headers.putAll(new Headers(Map.of("Location", "/" + httpStatus.getValue() + ".html ")));
+            return new ModelAndView(HttpStatus.FOUND, headers, "", ContentType.HTML);
+        }
+
+        if (responseBody.isBlank()) {
+            return new ModelAndView(httpStatus, headers, responseBody, contentType);
         }
 
         URL resource = getResource(responseBody);
         if (resource == null) {
-            return new ModelAndView(httpStatus, responseHeaders, responseBody, contentType);
+            return new ModelAndView(httpStatus, headers, responseBody, contentType);
         }
 
-        return getModelAndView(httpStatus, responseHeaders, resource);
+        return getModelAndView(httpStatus, headers, resource);
     }
 
     private static ModelAndView getFileResponse(FileHandlerResponse response) throws IOException {
 
+        final HttpStatus httpStatus = response.getHttpStatus();
         final String path = response.getPath();
+
+        if (httpStatus.isFound()) {
+            Map<String, String> location = new LinkedHashMap<>();
+            location.put("Location", path);
+
+            return new ModelAndView(HttpStatus.FOUND, new Headers(location), "", ContentType.HTML);
+        }
+
         if (path.isBlank()) {
-            return ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html"));
+            return ModelAndView.of(new FileHandlerResponse(HttpStatus.FOUND, "/404.html "));
         }
 
         final URL resource = getResource(path);
         if (resource == null) {
-            return ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html"));
+            return ModelAndView.of(new FileHandlerResponse(HttpStatus.FOUND, "/404.html "));
         }
 
-        return getModelAndView(response.getHttpStatus(), new Headers(new LinkedHashMap<>()), resource);
+        return getModelAndView(httpStatus, new Headers(new LinkedHashMap<>()), resource);
     }
 
     private static URL getResource(String path) {

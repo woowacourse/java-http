@@ -2,12 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.controller.HomeController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import nextstep.jwp.controller.StaticResourceController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +13,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestConvertor httpRequestConvertor = new HttpRequestConvertor();
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -44,28 +41,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest request) {
-        final HttpResponse response = findController(request).doService(request);
+        final Controller controller = requestMapping.findController(request);
+        final HttpResponse response = controller.doService(request);
 
         addContentTypeToResponse(request, response);
         addCookieForSessionToResponse(request, response);
 
         return response;
-    }
-
-    private Controller findController(final HttpRequest request) {
-        if (request.getUriPath().equals("/")) {
-            return new HomeController();
-        }
-
-        if (request.getUriPath().equals("/login")) {
-            return new LoginController();
-        }
-
-        if (request.getUriPath().equals("/register")) {
-            return new RegisterController();
-        }
-
-        return new StaticResourceController();
     }
 
     private void addContentTypeToResponse(final HttpRequest request, final HttpResponse response) {

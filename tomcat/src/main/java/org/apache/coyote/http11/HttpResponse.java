@@ -49,10 +49,6 @@ public class HttpResponse {
         return body.length() > 0;
     }
 
-    public String getHeader(final String name) {
-        return headers.get(name);
-    }
-
     public byte[] writeValueAsBytes() {
         return writeValueAsString().getBytes();
     }

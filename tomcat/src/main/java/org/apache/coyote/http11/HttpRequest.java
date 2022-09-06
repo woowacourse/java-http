@@ -4,7 +4,9 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String QUERY_PARAMETER_DELIMITER = "?";
+    private static final String PARAMETERS_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final String requestLine;
     private final Map<String, String> headers;
@@ -28,14 +30,14 @@ public class HttpRequest {
 
     public String getUriPath() {
         if (hasQueryParamsInUri()) {
-            final int index = getUri().lastIndexOf('?');
+            final int index = getUri().lastIndexOf(QUERY_PARAMETER_DELIMITER);
             return getUri().substring(0, index);
         }
         return getUri();
     }
 
     private boolean hasQueryParamsInUri() {
-        return getUri().contains(QUERY_STRING_DELIMITER);
+        return getUri().contains(QUERY_PARAMETER_DELIMITER);
     }
 
     private String getUri() {
@@ -61,16 +63,16 @@ public class HttpRequest {
 
     private String queryString() {
         if (hasQueryParamsInUri()) {
-            final int index = getUri().indexOf("?");
+            final int index = getUri().indexOf(QUERY_PARAMETER_DELIMITER);
             return getUri().substring(index + 1);
         }
         return "";
     }
 
     private String findParamValue(final String paramName, final String params) {
-        for (String param : params.split("&")) {
-            final String key = param.split("=")[0];
-            final String value = param.split("=")[1];
+        for (String param : params.split(PARAMETERS_DELIMITER)) {
+            final String key = param.split(KEY_VALUE_DELIMITER)[0];
+            final String value = param.split(KEY_VALUE_DELIMITER)[1];
 
             if (key.equals(paramName)) {
                 return value;
@@ -97,7 +99,7 @@ public class HttpRequest {
         final String cookie = headers.get("Cookie");
 
         if (cookie != null) {
-            final String sessionId = cookie.split("=")[1];
+            final String sessionId = cookie.split(KEY_VALUE_DELIMITER)[1];
             if (SessionManager.getSession(sessionId).isPresent()) {
                 session = SessionManager.getSession(sessionId).get();
                 return session;

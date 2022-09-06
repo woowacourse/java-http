@@ -16,6 +16,7 @@ import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -35,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_EXTENSION = ".html";
     private static final String REGISTER_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE_PATH = "/login.html";
     private static final String SIGN_UP_REDIRECT_PATH = "/index.html";
     private static final String LOGIN_REDIRECT_PATH = "/index.html";
     private static final String BAD_REQUEST_PATH = "/400.html";
@@ -109,6 +111,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         ContentType contentType = HttpRequestParser.parseContentType(url);
         String resourceUrl = addExtension(url);
+        if (resourceUrl.equals(LOGIN_PAGE_PATH) && isLoggedIn(httpRequest)) {
+            return toFoundResponse(httpRequest, LOGIN_REDIRECT_PATH);
+        }
         String responseBody = ResourcesUtil.readResource(STATIC_PATH + resourceUrl);
         return toOkResponse(httpRequest, contentType, responseBody);
     }
@@ -121,6 +126,25 @@ public class Http11Processor implements Runnable, Processor {
         return url;
     }
 
+    private boolean isLoggedIn(final HttpRequest httpRequest) {
+        Session session = findSession(httpRequest);
+        if (session == null) {
+            return false;
+        }
+        User loginUser = (User) session.getAttribute("user");
+        return loginUser != null;
+    }
+
+    private Session findSession(final HttpRequest httpRequest) {
+        SessionManager sessionManager = new SessionManager();
+        String jSessionId = httpRequest.getCookie()
+                .get(JSESSIONID_KEY);
+        if (jSessionId == null) {
+            return null;
+        }
+        return sessionManager.findSession(jSessionId);
+    }
+
     private HttpResponse accessPostMethod(final HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
         String requestBody = httpRequest.getBody();
@@ -129,9 +153,16 @@ public class Http11Processor implements Runnable, Processor {
             return toFoundResponse(httpRequest, SIGN_UP_REDIRECT_PATH);
         }
         if (url.equals(LOGIN_PATH)) {
+            setLoginAttribute(httpRequest, requestBody);
             return toFoundResponse(httpRequest, LOGIN_REDIRECT_PATH);
         }
         return toFoundResponse(httpRequest, NOT_FOUND_PATH);
+    }
+
+    private void setLoginAttribute(final HttpRequest httpRequest, final String requestBody) {
+        User loginUser = authService.login(requestBody);
+        Session session = findSession(httpRequest);
+        session.setAttribute("user", loginUser);
     }
 
     private HttpResponse toOkResponse(final HttpRequest httpRequest, final ContentType contentType,

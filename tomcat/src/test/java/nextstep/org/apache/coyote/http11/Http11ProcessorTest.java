@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
+import nextstep.jwp.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -273,6 +277,8 @@ class Http11ProcessorTest {
     @Test
     void 로그인에_성공하면_index_페이지로_redirect한다() {
         // given
+        String sessionId = UUID.randomUUID().toString();
+        new SessionManager().add(new Session(sessionId));
         String requestBody = "account=gugu&password=password";
         int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
@@ -280,6 +286,7 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + contentLength,
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 requestBody);
 
@@ -399,5 +406,37 @@ class Http11ProcessorTest {
         String actual = socket.output();
 
         assertThat(actual).contains("JSESSIONID=");
+    }
+
+    @Test
+    void 로그인한_유저가_login_페이지에_접근하면_index_페이지로_redirect한다() {
+        // given
+        SessionManager sessionManager = new SessionManager();
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        sessionManager.add(session);
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+
+        String httpRequest = String.join("\r\n",
+                "GET /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
     }
 }

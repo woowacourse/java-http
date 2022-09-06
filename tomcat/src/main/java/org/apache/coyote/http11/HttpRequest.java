@@ -46,7 +46,7 @@ public class HttpRequest {
     private static List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {
         List<String> headerLines = new ArrayList<>();
         String line;
-        while (!(line = bufferedReader.readLine()).isBlank()) {
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
             headerLines.add(line);
         }
         return headerLines;

@@ -26,7 +26,7 @@ class RequestTest {
             "",
             "param3=123&param4=678");
 
-    Http11Request request;
+    HttpRequest request;
 
     @BeforeEach
     void setUp() {

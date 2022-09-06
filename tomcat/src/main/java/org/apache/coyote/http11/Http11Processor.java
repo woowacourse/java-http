@@ -15,9 +15,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.constant.HttpMethods;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestAssembler;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseAssembler;
 import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    public Http11Response get(Http11Request request, OutputStream outputStream) throws IOException {
+    public HttpResponse get(HttpRequest request, OutputStream outputStream) throws IOException {
         if (request.isResource()) {
             return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
         }
@@ -59,14 +59,14 @@ public class Http11Processor implements Runnable, Processor {
         return generateDefaultResponse();
     }
 
-    private Http11Response generateLoginPage(Http11Request request) {
+    private HttpResponse generateLoginPage(HttpRequest request) {
         if (request.getCookies().hasCookie("JSESSIONID")) {
             return responseAssembler.redirectResponse("/index.html");
         }
         return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
     }
 
-    public Http11Response post(Http11Request request, OutputStream outputStream) throws IOException {
+    public HttpResponse post(HttpRequest request, OutputStream outputStream) throws IOException {
         Map<String, String> bodyParams = request.getBody();
 
         if (request.getUrl().equals("/register")) {
@@ -81,14 +81,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-    private Http11Response login(Cookie cookies, Map<String, String> bodyParams) {
+    private HttpResponse login(Cookie cookies, Map<String, String> bodyParams) {
         String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
         String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
 
         return checkUserInformation(cookies, account, password);
     }
 
-    private Http11Response register(Map<String, String> bodyParams) {
+    private HttpResponse register(Map<String, String> bodyParams) {
         String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
         String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
         String email = Objects.requireNonNull(bodyParams.get("email"), "이메일이 입력되지 않았습니다.");
@@ -99,13 +99,13 @@ public class Http11Processor implements Runnable, Processor {
         return responseAssembler.redirectResponse("/index.html");
     }
 
-    private Http11Response checkUserInformation(Cookie cookie, String account, String password) {
+    private HttpResponse checkUserInformation(Cookie cookie, String account, String password) {
         Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
 
         if (userByAccount.isPresent()) {
             log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
-            Http11Response response = responseAssembler.redirectResponse("/index.html");
+            HttpResponse response = responseAssembler.redirectResponse("/index.html");
             processCookie(cookie, response, userByAccount.get());
             return response;
         }
@@ -113,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
         return responseAssembler.redirectResponse("/401.html");
     }
 
-    private void processCookie(Cookie cookie, Http11Response response, User user) {
+    private void processCookie(Cookie cookie, HttpResponse response, User user) {
         if (!cookie.hasCookie(SESSION_COOKIE_NAME)) {
             String jSessionId = UUID.randomUUID().toString();
             response.addCookie(SESSION_COOKIE_NAME, jSessionId);
@@ -121,7 +121,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response generateDefaultResponse() {
+    private HttpResponse generateDefaultResponse() {
         final var responseBody = "Hello world!";
         return responseAssembler.rawStringResponse(responseBody);
     }
@@ -134,21 +134,21 @@ public class Http11Processor implements Runnable, Processor {
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-            Http11Request request = requestAssembler.makeRequest(bufferedReader);
+            HttpRequest request = requestAssembler.makeRequest(bufferedReader);
             execute(outputStream, request);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void execute(OutputStream outputStream, Http11Request request) throws IOException {
-        Http11Response response = processByMethod(outputStream, request);
+    private void execute(OutputStream outputStream, HttpRequest request) throws IOException {
+        HttpResponse response = processByMethod(outputStream, request);
 
         outputStream.write(response.toMessage().getBytes());
         outputStream.flush();
     }
 
-    private Http11Response processByMethod(OutputStream outputStream, Http11Request request) throws IOException {
+    private HttpResponse processByMethod(OutputStream outputStream, HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethods.GET) {
             return get(request, outputStream);
         }

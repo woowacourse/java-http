@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import org.apache.coyote.http11.cookie.Cookie;
 
-public class Http11Response {
+public class HttpResponse {
 
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String HEADER_DELIMITER = ": ";
@@ -17,9 +17,9 @@ public class Http11Response {
     private final Cookie cookie;
     private final String body;
 
-    public Http11Response(String protocolVersion, int statusCode, String statusMessage,
-                          Map<String, String> responseHeader,
-                          String body) {
+    public HttpResponse(String protocolVersion, int statusCode, String statusMessage,
+                        Map<String, String> responseHeader,
+                        String body) {
         this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
@@ -28,9 +28,9 @@ public class Http11Response {
         this.cookie = new Cookie();
     }
 
-    public Http11Response(int statusCode, String statusMessage,
-                          Map<String, String> responseHeader,
-                          String body) {
+    public HttpResponse(int statusCode, String statusMessage,
+                        Map<String, String> responseHeader,
+                        String body) {
         this("HTTP/1.1", statusCode, statusMessage, responseHeader, body);
     }
 

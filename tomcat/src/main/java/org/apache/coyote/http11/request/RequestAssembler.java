@@ -13,7 +13,7 @@ public class RequestAssembler {
     private static final int HEADER_VALUE_INDEX = 1;
     private static final String CRLF = "\r\n";
 
-    public Http11Request makeRequest(BufferedReader bufferedReader) throws IOException {
+    public HttpRequest makeRequest(BufferedReader bufferedReader) throws IOException {
         String[] rawStart = bufferedReader.readLine()
                 .split(" ");
 
@@ -23,7 +23,7 @@ public class RequestAssembler {
 
         String body = parseBody(headers.get("Content-Length"), bufferedReader);
 
-        return new Http11Request(method, url, headers, body);
+        return new HttpRequest(method, url, headers, body);
     }
 
     private String parseBody(String contentLength, BufferedReader bufferedReader) throws IOException {

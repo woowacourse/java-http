@@ -18,7 +18,7 @@ public class ResponseAssembler {
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String EMPTY_BODY = "";
 
-    public Http11Response resourceResponse(String url, HttpStatus httpStatus) {
+    public HttpResponse resourceResponse(String url, HttpStatus httpStatus) {
         URL resource = getClass().getClassLoader()
                 .getResource(RESOURCE_FOLDER + url);
 
@@ -28,7 +28,7 @@ public class ResponseAssembler {
         Map<String, String> headers = initHeader(contentType, fileSize);
 
         try {
-            return new Http11Response(
+            return new HttpResponse(
                     httpStatus.getStatusCode(),
                     httpStatus.getMessage(),
                     headers,
@@ -47,11 +47,11 @@ public class ResponseAssembler {
         return headers;
     }
 
-    public Http11Response rawStringResponse(String responseData) {
+    public HttpResponse rawStringResponse(String responseData) {
         Map<String, String> headers = initHeader(HttpContent.HTML.getContentType(),
                 responseData.getBytes().length);
 
-        return new Http11Response(
+        return new HttpResponse(
                 HttpStatus.OK.getStatusCode(),
                 HttpStatus.OK.getMessage(),
                 headers,
@@ -59,11 +59,11 @@ public class ResponseAssembler {
         );
     }
 
-    public Http11Response redirectResponse(String redirectUrl) {
+    public HttpResponse redirectResponse(String redirectUrl) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Location", redirectUrl);
 
-        return new Http11Response(
+        return new HttpResponse(
                 HttpStatus.REDIRECT.getStatusCode(),
                 HttpStatus.REDIRECT.getMessage(),
                 headers,

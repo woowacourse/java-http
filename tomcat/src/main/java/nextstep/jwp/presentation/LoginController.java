@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         try {
             final String account = request.getParam(ACCOUNT_PARAM);
             final String password = request.getParam(PASSWORD_PARAM);

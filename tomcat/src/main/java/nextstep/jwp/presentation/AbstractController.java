@@ -13,7 +13,7 @@ public abstract class AbstractController implements Controller {
     public final void service(final HttpRequest request, final HttpResponse response) throws Exception {
         final HttpMethod method = request.getMethod();
 
-        try{
+        try {
             if (HttpMethod.GET == method) {
                 doGet(request, response);
             }
@@ -22,5 +22,9 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    }
+
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    }
 }

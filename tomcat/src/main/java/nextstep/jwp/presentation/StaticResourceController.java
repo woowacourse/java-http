@@ -22,7 +22,7 @@ public class StaticResourceController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final URL resource = getResource(request, response);
 
         response.setBody(resource);

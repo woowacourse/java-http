@@ -18,7 +18,7 @@ public class WelcomeController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setBody(WELCOME_MESSAGE);
         response.setStatus(HttpStatus.OK);
     }

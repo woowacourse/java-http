@@ -3,21 +3,18 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
-    private final HttpCookie httpCookie;
 
     private HttpRequest(RequestLine requestLine, RequestHeader requestHeader,
-        RequestBody requestBody, HttpCookie httpCookie) {
+        RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
-        this.httpCookie = httpCookie;
     }
 
     public static HttpRequest from(BufferedReader reader) {
@@ -25,8 +22,7 @@ public class HttpRequest {
             RequestLine requestLine = RequestLine.from(reader.readLine());
             RequestHeader requestHeader = parseHeader(reader);
             RequestBody requestBody = parseBody(reader, requestHeader.getContentLength());
-            HttpCookie httpCookie = HttpCookie.of(requestHeader.get("Cookie"));
-            return new HttpRequest(requestLine, requestHeader, requestBody, httpCookie);
+            return new HttpRequest(requestLine, requestHeader, requestBody);
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP Request 생성 중 에러가 발생하였습니다.");
         }
@@ -53,10 +49,6 @@ public class HttpRequest {
         return RequestBody.from(new String(buffer));
     }
 
-    public String getCookie(String key) {
-        return httpCookie.getOrDefault(key);
-    }
-
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
@@ -69,9 +61,11 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public boolean isSamePath(String... paths) {
-        String realPath = getPath();
-
-        return Arrays.asList(paths).contains(realPath);
+    public String getCookie(String key) {
+        if (requestHeader.contains("Cookie")) {
+            return HttpCookie.of(requestHeader.get("Cookie"))
+                .getOrDefault(key);
+        }
+        throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
     }
 }

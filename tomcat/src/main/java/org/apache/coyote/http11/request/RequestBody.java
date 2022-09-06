@@ -28,4 +28,8 @@ public class RequestBody {
     public String get(String input) {
         return values.get(input);
     }
+
+    public boolean contains(String input) {
+        return values.containsKey(input);
+    }
 }

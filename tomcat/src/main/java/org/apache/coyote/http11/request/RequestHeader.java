@@ -30,4 +30,8 @@ public class RequestHeader {
     public String get(String input) {
         return headers.get(input);
     }
+
+    public boolean contains(String key){
+        return headers.containsKey(key);
+    }
 }

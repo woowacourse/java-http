@@ -10,12 +10,12 @@ public class RequestLine {
 
     private final HttpMethod method;
     private final RequestUri requestUri;
-    private final String version;
+    private final String protocolVersion;
 
-    private RequestLine(final HttpMethod method, final RequestUri requestUri, final String version) {
+    private RequestLine(final HttpMethod method, final RequestUri requestUri, final String protocolVersion) {
         this.method = method;
         this.requestUri = requestUri;
-        this.version = version;
+        this.protocolVersion = protocolVersion;
     }
 
     public static RequestLine from(final String line) {
@@ -36,14 +36,6 @@ public class RequestLine {
         }
     }
 
-    public String findQueryValue(final String key) {
-        return requestUri.findQueryValue(key);
-    }
-
-    public boolean containsQuery() {
-        return requestUri.containsQuery();
-    }
-
     public boolean isPostMethod() {
         return method.isPost();
     }
@@ -60,7 +52,7 @@ public class RequestLine {
         return requestUri;
     }
 
-    public String getVersion() {
-        return version;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 }

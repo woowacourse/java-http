@@ -29,7 +29,7 @@ class RequestLineTest {
                     () -> assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET),
                     () -> assertThat(requestLine.getRequestUri().getPath()).isEqualTo("/index.html"),
                     () -> assertThat(requestLine.getRequestUri().getParams()).isEmpty(),
-                    () -> assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1")
+                    () -> assertThat(requestLine.getProtocolVersion()).isEqualTo("HTTP/1.1")
             );
         }
 

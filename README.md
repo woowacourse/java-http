@@ -72,17 +72,17 @@ Content-Type: text/html;charset=utf-8;
 
 ## 🖊 체크리스트
 
-- [ ] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
-- [ ] POST 로 들어온 요청의 Request Body를 파싱할 수 있다.
-- [ ] 로그인에  성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
-- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+- [x] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
+- [x] POST 로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [x] 로그인에  성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
 
 ## 🖥 기능 목록
 
-- [ ] HTTP Status Code 302
-- [ ] POST 방식으로 회원가입
-- [ ] Cookie 에 JSESSIONID 값 저장하기
-- [ ] Session 구현하기
+- [x] HTTP Status Code 302
+- [x] POST 방식으로 회원가입
+- [x] Cookie 에 JSESSIONID 값 저장하기
+- [x] Session 구현하기
 
 ## 🔥 리팩토링 목록
 
@@ -91,6 +91,7 @@ Content-Type: text/html;charset=utf-8;
 - [ ] builder 패턴 사용해 status Code 별 분리하기
 - [ ] 각 상태코드 별 필요 헤더 추가할 수 있게 세팅하기
 - [ ] 바디 값을 따로 넣을 수 있게 세팅하기
+- [ ] 302 location 헤더 추가할 수 있도록 변경!!!
 
 ### 📝 피드백
 

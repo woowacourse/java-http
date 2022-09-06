@@ -10,7 +10,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.db.Cookies;
+import nextstep.jwp.db.HttpCookie;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String request = readRequest(reader);
-            String response = servlet.doService(request);
+            String response = servlet.doService(reader, request);
             logIO(request, response);
 
             outputStream.write(response.getBytes());

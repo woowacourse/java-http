@@ -1,52 +1,54 @@
 package org.apache.coyote.http11.request;
 
 
-import static org.apache.coyote.Constants.CRLF;
-
-import java.util.NoSuchElementException;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.request.element.HttpRequestBody;
+import org.apache.coyote.http11.request.element.HttpRequestHeader;
 import org.apache.coyote.http11.request.element.Path;
 import org.apache.coyote.http11.request.element.Query;
 import org.apache.coyote.http11.response.element.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String EMPTY_REQUEST = "요청이 비어있습니다.";
+    private final HttpRequestHeader header;
+    private final HttpRequestBody body;
 
-    private final HttpMethod method;
-    private final Path path;
-    private final Query query;
-
-    public HttpRequest(HttpMethod method, Path path, Query query) {
-        this.method = method;
-        this.path = path;
-        this.query = query;
+    public HttpRequest(HttpRequestHeader header, HttpRequestBody body) {
+        this.header = header;
+        this.body = body;
     }
-
-    public static HttpRequest of(String request) {
-        if (request == null || request.isEmpty()) {
-            throw new NoSuchElementException(EMPTY_REQUEST);
-        }
-        String[] firstLine = request
-                .split(CRLF)[0]
-                .split(" ");
-
-        HttpMethod method = HttpMethod.valueOf(firstLine[0]);
-        Path path = Path.of(firstLine[1]);
-        Query query = new Query(firstLine[1]);
-
-        return new HttpRequest(method, path, query);
-    }
-
 
     public HttpMethod getMethod() {
-        return method;
+        return header.getMethod();
     }
 
-    public String getPath() {
-        return path.getPath();
+    public Path getPath() {
+        return header.getPath();
     }
 
     public Query getQuery() {
-        return query;
+        return header.getQuery();
+    }
+
+    public String getBody() {
+        return body.getBodyContext();
+    }
+
+    public String findHeader(String header) {
+        return this.header.find(header);
+    }
+
+    public Session getSession() {
+        return new Session(String.valueOf(UUID.randomUUID()));
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "header=" + header +
+                ", body=" + body +
+                '}';
     }
 }

@@ -8,25 +8,25 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
-import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class ViewResolver {
 
-    public ViewResolver() {}
+    public ViewResolver() {
+    }
 
-    public HttpResponse getResponse(HttpMethod method, String url, HttpStatus status) {
+    public HttpResponse getResponse(String url, HttpStatus status,
+                                    Map<String, String> headers) {
         if (status == HttpStatus.FOUND) {
-            return HttpResponse.found(url);
+            return HttpResponse.found(url).addHeaders(headers);
         }
-        if (method == HttpMethod.GET) {
-            return getStaticResponse(url, status);
-        }
-        throw new NoSuchElementException();
+        return getStaticResponse(url, status).addHeaders(headers);
     }
 
     private HttpResponse getStaticResponse(String url, HttpStatus status) {
@@ -54,7 +54,7 @@ public class ViewResolver {
         }
     }
 
-    public HttpResponse getResponse(HttpMethod method, String url) {
-        return getResponse(method, url, HttpStatus.OK);
+    public HttpResponse getResponse(String url) {
+        return getResponse(url, HttpStatus.OK, new HashMap<>());
     }
 }

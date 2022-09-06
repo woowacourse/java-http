@@ -13,7 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.Controllers;
+import nextstep.jwp.controller.ControllerAdapter;
+import nextstep.jwp.controller.ControllerMapper;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
@@ -50,12 +51,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processRequest(HttpRequest request) {
-        Optional<Controller> controller = Controllers.findController(request.getUri());
+        Optional<Controller> controller = ControllerMapper.findController(request.getUri());
 
         if (controller.isEmpty()) {
             return HttpResponse.notFound();
         }
 
-        return controller.get().doService(request);
+        return ControllerAdapter.doService(controller.get(), request);
     }
 }

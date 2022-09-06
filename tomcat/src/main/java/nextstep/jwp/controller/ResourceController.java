@@ -8,8 +8,14 @@ import nextstep.jwp.util.FileReader;
 public class ResourceController implements Controller {
 
     @Override
-    public HttpResponse doService(HttpRequest request) {
+    public HttpResponse doGet(HttpRequest request) {
         String uri = request.getUri();
         return HttpResponse.ok(uri, FileReader.read(uri));
     }
+
+    @Override
+    public HttpResponse doPost(HttpRequest request) {
+        return HttpResponse.notFound();
+    }
+
 }

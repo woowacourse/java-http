@@ -8,12 +8,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ControllersTest {
+class ControllerMapperTest {
 
     @Test
     @DisplayName("해당 uri를 처리할 수 있는 컨트롤러를 반환한다.")
     void findController() {
-        Optional<Controller> controller = Controllers.findController("/login");
+        Optional<Controller> controller = ControllerMapper.findController("/login");
 
         assertThat(controller.isPresent()).isTrue();
         assertDoesNotThrow(() -> (LoginController)controller.get());
@@ -22,7 +22,7 @@ class ControllersTest {
     @Test
     @DisplayName("처리할 수 있는 컨트롤러가 없는 경우 빈 값을 반환한다.")
     void invalidUri() {
-        Optional<Controller> controller = Controllers.findController("/abcdefg");
+        Optional<Controller> controller = ControllerMapper.findController("/abcdefg");
 
         assertThat(controller.isEmpty()).isTrue();
     }

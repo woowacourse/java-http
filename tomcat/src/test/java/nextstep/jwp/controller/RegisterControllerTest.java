@@ -28,7 +28,7 @@ class RegisterControllerTest {
             HttpRequest request = HttpRequestGenerator.generate("GET", "/register");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doGet(request);
 
             // then
             String responseString = response.toResponseString();
@@ -53,7 +53,7 @@ class RegisterControllerTest {
             // when
             boolean isAlreadySignInBeforeRequest = InMemoryUserRepository.isAlreadySignIn("account", "password",
                 "email@email.email");
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doPost(request);
 
             // then
             boolean isAlreadySignInAfterRequest = InMemoryUserRepository.isAlreadySignIn("account", "password",

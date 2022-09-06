@@ -12,24 +12,12 @@ import nextstep.jwp.util.FileReader;
 public class RegisterController implements Controller {
 
     @Override
-    public HttpResponse doService(HttpRequest request) {
-
-        if (request.isGet()) {
-            return doGet();
-        }
-
-        if (request.isPost()) {
-            return doPost(request);
-        }
-
-        return HttpResponse.notFound();
-    }
-
-    private HttpResponse doGet() {
+    public HttpResponse doGet(HttpRequest request) {
         return HttpResponse.ok("/register.html", FileReader.read("/register.html"));
     }
 
-    private HttpResponse doPost(HttpRequest request) {
+    @Override
+    public HttpResponse doPost(HttpRequest request) {
         Map<String, String> body = request.getBody();
         String account = body.get("account");
         String password = body.get("password");

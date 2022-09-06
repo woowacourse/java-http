@@ -27,7 +27,7 @@ class LoginControllerTest {
             HttpRequest request = HttpRequestGenerator.generate("GET", "/login");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doGet(request);
 
             // then
             String responseString = response.toResponseString();
@@ -43,7 +43,7 @@ class LoginControllerTest {
             HttpRequest request = HttpRequestGenerator.generateWithCookie("GET", "/login");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doGet(request);
 
             // then
             String responseString = response.toResponseString();
@@ -65,7 +65,7 @@ class LoginControllerTest {
                 "account=gugu&password=password");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doPost(request);
 
             // then
             String responseString = response.toResponseString();
@@ -82,7 +82,7 @@ class LoginControllerTest {
                 "account=gugu&password=invalidPassword");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doPost(request);
 
             // then
             String responseString = response.toResponseString();
@@ -99,7 +99,7 @@ class LoginControllerTest {
                 "account=ari&password=password");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doPost(request);
 
             // then
             String responseString = response.toResponseString();
@@ -115,7 +115,7 @@ class LoginControllerTest {
             HttpRequest request = HttpRequestGenerator.generateWithCookie("POST", "/login");
 
             // when
-            HttpResponse response = controller.doService(request);
+            HttpResponse response = controller.doPost(request);
 
             // then
             String responseString = response.toResponseString();

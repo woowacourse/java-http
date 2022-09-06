@@ -18,20 +18,7 @@ public class LoginController implements Controller {
     private static SessionManager sessionManager = new SessionManager();
 
     @Override
-    public HttpResponse doService(HttpRequest request) {
-
-        if (request.isGet()) {
-            return doGet(request);
-        }
-
-        if (request.isPost()) {
-            return doPost(request);
-        }
-
-        return HttpResponse.notFound();
-    }
-
-    private HttpResponse doGet(HttpRequest request) {
+    public HttpResponse doGet(HttpRequest request) {
         if (request.containsSession()) {
             findUserFromCookie(request);
             return HttpResponse.found("/index.html");
@@ -40,7 +27,8 @@ public class LoginController implements Controller {
         return HttpResponse.ok("/login.html", FileReader.read("/login.html"));
     }
 
-    private HttpResponse doPost(HttpRequest request) {
+    @Override
+    public HttpResponse doPost(HttpRequest request) {
         if (request.containsSession()) {
             findUserFromCookie(request);
             return HttpResponse.found("/index.html");

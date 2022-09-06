@@ -22,7 +22,7 @@ class ResourceControllerTest {
         HttpRequest request = HttpRequestGenerator.generate("GET", "/index.html");
 
         // when
-        HttpResponse response = controller.doService(request);
+        HttpResponse response = controller.doGet(request);
 
         // then
         String responseString = response.toResponseString();
@@ -30,4 +30,21 @@ class ResourceControllerTest {
         assertThat(responseString).contains("200 OK");
         assertThat(responseString).contains(FileReader.read("/index.html"));
     }
+
+    @Test
+    @DisplayName("post 요청시 404.html을 반환한다.")
+    void post() throws IOException {
+        // given
+        HttpRequest request = HttpRequestGenerator.generate("POST", "/index.html");
+
+        // when
+        HttpResponse response = controller.doPost(request);
+
+        // then
+        String responseString = response.toResponseString();
+
+        assertThat(responseString).contains("404 Not Found");
+        assertThat(responseString).contains(FileReader.read("/404.html"));
+    }
+
 }

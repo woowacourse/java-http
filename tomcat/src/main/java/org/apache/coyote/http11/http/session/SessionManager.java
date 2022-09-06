@@ -5,12 +5,13 @@ import static org.apache.coyote.http11.http.session.Session.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.coyote.http11.http.header.Cookie;
 
 public class SessionManager {
 
-	private static final Map<String, Session> SESSIONS = new HashMap<>();
+	private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
 	private SessionManager() {
 	}

@@ -39,11 +39,9 @@ public class LoginController extends AbstractController {
             if (user.checkPassword(password)) {
                 final String successMessage = user.toString();
                 log.info(successMessage);
-                response.setStatus(HttpStatus.FOUND);
-                response.setLocation("/index.html");
+                redirectIndex(response);
             } else {
-                response.setStatus(HttpStatus.FOUND);
-                response.setLocation("/401.html");
+                redirectNoAuth(response);
             }
         } catch (final RuntimeException e) {
             log.error(e.getMessage());
@@ -51,5 +49,15 @@ public class LoginController extends AbstractController {
 
         final Controller staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
+    }
+
+    private static void redirectNoAuth(final HttpResponse response) {
+        response.setStatus(HttpStatus.FOUND);
+        response.setLocation("/401.html");
+    }
+
+    private static void redirectIndex(final HttpResponse response) {
+        response.setStatus(HttpStatus.FOUND);
+        response.setLocation("/index.html");
     }
 }

@@ -25,6 +25,10 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
+    public static Cookie fromJSessionId(String id) {
+        return new Cookie(Map.of(JSESSIONID_KEY, id));
+    }
+
     public static Cookie empty() {
         return new Cookie(Map.of());
     }

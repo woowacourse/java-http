@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Controller;
@@ -35,7 +34,8 @@ public class LoginController extends Controller {
         return createLoginResultResponse(account, password, request);
     }
 
-    private HttpResponse createLoginResultResponse(final String account, final String password, final HttpRequest request) {
+    private HttpResponse createLoginResultResponse(final String account, final String password,
+                                                   final HttpRequest request) {
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty()) {

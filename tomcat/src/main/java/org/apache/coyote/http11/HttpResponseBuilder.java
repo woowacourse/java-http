@@ -6,8 +6,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class HttpResponseBuilder {
@@ -34,7 +32,7 @@ public class HttpResponseBuilder {
             final URL resource = getClass()
                     .getClassLoader()
                     .getResource("static" + filePath);
-            body =  new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             return this;
         } catch (IOException e) {
             throw new UncheckedServletException(e);

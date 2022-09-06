@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.User;
 
 public class Session {
 

@@ -31,7 +31,7 @@ public class HttpResponse {
 
     public byte[] writeResponse() {
         final String responseLine = String.format("HTTP/1.1 %s ", statusCode.getStatus());
-        if (cookie != null) {
+        if (cookie == null) {
             final String header = String.join("\r\n",
                  writeSetCookieOfHeader(),
                 "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",

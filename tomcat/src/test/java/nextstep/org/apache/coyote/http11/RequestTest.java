@@ -3,8 +3,8 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import org.apache.coyote.HttpMethod;
-import org.apache.coyote.http11.Request;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.Request;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;

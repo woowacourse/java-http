@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Request.PATH_INDEX;
-import static org.apache.coyote.http11.Request.QUERY_PARAM_DELIMITER_REGEX;
+import static org.apache.coyote.http11.request.Request.PATH_INDEX;
+import static org.apache.coyote.http11.request.Request.QUERY_PARAM_DELIMITER_REGEX;
 
 import java.io.File;
 import java.io.IOException;

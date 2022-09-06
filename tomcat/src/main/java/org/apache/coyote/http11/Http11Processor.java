@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Controller;
-import org.apache.coyote.ControllerContainer;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.ControllerContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,8 @@
-package org.apache.coyote;
+package org.apache.coyote.controller;
 
 import java.util.List;
 import org.apache.coyote.exception.ControllerNotFoundException;
-import org.apache.coyote.http11.Request;
+import org.apache.coyote.http11.request.Request;
 
 public class ControllerContainer {
     private static final List<Controller> controllers = List.of(

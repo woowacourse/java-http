@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import org.apache.coyote.HttpStatus;
 
 public class Response {
 

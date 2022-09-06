@@ -1,6 +1,6 @@
 package support;
 
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.http11.request.HttpMethod;
 
 public class RequestFixture {
 

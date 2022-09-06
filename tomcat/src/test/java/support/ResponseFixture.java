@@ -1,6 +1,6 @@
 package support;
 
-import org.apache.coyote.HttpStatus;
+import org.apache.coyote.http11.HttpStatus;
 
 public class ResponseFixture {
 

@@ -1,22 +1,23 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.URL;
 
 public class Request {
-    protected static final String SPACE_DELIMITER = " ";
-    protected static final int URI_INDEX = 1;
-    protected static final String QUERY_PARAM_DELIMITER = "?";
-    protected static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
-    protected static final int PARAM_INDEX = 1;
-    protected static final int PATH_INDEX = 0;
-    protected static final String HEADER_KEY_VALUE_DELIMITER = ":";
-    protected static final int KEY = 0;
-    protected static final int VALUE = 1;
+    public static final String SPACE_DELIMITER = " ";
+    public static final int URI_INDEX = 1;
+    public static final String QUERY_PARAM_DELIMITER = "?";
+    public static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
+    public static final int PARAM_INDEX = 1;
+    public static final int PATH_INDEX = 0;
+    public static final String HEADER_KEY_VALUE_DELIMITER = ":";
+    public static final int KEY = 0;
+    public static final int VALUE = 1;
 
     private final HttpMethod method;
     private final URL requestURL;

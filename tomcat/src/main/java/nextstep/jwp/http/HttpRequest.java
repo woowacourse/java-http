@@ -17,29 +17,37 @@ public class HttpRequest {
     private final String uri;
     private final String path;
     private final QueryParams queryParams;
+    private final HttpHeaders httpHeaders;
+    private final String requestBody;
 
-    public HttpRequest(HttpMethod httpMethod, String uri, String path, QueryParams queryParams) {
+    public HttpRequest(HttpMethod httpMethod, String uri, String path, QueryParams queryParams,
+                       HttpHeaders httpHeaders, String requestBody) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.path = path;
         this.queryParams = queryParams;
+        this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(String requestLine) {
+    public static HttpRequest from(String requestLine, HttpHeaders httpHeaders,
+                                   String requestBody) {
         List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
         HttpMethod httpMethod = HttpMethod.from(request.get(HTTP_METHOD_INDEX));
         String uri = request.get(URI_INDEX);
         List<String> separatedUri = List.of(uri.split(URI_PATH_SEPARATOR));
-        return handleHavingQueryParams(httpMethod, uri, separatedUri);
+        return handleHavingQueryParams(httpMethod, uri, separatedUri, httpHeaders, requestBody);
     }
 
     private static HttpRequest handleHavingQueryParams(HttpMethod httpMethod, String uri,
-                                                       List<String> separatedUri) {
+                                                       List<String> separatedUri,
+                                                       HttpHeaders httpHeaders,
+                                                       String requestBody) {
         if (hasQueryParam(separatedUri)) {
             return new HttpRequest(httpMethod, uri, separatedUri.get(PATH_INDEX),
-                QueryParams.from(separatedUri.get(QUERY_PARAM_INDEX)));
+                QueryParams.from(separatedUri.get(QUERY_PARAM_INDEX)), httpHeaders, requestBody);
         }
-        return new HttpRequest(httpMethod, uri, uri, QueryParams.empty());
+        return new HttpRequest(httpMethod, uri, uri, QueryParams.empty(), httpHeaders, requestBody);
     }
 
     private static boolean hasQueryParam(List<String> separatedUri) {

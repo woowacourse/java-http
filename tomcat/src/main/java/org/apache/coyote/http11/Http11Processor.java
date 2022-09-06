@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import static nextstep.jwp.http.StatusCode.matchStatusCode;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +11,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.QueryParams;
@@ -42,12 +42,12 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        final int REQUEST_LINE_INDEX = 0;
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
-            final List<String> request = extractRequest(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            HttpRequest httpRequest = HttpRequest.from(request.get(REQUEST_LINE_INDEX));
+            HttpRequest httpRequest = extractRequest(bufferedReader);
             HttpResponse httpResponse = handle(httpRequest);
 
             outputStream.write(httpResponse.writeResponse());
@@ -57,15 +57,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> extractRequest(InputStream inputStream) throws IOException {
-        List<String> request = new ArrayList<>();
-        final BufferedReader bufferedReader = new BufferedReader(
-            new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    private HttpRequest extractRequest(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
+        String requestBody = parseRequestBody(bufferedReader, httpHeaders);
+
+        return HttpRequest.from(requestLine, httpHeaders, requestBody);
+    }
+
+    private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = new ArrayList<>();
         String line;
         while (!(line = bufferedReader.readLine()).isEmpty()) {
-            request.add(line);
+            lines.add(line);
         }
-        return request;
+        return HttpHeaders.parse(lines);
+    }
+
+    private String parseRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
+        throws IOException {
+        int contentLength = Integer.parseInt(httpHeaders.get("Content-Length").orElse("0"));
+
+        char[] body = new char[contentLength];
+        bufferedReader.read(body);
+        return new String(body);
     }
 
     private HttpResponse handle(HttpRequest httpRequest) {

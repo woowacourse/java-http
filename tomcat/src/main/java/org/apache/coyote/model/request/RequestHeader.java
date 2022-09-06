@@ -7,6 +7,7 @@ import java.util.Map;
 public class RequestHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE = "Cookie";
     private final Map<String, String> requestHeader;
 
     private RequestHeader(Map<String, String> requestHeader) {
@@ -34,5 +35,9 @@ public class RequestHeader {
 
     public Map<String, String> getRequestHeader() {
         return requestHeader;
+    }
+
+    public String getCookieKey() {
+        return requestHeader.get(COOKIE);
     }
 }

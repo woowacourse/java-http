@@ -57,6 +57,10 @@ public class HttpRequest {
         return requestHeader.existKey(cookie);
     }
 
+    public String getCookieKey() {
+        return requestHeader.getCookieKey();
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

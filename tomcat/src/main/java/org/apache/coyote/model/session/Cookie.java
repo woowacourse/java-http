@@ -11,8 +11,8 @@ public class Cookie {
         this.uuid = UUID.randomUUID();
     }
 
-    public Cookie(UUID uuid) {
-        this.uuid = uuid;
+    public UUID getUuid() {
+        return uuid;
     }
 
     @Override

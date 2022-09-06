@@ -10,6 +10,8 @@ import org.apache.coyote.model.response.ResponseHeader;
 import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.model.session.Cookie;
+import org.apache.coyote.model.session.Session;
+import org.apache.coyote.model.session.SessionManager;
 import org.apache.coyote.utils.RequestUtil;
 
 import java.util.Optional;
@@ -31,28 +33,29 @@ public class LoginHandler implements Handler {
     @Override
     public String getResponse() {
         if (httpRequest.checkMethod(Method.GET)) {
-            return createResponse(httpRequest, StatusCode.OK, RequestUtil.getResponseBody(LOGIN_HTML, getClass()))
+            if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
+                return createResponse(StatusCode.OK, RequestUtil.getResponseBody(INDEX_HTML, getClass()))
+                        .getResponse();
+            }
+            return createResponse(StatusCode.OK, RequestUtil.getResponseBody(LOGIN_HTML, getClass()))
                     .getResponse();
         }
         if (httpRequest.checkMethod(Method.POST) && checkUser(httpRequest.getRequestBody())) {
-            HttpResponse httpResponse = createResponse(httpRequest, StatusCode.FOUND,
-                    RequestUtil.getResponseBody(INDEX_HTML, getClass()));
+            HttpResponse httpResponse = createResponse(StatusCode.FOUND, RequestUtil.getResponseBody(INDEX_HTML, getClass()));
             if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
-                System.out.println("쿠키없음 -> 새로만듦");
-                httpResponse.addCookie(new Cookie());
-            } else {
-                System.out.println("쿠키있음!");
+                Cookie cookie = new Cookie();
+                RequestBody requestBody = httpRequest.getRequestBody();
+                SessionManager.add(cookie.toString(), new Session("user", requestBody.getByKey("account")));
+                httpResponse.addCookie(cookie);
             }
-            System.out.println(httpResponse.getResponseHeader().toString());
             return httpResponse.getResponse();
         }
-        return createResponse(httpRequest, StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_401, getClass()))
+        return createResponse(StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_401, getClass()))
                 .getResponse();
     }
 
-    protected static HttpResponse createResponse(HttpRequest httpRequest, StatusCode statusCode, String responseBody) {
+    protected static HttpResponse createResponse(StatusCode statusCode, String responseBody) {
         ResponseLine responseLine = ResponseLine.of(statusCode);
-        HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
         return HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
     }
 

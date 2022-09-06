@@ -52,7 +52,9 @@ public class DynamicMethodInvoke {
 
             final Method method = object.getClass().getDeclaredMethod(methodName, parameterTypes);
             method.setAccessible(true);
-
+            method.invoke(object, parameters);
+            method.setAccessible(false);
+            method.invoke(object, parameters);
             return method.invoke(object, parameters);
         } catch (Exception e) {
             throw new RuntimeException(e);

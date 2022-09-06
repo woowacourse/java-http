@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.model.ContentType.TEXT_HTML_CHARSET_UTF_8
 
 import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.LoginController;
+import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpRequest;
@@ -24,7 +25,7 @@ public class Controller {
             return controller.index(httpRequest);
         }
 
-        if (uri.getValue().equals("/login.html")) {
+        if (uri.getValue().equals("/login.html") || uri.getValue().equals("/login")) {
             BasicController basicController = new BasicController();
             return basicController.execute(httpRequest);
         }
@@ -43,6 +44,12 @@ public class Controller {
 
     public HttpResponse post() {
         LoginController controller = new LoginController();
-        return controller.login(httpRequest);
+        if (httpRequest.isEqualToUri("/login.html") || httpRequest.isEqualToUri("/login")) {
+            return controller.login(httpRequest);
+        }
+        if (httpRequest.isEqualToUri("/register.html") || httpRequest.isEqualToUri("/register")) {
+            return controller.register(httpRequest);
+        }
+        throw new BadRequestException(httpRequest.getUri().getValue());
     }
 }

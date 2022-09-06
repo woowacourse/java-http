@@ -117,7 +117,7 @@ class Http11ProcessorTest {
     void login() throws IOException {
         // given
         String requestBody = "account=gugu&password=password";
-        String request = "POST /index.html HTTP/1.1\n"
+        String request = "POST /login.html HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Content-Length: " + requestBody.getBytes().length + "\n"
                 + "Connection: keep-alive\n"
@@ -142,7 +142,7 @@ class Http11ProcessorTest {
     void login_fail() throws IOException {
         // given
         String requestBody = "account=gugu&password=pass";
-        String request = "POST /index.html HTTP/1.1\n"
+        String request = "POST /login.html HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Content-Length: " + requestBody.getBytes().length + "\n"
                 + "Connection: keep-alive\n"
@@ -158,6 +158,31 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found \r\n"
                 + "Location: /401.html \r\n"
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void register() throws IOException {
+        // given
+        String requestBody = "account=hoho&email=hoho@email.com&password=password";
+        String request = "POST /register.html HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Content-Length: " + requestBody.getBytes().length + "\n"
+                + "Connection: keep-alive\n"
+                + "Accept: */*\n"
+                + "\n"
+                + requestBody;
+        final var socket = new StubSocket(request);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n"
+                + "Location: /index.html \r\n"
                 + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);

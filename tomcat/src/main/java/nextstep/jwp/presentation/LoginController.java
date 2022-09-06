@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpResponse;
@@ -27,6 +28,25 @@ public class LoginController {
                 .orElseThrow(() -> new RuntimeException("not found account"));
 
         return response(values.get("password"), user);
+    }
+
+    public HttpResponse register(final HttpRequest httpRequest) {
+        String body = httpRequest.getBody();
+        String[] split = body.split("&");
+        Map<String, String> values = new HashMap<>();
+        for (String value : split) {
+            String[] keyAndValue = value.split("=");
+            values.put(keyAndValue[0], keyAndValue[1]);
+        }
+        String account = values.get("account");
+        Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
+        if (byAccount.isPresent()) {
+            return response("Location: /401.html");
+        }
+        User user = new User(account, values.get("password"), values.get("email"));
+
+        InMemoryUserRepository.save(user);
+        return response("Location: /index.html");
     }
 
     private HttpResponse response(final String password, final User user) {

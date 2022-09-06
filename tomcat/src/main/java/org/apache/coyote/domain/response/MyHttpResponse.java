@@ -1,9 +1,11 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.domain.response;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.domain.FilePath;
+import org.apache.coyote.domain.HttpCookie;
 
 public class MyHttpResponse {
 

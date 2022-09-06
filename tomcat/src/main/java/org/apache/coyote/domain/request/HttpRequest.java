@@ -1,7 +1,8 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.domain.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.coyote.domain.HttpCookie;
 
 public class HttpRequest {
 

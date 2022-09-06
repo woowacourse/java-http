@@ -1,6 +1,6 @@
 package org.apache.coyote.handler;
 
-import org.apache.coyote.domain.HttpRequest;
+import org.apache.coyote.domain.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

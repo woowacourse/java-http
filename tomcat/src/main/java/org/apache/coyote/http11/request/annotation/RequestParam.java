@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.mapping;
+package org.apache.coyote.http11.request.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.request.mapping.RequestMapping;
-import org.apache.coyote.http11.request.mapping.RequestParam;
+import org.apache.coyote.http11.request.annotation.RequestMapping;
+import org.apache.coyote.http11.request.annotation.RequestParam;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;

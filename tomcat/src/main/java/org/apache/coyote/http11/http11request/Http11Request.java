@@ -1,21 +1,20 @@
 package org.apache.coyote.http11.http11request;
 
+import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 
 public class Http11Request {
 
     private final HttpMethod httpMethod;
     private final String uri;
+    private final Map<String, String> header;
     private final String body;
 
-    public Http11Request(String httpMethod, String uri, String body) {
+    public Http11Request(String httpMethod, String uri, Map<String, String> header, String body) {
         this.httpMethod = HttpMethod.valueOf(httpMethod.toUpperCase());
         this.uri = uri;
+        this.header = header;
         this.body = body;
-        System.out.println("@@@request");
-        System.out.println(httpMethod);
-        System.out.println(uri);
-        System.out.println(body);
     }
 
     public HttpMethod getHttpMethod() {
@@ -24,6 +23,10 @@ public class Http11Request {
 
     public String getUri() {
         return uri;
+    }
+
+    public Map<String, String> getHeader() {
+        return header;
     }
 
     public String getBody() {

@@ -1,11 +1,11 @@
-package nextstep.jwp;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.apache.coyote.http11.ResourceLocator;
+import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.ResourceLocator;
-import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.request.spec.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;

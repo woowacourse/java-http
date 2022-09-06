@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
-import org.apache.coyote.http11.request.ResourceLocator;
+import org.apache.catalina.servlets.ControllerMappings;
+import org.apache.coyote.http11.ResourceLocator;
 
 public class WebConfig {
 

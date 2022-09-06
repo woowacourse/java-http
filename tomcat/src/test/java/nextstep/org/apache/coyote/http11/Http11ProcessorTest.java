@@ -2,10 +2,9 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.apache.coyote.Controller;
-import org.apache.coyote.ControllerMappings;
+import org.apache.catalina.servlets.Controller;
+import org.apache.catalina.servlets.ControllerMappings;
 import org.apache.coyote.WebConfig;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -23,7 +22,12 @@ class Http11ProcessorTest {
         // given
         StubSocket stubSocket = new StubSocket();
         String body = "body message";
-        stubSocket.setRequest("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n" + body + "\r\n");
+        stubSocket.setRequest(String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body));
         WebConfig webConfig = new WebConfig(null, new ControllerMappings(List.of(new Controller() {
             @Override
             public boolean isProcessable(HttpRequest request) {
@@ -43,11 +47,11 @@ class Http11ProcessorTest {
         processor.process(stubSocket);
 
         // then
-        String expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length + "\r\n" +
-                "\r\n" +
-                body;
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html",
+                "",
+                body);
 
         assertThat(stubSocket.output()).isEqualTo(expected);
     }

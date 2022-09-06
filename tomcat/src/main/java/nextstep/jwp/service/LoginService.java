@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.service;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;

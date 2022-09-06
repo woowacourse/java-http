@@ -1,9 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.servlets;
 
-import org.apache.coyote.Controller;
+import org.apache.coyote.http11.Resource;
+import org.apache.coyote.http11.ResourceLocator;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Resource;
-import org.apache.coyote.http11.request.ResourceLocator;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
 

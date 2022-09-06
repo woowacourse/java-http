@@ -3,9 +3,9 @@ package org.apache.coyote.http11.response;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.request.spec.HttpHeaders;
+import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.response.spec.HttpStatus;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpResponse {
 
@@ -15,7 +15,7 @@ public class HttpResponse {
 
     public HttpResponse(HttpStatus status) {
         this.status = status;
-        this.headers = initHeaders();
+        this.headers = new HttpHeaders(new HashMap<>());
         this.body = "";
     }
 

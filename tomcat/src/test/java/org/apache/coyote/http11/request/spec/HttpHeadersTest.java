@@ -3,7 +3,8 @@ package org.apache.coyote.http11.request.spec;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
-import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.general.HttpHeaders;
+import org.apache.coyote.http11.session.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

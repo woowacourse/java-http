@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.Controller;
-import org.apache.coyote.ControllerMappings;
+import org.apache.catalina.servlets.Controller;
+import org.apache.catalina.servlets.ControllerMappings;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.spec.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;

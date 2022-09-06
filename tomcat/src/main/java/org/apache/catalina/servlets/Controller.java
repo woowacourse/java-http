@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina.servlets;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

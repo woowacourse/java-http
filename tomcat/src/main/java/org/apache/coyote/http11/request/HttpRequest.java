@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.request.spec.HttpHeaders;
+import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.request.spec.HttpMethod;
 import org.apache.coyote.http11.request.spec.StartLine;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpRequest {
 

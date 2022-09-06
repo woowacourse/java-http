@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.request.spec;
+package org.apache.coyote.http11.general;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpHeaders {
 

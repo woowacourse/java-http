@@ -1,5 +1,8 @@
 package nextstep.jwp;
 
+import static org.apache.coyote.http11.StatusCode.FOUND;
+import static org.apache.coyote.http11.StatusCode.OK;
+
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,14 +18,18 @@ import org.slf4j.LoggerFactory;
 
 public enum Url {
 
-    DEFAULT("/"::equals, url -> new Http11Response("200 OK", "html", "Hello world!")),
+    DEFAULT("/"::equals, url -> new Http11Response(OK, "html", "Hello world!")),
     LOGIN(url -> isMatchRegex("/login.*", url), url -> {
-        if (isLoginSuccess(url)) {
-            return Http11Response.from("302 FOUND", "/index.html");
+        final Http11QueryParams queryParams = Http11QueryParams.from(url);
+        if (!queryParams.hasParam()) {
+            return Http11Response.from(OK, "/login.html");
         }
-        return Http11Response.from("200 OK", "/login.html");
+        if (isLoginSuccess(queryParams)) {
+            return Http11Response.from(FOUND, "/index.html");
+        }
+        return Http11Response.from(OK, "/401.html");
     }),
-    RESOURCE(url -> isMatchRegex(".*\\..*", url), url -> Http11Response.from("200 OK", url));
+    RESOURCE(url -> isMatchRegex(".*\\..*", url), url -> Http11Response.from(OK, url));
 
     private static final Logger log = LoggerFactory.getLogger(Url.class);
 
@@ -48,8 +55,7 @@ public enum Url {
         return matcher.find();
     }
 
-    private static boolean isLoginSuccess(String url) {
-        final Http11QueryParams queryParams = Http11QueryParams.from(url);
+    private static boolean isLoginSuccess(Http11QueryParams queryParams) {
         final String account = queryParams.getValueFrom("account");
         final String password = queryParams.getValueFrom("password");
 

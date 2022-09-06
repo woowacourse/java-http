@@ -29,10 +29,10 @@ class UrlTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @DisplayName("로그인 페이지에 대한 응답을 반환한다")
+    @DisplayName("로그인 페이지에 대한 응답을 반환한다.")
     @Test
     void getResponse_login() throws IOException {
-        final Http11Response response = Url.getResponseFrom("/login?account=gugu&password=password");
+        final Http11Response response = Url.getResponseFrom("/login");
 
         final String actual = response.getOkResponse();
 
@@ -48,7 +48,45 @@ class UrlTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @DisplayName("인덱스 페이지에 대한 응답을 반환한다")
+    @DisplayName("로그인에 성공하면 인덱스 페이지로 리다이렉트 시킨다.")
+    @Test
+    void getResponse_loginSuccess() throws IOException {
+        final Http11Response response = Url.getResponseFrom("/login?account=gugu&password=password");
+
+        final String actual = response.getOkResponse();
+
+        final java.net.URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인에 실패하면 401 페이지를 반환한다.")
+    @Test
+    void getResponse_loginFailure() throws IOException {
+        final Http11Response response = Url.getResponseFrom("/login?account=gugu&password=p");
+
+        final String actual = response.getOkResponse();
+
+        final java.net.URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("인덱스 페이지에 대한 응답을 반환한다.")
     @Test
     void getResponse_index() throws IOException {
         final Http11Response response = Url.getResponseFrom("/index.html");
@@ -67,7 +105,7 @@ class UrlTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @DisplayName(".css 파일에 대한 응답을 반환한다")
+    @DisplayName(".css 파일에 대한 응답을 반환한다.")
     @Test
     void getResponse_css() throws IOException {
         final Http11Response response = Url.getResponseFrom("/css/styles.css");

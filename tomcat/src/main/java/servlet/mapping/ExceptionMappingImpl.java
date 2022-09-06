@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExceptionMappingImpl implements ExceptionMapping {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExceptionHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingImpl.class);
 
     private final ExceptionHandler exceptionHandler;
 
@@ -20,15 +20,14 @@ public class ExceptionMappingImpl implements ExceptionMapping {
     @Override
     public ResponseEntity map(Exception exception) {
         LOG.error(exception.getMessage(), exception);
-        Class<? extends Exception> exceptionClass = exception.getClass();
-
-        if (exceptionClass.isInstance(NoSuchElementException.class)) {
+        try {
+            throw exception;
+        } catch (NoSuchElementException e) {
             return exceptionHandler.notFound();
-        }
-        if (exceptionClass.isInstance(NoUserException.class) ||
-                exceptionClass.isInstance(InvalidPasswordException.class)) {
+        } catch (NoUserException | InvalidPasswordException e) {
             return exceptionHandler.unauthorized();
+        } catch (Exception e) {
+            return exceptionHandler.internalServerError();
         }
-        return exceptionHandler.internalServerError();
     }
 }

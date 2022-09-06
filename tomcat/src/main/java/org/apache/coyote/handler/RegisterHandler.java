@@ -25,7 +25,8 @@ public class RegisterHandler implements Handler {
         if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && httpRequest.getQueryParam().isEmpty()) {
             return MyHttpResponse.from(filePath, HttpStatusCode.OK);
         }
-        return MyHttpResponse.from(filePath, HttpStatusCode.FOUND, RedirectUrl.from(register(httpRequest)));
+        return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
+                .addRedirectUrlHeader(RedirectUrl.from(register(httpRequest)));
     }
 
     private static String register(HttpRequest httpRequest) {

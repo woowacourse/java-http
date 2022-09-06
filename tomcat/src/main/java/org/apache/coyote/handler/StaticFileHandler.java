@@ -11,6 +11,6 @@ public class StaticFileHandler implements Handler {
     @Override
     public MyHttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
         final FilePath filePath = FilePath.from(httpRequest.getUri());
-        return MyHttpResponse.from(filePath, HttpStatusCode.OK, null);
+        return MyHttpResponse.from(filePath, HttpStatusCode.OK);
     }
 }

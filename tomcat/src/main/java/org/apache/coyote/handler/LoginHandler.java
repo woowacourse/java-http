@@ -22,21 +22,29 @@ public class LoginHandler implements Handler {
     @Override
     public MyHttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
         final FilePath filePath = FilePath.from(httpRequest.getUri());
-        if(httpRequest.getHttpMethod().equals(HttpMethod.GET) && httpRequest.getQueryParam().isEmpty()){
+        if (httpRequest.getHttpCookie().getJSESSIONID()) {
+            return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
+                    .addRedirectUrlHeader(RedirectUrl.from("/index.html"));
+        }
+        if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && httpRequest.getQueryParam().isEmpty()) {
             return MyHttpResponse.from(filePath, HttpStatusCode.OK);
         }
-        return MyHttpResponse.from(filePath, HttpStatusCode.FOUND, RedirectUrl.from(login(httpRequest)));
+        return login(httpRequest);
     }
 
-    private static String login(HttpRequest httpRequest) {
+    private static MyHttpResponse login(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        final FilePath filePath = FilePath.from(httpRequest.getUri());
         Optional<User> user = InMemoryUserRepository.findByAccount(
                 httpRequest.getRequestBody().getRequestBody().get("account"));
         if (user.isPresent()) {
             log.info(user.get().toString());
             if (user.get().checkPassword(httpRequest.getRequestBody().getRequestBody().get("password"))) {
-                return "/index.html";
+                return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
+                        .addRedirectUrlHeader(RedirectUrl.from("/index.html"))
+                        .addSetCookieHeader(httpRequest.getHttpCookie());
             }
         }
-        return "/401.html";
+        return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
+                .addRedirectUrlHeader(RedirectUrl.from("/401.html"));
     }
 }

@@ -29,4 +29,8 @@ public class RequestHeader {
     public int getContentLength() {
         return Integer.parseInt(requestHeader.getOrDefault("Content-Length", "0"));
     }
+
+    public String getCookies() {
+        return requestHeader.getOrDefault("Cookie", "");
+    }
 }

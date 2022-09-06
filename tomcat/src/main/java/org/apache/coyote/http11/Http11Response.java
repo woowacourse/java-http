@@ -13,15 +13,17 @@ public class Http11Response {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Response.class);
 
+    private final StatusCode statusCode;
     private final String contentType;
     private final String responseBody;
 
-    public Http11Response(String contentType, String responseBody) {
+    public Http11Response(StatusCode statusCode, String contentType, String responseBody) {
+        this.statusCode = statusCode;
         this.contentType = contentType;
         this.responseBody = responseBody;
     }
 
-    public static Http11Response from(String resourcePath) {
+    public static Http11Response from(StatusCode statusCode, String resourcePath) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -29,7 +31,7 @@ public class Http11Response {
 
         final String responseBody = getResponseBody(resource);
         final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(contentType, responseBody);
+        return new Http11Response(statusCode, contentType, responseBody);
     }
 
     private static void validateResourcePath(URL resource) {
@@ -48,24 +50,42 @@ public class Http11Response {
     }
 
     public void write(OutputStream outputStream) throws IOException {
-        outputStream.write(getOkResponse().getBytes());
+        outputStream.write(statusCode.responseToString(this).getBytes());
         outputStream.flush();
     }
 
     public String getOkResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                getContentTypeHeader(),
-                getContentLengthHeader(),
+                startLineToString(),
+                contentTypeToString(),
+                contentLengthToString(),
                 "",
                 responseBody);
     }
 
-    private String getContentTypeHeader() {
+    public String getFoundResponse(String locationUrl) {
+        return String.join("\r\n",
+                startLineToString(),
+                contentTypeToString(),
+                contentLengthToString(),
+                locationToString(locationUrl),
+                "",
+                responseBody);
+    }
+
+    private String startLineToString() {
+        return String.format("HTTP/1.1 %s ", statusCode.statusCodeToString());
+    }
+
+    private String contentTypeToString() {
         return String.format("Content-Type: text/%s;charset=utf-8 ", contentType);
     }
 
-    private String getContentLengthHeader() {
+    private String contentLengthToString() {
         return String.format("Content-Length: %s ", responseBody.getBytes().length);
+    }
+
+    private CharSequence locationToString(String locationUrl) {
+        return String.format("Location: %s ", locationUrl);
     }
 }

@@ -3,6 +3,8 @@ package org.apache.coyote.http11.response;
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String CRLF = "\r\n";
+    private static final String SPACE = " ";
 
     private final HttpStatus status;
     private final Headers headers;
@@ -30,9 +32,13 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        return String.join("\r\n",
-                HTTP_VERSION + " " + status.code() + " " + status + " ",
+        return String.join(CRLF,
+                statusLine(),
                 headers.toResponseValue(),
                 body).getBytes();
+    }
+
+    private String statusLine() {
+        return HTTP_VERSION + SPACE + status.code() + SPACE + status + SPACE;
     }
 }

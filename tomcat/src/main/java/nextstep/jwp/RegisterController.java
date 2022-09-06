@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.ResourceLocator;
+import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
 
@@ -27,7 +28,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> headers = request.getHeaders();
+        HttpHeaders headers = request.getHeaders();
         String contentType = headers.get("Content-Type");
         if (!contentType.equals("application/x-www-form-urlencoded")) {
             response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);

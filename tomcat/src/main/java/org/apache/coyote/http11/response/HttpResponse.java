@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.response.spec.HttpStatus;
 
@@ -50,6 +51,14 @@ public class HttpResponse {
 
     public HttpStatus getStatus() {
         return this.status;
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public void addCookie(Cookie cookie) {
+        headers.addCookie(cookie);
     }
 
     private static class StatusLine {

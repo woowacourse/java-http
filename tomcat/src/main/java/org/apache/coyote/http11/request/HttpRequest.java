@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Map;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.request.spec.HttpMethod;
 import org.apache.coyote.http11.request.spec.StartLine;
@@ -21,18 +21,6 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String getPathString() {
-        return startLine.getPath();
-    }
-
-    public Map<String, String> getParams() {
-        return startLine.getParams();
-    }
-
-    public void setPath(String pathName) {
-        startLine.setPath(pathName);
-    }
-
     public boolean isPathEqualTo(String path) {
         return startLine.isPathEqualTo(path);
     }
@@ -41,15 +29,27 @@ public class HttpRequest {
         return startLine.isStaticResourcePath();
     }
 
+    public boolean hasCookie() {
+        return headers.hasCookie();
+    }
+
+    public String getPathString() {
+        return startLine.getPath();
+    }
+
     public HttpMethod getMethod() {
         return startLine.getMethod();
     }
 
-    public Map<String, String> getHeaders() {
-        return headers.getValues();
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     public String getBody() {
         return body;
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
     }
 }

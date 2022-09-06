@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.Cookie;
 
 public class HttpHeaders {
 
@@ -51,5 +52,17 @@ public class HttpHeaders {
         return values.entrySet().stream()
                 .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
                 .collect(Collectors.joining("\r\n"));
+    }
+
+    public void addCookie(Cookie cookie) {
+        values.put("Set-Cookie", cookie.headerValue());
+    }
+
+    public boolean hasCookie() {
+        return values.containsKey("Cookie");
+    }
+
+    public Cookie getCookie() {
+        return Cookie.from(values.get("Cookie"));
     }
 }

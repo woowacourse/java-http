@@ -29,4 +29,9 @@ public class LoginService {
         }
         return true;
     }
+
+    public User findUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다. account = " + account));
+    }
 }

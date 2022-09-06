@@ -48,6 +48,22 @@ class LoginApiHandlerTest {
     }
 
     @Test
+    void loginApiHandler는_로그인_요청이_POST가_아니면_처리할_수_없다() throws IOException {
+        // given
+        final String body = "account=gugu&password=password";
+        final String requestMessage = 로그인_요청_메시지("GET /signin HTTP/1.1 ", body);
+        final HttpRequest httpRequest = httpRequest_생성(requestMessage);
+
+        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+
+        // when
+        boolean result = loginApiHandler.canHandle(httpRequest);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
     void loginApiHandler는_로그인_처리_성공_시_302_index_html을_반환한다() throws IOException {
         // given
         final String body = "account=gugu&password=password";

@@ -48,6 +48,22 @@ class RegisterPageApiHandlerTest {
     }
 
     @Test
+    void RegisterPageApiHandler는_register요청이_GET이_아니면_처리할_수_없다() throws IOException {
+        // given
+        final String body = "";
+        String requestMessage = 회원가입_페이지_요청("POST /register HTTP/1.1 ", body);
+        HttpRequest httpRequest = httpRequest_생성(requestMessage);
+
+        RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
+
+        // when
+        boolean result = registerPageApiHandler.canHandle(httpRequest);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
     void RegisterPageApiHandler는_register요청이오면_register_html_파일을_반환한다() throws IOException {
         // given
         final String body = "";

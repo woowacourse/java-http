@@ -48,6 +48,22 @@ class RootApiHandlerTest {
     }
 
     @Test
+    void rootApiHandler는_root요청이_GET이_아니면_처리할_수_없다() throws IOException {
+        // given
+        final String body = "";
+        String invalidRequestMessage = 루트_요청_메시지("POST /index.html HTTP/1.1 ", body);
+        HttpRequest httpRequest = httpRequest_생성(invalidRequestMessage);
+
+        RootApiHandler rootApiHandler = new RootApiHandler();
+
+        // when
+        boolean result = rootApiHandler.canHandle(httpRequest);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
     void rootApiHandler는_root요청_처리_시_helloWorld를_반환한다() throws IOException {
         // given
         final String body = "";

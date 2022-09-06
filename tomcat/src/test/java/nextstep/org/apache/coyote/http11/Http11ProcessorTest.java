@@ -125,10 +125,6 @@ class Http11ProcessorTest {
     }
 
     private boolean isContains(String actual, List<String> result) {
-        System.out.println(actual);
-        System.out.println(result.stream()
-                .filter(actual::contains)
-                .count());
         return result.size() == result.stream()
                 .filter(actual::contains)
                 .count();

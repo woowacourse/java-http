@@ -9,14 +9,13 @@ import org.apache.catalina.SessionManager;
 
 import java.io.IOException;
 
+import static nextstep.jwp.vo.HttpHeader.*;
+
 public class GetRequestMangerImpl implements RequestManager {
 
     private static final String PREFIX = "static/";
     private static final String POST_LOGIN_REDIRECT = "static/index.html";
     private static final String LOGIN = "/login";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
 
     private final Request request;
 
@@ -37,8 +36,9 @@ public class GetRequestMangerImpl implements RequestManager {
         }
 
         return Response.from(ResponseStatus.OK)
-                .addHeader(CONTENT_TYPE, "text/" + fileName.getExtension() + CHARSET_UTF_8)
-                .addHeader(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length))
+                .addHeader(CONTENT_TYPE.getValue(),
+                        "text/" + fileName.getExtension() + CHARSET_UTF_8.getValue())
+                .addHeader(CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length))
                 .addBlankLine()
                 .addBody(responseBody)
                 .getResponse();

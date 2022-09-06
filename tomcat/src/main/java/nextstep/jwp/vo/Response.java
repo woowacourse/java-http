@@ -10,6 +10,7 @@ public class Response {
     private static final String DELIMITER = "\r\n";
     private static final String EMPTY = "";
     private static final String HEADER_DELIMITER = ": ";
+    
     private final List<String> headers;
 
     private Response(ResponseStatus responseStatus) {

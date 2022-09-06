@@ -2,8 +2,10 @@ package nextstep.jwp.vo;
 
 import java.util.Map;
 
+import static nextstep.jwp.vo.HttpHeader.*;
+
+
 public class HttpCookie {
-    private static final String JSESSION_ID = "JSESSIONID";
     private static final String NO_JSESSION_ID = "";
 
     private final Map<String, String> cookies;
@@ -13,6 +15,6 @@ public class HttpCookie {
     }
 
     public String getJsessionId() {
-        return this.cookies.getOrDefault(JSESSION_ID, NO_JSESSION_ID);
+        return this.cookies.getOrDefault(JSESSION_ID.getValue(), NO_JSESSION_ID);
     }
 }

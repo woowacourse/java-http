@@ -11,15 +11,14 @@ import org.apache.catalina.SessionManager;
 import java.util.Optional;
 import java.util.UUID;
 
+import static nextstep.jwp.vo.HttpHeader.*;
+
 public class LoginService {
 
     private static final String SUCCESS_URL = "/index.html";
     private static final String FAIL_URL = "/401.html";
 
     private static final LoginService loginService = new LoginService();
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String LOCATION = "Location";
-    private static final String JSESSIONID = "JSESSIONID=";
 
     private LoginService() {
     }
@@ -32,10 +31,11 @@ public class LoginService {
         LoginResult loginResult = generateResult(account, password);
         Response response = Response.from(ResponseStatus.FOUND);
         if (loginResult.getSession() != null) {
-            response.addHeader(SET_COOKIE, JSESSIONID + loginResult.getSession().getId());
+            response.addHeader(SET_COOKIE.getValue(),
+                    JSESSION_ID.getValue() + "=" + loginResult.getSession().getId());
 
         }
-        return response.addHeader(LOCATION, loginResult.getRedirectUrl())
+        return response.addHeader(LOCATION.getValue(), loginResult.getRedirectUrl())
                 .addBlankLine()
                 .getResponse();
 

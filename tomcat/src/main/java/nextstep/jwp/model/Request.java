@@ -1,10 +1,7 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.exception.InvalidRequest;
-import nextstep.jwp.vo.FileName;
-import nextstep.jwp.vo.FormData;
-import nextstep.jwp.vo.HttpCookie;
-import nextstep.jwp.vo.RequestMethod;
+import nextstep.jwp.vo.*;
 
 import java.util.*;
 
@@ -17,7 +14,6 @@ public class Request {
     private static final String QUERY_STRING_DELIMITER = "\\?";
     private static final String ROOT_DIR = "/";
     private static final String EXTENSION_DELIMITER = "\\.";
-    private static final String COOKIE = "Cookie";
     private static final String COOKIE_DELIMITER = "; ";
     private static final String QUERY_STRING_PAIR_DELIMITER = "=";
     private static final String BODY = "Body";
@@ -112,7 +108,7 @@ public class Request {
 
     public HttpCookie getCookie() {
         return new HttpCookie(parseData(
-                request.getOrDefault(COOKIE, EMPTY_VALUE).split(COOKIE_DELIMITER)));
+                request.getOrDefault(HttpHeader.COOKIE.getValue(), EMPTY_VALUE).split(COOKIE_DELIMITER)));
     }
 
     public FormData getQueryString() {

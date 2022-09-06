@@ -32,5 +32,4 @@ class HttpResponseTest {
                         new Headers(expectedHeaders),
                         "");
     }
-
 }

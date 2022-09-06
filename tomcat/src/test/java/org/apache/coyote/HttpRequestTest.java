@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestTest {
 
     @Test
-    void Request_헤더_생성_테스트() throws IOException {
+    void HTTP_Request_생성_테스트() throws IOException {
         // given
         String requestBody = "requestBody1\r\nrequestBody2";
         int contentLength = requestBody.getBytes().length;

@@ -7,8 +7,6 @@ import static org.apache.coyote.support.HttpRequestParser.parseUrl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,21 +28,6 @@ public class HttpRequest {
         this.queryParams = queryParams;
         this.headers = headers;
         this.body = body;
-    }
-
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String startLine = bufferedReader.readLine();
-            HttpMethod httpMethod = parseHttpMethod(startLine);
-            String uri = parseUri(startLine);
-            String url = parseUrl(uri);
-            QueryParams queryParams = QueryParams.parseQueryParams(parseQueryString(uri));
-            Map<String, String> headers = HttpRequestParser.parseHeaders(readHeaders(bufferedReader));
-            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-            String body = readBody(bufferedReader, contentLength);
-
-            return new HttpRequest(httpMethod, url, queryParams, headers, body);
-        }
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {

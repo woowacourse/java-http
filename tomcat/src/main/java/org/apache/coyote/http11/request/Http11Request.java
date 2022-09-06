@@ -22,7 +22,7 @@ public class Http11Request {
     }
 
     public boolean isResource() {
-        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
+        return getUrl().endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
     }
 
     public boolean hasCookie() {
@@ -54,6 +54,9 @@ public class Http11Request {
 
         for (String rawBody : rawBodies) {
             String[] params = rawBody.split("=");
+            if (params.length != 2) {
+                continue;
+            }
             String paramName = params[0];
             String paramValue = params[1];
 

@@ -3,7 +3,7 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.QueryParameters;
+import org.apache.coyote.http11.RequestParameters;
 import org.junit.jupiter.api.Test;
 
 public class QueryParametersTest {
@@ -14,7 +14,7 @@ public class QueryParametersTest {
         final String uri = "/login?account=gugu&password=password";
 
         // when
-        final QueryParameters queryParameters = QueryParameters.of(uri);
+        final RequestParameters queryParameters = RequestParameters.of(uri);
 
         // then
         assertAll(() -> {

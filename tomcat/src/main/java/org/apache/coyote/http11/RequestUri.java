@@ -3,27 +3,23 @@ package org.apache.coyote.http11;
 public class RequestUri {
 
     private final String resourcePath;
-    private final QueryParameters queryParams;
+    private final RequestParameters requestParameters;
 
-    private RequestUri(final String resourcePath, final QueryParameters queryParams) {
+    private RequestUri(final String resourcePath, final RequestParameters requestParameters) {
         this.resourcePath = resourcePath;
-        this.queryParams = queryParams;
+        this.requestParameters = requestParameters;
     }
 
     public static RequestUri of(final String uri) {
-        return new RequestUri(parseResourcePath(uri), QueryParameters.of(uri));
-    }
-
-    private static String parseResourcePath(String uri) {
         int index = uri.indexOf("?");
         if (index != -1) {
-            return uri.substring(0, index);
+            return new RequestUri(uri.substring(0, index), RequestParameters.of(uri.substring(index + 1)));
         }
-        return uri;
+        return new RequestUri(uri, RequestParameters.empty());
     }
 
-    public boolean hasQueryParams() {
-        return !queryParams.isEmpty();
+    public boolean hasRequestParameters() {
+        return !requestParameters.isEmpty();
     }
 
     public MediaType findMediaType() {
@@ -41,7 +37,7 @@ public class RequestUri {
         return resourcePath;
     }
 
-    public QueryParameters getQueryParams() {
-        return queryParams;
+    public RequestParameters getRequestParameters() {
+        return requestParameters;
     }
 }

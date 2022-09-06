@@ -4,12 +4,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Headers headers;
-    private final String body;
+    private final RequestParameters requestParameters;
 
-    public HttpRequest(final RequestLine requestLine, final Headers headers, final String body) {
+    public HttpRequest(final RequestLine requestLine, final Headers headers, final String requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
+        this.requestParameters = RequestParameters.of(requestBody);
     }
 
     public RequestUri getRequestUri() {
@@ -20,7 +20,7 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String getBody() {
-        return body;
+    public RequestParameters getRequestParameters() {
+        return requestParameters;
     }
 }

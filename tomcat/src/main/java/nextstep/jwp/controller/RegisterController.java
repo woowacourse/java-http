@@ -1,12 +1,11 @@
 package nextstep.jwp.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.RequestParameters;
 import org.apache.coyote.http11.RequestUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +23,17 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Map<String, String> bodyParams = new HashMap<>();
-        String body = httpRequest.getBody();
-        for (String element : body.split("&")) {
-            String[] split = element.split("=");
-            bodyParams.put(split[0], split[1]);
-        }
-        register(httpResponse, bodyParams);
+        RequestParameters requestParameters = httpRequest.getRequestParameters();
+        register(httpResponse, requestParameters);
     }
 
-    private void register(final HttpResponse httpResponse, final Map<String, String> bodyParams) {
+    private void register(final HttpResponse httpResponse, final RequestParameters requestParameters) {
         try {
-            User user = new User(bodyParams.get("account"), bodyParams.get("password"), bodyParams.get("email"));
+            User user = new User(
+                    requestParameters.get("account"),
+                    requestParameters.get("password"),
+                    requestParameters.get("email")
+            );
             InMemoryUserRepository.save(user);
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .addHeader("Location", "/index.html");

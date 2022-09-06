@@ -6,7 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.QueryParameters;
+import org.apache.coyote.http11.RequestParameters;
 import org.apache.coyote.http11.RequestUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
         RequestUri requestUri = httpRequest.getRequestUri();
-        if (requestUri.hasQueryParams()) {
-            QueryParameters queryParameters = requestUri.getQueryParams();
+        if (requestUri.hasRequestParameters()) {
+            RequestParameters queryParameters = requestUri.getRequestParameters();
             login(httpResponse, queryParameters);
             return;
         }
@@ -27,10 +27,16 @@ public class LoginController extends AbstractController {
                 .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
     }
 
-    private void login(final HttpResponse httpResponse, final QueryParameters queryParameters) {
+    @Override
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        RequestParameters requestParameters = httpRequest.getRequestParameters();
+        login(httpResponse, requestParameters);
+    }
+
+    private void login(final HttpResponse httpResponse, final RequestParameters requestParameters) {
         try {
-            User user = getUserByAccount(queryParameters.get("account"));
-            validatePassword(queryParameters, user);
+            User user = getUserByAccount(requestParameters.get("account"));
+            validatePassword(requestParameters, user);
             log.info("user : " + user);
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .addHeader("Location", "/index.html");
@@ -41,7 +47,7 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private static void validatePassword(final QueryParameters queryParameters, final User user) {
+    private static void validatePassword(final RequestParameters queryParameters, final User user) {
         if (!user.checkPassword(queryParameters.get("password"))) {
             throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
         }
@@ -50,10 +56,5 @@ public class LoginController extends AbstractController {
     private User getUserByAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
-    }
-
-    @Override
-    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-
     }
 }

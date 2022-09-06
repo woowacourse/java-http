@@ -41,7 +41,7 @@ class RequestUriTest {
         final RequestUri requestUri = RequestUri.of(uri);
 
         // then
-        assertThat(requestUri.hasQueryParams()).isFalse();
+        assertThat(requestUri.hasRequestParameters()).isFalse();
     }
 
     @Test
@@ -53,7 +53,7 @@ class RequestUriTest {
         final RequestUri requestUri = RequestUri.of(uri);
 
         // then
-        assertThat(requestUri.hasQueryParams()).isTrue();
+        assertThat(requestUri.hasRequestParameters()).isTrue();
     }
 
     @Test

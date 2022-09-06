@@ -24,6 +24,10 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
+    public static Cookie empty() {
+        return new Cookie(Map.of());
+    }
+
     public Optional<String> getJSessionId() {
         if (cookies.containsKey(JSESSIONID_KEY)) {
             return Optional.ofNullable(cookies.get(JSESSIONID_KEY));

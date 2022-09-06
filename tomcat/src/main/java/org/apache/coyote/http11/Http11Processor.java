@@ -12,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.DefaultController;
 import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -27,7 +28,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping(List.of(new LoginController(), new DefaultController()));
+        this.requestMapping = new RequestMapping(List.of(new LoginController(), new DefaultController(), new RegisterController()));
     }
 
     @Override

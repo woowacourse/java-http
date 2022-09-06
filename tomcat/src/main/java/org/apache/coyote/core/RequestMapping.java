@@ -2,6 +2,7 @@ package org.apache.coyote.core;
 
 import nextstep.jwp.http.reqeust.HttpRequest;
 import org.apache.coyote.core.controller.Controller;
+import org.apache.coyote.core.controller.CssController;
 import org.apache.coyote.core.controller.ExceptionController;
 import org.apache.coyote.core.controller.IndexController;
 import org.apache.coyote.core.controller.LoginController;
@@ -15,7 +16,7 @@ public class RequestMapping {
         if (path.equals("/")) {
             return new RootController();
         }
-        if (path.equals("/index.html") || path.equals("/css/styles.css")) {
+        if (path.equals("/index.html")) {
             return new IndexController();
         }
         if (path.equals("/401.html")) {
@@ -27,6 +28,6 @@ public class RequestMapping {
         if (path.contains("/register")) {
             return new RegisterController();
         }
-        throw new IllegalArgumentException();
+        return new CssController();
     }
 }

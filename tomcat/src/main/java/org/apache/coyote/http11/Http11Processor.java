@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         if (controller == null) {
             Resource resource = this.resourceLocator.locate("/404.html");
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.addHeader("Content-Type", resource.getContentType().getValue());
             response.setBody(resource.getData());
             return;
         }

@@ -63,7 +63,7 @@ public class LoginController extends AbstractController {
         if (!loginService.login(account, password)) {
             Resource resource = resourceLocator.locate("/401.html");
             response.setStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.addHeader("Content-Type", resource.getContentType().getValue());
             response.setBody(resource.getData());
             return;
         }

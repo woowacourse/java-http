@@ -50,12 +50,12 @@ public abstract class AbstractController implements Controller {
         try {
             Resource resource = resourceLocator.locate(path);
             response.setStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.addHeader("Content-Type", resource.getContentType().getValue());
             response.setBody(resource.getData());
         } catch (IllegalArgumentException e) {
             Resource resource = resourceLocator.locate("/404.html");
             response.setStatus(HttpStatus.NOT_FOUND);
-            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.addHeader("Content-Type", resource.getContentType().getValue());
             response.setBody(resource.getData());
         }
     }

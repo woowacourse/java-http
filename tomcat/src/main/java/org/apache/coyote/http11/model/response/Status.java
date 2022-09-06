@@ -5,6 +5,7 @@ public enum Status {
     OK(200),
     FOUND(302),
     UNAUTHORIZED(401),
+    INTERNAL_SERVER_ERROR(500),
     ;
 
     private final int code;

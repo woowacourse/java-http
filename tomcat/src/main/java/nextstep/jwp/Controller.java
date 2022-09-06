@@ -13,24 +13,21 @@ import org.apache.coyote.http11.model.response.Status;
 
 public class Controller {
 
-    public static final String URL_LOGIN = "/login";
-
     private static final UserService userService = new UserService();
 
-    public static HttpResponse process(final HttpRequest request) throws IOException {
-        if (isLoginRequest(request)) {
-            return login(request);
-        }
+    public static HttpResponse hello() throws IOException {
         HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource(request.getUrl()));
+        response.addResource(findResource("/hello.txt"));
         return response;
     }
 
-    private static boolean isLoginRequest(final HttpRequest request) {
-        return request.getUrl().startsWith(URL_LOGIN) && !request.getQueryParams().isEmpty();
+    public static HttpResponse index() throws IOException {
+        HttpResponse response = HttpResponse.of(Status.OK);
+        response.addResource(findResource("/index.html"));
+        return response;
     }
 
-    private static HttpResponse login(final HttpRequest request) throws IOException {
+    public static HttpResponse login(final HttpRequest request) throws IOException {
         try {
             userService.login(request.getQueryParams());
             HttpResponse response = HttpResponse.of(Status.FOUND);
@@ -44,10 +41,13 @@ public class Controller {
         }
     }
 
+    public static HttpResponse register(final HttpRequest request) throws IOException {
+        HttpResponse response = HttpResponse.of(Status.OK);
+        response.addResource(findResource("/register.html"));
+        return response;
+    }
+
     private static Resource findResource(String url) throws IOException {
-        if (url.equals("/")) {
-            url += "hello.txt";
-        }
         Path path = Path.of(Controller.class.getResource("/static" + url).getPath());
         String body = Files.readString(path);
 

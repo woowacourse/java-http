@@ -46,6 +46,10 @@ public class HttpResponse {
 		return stringBuilder.toString();
 	}
 
+	public void addCookie(String key, String value) {
+		httpHeaders.addHeader(HttpHeader.SET_COOKIE, new Cookie(key, value).values());
+	}
+
 	public void setStatus(HttpStatus httpStatus) {
 		this.httpStatus = httpStatus;
 	}

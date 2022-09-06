@@ -80,9 +80,10 @@ class LoginControllerTest extends DatabaseIsolation {
 
 		// then
 		var expected = "HTTP/1.1 302 Found \r\n" +
-			"Location: /index.html" + " \r\n";
+			"Location: /index.html" + " \r\n" +
+			"Set-Cookie: JSESSIONID=";
 
-		assertThat(socket.output()).isEqualTo(expected);
+		assertThat(socket.output()).contains(expected);
 	}
 
 	@DisplayName("로그인이 실패하면 401.html을 반환한다.")

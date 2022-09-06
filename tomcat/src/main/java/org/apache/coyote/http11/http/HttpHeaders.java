@@ -51,6 +51,12 @@ public class HttpHeaders {
 		return Optional.ofNullable(headers.get(header));
 	}
 
+	public Cookie getCookie() {
+		return Optional.ofNullable(headers.get(HttpHeader.COOKIE))
+			.map(Cookie::new)
+			.orElse(new Cookie());
+	}
+
 	@Override
 	public String toString() {
 		return "HttpHeaders{" +

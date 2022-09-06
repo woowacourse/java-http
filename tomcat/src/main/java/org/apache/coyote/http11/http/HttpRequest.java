@@ -68,6 +68,11 @@ public class HttpRequest {
 		return EMPTY_BODY;
 	}
 
+	public Session getSession() {
+		Cookie cookie = httpHeaders.getCookie();
+		return SessionManager.findSession(cookie);
+	}
+
 	public String getUrl() {
 		return url;
 	}

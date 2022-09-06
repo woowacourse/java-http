@@ -2,7 +2,6 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
@@ -14,23 +13,12 @@ import nextstep.jwp.http.SessionManager;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 
-public class LoginRequestHandler implements HttpRequestHandler {
+public final class LoginRequestHandler extends AbstractHttpRequestHandler {
 
     private final HttpVersion httpVersion;
 
     public LoginRequestHandler(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-    }
-
-    @Override
-    public HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return handleHttpGetRequest(httpRequest);
-        }
-        if (httpRequest.isPostMethod()) {
-            return handleHttpPostRequest(httpRequest);
-        }
-        throw new UncheckedServletException("지원하는 method가 존재하지 않습니다.");
     }
 
     @Override

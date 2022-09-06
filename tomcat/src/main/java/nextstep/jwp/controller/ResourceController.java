@@ -8,7 +8,7 @@ public class ResourceController implements Controller {
 
     @Override
     public HttpResponse process(HttpRequest httpRequest) throws Exception {
-        String url = httpRequest.getPath().getUrl();
+        String url = httpRequest.getUrl();
         return HttpResponse.ok(url);
     }
 }

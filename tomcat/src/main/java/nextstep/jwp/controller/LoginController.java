@@ -8,9 +8,17 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController implements Controller {
+
     @Override
     public HttpResponse process(HttpRequest httpRequest) throws IOException {
-        Map<String, String> requestParams = httpRequest.getPath().getRequestParams();
+        if (httpRequest.isGet()) {
+            return doGet(httpRequest);
+        }
+        return HttpResponse.notFound();
+    }
+
+    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        Map<String, String> requestParams = httpRequest.getParams();
         if (requestParams.size() == 0) {
             return HttpResponse.ok("/login.html");
         }

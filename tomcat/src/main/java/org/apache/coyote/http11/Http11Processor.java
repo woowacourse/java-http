@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.FrontController;
+import java.util.Optional;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +36,10 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final var httpRequest = readRequest(bufferedReader);
-            final var httpResponse = getHttpResponse(HttpRequest.from(httpRequest));
+            final var httpRequest = HttpRequest.read(bufferedReader);
+            final var httpResponse = getHttpResponse(httpRequest);
 
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(httpResponse.getHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -57,8 +58,13 @@ public class Http11Processor implements Runnable, Processor {
         return header.toString();
     }
 
-    private String getHttpResponse(final HttpRequest httpRequest) throws Exception {
-        Controller controller = FrontController.findController(httpRequest);
-        return controller.process(httpRequest).getHttpResponse();
+    private HttpResponse getHttpResponse(final HttpRequest httpRequest) throws Exception {
+        Optional<RequestMapping> requestMapping = RequestMapping.findController(httpRequest);
+
+        if (requestMapping.isEmpty()) {
+            return HttpResponse.notFound();
+        }
+
+        return requestMapping.get().getController().process(httpRequest);
     }
 }

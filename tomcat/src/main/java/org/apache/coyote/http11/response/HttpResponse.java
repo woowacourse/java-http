@@ -18,11 +18,11 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok(String url) throws IOException {
-        return ok(ContentType.findByUrl(url), url);
+        String requestBody = readFile(url);
+        return ok(ContentType.findByUrl(url), requestBody);
     }
 
-    public static HttpResponse ok(ContentType contentType, String url) throws IOException {
-        String requestBody = readFile(url);
+    public static HttpResponse ok(ContentType contentType, String requestBody) {
         return new HttpResponse(
                 HttpStatus.OK,
                 new ResponseHeader(contentType, requestBody.getBytes().length),
@@ -41,6 +41,15 @@ public class HttpResponse {
 
     public static HttpResponse unAuthorized() throws IOException {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String responseBody = readFile(status.getFilePath());
+        return new HttpResponse(status,
+                new ResponseHeader(ContentType.findByUrl(status.getFilePath()), responseBody.getBytes().length),
+                responseBody
+        );
+    }
+
+    public static HttpResponse notFound() throws IOException {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         String responseBody = readFile(status.getFilePath());
         return new HttpResponse(status,
                 new ResponseHeader(ContentType.findByUrl(status.getFilePath()), responseBody.getBytes().length),

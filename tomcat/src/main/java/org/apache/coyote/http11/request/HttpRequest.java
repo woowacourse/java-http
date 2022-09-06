@@ -1,31 +1,46 @@
 package org.apache.coyote.http11.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+
 public class HttpRequest {
 
-    private static final int HTTP_METHOD_INDEX = 0;
-    private static final int HTTP_PATH_INDEX = 1;
+    private final RequestStartLine startLine;
+    private final RequestHeader header;
+    private final RequestBody body;
 
-    private final HttpMethod httpMethod;
-    private final Path path;
-
-    private HttpRequest(final HttpMethod httpMethod, final Path path) {
-        this.httpMethod = httpMethod;
-        this.path = path;
+    public HttpRequest(RequestStartLine startLine, RequestHeader header, RequestBody body) {
+        this.startLine = startLine;
+        this.header = header;
+        this.body = body;
     }
 
-    public static HttpRequest from(final String request) {
-        String[] requestSegment = request.split(" ");
-        return new HttpRequest(
-                HttpMethod.from(requestSegment[HTTP_METHOD_INDEX]),
-                Path.parsePath(requestSegment[HTTP_PATH_INDEX])
-        );
+    public static HttpRequest read(BufferedReader bufferedReader) throws IOException {
+        RequestStartLine startLine = RequestStartLine.from(bufferedReader.readLine());
+        RequestHeader header = RequestHeader.parse(bufferedReader);
+        RequestBody body = RequestBody.from(bufferedReader, header.getContentLength());
+
+        return new HttpRequest(startLine, header, body);
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public boolean isGet() {
+        return startLine.isGet();
     }
 
-    public Path getPath() {
-        return path;
+    public boolean isPost() {
+        return startLine.isPost();
+    }
+
+    public String getUrl() {
+        return startLine.getPath().getUrl();
+    }
+
+    public Map<String, String> getParams() {
+        return startLine.getPath().getRequestParams();
+    }
+
+    public Map<String, String> getBody() {
+        return body.getRequestBody();
     }
 }

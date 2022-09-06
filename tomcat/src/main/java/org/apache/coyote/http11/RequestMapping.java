@@ -6,7 +6,7 @@ import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.request.HttpRequest;
 
-public class RequestMapper {
+public class RequestMapping {
 
     private static final List<Controller> controllers = new ArrayList<>();
 
@@ -19,5 +19,8 @@ public class RequestMapper {
                 .filter(controller -> controller.canHandle(httpRequest))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("페이지를 찾을 수 없습니다."));
+    }
+
+    private RequestMapping() {
     }
 }

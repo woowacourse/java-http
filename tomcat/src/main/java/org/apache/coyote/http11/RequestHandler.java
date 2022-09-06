@@ -18,7 +18,7 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static HttpResponse handle(HttpRequest httpRequest) throws IOException, URISyntaxException {
-        final Controller controller = RequestMapper.getController(httpRequest);
+        final Controller controller = RequestMapping.getController(httpRequest);
         try {
             return controller.service(httpRequest);
         } catch (Exception e) {
@@ -45,5 +45,8 @@ public class RequestHandler {
         }
 
         return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, ResourceLoader.getStaticResource("/500.html"));
+    }
+
+    private RequestHandler() {
     }
 }

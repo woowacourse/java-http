@@ -97,9 +97,9 @@ class Http11ProcessorTest {
     void login_success() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login?account=gugu&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
-            "Accept: text/css,*/*;q=0.1",
+            "Accept: text/html,*/*;q=0.1",
             "Connection: keep-alive ",
             "",
             "");
@@ -128,9 +128,9 @@ class Http11ProcessorTest {
     void login_fail() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-            "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+            "POST /login?account=gugu&password=wrong HTTP/1.1 ",
             "Host: localhost:8080 ",
-            "Accept: text/css,*/*;q=0.1",
+            "Accept: text/html,*/*;q=0.1",
             "Connection: keep-alive ",
             "",
             "");

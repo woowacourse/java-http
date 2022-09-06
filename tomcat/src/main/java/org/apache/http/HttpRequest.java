@@ -1,6 +1,7 @@
 package org.apache.http;
 
 import java.util.Map;
+import org.apache.http.info.HttpMethod;
 
 public interface HttpRequest {
 

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.http.info.ContentType;
+import org.apache.http.info.HttpHeaderName;
+import org.apache.http.info.HttpMethod;
 
 public class BasicHttpRequest implements HttpRequest {
 
@@ -28,7 +31,6 @@ public class BasicHttpRequest implements HttpRequest {
     private static final String EQUALS_MARK = "=";
 
     private final Map<String, String> headers;
-    //    private final HttpHeader httpHeader;
     private final Map<String, Object> queryParameters;
     private final String body;
 

@@ -37,8 +37,8 @@ public class LoginPostResponseMaker implements ResponseMaker {
     ) {
         final String account = loginData.get("account");
         final String password = loginData.get("password");
-        if (loginData.isEmpty() || !validateAccount(account, password)) {
-            log.info("로그인 데이터가 없습니다.");
+        if (loginData.isEmpty() || !isSuccessLogin(account, password)) {
+            log.info("로그인에 실패했습니다.");
             return failLoginResponse(responseBody);
         }
         final User user = new User(account, password);
@@ -62,13 +62,13 @@ public class LoginPostResponseMaker implements ResponseMaker {
         return httpResponse.toString();
     }
 
-    private boolean validateAccount(final String account, final String password) {
+    private boolean isSuccessLogin(final String account, final String password) {
         final Optional<User> accessUser = InMemoryUserRepository.findByAccount(account);
-        return accessUser.filter(user -> validatePassword(password, user))
+        return accessUser.filter(user -> checkPassword(password, user))
                 .isPresent();
     }
 
-    private boolean validatePassword(final String password, final User accessUser) {
+    private boolean checkPassword(final String password, final User accessUser) {
         if (!accessUser.checkPassword(password)) {
             return false;
         }

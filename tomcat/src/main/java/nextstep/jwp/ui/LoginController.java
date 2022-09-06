@@ -42,7 +42,7 @@ public class LoginController extends AbstractController {
             HttpCookie httpCookie = HttpCookie.of(cookies);
 
             return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
-                .setCookie(httpCookie.toString());
+                .setCookie(httpCookie.toMessage());
         }
         return createGetResponseFrom(request);
     }
@@ -68,6 +68,6 @@ public class LoginController extends AbstractController {
         HttpCookie httpCookie = HttpCookie.of(cookies);
 
         return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
-            .setCookie(httpCookie.toString());
+            .setCookie(httpCookie.toMessage());
     }
 }

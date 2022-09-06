@@ -10,8 +10,6 @@ import org.apache.coyote.http11.model.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nextstep.jwp.exception.UncheckedServletException;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -32,14 +30,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequestParser.from(inputStream).toHttpRequest();
+            HttpRequest request = HttpRequestParser.from(inputStream)
+                .toHttpRequest();
 
             Controller controller = RequestMapping.getController(request.getPath());
             HttpResponse httpResponse = controller.service(request);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             e.printStackTrace();

@@ -24,11 +24,12 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+            "HTTP/1.1 200 OK",
+            "Content-Length: 13 ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Location: /hello.html",
+            "",
+            "Hello world!\n");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -37,9 +38,9 @@ class Http11ProcessorTest {
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -51,11 +52,12 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = "HTTP/1.1 200 OK\r\n" +
+            "Content-Length: 5670 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "Location: /index.html\r\n"+
+            "\r\n"+
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

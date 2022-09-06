@@ -5,19 +5,19 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class HttpURI {
+public class HttpRequestURI {
 
-    private static final String DEFAULT_PATH = "/index";
+    private static final String DEFAULT_PATH = "/hello";
 
-    private String path;
-    private Map<String, String> queryParams;
+    private final String path;
+    private final Map<String, String> queryParams;
 
-    private HttpURI(String path, Map<String, String> queryParams) {
+    private HttpRequestURI(String path, Map<String, String> queryParams) {
         this.path = path;
         this.queryParams = queryParams;
     }
 
-    public static HttpURI from(String uri) {
+    public static HttpRequestURI from(String uri) {
         String path = uri;
         Map<String, String> queryParams = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class HttpURI {
             path = path + ".html";
         }
 
-        return new HttpURI(path, queryParams);
+        return new HttpRequestURI(path, queryParams);
     }
 
     public boolean pathStartsWith(String text) {

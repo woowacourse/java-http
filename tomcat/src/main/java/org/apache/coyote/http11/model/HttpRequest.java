@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.model;
 
-import java.util.Map;
 import java.util.UUID;
 
 import nextstep.jwp.model.Session;
@@ -8,58 +7,47 @@ import nextstep.jwp.model.SessionManager;
 
 public class HttpRequest {
 
-    private final HttpMethod httpMethod;
-    private final HttpURI uri;
-    private final Map<String, String> httpRequestHeaders;
-    private final Map<String, String> bodyParams;
+    private final HttpMethod method;
+    private final HttpRequestURI requestURI;
+    private final HttpHeaders requestHeaders;
+    private final HttpRequestBody requestBody;
     private final HttpCookie cookie;
 
-    public HttpRequest(HttpMethod httpMethod, HttpURI uri,
-        Map<String, String> httpRequestHeaders, Map<String, String> bodyParms, HttpCookie cookie) {
-        this.httpMethod = httpMethod;
-        this.uri = uri;
-        this.httpRequestHeaders = httpRequestHeaders;
-        this.bodyParams = bodyParms;
+    public HttpRequest(HttpMethod httpMethod, HttpRequestURI requestURI,
+        HttpHeaders httpRequestHeaders, HttpRequestBody requestBody, HttpCookie cookie) {
+        this.method = httpMethod;
+        this.requestURI = requestURI;
+        this.requestHeaders = httpRequestHeaders;
+        this.requestBody = requestBody;
         this.cookie = cookie;
-    }
-
-    public boolean isValidLoginRequest() {
-        return isPostRequest() && uri.pathStartsWith("/login");
-    }
-
-    public boolean isValidRegisterRequest() {
-        return isPostRequest() && uri.pathStartsWith("/register");
     }
 
     public boolean isLoginRequestWithAuthorization() {
         return isGetRequest()
-            && uri.pathStartsWith("/login")
+            && requestURI.pathStartsWith("/login")
             && cookie.containsAttribute("JSESSIONID");
     }
 
     public boolean isGetRequest() {
-        return httpMethod.equals(HttpMethod.GET);
+        return method.equals(HttpMethod.GET);
     }
 
     public boolean isPostRequest() {
-        return httpMethod.equals(HttpMethod.POST);
+        return method.equals(HttpMethod.POST);
     }
 
     public String getBodyParam(String paramName) {
-        return bodyParams.get(paramName);
+        return requestBody.getParam(paramName);
     }
 
     public String getResourcePath() {
-        return "static" + uri.getPath();
+        return "static" + requestURI.getPath();
     }
 
     public String getContentType() {
-        String extension = uri.getExtension();
+        String extension = requestURI.getExtension();
 
-        if (extension.equals("ico")) {
-            return "image/apng";
-        }
-        return "text/" + extension;
+        return ContentType.getContentType(extension).getType();
     }
 
     public Session getSession() {
@@ -69,6 +57,6 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return uri.getPath();
+        return requestURI.getPath();
     }
 }

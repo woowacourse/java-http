@@ -39,7 +39,7 @@ public abstract class AbstractController implements Controller {
     protected HttpResponse createHttpResponseFrom(String resourcePath, HttpStatusCode httpStatusCode, String ContentType,
         String location) throws IOException {
 
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
         if(Objects.isNull(resource)){
             return redirectTo("/404", HttpStatusCode.HTTP_STATUS_NOT_FOUND);
         }

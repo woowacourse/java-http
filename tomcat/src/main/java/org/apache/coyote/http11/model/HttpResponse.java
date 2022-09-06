@@ -1,20 +1,18 @@
 package org.apache.coyote.http11.model;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private final HttpStatusCode httpStatusCode;
-    private final Map<String, String> responseHeaders;
+    private final HttpHeaders responseHeaders;
     private final String responseBody;
 
     private HttpResponse(HttpStatusCode httpStatusCode, String responseBody) {
         this.httpStatusCode = httpStatusCode;
         this.responseBody = responseBody;
-        this.responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Length", responseBody.getBytes().length + "");
+        this.responseHeaders = new HttpHeaders(
+            Map.of("Content-Length", String.valueOf(responseBody.getBytes().length)));
     }
 
     public static HttpResponse of(HttpStatusCode httpStatusCode, String responseBody) {
@@ -22,28 +20,25 @@ public class HttpResponse {
     }
 
     public HttpResponse setCookie(String cookie) {
-        responseHeaders.put("Set-Cookie", cookie);
+        responseHeaders.addAttribute("Set-Cookie", cookie);
         return this;
     }
 
     public HttpResponse setContentType(String contentType) {
-        responseHeaders.put("Content-Type", contentType);
+        responseHeaders.addAttribute("Content-Type", contentType);
         return this;
     }
 
-    public HttpResponse setLocation(String location){
-        responseHeaders.put("Location", location);
+    public HttpResponse setLocation(String location) {
+        responseHeaders.addAttribute("Location", location);
         return this;
     }
 
     public byte[] getBytes() {
-        String httpResponseHeaders = responseHeaders.entrySet().stream()
-            .map(it -> it.getKey() + ": " + it.getValue())
-            .collect(Collectors.joining(" \r\n"));
 
         return String.join("\r\n",
             "HTTP/1.1 " + httpStatusCode.toString(),
-            httpResponseHeaders,
+            responseHeaders.toMessage(),
             "",
             responseBody).getBytes();
     }

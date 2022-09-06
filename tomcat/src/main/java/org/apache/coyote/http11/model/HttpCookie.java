@@ -11,7 +11,7 @@ public class HttpCookie {
         this.cookies = new HashMap<>();
     }
 
-    public static HttpCookie of(Map<String, String> cookies){
+    public static HttpCookie of(Map<String, String> cookies) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.putAll(cookies);
         return httpCookie;
@@ -21,16 +21,15 @@ public class HttpCookie {
         this.cookies.putAll(cookies);
     }
 
-    public String getAttribute(String name){
+    public String getAttribute(String name) {
         return cookies.get(name);
     }
 
-    public boolean containsAttribute(String name){
+    public boolean containsAttribute(String name) {
         return cookies.containsKey(name);
     }
 
-    @Override
-    public String toString() {
+    public String toMessage() {
         return cookies.entrySet().stream()
             .map(it -> it.getKey() + "=" + it.getValue())
             .collect(Collectors.joining(";"));

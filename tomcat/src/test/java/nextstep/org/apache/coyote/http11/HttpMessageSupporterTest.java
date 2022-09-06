@@ -30,7 +30,7 @@ class HttpMessageSupporterTest {
     void 요청URI에_해당하는_리소스를_읽어서_HTTP_MESSAGE를_만든다(final String requestURI, final String expectedContent)
             throws IOException {
         // given, when
-        final var actual = HttpMessageSupporter.getHttpMessage(requestURI);
+        final var actual = HttpMessageSupporter.getHttpMessageWithStaticResource(requestURI);
 
         // then
         assertThat(actual).containsIgnoringCase(expectedContent);

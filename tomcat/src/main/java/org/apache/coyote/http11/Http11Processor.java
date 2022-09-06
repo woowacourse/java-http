@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.catalina.ChicChocServlet;
+import org.apache.catalina.servlet.ChicChocServlet;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.util.HttpMessageSupporter;
 import org.apache.coyote.http11.util.StaticResourceExtensionSupporter;
@@ -40,19 +40,19 @@ public class Http11Processor implements Runnable, Processor {
 
             // 정적 파일 요청일 경우
             if (isStaticResourceRequest(requestURI)) {
-                final var response = HttpMessageSupporter.getHttpMessage(requestURI);
+                final var response = HttpMessageSupporter.getHttpMessageWithStaticResource(requestURI);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             // Request, Response 생성
-            final var customRequest = Request.from(requestURI);
-            final var customResponse = new Response();
+            final var servletRequest = Request.from(requestURI);
+            final var servletResponse = new Response();
 
             // servlet 요청 처리
-            chicChocServlet.doService(customRequest, customResponse);
-            final var response = HttpMessageSupporter.getHttpMessage(customResponse.getViewName());
+            chicChocServlet.doService(servletRequest, servletResponse);
+            final var response = HttpMessageSupporter.getHttpMessage(servletResponse);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

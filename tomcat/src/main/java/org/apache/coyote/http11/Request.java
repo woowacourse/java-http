@@ -7,13 +7,20 @@ public class Request {
     private static final String QUERY_PARAM_PREFIX = "?";
     private static final int NEXT_INDEX = 1;
 
-    private final Map<String, String> queryParams;
     private final String requestURI;
+    private final Map<String, String> queryParams;
 
     private Request(final String requestURI) {
-        final var queryString = parseQueryString(requestURI);
         this.requestURI = requestURI;
-        this.queryParams = QueryStringResolver.resolve(queryString);
+        this.queryParams = parseURI(requestURI);
+    }
+
+    private Map<String, String> parseURI(final String requestURI) {
+        if (!requestURI.contains(QUERY_PARAM_PREFIX)) {
+            return Map.of();
+        }
+        final var queryString = parseQueryString(requestURI);
+        return QueryStringResolver.resolve(queryString);
     }
 
     private static String parseQueryString(final String requestURI) {

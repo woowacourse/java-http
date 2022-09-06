@@ -3,6 +3,8 @@ package org.apache.coyote.http11.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
+import org.apache.coyote.http11.Response;
 import org.apache.coyote.http11.exception.NotFoundResourceException;
 
 public class HttpMessageSupporter {
@@ -21,7 +23,7 @@ public class HttpMessageSupporter {
         return requestURI;
     }
 
-    public static String getHttpMessage(final String requestURI) throws IOException {
+    public static String getHttpMessageWithStaticResource(final String requestURI) throws IOException {
         final var absolutePath = parsePath(requestURI);
         final var contentType = Files.probeContentType(absolutePath);
         final var responseBody = readFile(absolutePath);
@@ -29,6 +31,38 @@ public class HttpMessageSupporter {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + BLANK,
+                "",
+                responseBody);
+    }
+
+    public static String getHttpMessage(final Response response) throws IOException {
+        final String resourceURI = response.getResourceURI();
+        if (!Objects.isNull(resourceURI)) {
+            final var absolutePath = parsePath(resourceURI);
+            final var contentType = Files.probeContentType(absolutePath);
+            final var responseBody = readFile(absolutePath);
+
+            response.setContentType(contentType);
+            response.setResponseBody(responseBody);
+
+            return readResponse(response);
+        }
+        return readResponse(response);
+    }
+
+    private static String readResponse(final Response response) {
+        final String responseBody = response.getResponseBody();
+
+        if (Objects.isNull(responseBody)) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + response.getHttpStatusCode() + BLANK,
+                    "Location: " + response.getLocation() + BLANK
+            );
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 " + response.getHttpStatusCode() + BLANK,
+                "Content-Type: " + response.getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + BLANK,
                 "",
                 responseBody);

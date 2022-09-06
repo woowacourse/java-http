@@ -25,4 +25,8 @@ public class LoginFilter {
             }
         }
     }
+
+    public boolean support(final Request request) {
+        return request.getRequestURI().contains("login") && !request.getQueryParams().isEmpty();
+    }
 }

@@ -3,6 +3,10 @@ package org.apache.coyote.http11.http;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.http.header.Cookie;
+import org.apache.coyote.http11.http.header.HttpHeader;
+import org.apache.coyote.http11.http.header.HttpHeaders;
+
 public class HttpResponse {
 
 	private HttpStatus httpStatus;

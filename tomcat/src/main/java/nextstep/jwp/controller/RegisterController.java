@@ -3,8 +3,8 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.http.ContentType;
-import org.apache.coyote.http11.http.HttpHeader;
+import org.apache.coyote.http11.http.header.ContentType;
+import org.apache.coyote.http11.http.header.HttpHeader;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;

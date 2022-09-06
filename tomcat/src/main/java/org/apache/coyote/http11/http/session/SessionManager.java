@@ -1,10 +1,12 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.session;
 
-import static org.apache.coyote.http11.http.Session.*;
+import static org.apache.coyote.http11.http.session.Session.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import org.apache.coyote.http11.http.header.Cookie;
 
 public class SessionManager {
 

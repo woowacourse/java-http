@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.http11.http.header.ContentType;
+
 public class RequestParams {
 
 	private static final String QUERY_STRING_DELIMITER = "\\?";

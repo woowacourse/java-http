@@ -1,17 +1,17 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.http.Session.*;
+import static org.apache.coyote.http11.http.session.Session.*;
 
 import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http11.http.ContentType;
-import org.apache.coyote.http11.http.HttpHeader;
+import org.apache.coyote.http11.http.header.ContentType;
+import org.apache.coyote.http11.http.header.HttpHeader;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
-import org.apache.coyote.http11.http.Session;
+import org.apache.coyote.http11.http.session.Session;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 
 import nextstep.jwp.exception.InvalidLoginException;

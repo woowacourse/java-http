@@ -79,9 +79,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(url)) {
-            LoginHandler.handle(requestParam);
+            if (LoginHandler.handle(requestParam)) {
+                return createLoginSuccessResponse();
+            }
 
-            return createStaticFileResponse("/index.html");
+            return createLoginFailResponse();
         }
 
         if (url.contains(".")) {
@@ -103,6 +105,32 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String createLoginSuccessResponse() throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final Path path = new File(resource.getFile()).toPath();
+        final String responseBody = new String(Files.readAllBytes(path));
+
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String createLoginFailResponse() throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final Path path = new File(resource.getFile()).toPath();
+        final String responseBody = new String(Files.readAllBytes(path));
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

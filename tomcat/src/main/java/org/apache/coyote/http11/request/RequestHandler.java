@@ -13,10 +13,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;
 
+import nextstep.AppConfig;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.service.Service;
 
 public class RequestHandler {
+
+    private static final Controller controller = AppConfig.getInstance().controller;
 
     public String handle(final RequestHeader request) {
         final Uri uri = Uri.parse(request.getUri());
@@ -28,8 +30,6 @@ public class RequestHandler {
         }
 
         try {
-            Controller controller = new Controller(new Service());
-
             Method m = method.get();
 
             List<Parameter> parameters = List.of(m.getParameters());
@@ -48,7 +48,7 @@ public class RequestHandler {
     }
 
     private Optional<Method> findRequestMappedMethodByPath(final String path) {
-        final List<Method> methods = Arrays.stream(Controller.class.getDeclaredMethods())
+        final List<Method> methods = Arrays.stream(controller.getClass().getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(RequestMapping.class))
                 .collect(Collectors.toUnmodifiableList());
 

@@ -20,6 +20,10 @@ public enum HttpStatus {
         return this == FOUND;
     }
 
+    public boolean isError() {
+        return value >= 400;
+    }
+
     public int getValue() {
         return value;
     }

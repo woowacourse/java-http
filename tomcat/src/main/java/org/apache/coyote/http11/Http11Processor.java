@@ -14,6 +14,7 @@ import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 import org.apache.coyote.exception.QueryStringFormatException;
 import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.support.HttpRequestParser;
@@ -29,13 +30,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_EXTENSION = ".html";
     public static final String REGISTER_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
-    public static final String SIGN_UP_REDIRECT_PATH = "/index.html";
-    public static final String LOGIN_REDIRECT_PATH = "/index.html";
-    public static final String BAD_REQUEST_PATH = "/400.html";
-    public static final String UNAUTHORIZED_PATH = "/401.html";
-    public static final String NOT_FOUND_PATH = "/404.html";
-    public static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
-    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String SIGN_UP_REDIRECT_PATH = "/index.html";
+    private static final String LOGIN_REDIRECT_PATH = "/index.html";
+    private static final String BAD_REQUEST_PATH = "/400.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String NOT_FOUND_PATH = "/404.html";
+    private static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
     private final AuthService authService = AuthService.instance();
@@ -74,7 +75,8 @@ public class Http11Processor implements Runnable, Processor {
         } catch (ResourceNotFoundException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(NOT_FOUND_PATH);
-        } catch (QueryStringFormatException | InvalidSignUpFormatException | DuplicateAccountException e) {
+        } catch (InvalidHttpRequestFormatException | QueryStringFormatException | InvalidSignUpFormatException |
+                 DuplicateAccountException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(BAD_REQUEST_PATH);
         } catch (Exception e) {

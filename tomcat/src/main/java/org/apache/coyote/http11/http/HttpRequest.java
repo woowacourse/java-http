@@ -34,6 +34,10 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
+    public String getUri() {
+        return requestLine.getRequestTarget().getUri();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

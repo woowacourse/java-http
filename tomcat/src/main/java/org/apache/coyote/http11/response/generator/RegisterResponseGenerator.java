@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.generator;
 
+import static org.apache.coyote.http11.request.HttpMethod.POST;
+
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -8,11 +10,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterResponseGenerator implements ResponseGenerator {
 
+    private static final String REGISTER_REQUEST = "/register";
     private static final String REGISTER_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {
-        return httpRequest.isRegisterRequest();
+        return httpRequest.hasRequestPathOf(REGISTER_REQUEST) && httpRequest.hasHttpMethodOf(POST);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
+import static org.apache.coyote.http11.util.StringUtils.SPACE;
+
 public class ContentLength implements HttpResponseHeader {
 
     private static final String HEADER_KEY = "Content-Length: ";
@@ -16,6 +18,6 @@ public class ContentLength implements HttpResponseHeader {
 
     @Override
     public String toHeaderFormat() {
-        return HEADER_KEY + value;
+        return HEADER_KEY + value + SPACE;
     }
 }

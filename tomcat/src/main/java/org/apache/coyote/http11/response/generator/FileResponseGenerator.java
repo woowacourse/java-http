@@ -10,8 +10,9 @@ public abstract class FileResponseGenerator implements ResponseGenerator {
 
     private static final String ROOT_PAGE_REQUEST_URI = "/";
     private static final String ROOT_PAGE = "Hello world!";
+    private static final String FILE_EXTENSION_PREFIX = ".";
     private static final String STATIC_RESOURCE_PATH = "static";
-    private static final String LOGIN_HTML_PATH = "/login.html";
+    private static final String HTML_FILE_EXTENSION = ".html";
     private static final String NOT_FOUND_MESSAGE = "404";
 
     protected final String generate(String resource) throws IOException {
@@ -33,13 +34,9 @@ public abstract class FileResponseGenerator implements ResponseGenerator {
     }
 
     private String getResourceName(String resource) {
-        if (isLoginRequest(resource)) {
-            return STATIC_RESOURCE_PATH + LOGIN_HTML_PATH;
+        if (!resource.contains(FILE_EXTENSION_PREFIX)) {
+            return STATIC_RESOURCE_PATH + resource + HTML_FILE_EXTENSION;
         }
         return STATIC_RESOURCE_PATH + resource;
-    }
-
-    private static boolean isLoginRequest(String resource) {
-        return resource.contains("login");
     }
 }

@@ -59,28 +59,16 @@ public class HttpRequest {
         return requestPath.containsLoginPath() && httpMethod.isPost();
     }
 
-    public boolean isJsFileRequest() {
-        return requestPath.containsJsFileExtension() && httpMethod.isGet();
+    public boolean hasRequestPathIncluding(String value) {
+        return requestPath.contains(value);
     }
 
-    public boolean isCssFileRequest() {
-        return requestPath.containsCssFileExtension() && httpMethod.isGet();
+    public boolean hasRequestPathOf(String requestPath) {
+        return this.requestPath.isSameWith(requestPath);
     }
 
-    public boolean isHtmlFileRequest() {
-        return requestPath.containsHtmlFileExtension() && httpMethod.isGet();
-    }
-
-    public boolean isRootRequest() {
-        return requestPath.isRootPath() && httpMethod.isGet();
-    }
-
-    public boolean isRegisterRequest() {
-        return requestPath.containsRegisterPath() && httpMethod.isPost();
-    }
-
-    public boolean hasCookie() {
-        return httpRequestHeader.hasCookie();
+    public boolean hasHttpMethodOf(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
     }
 
     public String getParamValueOf(String key) {

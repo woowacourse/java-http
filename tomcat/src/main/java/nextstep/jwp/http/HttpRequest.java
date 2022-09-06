@@ -99,6 +99,10 @@ public class HttpRequest {
         return path.contains(STATIC_EXTENTION_DOT);
     }
 
+    public boolean isEmptySessionId() {
+        return httpCookie.isEmptySessionId();
+    }
+
     public String getFilePath() {
         if (path.contains(STATIC_EXTENTION_DOT)) {
             return path;

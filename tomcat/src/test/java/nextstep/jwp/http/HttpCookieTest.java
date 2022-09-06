@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpCookieTest {
 
@@ -22,6 +24,15 @@ class HttpCookieTest {
     void 빈_HttpCookie를_생성한다() {
         HttpCookie expected = new HttpCookie(new HashMap<>());
         HttpCookie actual = HttpCookie.empty();
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46,true", "tasty_cookie=strawberry,false"})
+    void session_id가_비어있는지_확인한다(final String input, final boolean expected) {
+        HttpCookie httpCookie = HttpCookie.from(input);
+        boolean actual = httpCookie.isEmptySessionId();
 
         assertThat(actual).isEqualTo(expected);
     }

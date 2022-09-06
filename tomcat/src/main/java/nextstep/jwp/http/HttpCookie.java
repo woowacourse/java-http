@@ -11,6 +11,8 @@ public class HttpCookie {
     private static final String COOKIES_DELIMITER = "; ";
     private static final String COOKIE_DELIMITER = "=";
 
+    private static final String SESSION_ID_KEY = "JSESSIONID";
+
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
 
@@ -28,6 +30,14 @@ public class HttpCookie {
 
     public static HttpCookie empty() {
         return new HttpCookie(new ConcurrentHashMap<>());
+    }
+
+    public boolean isEmptySessionId() {
+        return values.containsKey(SESSION_ID_KEY);
+    }
+
+    public void addSessionId(final String sessionId) {
+        values.put(SESSION_ID_KEY, sessionId);
     }
 
     @Override

@@ -9,12 +9,12 @@ public class HttpRequestStartLine {
 
     private static final String QUERY_STRING_PREFIX = "?";
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String httpVersion;
     private final Map<String, String> queryParams;
 
-    public HttpRequestStartLine(String method, String uri, String httpVersion,
+    public HttpRequestStartLine(final HttpMethod method, final String uri, final String httpVersion,
                                 final Map<String, String> queryParams) {
         this.method = method;
         this.uri = uri;
@@ -30,7 +30,7 @@ public class HttpRequestStartLine {
 
         final String[] startLineContents = startLine.split(" ");
 
-        return new HttpRequestStartLine(startLineContents[0],
+        return new HttpRequestStartLine(HttpMethod.findMethod(startLineContents[0]),
                 takeUri(startLineContents[1]),
                 startLineContents[2],
                 takeQueryParams(startLineContents[1]));
@@ -68,7 +68,7 @@ public class HttpRequestStartLine {
         return result;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

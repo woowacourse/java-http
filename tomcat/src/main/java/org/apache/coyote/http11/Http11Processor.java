@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.HandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +34,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader headerReader = new BufferedReader(new InputStreamReader(inputStream,
                      StandardCharsets.UTF_8))) {
             final HttpRequestStartLine startLine = HttpRequestStartLine.from(headerReader);
-            
-            final Handler handler = new Handler(startLine);
-            handler.handle();
+
+            final Handler handler = HandlerMapper.findHandler(startLine);
+            handler.handle(startLine);
 
             final HttpResponse httpResponse = HttpResponse.from(startLine);
 

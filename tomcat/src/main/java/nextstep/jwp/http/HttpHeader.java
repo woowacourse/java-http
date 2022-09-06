@@ -1,7 +1,8 @@
 package nextstep.jwp.http;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,36 +15,42 @@ public class HttpHeader {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private Map<String, String> headers;
+    private Map<String, String> values;
 
     public HttpHeader() {
-        this.headers = new LinkedHashMap<>();
+        this.values = new LinkedHashMap<>();
     }
 
-    public HttpHeader(final List<String> headers) {
-        this.headers = new LinkedHashMap();
+    public HttpHeader(final BufferedReader bufferReader) throws IOException {
+        this.values = new LinkedHashMap<>();
 
-        for (String header : headers) {
-            String[] headerLine = header.split(HEADER_SEPARATOR, SPLIT_SIZE);
-            addHeader(headerLine[KEY_INDEX], headerLine[VALUE_INDEX]);
+        String headerLine = bufferReader.readLine();
+        while (isValidHeaderForm(headerLine)) {
+            String[] value = headerLine.split(HEADER_SEPARATOR, SPLIT_SIZE);
+            addValue(value[KEY_INDEX], value[VALUE_INDEX]);
+            headerLine = bufferReader.readLine();
         }
     }
 
-    public void addHeader(final String key, final String value) {
-        this.headers.put(key, value);
+    private boolean isValidHeaderForm(final String headerLine) {
+        return headerLine != null && !headerLine.isBlank();
+    }
+
+    public void addValue(final String key, final String value) {
+        this.values.put(key, value);
     }
 
     public String createHeaderTemplate() {
-        return headers.entrySet().stream()
+        return values.entrySet().stream()
                 .map(header -> header.getKey() + HEADER_SEPARATOR + header.getValue() + BLANK)
                 .collect(Collectors.joining(LINE_SEPARATOR));
     }
 
-    public String get(final String key) {
-        return headers.get(key);
+    public String getValues(final String key) {
+        return values.get(key);
     }
 
     public String getCookie() {
-        return headers.get("Cookie");
+        return values.get("Cookie");
     }
 }

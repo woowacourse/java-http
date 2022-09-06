@@ -1,10 +1,16 @@
 package nextstep.jwp.http.reqeust;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 public class HttpRequestLine {
 
+    private static final String REQUEST_LINE_SEPARATOR = " ";
+    private static final int REQUEST_LINE_CONTENT_COUNT = 3;
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
     private static final String HTML_EXTENSION = ".html";
 
     private String method;
@@ -19,8 +25,29 @@ public class HttpRequestLine {
         this.version = version;
     }
 
-    public boolean hasQueryParams() {
-        return queryParams.isNotEmpty();
+    public static HttpRequestLine from(final String requestLine) {
+        String[] line = requestLine.split(REQUEST_LINE_SEPARATOR);
+        validateRequestLineFormat(line);
+
+        String method = line[METHOD_INDEX];
+        URI uri = requestUri(line[URI_INDEX]);
+        String version = line[VERSION_INDEX];
+
+        return new HttpRequestLine(method, uri, version);
+    }
+
+    private static void validateRequestLineFormat(final String[] line) {
+        if (line.length != REQUEST_LINE_CONTENT_COUNT) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private static URI requestUri(final String uri) {
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     private boolean hasNotExtension() {
@@ -39,7 +66,7 @@ public class HttpRequestLine {
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams.getParams();
+        return queryParams.getValues();
     }
 
     public String getMethod() {

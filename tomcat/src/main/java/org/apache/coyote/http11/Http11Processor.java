@@ -7,6 +7,7 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.StatusCode;
 import org.apache.coyote.Processor;
 import org.apache.coyote.core.RequestMapping;
 import org.apache.coyote.core.controller.Controller;
@@ -34,8 +35,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            HttpRequest httpRequest = createHttpRequest(bufferReader);
-            HttpResponse httpResponse = createHttpResponse();
+            HttpRequest httpRequest = new HttpRequest(bufferReader);
+            HttpResponse httpResponse = new HttpResponse(StatusCode.OK, httpRequest.findContentType());
 
             Controller controller = new RequestMapping().getController(httpRequest);
             controller.service(httpRequest, httpResponse);
@@ -45,13 +46,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        return new HttpRequestCreator().createHttpRequest(bufferReader);
-    }
-
-    private HttpResponse createHttpResponse() {
-        return new HttpResponse();
     }
 }

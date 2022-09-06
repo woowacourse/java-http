@@ -7,10 +7,10 @@ import nextstep.jwp.http.HttpHeader;
 public class HttpResponse {
 
     private static final String BLANK = " ";
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
-    private static final String HEADER_CONTENT_LENGTH = "Content-Length";
-    private static final String HEADER_LOCATION = "Location";
-    private static final String HEADER_SET_COOKIE = "Set-Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private String version = "HTTP/1.1";
     private StatusCode statusCode;
@@ -20,20 +20,25 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
+    public HttpResponse(final StatusCode statusCode, final String contentType) {
+        this.statusCode = statusCode;
+        this.httpHeaders.addValue(CONTENT_TYPE, contentType);
+    }
+
     public void setStatus(final String status) {
         this.statusCode = StatusCode.valueOf(status);
     }
 
     public void setContentType(final String contentType) {
-        this.httpHeaders.addHeader(HEADER_CONTENT_TYPE, contentType);
+        this.httpHeaders.addValue(CONTENT_TYPE, contentType);
     }
 
     public void setContentLength(final int contentLength) {
-        this.httpHeaders.addHeader(HEADER_CONTENT_LENGTH, String.valueOf(contentLength));
+        this.httpHeaders.addValue(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void setLocation(final String location) {
-        this.httpHeaders.addHeader(HEADER_LOCATION, location);
+        this.httpHeaders.addValue(LOCATION, location);
     }
 
     public void setResponseBody(final String responseBody) {
@@ -41,7 +46,7 @@ public class HttpResponse {
     }
 
     public void setCookie(final HttpCookie cookie) {
-        this.httpHeaders.addHeader(HEADER_SET_COOKIE, cookie.getCookie());
+        this.httpHeaders.addValue(SET_COOKIE, cookie.getCookie());
     }
 
     public String getResponseTemplate() {

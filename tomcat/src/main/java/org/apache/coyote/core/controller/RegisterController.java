@@ -25,7 +25,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response)
-            throws IOException, UncheckedServletException {
+            throws UncheckedServletException {
         registerUser(request);
 
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
@@ -56,7 +56,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response)
-            throws IOException, UncheckedServletException {
+            throws UncheckedServletException {
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
 
         response.setStatus("OK");

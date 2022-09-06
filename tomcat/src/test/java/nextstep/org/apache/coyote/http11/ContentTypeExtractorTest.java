@@ -2,6 +2,7 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.ContentTypeExtractor;
 import org.apache.coyote.http11.HttpRequest;
@@ -16,17 +17,15 @@ public class ContentTypeExtractorTest {
     @Test
     void extractFromAcceptHeader() {
         // arrange
-        final String request= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive ",
-                "",
+        final HttpRequest request = new HttpRequest("GET /css/styles.css HTTP/1.1",
+                Map.of("Host", "localhost:8080",
+                        "Accept", "text/css,*/*;q=0.1",
+                        "Connection", "keep-alive"),
                 "");
         ContentTypeExtractor extractor = new ContentTypeExtractor();
 
         // act
-        ContentType actual = extractor.extract(HttpRequest.from(request));
+        ContentType actual = extractor.extract(request);
 
         // assert
         assertThat(actual).isEqualTo(ContentType.TEXT_CSS);
@@ -36,16 +35,14 @@ public class ContentTypeExtractorTest {
     @CsvSource({"/index.html, text/html", "/css/styles.css, text/css", "/main.js, text/javascript"})
     void extractFromExtension(String uri, String expectContentType) {
         // arrange
-        final String request= String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
+        final HttpRequest request = new HttpRequest("GET " + uri + " HTTP/1.1",
+                Map.of("Host", "localhost:8080",
+                        "Connection", "keep-alive"),
                 "");
         ContentTypeExtractor extractor = new ContentTypeExtractor();
 
         // act
-        ContentType actual = extractor.extract(HttpRequest.from(request));
+        ContentType actual = extractor.extract(request);
 
         // assert
         assertThat(actual).isEqualTo(ContentType.getByAcceptHeader(expectContentType).orElseThrow());

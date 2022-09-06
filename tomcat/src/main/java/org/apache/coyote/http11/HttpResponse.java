@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Objects;
 
 public class HttpResponse {
 
-    private final String responseStartLine;
+    private final String statusLine;
     private final Map<String, String> responseHeaders;
     private String responseBody;
 
@@ -23,10 +23,10 @@ public class HttpResponse {
         return new HttpResponseBuilder("HTTP/1.1 404 Not Found \r\n");
     }
 
-    HttpResponse(String startLine) {
-        responseStartLine = startLine;
-        responseHeaders = new HashMap<>();
-        responseBody = "";
+    HttpResponse(String statusLine) {
+        this.statusLine = statusLine;
+        this.responseHeaders = new HashMap<>();
+        this.responseBody = "";
     }
 
     public void addBody(final String responseBody) {
@@ -43,7 +43,7 @@ public class HttpResponse {
     }
 
     public String writeValueAsString() {
-        String response = responseStartLine;
+        String response = statusLine;
         for (String key : responseHeaders.keySet()) {
             response += key + ": " + responseHeaders.get(key) + " \r\n";
         }
@@ -54,5 +54,23 @@ public class HttpResponse {
 
     public boolean hasBody() {
         return responseBody.length() > 0;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HttpResponse that = (HttpResponse) o;
+        return Objects.equals(statusLine, that.statusLine) && Objects
+                .equals(responseHeaders, that.responseHeaders) && Objects.equals(responseBody, that.responseBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(statusLine, responseHeaders, responseBody);
     }
 }

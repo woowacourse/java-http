@@ -1,18 +1,18 @@
 package nextstep.org.apache.coyote.http11;
 
-import org.apache.coyote.http11.HttpResponse;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nextstep.jwp.db.InMemoryUserRepository;
+import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpResponse;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -114,7 +114,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void getLoginForm() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -146,7 +146,7 @@ class Http11ProcessorTest {
     void loginByValidAccount() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html,*/*;q=0.1 ",
                 "Connection: keep-alive ",
@@ -167,10 +167,10 @@ class Http11ProcessorTest {
 
     @ParameterizedTest
     @CsvSource({"invalidAccount,password", "gugu,invalidPassword"})
-    void loginByInvalidAccount(String account, String password) throws IOException {
+    void loginByInvalidAccount(String account, String password) {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=" + account + "&password=" + password + " HTTP/1.1 ",
+                "POST /login?account=" + account + "&password=" + password + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html,*/*;q=0.1 ",
                 "Connection: keep-alive ",
@@ -187,5 +187,53 @@ class Http11ProcessorTest {
         HttpResponse response = HttpResponse.redirect("/401.html").build();
         response.addHeader("Location", "/401.html");
         assertThat(socket.output()).contains(response.writeValueAsString());
+    }
+
+    @Test
+    void getRegisterForm() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        HttpResponse response = HttpResponse.ok().fileBody("/register.html").build();
+        response.addHeader("Content-Type", "text/html");
+        assertThat(socket.output()).contains(response.writeValueAsString());
+    }
+
+    @Test
+    void postRegister() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "Content-Length: 66",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=wilgur513&password=password&email=wilgur513@woowahan.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        HttpResponse response = HttpResponse.redirect("/index.html").build();
+        assertThat(socket.output()).contains(response.writeValueAsString());
+        assertThat(InMemoryUserRepository.findByAccount("wilgur513")).isPresent();
     }
 }

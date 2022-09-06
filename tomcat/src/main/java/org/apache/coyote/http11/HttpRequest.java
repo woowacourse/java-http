@@ -1,45 +1,20 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class HttpRequest {
 
-    private final String httpRequest;
+    private static final String QUERY_STRING_DELIMITER = "?";
+
+    private final String requestLine;
     private final Map<String, String> headers;
+    private final String body;
 
-    public static HttpRequest from(final String httpRequest) {
-        return new HttpRequest(httpRequest, headers(httpRequest));
-    }
-
-    private static Map<String, String> headers(final String httpRequest) {
-        final Map<String, String> headers = new HashMap<>();
-        final String[] requestLines = httpRequest.split("\n");
-
-        for (int i = 1; i < requestLines.length; i++) {
-            if (requestLines[i].isBlank()) {
-                break;
-            }
-
-            final String name = headerName(requestLines[i]);
-            final String value = headerValue(requestLines[i]);
-            headers.put(name, value);
-        }
-
-        return headers;
-    }
-
-    private static String headerName(final String line) {
-        return line.trim().split(" ")[0].replaceAll(":", "");
-    }
-
-    private static String headerValue(final String line) {
-        return line.trim().split(" ")[1];
-    }
-
-    private HttpRequest(final String httpRequest, final Map<String, String> headers) {
-        this.httpRequest = httpRequest;
+    public HttpRequest(final String requestLine, final Map<String, String> headers, final String body) {
+        this.requestLine = requestLine;
         this.headers = headers;
+        this.body = body;
     }
 
     public boolean hasHeader(String name) {
@@ -55,30 +30,44 @@ public class HttpRequest {
             final int index = getUri().lastIndexOf('?');
             return getUri().substring(0, index);
         }
-
         return getUri();
     }
 
     private boolean hasQueryParamsInUri() {
-        return getUri().contains("?");
+        return getUri().contains(QUERY_STRING_DELIMITER);
     }
 
     private String getUri() {
-        return requestStartLine().split(" ")[1];
+        return requestLine.split(" ")[1];
     }
 
-    private String requestStartLine() {
-        return httpRequest.split("\n")[0];
+    public HttpMethod getHttpMethod() {
+        final String methodName = requestLine.split(" ")[0];
+        return HttpMethod.valueOf(methodName);
     }
 
     public String getRequestParam(String paramName) {
-        if (!hasQueryParamsInUri()) {
-            return null;
+        if (hasQueryParamsInUri()) {
+            return findParamValue(paramName, queryString());
         }
 
-        final String queryString = getQueryString();
+        if (isFormUrlencoded()) {
+            return findParamValue(paramName, body);
+        }
 
-        for (String param : queryString.split("&")) {
+        return null;
+    }
+
+    private String queryString() {
+        if (hasQueryParamsInUri()) {
+            final int index = getUri().indexOf("?");
+            return getUri().substring(index + 1);
+        }
+        return "";
+    }
+
+    private String findParamValue(final String paramName, final String params) {
+        for (String param : params.split("&")) {
             final String key = param.split("=")[0];
             final String value = param.split("=")[1];
 
@@ -90,11 +79,12 @@ public class HttpRequest {
         return null;
     }
 
-    private String getQueryString() {
-        if (hasQueryParamsInUri()) {
-            final int index = getUri().indexOf("?");
-            return getUri().substring(index + 1);
-        }
-        return "";
+    private boolean isFormUrlencoded() {
+        final String contentType = headers.get("Content-Type");
+        return contentType != null && contentType.equals("application/x-www-form-urlencoded");
+    }
+
+    public String getBody() {
+        return body;
     }
 }

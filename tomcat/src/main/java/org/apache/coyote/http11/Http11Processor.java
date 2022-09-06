@@ -4,9 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Optional;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -44,19 +45,37 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse createResponse(final HttpRequest request) throws IOException {
+    private HttpResponse createResponse(final HttpRequest request) {
+        Optional<Controller> controllerOptional = findController(request);
+
+        if (controllerOptional.isPresent()) {
+            Controller controller = controllerOptional.get();
+            return controller.doService(request);
+        }
+
+        return createStaticResourceResponse(request);
+    }
+
+    private Optional<Controller> findController(final HttpRequest request) {
         if (request.getUriPath().equals("/")) {
-            return new HomeController().handle(request);
+            return Optional.of(new HomeController());
         }
 
         if (request.getUriPath().equals("/login")) {
-            return new LoginController().handle(request);
+            return Optional.of(new LoginController());
         }
 
+        if (request.getUriPath().equals("/register")) {
+            return Optional.of(new RegisterController());
+        }
+
+        return Optional.empty();
+    }
+
+    private HttpResponse createStaticResourceResponse(final HttpRequest request) {
         if (hasStaticResourceFile(request.getUriPath())) {
-            return new StaticResourceController().handle(request);
+            return HttpResponse.ok().fileBody(request.getUriPath()).build();
         }
-
         return HttpResponse.notFound().build();
     }
 

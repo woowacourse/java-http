@@ -39,9 +39,11 @@ public class HttpResponse {
 
     public String getResponse() {
         if (httpStatusCode.isFound()) {
-            return String.join("\r\n",
+            String a = String.join("\r\n",
                     HTTP_VERSION + httpStatusCode.getValue(),
                     location.getValue());
+            System.out.println(a);
+            return a;
         }
         return String.join("\r\n",
                 HTTP_VERSION + httpStatusCode.getValue(),

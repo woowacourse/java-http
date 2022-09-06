@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.Http11HandlerSelector;
 import org.apache.coyote.http11.http11request.Http11Request;

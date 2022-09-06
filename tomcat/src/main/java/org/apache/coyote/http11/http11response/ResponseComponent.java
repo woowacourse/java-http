@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.dto;
+package org.apache.coyote.http11.http11response;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HeaderElement;
 import org.apache.coyote.http11.StatusCode;

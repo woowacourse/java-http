@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
-import javax.swing.text.html.HTML;
 import org.apache.coyote.http11.ExtensionContentType;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 
 public class HandlerSupporter {
 

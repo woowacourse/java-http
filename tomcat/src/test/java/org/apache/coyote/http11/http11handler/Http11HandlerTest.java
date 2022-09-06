@@ -10,7 +10,7 @@ import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.coyote.http11.ExtensionContentType;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.impl.DefaultPageHandler;
 import org.apache.coyote.http11.http11handler.impl.IndexPageHandler;
 import org.apache.coyote.http11.http11handler.impl.LoginPageHandler;

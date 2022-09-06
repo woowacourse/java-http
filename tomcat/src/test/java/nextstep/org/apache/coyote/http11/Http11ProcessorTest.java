@@ -1,11 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,12 +87,12 @@ class Http11ProcessorTest {
         assertThat(socket.output().contains("text/css")).isTrue();
     }
 
-    @DisplayName("query string으로 들어온 파일을 html파일로 읽는다.")
+    @DisplayName("login 화면을 보여준다.")
     @Test
-    void queryString() {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -109,12 +112,14 @@ class Http11ProcessorTest {
     @Test
     void redirect() throws IOException {
         // given
+        final String content = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
                 "",
-                "");
+                content);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -137,12 +142,14 @@ class Http11ProcessorTest {
     @Test
     void loginFailure() throws IOException {
         // given
+        final String content = "account=gugu&password=wrong";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
                 "",
-                "");
+                content);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -159,5 +166,68 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입 화면을 보여준다.")
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 4391 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입에 성공하면 index.html을 보여준다.")
+    @Test
+    void registerSuccess() throws IOException {
+        // given
+        String content = "account=giron&password=123&email=giron%gmail.com";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
+                "",
+                content);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5670 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        User user = InMemoryUserRepository.findByAccount("giron").get();
+
+        assertAll(
+                () -> assertThat(user.getPassword()).isEqualTo("123"),
+                () -> assertThat(socket.output()).isEqualTo(expected)
+        );
     }
 }

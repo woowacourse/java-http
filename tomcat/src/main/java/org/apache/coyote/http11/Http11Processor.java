@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
@@ -60,8 +58,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, Url url) throws IOException {
-        String requestBody="";
+    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, Url url)
+            throws IOException {
+        String requestBody = "";
         if (url.getHttpMethod().equals(HttpMethod.POST)) {
             int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];

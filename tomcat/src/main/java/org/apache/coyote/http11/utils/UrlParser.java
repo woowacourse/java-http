@@ -1,34 +1,36 @@
 package org.apache.coyote.http11.utils;
 
-import static org.apache.coyote.http11.response.ContentType.*;
+import static org.apache.coyote.http11.response.ContentType.TEXT_HTML;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import org.apache.coyote.http11.dto.JoinQueryDto;
-import org.apache.coyote.http11.dto.LoginQueryDataDto;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UrlParser {
     private static final Logger log = LoggerFactory.getLogger(UrlParser.class);
-    private static final String PATH_STANDARD = "?";
     private static final String REQUEST_STANDARD = "&";
     private static final String DATA_STANDARD = "=";
+    private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    public static LoginQueryDataDto loginQuery(String query) {
-
+    public static HttpRequest extractRequest(String query) {
         String[] dataMap = query.split(REQUEST_STANDARD);
-        String account = getValue(dataMap, 0);
-        String password = getValue(dataMap, 1);
-
-        return new LoginQueryDataDto(account, password);
+        Map<String, String> mp = new HashMap<>();
+        for (String data : dataMap) {
+            mp.put(getKey(data), getValue(data));
+        }
+        return new HttpRequest(mp);
     }
 
-    private static String getValue(String[] dataMap, int index) {
-        return dataMap[index].split(DATA_STANDARD)[VALUE_INDEX];
+    private static String getKey(String dataMap) {
+        return dataMap.split(DATA_STANDARD)[KEY_INDEX];
+    }
+
+    private static String getValue(String dataMap) {
+        return dataMap.split(DATA_STANDARD)[VALUE_INDEX];
     }
 
     public static HttpMethod extractMethod(final String httpRequest) {
@@ -40,12 +42,7 @@ public class UrlParser {
         return httpRequest.split(" ")[1];
     }
 
-    public static JoinQueryDto joinQuery(String requestBody) {
-        String[] dataMap = requestBody.split(REQUEST_STANDARD);
-        return new JoinQueryDto(getValue(dataMap, 0), getValue(dataMap, 1), getValue(dataMap, 2));
-    }
-
-    public static String convertEmptyToHtml(String url){
+    public static String convertEmptyToHtml(String url) {
         String resource = url;
         int index = url.indexOf(".");
         if (index == -1) {

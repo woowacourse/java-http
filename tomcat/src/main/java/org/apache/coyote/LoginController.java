@@ -26,6 +26,7 @@ public class LoginController implements Controller {
     public void run(final Http11Request request, final Http11Response response) throws IOException, URISyntaxException {
         if (request.getMethod().equals(HttpMethod.POST)) {
             runLogin(request, response);
+            return;
         }
         response.write(HttpStatus.OK, new Http11URL("/login.html"));
     }
@@ -36,8 +37,9 @@ public class LoginController implements Controller {
         if (loginSuccess(body)) {
             final User loggedInUser = findUser(body);
             log.info(loggedInUser.toString());
+            response.write(HttpStatus.FOUND, new Http11URL("/index.html"));
         }
-        response.write(HttpStatus.FOUND, new Http11URL("/index.html"));
+        response.write(HttpStatus.UNAUTHORIZED, new Http11URL("/401.html"));
     }
 
     private boolean loginSuccess(final Http11RequestBody body) {

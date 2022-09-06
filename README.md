@@ -17,7 +17,7 @@
 ### [🚀 2단계 - 로그인 구현하기](https://techcourse.woowahan.com/s/cCM7rQR9/ls/YSC17uAy)
 - [X] 로그인 성공 시 `index.html`로 redirect, 실패 시 `401.html`로 redirect한다.
     - [X] 로그인에 성공하면 `Status Code`를 `302 Found`로 응답하고 `Location` header를 추가한다.
-    - [ ] 로그인에 실패하면 `Status Code`를 `303 See Other`로 응답하고 `Location` header를 추가한다.
+    - [X] 로그인에 실패하면 `Status Code`를 `303 See Other`로 응답하고 `Location` header를 추가한다.
 - [X] `POST /register` 요청을 받아 회원 가입을 처리한다.
     - [X] `GET /register`요청 시 `register.html` 페이지를 응답한다.
     - [X] `POST` 요청의 request body에서 데이터를 읽어온다.

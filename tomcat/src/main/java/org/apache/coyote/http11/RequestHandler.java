@@ -37,7 +37,7 @@ public class RequestHandler {
         }
 
         if (e instanceof UnauthorizedException) {
-            return new HttpResponse(StatusCode.UNAUTHORIZED, ResourceLoader.getStaticResource("/401.html"));
+            return HttpResponse.ofRedirection(StatusCode.SEE_OTHER, "/401.html");
         }
 
         if (e instanceof UnsupportedMethodException) {

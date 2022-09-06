@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
 
 import java.util.List;
 import java.util.Map;

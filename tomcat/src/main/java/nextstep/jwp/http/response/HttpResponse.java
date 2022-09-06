@@ -1,4 +1,10 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
+
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.Location;
 
 public class HttpResponse {
 

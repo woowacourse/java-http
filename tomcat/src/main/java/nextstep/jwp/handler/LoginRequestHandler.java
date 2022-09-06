@@ -3,13 +3,13 @@ package nextstep.jwp.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpRequestBody;
-import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.Location;
-import nextstep.jwp.http.Session;
-import nextstep.jwp.http.SessionManager;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.HttpRequestBody;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.session.Session;
+import nextstep.jwp.http.session.SessionManager;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 

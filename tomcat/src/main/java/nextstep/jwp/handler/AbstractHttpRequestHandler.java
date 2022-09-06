@@ -1,8 +1,8 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 
 public abstract class AbstractHttpRequestHandler implements HttpRequestHandler {
 

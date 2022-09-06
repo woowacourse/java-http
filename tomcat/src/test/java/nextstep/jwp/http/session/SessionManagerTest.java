@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

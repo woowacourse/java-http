@@ -5,7 +5,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceController implements Controller {
 
-
     @Override
     public HttpResponse process(HttpRequest httpRequest) throws Exception {
         String url = httpRequest.getUrl();

@@ -20,12 +20,12 @@ public class HttpCookie implements RequestHeader, ResponseHeader {
 
     private final Map<String, String> cookies;
 
-    private HttpCookie(Map<String, String> cookies) {
-        this.cookies = cookies;
+    public HttpCookie() {
+        this(new HashMap<>());
     }
 
-    public static ResponseHeader empty() {
-        return new HttpCookie(new HashMap<>());
+    private HttpCookie(Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
     public static HttpCookie parse(String ignored, String value) {
@@ -54,12 +54,12 @@ public class HttpCookie implements RequestHeader, ResponseHeader {
 
     @Override
     public ResponseHeader postProcess(PostProcessMeta meta) {
-        Map<String, String> newCookies = new HashMap<>(cookies);
+        Map<String, String> cookies = new HashMap<>();
         Optional<RequestHeader> optionalHeader = meta.findHeaderByField(getField());
         if (optionalHeader.isEmpty() || !isSessionIdExists(optionalHeader.get())) {
-            newCookies.put(SESSION_ID, UUID.randomUUID().toString());
+            cookies.put(SESSION_ID, UUID.randomUUID().toString());
         }
-        return new HttpCookie(newCookies);
+        return new HttpCookie(cookies);
     }
 
     private static boolean isSessionIdExists(RequestHeader header) {

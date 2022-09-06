@@ -6,11 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.exception.TempException;
 import org.apache.util.NumberUtil;
 
 public class HttpRequest {
+
+    private static final SessionManager MANAGER = new SessionManager();
 
     private final RequestGeneral requestGeneral;
     private final RequestHeaders requestHeaders;
@@ -57,7 +62,7 @@ public class HttpRequest {
         try {
             RequestHeader header = headers.findHeader("Content-Length");
             return NumberUtil.parseIntSafe(header.getValue());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return 0;
         }
     }
@@ -78,6 +83,17 @@ public class HttpRequest {
         } catch (IOException e) {
             throw new TempException();
         }
+    }
+
+    public Session getSession(boolean isCreate) {
+        if (isCreate) {
+            Session session = new Session(UUID.randomUUID().toString());
+            MANAGER.add(session);
+            return session;
+        }
+        RequestHeader cookie = this.requestHeaders.findHeader("Cookie");
+        return null;
+//        MANAGER.findSession();
     }
 
     public RequestHeader findHeader(String field) {

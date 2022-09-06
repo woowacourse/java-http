@@ -27,7 +27,7 @@ public class HttpResponse implements Response {
 
     public HttpResponse postProcess(HttpRequest request) {
         PostProcessMeta meta = new PostProcessMeta(request, this.body);
-        return new HttpResponse(general, this.headers.replace(HttpCookie.empty()).postProcess(meta), body);
+        return new HttpResponse(general, this.headers.replace(new HttpCookie()).postProcess(meta), body);
     }
 
     public HttpResponse update(HttpStatus status, String bodyString) {

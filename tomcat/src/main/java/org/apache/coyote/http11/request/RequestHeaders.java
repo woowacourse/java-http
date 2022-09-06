@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.request;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.header.HttpCookie;
 import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.request.headers.RequestHeaderMapper;
 
@@ -13,11 +15,17 @@ import org.apache.coyote.http11.request.headers.RequestHeaderMapper;
 public class RequestHeaders {
 
     private static final Pattern HEADER_PATTERN = Pattern.compile("(?<field>[a-zA-Z\\- ]+): ?(?<value>.+)");
+    private static final Map<String, RequestHeader> PREDEFINED;
+
+    static {
+        PREDEFINED = Map.of("Cookie", new HttpCookie());
+    }
 
     private final Map<String, RequestHeader> headers;
 
     private RequestHeaders(Map<String, RequestHeader> headers) {
-        this.headers = headers;
+        this.headers = new HashMap<>(PREDEFINED);
+        this.headers.putAll(headers);
     }
 
     public static RequestHeaders parse(List<String> lines) {

@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.url.HandlerMapping;
@@ -39,8 +42,12 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = UrlParser.extractUri(request);
             String httpMethod = UrlParser.extractMethod(request);
-            Url url = HandlerMapping.from(uri);
-            Http11Response responseBody = Http11Response.extract(url, httpMethod);
+            HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
+
+            Url url = HandlerMapping.from(uri, httpMethod);
+
+            String requestBody = extractRequestBody(bufferedReader, httpHeaders, url);
+            Http11Response responseBody = Http11Response.extract(url, httpHeaders, requestBody);
 
             final var response = createResponse(responseBody.getHttpStatus(), responseBody.getContentType(),
                     responseBody.getResource());
@@ -50,6 +57,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, Url url) throws IOException {
+        String requestBody="";
+        if (url.getHttpMethod().equals("POST")) {
+            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            requestBody = new String(buffer);
+        }
+        log.info("request : {}", requestBody);
+        return requestBody;
     }
 
     private String getUri(final BufferedReader bufferedReader) {

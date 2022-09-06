@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.utils.UrlParser;
 
 public enum ContentType {
     TEXT_HTML("text/html", "html"),
@@ -19,14 +20,15 @@ public enum ContentType {
     }
 
     public static String from(String url) {
-        int index = url.indexOf(".");
-        if (index == -1) {
-            return TEXT_HTML.name;
-        }
+        String path = UrlParser.convertEmptyToHtml(url);
         return Arrays.stream(values())
-                .filter(contentType -> url.endsWith(contentType.extension))
+                .filter(contentType -> path.endsWith(contentType.extension))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("알맞은 확장자가 없습니다."))
                 .name;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 }

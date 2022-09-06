@@ -20,13 +20,11 @@ public class RequestHandler {
 
     private static final Controller controller = AppConfig.getInstance().controller;
 
-    public String handle(final RequestHeader request) {
-        final Uri uri = Uri.parse(request.getUri());
-
-        Optional<Method> method = findRequestMappedMethodByPath(uri.getPath());
+    public String handle(final HttpRequest request) {
+        Optional<Method> method = findRequestMappedMethodByPath(request.getPath());
 
         if (method.isEmpty()) {
-            return resource(uri.getPath());
+            return resource(request.getPath());
         }
 
         try {
@@ -38,7 +36,7 @@ public class RequestHandler {
                 return response.asFormat();
             }
 
-            HttpResponse response = (HttpResponse) m.invoke(controller, uri.getParams());
+            HttpResponse response = (HttpResponse) m.invoke(controller, request.getParamsFromBody());
             return response.asFormat();
 
         } catch (InvocationTargetException | IllegalAccessException e) {

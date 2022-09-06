@@ -4,14 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHandler;
 import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +40,8 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final RequestHeader requestHeader = readRequestHeader(bufferedReader);
-            final String response = REQUEST_HANDLER.handle(requestHeader);
+            final HttpRequest request = readHttpRequest(bufferedReader);
+            final String response = REQUEST_HANDLER.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,25 +50,37 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
-        final Deque<String> lines = readRequest(reader);
+    private HttpRequest readHttpRequest(final BufferedReader reader) throws IOException {
+        final RequestLine requestLine = RequestLine.parse(reader.readLine());
+        final RequestHeader header = readHeaders(reader);
+        final RequestBody body = readBody(reader);
 
-        final String startLine = lines.pollFirst();
-        final List<String> headerLines = new ArrayList<>(lines);
-
-        return RequestHeader.parse(startLine, headerLines);
+        return new HttpRequest(requestLine, header, body);
     }
 
-    private Deque<String> readRequest(final BufferedReader reader) throws IOException {
-        final Deque<String> lines = new ArrayDeque<>();
+    private RequestHeader readHeaders(final BufferedReader reader) throws IOException {
+        final List<String> lines = new ArrayList<>();
 
+        final String endOfHeader = "";
         while (true) {
             final String line = reader.readLine();
-            if ("".equals(line)) {
+            if (endOfHeader.equals(line)) {
                 break;
             }
             lines.add(line);
         }
-        return lines;
+        return RequestHeader.parse(lines);
+    }
+
+    private RequestBody readBody(final BufferedReader reader) throws IOException {
+        final StringBuilder builder = new StringBuilder();
+        while (reader.ready()) {
+            final char[] buffer = new char[128];
+            final int size = reader.read(buffer);
+            builder.append(buffer, 0, size);
+        }
+
+        final String body = builder.toString();
+        return RequestBody.parse(body);
     }
 }

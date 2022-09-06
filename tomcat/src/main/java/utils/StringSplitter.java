@@ -10,7 +10,18 @@ public class StringSplitter {
     }
 
     public static List<String> split(final String delimiter, final String target) {
+        if (!target.contains(delimiter)) {
+            return List.of(target);
+        }
         return List.of(target.split(delimiter));
+    }
+
+    public static String getFirst(final String delimiter, final String target) {
+        final List<String> units = split(delimiter, target);
+        if (units.isEmpty()) {
+            return target;
+        }
+        return units.get(0);
     }
 
     public static String getLast(final String delimiter, final String target) {
@@ -39,7 +50,7 @@ public class StringSplitter {
             return asPair(key, value);
         }
 
-        final String key = target.substring(0, index);
+        final String key = target;
         final String value = "";
         return asPair(key, value);
     }

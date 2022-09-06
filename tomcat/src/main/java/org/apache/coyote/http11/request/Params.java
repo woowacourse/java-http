@@ -16,7 +16,7 @@ public class Params {
     }
 
     public static Params parse(final String query) {
-        if (query == null) {
+        if (query == null || query.equals("")) {
             return new Params(Collections.emptyMap());
         }
 

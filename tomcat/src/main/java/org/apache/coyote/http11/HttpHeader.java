@@ -10,6 +10,8 @@ public enum HttpHeader {
     ACCEPT("Accept"),
     CONNECTION("Connection"),
     LOCATION("Location"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie"),
     NONE("");
 
     private final String value;

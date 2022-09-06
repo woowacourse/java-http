@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.COOKIE;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,5 +65,12 @@ public class HttpHeaders {
 
     public String getValue(final HttpHeader httpHeader) {
         return this.headers.get(httpHeader);
+    }
+
+    public HttpCookie getHttpCookie() {
+        if (headers.isEmpty() || !headers.containsKey(COOKIE)) {
+            return new HttpCookie("");
+        }
+        return new HttpCookie(this.headers.get(COOKIE));
     }
 }

@@ -70,6 +70,35 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("GET /index.hmtl에 쿠키와 함께 요청, index.html을 출력한다.")
+    void indexWithCookie() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("css 파일에 대한 요청이 들어오면, 해당 css 파일을 응답한다.")
     void allowCss() throws IOException {
         // given
@@ -128,7 +157,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: Status 302, index.html 반환")
+    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: Status 302, index.html 반환, Cookie 설정")
     void loginRequestAndSuccessLogin() {
         // given
         final String httpRequest = String.join("\r\n",
@@ -148,10 +177,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(
+                List.of("HTTP/1.1 302 Found", "Set-Cookie: JSESSIONID=", "Location: /index.html"));
     }
 
     @Test
@@ -170,7 +197,7 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
-        
+
         // when
         processor.process(socket);
 

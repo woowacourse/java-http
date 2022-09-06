@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatusCode.BAD_REQUEST;
@@ -17,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -33,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -100,7 +104,9 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest.getHttpMethod() == POST) {
                 final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
                 validateLogin(httpRequestBody);
+                final UUID id = UUID.randomUUID();
                 final HttpHeaders httpHeaders = new HttpHeaders()
+                        .addHeader(SET_COOKIE, JSESSIONID + "=" + id)
                         .addHeader(LOCATION, "/index.html");
                 return new HttpResponse.Builder()
                         .statusCode(FOUND)

@@ -20,7 +20,7 @@ public class HttpResponse {
 
     public static class Builder {
         private String body;
-        private String version;
+        private HttpVersion version = HttpVersion.HTTP_1_1;
         private String status;
         private String[] headers;
 
@@ -30,7 +30,7 @@ public class HttpResponse {
         }
 
         public Builder version(final HttpVersion version) {
-            this.version = version.getValue();
+            this.version = version;
             return this;
         }
 
@@ -47,7 +47,7 @@ public class HttpResponse {
         public HttpResponse build() {
             return new HttpResponse(
                     String.join("\r\n",
-                            version + " " + status + " ",
+                            version.getValue() + " " + status + " ",
                             String.join(" \r\n", headers) + " \r\n",
                             body == null ? "" : body));
         }

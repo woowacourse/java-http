@@ -21,7 +21,7 @@ public enum StatusCode {
         this.name = name;
     }
 
-    public static StatusCode findBy(final String statusCode) {
+    public static StatusCode from(final String statusCode) {
         return Arrays.stream(values())
             .filter(value -> isSame(statusCode, value))
             .findFirst()

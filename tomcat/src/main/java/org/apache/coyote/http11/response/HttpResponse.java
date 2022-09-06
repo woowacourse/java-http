@@ -25,7 +25,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(final String httpVersion, final String resource, final String statusCode) {
-        final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.findBy(statusCode));
+        final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.from(statusCode));
 
         final String contentType = selectContentType(resource);
         final String body = loadResourceContent(resource);

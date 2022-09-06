@@ -1,7 +1,5 @@
-package org.apache.coyote.http11.responseGenerator;
+package nextstep.jwp.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -20,22 +18,34 @@ import org.apache.coyote.http11.utils.QueryParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginPostResponseMaker implements ResponseMaker {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginGetResponseMaker.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public String createResponse(final HttpRequest httpRequest)
-            throws URISyntaxException, IOException {
-        final HashMap<String, String> loginData = QueryParamsParser.parseByBody(httpRequest.getRequestBody());
+    protected HttpResponse doGet(final HttpRequest request) throws Exception {
         final Path path = PathFinder.findPath("/login.html");
-        final var responseBody = new String(Files.readAllBytes(path));
+        final String responseBody = new String(Files.readAllBytes(path));
+        final Optional<User> loginUser = request.findUserByJSessionId();
+        if (loginUser.isPresent()) {
+            return redirectByAlreadyLogin(responseBody);
+        }
+        return new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+    }
+
+    private HttpResponse redirectByAlreadyLogin(final String responseBody) {
+        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest request) throws Exception {
+        final HashMap<String, String> loginData = QueryParamsParser.parseByBody(request.getRequestBody());
+        final Path path = PathFinder.findPath("/login.html");
+        final String responseBody = new String(Files.readAllBytes(path));
         return makeLoginResponse(loginData, responseBody);
     }
 
-    private String makeLoginResponse(
-            final Map<String, String> loginData, final String responseBody
-    ) {
+    private HttpResponse makeLoginResponse(final Map<String, String> loginData, final String responseBody) {
         final String account = loginData.get("account");
         final String password = loginData.get("password");
         if (loginData.isEmpty() || !isSuccessLogin(account, password)) {
@@ -46,21 +56,19 @@ public class LoginPostResponseMaker implements ResponseMaker {
         return successLoginResponse(responseBody, user);
     }
 
-    private String successLoginResponse(final String responseBody, final User user) {
+    private HttpResponse successLoginResponse(final String responseBody, final User user) {
         final HttpResponse httpResponse =
                 new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
         final Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session);
         httpResponse.addJSessionId(session);
-        return httpResponse.toString();
+        return httpResponse;
     }
 
-    private String failLoginResponse(final String responseBody) {
+    private HttpResponse failLoginResponse(final String responseBody) {
         log.info("로그인 계정 정보가 이상합니다. responseBody={}", responseBody);
-        final HttpResponse httpResponse =
-                new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/401.html");
-        return httpResponse.toString();
+        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/401.html");
     }
 
     private boolean isSuccessLogin(final String account, final String password) {

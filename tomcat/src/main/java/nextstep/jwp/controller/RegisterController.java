@@ -1,7 +1,5 @@
-package org.apache.coyote.http11.responseGenerator;
+package nextstep.jwp.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -17,20 +15,26 @@ import org.apache.coyote.http11.utils.QueryParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterPostResponseMaker implements ResponseMaker {
+public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginGetResponseMaker.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
-    public String createResponse(final HttpRequest httpRequest) throws URISyntaxException, IOException {
-        final String requestUrl = httpRequest.getRequestUrl();
-        final String requestBody = httpRequest.getRequestBody();
-        saveUser(requestBody);
+    protected HttpResponse doGet(final HttpRequest request) throws Exception {
+        final String requestUrl = request.getRequestUrl();
         final Path path = PathFinder.findPath(requestUrl + ".html");
         final var responseBody = new String(Files.readAllBytes(path));
-        final HttpResponse httpResponse =
-                new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
-        return httpResponse.toString();
+        return new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest request) throws Exception {
+        final String requestUrl = request.getRequestUrl();
+        final String requestBody = request.getRequestBody();
+        saveUser(requestBody);
+        final Path path = PathFinder.findPath(requestUrl + ".html");
+        final String responseBody = new String(Files.readAllBytes(path));
+        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
     }
 
     private void saveUser(final String requestBody) {

@@ -90,6 +90,10 @@ public class HttpRequest {
         }
     }
 
+    public HttpMethod getHttpMethod() {
+        return line.getHttpMethod();
+    }
+
     public String getMethod() {
         return line.getMethod();
     }

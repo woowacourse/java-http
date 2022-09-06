@@ -26,6 +26,10 @@ public class HttpRequestLine {
         return new HttpRequestLine(requestMethod, requestUrl, version);
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     public String getMethod() {
         return httpMethod.getMethod();
     }

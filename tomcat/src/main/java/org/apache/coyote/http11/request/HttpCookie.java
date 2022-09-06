@@ -10,7 +10,7 @@ public class HttpCookie {
 
     private final Map<String, String> cookies;
 
-    private HttpCookie(final HashMap<String, String> cookies) {
+    private HttpCookie(final Map<String, String> cookies) {
         this.cookies = new HashMap<>(cookies);
     }
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.utils;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class QueryParamsParser {
 
@@ -14,7 +15,7 @@ public class QueryParamsParser {
         return data;
     }
 
-    private static void initData(final HashMap<String, String> data, final String[] params) {
+    private static void initData(final Map<String, String> data, final String[] params) {
         for (final String param : params) {
             final String paramInfo = param.split("=")[PARAM_INFO_INDEX];
             final String paramValue = param.split("=")[PARAM_VALUE_INDEX];

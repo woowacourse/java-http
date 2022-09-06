@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -33,7 +34,7 @@ public class LoginPostResponseMaker implements ResponseMaker {
     }
 
     private String makeLoginResponse(
-            final HashMap<String, String> loginData, final String responseBody
+            final Map<String, String> loginData, final String responseBody
     ) {
         final String account = loginData.get("account");
         final String password = loginData.get("password");

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
@@ -6,10 +6,10 @@ import org.apache.coyote.http11.http.domain.ContentType;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 
-public class ResourceHandler implements Handler {
+public class ResourceController implements Controller {
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    public HttpResponse service(final HttpRequest httpRequest) {
         String uri = httpRequest.getRequestLine()
                 .getRequestTarget()
                 .getUri();

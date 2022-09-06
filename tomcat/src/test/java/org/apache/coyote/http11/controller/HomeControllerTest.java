@@ -1,18 +1,16 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.nio.file.Files;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
 
-class ResourceHandlerTest {
+class HomeControllerTest {
 
     @Test
     void handle() {
@@ -23,18 +21,15 @@ class ResourceHandlerTest {
                 "",
                 "");
 
-        Handler handler = new ResourceHandler();
+        Controller controller = new HomeController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = handler.handle(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),
-                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(
-                        ContentType.TEXT_HTML.getValue()),
-                () -> assertThat(httpResponse.getMessageBody().getValue()).isEqualTo(new String(
-                        Files.readAllBytes(new File(
-                                getClass().getClassLoader().getResource("static/index.html").getFile()).toPath())))
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(ContentType.TEXT_HTML.getValue()),
+                () -> assertThat(httpResponse.getMessageBody().getValue()).isEqualTo("Hello world!")
         );
     }
 }

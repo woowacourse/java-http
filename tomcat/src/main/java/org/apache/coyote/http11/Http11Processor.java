@@ -7,8 +7,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.HandlerMapper;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         String uri = httpRequest.getRequestLine()
                 .getRequestTarget()
                 .getUri();
-        Handler handler = HandlerMapper.lookUp(uri);
-        return handler.handle(httpRequest);
+        Controller controller = HandlerMapper.lookUp(uri);
+        return controller.service(httpRequest);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -7,24 +7,36 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
+import org.apache.coyote.http11.http.domain.HttpMethod;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
+public class LoginController implements Controller {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
-        inquireUser(httpRequest);
+    public HttpResponse service(final HttpRequest httpRequest) {
+        HttpMethod httpMethod = httpRequest.getHttpMethod();
+        System.out.println(httpMethod);
+        if (httpMethod.equals(HttpMethod.GET)) {
+            return doGet(httpRequest);
+        }
+        if (httpMethod.equals(HttpMethod.POST)) {
+            return doPost(httpRequest);
+        }
+        return HttpResponse.methodNotAllowed();
+    }
+
+    private HttpResponse doGet(final HttpRequest httpRequest) {
         String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
         String responseBody = FileReader.read(uri + ".html");
         return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 
-    private void inquireUser(final HttpRequest httpRequest) {
+    private HttpResponse doPost(final HttpRequest httpRequest) {
         Map<String, String> queryParameters = httpRequest.getRequestLine()
                 .getRequestTarget()
                 .getQueryParameters();
@@ -34,6 +46,8 @@ public class LoginHandler implements Handler {
                 .orElseThrow(() -> new NotFoundException("User not found."));
         if (user.checkPassword(password)) {
             log.info("User : {}", user);
+            return HttpResponse.found();
         }
+        return HttpResponse.unauthorized();
     }
 }

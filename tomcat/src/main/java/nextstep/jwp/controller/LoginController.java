@@ -20,22 +20,31 @@ public class LoginController extends AbstractController {
         RequestUri requestUri = httpRequest.getRequestUri();
         if (requestUri.hasQueryParams()) {
             QueryParameters queryParameters = requestUri.getQueryParams();
-            login(queryParameters);
-            httpResponse.httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "/index.html");
+            login(httpResponse, queryParameters);
             return;
         }
         httpResponse.httpStatus(HttpStatus.OK)
-                .body(FileReader.read(requestUri.getResourcePath()), requestUri.findMediaType());
+                .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
     }
 
-    private void login(final QueryParameters queryParameters) {
-        User user = getUserByAccount(queryParameters.get("account"));
-        if (user.checkPassword(queryParameters.get("password"))) {
+    private void login(final HttpResponse httpResponse, final QueryParameters queryParameters) {
+        try {
+            User user = getUserByAccount(queryParameters.get("account"));
+            validatePassword(queryParameters, user);
             log.info("user : " + user);
-            return;
+            httpResponse.httpStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "/index.html");
+        } catch (NoSuchUserException e) {
+            log.info(e.getMessage());
+            httpResponse.httpStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "/401.html");
         }
-        log.info("비밀번호가 일치하지 않습니다.");
+    }
+
+    private static void validatePassword(final QueryParameters queryParameters, final User user) {
+        if (!user.checkPassword(queryParameters.get("password"))) {
+            throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     private User getUserByAccount(final String account) {

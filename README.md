@@ -34,6 +34,6 @@
 
 리팩터링
 
-- [ ] 패키지 구조에 맞게 application 영역과 framework 영역 분리하기
+- [x] 패키지 구조에 맞게 application 영역과 framework 영역 분리하기
 
 </details>

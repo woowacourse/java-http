@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestLine {
 
@@ -64,5 +65,23 @@ public class RequestLine {
 
     public Map<String, String> getQueryParams() {
         return queryParams;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RequestLine that = (RequestLine) o;
+        return httpMethod == that.httpMethod && Objects.equals(url, that.url) && Objects.equals(
+                queryParams, that.queryParams);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, url, queryParams);
     }
 }

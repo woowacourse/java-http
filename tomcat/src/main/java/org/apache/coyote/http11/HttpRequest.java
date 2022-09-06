@@ -32,4 +32,12 @@ public class HttpRequest {
     public String getUrl() {
         return requestLine.getUrl();
     }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 }

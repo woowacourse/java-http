@@ -19,6 +19,10 @@ public class HttpRequest {
         return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion().getValue();
     }
 
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return requestLine.isSameHttpMethod(httpMethod);
+    }
+
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }

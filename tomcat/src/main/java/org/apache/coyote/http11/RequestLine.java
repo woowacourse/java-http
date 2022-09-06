@@ -16,6 +16,10 @@ public class RequestLine {
         this.httpVersion = httpVersion;
     }
 
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

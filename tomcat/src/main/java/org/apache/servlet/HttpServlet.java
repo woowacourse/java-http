@@ -8,12 +8,12 @@ import org.apache.coyote.http11.StatusCode;
 public abstract class HttpServlet implements Servlet {
 
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+        if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
             doGet(httpRequest, httpResponse);
             return;
         }
 
-        if (httpRequest.getHttpMethod() == HttpMethod.POST) {
+        if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
             doPost(httpRequest, httpResponse);
             return;
         }

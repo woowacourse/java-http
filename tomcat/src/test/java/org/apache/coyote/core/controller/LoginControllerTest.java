@@ -24,7 +24,7 @@ class LoginControllerTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
-                "account=gugu&password=&email=hkkang%40woowahan.com ");
+                "account=gugu&password= &email=hkkang%40woowahan.com ");
 
         InputStream inputStream = new ByteArrayInputStream(httpRequestProtocol.getBytes());
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));

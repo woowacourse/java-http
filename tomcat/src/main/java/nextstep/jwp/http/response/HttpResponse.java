@@ -25,6 +25,11 @@ public class HttpResponse {
         this.httpHeaders.addValue(CONTENT_TYPE, contentType);
     }
 
+    public void sendRedirect(final String location) {
+        statusCode = StatusCode.FOUND;
+        httpHeaders.addValue(LOCATION, location);
+    }
+
     public void setStatus(final String status) {
         this.statusCode = StatusCode.valueOf(status);
     }

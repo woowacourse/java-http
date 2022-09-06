@@ -18,13 +18,13 @@ public class RequestMapping {
         if (path.equals("/index.html") || path.equals("/css/styles.css")) {
             return new IndexController();
         }
-        if (path.equals("/login.html")) {
-            return new LoginController();
-        }
         if (path.equals("/401.html")) {
             return new ExceptionController();
         }
-        if (path.equals("/register.html")) {
+        if (path.contains("/login")) {
+            return new LoginController();
+        }
+        if (path.contains("/register")) {
             return new RegisterController();
         }
         throw new IllegalArgumentException();

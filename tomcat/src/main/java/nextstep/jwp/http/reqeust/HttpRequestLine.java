@@ -2,7 +2,6 @@ package nextstep.jwp.http.reqeust;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 public class HttpRequestLine {
 
@@ -11,7 +10,6 @@ public class HttpRequestLine {
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
     private static final int VERSION_INDEX = 2;
-    private static final String HTML_EXTENSION = ".html";
 
     private String method;
     private String path;
@@ -50,23 +48,8 @@ public class HttpRequestLine {
         }
     }
 
-    private boolean hasNotExtension() {
-        return !path.contains(".");
-    }
-
-    private boolean isNotRootPath() {
-        return !path.equals("/");
-    }
-
     public String getPath() {
-        if (hasNotExtension() && isNotRootPath()) {
-            return path + HTML_EXTENSION;
-        }
         return path;
-    }
-
-    public Map<String, String> getQueryParams() {
-        return queryParams.getValues();
     }
 
     public String getMethod() {

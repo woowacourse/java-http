@@ -12,8 +12,6 @@ public class RootController extends AbstractController {
     @Override
     public void service(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
-        response.setStatus("OK");
-        response.setContentType(request.findContentType());
         response.setContentLength(ROOT_RESPONSE_BODY.getBytes().length);
         response.setResponseBody(ROOT_RESPONSE_BODY);
     }

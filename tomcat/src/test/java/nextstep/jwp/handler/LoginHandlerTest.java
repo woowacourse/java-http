@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,11 +13,11 @@ import org.junit.jupiter.api.Test;
 
 class LoginHandlerTest {
 
-    private final LoginHandler loginHandler = new LoginHandler();
+    private final LoginServlet loginHandler = new LoginServlet();
 
     @Nested
-    @DisplayName("handle 메소드는")
-    class Handle {
+    @DisplayName("doPost 메소드는")
+    class DoPost {
 
         @Test
         @DisplayName("로그인에 성공하면 /login.html을 반환한다.")
@@ -27,10 +28,10 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final String response = loginHandler.handle(httpRequest);
+            final ServletResponseEntity response = loginHandler.doPost(httpRequest);
 
             // then
-            assertThat(response).isEqualTo("/login.html");
+            assertThat(response.getResource()).isEqualTo("/login.html");
         }
 
         @Test
@@ -42,7 +43,7 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when & then
-            assertThatThrownBy(() -> loginHandler.handle(httpRequest))
+            assertThatThrownBy(() -> loginHandler.doPost(httpRequest))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("No Parameters");
         }
@@ -56,7 +57,7 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when & then
-            assertThatThrownBy(() -> loginHandler.handle(httpRequest))
+            assertThatThrownBy(() -> loginHandler.doPost(httpRequest))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("User not found");
         }

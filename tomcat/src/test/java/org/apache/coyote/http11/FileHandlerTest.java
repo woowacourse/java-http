@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.file.FileHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response.file;
 
 import static org.apache.coyote.http11.HttpStatus.OK;
 
@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FileHandler {
@@ -21,6 +23,14 @@ public class FileHandler {
         final byte[] fileBytes = Files.readAllBytes(path);
 
         return new ResponseEntity(OK, Files.probeContentType(path), new String(fileBytes));
+    }
+
+    public static ResponseEntity createFileResponse(final ServletResponseEntity response) throws IOException {
+        final URL url = FileHandler.class.getClassLoader().getResource("static" + response.getResource());
+        final Path path = Path.of(url.getPath());
+        final byte[] fileBytes = Files.readAllBytes(path);
+
+        return new ResponseEntity(response.getHttpStatus(), Files.probeContentType(path), new String(fileBytes));
     }
 
     public static ResponseEntity createErrorFileResponse(final HttpStatus httpStatus) throws IOException {

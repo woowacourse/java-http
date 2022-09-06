@@ -6,21 +6,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
-import org.apache.coyote.http11.FileHandler;
+import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.file.FileHandler;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class FrontRequestHandlerTest {
+class HttpFrontServletTest {
 
-    private final FrontRequestHandler frontRequestHandler = new FrontRequestHandler(RequestHandlerMapping.init());
+    private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(RequestServletMapping.init());
 
     @Nested
     @DisplayName("handle 메소드는")
@@ -35,7 +33,7 @@ class FrontRequestHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/login", httpRequest);
+            final ResponseEntity response = httpFrontServlet.service("/login", httpRequest);
 
             // then
             final URL url = FileHandler.class.getClassLoader().getResource("static/login.html");
@@ -55,7 +53,7 @@ class FrontRequestHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/wrong", httpRequest);
+            final ResponseEntity response = httpFrontServlet.service("/wrong", httpRequest);
 
             // then
             final URL url = FileHandler.class.getClassLoader().getResource("static/404.html");
@@ -67,7 +65,7 @@ class FrontRequestHandlerTest {
         }
 
         @Test
-        @DisplayName("매핑한 핸들러 실행 도중 예외가 발생하면 Server Error ResponseEntity를 반환한다.")
+        @DisplayName("매핑한 핸들러 실행 도중 IllegalArgumentException 예외가 발생하면 Not Found ResponseEntity를 반환한다.")
         void success_ServerErrorResponse() throws IOException {
             // given
             final Queue<String> rawRequest = new LinkedList<>();
@@ -75,15 +73,15 @@ class FrontRequestHandlerTest {
             final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/login", httpRequest);
+            final ResponseEntity response = httpFrontServlet.service("/login", httpRequest);
 
             // then
-            final URL url = FileHandler.class.getClassLoader().getResource("static/500.html");
+            final URL url = FileHandler.class.getClassLoader().getResource("static/404.html");
             final Path path = Path.of(url.getPath());
             final byte[] fileBytes = Files.readAllBytes(path);
 
             assertThat(response).extracting("httpStatus", "mimeType", "body")
-                    .containsExactly(HttpStatus.SERVER_ERROR, Files.probeContentType(path), new String(fileBytes));
+                    .containsExactly(HttpStatus.NOT_FOUND, Files.probeContentType(path), new String(fileBytes));
         }
     }
 }

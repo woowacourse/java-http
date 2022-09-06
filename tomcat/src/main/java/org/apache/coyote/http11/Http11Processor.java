@@ -12,10 +12,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.FrontRequestHandler;
+import org.apache.coyote.http11.handler.HttpFrontServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +40,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(),
                 StandardCharsets.UTF_8)); final var outputStream = connection.getOutputStream()) {
-            final FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
+            final HttpFrontServlet httpRequestServlet = new HttpFrontServlet();
 
             final HttpRequest httpRequest = HttpRequest.of(readHttpRequest(bufferedReader));
-            final ResponseEntity response = handleRequest(httpRequest, frontRequestHandler);
+            final ResponseEntity response = handleRequest(httpRequest, httpRequestServlet);
             final HttpResponse httpResponse = HttpResponse.of(response);
 
             writeResponse(outputStream, httpResponse.createResponse());
@@ -63,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler frontHandler)
+    private ResponseEntity handleRequest(final HttpRequest httpRequest, final HttpFrontServlet frontHandler)
             throws IOException {
         final String path = httpRequest.getPath();
 
@@ -75,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
             return FileHandler.createFileResponse(path);
         }
 
-        return frontHandler.handle(httpRequest.getPath(), httpRequest);
+        return frontHandler.service(httpRequest.getPath(), httpRequest);
     }
 
     private boolean isRootPath(final String path) {

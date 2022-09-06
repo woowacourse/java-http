@@ -11,11 +11,11 @@ import org.apache.constant.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public enum HandlerMethod {
+public enum ApiHandlerMethod {
 
     HOME_GET(HttpMethod.GET, "/") {
         @Override
-        public void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
+        public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final String welcomeMessage = "Hello world!";
             final String response = HttpResponse.builder()
                     .add(HttpHeader.HTTP_1_1_STATUS_CODE, "200 OK")
@@ -29,7 +29,7 @@ public enum HandlerMethod {
 
     LOGIN_POST(HttpMethod.POST, "/login") {
         @Override
-        public void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
+        public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getPostContent());
             final String account = userMap.get("account");
             final String password = userMap.get("password");
@@ -95,21 +95,21 @@ public enum HandlerMethod {
         }
     };
 
-    private static final Logger log = LoggerFactory.getLogger(HandlerMethod.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiHandlerMethod.class);
 
     private String httpMethod;
     private String uri;
 
-    HandlerMethod(final String httpMethod, final String uri) {
+    ApiHandlerMethod(final String httpMethod, final String uri) {
         this.httpMethod = httpMethod;
         this.uri = uri;
     }
 
-    public abstract void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter);
+    public abstract void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter);
 
-    public static HandlerMethod find(final HttpRequest httpRequest) {
+    public static ApiHandlerMethod find(final HttpRequest httpRequest) {
         return stream(values())
-                .filter(handlerMethod -> httpRequest.isSame(handlerMethod.httpMethod, handlerMethod.uri))
+                .filter(apiHandlerMethod -> httpRequest.isSame(apiHandlerMethod.httpMethod, apiHandlerMethod.uri))
                 .findAny()
                 .orElse(null);
     }

@@ -26,24 +26,8 @@ public class HttpRequest {
         uri = split[1];
         headers = new Headers(reader);
         if (HttpMethod.POST.equalsIgnoreCase(httpMethod)) {
-//            postContent = findPostContent(httpRequestStringLines);
-//            postContent = headers[headers.length - 1].replaceAll("\\s+", "");
             postContent = headers.findPostContent();
         }
-    }
-
-    /**
-     * TODO 아래의 내용을 파싱해야함
-     * @   %40
-     * !   %21
-     */
-    private String findPostContent(final String[] httpRequestStringLines) {
-        return Arrays.stream(httpRequestStringLines)
-                .filter(it -> it.contains("JSESSIONID"))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Not found JSESSIONID "))
-                .split("\\s+")
-                [1];
     }
 
     public String getHttpMethod() {

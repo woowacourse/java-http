@@ -2,20 +2,21 @@ package org.apache.coyote.support;
 
 import static support.IoUtils.writeAndFlush;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import org.apache.constant.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import support.IoUtils;
 
-public class Router {
+public enum StaticHandlerMethod {
 
-    private static final Logger log = LoggerFactory.getLogger(Router.class);
+    INSTANCE;
+
+    private static final Logger log = LoggerFactory.getLogger(StaticHandlerMethod.class);
 
     private class FileDto {
 
+        private static final String HTML_EXTENSION = "html";
         public String extension;
         public String fileName;
 
@@ -26,30 +27,12 @@ public class Router {
                 extension = fileNameSplit[fileNameSplit.length - 1];
                 return;
             }  // /index
-            extension = "html";
+            extension = HTML_EXTENSION;
             fileName += "." + extension;
         }
     }
 
-    public void route(final HttpRequest httpRequest,
-                      final BufferedReader bufferedReader,
-                      final BufferedWriter bufferedWriter) throws IOException {
-        // 방어 코드: 공백의 문자열이 들어오는 현상
-        if (httpRequest.isEmpty()) {
-            log.info("isEmpty = {}", httpRequest);
-            return;
-        }
-        HandlerMethod handlerMethod = HandlerMethod.find(httpRequest);
-        if (handlerMethod == null) {
-            log.info("View Request = {}", httpRequest);
-            routeForStaticResource(httpRequest, bufferedWriter);
-            return;
-        }
-        log.info("API Request = {}", httpRequest);
-        handlerMethod.service(httpRequest, bufferedWriter);
-    }
-
-    private void routeForStaticResource(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
+    public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
         final FileDto dto = new FileDto(httpRequest.getUri());
         final String responseBody = IoUtils.readLines(dto.fileName);
         final String contentType = getContentType(dto.extension);

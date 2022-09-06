@@ -8,8 +8,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.support.ApiHandlerMethod;
 import org.apache.coyote.support.HttpRequest;
-import org.apache.coyote.support.Router;
+import org.apache.coyote.support.StaticHandlerMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +19,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private Socket connection;
-    private Router router;
 
     public Http11Processor() {
     }
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.router = new Router();
     }
 
     @Override
@@ -42,9 +41,28 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
-            router.route(httpRequest, bufferedReader, bufferedWriter);
+            if (route(bufferedWriter, httpRequest)) {
+                return;
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean route(final BufferedWriter bufferedWriter, final HttpRequest httpRequest) {
+        if (httpRequest.isEmpty()) {
+            log.info("isEmpty = {}", httpRequest);
+            return true;
+        }
+        ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(httpRequest);
+        if (apiHandlerMethod != null) {
+            log.info("API Request = {}", httpRequest);
+            apiHandlerMethod.handle(httpRequest, bufferedWriter);
+            return true;
+        }
+        log.info("View Request = {}", httpRequest);
+        StaticHandlerMethod.INSTANCE.handle(httpRequest, bufferedWriter);
+        return false;
     }
 }

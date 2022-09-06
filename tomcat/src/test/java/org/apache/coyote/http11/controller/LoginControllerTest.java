@@ -14,6 +14,8 @@ import support.BufferedReaderFactory;
 
 class LoginControllerTest {
 
+    private static final LoginController CONTROLLER = new LoginController();
+
     @Test
     void page() {
         String httpRequest = String.join("\r\n",
@@ -23,10 +25,9 @@ class LoginControllerTest {
                 "",
                 "");
 
-        Controller controller = new LoginController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -48,10 +49,9 @@ class LoginControllerTest {
                 "",
                 "");
 
-        Controller controller = new LoginController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -70,10 +70,9 @@ class LoginControllerTest {
                 "",
                 "");
 
-        Controller controller = new LoginController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -92,10 +91,9 @@ class LoginControllerTest {
                 "",
                 "");
 
-        Controller controller = new LoginController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())

@@ -21,10 +21,13 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader bufferedReader) {
         try {
+            RequestLine requestLine = RequestLine.from(bufferedReader);
+            Headers headers = Headers.from(bufferedReader);
+            MessageBody messageBody = MessageBody.from(bufferedReader, headers);
             return new HttpRequest(
-                    RequestLine.from(bufferedReader),
-                    Headers.from(bufferedReader),
-                    MessageBody.from(bufferedReader));
+                    requestLine,
+                    headers,
+                    messageBody);
         } catch (IOException e) {
             throw new IllegalArgumentException("HttpRequest creation failed.");
         }

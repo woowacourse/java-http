@@ -15,7 +15,10 @@ class RequestMappingTest {
         return Stream.of(
                 Arguments.of("/", HomeController.class),
                 Arguments.of("/index.html", ResourceController.class),
-                Arguments.of("/login", LoginController.class)
+                Arguments.of("/login", LoginController.class),
+                Arguments.of("/login?account=gugu&password=password", LoginController.class),
+                Arguments.of("/register", RegisterController.class),
+                Arguments.of("/register", RegisterController.class)
         );
     }
 

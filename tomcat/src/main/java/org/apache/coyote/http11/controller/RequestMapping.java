@@ -11,6 +11,7 @@ public class RequestMapping {
     static {
         controllers.put("/", new HomeController());
         controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     public Controller getController(final HttpRequest httpRequest) {

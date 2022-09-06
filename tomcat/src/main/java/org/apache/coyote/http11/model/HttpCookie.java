@@ -33,4 +33,8 @@ public class HttpCookie {
     public String getValue(String key) {
         return values.get(key);
     }
+
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
 }

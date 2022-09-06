@@ -72,4 +72,8 @@ public class HttpRequest {
     public String getCookieValue(String key) {
         return requestHeader.getCookieValue(key);
     }
+
+    public boolean hasSession() {
+        return requestHeader.hasCookie();
+    }
 }

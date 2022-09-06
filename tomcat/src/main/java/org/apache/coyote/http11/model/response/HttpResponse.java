@@ -2,7 +2,6 @@ package org.apache.coyote.http11.model.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.coyote.http11.model.HttpHeaderType;
 import org.apache.coyote.http11.model.HttpStatus;
@@ -46,8 +45,8 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder addCookie(UUID cookie) {
-            this.headers.put(HttpHeaderType.SET_COOKIE, "JSESSIONID=" + cookie.toString());
+        public Builder addCookie(String cookie) {
+            this.headers.put(HttpHeaderType.SET_COOKIE, "JSESSIONID=" + cookie);
             return this;
         }
 

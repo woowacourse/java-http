@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpHeaderType;
 import org.apache.coyote.http11.model.HttpStatus;
@@ -42,6 +44,28 @@ class LoginHandlerTest {
         );
     }
 
+    @DisplayName("GET /login 경로로 요청시 Session 정보가 있다면 302 Found와 함께 index 페이지를 반환한다.")
+    @Test
+    void performGetMethodWithSession() throws IOException {
+        String session = login();
+        String request = "GET /login HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Connection: keep-alive\n"
+                + "Cookie: " + session + "\n";
+
+        HttpRequest httpRequest = HttpRequestGenerator.generate(request);
+        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/index.html")
+        );
+    }
+
     @DisplayName("Put /login 경로로 로그인이 성공하면 302 Found와 함께 Index 페이지를 반환한다.")
     @Test
     void performPutMethod() throws IOException {
@@ -65,6 +89,17 @@ class LoginHandlerTest {
         );
     }
 
+    @DisplayName("Put /login 경로로 로그인이 성공하면 SessionManager에 Session을 저장한다.")
+    @Test
+    void performPutMethodAndSaveSession() throws IOException {
+        String jSessionId = login();
+        String sessionId = jSessionId.substring(11);
+        SessionManager sessionManager = new SessionManager();
+        Session session = sessionManager.findSession(sessionId);
+
+        assertThat(session).isNotNull();
+    }
+
     @DisplayName("Put /login 경로로 로그인이 실패하면 302 Found와 함께 401 페이지를 반환한다.")
     @Test
     void performPutMethodWithWrongPassword() throws IOException {
@@ -85,5 +120,20 @@ class LoginHandlerTest {
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/401.html")
         );
+    }
+
+    String login() throws IOException {
+        String request = "POST /login HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Connection: keep-alive\n"
+                + "Content-Length: 29\n"
+                + "Content-Type: application/x-www-form-urlencoded\n"
+                + "Accept: */*\n"
+                + "\n"
+                + "account=rex&password=password\n";
+
+        HttpRequest httpRequest = HttpRequestGenerator.generate(request);
+        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        return httpResponse.getHeader("Set-Cookie");
     }
 }

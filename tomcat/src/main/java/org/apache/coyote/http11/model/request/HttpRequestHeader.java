@@ -56,11 +56,11 @@ public class HttpRequestHeader {
         return !values.containsKey(key);
     }
 
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
-    }
-
     public String getCookieValue(String key) {
         return httpCookie.getValue(key);
+    }
+
+    public boolean hasCookie() {
+        return !httpCookie.isEmpty();
     }
 }

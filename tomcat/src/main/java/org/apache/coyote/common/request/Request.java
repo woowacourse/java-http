@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.common.Header;
+import org.apache.coyote.common.header.Header;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.request.parser.UrlParser;

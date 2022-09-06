@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.common.header;
 
 public enum Header {
 

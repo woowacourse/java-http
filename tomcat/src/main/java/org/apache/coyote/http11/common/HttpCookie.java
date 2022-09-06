@@ -27,7 +27,10 @@ public class HttpCookie {
         String[] cookies = input.split(COOKIE_DELIMITER);
         for (String cookie : cookies) {
             String[] parsedCookie = cookie.split(COOKIE_MAPPER);
-            httpCookie.put(parsedCookie[0], parsedCookie[1]);
+            String cookieKey = parsedCookie[0];
+            String cookieValue = parsedCookie[1];
+
+            httpCookie.put(cookieKey, cookieValue);
         }
 
         return new HttpCookie(httpCookie);

@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             HttpRequest request = HttpRequest.from(bufferedReader);
-            HttpResponse response = processTheRequest(request);
+            HttpResponse response = processRequest(request);
 
             outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse processTheRequest(HttpRequest request) {
+    private HttpResponse processRequest(HttpRequest request) {
         Optional<Controller> controller = Controllers.findController(request.getUri());
 
         if (controller.isEmpty()) {

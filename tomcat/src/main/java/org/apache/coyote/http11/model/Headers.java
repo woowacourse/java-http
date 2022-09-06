@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 public class Headers {
 
+    public static final String KEY_VALUE_SEPARATOR = ": ";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
     private final Map<String, String> headers;
     private final HttpCookie cookie;
 
@@ -34,8 +37,8 @@ public class Headers {
 
     private static Map<String, String> extract(final List<String> headerLines) {
         return headerLines.stream()
-                .map(line -> line.split(": "))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+                .map(line -> line.split(KEY_VALUE_SEPARATOR))
+                .collect(Collectors.toMap(it -> it[KEY_INDEX], it -> it[VALUE_INDEX]));
     }
 
     private static boolean hasCookie(final Map<String, String> headers) {
@@ -57,7 +60,7 @@ public class Headers {
     public String getString() {
         List<String> headerLines = headers.entrySet()
                 .stream()
-                .map(keyValue -> String.join(": ",
+                .map(keyValue -> String.join(KEY_VALUE_SEPARATOR,
                         keyValue.getKey(),
                         keyValue.getValue() + " ")
                 ).collect(Collectors.toList());

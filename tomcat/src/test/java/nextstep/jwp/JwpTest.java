@@ -94,21 +94,4 @@ class JwpTest {
 
         assertThat(sessionId).isNotNull();
     }
-
-    @DisplayName("로그인 시 쿠키에 세션 id가 있다면, 응답 헤더에 Set-Cookie 설정하지 않음")
-    @Test
-    void login_sessionIdInRequestCookie_doesNotSetHeaderCookie() {
-        final var request = HttpRequest.from(
-                "POST /login HTTP/1.1 ",
-                List.of("Host: localhost:8080 ",
-                        "Connection: keep-alive ",
-                        "Cookie: cookie=choco; JSESSIONID=uuidString; dog=woff")
-        );
-        request.addBody("account=gugu&password=password");
-
-        final var response = RequestHandler.process(request);
-        final var sessionId = response.getHeaderValue(Header.SET_COOKIE);
-
-        assertThat(sessionId).isNull();
-    }
 }

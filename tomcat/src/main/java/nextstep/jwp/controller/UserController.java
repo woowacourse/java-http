@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,6 +6,9 @@ import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import nextstep.jwp.model.User;
+import nextstep.jwp.service.LoginRequest;
+import nextstep.jwp.service.RegisterRequest;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.Session;
@@ -23,9 +26,13 @@ public class UserController {
 
     public static HttpResponse login(final HttpRequest request) throws IOException {
         if (request.getMethod() == Method.POST) {
-            return tryLogin(request);
+            return postLogin(request);
         }
-        if (request.getCookie().hasKey(SESSION_ID)) {
+        return getLogin(request);
+    }
+
+    private static HttpResponse getLogin(final HttpRequest request) throws IOException {
+        if (loginAlready(request)) {
             String sessionId = request.getCookie().getValue(SESSION_ID);
             if (Sessions.find(sessionId).isPresent()) {
                 HttpResponse response = HttpResponse.of(Status.FOUND);
@@ -33,26 +40,24 @@ public class UserController {
                 return response;
             }
         }
-        return getLoginTemplate();
-    }
-
-    private static HttpResponse getLoginTemplate() throws IOException {
         HttpResponse response = HttpResponse.of(Status.OK);
         response.addResource(findResource("/login.html"));
         return response;
     }
 
-    private static HttpResponse tryLogin(final HttpRequest request) throws IOException {
+    private static boolean loginAlready(final HttpRequest request) {
+        return request.getCookie().hasKey(SESSION_ID);
+    }
+
+    private static HttpResponse postLogin(final HttpRequest request) throws IOException {
         try {
             User user = userService.login(LoginRequest.of(request.getBody()));
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
 
-            if (!request.getCookie().hasKey(SESSION_ID)) {
-                UUID uuid = UUID.randomUUID();
-                response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + uuid);
-                Sessions.addNew(uuid.toString(), new Session("user", user));
-            }
+            UUID uuid = UUID.randomUUID();
+            response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + uuid);
+            Sessions.addNew(uuid.toString(), new Session("user", user));
 
             return response;
         } catch (IllegalArgumentException | NoSuchElementException e) {
@@ -64,18 +69,18 @@ public class UserController {
 
     public static HttpResponse register(final HttpRequest request) throws IOException {
         if (request.getMethod() == Method.POST) {
-            return registerNewUser(request);
+            return postRegister(request);
         }
-        return getRegisterTemplate();
+        return getRegister();
     }
 
-    private static HttpResponse getRegisterTemplate() throws IOException {
+    private static HttpResponse getRegister() throws IOException {
         HttpResponse response = HttpResponse.of(Status.OK);
         response.addResource(findResource("/register.html"));
         return response;
     }
 
-    private static HttpResponse registerNewUser(final HttpRequest request) {
+    private static HttpResponse postRegister(final HttpRequest request) {
         RegisterRequest registerRequest = RegisterRequest.of(request.getBody());
         userService.register(registerRequest);
         HttpResponse response = HttpResponse.of(Status.FOUND);

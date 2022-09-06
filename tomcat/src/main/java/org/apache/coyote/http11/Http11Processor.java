@@ -54,13 +54,17 @@ public class Http11Processor implements Runnable, Processor {
         HttpRequest request = HttpRequest.from(requestLine, headerLines);
 
         if (request.getMethod() == Method.POST) {
-            int contentLength = Integer.parseInt(request.getHeaderValue(Header.CONTENT_LENGTH));
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            String requestBody = new String(buffer);
-            request.addBody(requestBody);
+            readBody(reader, request);
         }
         return request;
+    }
+
+    private void readBody(final BufferedReader reader, final HttpRequest request) throws IOException {
+        int contentLength = Integer.parseInt(request.getHeaderValue(Header.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        request.addBody(requestBody);
     }
 
     private List<String> readHeaders(final BufferedReader reader) throws IOException {

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.NoSuchElementException;
+import nextstep.jwp.service.LoginRequest;
+import nextstep.jwp.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

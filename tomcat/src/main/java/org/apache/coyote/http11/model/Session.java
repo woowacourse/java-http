@@ -13,10 +13,6 @@ public class Session {
         this.session.put(key, object);
     }
 
-    public void setAttribute(final String key, final Object object) {
-        this.session.put(key, object);
-    }
-
     public Optional<Object> get(final String key) {
         if (session.containsKey(key)) {
             return Optional.of(session.get(key));

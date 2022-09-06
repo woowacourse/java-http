@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +29,7 @@ public class MainController {
         return response;
     }
 
-    private static Resource findResource(String url) throws IOException {
+    private static Resource findResource(final String url) throws IOException {
         Path path = Path.of(MainController.class.getResource("/static" + url).getPath());
         String body = Files.readString(path);
 

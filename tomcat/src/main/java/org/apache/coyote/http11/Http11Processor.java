@@ -7,11 +7,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.application.AuthService;
+import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.exception.InvalidLoginFormatException;
 import nextstep.jwp.exception.InvalidPasswordException;
+import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.exception.QueryStringFormatException;
 import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.support.HttpRequestParser;
 import org.apache.coyote.support.ResourcesUtil;
@@ -24,7 +27,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LANDING_PAGE_URL = "/";
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";
+    public static final String REGISTER_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
+    public static final String BAD_REQUEST_PATH = "/400.html";
     public static final String UNAUTHORIZED_PATH = "/401.html";
     public static final String NOT_FOUND_PATH = "/404.html";
     public static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
@@ -67,6 +72,9 @@ public class Http11Processor implements Runnable, Processor {
         } catch (ResourceNotFoundException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(NOT_FOUND_PATH);
+        } catch (QueryStringFormatException | InvalidSignUpFormatException | DuplicateAccountException e) {
+            log.error(e.getMessage(), e);
+            return toFoundResponse(BAD_REQUEST_PATH);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(INTERNAL_SERVER_ERROR_PATH);
@@ -104,6 +112,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String accessPostMethod(final String url, final String requestBody) {
+        if (url.equals(REGISTER_PATH)) {
+            String location = authService.signUp(requestBody);
+            return toFoundResponse(location);
+        }
         if (url.equals(LOGIN_PATH)) {
             String location = authService.login(requestBody);
             return toFoundResponse(location);

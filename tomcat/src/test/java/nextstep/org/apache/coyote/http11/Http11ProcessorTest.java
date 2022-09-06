@@ -138,6 +138,30 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 회원가입_페이지_렌더링() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        assert resource != null;
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).contains(expectedResponseBody);
+    }
+
+    @Test
     void 로그인_페이지_렌더링() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
@@ -159,6 +183,84 @@ class Http11ProcessorTest {
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).contains(expectedResponseBody);
+    }
+
+    @Test
+    void 회원가입에_성공하면_index_페이지로_redirect한다() {
+        String requestBody = "account=ohzzi&password=password&email=ohzzi@woowahan.com";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /index.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 회원가입_시_중복회원이_있으면_400_페이지로_redirect한다() {
+        String requestBody = "account=gugu&password=password&email=hkkang@woowahan.com";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /400.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 회원가입_시_정보_누락이_있으면_400_페이지로_redirect한다() {
+        String requestBody = "query=invalid";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /400.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test

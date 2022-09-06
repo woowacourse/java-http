@@ -47,7 +47,6 @@ public class HttpRequestFactory {
             headers.put(headerContents[REQUEST_HEADER_FIELD_INDEX], headerContents[REQUEST_HEADER_VALUE_INDEX]);
             line = reader.readLine();
         }
-
         return new RequestHeaders(headers);
     }
 

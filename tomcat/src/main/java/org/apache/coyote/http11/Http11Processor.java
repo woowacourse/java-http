@@ -96,22 +96,12 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/login") && httpRequest.hasRequestBody()) {
             return getLoginResponseWithRequestBody(httpRequest);
         }
+        if (path.equals("/register") && httpRequest.hasRequestBody()) {
+            return getRegisterResponseWithRequestBody(httpRequest);
+        }
         String responseBody = getStaticResourceResponse(path + ".html");
         return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK,
                 ContentType.TEXT_HTML_CHARSET_UTF_8, responseBody);
-    }
-
-    private HttpResponse getLoginResponseWithRequestBody(final HttpRequest httpRequest) {
-        RequestBody requestBody = httpRequest.getRequestBody();
-        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
-        if (user.isPresent()) {
-            if (user.get().checkPassword(requestBody.getValue("password"))) {
-                return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND,
-                        ContentType.TEXT_HTML_CHARSET_UTF_8,
-                        getStaticResourceResponse("/index.html"));
-            }
-        }
-        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND, "/401.html");
     }
 
     private HttpResponse getLoginResponseWithQueryParams(HttpRequest httpRequest) {
@@ -125,5 +115,29 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND, "/401.html");
+    }
+
+    private HttpResponse getLoginResponseWithRequestBody(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
+        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
+        if (user.isPresent()) {
+            if (user.get().checkPassword(requestBody.getValue("password"))) {
+                return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND,
+                        ContentType.TEXT_HTML_CHARSET_UTF_8,
+                        getStaticResourceResponse("/index.html"));
+            }
+        }
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND, "/401.html");
+    }
+
+    private HttpResponse getRegisterResponseWithRequestBody(HttpRequest httpRequest) {
+        String account = httpRequest.getRequestBody().getValue("account");
+        String password = httpRequest.getRequestBody().getValue("password");
+        String email = httpRequest.getRequestBody().getValue("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND,
+                ContentType.TEXT_HTML_CHARSET_UTF_8,
+                getStaticResourceResponse("/index.html"));
     }
 }

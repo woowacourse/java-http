@@ -15,6 +15,9 @@ public class StringSplitter {
 
     public static String getLast(final String delimiter, final String target) {
         final List<String> units = split(delimiter, target);
+        if (units.isEmpty()) {
+            return target;
+        }
         return units.get(units.size() - 1);
     }
 

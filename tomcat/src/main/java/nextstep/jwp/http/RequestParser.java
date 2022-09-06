@@ -7,8 +7,6 @@ import org.apache.http.HttpMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class RequestParser {
@@ -19,7 +17,7 @@ public class RequestParser {
     public static Request parse(final BufferedReader bufferedReader) {
         final RequestInfo requestInfo = extractRequestInfo(bufferedReader);
         final Headers headers = extractHeaders(bufferedReader);
-        final String body = extractBody(bufferedReader);
+        final String body = extractBody(bufferedReader, Integer.parseInt(headers.find(HttpHeader.CONTENT_LENGTH)));
         return new Request(requestInfo, headers, body);
     }
 
@@ -59,22 +57,27 @@ public class RequestParser {
         return headers;
     }
 
-    private static String extractBody(final BufferedReader bufferedReader) {
-        final List<String> builder = new ArrayList<>();
-        String line;
-        while (isNotEnd(line = readLine(bufferedReader))) {
-            builder.add(line);
+    private static String readLine(final BufferedReader bufferedReader) {
+        try {
+            return bufferedReader.readLine();
+        } catch (IOException e) {
+            throw new FileAccessException();
         }
-        return String.join("\r\n", builder);
     }
 
     private static boolean isNotEnd(final String line) {
         return line != null && !line.isBlank();
     }
 
-    private static String readLine(final BufferedReader bufferedReader) {
+    private static String extractBody(final BufferedReader bufferedReader, final int contentLength) {
+        final char[] body = new char[contentLength];
+        readWithOffset(bufferedReader, body, contentLength);
+        return new String(body);
+    }
+
+    private static void readWithOffset(final BufferedReader bufferedReader, final char[] body, final int contentLength) {
         try {
-            return bufferedReader.readLine();
+            bufferedReader.read(body, 0, contentLength);
         } catch (IOException e) {
             throw new FileAccessException();
         }

@@ -16,9 +16,13 @@ public class HttpFixtures {
     }
 
     public static String 요청을_생성한다(final HttpMethod httpMethod, final String uri, final HttpMime contentType, final String body) {
-        final String withoutBody = 요청을_생성한다(httpMethod, uri, contentType);
         return String.join("\r\n",
-                withoutBody,
+                httpMethod.name() + " " + uri + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: " + contentType.getValue() + ",*/*;q=0.1",
+                "Content-Length: " + body.getBytes().length,
+                "",
                 body);
     }
 

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Objects;
-import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
     private static final int DEFAULT_LENGTH = 3;

@@ -5,66 +5,57 @@ import static java.util.stream.Collectors.*;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class QueryParams {
 
-    private final Map<String, List<String>> queryParams;
+    private final Map<String, String> queryParams = new HashMap<>();
 
     public QueryParams(URI requestUri) {
-        this.queryParams = parseQueryParams(requestUri);
+        parseQueryParams(requestUri);
     }
 
-    private Map<String, List<String>> parseQueryParams(URI requestUri) {
+    private void parseQueryParams(URI requestUri) {
         if (Objects.isNull(requestUri)) {
-            return Collections.emptyMap();
+            return;
         }
 
-        String query = requestUri.getQuery();
+        final String query = requestUri.getQuery();
         if (Objects.isNull(query) || query.isEmpty()) {
-            return Collections.emptyMap();
+            return;
         }
 
-        return Arrays.stream(query.split("&"))
-            .map(this::splitQueryParameters)
-            .collect(Collectors.groupingBy(
-                AbstractMap.SimpleImmutableEntry::getKey, HashMap::new, mapping(Map.Entry::getValue, toList())));
+        splitQueryParameters(query);
     }
 
-    private AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameters(String query) {
-        int index = query.indexOf("=");
-        String key = query;
-        String value = "";
-        if (index > 0) {
-            key = key.substring(0, index);
+    private void splitQueryParameters(String query) {
+        final String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
+
+        final List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
+            .map(it -> it.split("=")).collect(toList());
+
+        for (String[] parameter : splitQuery) {
+            queryParams.put(parameter[0], parameter[1]);
+        }
+    }
+
+    public void addQuery(String query) {
+        if (query.isEmpty()) {
+            return;
         }
 
-        if (index > 0 && query.length() > index + 1) {
-            value = query.substring(index + 1);
-        }
-
-        return new AbstractMap.SimpleImmutableEntry<>(
-            URLDecoder.decode(key, StandardCharsets.UTF_8),
-            URLDecoder.decode(value, StandardCharsets.UTF_8)
-        );
+        splitQueryParameters(query);
     }
 
     public boolean hasQuery() {
         return !queryParams.isEmpty();
     }
 
-    public boolean containsKey(String queryKey) {
-        return queryParams.containsKey(queryKey);
-    }
-
     public String getQueryValue(String queryKey) {
-        return queryParams.get(queryKey).get(0);
+        return queryParams.get(queryKey);
     }
 }

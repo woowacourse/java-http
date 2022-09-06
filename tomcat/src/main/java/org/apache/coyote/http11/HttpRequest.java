@@ -2,10 +2,8 @@ package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,54 +14,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
 
+    static final String HTTP_METHOD = "HTTP METHOD";
     private static final String REQUEST_URI = "REQUEST URI";
-    private static final String HTTP_METHOD = "HTTP METHOD";
     private static final String HTTP_VERSION = "HTTP VERSION";
+    private static final String HEADER_DELIMITER = ":";
+    private static final String REQUEST_LINE_DELIMITER = " ";
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        this.headers = parseHeaders(inputStream);
+        final String messageBody = parseHeaders(inputStream);
         this.queryParams = new QueryParams(getUri());
+        this.queryParams.addQuery(messageBody);
     }
 
-    private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    private String parseHeaders(InputStream inputStream) {
+        final Reader reader = new Reader(inputStream);
 
-        final Map<String, String> requestHeaders = new HashMap<>();
-        String line = bufferedReader.readLine();
-
-        try {
-            while (!"".equals(line)) {
-                if (Objects.isNull(line)) {
-                    return requestHeaders;
-                }
-                putHeader(requestHeaders, line);
-                line = bufferedReader.readLine();
-            }
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("invalid HTTP request received", e.getCause());
+        String line;
+        while (!(line = reader.readLine()).isEmpty()) {
+            putHeader(line);
         }
-        return requestHeaders;
+
+        if (!(containsHeader("Content-Type") &&
+            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
+        return reader.readByLength(contentLength);
     }
 
-    private void putHeader(Map<String, String> requestHeaders, String requestLine) {
-        if (!requestHeaders.isEmpty()) {
-            List<String> headerAndValue = parseRequestLine(requestLine, ":");
-            requestHeaders.put(headerAndValue.get(0), headerAndValue.get(1));
+    private void putHeader(String requestLine) {
+        if (!headers.isEmpty()) {
+            final List<String> headerAndValue = parseRequestLine(requestLine, HEADER_DELIMITER);
+            headers.put(headerAndValue.get(0), headerAndValue.get(1));
             return;
         }
-        List<String> startLine = parseRequestLine(requestLine, " ");
-        requestHeaders.put(HTTP_METHOD, startLine.get(0));
-        requestHeaders.put(REQUEST_URI, startLine.get(1));
-        requestHeaders.put(HTTP_VERSION, startLine.get(2));
+        final List<String> startLine = parseRequestLine(requestLine, REQUEST_LINE_DELIMITER);
+        headers.put(HTTP_METHOD, startLine.get(0));
+        headers.put(REQUEST_URI, startLine.get(1));
+        headers.put(HTTP_VERSION, startLine.get(2));
     }
 
     private List<String> parseRequestLine(String requestLine, String delimiter) {
@@ -80,17 +76,21 @@ public class HttpRequest {
         return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
     }
 
-    public URL getUrl() throws MalformedURLException, URISyntaxException {
-        final URI requestUri = getUri();
+    public URL getUrl() {
+        try {
+            final URI requestUri = getUri();
 
-        if (requestUri.getPath().equals("/")) {
-            return requestUri.toURL();
-        }
-        if (hasQuery()) {
-            return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
-        }
+            if (requestUri.getPath().equals("/")) {
+                return requestUri.toURL();
+            }
+            if (hasQuery()) {
+                return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
+            }
 
-        return addExtensionToPath(requestUri);
+            return addExtensionToPath(requestUri);
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid Uri");
+        }
     }
 
     private String removeQueryStrings(URI requestUri) {
@@ -103,7 +103,7 @@ public class HttpRequest {
             requestUri = new URI(requestUri + ".html");
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
+        final URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
         if (Objects.isNull(resource)) {
             return requestUri.toURL();
         }
@@ -124,5 +124,21 @@ public class HttpRequest {
 
     public String getHttpVersion() {
         return getHeaderValue(HTTP_VERSION);
+    }
+
+    public Session getSession() {
+        validateJSESSIONIDExist();
+        final HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
+        return new Session(cookie.getCookieValue("JSESSIONID"));
+    }
+
+    private void validateJSESSIONIDExist() {
+        if (!hasSession()) {
+            throw new IllegalArgumentException("JSESSIONID Not Found");
+        }
+    }
+
+    public boolean hasSession() {
+        return containsHeader("Cookie") && getHeaderValue("Cookie").contains("JSESSIONID");
     }
 }

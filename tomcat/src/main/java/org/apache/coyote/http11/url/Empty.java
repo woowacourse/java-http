@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.url;
 
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ public class Empty extends Url {
     private static final Logger log = LoggerFactory.getLogger(Empty.class);
 
     public Empty(final String url) {
-        super(url, "GET");
+        super(url, HttpMethod.GET);
     }
 
     @Override

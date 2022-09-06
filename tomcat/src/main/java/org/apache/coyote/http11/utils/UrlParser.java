@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.coyote.http11.dto.JoinQueryDto;
 import org.apache.coyote.http11.dto.LoginQueryDataDto;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,9 @@ public class UrlParser {
         return dataMap[index].split(DATA_STANDARD)[VALUE_INDEX];
     }
 
-    public static String extractMethod(final String httpRequest) {
-        return httpRequest.split(" ")[0];
+    public static HttpMethod extractMethod(final String httpRequest) {
+        String method = httpRequest.split(" ")[0];
+        return HttpMethod.valueOf(method);
     }
 
     public static String extractUri(final String httpRequest) {

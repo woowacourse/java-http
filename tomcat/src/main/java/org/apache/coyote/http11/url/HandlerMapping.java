@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.url;
 
+import org.apache.coyote.http11.request.HttpMethod;
+
 public class HandlerMapping {
 
-    public static Url from(String uri, String httpMethod) {
+    public static Url from(String uri, HttpMethod httpMethod) {
         if (isHomeUrl(uri)) {
             return new HomePage(uri, httpMethod);
         }

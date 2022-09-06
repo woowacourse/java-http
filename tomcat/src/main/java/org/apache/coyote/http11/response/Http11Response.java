@@ -19,7 +19,7 @@ public class Http11Response {
 
     public static Http11Response extract(final Url url, final HttpHeaders httpHeaders,
                                          final String requestBody) throws IOException {
-        if (url.getHttpMethod().equals(HttpMethod.GET.name())) {
+        if (url.getHttpMethod().equals(HttpMethod.GET)) {
             return url.getResponse(httpHeaders);
         }
         return url.postResponse(httpHeaders, requestBody);

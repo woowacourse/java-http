@@ -9,6 +9,7 @@ import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.url.HandlerMapping;
@@ -41,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             String request = bufferedReader.readLine();
 
             String uri = UrlParser.extractUri(request);
-            String httpMethod = UrlParser.extractMethod(request);
+            HttpMethod httpMethod = UrlParser.extractMethod(request);
             HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
 
             Url url = HandlerMapping.from(uri, httpMethod);
@@ -61,26 +62,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, Url url) throws IOException {
         String requestBody="";
-        if (url.getHttpMethod().equals("POST")) {
+        if (url.getHttpMethod().equals(HttpMethod.POST)) {
             int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             requestBody = new String(buffer);
         }
-        log.info("request : {}", requestBody);
+        log.info("requestBody : {}", requestBody);
         return requestBody;
-    }
-
-    private String getUri(final BufferedReader bufferedReader) {
-        String uri = "";
-        try {
-            uri = bufferedReader.readLine()
-                    .split(" ")[1]
-                    .substring(1);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return uri;
     }
 
     private String createResponse(HttpStatus httpStatus, String contentType, String responseBody) {

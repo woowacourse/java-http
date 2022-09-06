@@ -5,6 +5,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.dto.LoginQueryDataDto;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.utils.IOUtils;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class Login extends Url {
     private static final Logger log = LoggerFactory.getLogger(Login.class);
 
-    public Login(final String url, String httpMethod) {
+    public Login(final String url, HttpMethod httpMethod) {
         super(url, httpMethod);
     }
 

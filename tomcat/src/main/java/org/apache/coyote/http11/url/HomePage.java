@@ -1,13 +1,14 @@
 package org.apache.coyote.http11.url;
 
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.utils.IOUtils;
 
 public class HomePage extends Url {
 
-    public HomePage(final String url, final String httpMethod) {
+    public HomePage(final String url, final HttpMethod httpMethod) {
         super(url, httpMethod);
     }
 

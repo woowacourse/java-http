@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.catalina.session.Session;
 
@@ -28,12 +27,12 @@ public class HttpRequest {
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        final String messageBody = parseHeaders(inputStream);
+        final String messageBody = parseRequest(inputStream);
         this.queryParams = new QueryParams(getUri());
         this.queryParams.addQuery(messageBody);
     }
 
-    private String parseHeaders(InputStream inputStream) {
+    private String parseRequest(InputStream inputStream) {
         final Reader reader = new Reader(inputStream);
 
         String line;
@@ -41,13 +40,12 @@ public class HttpRequest {
             putHeader(line);
         }
 
-        if (!(containsHeader("Content-Type") &&
-            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
-            return "";
+        if (isContentTypeUrlEncoded()) {
+            final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
+            return reader.readByLength(contentLength);
         }
 
-        final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
-        return reader.readByLength(contentLength);
+        return "";
     }
 
     private void putHeader(String requestLine) {
@@ -68,6 +66,11 @@ public class HttpRequest {
             .collect(toList());
     }
 
+    private boolean isContentTypeUrlEncoded() {
+        return containsHeader("Content-Type") &&
+            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded");
+    }
+
     public String getHeaderValue(String headerName) {
         return headers.get(headerName);
     }
@@ -83,8 +86,9 @@ public class HttpRequest {
             if (requestUri.getPath().equals("/")) {
                 return requestUri.toURL();
             }
+
             if (hasQuery()) {
-                return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
+                return addExtensionToPath(new URI(requestUri.getPath()));
             }
 
             return addExtensionToPath(requestUri);
@@ -93,18 +97,13 @@ public class HttpRequest {
         }
     }
 
-    private String removeQueryStrings(URI requestUri) {
-        return requestUri.toString()
-            .replace("?" + requestUri.getQuery(), "");
-    }
-
     private URL addExtensionToPath(URI requestUri) throws MalformedURLException, URISyntaxException {
         if (!requestUri.getPath().contains(".")) {
             requestUri = new URI(requestUri + ".html");
         }
 
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
-        if (Objects.isNull(resource)) {
+        if (resource == null) {
             return requestUri.toURL();
         }
         return resource;

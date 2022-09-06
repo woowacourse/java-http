@@ -19,7 +19,7 @@ class Http11ProcessorTest {
 
     @BeforeAll
     static void config() {
-        WebConfig.addControllers();
+        new WebConfig().init();
     }
 
     @DisplayName("서버에 접속하면 Hello world를 응답한다.")

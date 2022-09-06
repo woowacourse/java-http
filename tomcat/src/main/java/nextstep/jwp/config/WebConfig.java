@@ -1,17 +1,24 @@
 package nextstep.jwp.config;
 
+import nextstep.jwp.controller.ErrorHandler;
 import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
-import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.Config;
 
-public class WebConfig {
+public class WebConfig extends Config {
 
-    public static void addControllers() {
-        RequestMapping.addController(new HelloController());
-        RequestMapping.addController(new LoginController());
-        RequestMapping.addController(new ResourceController());
-        RequestMapping.addController(new RegisterController());
+    @Override
+    protected void addControllers() {
+        addController(new HelloController());
+        addController(new LoginController());
+        addController(new ResourceController());
+        addController(new RegisterController());
+    }
+
+    @Override
+    protected void setExceptionHandler() {
+        setExceptionHandler(new ErrorHandler());
     }
 }

@@ -10,7 +10,7 @@ public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
-        WebConfig.addControllers();
+        new WebConfig().init();
         log.info("web server start.");
         final var tomcat = new Tomcat();
         tomcat.start();

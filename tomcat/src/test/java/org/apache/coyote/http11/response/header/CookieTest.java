@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response.header;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,14 +25,16 @@ class CookieTest {
     @DisplayName("쿠키를 헤더포맷으로 반환한다.")
     @Test
     void toHeaderFormat() {
-        Cookie cookie = Cookie.fromResponse("JSESSIONID");
+        String jSessionIdValue = UUID.randomUUID()
+                .toString();
+        Cookie cookie = Cookie.fromResponse("JSESSIONID", jSessionIdValue);
 
         boolean contains = cookie.containsCookieOf("JSESSIONID");
         String headerFormat = cookie.toHeaderFormat();
 
         assertAll(
                 () -> assertThat(contains).isTrue(),
-                () -> assertThat(headerFormat).contains("Set-Cookie: JSESSIONID=")
+                () -> assertThat(headerFormat).contains("Set-Cookie: JSESSIONID=" + jSessionIdValue)
         );
     }
 }

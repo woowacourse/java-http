@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Cookie implements HttpResponseHeader {
@@ -27,10 +26,9 @@ public class Cookie implements HttpResponseHeader {
         this.values = values;
     }
 
-    public static Cookie fromResponse(String cookieName) {
+    public static Cookie fromResponse(String cookieName, String cookieValue) {
         Map<String, String> generated = new ConcurrentHashMap<>();
-        UUID uuid = UUID.randomUUID();
-        generated.put(cookieName, uuid.toString());
+        generated.put(cookieName, cookieValue);
         return new Cookie(generated);
     }
 
@@ -57,5 +55,9 @@ public class Cookie implements HttpResponseHeader {
         return values.keySet()
                 .stream()
                 .anyMatch(name::equals);
+    }
+
+    public String getCookieOf(String cookieName) {
+        return values.get(cookieName);
     }
 }

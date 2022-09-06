@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
+import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -64,5 +67,27 @@ class HtmlResponseGeneratorTest {
                 .contains("200 OK")
                 .contains("Content-Type: text/html;charset=utf-8 ")
                 .contains("Content-Length: 5564");
+    }
+
+    @DisplayName("이미 로그인을 해서 JSESSIONID를 가진 사용자가 다시 로그인 페이지에 접근하면 index.html로 리다이렉트 시킨다.")
+    @Test
+    void generate_RedirectToIndexHtml() throws IOException {
+        User user = new User("chris", "password", "email@google.com");
+        Session session = new Session("user", user);
+        SessionManager.add(session);
+
+        String request = "GET /login HTTP/1.1\n" +
+                "Host: localhost:8080\n" +
+                "Connection: keep-alive\n" +
+                "Cookie: JSESSIONID=" + session.getId() +
+                "";
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpResponse httpResponse = HTML_RESPONSE_GENERATOR.generate(HttpRequest.from(bufferedReader));
+
+        assertThat(httpResponse.getResponse())
+                .contains("302 Found ")
+                .contains("Location: http://localhost:8080/index.html");
     }
 }

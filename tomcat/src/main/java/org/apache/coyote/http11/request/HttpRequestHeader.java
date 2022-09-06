@@ -51,4 +51,8 @@ public class HttpRequestHeader {
     public boolean hasCookieOf(String cookieName) {
         return cookie.containsCookieOf(cookieName);
     }
+
+    public String getCookieOf(String cookieName) {
+        return cookie.getCookieOf(cookieName);
+    }
 }

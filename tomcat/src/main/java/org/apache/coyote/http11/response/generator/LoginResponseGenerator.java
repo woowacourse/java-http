@@ -5,6 +5,8 @@ import static org.apache.coyote.http11.request.HttpMethod.POST;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.Cookie;
@@ -49,7 +51,10 @@ public class LoginResponseGenerator implements ResponseGenerator {
         log.info(user.toString());
 
         if (!httpRequest.hasCookieOf(JSESSION_COOKIE_KEY)) {
-            return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI, Cookie.fromResponse(JSESSION_COOKIE_KEY));
+            Session session = new Session("user", user);
+            SessionManager.add(session);
+            return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI,
+                    Cookie.fromResponse(JSESSION_COOKIE_KEY, session.getId()));
         }
         return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI);
     }

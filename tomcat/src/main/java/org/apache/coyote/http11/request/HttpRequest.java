@@ -78,4 +78,8 @@ public class HttpRequest {
         return formData.getValues()
                 .get(key);
     }
+
+    public String getCookieOf(String cookieName) {
+        return httpRequestHeader.getCookieOf(cookieName);
+    }
 }

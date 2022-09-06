@@ -41,7 +41,7 @@ public class LoginController {
         String account = values.get("account");
         Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
         if (byAccount.isPresent()) {
-            return response("Location: /401.html");
+            return response("Location: /404.html");
         }
         User user = new User(account, values.get("password"), values.get("email"));
 

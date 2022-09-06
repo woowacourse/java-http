@@ -3,14 +3,14 @@ package org.apache.coyote.http11.utils;
 import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.FileGetResponseMaker;
-import org.apache.coyote.http11.LoginGetResponseMaker;
-import org.apache.coyote.http11.LoginPostResponseMaker;
-import org.apache.coyote.http11.RegisterGetResponseMaker;
-import org.apache.coyote.http11.RegisterPostResponseMaker;
-import org.apache.coyote.http11.ResponseMaker;
-import org.apache.coyote.http11.HelloResponseMaker;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.responseGenerator.FileGetResponseMaker;
+import org.apache.coyote.http11.responseGenerator.HelloResponseMaker;
+import org.apache.coyote.http11.responseGenerator.LoginGetResponseMaker;
+import org.apache.coyote.http11.responseGenerator.LoginPostResponseMaker;
+import org.apache.coyote.http11.responseGenerator.RegisterGetResponseMaker;
+import org.apache.coyote.http11.responseGenerator.RegisterPostResponseMaker;
+import org.apache.coyote.http11.responseGenerator.ResponseMaker;
 
 public enum RequestMappingHandler {
 

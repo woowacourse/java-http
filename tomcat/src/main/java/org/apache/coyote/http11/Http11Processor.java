@@ -64,8 +64,9 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private String readRequestBody(final BufferedReader bufferedReader, final Headers requestHeaders) throws IOException {
-        if (requestHeaders.contains(CONTENT_LENGTH)){
+    private String readRequestBody(final BufferedReader bufferedReader, final Headers requestHeaders)
+            throws IOException {
+        if (requestHeaders.contains(CONTENT_LENGTH)) {
             int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
@@ -87,8 +88,14 @@ public class Http11Processor implements Runnable, Processor {
             new LoginController().service(httpRequest, httpResponse);
             return;
         }
-        httpResponse
+        try {
+            httpResponse
                     .httpStatus(HttpStatus.OK)
-                    .body(FileReader.read(requestUri.getResourcePath()), requestUri.findMediaType());
+                    .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
+        } catch (Exception e) {
+            httpResponse
+                    .httpStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "404.html");
+        }
     }
 }

@@ -31,4 +31,8 @@ public enum MediaType {
     public String getValue() {
         return value;
     }
+
+    public String getExtension() {
+        return extension;
+    }
 }

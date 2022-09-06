@@ -22,10 +22,6 @@ public class RequestUri {
         return uri;
     }
 
-    public boolean isResourceFileRequest() {
-        return resourcePath.contains(".");
-    }
-
     public boolean hasQueryParams() {
         return !queryParams.isEmpty();
     }
@@ -35,6 +31,9 @@ public class RequestUri {
     }
 
     public String parseFullPath() {
+        if (resourcePath.endsWith(findMediaType().getExtension())) {
+            return resourcePath;
+        }
         return findMediaType().appendExtension(resourcePath);
     }
 

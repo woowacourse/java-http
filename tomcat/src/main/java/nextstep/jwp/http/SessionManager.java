@@ -13,10 +13,7 @@ public class SessionManager {
     }
 
     public static Optional<Session> findSession(final String id) {
-        if (SESSIONS.containsKey(id)) {
-            return Optional.of(SESSIONS.get(id));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     public static void remove(final String id) {

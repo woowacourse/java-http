@@ -63,29 +63,28 @@ public class Http11Processor implements Runnable, Processor {
         String requestPath = uri.getPath();
 
         if ("/".equals(requestPath)) {
-            return makeResponse(ContentType.HTML.getContentType(), "Hello world!");
+            return makeResponse(StatusCode.getStatusCode(200), ContentType.HTML.getContentType(), "Hello world!");
         }
 
         if ("/login".equals(requestPath)) {
-            doLoginRequest(uri);
-            return makeResponse(requestPath.concat("." + ContentType.HTML.getExtension()));
+            return doLoginRequest(uri);
         }
 
-        return makeResponse(requestPath);
+        return makeResponse(StatusCode.getStatusCode(200), requestPath);
     }
 
-    private String makeResponse(String contentType, String responseBody) {
+    private String makeResponse(String statusCode, String contentType, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
-    private String makeResponse(String file) throws IOException {
+    private String makeResponse(String statusCode, String file) throws IOException {
         final String responseBody = readFile("static" + file);
-        return makeResponse(ContentType.findContentType(file), responseBody);
+        return makeResponse(statusCode, ContentType.findContentType(file), responseBody);
     }
 
     private String readFile(String fileName) throws IOException {
@@ -95,7 +94,12 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private void doLoginRequest(URI uri) {
+    private String doLoginRequest(URI uri) throws IOException {
+        if (uri.getQuery() == null) {
+            return makeResponse(StatusCode.getStatusCode(200),
+                    uri.getPath().concat("." + ContentType.HTML.getExtension()));
+        }
+
         QueryMapper queryMapper = new QueryMapper(uri);
         Map<String, String> parameters = queryMapper.getParameters();
 
@@ -104,6 +108,8 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.checkPassword(parameters.get("password"))) {
             log.info("user : " + user);
+            return makeResponse(StatusCode.getStatusCode(302), "/index.html");
         }
+        return makeResponse(StatusCode.getStatusCode(200), "/401.html");
     }
 }

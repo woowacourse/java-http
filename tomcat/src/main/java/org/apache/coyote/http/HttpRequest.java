@@ -78,4 +78,12 @@ public class HttpRequest {
     public Map<String, String> getQuery() {
         return query;
     }
+
+    public Header getHeader() {
+        return header;
+    }
+
+    public String getBody() {
+        return body;
+    }
 }

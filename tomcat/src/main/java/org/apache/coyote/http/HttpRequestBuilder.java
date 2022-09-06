@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpRequestBuilder {
 
@@ -15,35 +14,34 @@ public class HttpRequestBuilder {
 
     public static HttpRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
         final String requestLine = bufferedReader.readLine();
+        final Map<String, String> header = makeHeader(bufferedReader);
+        final String body = makeBody(bufferedReader,header);
+        return new HttpRequest(requestLine, new Header(header) , body);
+    }
+
+    private static Map<String, String> makeHeader(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headerMap = new HashMap<>();
-        String body = EMPTY;
         String reader;
-        while ((reader = bufferedReader.readLine()) != null) {
-            if (isEmptyString(reader)) {
-                if (hasBody(headerMap)) {
-                    body = makeRequestBody(bufferedReader);
-                }
-                break;
-            }
+        while (!(reader = bufferedReader.readLine()).equals(EMPTY)) {
             final Integer index = reader.indexOf(DELIMITER);
             headerMap.put(reader.substring(START, index), reader.substring(index + 1).replace(BLANK, EMPTY));
         }
-        return new HttpRequest(requestLine, new Header(headerMap), body);
+        return headerMap;
     }
 
-    private static boolean hasBody(final Map<String, String> headerMap) {
-        return headerMap.get("Content-Length") != null;
-    }
-
-    private static boolean isEmptyString(final String reader) {
-        return reader.equals(EMPTY);
-    }
-
-    private static String makeRequestBody(final BufferedReader bufferedReader) throws IOException {
-        String str;
-        if ((str = bufferedReader.readLine()) == null) {
+    private static String makeBody(final BufferedReader bufferedReader,
+                                   Map<String, String> headerMap) throws IOException {
+        final String contentLength = headerMap.get("Content-Length");
+        if(!hasBody(contentLength)){
             return EMPTY;
         }
-        return bufferedReader.lines().collect(Collectors.joining());
+        final int contentLengthSize = Integer.parseInt(contentLength);
+        final char[] body = new char[contentLengthSize];
+        bufferedReader.read(body, 0, contentLengthSize);
+        return new String(body);
+    }
+
+    private static boolean hasBody(final String contentLength) {
+        return contentLength != null;
     }
 }

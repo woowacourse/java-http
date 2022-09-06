@@ -21,7 +21,7 @@ public class Http11Headers {
     public int getContentLength() {
         final String contentLength = headers.get("Content-Length");
         if (contentLength != null) {
-            return Integer.parseInt(contentLength);
+            return Integer.parseInt(contentLength.trim());
         }
         return 0;
     }

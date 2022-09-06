@@ -5,8 +5,9 @@ import java.net.URISyntaxException;
 import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.Http11QueryParams;
+import org.apache.coyote.exception.AccountNotFoundException;
 import org.apache.coyote.http11.Http11Request;
+import org.apache.coyote.http11.Http11RequestBody;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11URL;
 import org.slf4j.Logger;
@@ -23,27 +24,32 @@ public class LoginController implements Controller {
 
     @Override
     public void run(final Http11Request request, final Http11Response response) throws IOException, URISyntaxException {
-        final Http11QueryParams params = request.getParams();
-        if (loginSuccess(params)) {
-            final User loggedInUser = findUser(params);
-            log.info(loggedInUser.toString());
+        if (request.getMethod().equals(HttpMethod.POST)) {
+            runLogin(request, response);
         }
         response.write(HttpStatus.OK, new Http11URL("/login.html"));
     }
 
-    private boolean loginSuccess(final Http11QueryParams params) {
-        if (!params.isEmpty()) {
-            return false;
+    private void runLogin(final Http11Request request, final Http11Response response)
+            throws IOException, URISyntaxException {
+        final Http11RequestBody body = request.getBody();
+        if (loginSuccess(body)) {
+            final User loggedInUser = findUser(body);
+            log.info(loggedInUser.toString());
         }
-        final User foundUser = findUser(params);
-        final String password = params.get("password");
+        response.write(HttpStatus.FOUND, new Http11URL("/index.html"));
+    }
+
+    private boolean loginSuccess(final Http11RequestBody body) {
+        final User foundUser = findUser(body);
+        final String password = body.get("password");
         return foundUser.checkPassword(password);
 
     }
 
-    private User findUser(final Http11QueryParams params) {
-        String account = params.get("account");
+    private User findUser(final Http11RequestBody body) {
+        String account = body.get("account");
         return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(AccountNotFoundException::new);
     }
 }

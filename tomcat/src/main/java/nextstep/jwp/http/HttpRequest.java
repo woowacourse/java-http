@@ -12,6 +12,7 @@ public class HttpRequest {
     private static final int PATH_INDEX = 0;
     private static final int QUERY_PARAM_INDEX = 1;
     private static final int ONLY_PATH_SIZE = 1;
+    private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final HttpMethod httpMethod;
     private final String uri;
@@ -67,7 +68,7 @@ public class HttpRequest {
     }
 
     public QueryParams getFormData() {
-        if (httpHeaders.matchesContentType("application/x-www-form-urlencoded")) {
+        if (httpHeaders.matchesContentType(CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED)) {
             return QueryParams.from(requestBody);
         }
         return QueryParams.empty();

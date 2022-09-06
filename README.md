@@ -109,7 +109,7 @@ return new String(buffer);
 회원가입을 구현하고, 이를 테스트하기 위해 단위 테스트(`RegisterHandlerTest`) 를 작성하다보니 각 단위테스트가 격리되지 못하는 문제가 발생하였다.
 앞선 단위 테스트에서 저장한 `User` 가 다른 단위테스트에도 영향을 끼치는 것이다.
 
-![](../../../Downloads/KakaoTalk_Photo_2022-09-06-06-51-11.png)
+<img width="1622" alt="KakaoTalk_Photo_2022-09-06-06-51-11" src="https://user-images.githubusercontent.com/57028386/188536783-314637b5-2b9d-460f-9e71-7e45fafbf42a.png">
 
 따라서 이를 격리해줄 필요성이 있게 되었고, 다음과 같은 메소드를 `InMemoryUserRepositroy` 에 만들고,
 `BeforeEach` 를 통해서 각 단위 테스트 진행 전에 호출하도록 구현해주었다.

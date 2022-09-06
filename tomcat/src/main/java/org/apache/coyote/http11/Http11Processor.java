@@ -1,12 +1,21 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import static org.apache.coyote.http11.HttpRequest.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Objects;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import nextstep.jwp.AuthController;
+import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,19 +37,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest request = new HttpRequest(inputStream);
+            final HttpResponse response = getResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse getResponse(HttpRequest request) throws URISyntaxException, IOException {
+        if (request.getUrl().getPath().endsWith("/login.html")) {
+            return AuthController.login(request);
+        }
+
+        if (request.getHeaderValue(HTTP_METHOD).equals("POST") && request.getUrl()
+            .getPath()
+            .endsWith("/register.html")) {
+            return AuthController.signUp(request);
+        }
+
+        return new HttpResponse(request, StatusCode.OK, getStaticResource(request));
+    }
+
+    private String getStaticResource(HttpRequest request) throws IOException {
+        final URL requestUrl = request.getUrl();
+        if (requestUrl.getPath().equals("/")) {
+            return "Hello world!";
+        }
+        return Files.readString(new File(Objects.requireNonNull(requestUrl).getFile()).toPath());
     }
 }

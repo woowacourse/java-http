@@ -47,13 +47,13 @@ class Http11ProcessorTest {
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        processor.process(socket); // processor.run(); 현재 같은 소켓을 사용하므로 같은 결과
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: 5801 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

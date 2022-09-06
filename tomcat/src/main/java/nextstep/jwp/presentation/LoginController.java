@@ -3,7 +3,7 @@ package nextstep.jwp.presentation;
 import static org.apache.coyote.http11.support.HttpHeader.LOCATION;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.EmptyQueryParametersException;
+import nextstep.jwp.exception.EmptyParameterException;
 import nextstep.jwp.exception.PasswordNotMatchException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
@@ -34,7 +34,7 @@ public class LoginController {
 
             return new HttpResponse(HttpStatus.FOUND, httpHeaders, "");
 
-        } catch (EmptyQueryParametersException e) {
+        } catch (EmptyParameterException e) {
             final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
             httpHeaders.put(LOCATION, "/login.html");
 
@@ -51,7 +51,7 @@ public class LoginController {
 
     private void validateQueryParametersExist(final QueryParameters queryParameters) {
         if (queryParameters.isEmpty()) {
-            throw new EmptyQueryParametersException();
+            throw new EmptyParameterException();
         }
     }
 

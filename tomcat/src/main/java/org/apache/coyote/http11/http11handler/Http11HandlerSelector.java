@@ -10,14 +10,13 @@ import org.apache.coyote.http11.http11handler.impl.LoginPageHandler;
 import org.apache.coyote.http11.http11handler.impl.RegisterAccountHandler;
 import org.apache.coyote.http11.http11handler.impl.RegisterPageHandler;
 import org.apache.coyote.http11.http11handler.impl.ResourceHandler;
-import org.apache.coyote.http11.http11handler.impl.faviconHandler;
 import org.apache.coyote.http11.http11request.Http11Request;
 
 public class Http11HandlerSelector {
 
     private List<Http11Handler> http11Handlers = List.of(new IndexPageHandler(), new LoginPageHandler(),
             new ResourceHandler(), new DefaultPageHandler(), new RegisterPageHandler(), new RegisterAccountHandler(),
-            new faviconHandler(), new ErrorPageHandler(), new LoginHandler());
+            new ErrorPageHandler(), new LoginHandler());
 
     public Http11Handler getHttp11Handler(Http11Request http11Request) {
         return http11Handlers.stream()

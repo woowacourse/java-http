@@ -23,11 +23,6 @@ public class IndexPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request) {
-        return new ResponseComponent(
-                StatusCode.OK,
-                handlerSupporter.getContentType(URI_WITH_EXTENSION),
-                handlerSupporter.getContentLength(URI_WITH_EXTENSION),
-                handlerSupporter.extractBody(URI_WITH_EXTENSION)
-        );
+        return handlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }
 }

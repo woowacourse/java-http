@@ -15,14 +15,34 @@ public class HandlerSupporter {
     private static final String HTML_EXTENSION = ".html";
     private static final String EXTENSION_IDENTIFIER = ".";
 
-    public ResponseComponent extractElements(String uri, StatusCode statusCode) {
-        return new ResponseComponent(
-                statusCode,
-                getContentType(uri),
-                getContentLength(uri),
-                extractBody(uri)
-        );
+    public ResponseComponent redirectResponseComponent(String uri, StatusCode statusCode) {
+        ResponseComponent responseComponent = new ResponseComponent(statusCode);
+        responseComponent.setLocation(uri);
+        return responseComponent;
     }
+
+    public ResponseComponent resourceResponseComponent(String uri, StatusCode statusCode) {
+        ResponseComponent responseComponent = new ResponseComponent(statusCode, extractBody(uri));
+        responseComponent.setContentLength(getContentLength(uri));
+        responseComponent.setContentType(getContentType(uri));
+        return responseComponent;
+    }
+
+    public ResponseComponent defaultResponseComponent(String message, StatusCode statusCode) {
+        ResponseComponent responseComponent = new ResponseComponent(statusCode, message);
+        responseComponent.setContentLength(Integer.toString(message.length()));
+        responseComponent.setContentType(ExtensionContentType.HTML.getContentType());
+        return responseComponent;
+    }
+
+//    public ResponseComponent extractElements(String uri, StatusCode statusCode) {
+//        return new ResponseComponent(
+//                statusCode,
+//                getContentType(uri),
+//                getContentLength(uri),
+//                extractBody(uri)
+//        );
+//    }
     
     public String addHtmlExtension(String uri) {
         return uri + HTML_EXTENSION;

@@ -22,11 +22,6 @@ public class ResourceHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request) {
-        return new ResponseComponent(
-                StatusCode.OK,
-                handlerSupporter.getContentType(http11Request.getUri()),
-                handlerSupporter.getContentLength(http11Request.getUri()),
-                handlerSupporter.extractBody(http11Request.getUri())
-        );
+        return handlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
     }
 }

@@ -34,18 +34,8 @@ public class RegisterAccountHandler implements Http11Handler {
     public ResponseComponent handle(Http11Request http11Request) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (userService.addNewUser(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(EMAIL_KEY), queryStringDatas.get(PASSWORD_KEY))) {
-            return new ResponseComponent(
-                    StatusCode.REDIRECT,
-                    handlerSupporter.getContentType(REDIRECT_WHEN_REGISTER_SUCCESS),
-                    handlerSupporter.getContentLength(REDIRECT_WHEN_REGISTER_SUCCESS),
-                    null,
-                    handlerSupporter.getLocation(REDIRECT_WHEN_REGISTER_SUCCESS));
+            return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_REGISTER_SUCCESS, StatusCode.REDIRECT);
         }
-        return new ResponseComponent(
-                StatusCode.REDIRECT,
-                handlerSupporter.getContentType(REDIRECT_WHEN_REGISTER_FAIL),
-                handlerSupporter.getContentLength(REDIRECT_WHEN_REGISTER_FAIL),
-                null,
-                handlerSupporter.getLocation(REDIRECT_WHEN_REGISTER_FAIL));
+        return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_REGISTER_FAIL, StatusCode.REDIRECT);
     }
 }

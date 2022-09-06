@@ -85,12 +85,4 @@ public class HttpRequest {
     public String getPath() {
         return path;
     }
-
-    public QueryParams getQueryParams() {
-        return queryParams;
-    }
-
-    public String getRequestBody() {
-        return requestBody;
-    }
 }

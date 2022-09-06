@@ -22,30 +22,29 @@ public class HttpRequest {
     private static final String HTTP_VERSION = "HTTP VERSION";
     private static final String HEADER_DELIMITER = ":";
     private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final String MESSAGE_DIVIDER = "\r\n\r\n";
+    private static final String LINE_BREAK = "\r\n";
+    private static final String EMPTY_MESSAGE_BODY = "";
 
     private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        final String messageBody = parseRequest(inputStream);
-        this.queryParams = new QueryParams(getUri());
-        this.queryParams.addQuery(messageBody);
+        final String message = readMessage(inputStream);
+        parseHeaders(message);
+        this.queryParams = new QueryParams(getUri(), parseMessageBody(message));
     }
 
-    private String parseRequest(InputStream inputStream) {
-        final Reader reader = new Reader(inputStream);
+    private String readMessage(InputStream inputStream) {
+        final HttpReader reader = new HttpReader(inputStream);
+        return reader.readHttpRequest();
+    }
 
-        String line;
-        while (!(line = reader.readLine()).isEmpty()) {
-            putHeader(line);
+    private void parseHeaders(String message) {
+        final String headers = message.split(MESSAGE_DIVIDER)[0];
+        for (String header : headers.split(LINE_BREAK)) {
+            putHeader(header);
         }
-
-        if (isContentTypeUrlEncoded()) {
-            final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
-            return reader.readByLength(contentLength);
-        }
-
-        return "";
     }
 
     private void putHeader(String requestLine) {
@@ -66,9 +65,12 @@ public class HttpRequest {
             .collect(toList());
     }
 
-    private boolean isContentTypeUrlEncoded() {
-        return containsHeader("Content-Type") &&
-            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded");
+    private String parseMessageBody(String message) {
+        final String[] split = message.split(MESSAGE_DIVIDER);
+        if (split.length < 2) {
+            return EMPTY_MESSAGE_BODY;
+        }
+        return split[1];
     }
 
     public String getHeaderValue(String headerName) {

@@ -40,7 +40,6 @@ public class RequestLine {
     }
 
     public String getContentType() {
-        System.out.println("###" + path + " " + method + " " + protocolVersion);
         if (path.contains(".css")) {
             return CONTENT_TYPE + "text/css;" + CHARSET_UTF_8;
         }

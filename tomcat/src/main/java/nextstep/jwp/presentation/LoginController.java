@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
+import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.http.common.HttpStatus;
+import nextstep.jwp.http.common.Session;
+import nextstep.jwp.http.common.SessionManager;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.model.User;
 import nextstep.jwp.http.response.HttpResponse;
@@ -34,14 +37,15 @@ public class LoginController extends AbstractController {
 
     @Override
     void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        String account = httpRequest.getQueryParameterValue("account");
-        String password = httpRequest.getQueryParameterValue("password");
+        String account = httpRequest.getRequestBody().getValue("account");
+        String password = httpRequest.getRequestBody().getValue("password");
         try {
             User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
             validatePassword(user, password);
             log.info("user : {}", user);
-            File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/login.html").getFile());
+            addCookie(httpResponse, user);
+            File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/index.html").getFile());
             httpResponse.addResponseBody(file);
         } catch (NotFoundUserException e) {
             httpResponse.addHttpStatus(HttpStatus.UNAUTHORIZED);
@@ -54,5 +58,14 @@ public class LoginController extends AbstractController {
         if (!user.checkPassword(password)) {
             throw new NotFoundUserException();
         }
+    }
+
+    // Cookie (JSESSIONID, UUID) -> Session(JSESSIONID, USER) -> SessionMap(UUID, USER)
+    private void addCookie(final HttpResponse httpResponse, final User user) {
+        HttpCookie httpCookie = SessionManager.createCookie();
+        Session session = new Session(httpCookie.getKey());
+        session.addAttribute("user", user);
+        SessionManager.addSession(httpCookie.getValue(), session);
+        httpResponse.addCookie(httpCookie);
     }
 }

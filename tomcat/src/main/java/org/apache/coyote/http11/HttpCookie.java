@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 public class HttpCookie {
     private final Map<String, String> cookies;
 
-    public HttpCookie() {
+    private HttpCookie() {
         this.cookies = new HashMap<>();
     }
 
@@ -15,10 +15,6 @@ public class HttpCookie {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.putAll(cookies);
         return httpCookie;
-    }
-
-    public void putAll(Map<String, String> cookies) {
-        this.cookies.putAll(cookies);
     }
 
     public String getAttribute(String name){
@@ -29,8 +25,11 @@ public class HttpCookie {
         return cookies.containsKey(name);
     }
 
-    @Override
-    public String toString() {
+    private void putAll(Map<String, String> cookies) {
+        this.cookies.putAll(cookies);
+    }
+
+    public String toMessage() {
         return cookies.entrySet().stream()
             .map(it -> it.getKey() + "=" + it.getValue())
             .collect(Collectors.joining(";"));

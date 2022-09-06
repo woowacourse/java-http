@@ -13,7 +13,7 @@ public enum HttpStatusCode {
         this.description = description;
     }
 
-    public String toString() {
+    public String toMessage() {
         return value + " " + description;
     }
 }

@@ -16,19 +16,7 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
-
     public void setAttribute(final String name, final Object object) {
         values.put(name, object);
-    }
-
-    public void removeAttribute(final String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
     }
 }

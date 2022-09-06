@@ -28,12 +28,8 @@ public class SessionManager implements Manager {
         return Optional.ofNullable(SESSIONS.get(id));
     }
 
+    @Override
     public boolean containsSession(final Session session){
         return SESSIONS.containsValue(session);
-    }
-
-    @Override
-    public void remove(final String id) {
-        SESSIONS.remove(id);
     }
 }

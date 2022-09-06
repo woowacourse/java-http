@@ -10,23 +10,19 @@ import java.util.StringTokenizer;
 
 public class HttpRequestParser {
 
-    private static final String DEFAULT_PATH = "/index";
     private final HttpMethod httpMethod;
-    private final Map<String, String> queryParams;
-    private final Map<String, String> httpRequestHeaders;
-    private final Map<String, String> bodyParams;
+    private final HttpRequestURI requestURI;
+    private final HttpHeaders httpRequestHeaders;
+    private final HttpRequestBody requestBody;
     private final HttpCookie httpCookie;
-    private String path;
 
     private HttpRequestParser(HttpMethod httpMethod, String uri, Map<String, String> httpRequestHeaders,
         Map<String, String> cookies, Map<String, String> bodyParams) {
         this.httpMethod = httpMethod;
-        this.queryParams = new HashMap<>();
-        this.path = uri;
-        formatPath();
-        this.httpRequestHeaders = httpRequestHeaders;
+        this.requestURI = HttpRequestURI.from(uri);
+        this.httpRequestHeaders = new HttpHeaders(httpRequestHeaders);
         this.httpCookie = HttpCookie.of(cookies);
-        this.bodyParams = new HashMap<>();
+        this.requestBody = new HttpRequestBody(bodyParams);
     }
 
     public static HttpRequestParser from(InputStream inputStream) throws IOException {
@@ -41,19 +37,18 @@ public class HttpRequestParser {
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             StringTokenizer headerTokenizer =
-                new StringTokenizer(line.replaceAll(" ", "").replaceAll(":", " "));
+                new StringTokenizer(line.replaceAll(" ", ""), ":");
             httpRequestHeaders.put(headerTokenizer.nextToken(), headerTokenizer.nextToken());
             line = bufferedReader.readLine();
         }
 
         Map<String, String> cookies = new HashMap<>();
         String cookie = httpRequestHeaders.getOrDefault("Cookie", "")
-            .replaceAll(" ", "")
-            .replaceAll(";", " ");
-        StringTokenizer cookieTokenizer = new StringTokenizer(cookie);
+            .replaceAll(" ", "");
+        StringTokenizer cookieTokenizer = new StringTokenizer(cookie, ";");
         while (cookieTokenizer.hasMoreTokens()) {
-            String attribute = cookieTokenizer.nextToken().replaceAll("=", " ");
-            StringTokenizer attributeTokenizer = new StringTokenizer(attribute);
+            String attribute = cookieTokenizer.nextToken();
+            StringTokenizer attributeTokenizer = new StringTokenizer(attribute, "=");
             cookies.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
 
@@ -63,41 +58,15 @@ public class HttpRequestParser {
         bufferedReader.read(buffer, 0, contentLength);
         StringTokenizer bodyTokenizer = new StringTokenizer(new String(buffer).replaceAll("&", " "));
         while (bodyTokenizer.hasMoreTokens()) {
-            String attribute = bodyTokenizer.nextToken().replaceAll("=", " ");
-            StringTokenizer attributeTokenizer = new StringTokenizer(attribute);
+            String attribute = bodyTokenizer.nextToken();
+            StringTokenizer attributeTokenizer = new StringTokenizer(attribute, "=");
             bodyParams.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
 
         return new HttpRequestParser(httpMethod, uri, httpRequestHeaders, cookies, bodyParams);
     }
 
-    private void formatPath() {
-        if (path.contains("?")) {
-            separateQueryParams(path);
-        }
-
-        if (path.equals("/")) {
-            path = DEFAULT_PATH;
-        }
-
-        if (!path.contains(".")) {
-            path = path + ".html";
-        }
-    }
-
-    private void separateQueryParams(String uri) {
-        int index = uri.indexOf("?");
-        path = uri.substring(0, index);
-
-        String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
-        for (String query : queries) {
-            String[] queryEntry = query.split("=");
-            queryParams.put(queryEntry[0], queryEntry[1]);
-        }
-    }
-
     public HttpRequest toHttpRequest() {
-        return new HttpRequest(httpMethod, path, queryParams, httpRequestHeaders, bodyParams, httpCookie);
+        return new HttpRequest(httpMethod, requestURI, httpRequestHeaders, requestBody, httpCookie);
     }
 }

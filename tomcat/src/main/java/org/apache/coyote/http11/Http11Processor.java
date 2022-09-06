@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.Session;
 import nextstep.jwp.model.SessionManager;
 import nextstep.jwp.model.User;
@@ -38,13 +37,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = HttpRequestParser.from(inputStream).toHttpRequest();
+            HttpRequest request = HttpRequestParser.from(inputStream)
+                .toHttpRequest();
 
             HttpResponse httpResponse = createHttpResponseFrom(request);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie httpCookie = HttpCookie.of(cookies);
 
             return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
-                .setCookie(httpCookie.toString());
+                .setCookie(httpCookie.toMessage());
         }
         return createGetResponseFrom(request);
     }
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpCookie httpCookie = HttpCookie.of(cookies);
 
         return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
-            .setCookie(httpCookie.toString());
+            .setCookie(httpCookie.toMessage());
     }
 
     private HttpResponse registerUser(HttpRequest request) throws IOException {
@@ -117,14 +117,13 @@ public class Http11Processor implements Runnable, Processor {
             request.getPath());
     }
 
-    private HttpResponse createGetResponseFrom(String resourcePath, HttpStatusCode httpStatusCode, String ContentType,
-        String location) throws
-        IOException {
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+    private HttpResponse createGetResponseFrom(String resourcePath, HttpStatusCode httpStatusCode, String contentType,
+        String location) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         return HttpResponse.of(httpStatusCode, responseBody)
-            .setContentType(ContentType + ";charset=utf-8")
+            .setContentType(contentType + ";charset=utf-8")
             .setLocation(location);
     }
 }

@@ -28,6 +28,11 @@ public class Controller {
     }
 
     public static HttpResponse login(final HttpRequest request) throws IOException {
+        if (request.getQueryParams().isEmpty()) {
+            HttpResponse response = HttpResponse.of(Status.OK);
+            response.addResource(findResource("/login.html"));
+            return response;
+        }
         try {
             userService.login(request.getQueryParams());
             HttpResponse response = HttpResponse.of(Status.FOUND);
@@ -42,8 +47,21 @@ public class Controller {
     }
 
     public static HttpResponse register(final HttpRequest request) throws IOException {
+        if (!request.getBody().isBlank()) {
+            RegisterRequest registerRequest = RegisterRequest.of(request.getBody());
+            userService.register(registerRequest);
+            HttpResponse response = HttpResponse.of(Status.FOUND);
+            response.addHeader(Header.LOCATION, "/index.html");
+            return response;
+        }
         HttpResponse response = HttpResponse.of(Status.OK);
         response.addResource(findResource("/register.html"));
+        return response;
+    }
+
+    public static HttpResponse template(final HttpRequest request) throws IOException{
+        HttpResponse response = HttpResponse.of(Status.OK);
+        response.addResource(findResource(request.getUrl()));
         return response;
     }
 

@@ -17,6 +17,9 @@ public class ControllerMatcher {
 
     public static HttpResponse process(final HttpRequest request) {
         try {
+            if (request.getUrl().contains(".")) {
+                return Controller.template(request);
+            }
             if (request.getUrl().equals(URL_LOGIN)) {
                 return Controller.login(request);
             }

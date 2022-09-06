@@ -39,4 +39,8 @@ public class HttpRequest {
     public void addBody(final String body) {
         this.body = body;
     }
+
+    public String getBody() {
+        return body;
+    }
 }

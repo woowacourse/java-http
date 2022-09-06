@@ -14,6 +14,12 @@ public class UserService {
     public static final String KEY_ACCOUNT = "account";
     public static final String KEY_PASSWORD = "password";
 
+    public void register(final RegisterRequest request) {
+        User user = new User(request.getAccount(), request.getPassword(), request.getEmail());
+
+        InMemoryUserRepository.save(user);
+    }
+
     public void login(final Map<String, String> params) {
         User user = InMemoryUserRepository.findByAccount(params.get(KEY_ACCOUNT))
                 .orElseThrow(NoSuchElementException::new);

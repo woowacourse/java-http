@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("200 OK");
+            assertThat(responseString).contains(HttpStatus.OK.toResponseString());
             assertThat(responseString).contains(FileReader.read("/login.html"));
         }
 
@@ -48,7 +49,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("302 Found");
+            assertThat(responseString).contains(HttpStatus.FOUND.toResponseString());
             assertThat(responseString).contains("Location: /index.html");
         }
     }
@@ -70,7 +71,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("302 Found");
+            assertThat(responseString).contains(HttpStatus.FOUND.toResponseString());
             assertThat(responseString).contains("Location: /index.html");
         }
 
@@ -87,7 +88,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("302 Found");
+            assertThat(responseString).contains(HttpStatus.FOUND.toResponseString());
             assertThat(responseString).contains("Location: /401.html");
         }
 
@@ -104,7 +105,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("302 Found");
+            assertThat(responseString).contains(HttpStatus.FOUND.toResponseString());
             assertThat(responseString).contains("Location: /401.html");
         }
 
@@ -120,7 +121,7 @@ class LoginControllerTest {
             // then
             String responseString = response.toResponseString();
 
-            assertThat(responseString).contains("302 Found");
+            assertThat(responseString).contains(HttpStatus.FOUND.toResponseString());
             assertThat(responseString).contains("Location: /index.html");
         }
     }

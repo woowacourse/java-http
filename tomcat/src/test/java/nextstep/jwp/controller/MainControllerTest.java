@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ class MainControllerTest {
         // then
         String responseString = response.toResponseString();
 
-        assertThat(responseString).contains("200 OK");
+        assertThat(responseString).contains(HttpStatus.OK.toResponseString());
         assertThat(responseString).contains("Hello world!");
     }
 
@@ -43,7 +44,7 @@ class MainControllerTest {
         // then
         String responseString = response.toResponseString();
 
-        assertThat(responseString).contains("404 Not Found");
+        assertThat(responseString).contains(HttpStatus.NOT_FOUND.toResponseString());
         assertThat(responseString).contains(FileReader.read("/404.html"));
     }
 

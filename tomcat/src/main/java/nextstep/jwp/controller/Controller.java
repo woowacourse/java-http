@@ -17,9 +17,13 @@ public class Controller {
         return new ResponseEntity(method, "/welcome.html", HttpStatus.OK);
     }
 
+    public ResponseEntity goLoginPage(HttpMethod method) {
+        return new ResponseEntity(method, "/login.html", HttpStatus.OK);
+    }
+
     public ResponseEntity login(HttpMethod method, String path) {
         userService.login(path);
-        return new ResponseEntity(method, "/login.html", HttpStatus.OK);
+        return new ResponseEntity(method, "/index.html", HttpStatus.FOUND);
     }
 
     public ResponseEntity findResource(HttpMethod method, String path) {

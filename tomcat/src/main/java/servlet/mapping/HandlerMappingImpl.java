@@ -25,6 +25,9 @@ public class HandlerMappingImpl implements HandlerMapping {
         if (method == GET && List.of("/", "").contains(path)) {
             return controller.welcome(method);
         }
+        if (method == GET && path.equals("/login")) {
+            return controller.goLoginPage(method);
+        }
         if (method == GET && path.split("\\?")[0].equals("/login")) {
             return controller.login(method, path);
         }

@@ -3,18 +3,18 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.Http11Headers;
+import org.apache.coyote.http11.Headers;
 import org.junit.jupiter.api.Test;
 
-class Http11HeadersTest {
+class HeadersTest {
 
     @Test
     void getContentLength() {
         // given
-        final Http11Headers http11Headers = new Http11Headers(Map.of("Content-Length", "1"));
+        final Headers headers = new Headers(Map.of("Content-Length", "1"));
 
         // when
-        final int actual = http11Headers.getContentLength();
+        final int actual = headers.getContentLength();
 
         // then
         assertThat(actual).isEqualTo(1);
@@ -23,10 +23,10 @@ class Http11HeadersTest {
     @Test
     void getContentLength_notExistsContentLength() {
         // given
-        final Http11Headers http11Headers = new Http11Headers(Map.of("Content-Type", "text/html"));
+        final Headers headers = new Headers(Map.of("Content-Type", "text/html"));
 
         // when
-        final int actual = http11Headers.getContentLength();
+        final int actual = headers.getContentLength();
 
         // then
         assertThat(actual).isEqualTo(0);

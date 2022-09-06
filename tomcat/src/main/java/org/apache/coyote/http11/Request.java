@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import org.apache.coyote.HttpMethod;
 
-public class Http11Request {
+public class Request {
     protected static final String SPACE_DELIMITER = " ";
     protected static final int URI_INDEX = 1;
     protected static final String QUERY_PARAM_DELIMITER = "?";
@@ -19,13 +19,13 @@ public class Http11Request {
     protected static final int VALUE = 1;
 
     private final HttpMethod method;
-    private final Http11URL requestURL;
-    private final Http11QueryParams params;
-    private final Http11Headers headers;
-    private final Http11RequestBody body;
+    private final URL requestURL;
+    private final QueryParams params;
+    private final Headers headers;
+    private final RequestBody body;
 
-    public Http11Request(final HttpMethod method, final Http11URL requestURL, final Http11QueryParams params, final Http11Headers headers,
-                         final Http11RequestBody body) {
+    public Request(final HttpMethod method, final URL requestURL, final QueryParams params, final Headers headers,
+                   final RequestBody body) {
         this.method = method;
         this.requestURL = requestURL;
         this.params = params;
@@ -33,28 +33,28 @@ public class Http11Request {
         this.body = body;
     }
 
-    public static Http11Request of(final InputStream inputStream) throws IOException {
+    public static Request of(final InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final String startLine = bufferedReader.readLine();
         final String[] splitStartLine = startLine.split(SPACE_DELIMITER);
         final HttpMethod httpMethod = HttpMethod.of(splitStartLine[KEY]);
-        final Http11URL http11URL = Http11URL.of(splitStartLine[URI_INDEX]);
-        final Http11QueryParams params = parseQueryParams(splitStartLine[URI_INDEX]);
-        final Http11Headers headers = parseHeader(bufferedReader);
+        final URL url = URL.of(splitStartLine[URI_INDEX]);
+        final QueryParams params = parseQueryParams(splitStartLine[URI_INDEX]);
+        final Headers headers = parseHeader(bufferedReader);
         final int contentLength = headers.getContentLength();
-        final Http11RequestBody requestBody = parseBody(bufferedReader, contentLength);
-        return new Http11Request(httpMethod, http11URL, params, headers, requestBody);
+        final RequestBody requestBody = parseBody(bufferedReader, contentLength);
+        return new Request(httpMethod, url, params, headers, requestBody);
     }
 
-    private static Http11QueryParams parseQueryParams(final String parsedUrl) {
+    private static QueryParams parseQueryParams(final String parsedUrl) {
         if (!parsedUrl.contains(QUERY_PARAM_DELIMITER)) {
-            return Http11QueryParams.ofEmpty();
+            return QueryParams.ofEmpty();
         }
         final String urlQueryParams = parsedUrl.split(QUERY_PARAM_DELIMITER_REGEX)[PARAM_INDEX];
-        return Http11QueryParams.of(urlQueryParams);
+        return QueryParams.of(urlQueryParams);
     }
 
-    private static Http11Headers parseHeader(final BufferedReader bufferedReader) throws IOException {
+    private static Headers parseHeader(final BufferedReader bufferedReader) throws IOException {
         bufferedReader.readLine();
         String headerKeyValue = bufferedReader.readLine();
         final HashMap<String, String> headers = new HashMap<>();
@@ -63,13 +63,13 @@ public class Http11Request {
             headers.put(splitHeaderKeyValue[KEY], splitHeaderKeyValue[VALUE]);
             headerKeyValue = bufferedReader.readLine();
         }
-        return new Http11Headers(headers);
+        return new Headers(headers);
     }
 
-    private static Http11RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+    private static RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
         final char[] chars = new char[contentLength];
         bufferedReader.read(chars, 0, contentLength);
-        return new Http11RequestBody(String.valueOf(chars));
+        return new RequestBody(String.valueOf(chars));
     }
 
     public boolean isForStaticFile() {
@@ -88,19 +88,19 @@ public class Http11Request {
         return method;
     }
 
-    public Http11URL getRequestURL() {
+    public URL getRequestURL() {
         return requestURL;
     }
 
-    public Http11QueryParams getParams() {
+    public QueryParams getParams() {
         return params;
     }
 
-    public Http11Headers getHeaders() {
+    public Headers getHeaders() {
         return headers;
     }
 
-    public Http11RequestBody getBody() {
+    public RequestBody getBody() {
         return body;
     }
 }

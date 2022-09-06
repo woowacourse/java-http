@@ -30,8 +30,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final Http11Request request = Http11Request.of(inputStream);
-            final Http11Response response = Http11Response.of(outputStream);
+            final Request request = Request.of(inputStream);
+            final Response response = Response.of(outputStream);
             final Controller controller = ControllerContainer.findController(request);
             controller.run(request, response);
         } catch (IOException | UncheckedServletException | IllegalArgumentException | URISyntaxException e) {

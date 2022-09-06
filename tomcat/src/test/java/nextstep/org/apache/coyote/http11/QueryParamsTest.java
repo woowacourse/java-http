@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import nextstep.jwp.exception.InvalidQueryParamKeyException;
-import org.apache.coyote.http11.Http11QueryParams;
+import org.apache.coyote.http11.QueryParams;
 import org.junit.jupiter.api.Test;
 
-class Http11QueryParamsTest {
+class QueryParamsTest {
 
     @Test
     void of() {
@@ -16,12 +16,12 @@ class Http11QueryParamsTest {
         final String urlQueryParams = "id=abc&password=1234";
 
         // when
-        final Http11QueryParams http11QueryParams = Http11QueryParams.of(urlQueryParams);
+        final QueryParams queryParams = QueryParams.of(urlQueryParams);
 
         // then
         assertAll(
-                () -> assertThat(http11QueryParams.get("id")).isEqualTo("abc"),
-                () -> assertThat(http11QueryParams.get("password")).isEqualTo("1234")
+                () -> assertThat(queryParams.get("id")).isEqualTo("abc"),
+                () -> assertThat(queryParams.get("password")).isEqualTo("1234")
         );
     }
 
@@ -31,10 +31,10 @@ class Http11QueryParamsTest {
         final String urlQueryParams = "id=abc&password=1234";
 
         // when
-        final Http11QueryParams http11QueryParams = Http11QueryParams.of(urlQueryParams);
+        final QueryParams queryParams = QueryParams.of(urlQueryParams);
 
         // then
-        assertThatThrownBy(() -> http11QueryParams.get("notExistKey"))
+        assertThatThrownBy(() -> queryParams.get("notExistKey"))
                 .isExactlyInstanceOf(InvalidQueryParamKeyException.class);
     }
 }

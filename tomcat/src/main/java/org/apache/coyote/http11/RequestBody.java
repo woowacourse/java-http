@@ -4,10 +4,10 @@ import java.util.Map;
 import org.apache.coyote.KeyValueTupleParser;
 import org.apache.coyote.exception.RequestBodyValueNotExists;
 
-public class Http11RequestBody {
+public class RequestBody {
     private final Map<String, String> content;
 
-    public Http11RequestBody(final String content) {
+    public RequestBody(final String content) {
         this.content = KeyValueTupleParser.parse(content);
     }
 

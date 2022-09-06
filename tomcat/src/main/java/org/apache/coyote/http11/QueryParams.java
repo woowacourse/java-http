@@ -5,21 +5,21 @@ import java.util.Map;
 import nextstep.jwp.exception.InvalidQueryParamKeyException;
 import org.apache.coyote.KeyValueTupleParser;
 
-public class Http11QueryParams {
+public class QueryParams {
 
     private final Map<String, String> params;
 
-    public Http11QueryParams(final Map<String,String> params) {
+    public QueryParams(final Map<String,String> params) {
         this.params = params;
     }
 
-    public static Http11QueryParams of(final String urlQueryParams) {
+    public static QueryParams of(final String urlQueryParams) {
         final Map<String, String> parsedTuples = KeyValueTupleParser.parse(urlQueryParams);
-        return new Http11QueryParams(parsedTuples);
+        return new QueryParams(parsedTuples);
     }
 
-    public static Http11QueryParams ofEmpty() {
-        return new Http11QueryParams(new HashMap<>());
+    public static QueryParams ofEmpty() {
+        return new QueryParams(new HashMap<>());
     }
 
     public String get(final String key) {

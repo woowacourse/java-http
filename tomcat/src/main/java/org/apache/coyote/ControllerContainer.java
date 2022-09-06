@@ -2,7 +2,7 @@ package org.apache.coyote;
 
 import java.util.List;
 import org.apache.coyote.exception.ControllerNotFoundException;
-import org.apache.coyote.http11.Http11Request;
+import org.apache.coyote.http11.Request;
 
 public class ControllerContainer {
     private static final List<Controller> controllers = List.of(
@@ -10,7 +10,7 @@ public class ControllerContainer {
             new StaticFileController()
     );
 
-    public static Controller findController(final Http11Request request) {
+    public static Controller findController(final Request request) {
         return controllers.stream()
                 .filter(controller -> controller.isRunnable(request))
                 .findFirst()

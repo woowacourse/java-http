@@ -1,17 +1,16 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import org.apache.coyote.HttpMethod;
-import org.apache.coyote.http11.Http11Request;
+import org.apache.coyote.http11.Request;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
 import support.StubSocket;
 
-class Http11RequestTest {
+class RequestTest {
 
     private StubSocket stubSocket;
 
@@ -27,7 +26,7 @@ class Http11RequestTest {
         stubSocket = new StubSocket(requestString);
 
         // when
-        final Http11Request request = Http11Request.of(stubSocket.getInputStream());
+        final Request request = Request.of(stubSocket.getInputStream());
 
         // then
         assertThat(request.hasPath("/")).isTrue();

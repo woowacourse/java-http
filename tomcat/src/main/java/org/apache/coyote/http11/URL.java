@@ -1,20 +1,19 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Http11Request.PATH_INDEX;
-import static org.apache.coyote.http11.Http11Request.QUERY_PARAM_DELIMITER_REGEX;
+import static org.apache.coyote.http11.Request.PATH_INDEX;
+import static org.apache.coyote.http11.Request.QUERY_PARAM_DELIMITER_REGEX;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import nextstep.jwp.exception.StaticFileNotFoundException;
 
-public class Http11URL {
+public class URL {
     private static final String PATH_FROM_RESOURCE = "static";
     private static final String DEFAULT_URL = "/";
     private static final String NEWLINE = "\n";
@@ -24,12 +23,12 @@ public class Http11URL {
 
     private final String url;
 
-    public Http11URL(final String url) {
+    public URL(final String url) {
         this.url = url;
     }
 
-    public static Http11URL of(final String uri) {
-        return new Http11URL(uri.split(QUERY_PARAM_DELIMITER_REGEX)[PATH_INDEX]);
+    public static URL of(final String uri) {
+        return new URL(uri.split(QUERY_PARAM_DELIMITER_REGEX)[PATH_INDEX]);
     }
 
     public String getMIMEType() throws IOException {
@@ -59,7 +58,7 @@ public class Http11URL {
     }
 
     private URI getUri(final String filePathString) throws URISyntaxException {
-        final URL fileUrl = Thread.currentThread().getContextClassLoader().getResource(filePathString);
+        final java.net.URL fileUrl = Thread.currentThread().getContextClassLoader().getResource(filePathString);
         if (fileUrl == null) {
             throw new StaticFileNotFoundException(filePathString);
         }

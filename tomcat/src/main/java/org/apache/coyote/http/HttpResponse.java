@@ -2,80 +2,105 @@ package org.apache.coyote.http;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.coyote.util.StringParser;
 
 public class HttpResponse {
 
-    private static final String WELCOME_MESSAGE = "Hello world!";
+    private static final String TEXT_HTML = "text/html";
+    private static final String NEW_LINE = "\r\n";
 
-    private final List<String> values;
-    private final String responseBody;
+    private final HttpStatusCode statusCode;
+    private final Map<String, String> headers;
+    private String responseBody;
 
-    private HttpResponse(final List<String> values, final String responseBody) {
-        this.values = values;
+    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> headers) {
+        this.statusCode = statusCode;
+        this.headers = headers;
+        this.responseBody = "";
+    }
+
+    public static HttpResponse init(final HttpStatusCode statusCode) {
+        final Map<String, String> headers = new LinkedHashMap<>();
+
+        return new HttpResponse(statusCode, headers);
+    }
+
+    public HttpResponse setBody(final String responseBody) {
         this.responseBody = responseBody;
+        addContentTypeAndLength(TEXT_HTML);
+        return this;
     }
 
-    public static HttpResponse from(final HttpRequest httpRequest) throws IOException {
-        final List<String> values = new ArrayList<>();
-        final String responseBody = getResponseBody(httpRequest.getPath());
-
-        values.add(HttpStatusCode.OK.getResponseStartLine());
-        values.add("Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ");
-        values.add("Content-Length: " + responseBody.getBytes().length + " ");
-
-        return new HttpResponse(values, responseBody);
+    private void addContentTypeAndLength(final String mimeType) {
+        headers.put("Content-Type", mimeType + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
-    private static String getResponseBody(final String path) throws IOException {
-        if (path.equals("/")) {
-            return WELCOME_MESSAGE;
-        }
+    public HttpResponse setBodyByPath(final String path) {
+        try (final BufferedReader reader = toReaderByPath(path)) {
+            final String body = reader.lines()
+                    .collect(Collectors.joining("\n"));
 
-        String resourcePath = "static/" + path;
-        if (!resourcePath.contains(".")) {
-            resourcePath += ".html";
+            this.responseBody = body + "\n";
+            addContentTypeAndLength(StringParser.toMimeType(path));
+            return this;
+        } catch (final Exception e) {
+            e.printStackTrace();
+            return setBodyByPath("/404.html");
         }
+    }
 
+    private BufferedReader toReaderByPath(final String path) throws FileNotFoundException {
+        final String resourcePath = toResourcePath(path);
         final String resource = HttpResponse.class.getClassLoader()
                 .getResource(resourcePath)
                 .getPath();
         final File file = new File(resource);
-        final BufferedReader fileReader = new BufferedReader(new FileReader(file));
-        String responseBody = fileReader.lines()
-                .collect(Collectors.joining("\n"));
-        responseBody += "\n";
 
-        fileReader.close();
-
-        return responseBody;
+        return new BufferedReader(new FileReader(file));
     }
 
-    public HttpResponse changeStatusCode(final HttpStatusCode httpStatusCode) {
-        values.set(0, httpStatusCode.getResponseStartLine());
-        return this;
+    private String toResourcePath(final String path) {
+        String resourcePath = "static/" + path;
+        if (!resourcePath.contains(".")) {
+            resourcePath += ".html";
+        }
+        return resourcePath;
     }
 
     public HttpResponse setLocationAsHome() {
-        values.add("Location: /index.html ");
+        headers.put("Location", "/index.html");
         return this;
     }
 
     public HttpResponse setSessionId(final String sessionId) {
-        values.add("Set-Cookie: JSESSIONID=" + sessionId + " ");
+        headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
         return this;
     }
 
     public byte[] toResponseBytes() {
-        values.add("");
-        if (responseBody != null) {
-            values.add(responseBody);
+        final StringBuilder stringBuilder = new StringBuilder()
+                .append(statusCode.getResponseStartLine())
+                .append(" ")
+                .append(NEW_LINE);
+
+        for (final Entry<String, String> entry : headers.entrySet()) {
+            stringBuilder.append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append(" ")
+                    .append(NEW_LINE);
         }
-        return String.join("\r\n", values)
+
+        return stringBuilder.append(NEW_LINE)
+                .append(responseBody)
+                .toString()
                 .getBytes();
     }
 }

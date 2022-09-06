@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.request.HttpMethod.*;
+import static org.apache.coyote.request.HttpMethod.POST;
 import static org.apache.coyote.response.StatusCode.OK;
 
 import java.io.BufferedReader;
@@ -49,10 +49,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
             final HttpMethod requestMethod = httpRequest.getRequestMethod();
             String requestUrl = httpRequest.getRequestUrlWithoutQuery();
-            HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), "", requestUrl);
+            HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), requestUrl);
 
             if (requestUrl.contains("login") && requestMethod.equals(POST)) {
-                httpResponse = LoginHandler.login(httpRequest.getRequestBody());
+                httpResponse = LoginHandler.login(httpRequest.getRequestBody(), httpRequest.getCookies());
             }
             if (requestUrl.contains("register") && requestMethod.equals(POST)) {
                 httpResponse = RegisterHandler.register(httpRequest.getRequestBody());
@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> httpHeaderLines = readHttpHeaderLines(bufferedReader);
         final String requestBody = readRequestBody(bufferedReader, httpHeaderLines);
 
-        return new HttpRequest(httpStartLine, httpHeaderLines, requestBody);
+        return HttpRequest.of(httpStartLine, httpHeaderLines, requestBody);
     }
 
     private static Map<String, String> readHttpHeaderLines(BufferedReader bufferedReader) throws IOException {
@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
             final String[] header = line.split(HEADER_DELIMITER);
-            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX]);
+            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX].trim());
         }
 
         return httpHeaderLines;

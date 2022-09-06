@@ -56,7 +56,7 @@ class RegisterHandlerTest {
 
     @DisplayName("이미 존재하는 account로 회원가입시 ExistUserException이 발생한다.")
     @Test
-    public void failToLogin() {
+    void failToLogin() {
         //given
         final String requestBody = "account=gugu&password=password&email=gugu@email.com";
 
@@ -67,7 +67,7 @@ class RegisterHandlerTest {
 
     @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
     @Test
-    public void returnLoginWhenWithoutQuery() {
+    void returnLoginWhenWithoutQuery() {
         //given
         final String requestBody = "account=dwoo&password=1234&email=dwoo@email.com";
 

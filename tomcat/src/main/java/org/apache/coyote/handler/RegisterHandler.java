@@ -9,6 +9,7 @@ import nextstep.jwp.exception.ExistUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.request.QueryParams;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class RegisterHandler {
         final String userInformation = user.toString();
         log.info("회원가입 성공! : {}", userInformation);
 
-        return HttpResponse.of(FOUND, HTML, "/index.html");
+        return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
     }
 
     private static void checkAlreadyExistUser(String account) {

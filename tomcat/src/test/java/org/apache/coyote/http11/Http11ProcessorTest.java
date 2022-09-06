@@ -255,9 +255,34 @@ class Http11ProcessorTest {
         assertThat(level).isEqualTo(INFO);
     }
 
+    @DisplayName("로그인 성공시 Cookie에 JSESSIONID가 없으면 Set-Cookie를 응답한다.")
+    @Test
+    void successLoginWithCookie() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "Set-Cookie: JSESSIONID";
+        assertThat(socket.output()).contains(expected);
+    }
+
     @DisplayName("로그인 실패시(비밀번호 불일치)에는 401.html로 리다이렉트(302 Found 응답)한다.")
     @Test
-    public void failToLogin() throws IOException {
+    void failToLogin() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -289,7 +314,7 @@ class Http11ProcessorTest {
 
     @DisplayName("GET 메소드로 /register 요청시 register.html 페이지를 응답한다.")
     @Test
-    public void getRegister() throws IOException {
+    void getRegister() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /register HTTP/1.1 ",
@@ -317,7 +342,7 @@ class Http11ProcessorTest {
 
     @DisplayName("가입되어 있지 않은 새로운 Account로 회원가입시 회원을 저장한다.")
     @Test
-    public void registerWithNewUser() {
+    void registerWithNewUser() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         final Logger logger = (Logger) LoggerFactory.getLogger(RegisterHandler.class);
@@ -356,7 +381,7 @@ class Http11ProcessorTest {
 
     @DisplayName("회원가입에 성공시 index.html로 리다이렉트(302 Found 응답)한다.")
     @Test
-    public void successToRegister() throws IOException {
+    void successToRegister() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "POST /register HTTP/1.1 ",

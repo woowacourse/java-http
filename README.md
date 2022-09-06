@@ -81,6 +81,11 @@ css 파일과 같은 것을 응답으로 반환해줄 때에는 'text/css' 와 �
       - [x] 회원가입 성공시 index.html 로 리다이렉트한다.
       - [x] 회원가입 실패시 ExistUserException 예외를 던진다.
 
+
+- [x] Cookie에 JSESSIONID 값 저장하기
+  - [x] 로그인 성공시에 `JSESSIONID` 쿠키를 생성해서 응답(Set-Cookie)에 함께 보낸다.
+  - [x] 만약 HTTP 요청 헤더의 Cookie에 `JSESSIONID` 가 존재하면 Set-Cookie 응답을 보내지 않는다.
+ 
 ## 새롭게 알게 된 내용 (레벨2)
 
 ### Content-Length 헤더 필드

@@ -22,7 +22,7 @@ class ContentTypeTest {
 
     @DisplayName("확장자가 없는 경우 .html을 기본으로 반환한다.")
     @Test
-    public void noExtension() {
+    void noExtension() {
         // given
         String requestUrl = "/index";
 

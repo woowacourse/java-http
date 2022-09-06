@@ -2,6 +2,7 @@ package org.apache.coyote.http11.web;
 
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.RegisterController;
+import nextstep.jwp.presentation.dto.UserRegisterRequest;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpMethod;
 import org.apache.coyote.http11.support.HttpStatus;
@@ -24,7 +25,9 @@ public class RequestHandler {
 
         if (httpRequest.isMethod(HttpMethod.POST) && httpRequest.isUri("/register")) {
             final String requestBody = httpRequest.getRequestBody();
-            return new RegisterController().register(requestBody);
+            final QueryParameters queryParameters = QueryParameters.from(requestBody);
+            final UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(queryParameters);
+            return new RegisterController().register(userRegisterRequest);
         }
 
         return new HttpResponse(HttpStatus.OK, new HttpHeaders(new LinkedHashMap<>()), "Hello world!");

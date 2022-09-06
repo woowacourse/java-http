@@ -14,6 +14,7 @@ public class HttpRequestHeaders {
 
     private static final String CONTENT_LENGTH_KEY = "Content-Length";
     private static final String COOKIE_KEY = "Cookie";
+    private static final String EMPTY_COOKIE = "";
 
     private final Map<String, String> values;
 
@@ -44,7 +45,7 @@ public class HttpRequestHeaders {
 
     public String getCookie() {
         if (!isContainCookie()) {
-            throw new UncheckedServletException("cookie가 없습니다.");
+            return EMPTY_COOKIE;
         }
         return values.get(COOKIE_KEY);
     }

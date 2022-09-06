@@ -42,6 +42,9 @@ public class HttpResponse {
         if (!location.isEmpty()) {
             response = joinOutputResponseFormat(response, location.toHeaderFormat());
         }
+        if (!httpCookie.isEmpty()) {
+            response = joinOutputResponseFormat(response, httpCookie.toHeaderFormat());
+        }
         return joinOutputResponseFormat(response, "", responseBody);
     }
 

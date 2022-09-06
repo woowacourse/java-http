@@ -29,10 +29,19 @@ class HttpCookieTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46,true", "tasty_cookie=strawberry,false"})
+    @CsvSource(value = {"JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46,false", "tasty_cookie=strawberry,true"})
     void session_id가_비어있는지_확인한다(final String input, final boolean expected) {
         HttpCookie httpCookie = HttpCookie.from(input);
         boolean actual = httpCookie.isEmptySessionId();
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void response에_담길_cookie정보를_생성한다() {
+        String expected = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        HttpCookie httpCookie = new HttpCookie(Map.of("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46"));
+        String actual = httpCookie.toHeaderFormat();
 
         assertThat(actual).isEqualTo(expected);
     }

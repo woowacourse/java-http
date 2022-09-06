@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
@@ -41,10 +42,19 @@ public class RegisterRequestHandler implements HttpRequestHandler {
     @Override
     public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
         HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
+        registerUser(httpRequestBody);
+
+        HttpCookie responseCookie = HttpCookie.empty();
+        if (httpRequest.isEmptySessionId()) {
+            responseCookie.addSessionId(String.valueOf(UUID.randomUUID()));
+        }
+        return HttpResponse.found(httpVersion, responseCookie, new Location("/index.html"));
+    }
+
+    private void registerUser(final HttpRequestBody httpRequestBody) {
         String account = httpRequestBody.getValue("account");
         String email = httpRequestBody.getValue("email");
         String password = httpRequestBody.getValue("password");
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html"));
     }
 }

@@ -57,7 +57,6 @@ public enum ApiHandlerMethod {
         }
 
         private void loginSuccessEvent(final BufferedWriter bufferedWriter, final User foundUser) {
-//            final String response0 = getRedirectResponseForLoginSuccess("302 Found", "/index.html");
             final String response = HttpResponse.builder()
                     .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
                     .add(HttpHeader.LOCATION, "/index.html")
@@ -68,7 +67,6 @@ public enum ApiHandlerMethod {
         }
 
         private void loginFailEvent(final BufferedWriter bufferedWriter) {
-//            final String response0 = getRedirectResponse("302 Found", "/401.html");
             final String response = HttpResponse.builder()
                     .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
                     .add(HttpHeader.LOCATION, "/401.html")
@@ -76,22 +74,6 @@ public enum ApiHandlerMethod {
 
             writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /401.html");
-        }
-
-        private String getRedirectResponseForLoginSuccess(final String status, final String redirectUrl) {
-            return String.join(
-                    "\r\n",
-                    "HTTP/1.1 " + status + " ",
-                    "Location: " + redirectUrl + " ",
-                    "");
-        }
-
-        private String getRedirectResponse(final String status, final String redirectUrl) {
-            return String.join(
-                    "\r\n",
-                    "HTTP/1.1 " + status + " ",
-                    "Location: " + redirectUrl + " ",
-                    "");
         }
     };
 
@@ -112,14 +94,5 @@ public enum ApiHandlerMethod {
                 .filter(apiHandlerMethod -> httpRequest.isSame(apiHandlerMethod.httpMethod, apiHandlerMethod.uri))
                 .findAny()
                 .orElse(null);
-    }
-
-    private static String getResponse(final String responseBody, final String fileType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

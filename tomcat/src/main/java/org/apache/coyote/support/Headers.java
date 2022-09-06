@@ -11,7 +11,6 @@ public class Headers {
 
     public static final String HEADER_DELIMINATOR = ": ";
     private final Map<String, String> keyValues = new HashMap<>();
-//    private final LinkedList<String> nonKeyValues = new LinkedList<>(); // Map형태로 저장되지 않는 header들
 
     public Headers(final BufferedReader reader) {
         try {
@@ -23,8 +22,6 @@ public class Headers {
                     final String value = keyValue[1];
                     keyValues.put(key, value);
                 } else if (StringUtils.isEmpty(headerKeyValue)) {
-//                    System.err.println("Key Value 값 형태가 아님! {" + headerKeyValue + "}");
-//                    nonKeyValues.add(headerKeyValue);
                     break;
                 }
             }

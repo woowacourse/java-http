@@ -18,6 +18,10 @@ public class HttpRequest {
         return new HttpRequest(RequestLine.parse(startLine), RequestHeader.parse(header), RequestBody.parse(body));
     }
 
+    public RequestMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

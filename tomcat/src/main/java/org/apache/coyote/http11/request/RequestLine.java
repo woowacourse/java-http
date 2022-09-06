@@ -43,6 +43,10 @@ public class RequestLine {
         }
     }
 
+    public RequestMethod getMethod() {
+        return method;
+    }
+
     public String getPath() {
         return uri.getPath();
     }

@@ -1,10 +1,9 @@
 package nextstep.jwp.controller;
 
 
-import java.util.NoSuchElementException;
-
-import org.apache.coyote.http11.request.Params;
+import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.request.mapping.RequestMapping;
+import org.apache.coyote.http11.request.mapping.RequestParam;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;
@@ -19,29 +18,29 @@ public class Controller {
         this.service = service;
     }
 
-    @RequestMapping("/")
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public HttpResponse none() {
         return new HttpResponse()
                 .status(HttpStatus.OK)
                 .body("Hello world!");
     }
 
-    @RequestMapping("/index")
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
     public HttpResponse index() {
         return success("index.html");
     }
 
-    @RequestMapping("/login")
-    public HttpResponse login(final Params params) {
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public HttpResponse login() {
+        return success("login.html");
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public HttpResponse login(@RequestParam("account") final String account,
+                              @RequestParam("password") final String password) {
         try {
-            final String account = params.find("account");
-            final String password = params.find("password");
             service.login(account, password);
-
             return redirect("/index.html");
-
-        } catch (NoSuchElementException e) {
-            return success("login.html");
 
         } catch (IllegalArgumentException e) {
             return redirect("/401.html");

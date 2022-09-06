@@ -30,4 +30,25 @@ class HttpHeadersTest {
 
         assertThat(actual).isTrue();
     }
+
+    @Test
+    @DisplayName("ContentLength Header 정보를 반환한다.")
+    void getContentLength() {
+        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("Content-Length: 10"));
+
+        Integer actual = httpHeaders.getContentLength();
+
+        assertThat(actual).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("Cookie Header 정보를 반환한다.")
+    void parseCookie() {
+        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("COOKIE: key=value"));
+
+        Cookie actual = httpHeaders.parseCookie();
+
+        Cookie expected = Cookie.parse("key=value");
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
 }

@@ -49,4 +49,10 @@ public class HttpHeaders {
             .map(Integer::parseInt)
             .orElse(ZERO_CONTENT_LENGTH);
     }
+
+    public Cookie parseCookie() {
+        return get(COOKIE_HEADER)
+            .map(Cookie::parse)
+            .orElseGet(Cookie::empty);
+    }
 }

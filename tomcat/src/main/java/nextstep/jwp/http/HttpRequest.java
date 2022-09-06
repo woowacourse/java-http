@@ -74,6 +74,10 @@ public class HttpRequest {
         return QueryParams.empty();
     }
 
+    public Cookie getCookie() {
+        return httpHeaders.parseCookie();
+    }
+
     public String getPath() {
         return path;
     }

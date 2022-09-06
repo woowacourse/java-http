@@ -29,6 +29,10 @@ public class Request {
         return this.startLine.checkRequest(path);
     }
 
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
     public RequestBody getRequestBody() {
         return requestBody;
     }

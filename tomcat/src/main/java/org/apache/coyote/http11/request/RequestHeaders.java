@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RequestHeaders {
@@ -24,5 +25,9 @@ public class RequestHeaders {
 
     public String getHeader(String headerName) {
         return values.get(headerName);
+    }
+
+    public String getOrCreateJSessionId() {
+        return this.values.getOrDefault("JSESSIONID", String.valueOf(UUID.randomUUID()));
     }
 }

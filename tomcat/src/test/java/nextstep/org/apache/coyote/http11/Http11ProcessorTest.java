@@ -16,6 +16,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.UserNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -33,6 +34,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -46,6 +48,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
+                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -60,6 +63,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                "JSESSIONID: eden \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
@@ -73,6 +77,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
+                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -89,6 +94,7 @@ class Http11ProcessorTest {
         byte[] styles = Files.readAllBytes(Paths.get(uri));
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/css;charset=utf-8 ",
                 "Content-Length: " + styles.length + " ",
                 "",
@@ -102,6 +108,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
+                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -118,6 +125,7 @@ class Http11ProcessorTest {
         final byte[] login = Files.readAllBytes(Paths.get(uri));
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + login.length + " ",
                 "",
@@ -127,14 +135,16 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void query_parameter로_들어온_계정_정보가_일치할_경우_print한다() {
+    void request_body로_들어온_계정_정보가_일치할_경우_print한다() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
+                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + "account=gugu&password=password".getBytes().length,
                 "",
-                "");
+                "account=gugu&password=password");
 
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -145,7 +155,6 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
-        assertThat(outContent.toString()).contains(expected);
+        assertThat(outContent.toString()).contains(" 로그인 성공! 아이디: gugu");
     }
 }

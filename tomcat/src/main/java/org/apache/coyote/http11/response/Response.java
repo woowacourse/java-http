@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.request.Request;
+
 public class Response {
 
     private final General general;
@@ -12,8 +14,8 @@ public class Response {
         this.responseBody = responseBody;
     }
 
-    public static Response of(ResponseEntity responseEntity) {
-        ResponseHeaders responseHeaders = ResponseHeaders.of(responseEntity);
+    public static Response of(Request request, ResponseEntity responseEntity) {
+        ResponseHeaders responseHeaders = ResponseHeaders.of(request.getRequestHeaders(), responseEntity);
         ResponseBody responseBody = ResponseBody.of(responseEntity, responseHeaders);
         return new Response(new General(responseEntity.getHttpStatus()), responseHeaders, responseBody);
     }

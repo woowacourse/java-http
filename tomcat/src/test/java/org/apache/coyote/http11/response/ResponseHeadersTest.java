@@ -2,13 +2,23 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.stream.Stream;
+import org.apache.coyote.http11.request.RequestHeaders;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class ResponseHeadersTest {
+
+    private RequestHeaders requestHeaders;
+
+    @BeforeEach
+    void setUp() {
+        requestHeaders = RequestHeaders.of(List.of("eden: king"));
+    }
 
     @ParameterizedTest
     @MethodSource("responseEntityAndContentType")
@@ -17,10 +27,10 @@ class ResponseHeadersTest {
         ResponseEntity responseEntity = ResponseEntity.body(body);
 
         // when
-        ResponseHeaders responseHeaders = ResponseHeaders.of(responseEntity);
+        ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
 
         // then
-        assertThat(responseHeaders.asString()).isEqualTo(expected);
+        assertThat(responseHeaders.asString()).contains(expected);
     }
 
     public static Stream<Arguments> responseEntityAndContentType() {
@@ -39,10 +49,10 @@ class ResponseHeadersTest {
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
 
         // when
-        ResponseHeaders responseHeaders = ResponseHeaders.of(responseEntity);
+        ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
 
         // then
-        assertThat(responseHeaders.asString()).isEqualTo("Location: index.html ");
+        assertThat(responseHeaders.asString()).contains("Location: index.html ");
     }
 
     @Test
@@ -50,14 +60,14 @@ class ResponseHeadersTest {
         // given
         String body = "Hello world!";
         ResponseEntity responseEntity = ResponseEntity.body(body);
-        ResponseHeaders responseHeaders = ResponseHeaders.of(responseEntity);
+        ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
 
         // when
         responseHeaders.setContentLength(body.getBytes().length);
         String expected = "Content-Type: text/html;charset=utf-8 \r\n"
                 + "Content-Length: " + body.getBytes().length + " ";
         // then
-        assertThat(responseHeaders.asString()).isEqualTo(expected);
+        assertThat(responseHeaders.asString()).contains(expected);
     }
 
 }

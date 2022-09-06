@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -36,5 +35,30 @@ class RequestHeadersTest {
 
         // then
         assertThat(requestHeaders.getContentLength()).isEqualTo(0);
+    }
+
+    @Test
+    void JSESSIONID가_있는지_확인한다() {
+        // given
+        String requestHeader = "JSESSIONID: eden";
+
+        //when
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of(requestHeader));
+
+        // then
+        assertThat(requestHeaders.getOrCreateJSessionId()).isEqualTo("eden");
+    }
+
+    @Test
+    void JSESSIONID가_없으면_UUID를_반환한다() {
+        // given
+        String requestHeader = "No-JSessionId: eden2";
+
+        //when
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of(requestHeader));
+
+        // then
+        assertThat(requestHeaders.getOrCreateJSessionId()).containsAnyOf("-");
+
     }
 }

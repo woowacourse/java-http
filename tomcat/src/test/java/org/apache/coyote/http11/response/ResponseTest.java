@@ -7,12 +7,26 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.ResponseEntity;
+import java.util.List;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestHeaders;
+import org.apache.coyote.http11.request.StartLine;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ResponseTest {
+
+    private StartLine startLine = new StartLine("GET /eden HTTP/1.1 ");
+    private RequestHeaders requestHeaders = RequestHeaders.of(List.of("JSESSIONID: eden"));
+    private RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
+    private Request request;
+
+    @BeforeEach
+    void setUp() {
+        request = new Request(startLine, requestHeaders, requestBody);
+    }
 
     @Test
     void html_파일을_받을_수_있다() throws URISyntaxException, IOException {
@@ -23,9 +37,10 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(responseEntity);
+        Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 200 + " " + "OK" + " ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/" + "html" + ";charset=utf-8 ",
                 "Content-Length: " + expectedBody.getBytes().length + " ",
                 "",
@@ -44,16 +59,17 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(responseEntity);
+        Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 200 + " " + "OK" + " ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/" + "css" + ";charset=utf-8 ",
                 "Content-Length: " + expectedBody.getBytes().length + " ",
                 "",
                 expectedBody);
 
         // then
-        assertThat(response.asString()).isEqualTo(expected);
+        assertThat(response.asString()).contains(expected);
     }
 
     @Test
@@ -65,9 +81,10 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(responseEntity);
+        Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 200 + " " + "OK" + " ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/" + "javascript" + ";charset=utf-8 ",
                 "Content-Length: " + expectedBody.getBytes().length + " ",
                 "",
@@ -84,9 +101,10 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body);
 
         // when
-        Response response = Response.of(responseEntity);
+        Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 200 + " " + "OK" + " ",
+                "JSESSIONID: eden ",
                 "Content-Type: text/" + "html" + ";charset=utf-8 ",
                 "Content-Length: " + body.getBytes().length + " ",
                 "",
@@ -103,13 +121,14 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
 
         // when
-        Response response = Response.of(responseEntity);
+        Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 302 + " " + "FOUND" + " ",
+                "JSESSIONID: eden ",
                 "Location: index.html ",
                 "",
                 ""
-                );
+        );
 
         // then
         assertThat(response.asString()).isEqualTo(expected);

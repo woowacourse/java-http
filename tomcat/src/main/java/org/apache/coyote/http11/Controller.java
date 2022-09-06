@@ -29,27 +29,10 @@ public enum Controller {
     REGISTER_GET("/register", GET, Controller::registerGet),
     REGISTER_POST("/register", POST, Controller::registerPost);
 
-    private static ResponseEntity loginPost(Object o) {
-        Request request = (Request) o;
-        RequestBody queryParameters = request.getRequestBody();
-        try {
-            validateUser(queryParameters);
-        } catch (UserNotFoundException | AuthenticationException | InvalidRequestException e) {
-            return ResponseEntity.body("redirect:401.html").status(HttpStatus.REDIRECT);
-        }
-        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
-    }
-
-
-    private static ResponseEntity registerGet(Object o) {
-        return ResponseEntity.body("register.html");
-    }
-
     private static final String WELCOME_MESSAGE = "Hello world!";
-
     private static final Logger log = LoggerFactory.getLogger(Application.class);
-    private final String path;
 
+    private final String path;
     private final HttpMethod httpMethod;
     private final Function<Object, ResponseEntity> function;
 
@@ -84,6 +67,17 @@ public enum Controller {
         return ResponseEntity.body("login.html");
     }
 
+    private static ResponseEntity loginPost(Object o) {
+        Request request = (Request) o;
+        RequestBody requestBody = request.getRequestBody();
+        try {
+            validateUser(requestBody);
+        } catch (UserNotFoundException | AuthenticationException | InvalidRequestException e) {
+            return ResponseEntity.body("redirect:401.html").status(HttpStatus.REDIRECT);
+        }
+        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
+    }
+
     private static void validateUser(RequestBody requestBody) {
         if (requestBody.isEmpty()) {
             throw new InvalidRequestException();
@@ -94,6 +88,10 @@ public enum Controller {
             throw new AuthenticationException();
         }
         log.info(String.format("로그인 성공! 아이디: %s", user.getAccount()));
+    }
+
+    private static ResponseEntity registerGet(Object o) {
+        return ResponseEntity.body("register.html");
     }
 
     private static ResponseEntity registerPost(Object o) {

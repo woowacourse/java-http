@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.RequestHeaders;
 
 public class ResponseHeaders {
 
@@ -12,8 +13,9 @@ public class ResponseHeaders {
         this.values = values;
     }
 
-    public static ResponseHeaders of(ResponseEntity responseEntity) {
+    public static ResponseHeaders of(RequestHeaders requestHeaders, ResponseEntity responseEntity) {
         Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("JSESSIONID", requestHeaders.getOrCreateJSessionId());
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
             responseHeaders.put("Location", responseBody.split(":")[1]);

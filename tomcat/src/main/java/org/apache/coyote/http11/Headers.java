@@ -32,6 +32,10 @@ public class Headers {
         return value.get(key);
     }
 
+    public boolean contains(final String key) {
+        return value.containsKey(key);
+    }
+
     public LinkedHashMap<String, String> getValue() {
         return new LinkedHashMap<>(value);
     }

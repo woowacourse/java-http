@@ -61,7 +61,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_페이지_접속시_login_html을_응답한다() throws IOException {
+    void login_성공시_302를_반환하고_index_html로_리다이렉트한다() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -78,11 +78,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

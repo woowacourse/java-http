@@ -17,6 +17,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_REQUEST_BODY = "Hello world!";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
 
@@ -35,10 +36,9 @@ public class Http11Processor implements Runnable, Processor {
                      = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            List<String> request = readRequest(bufferedReader);
-            HttpRequest httpRequest = HttpRequest.of(request);
-            HttpResponse httpResponse = new HttpResponse();
+            HttpRequest httpRequest = makeHttpRequest(bufferedReader);
 
+            HttpResponse httpResponse = new HttpResponse();
             doService(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getValue().getBytes());
@@ -48,13 +48,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> readRequest(final BufferedReader bufferedReader) throws IOException {
+    private HttpRequest makeHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
+        Headers requestHeaders = Headers.of(readRequestHeaders(bufferedReader));
+        String body = readRequestBody(bufferedReader, requestHeaders);
+        return new HttpRequest(requestLine, requestHeaders, body);
+    }
+
+    private List<String> readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         final List<String> request = new ArrayList<>();
         String line;
         while (!(line = bufferedReader.readLine()).isBlank()) {
             request.add(line);
         }
         return request;
+    }
+
+    private String readRequestBody(final BufferedReader bufferedReader, final Headers requestHeaders) throws IOException {
+        if (requestHeaders.contains(CONTENT_LENGTH)){
+            int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
     }
 
     private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
@@ -70,10 +87,8 @@ public class Http11Processor implements Runnable, Processor {
             new LoginController().service(httpRequest, httpResponse);
             return;
         }
-        if (requestUri.isResourceFileRequest()) {
-            httpResponse
+        httpResponse
                     .httpStatus(HttpStatus.OK)
                     .body(FileReader.read(requestUri.getResourcePath()), requestUri.findMediaType());
-        }
     }
 }

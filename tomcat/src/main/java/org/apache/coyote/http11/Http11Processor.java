@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.controller.FileReader;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,10 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (resourcePath.startsWith("/login")) {
             new LoginController().service(httpRequest, httpResponse);
+            return;
+        }
+        if (resourcePath.startsWith("/register")) {
+            new RegisterController().service(httpRequest, httpResponse);
             return;
         }
         try {

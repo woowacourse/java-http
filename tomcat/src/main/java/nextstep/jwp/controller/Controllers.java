@@ -7,9 +7,9 @@ import java.util.function.Predicate;
 public enum Controllers {
 
     MAIN(new MainController(), (uri) -> uri.equals("/")),
-    LOGIN(new LoginController(), (uri) -> uri.contains("/login")),
+    LOGIN(new LoginController(), (uri) -> uri.startsWith("/login")),
     RESOURCE(new ResourceController(), (uri) -> uri.contains(".")),
-    REGISTER(new RegisterController(), (uri) -> uri.contains("/register"));
+    REGISTER(new RegisterController(), (uri) -> uri.startsWith("/register"));
 
     private final Controller controller;
     private final Predicate<String> canHandle;

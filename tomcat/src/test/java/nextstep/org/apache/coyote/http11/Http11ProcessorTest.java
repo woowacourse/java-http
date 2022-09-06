@@ -378,4 +378,26 @@ class Http11ProcessorTest {
                 () -> assertThat(actual).contains("Location: /401.html")
         );
     }
+
+    @Test
+    void JSESSIONID가_없는_요청이_들어오면_새_세션을_만든다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertThat(actual).contains("JSESSIONID=");
+    }
 }

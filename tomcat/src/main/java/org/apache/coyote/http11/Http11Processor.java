@@ -16,6 +16,8 @@ import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 import org.apache.coyote.exception.QueryStringFormatException;
@@ -40,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String NOT_FOUND_PATH = "/404.html";
     private static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String JSESSIONID_KEY = "JSESSIONID";
 
     private final Socket connection;
     private final AuthService authService = AuthService.instance();
@@ -126,7 +129,6 @@ public class Http11Processor implements Runnable, Processor {
             return toFoundResponse(httpRequest, SIGN_UP_REDIRECT_PATH);
         }
         if (url.equals(LOGIN_PATH)) {
-            authService.login(requestBody);
             return toFoundResponse(httpRequest, LOGIN_REDIRECT_PATH);
         }
         return toFoundResponse(httpRequest, NOT_FOUND_PATH);
@@ -135,7 +137,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse toOkResponse(final HttpRequest httpRequest, final ContentType contentType,
                                       final String responseBody) {
         Map<String, String> responseHeaders = new HashMap<>();
-        setSessionId(httpRequest, responseHeaders);
+        handleSession(httpRequest, responseHeaders);
         responseHeaders.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         if (!responseBody.isBlank()) {
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
@@ -145,15 +147,23 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse toFoundResponse(final HttpRequest httpRequest, final String location) {
         Map<String, String> responseHeaders = new HashMap<>();
-        setSessionId(httpRequest, responseHeaders);
+        handleSession(httpRequest, responseHeaders);
         responseHeaders.put("Location", location);
         return new HttpResponse(HttpStatus.FOUND, responseHeaders, "");
     }
 
-    private void setSessionId(final HttpRequest httpRequest, final Map<String, String> responseHeaders) {
+    private void handleSession(final HttpRequest httpRequest, final Map<String, String> responseHeaders) {
         HttpCookie httpCookie = httpRequest.getCookie();
-        if (!httpCookie.has("JSESSIONID")) {
-            responseHeaders.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+        if (!httpCookie.has(JSESSIONID_KEY)) {
+            String sessionId = UUID.randomUUID().toString();
+            createSession(sessionId);
+            responseHeaders.put("Set-Cookie", JSESSIONID_KEY + "=" + sessionId);
         }
+    }
+
+    private void createSession(final String sessionId) {
+        Session session = new Session(sessionId);
+        SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
     }
 }

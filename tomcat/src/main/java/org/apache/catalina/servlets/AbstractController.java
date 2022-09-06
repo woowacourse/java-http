@@ -1,7 +1,10 @@
 package org.apache.catalina.servlets;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.Resource;
 import org.apache.coyote.http11.ResourceLocator;
+import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
@@ -92,4 +95,22 @@ public abstract class AbstractController implements Controller {
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
+    protected Map<String, String> parseFormPayload(HttpRequest request, HttpResponse response) {
+        HttpHeaders headers = request.getHeaders();
+        String contentType = headers.get("Content-Type");
+        if (!contentType.equals("application/x-www-form-urlencoded")) {
+            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+            return null;
+        }
+        String body = request.getBody();
+        Map<String, String> data = new HashMap<>();
+        String[] components = body.split("&");
+        for (String component : components) {
+            String[] keyVal = component.split("=");
+            String key = keyVal[0];
+            String value = keyVal[1];
+            data.put(key, value);
+        }
+        return data;
+    }
 }

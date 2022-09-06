@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.catalina.session.Session;
 
@@ -22,29 +23,31 @@ public class HttpRequest {
     private static final String HTTP_VERSION = "HTTP VERSION";
     private static final String HEADER_DELIMITER = ":";
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String MESSAGE_DIVIDER = "\r\n\r\n";
-    private static final String LINE_BREAK = "\r\n";
-    private static final String EMPTY_MESSAGE_BODY = "";
 
     private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        final String message = readMessage(inputStream);
-        parseHeaders(message);
-        this.queryParams = new QueryParams(getUri(), parseMessageBody(message));
+        final String messageBody = parseHeaders(inputStream);
+        this.queryParams = new QueryParams(getUri());
+        this.queryParams.addQuery(messageBody);
     }
 
-    private String readMessage(InputStream inputStream) {
-        final HttpReader reader = new HttpReader(inputStream);
-        return reader.readHttpRequest();
-    }
+    private String parseHeaders(InputStream inputStream) {
+        final Reader reader = new Reader(inputStream);
 
-    private void parseHeaders(String message) {
-        final String headers = message.split(MESSAGE_DIVIDER)[0];
-        for (String header : headers.split(LINE_BREAK)) {
-            putHeader(header);
+        String line;
+        while (!(line = reader.readLine()).isEmpty()) {
+            putHeader(line);
         }
+
+        if (!(containsHeader("Content-Type") &&
+            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
+        return reader.readByLength(contentLength);
     }
 
     private void putHeader(String requestLine) {
@@ -65,14 +68,6 @@ public class HttpRequest {
             .collect(toList());
     }
 
-    private String parseMessageBody(String message) {
-        final String[] split = message.split(MESSAGE_DIVIDER);
-        if (split.length < 2) {
-            return EMPTY_MESSAGE_BODY;
-        }
-        return split[1];
-    }
-
     public String getHeaderValue(String headerName) {
         return headers.get(headerName);
     }
@@ -88,9 +83,8 @@ public class HttpRequest {
             if (requestUri.getPath().equals("/")) {
                 return requestUri.toURL();
             }
-
             if (hasQuery()) {
-                return addExtensionToPath(new URI(requestUri.getPath()));
+                return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
             }
 
             return addExtensionToPath(requestUri);
@@ -99,13 +93,18 @@ public class HttpRequest {
         }
     }
 
+    private String removeQueryStrings(URI requestUri) {
+        return requestUri.toString()
+            .replace("?" + requestUri.getQuery(), "");
+    }
+
     private URL addExtensionToPath(URI requestUri) throws MalformedURLException, URISyntaxException {
         if (!requestUri.getPath().contains(".")) {
             requestUri = new URI(requestUri + ".html");
         }
 
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
-        if (resource == null) {
+        if (Objects.isNull(resource)) {
             return requestUri.toURL();
         }
         return resource;

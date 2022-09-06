@@ -5,20 +5,16 @@ import org.apache.coyote.http.ContentType;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
-import org.apache.coyote.http.response.HttpStatus;
+import org.apache.coyote.http.response.ResponseBody;
 import org.apache.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +50,11 @@ public class Http11Processor implements Runnable, Processor {
                 Map<String, String> queryString = httpRequest.getQueryString();
                 String account = queryString.get("account");
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                httpResponse = HttpResponse.create200Response(ContentType.HTML, new ResponseBody(
+                        new String(Files.readAllBytes(FileUtils.loadFile(STATIC_DIRECTORY + "/401.html").toPath()))));
+                if (user.isPresent()) {
+                    httpResponse = HttpResponse.create302Response(getResponseBody(httpRequest));
+                }
                 log.info(user.toString());
             }
 
@@ -73,22 +74,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest httpRequest) throws IOException {
-        final File file = FileUtils.loadFile(STATIC_DIRECTORY+ httpRequest.getUrl());
-        final String responseBody = new String(Files.readAllBytes(file.toPath()));
+        final ResponseBody responseBody = getResponseBody(httpRequest);
 
-        return new HttpResponse(httpRequest.getVersion(),
-                HttpStatus.OK,
-                ContentType.findContentType(httpRequest.getUrl()),
-                responseBody.getBytes().length,
-                responseBody);
+        return HttpResponse.create200Response(ContentType.findContentType(httpRequest.getUrl()), responseBody);
+    }
+
+    private ResponseBody getResponseBody(final HttpRequest httpRequest) throws IOException {
+        final File file = FileUtils.loadFile(STATIC_DIRECTORY + httpRequest.getUrl());
+        return new ResponseBody(new String(Files.readAllBytes(file.toPath())));
     }
 
     private HttpResponse getHelloResponse() {
-        String responseBody = "Hello world!";
-        return new HttpResponse(HttpVersion.HTTP11,
-                HttpStatus.OK,
-                ContentType.HTML,
-                responseBody.getBytes().length,
-                responseBody);
+        final ResponseBody responseBody = new ResponseBody("Hello world!");
+        return HttpResponse.create200Response(ContentType.HTML, responseBody);
     }
 }

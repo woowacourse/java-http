@@ -25,7 +25,10 @@ public class RequestPath {
             int index = url.indexOf(QUERY_IDENTIFIER);
             return url.substring(0, index) + HTML_EXTENSION;
         }
-        if (!url.contains(HTML_EXTENSION) && !url.contains(".")) {
+        if (url.equals("/")) {
+            return url;
+        }
+        if (!url.contains(".")) {
             return url + HTML_EXTENSION;
         }
         return url;

@@ -1,27 +1,52 @@
 package org.apache.coyote.http11.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class HttpRequest {
 
-    private final HttpMethod httpMethod;
-    private final Path path;
+    private final StartLine startLine;
+    private final HttpHeaders header;
+    private final RequestBody requestBody;
 
-    private HttpRequest(HttpMethod httpMethod, Path path) {
-        this.httpMethod = httpMethod;
-        this.path = path;
+    private HttpRequest(StartLine startLine, HttpHeaders header, RequestBody requestBody) {
+        this.startLine = startLine;
+        this.header = header;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(String request) {
-        if (request == null) {
-            throw new UncheckedServletException("request가 null이어서는 안됩니다.");
+    public static HttpRequest from(BufferedReader bufferedReader) {
+        try{
+            final StartLine startLine = StartLine.from(bufferedReader.readLine());
+            final List<String> headers = new ArrayList<>();
+            String line;
+            while(!"".equals(line = bufferedReader.readLine())){
+                headers.add(line);
+            }
+            final HttpHeaders httpHeaders = HttpHeaders.from(headers);
+            final int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length").trim());
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            final String requestBody = new String(buffer);
+            return new HttpRequest(startLine, httpHeaders, RequestBody.from(requestBody));
+        } catch (IOException exception) {
+            throw new UncheckedServletException("유효하지 않은 요청입니다.");
         }
-
-        final String[] split = request.split(" ");
-        return new HttpRequest(HttpMethod.from(split[0]), Path.from(split[1]));
     }
 
     public Path getPath() {
-        return path;
+        return startLine.getPath();
+    }
+
+    public Map<String, String> getHeader() {
+        return header.getValues();
+    }
+
+    public Map<String, String> getBody() {
+        return requestBody.getValues();
     }
 }

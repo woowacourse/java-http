@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.model.request;
 
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.Headers;
+import org.apache.coyote.http11.model.HttpCookie;
 
 public class HttpRequest {
 
@@ -28,12 +28,12 @@ public class HttpRequest {
         return startLine.getUrl();
     }
 
-    public Map<String, String> getQueryParams() {
-        return startLine.getQueryParams();
-    }
-
     public String getHeaderValue(final Header header) {
         return this.headers.getValue(header.getKey());
+    }
+
+    public HttpCookie getCookie() {
+        return this.headers.getCookie();
     }
 
     public void addBody(final String body) {

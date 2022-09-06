@@ -22,10 +22,6 @@ public class HttpResponse {
         return new HttpResponse(status);
     }
 
-    public boolean hasLocation() {
-        return headers.hasHeader(Header.LOCATION);
-    }
-
     public byte[] getBytes() {
         return getString().getBytes();
     }

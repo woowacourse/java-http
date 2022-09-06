@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
@@ -35,6 +36,8 @@ public class UserController {
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
             response.addResource(findResource("/index.html"));
+            UUID uuid = UUID.randomUUID();
+            response.addHeader(Header.SET_COOKIE, "JSESSIONID=" + uuid);
             return response;
         } catch (IllegalArgumentException | NoSuchElementException e) {
             HttpResponse response = HttpResponse.of(Status.UNAUTHORIZED);

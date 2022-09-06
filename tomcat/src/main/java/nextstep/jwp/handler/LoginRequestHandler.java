@@ -33,19 +33,13 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
 
     @Override
     public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
-        HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
-        String account = httpRequestBody.getValue("account");
-        String password = httpRequestBody.getValue("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(NotFoundUserException::new);
-
         HttpCookie httpCookie = HttpCookie.empty();
-        if (user.checkPassword(password)) {
-            Session session = Session.newSession();
-            session.setAttribute("user", user);
-            SessionManager.add(session);
-            httpCookie.addSessionId(session.getId());
-            return HttpResponse.found(httpVersion, httpCookie, new Location("/index.html"));
+        HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
+
+        User user = findUser(httpRequestBody);
+
+        if (user.checkPassword(httpRequestBody.getValue("password"))) {
+            return loginUserRedirect(user, httpCookie);
         }
         return HttpResponse.found(httpVersion, httpCookie, new Location("/401.html"));
     }
@@ -53,5 +47,19 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
     private HttpResponse parseRequestFile(final HttpRequest httpRequest) {
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
         return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
+    }
+
+    private User findUser(final HttpRequestBody httpRequestBody) {
+        String account = httpRequestBody.getValue("account");
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(NotFoundUserException::new);
+    }
+
+    private HttpResponse loginUserRedirect(final User user, final HttpCookie httpCookie) {
+        Session session = Session.newSession();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        httpCookie.addSessionId(session.getId());
+        return HttpResponse.found(httpVersion, httpCookie, new Location("/index.html"));
     }
 }

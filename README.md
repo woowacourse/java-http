@@ -20,3 +20,11 @@
   - Query String 없이 요청이 올 경우 `login.html` 만을 응답한다.
 - 파싱된 아이디, 비밀번호와 일치하는 회원을 조회하고 로그로 확인해본다. ✅
   - 올바르지 않은 회원인 경우 `401.html`을 응답한다.
+
+## 🚀 3단계 - 리팩터링
+### 1. HttpRequest 클래스 구현하기
+
+- Request Line을 추출할 수 있다.
+  - `Method`, `Request Uri`, `Version of the protocol`의 값을 각각 가진다.
+- header를 추출할 수 있다.
+- body를 추출할 수 있다.

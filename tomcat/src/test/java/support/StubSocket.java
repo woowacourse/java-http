@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
 
-    private final String request;
+    private String request;
     private final ByteArrayOutputStream outputStream;
 
     public StubSocket(final String request) {
@@ -50,5 +50,9 @@ public class StubSocket extends Socket {
 
     public String output() {
         return outputStream.toString(StandardCharsets.UTF_8);
+    }
+
+    public void setRequest(String request) {
+        this.request = request;
     }
 }

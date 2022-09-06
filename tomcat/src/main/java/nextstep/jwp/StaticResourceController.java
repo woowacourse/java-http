@@ -23,13 +23,13 @@ public class StaticResourceController extends AbstractController {
         try {
             Resource resource = resourceLocator.locate(request.getPathString());
 
-            response.setHttpStatus(HttpStatus.OK);
-            response.setMimeType(resource.getMimeType());
+            response.setStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", resource.getMimeType().getValue());
             response.setBody(resource.getData());
         } catch (IllegalArgumentException e) {
             Resource resource = resourceLocator.locate("/404.html");
-            response.setHttpStatus(HttpStatus.NOT_FOUND);
-            response.setMimeType(resource.getMimeType());
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.addHeader("Content-Type", resource.getMimeType().getValue());
             response.setBody(resource.getData());
         }
     }

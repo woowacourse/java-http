@@ -1,58 +1,68 @@
 package org.apache.coyote.http11.response;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.response.spec.HttpStatus;
-import org.apache.coyote.http11.response.spec.MimeType;
 
 public class HttpResponse {
 
-    private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
-    private static final String DEFAULT_CHARSET = "charset=utf-8";
-    private static final MimeType DEFAULT_MIME_TYPE = MimeType.HTML;
-
-    private HttpStatus httpStatus;
-    private MimeType mimeType;
+    private HttpStatus status;
+    private HttpHeaders headers;
     private String body;
 
-    public HttpResponse(HttpStatus httpStatus, MimeType mimeType, String body) {
-        this.httpStatus = httpStatus;
-        this.mimeType = mimeType;
-        this.body = body;
+    public HttpResponse(HttpStatus status) {
+        this.status = status;
+        this.headers = initHeaders();
+        this.body = "";
     }
 
-    public HttpResponse() {
-        this(null, DEFAULT_MIME_TYPE, "");
+    private HttpHeaders initHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Connection", "keep-alive");
+        return new HttpHeaders(headers);
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.add(key, value);
+    }
+
+    public String getHeader(String key) {
+        return this.headers.get(key);
     }
 
     public byte[] getBytes() {
-        return String.join("\r\n",
-                processStartLine(),
-                processHeaders(),
-                "",
-                body).getBytes();
-    }
-
-    private String processStartLine() {
-        String codeName = httpStatus.name();
-        int code = httpStatus.getCode();
-        return String.format("%s %d %s", DEFAULT_HTTP_VERSION, code, codeName);
-    }
-
-    private String processHeaders() {
-        String contentType = mimeType.getValue();
-        int contentLength = body.getBytes().length;
-        return String.format("Content-Type: %s;%s\r\nContent-Length: %d", contentType, DEFAULT_CHARSET,
-                contentLength);
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
-    public void setMimeType(MimeType mimeType) {
-        this.mimeType = mimeType;
+        return String.format("%s\r\n%s\r\n\r\n%s",
+                        new StatusLine(status).toHttpResponse(),
+                        this.headers.toHttpResponse(),
+                        body)
+                .getBytes(StandardCharsets.UTF_8);
     }
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return this.status;
+    }
+
+    private static class StatusLine {
+        private static final String DEFAULT_HTTP_PROTOCOL = "HTTP/1.1";
+
+        private final HttpStatus httpStatus;
+
+        public StatusLine(HttpStatus httpStatus) {
+            this.httpStatus = httpStatus;
+        }
+
+        public String toHttpResponse() {
+            return String.format("%s %d %s", DEFAULT_HTTP_PROTOCOL, httpStatus.getCode(), httpStatus.getReasonPhrase());
+        }
     }
 }

@@ -47,35 +47,35 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doHead(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPut(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doPatch(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doDelete(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doOptions(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     protected void doTrace(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
 }

@@ -39,19 +39,14 @@ public class LoginController extends AbstractController {
         RequestBody requestBody = request.getRequestBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
 
-        if (loginSuccess(user, requestBody)) {
-            Session session = new Session()
-                .setAttribute("user", user);
-            SessionManager.add(session);
-
-            return redirect(INDEX_PATH)
-                .addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
+        if (isLoginSuccess(user, requestBody)) {
+            return login(user.get());
         }
 
         return redirect(UNAUTHORIZED_PATH);
     }
 
-    private boolean loginSuccess(Optional<User> user, RequestBody requestBody) {
+    private boolean isLoginSuccess(Optional<User> user, RequestBody requestBody) {
         if (user.isEmpty() || !requestBody.contains("password")) {
             return false;
         }
@@ -60,6 +55,15 @@ public class LoginController extends AbstractController {
         String password = requestBody.get("password");
 
         return inputUser.checkPassword(password);
+    }
+
+    private HttpResponse login(User user) {
+        Session session = new Session()
+            .setAttribute("user", user);
+        SessionManager.add(session);
+
+        return redirect(INDEX_PATH)
+            .addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
     }
 
     private HttpResponse redirect(String locationUri) {

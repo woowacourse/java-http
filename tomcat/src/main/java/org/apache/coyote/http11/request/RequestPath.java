@@ -9,7 +9,8 @@ public class RequestPath {
     private static final String HTML_FILE_EXTENSION = ".html";
     private static final String CSS_FILE_EXTENSION = ".css";
     private static final String ROOT_PAGE_REQUEST_URI = "/";
-    private static final String LOGIN_REQUEST = "login";
+    private static final String LOGIN_REQUEST = "/login";
+    private static final String REGISTER_REQUEST = "/register";
     private static final String QUERY_STRING_PREFIX = "?";
     private static final String REQUEST_FILE_PATH_QUERY_STRING_DELIMITER = "\\?";
     private static final int REQUEST_PATH_INDEX = 0;
@@ -46,10 +47,14 @@ public class RequestPath {
     }
 
     public boolean containsLoginPath() {
-        return value.contains(LOGIN_REQUEST);
+        return value.equals(LOGIN_REQUEST);
     }
 
     public boolean isRootPath() {
         return value.equals(ROOT_PAGE_REQUEST_URI);
+    }
+
+    public boolean containsRegisterPath() {
+        return value.equals(REGISTER_REQUEST);
     }
 }

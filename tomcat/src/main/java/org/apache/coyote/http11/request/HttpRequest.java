@@ -75,6 +75,10 @@ public class HttpRequest {
         return requestPath.isRootPath() && httpMethod.isGet();
     }
 
+    public boolean isRegisterRequest() {
+        return requestPath.containsRegisterPath() && httpMethod.isPost();
+    }
+
     public String getParamValueOf(String key) {
         if (formData == null) {
             throw new FormDataValueNotFoundException();

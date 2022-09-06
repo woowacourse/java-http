@@ -8,7 +8,7 @@ public class RegisterResponseGenerator implements ResponseGenerator {
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {
-        return false;
+        return httpRequest.isRegisterRequest();
     }
 
     @Override

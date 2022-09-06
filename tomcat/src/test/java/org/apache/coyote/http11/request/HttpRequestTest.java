@@ -54,7 +54,7 @@ class HttpRequestTest {
         String request = "POST /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
-                + "Content-Length: 80\n"
+                + "Content-Length: 30\n"
                 + "Content-Type: application/x-www-form-urlencoded\n"
                 + "Accept: */*\n"
                 + "\n"

@@ -17,7 +17,6 @@ public class FormData {
     }
 
     public static FormData from(String formDataLine) {
-        formDataLine = formDataLine.trim();
         String[] queryParameters = formDataLine.split(QUERY_STRING_DELIMITER);
         Map<String, String> params = initializeData(queryParameters);
         return new FormData(params);

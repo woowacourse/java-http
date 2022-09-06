@@ -4,6 +4,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.vo.RequestMethod;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +43,9 @@ public class Http11Processor implements Runnable, Processor {
 
             Request request = saveRequest(bufferedReader);
 
-            RequestManager requestManager = RequestMethod.selectManager(request);
+            Controller controller = RequestControllerMapper.mapByRequest(request);
 
-            String response = requestManager.generateResponse();
+            String response = controller.respond(request).getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -60,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         int bodyLength = requestStrings.stream()
                 .filter(each -> each.startsWith(CONTENT_LENGTH.getValue()))
-                .map(each -> Integer.parseInt(now.split(CONTENT_LENGTH_DELIMITER)[1]))
+                .map(each -> Integer.parseInt(each.split(CONTENT_LENGTH_DELIMITER)[1]))
                 .findFirst()
                 .orElse(EMPTY_BODY_LENGTH);
         if (bodyLength > 0) {

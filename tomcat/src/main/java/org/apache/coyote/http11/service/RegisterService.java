@@ -1,4 +1,4 @@
-package nextstep.jwp.service;
+package org.apache.coyote.http11.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -16,23 +16,22 @@ public class RegisterService {
     private RegisterService() {
     }
 
-    public static String signUp(String account, String password, String email) {
+    public static Response signUp(String account, String password, String email) {
         return registerService.signUpInternal(account, password, email);
     }
 
-    public String signUpInternal(String account, String password, String email) {
+    public Response signUpInternal(String account, String password, String email) {
         Response response = Response.from(ResponseStatus.FOUND);
         try {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             response.addHeader(LOCATION.getValue(), SUCCESS_URL)
                     .addBlankLine();
-            return response.getResponse();
-        }
-        catch (IllegalArgumentException e) {
+            return response;
+        } catch (IllegalArgumentException e) {
             response.addHeader(LOCATION.getValue(), FAIL_URL)
                     .addBlankLine();
-            return response.getResponse();
+            return response;
         }
     }
 }

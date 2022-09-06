@@ -135,4 +135,9 @@ public class Request {
         }
         return queryStringMap;
     }
+
+    public boolean canMapped(RequestMethod requestMethod, String url) {
+        return this.request.get(METHOD).equals(requestMethod.name()) &&
+                this.request.get(URL).equals(url);
+    }
 }

@@ -1,4 +1,4 @@
-package nextstep.jwp.service;
+package org.apache.coyote.http11.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -23,11 +23,11 @@ public class LoginService {
     private LoginService() {
     }
 
-    public static String signIn(String account, String password) {
+    public static Response signIn(String account, String password) {
         return loginService.signInInternal(account, password);
     }
 
-    private String signInInternal(String account, String password) {
+    private Response signInInternal(String account, String password) {
         LoginResult loginResult = generateResult(account, password);
         Response response = Response.from(ResponseStatus.FOUND);
         if (loginResult.getSession() != null) {
@@ -36,9 +36,7 @@ public class LoginService {
 
         }
         return response.addHeader(LOCATION.getValue(), loginResult.getRedirectUrl())
-                .addBlankLine()
-                .getResponse();
-
+                .addBlankLine();
     }
 
     private LoginResult generateResult(String account, String password) {

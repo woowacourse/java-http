@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import nextstep.jwp.model.Request;
 import nextstep.jwp.vo.FileName;
@@ -6,32 +6,27 @@ import nextstep.jwp.vo.HttpCookie;
 import nextstep.jwp.vo.Response;
 import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HtmlLoader;
 
 import java.io.IOException;
 
 import static nextstep.jwp.vo.HttpHeader.*;
 
-public class GetRequestMangerImpl implements RequestManager {
+public class SessionedLoginController implements Controller {
 
     private static final String PREFIX = "static/";
     private static final String POST_LOGIN_REDIRECT = "static/index.html";
-    private static final String LOGIN = "/login";
-
-    private final Request request;
-
-    public GetRequestMangerImpl(Request request) {
-        this.request = request;
-    }
+    private static final SessionedLoginController INSTANCE = new SessionedLoginController();
 
     @Override
-    public String generateResponse() throws IOException {
+    public Response respond(Request request) throws IOException {
         FileName fileName = request.getFileName();
         SessionManager sessionManager = new SessionManager();
         HttpCookie httpCookie = request.getCookie();
         String sessionId = httpCookie.getJsessionId();
         String responseBody = HtmlLoader.generateFile(PREFIX + fileName.concat());
 
-        if (fileName.isSame(LOGIN) && sessionManager.existSession(sessionId)) {
+        if (sessionManager.existSession(sessionId)) {
             responseBody = HtmlLoader.generateFile(POST_LOGIN_REDIRECT);
         }
 
@@ -40,7 +35,13 @@ public class GetRequestMangerImpl implements RequestManager {
                         "text/" + fileName.getExtension() + CHARSET_UTF_8.getValue())
                 .addHeader(CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length))
                 .addBlankLine()
-                .addBody(responseBody)
-                .getResponse();
+                .addBody(responseBody);
+    }
+
+    private SessionedLoginController() {
+    }
+
+    public static Controller getInstance() {
+        return INSTANCE;
     }
 }

@@ -9,6 +9,7 @@ public enum HandlerMapper {
 
     LOGIN("/login.html", LoginHandler::new),
     INDEX("/index.html", IndexHandler::new),
+    REGISTER("/register", RegisterHandler::new),
     ;
 
     private final String path;

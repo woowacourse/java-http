@@ -2,16 +2,16 @@ package org.apache.coyote.model.request;
 
 import java.util.Map;
 
-public class HttpParam {
+public class Param {
 
     private final Map<String, String> params;
 
-    protected HttpParam(final Map<String, String> params) {
+    protected Param(final Map<String, String> params) {
         this.params = params;
     }
 
-    public static HttpParam of(final Map<String, String> params) {
-        return new HttpParam(params);
+    public static Param of(final Map<String, String> params) {
+        return new Param(params);
     }
 
     public String getByKey(String key) {

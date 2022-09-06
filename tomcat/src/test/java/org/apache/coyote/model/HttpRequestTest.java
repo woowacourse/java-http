@@ -1,13 +1,16 @@
 package org.apache.coyote.model;
 
-import org.apache.coyote.exception.InvalidRequestFormat;
-import org.apache.coyote.model.request.HttpMethod;
 import org.apache.coyote.model.request.HttpRequest;
+import org.apache.coyote.model.request.Method;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpRequestTest {
 
@@ -17,9 +20,11 @@ class HttpRequestTest {
         // given
         String requestLine = "GET /index HTTP/1.1";
         String expected = "/index.html";
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        HttpRequest actual = HttpRequest.of(requestLine);
+        HttpRequest actual = HttpRequest.of(reader);
 
         // then
         assertThat(actual.getPath()).isEqualTo(expected);
@@ -30,9 +35,11 @@ class HttpRequestTest {
     void checkNotParam() {
         // given
         String requestLine = "GET /index HTTP/1.1";
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        HttpRequest actual = HttpRequest.of(requestLine);
+        HttpRequest actual = HttpRequest.of(reader);
 
         // then
         assertThat(actual.getParams()
@@ -40,26 +47,17 @@ class HttpRequestTest {
     }
 
     @Test
-    @DisplayName("포맷이 맞지 않는 경우 예외가 발생한다.")
-    void wrongRequestFormat() {
-        // given
-        String requestLine = "GET /index.html";
-
-        // when & then
-        assertThatThrownBy(() -> HttpRequest.of(requestLine))
-                .isInstanceOf(InvalidRequestFormat.class);
-    }
-
-    @Test
     @DisplayName("HttpMethod를 검증한다.")
     void checkHttpMethod() {
         // given
         String requestLine = "POST /index HTTP/1.1";
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        HttpRequest actual = HttpRequest.of(requestLine);
+        HttpRequest actual = HttpRequest.of(reader);
 
         // then
-        assertThat(actual.getHttpMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(actual.getHttpMethod()).isEqualTo(Method.POST);
     }
 }

@@ -33,8 +33,8 @@ public class HttpResponse {
 
     public String getResponse() {
         return String.join("\r\n",
-                httpStatusCode.getResponse() +
-                        CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
+                httpStatusCode.getResponse(),
+                CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
                 CONTENT_LENGTH + HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
                 "",
                 body);

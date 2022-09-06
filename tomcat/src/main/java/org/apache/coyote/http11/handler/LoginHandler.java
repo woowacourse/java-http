@@ -2,8 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.model.request.HttpParam;
 import org.apache.coyote.model.request.HttpRequest;
+import org.apache.coyote.model.request.Param;
 import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.HttpStatusCode;
 import org.apache.coyote.model.response.StatusCode;
@@ -40,7 +40,7 @@ public class LoginHandler implements Handler {
                 .getResponse();
     }
 
-    private boolean checkUser(final HttpParam params) {
+    private boolean checkUser(final Param params) {
         final String account = params.getByKey("account");
         final String password = params.getByKey("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);

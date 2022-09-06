@@ -1,69 +1,52 @@
 package org.apache.coyote.model.request;
 
-import org.apache.coyote.exception.InvalidRequestFormat;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-import static org.apache.coyote.utils.RequestUtil.calculatePath;
-import static org.apache.coyote.utils.RequestUtil.getExtension;
-import static org.apache.coyote.utils.RequestUtil.getParam;
+import java.io.BufferedReader;
 
 public class HttpRequest {
 
-    private static final int REQUEST_SIZE_DEADLINE = 3;
-    private final String uri;
-    private final String path;
-    private final HttpParam params;
-    private final String contentType;
-    private final HttpMethod httpMethod;
+    private final RequestLine requestLine;
+    private final String requestBody;
 
-    public HttpRequest(String uri, String path, HttpParam httpParam, String contentType, HttpMethod httpMethod) {
-        this.uri = uri;
-        this.path = path;
-        this.params = httpParam;
-        this.contentType = contentType;
-        this.httpMethod = httpMethod;
+    private HttpRequest(RequestLine requestLine, String requestBody) {
+        this.requestLine = requestLine;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(final String requestLine) {
-        List<String> requests = Arrays.asList(Objects.requireNonNull(requestLine).split(" "));
-        validateRequestSize(requests);
-        final var uri = requests.get(1);
-        final var path = calculatePath(uri);
-        final var httpParams = HttpParam.of(getParam(uri));
-        final var content = ContentType.getType(getExtension(path));
-        return new HttpRequest(uri, path, httpParams, content, HttpMethod.of(requests.get(0)));
-    }
-
-    private static void validateRequestSize(List<String> requests) {
-        if (requests.size() < REQUEST_SIZE_DEADLINE) {
-            throw new InvalidRequestFormat("요청 값이 올바르지 않습니다.");
+    public static HttpRequest of(final BufferedReader reader) {
+        try {
+            RequestLine requestLine = RequestLine.of(reader.readLine());
+            String requestBody = createBody(reader);
+            return new HttpRequest(requestLine, requestBody);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Request 생성 오류");
         }
     }
 
-    public HttpParam getParams() {
-        return params;
+    private static String createBody(BufferedReader reader) {
+        try {
+            StringBuilder body = new StringBuilder();
+            while (reader.ready()) {
+                body.append(reader.readLine());
+            }
+            return body.toString();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Request Body 생성 오류");
+        }
+    }
+
+    public Param getParams() {
+        return requestLine.getParams();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public Method getHttpMethod() {
+        return requestLine.getMethod();
     }
 
     public boolean checkEmptyParams() {
-        return params.isEmpty();
+        return requestLine.isEmptyParam();
     }
 }

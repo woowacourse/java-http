@@ -11,6 +11,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.Cookie;
 import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
@@ -19,6 +20,8 @@ import nextstep.jwp.http.QueryParams;
 import nextstep.jwp.http.StatusCode;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.coyote.Processor;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -88,11 +92,10 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_PLAIN, "Hello world!");
         }
         if (httpRequest.matches("/login", HttpMethod.GET)) {
-            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
-                FileUtils.readFile(getResource("/login.html")));
+            return handleLoginPage(httpRequest);
         }
         if (httpRequest.matches("/login", HttpMethod.POST)) {
-            return login(httpRequest.getFormData());
+            return login(httpRequest);
         }
         if (httpRequest.matches(ContentType.TEXT_PLAIN)) {
             String filePath =
@@ -103,10 +106,23 @@ public class Http11Processor implements Runnable, Processor {
         return readFile(httpRequest);
     }
 
-    private HttpResponse login(QueryParams queryParams) {
-        if (LoginHandler.canLogin(queryParams)) {
-            return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
+    private HttpResponse handleLoginPage(HttpRequest httpRequest) {
+        if (httpRequest.isLoggedInUser(sessionManager)) {
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
                 FileUtils.readFile(getResource("/index.html")));
+        }
+        return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
+            FileUtils.readFile(getResource("/login.html")));
+    }
+
+    private HttpResponse login(HttpRequest httpRequest) {
+        QueryParams queryParams = httpRequest.getFormData();
+        if (LoginHandler.canLogin(queryParams)) {
+            Session session = sessionManager.generateNewSession();
+            sessionManager.add(session);
+            Cookie cookie = Cookie.fromJSessionId(session.getId());
+            return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource("/index.html")), cookie);
         }
         return HttpResponse.of(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML,
             FileUtils.readFile(getResource("/401.html")));

@@ -1,7 +1,5 @@
 package nextstep.jwp.http;
 
-import java.util.UUID;
-
 public class HttpResponse {
 
     private static final String SET_COOKIE_HEADER = "Set-Cookie: JSESSIONID=";
@@ -25,15 +23,15 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(StatusCode statusCode, ContentType contentType,
-                                            String responseBody, Cookie cookie) {
+                                  String responseBody, Cookie cookie) {
         return new HttpResponse(statusCode, contentType, responseBody, cookie);
     }
 
     public byte[] writeResponse() {
         final String responseLine = String.format("HTTP/1.1 %s ", statusCode.getStatus());
-        if (cookie == null) {
+        if (cookie != null) {
             final String header = String.join("\r\n",
-                 writeSetCookieOfHeader(),
+                writeSetCookieOfHeader(),
                 "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ");
             return write(responseLine, header);
@@ -45,8 +43,7 @@ public class HttpResponse {
     }
 
     private String writeSetCookieOfHeader() {
-        UUID uuid = UUID.randomUUID();
-        return SET_COOKIE_HEADER + uuid;
+        return SET_COOKIE_HEADER + cookie.getJSessionId().orElse("") + " ";
     }
 
     private byte[] write(String responseLine, String header) {

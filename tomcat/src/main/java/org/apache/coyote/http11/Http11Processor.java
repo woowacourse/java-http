@@ -54,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest generateHttpRequest(final BufferedReader bufferedReader) throws IOException {
         HttpRequest request = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
-        log.info(request.getRequestLine());
+        RequestLine requestLine = request.getRequestLine();
+        log.info("{} {} {}", requestLine.getHttpMethod(), requestLine.getRequestURI().getPath(),
+                requestLine.getHttpVersion().getValue());
 
         addHeaders(bufferedReader, request);
         addBody(bufferedReader, request);

@@ -15,10 +15,6 @@ public class HttpRequest {
         this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
 
-    public String getRequestLine() {
-        return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion().getValue();
-    }
-
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
         return requestLine.isSameHttpMethod(httpMethod);
     }
@@ -56,5 +52,9 @@ public class HttpRequest {
 
     public String getRequestParameter(final String key) {
         return requestParameters.getParameter(key);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 }

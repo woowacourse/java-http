@@ -1,5 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
@@ -103,6 +106,37 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("회원가입을 완료하면 index.html 페이지로 리다이렉트한다.")
+    @Test
+    void userRegisterIsSuccess() throws IOException {
+        //given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "account=green&email=green@0wooteco.com&password=1234");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @DisplayName("로그인이 성공하면 302를 반환하고 /index.html 리다이렉트한다.")
     @Test
     void userLoginIsSuccess() throws IOException {
@@ -125,9 +159,9 @@ class Http11ProcessorTest {
                 .getClassLoader()
                 .getResource("static/index.html");
 
+        //쿠키 포함 검증
         final String output = socket.output();
         String cookie = output.split("\r\n")[1];
-        System.out.println("cookie = " + cookie);
         assertThat(cookie.contains("Set-Cookie: JSESSIONID=")).isTrue();
 
         String expected = "HTTP/1.1 302 Moved Permanently \r\n" +
@@ -139,7 +173,34 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인이 성공하고, JSESSIONID가 request header에 있는 경우")
+    @DisplayName("로그인이 성공하면 session이 정상적으로 생성되고, sessionId가 session에 저장되어있는지 검증한다.")
+    @Test
+    void userLoginValidateSession() throws IOException {
+        //given
+        final String httpRequest = String.join("\r\n",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive "
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String output = socket.output();
+        final String cookie = output.split("\r\n")[1];
+        final String sessionId = cookie.split("JSESSIONID=")[1];
+
+        final Session session = SessionManager.findSession(sessionId);
+        assertThat(session.hasAttribute("user")).isTrue();
+        assertThat(session.getId()).isEqualTo(sessionId);
+    }
+
+    @DisplayName("JSESSIONID가 request header에 있는 경우, 로그인을 하지 않아도 index.html로 리다이렉트")
     @Test
     void userLoginWithJSESSIONID() throws IOException {
         //given
@@ -150,6 +211,9 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
         );
+
+        final Session session = SessionManager.add("656cef62-e3c4-40bc-a8df-94732920ed46");
+        session.addAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -232,37 +296,6 @@ class Http11ProcessorTest {
                 "Content-Length: " + content.getBytes().length + " ",
                 "",
                 content);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("회원가입을 완료하면 index.html 페이지로 리다이렉트한다.")
-    @Test
-    void userRegisterIsSuccess() throws IOException {
-        //given
-        final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/html,*/*;q=0.1 ",
-                "Connection: keep-alive ",
-                "",
-                "account=green&email=green@0wooteco.com&password=1234");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Moved Permanently \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

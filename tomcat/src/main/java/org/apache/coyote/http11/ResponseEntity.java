@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.exception.FileNotFoundException;
 
 public class ResponseEntity {
@@ -15,14 +16,20 @@ public class ResponseEntity {
     private final StatusCode statusCode;
     private final String path;
     private String body;
+    private String cookie;
 
     public ResponseEntity(final StatusCode statusCode, final String path) {
         this.statusCode = statusCode;
         this.path = path;
     }
 
-    public ResponseEntity body(String body) {
+    public ResponseEntity body(final String body) {
         this.body = body;
+        return this;
+    }
+
+    public ResponseEntity setCookie(final Session session) {
+        this.cookie = session.getId();
         return this;
     }
 
@@ -48,6 +55,8 @@ public class ResponseEntity {
         if (this.body == null) {
             this.body = getContent(path);
         }
-        return String.join("\r\n", httpHeader.getResponseHeader(statusCode, body), body);
+
+        final String header = httpHeader.getResponseHeader(statusCode, body.getBytes().length, cookie);
+        return String.join("\r\n", header, body);
     }
 }

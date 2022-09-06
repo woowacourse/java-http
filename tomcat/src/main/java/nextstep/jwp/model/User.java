@@ -26,6 +26,10 @@ public class User {
         return account;
     }
 
+    public String getId() {
+        return String.valueOf(id);
+    }
+
     @Override
     public String toString() {
         return "User{" +

@@ -16,44 +16,61 @@ public class HttpHeader {
         this.requestHeaders = PairConverter.toMap(requestHeaders, "\n", ": ");
     }
 
-    public String getResponseHeader(final StatusCode statusCode, final String response) {
-        final String method = requestStartLine.split(" ")[0];
-        final String path = requestStartLine.split(" ")[1];
-
-        if (method.equals("POST") && path.startsWith("/login") && statusCode.isEqual(StatusCode.MOVED_TEMPORARILY)) {
-            return setCookieIfNotExist(statusCode, response);
+    public String getResponseHeader(final StatusCode statusCode, final int contentLength, final String cookie) {
+        if (getMethod().equals("POST") && getUrl().startsWith("/login")
+                && statusCode.isEqual(StatusCode.MOVED_TEMPORARILY)) {
+            return responseCookieIfNotExist(statusCode, contentLength, cookie);
         }
-        return responseWithOutJSESIONID(statusCode, response);
+        return responseWithOutJSESIONID(statusCode, contentLength);
     }
 
-    private String setCookieIfNotExist(final StatusCode statusCode, final String response) {
-        if (requestHeaders.containsKey("Cookie")) {
-            final HttpCookie httpCookie = new HttpCookie(this.requestHeaders.get("Cookie"));
-            if (httpCookie.containsKey("JSESSIONID")) {
-                return responseWithOutJSESIONID(statusCode, response);
-            }
+    private String responseCookieIfNotExist(final StatusCode statusCode, final int contentLength, String cookie) {
+        if (hasJSESSIONID() && getJSESSIONID().equals(cookie)) {
+            return responseWithOutJSESIONID(statusCode, contentLength);
+        }
+        if (cookie == null) {
+            throw new RuntimeException("cookie가 존재하지 않습니다.");
         }
 
         return String.join("\r\n",
                 HTTP_VERSION + statusCode.getStatusMessage(),
-                "Set-Cookie: JSESSIONID=" + HttpCookie.getJSESSIONID(),
+                "Set-Cookie: JSESSIONID=" + cookie,
                 "Content-Type: " + getResponseContentType().getMIMEType() + ";charset=utf-8 ",
-                "Content-Length: " + response.getBytes().length + " ",
+                "Content-Length: " + contentLength + " ",
                 "");
     }
 
-    private String responseWithOutJSESIONID(final StatusCode statusCode, final String response) {
+    public boolean hasJSESSIONID() {
+        if (hasCookie()) {
+            final HttpCookie httpCookie = new HttpCookie(this.requestHeaders.get("Cookie"));
+            return httpCookie.containsKey("JSESSIONID");
+        }
+        return false;
+    }
+
+    public boolean hasCookie() {
+        return requestHeaders.containsKey("Cookie");
+    }
+
+    public String getJSESSIONID() {
+        if (hasJSESSIONID()) {
+            final HttpCookie httpCookie = new HttpCookie(this.requestHeaders.get("Cookie"));
+            return httpCookie.getJSESSIONID();
+        }
+        throw new RuntimeException("JSESSIONID가 없습니다.");
+    }
+
+    private String responseWithOutJSESIONID(final StatusCode statusCode, final int contentLength) {
         return String.join("\r\n",
                 HTTP_VERSION + statusCode.getStatusMessage(),
                 "Content-Type: " + getResponseContentType().getMIMEType() + ";charset=utf-8 ",
-                "Content-Length: " + response.getBytes().length + " ",
+                "Content-Length: " + contentLength + " ",
                 "");
     }
 
     private ContentType getResponseContentType() {
-        final String path = requestStartLine.split(" ")[1];
-        if (path.contains(EXTENSION_DELIMITER)) {
-            final String[] splitExtension = path.split("\\" + EXTENSION_DELIMITER);
+        if (getUrl().contains(EXTENSION_DELIMITER)) {
+            final String[] splitExtension = getUrl().split("\\" + EXTENSION_DELIMITER);
             return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
         }
         return ContentType.HTML;
@@ -61,5 +78,13 @@ public class HttpHeader {
 
     public String getStartLine() {
         return requestStartLine;
+    }
+
+    public String getMethod() {
+        return getStartLine().split(" ")[0];
+    }
+
+    public String getUrl() {
+        return getStartLine().split(" ")[1];
     }
 }

@@ -16,7 +16,11 @@ public class HttpCookie {
         return cookies.containsKey(key);
     }
 
-    public static UUID getJSESSIONID() {
-        return UUID.randomUUID();
+    public String getJSESSIONID() {
+        return cookies.get("JSESSIONID");
+    }
+
+    public static String makeJSESSIONID() {
+        return UUID.randomUUID().toString();
     }
 }

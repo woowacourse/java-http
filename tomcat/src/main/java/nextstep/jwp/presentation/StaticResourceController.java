@@ -10,7 +10,6 @@ public class StaticResourceController implements Controller {
 
     @Override
     public ResponseEntity run(final HttpHeader httpHeader, final HttpBody httpBody) {
-        String path = httpHeader.getStartLine().split(" ")[1];
-        return new ResponseEntity(StatusCode.OK, path);
+        return new ResponseEntity(StatusCode.OK, httpHeader.getUrl());
     }
 }

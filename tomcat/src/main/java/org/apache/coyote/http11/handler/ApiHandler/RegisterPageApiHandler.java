@@ -18,7 +18,7 @@ public class RegisterPageApiHandler implements Handler {
     }
 
     @Override
-    public Object getResponse(HttpRequest httpRequest) {
+    public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
         return ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "/register.html", ContentType.HTML);
     }
 }

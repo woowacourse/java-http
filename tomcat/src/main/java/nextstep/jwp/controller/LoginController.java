@@ -19,10 +19,14 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
         RequestUri requestUri = httpRequest.getRequestUri();
         if (requestUri.hasQueryParams()) {
-            login(requestUri.getQueryParams());
+            QueryParameters queryParameters = requestUri.getQueryParams();
+            login(queryParameters);
+            httpResponse.httpStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "/index.html");
+            return;
         }
         httpResponse.httpStatus(HttpStatus.OK)
-                .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
+                .body(FileReader.read(requestUri.getResourcePath()), requestUri.findMediaType());
     }
 
     private void login(final QueryParameters queryParameters) {

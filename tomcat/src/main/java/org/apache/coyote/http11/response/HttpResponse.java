@@ -2,55 +2,76 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-    private final String protocol;
-    private final HttpStatus status;
-    private final String location;
-    private final ContentType contentType;
-    private final String responseBody;
+    private String protocol = null;
+    private HttpStatus status = null;
+    private String location = null;
+    private String cookie = null;
+    private ContentType contentType = null;
+    private String responseBody = null;
 
-    public HttpResponse(String protocol,
-                        HttpStatus status,
-                        ContentType contentType,
-                        String responseBody) {
-        this.protocol = protocol;
-        this.status = status;
-        this.location = null;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
+    public HttpResponse() {
     }
 
-    public HttpResponse(String protocol,
-                        HttpStatus status,
-                        String location) {
+    public HttpResponse addProtocol(String protocol) {
         this.protocol = protocol;
+        return this;
+    }
+
+    public HttpResponse addStatus(HttpStatus status) {
         this.status = status;
+        return this;
+    }
+
+    public HttpResponse addLocation(String location) {
         this.location = location;
-        this.contentType = null;
-        this.responseBody = null;
+        return this;
+    }
+
+    public HttpResponse addResponseBody(String responseBody, ContentType contentType) {
+        this.responseBody = responseBody;
+        this.contentType = contentType;
+        return this;
+    }
+
+    public HttpResponse addCookie(String cookie) {
+        this.cookie = cookie;
+        return this;
     }
 
     public String parseToString() {
-        if (contentType == null && responseBody == null) {
-            return String.join("\r\n",
-                    protocol + " " + status.getCode() + " " + status.getText() + " ",
-                    "Location: " + location + " ",
-                    "");
+        StringBuilder sb = new StringBuilder();
+        if (protocol != null) {
+            sb.append(protocol).append(" ");
         }
-        return String.join("\r\n",
-                protocol + " " + status.getCode() + " " + status.getText() + " ",
-                "Content-Type: " + contentType.getType() + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        if (status != null) {
+            sb.append(status.getCode()).append(" ").append(status.getText()).append(" ");
+        }
+        sb.append("\r\n");
+
+        if (location != null) {
+            sb.append("Location: ").append(location).append("\r\n");
+        }
+        if (cookie != null) {
+            sb.append("Set-Cookie: ").append(cookie).append("\r\n");
+        }
+        if (responseBody != null) {
+            sb.append("Content-Type: ").append(contentType.getType()).append(" ").append("\r\n");
+            sb.append("Content-Length: ").append(responseBody.getBytes().length).append(" ").append("\r\n");
+            sb.append("\r\n");
+            sb.append(responseBody).append(" ").append("\r\n");
+        }
+        return sb.toString();
     }
 
     @Override
     public String toString() {
         return "HttpResponse{" +
                 "protocol='" + protocol + '\'' +
-                ", status='" + status + '\'' +
-                ", contentType='" + contentType + '\'' +
+                ", status=" + status +
+                ", location='" + location + '\'' +
+                ", contentType=" + contentType +
                 ", responseBody='" + responseBody + '\'' +
+                ", cookie='" + cookie + '\'' +
                 '}';
     }
 }

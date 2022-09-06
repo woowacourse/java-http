@@ -25,20 +25,23 @@ public class HttpRequest {
     private final RequestParams queryParams;
     private final ContentType contentType;
     private final HttpRequestHeaders httpRequestHeaders;
+    private final HttpCookie httpCookie;
     private final HttpRequestBody httpRequestBody;
 
     public HttpRequest(final HttpMethod httpMethod, final String path, final RequestParams queryParams,
                        final ContentType contentType, final HttpRequestHeaders httpRequestHeaders,
-                       final HttpRequestBody httpRequestBody) {
+                       final HttpCookie httpCookie, final HttpRequestBody httpRequestBody) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
         this.httpRequestHeaders = httpRequestHeaders;
+        this.httpCookie = httpCookie;
         this.httpRequestBody = httpRequestBody;
     }
 
-    public static HttpRequest of(final String requestLine, final HttpRequestHeaders httpRequestHeaders, final HttpRequestBody httpRequestBody) {
+    public static HttpRequest of(final String requestLine, final HttpRequestHeaders httpRequestHeaders,
+                                 final HttpRequestBody httpRequestBody) {
         String[] requestLineValues = splitRequestLine(requestLine);
 
         HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
@@ -46,8 +49,10 @@ public class HttpRequest {
         String path = parsePath(uri);
         RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
         ContentType contentType = parseContentType(path);
+        HttpCookie httpCookie = HttpCookie.from(httpRequestHeaders.getCookie());
 
-        return new HttpRequest(httpMethod, path, queryParams, contentType, httpRequestHeaders, httpRequestBody);
+        return new HttpRequest(httpMethod, path, queryParams, contentType, httpRequestHeaders, httpCookie,
+                httpRequestBody);
     }
 
     private static String[] splitRequestLine(final String requestLine) {

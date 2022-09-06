@@ -28,7 +28,7 @@ class HttpRequestTest {
         HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.from(List.of("Content-Length: 40"));
         HttpRequestBody httpRequestBody = HttpRequestBody.empty();
         HttpRequest expected = new HttpRequest(HttpMethod.GET, "/index.html", RequestParams.from("password=1234"),
-                ContentType.TEXT_HTML, httpRequestHeaders, httpRequestBody);
+                ContentType.TEXT_HTML, httpRequestHeaders, HttpCookie.empty(), httpRequestBody);
         HttpRequest actual = HttpRequest.of(requestLine, httpRequestHeaders, httpRequestBody);
 
         assertThat(actual).isEqualTo(expected);
@@ -38,7 +38,7 @@ class HttpRequestTest {
     @CsvSource(value = {"/,true", "/root,false"})
     void root_path인지_확인할_수_있다(final String path, final boolean expected) {
         HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, path, RequestParams.from(""), ContentType.TEXT_HTML,
-                HttpRequestHeaders.from(List.of("Content-Length: 40")), HttpRequestBody.empty());
+                HttpRequestHeaders.from(List.of("Content-Length: 40")), HttpCookie.empty(), HttpRequestBody.empty());
         boolean actual = httpRequest.isRootPath();
 
         assertThat(actual).isEqualTo(expected);

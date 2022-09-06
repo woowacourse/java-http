@@ -13,6 +13,7 @@ public class HttpRequestHeaders {
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 
     private static final String CONTENT_LENGTH_KEY = "Content-Length";
+    private static final String COOKIE_KEY = "Cookie";
 
     private final Map<String, String> values;
 
@@ -35,6 +36,17 @@ public class HttpRequestHeaders {
             throw new UncheckedServletException("content가 없습니다.");
         }
         return Integer.parseInt(values.get(CONTENT_LENGTH_KEY));
+    }
+
+    public boolean isContainCookie() {
+        return values.containsKey(COOKIE_KEY);
+    }
+
+    public String getCookie() {
+        if (!isContainCookie()) {
+            throw new UncheckedServletException("cookie가 없습니다.");
+        }
+        return values.get(COOKIE_KEY);
     }
 
     @Override

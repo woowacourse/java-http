@@ -31,7 +31,7 @@ public enum ContentType {
             .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 확장자입니다."));
     }
 
-    public String getMediaType() {
+    public String writeMediaType() {
         return String.format(MEDIA_TYPE_FORMAT, type, subType);
     }
 

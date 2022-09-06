@@ -32,12 +32,12 @@ public class HttpResponse {
         if (cookie != null) {
             final String header = String.join("\r\n",
                 writeSetCookieOfHeader(),
-                "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
+                "Content-Type: " + contentType.writeMediaType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ");
             return write(responseLine, header);
         }
         final String header = String.join("\r\n",
-            "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
+            "Content-Type: " + contentType.writeMediaType() + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ");
         return write(responseLine, header);
     }

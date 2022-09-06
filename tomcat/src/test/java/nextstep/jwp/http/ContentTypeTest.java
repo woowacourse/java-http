@@ -18,11 +18,11 @@ class ContentTypeTest {
     }
 
     @Test
-    @DisplayName("미디어 타입 정보를 반환한다.")
+    @DisplayName("Http Response에 들어갈 미디어 타입 정보를 반환한다.")
     void getMediaType_success() {
         ContentType contentType = ContentType.APPLICATION_JAVASCRIPT;
 
-        String actual = contentType.getMediaType();
+        String actual = contentType.writeMediaType();
 
         String expected = "application/javascript";
         assertThat(actual).isEqualTo(expected);

@@ -38,7 +38,7 @@ public enum StaticHandlerMethod {
         final String contentType = getContentType(dto.extension);
 
         final String response = HttpResponse.builder()
-                .add(HttpHeader.HTTP_1_1_STATUS_CODE, "200 OK")
+                .addStatus(HttpStatus.OK)
                 .add(HttpHeader.CONTENT_TYPE, contentType)
                 .body(responseBody)
                 .build();

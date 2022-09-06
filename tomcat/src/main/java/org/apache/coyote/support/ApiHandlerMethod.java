@@ -18,7 +18,7 @@ public enum ApiHandlerMethod {
         public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final String welcomeMessage = "Hello world!";
             final String response = HttpResponse.builder()
-                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "200 OK")
+                    .addStatus(HttpStatus.OK)
                     .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN)
                     .body(welcomeMessage)
                     .build();
@@ -37,7 +37,7 @@ public enum ApiHandlerMethod {
 
             if (isLoginSuccess(foundUser, password)) {
                 log.info("Login Success! {}", foundUser);
-                loginSuccessEvent(bufferedWriter, foundUser);
+                loginSuccessEvent(bufferedWriter);
                 return;
             }
 
@@ -56,9 +56,9 @@ public enum ApiHandlerMethod {
             return findUser != null && findUser.checkPassword(password);
         }
 
-        private void loginSuccessEvent(final BufferedWriter bufferedWriter, final User foundUser) {
+        private void loginSuccessEvent(final BufferedWriter bufferedWriter) {
             final String response = HttpResponse.builder()
-                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
+                    .addStatus(HttpStatus.FOUND)
                     .add(HttpHeader.LOCATION, "/index.html")
                     .build();
 
@@ -68,7 +68,7 @@ public enum ApiHandlerMethod {
 
         private void loginFailEvent(final BufferedWriter bufferedWriter) {
             final String response = HttpResponse.builder()
-                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
+                    .addStatus(HttpStatus.FOUND)
                     .add(HttpHeader.LOCATION, "/401.html")
                     .build();
 

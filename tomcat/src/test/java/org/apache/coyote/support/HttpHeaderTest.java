@@ -9,7 +9,7 @@ class HttpHeaderTest {
 
     @Test
     void apply() {
-        final String statusFormat = HttpHeader.HTTP_1_1_STATUS_CODE.apply("200 OK");
+        final String statusFormat = HttpHeader.HTTP_1_1_STATUS.apply(HttpStatus.OK);
         final String contentTypeFormat = HttpHeader.CONTENT_TYPE.apply("application/x-www-form-urlencoded");
         assertAll(
                 () -> assertThat(statusFormat).isEqualTo("HTTP/1.1 200 OK "),

@@ -5,24 +5,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.coyote.http11.cookie.Cookie;
-import org.apache.coyote.http11.constant.HttpMethods;
+import org.apache.coyote.http11.constant.HttpMethod;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String url;
+    private final HttpStartLine httpStartLine;
     private final Map<String, String> header;
     private final String body;
 
-    public HttpRequest(String method, String url, Map<String, String> header, String body) {
-        this.method = method;
-        this.url = url;
+    public HttpRequest(HttpStartLine httpStartLine, Map<String, String> header, String body) {
+        this.httpStartLine = httpStartLine;
         this.header = header;
         this.body = body;
     }
 
     public boolean isResource() {
-        return getUrl().endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
+        String url = getUrl();
+
+        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
     }
 
     public boolean hasCookie() {
@@ -67,41 +67,19 @@ public class HttpRequest {
     }
 
     public String getUrl() {
-        int queryIndex = url.indexOf("?");
-        if (queryIndex == -1) {
-            queryIndex = url.length();
-        }
+        return httpStartLine.getUrl();
+    }
 
-        return url.substring(0, queryIndex);
+    public boolean compareUrl(String url) {
+        return httpStartLine.getUrl()
+                .equals(url);
+    }
+
+    public HttpMethod getMethod() {
+        return httpStartLine.getMethod();
     }
 
     public Map<String, String> getQueryString() {
-        int queryIndex = url.indexOf("?");
-        if (queryIndex == -1) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> queries = new HashMap<>();
-        String rawQuery = url.substring(queryIndex + 1);
-        for (String query : rawQuery.split("&")) {
-            String[] temp = query.split("=");
-            queries.put(temp[0].toLowerCase(), temp[1].toLowerCase());
-        }
-
-        return queries;
-    }
-
-    public HttpMethods getMethod() {
-        return HttpMethods.toHttpMethod(method);
-    }
-
-    @Override
-    public String toString() {
-        return "Http11Request{" +
-                "method='" + method + '\'' +
-                ", url='" + url + '\'' +
-                ", header=" + header +
-                ", body='" + body + '\'' +
-                '}';
+        return httpStartLine.getQueryString();
     }
 }

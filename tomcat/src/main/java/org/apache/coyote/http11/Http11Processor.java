@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,13 +13,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.constant.HttpMethods;
+import org.apache.coyote.http11.constant.HttpMethod;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestAssembler;
+import org.apache.coyote.http11.request.HttpRequestAssembler;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseAssembler;
 import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +30,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final String RESOURCE_FOLDER = "static";
 
     private final Socket connection;
-    private final ResponseAssembler responseAssembler;
-    private final RequestAssembler requestAssembler;
+    private final HttpRequestAssembler requestAssembler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        responseAssembler = new ResponseAssembler();
-        requestAssembler = new RequestAssembler();
+        requestAssembler = new HttpRequestAssembler();
     }
 
     @Override
@@ -47,83 +46,72 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public HttpResponse get(HttpRequest request, OutputStream outputStream) throws IOException {
+        HttpResponse response = new HttpResponse();
         if (request.isResource()) {
-            return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
+            response.loadResource(request.getUrl());
+            return response;
         }
-        if (request.getUrl().equals("/login")) {
-            return generateLoginPage(request);
-        }
-        if (request.getUrl().equals("/register")) {
-            return responseAssembler.resourceResponse("/register.html", HttpStatus.OK);
-        }
-        return generateDefaultResponse();
-    }
+        if (request.compareUrl("/login")) {
+            if (request.getCookies().getCookie("JSESSIONID") != null) {
+                response.statusCode(HttpStatus.REDIRECT);
+                response.addHeader("Location", "/index.html");
+                return response;
+            }
 
-    private HttpResponse generateLoginPage(HttpRequest request) {
-        if (request.getCookies().hasCookie("JSESSIONID")) {
-            return responseAssembler.redirectResponse("/index.html");
+            response.loadResource("/index.html");
+            return response;
         }
-        return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
+        if (request.compareUrl("/register")) {
+            response.loadResource("/register.html");
+            return response;
+        }
+        response.loadRawString("Hello world!");
+        return response;
     }
 
     public HttpResponse post(HttpRequest request, OutputStream outputStream) throws IOException {
         Map<String, String> bodyParams = request.getBody();
+        HttpResponse httpResponse = new HttpResponse();
+        if (request.compareUrl("/register")) {
+            String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
+            String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
+            String email = Objects.requireNonNull(bodyParams.get("email"), "이메일이 입력되지 않았습니다.");
 
-        if (request.getUrl().equals("/register")) {
-            return register(bodyParams);
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+
+            httpResponse.addHeader("Location", "/index.html");
+            httpResponse.statusCode(HttpStatus.REDIRECT);
+
+            return httpResponse;
         }
 
-        if (request.getUrl().equals("/login")) {
-            return login(request.getCookies(), bodyParams);
+        if (request.compareUrl("/login")) {
+            String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
+            String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
+
+            Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password));
+            Cookie cookie = request.getCookies();
+
+            if (userByAccount.isPresent()) {
+                log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
+                if (!cookie.hasCookie(SESSION_COOKIE_NAME)) {
+                    String jSessionId = UUID.randomUUID().toString();
+                    httpResponse.addCookie(SESSION_COOKIE_NAME, jSessionId);
+                    httpResponse.addHeader("Location", "/index.html");
+                    Session.put(jSessionId, userByAccount.get());
+
+                    return httpResponse;
+                }
+            }
+
+            httpResponse.loadResource("/401.html");
+            return httpResponse;
         }
 
-        return responseAssembler.redirectResponse("/404.html");
-    }
-
-
-    private HttpResponse login(Cookie cookies, Map<String, String> bodyParams) {
-        String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
-        String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
-
-        return checkUserInformation(cookies, account, password);
-    }
-
-    private HttpResponse register(Map<String, String> bodyParams) {
-        String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
-        String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
-        String email = Objects.requireNonNull(bodyParams.get("email"), "이메일이 입력되지 않았습니다.");
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-
-        return responseAssembler.redirectResponse("/index.html");
-    }
-
-    private HttpResponse checkUserInformation(Cookie cookie, String account, String password) {
-        Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-
-        if (userByAccount.isPresent()) {
-            log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
-            HttpResponse response = responseAssembler.redirectResponse("/index.html");
-            processCookie(cookie, response, userByAccount.get());
-            return response;
-        }
-
-        return responseAssembler.redirectResponse("/401.html");
-    }
-
-    private void processCookie(Cookie cookie, HttpResponse response, User user) {
-        if (!cookie.hasCookie(SESSION_COOKIE_NAME)) {
-            String jSessionId = UUID.randomUUID().toString();
-            response.addCookie(SESSION_COOKIE_NAME, jSessionId);
-            Session.put(jSessionId, user);
-        }
-    }
-
-    private HttpResponse generateDefaultResponse() {
-        final var responseBody = "Hello world!";
-        return responseAssembler.rawStringResponse(responseBody);
+        httpResponse.loadResource("/404.html");
+        return httpResponse;
     }
 
     @Override
@@ -149,11 +137,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processByMethod(OutputStream outputStream, HttpRequest request) throws IOException {
-        if (request.getMethod() == HttpMethods.GET) {
+        if (request.getMethod() == HttpMethod.GET) {
             return get(request, outputStream);
         }
 
-        if (request.getMethod() == HttpMethods.POST) {
+        if (request.getMethod() == HttpMethod.POST) {
             return post(request, outputStream);
         }
 

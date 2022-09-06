@@ -2,7 +2,7 @@ package org.apache.coyote.http11.constant;
 
 import java.util.Arrays;
 
-public enum HttpMethods {
+public enum HttpMethod {
     GET("get"),
     POST("post");
 
@@ -10,7 +10,7 @@ public enum HttpMethods {
 
     private final String name;
 
-    HttpMethods(String name) {
+    HttpMethod(String name) {
         this.name = name;
     }
 
@@ -18,7 +18,7 @@ public enum HttpMethods {
         return name;
     }
 
-    public static HttpMethods toHttpMethod(String methodName) {
+    public static HttpMethod toHttpMethod(String methodName) {
         return Arrays.stream(values())
                 .filter(element -> element.name.equalsIgnoreCase(methodName))
                 .findAny()

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestAssembler {
+public class HttpRequestAssembler {
 
     private static final int METHOD_SEQUENCE = 0;
     private static final int URL_SEQUENCE = 1;
@@ -19,11 +19,12 @@ public class RequestAssembler {
 
         String method = rawStart[METHOD_SEQUENCE];
         String url = rawStart[URL_SEQUENCE];
+        HttpStartLine httpStartLine = new HttpStartLine(method, url);
+
         Map<String, String> headers = parseHeaders(bufferedReader);
 
         String body = parseBody(headers.get("Content-Length"), bufferedReader);
-
-        return new HttpRequest(method, url, headers, body);
+        return new HttpRequest(httpStartLine, headers, body);
     }
 
     private String parseBody(String contentLength, BufferedReader bufferedReader) throws IOException {

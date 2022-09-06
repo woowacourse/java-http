@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import org.apache.coyote.http11.constant.HttpMethods;
+import org.apache.coyote.http11.constant.HttpMethod;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ class RequestTest {
     void setUp() {
         InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        RequestAssembler requestAssembler = new RequestAssembler();
+        HttpRequestAssembler requestAssembler = new HttpRequestAssembler();
         try {
             request = requestAssembler.makeRequest(bufferedReader);
         } catch (IOException e) {
@@ -88,8 +88,8 @@ class RequestTest {
     @Test
     @DisplayName("메소드 이름을 읽어온다.")
     void getMethod() {
-        HttpMethods actual = request.getMethod();
+        HttpMethod actual = request.getMethod();
 
-        assertThat(actual).isEqualTo(HttpMethods.GET);
+        assertThat(actual).isEqualTo(HttpMethod.GET);
     }
 }

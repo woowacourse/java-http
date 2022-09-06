@@ -5,7 +5,7 @@ import java.util.Arrays;
 public enum HttpContent {
     CSS("css", "text/css"),
     JAVASCRIPT("js", "application/javascript"),
-    HTML("html", "text/html");
+    HTML("html", "text/html;charset=utf-8");
 
     private final String extension;
     private final String contentType;

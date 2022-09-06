@@ -12,7 +12,7 @@ class HttpContentTest {
 
     @DisplayName("확장자로 ContentType를 가져온다.")
     @ParameterizedTest
-    @CsvSource(value = {"html:text/html", "css:text/css", "js:application/javascript"}, delimiter = ':')
+    @CsvSource(value = {"html:text/html;charset=utf-8", "css:text/css", "js:application/javascript"}, delimiter = ':')
     void extensionToContentType(String extension, String expected) {
         String actual = HttpContent.extensionToContentType(extension);
 

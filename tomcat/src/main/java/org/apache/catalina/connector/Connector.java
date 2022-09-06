@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import nextstep.jwp.LoginController;
+import nextstep.jwp.RegisterController;
 import nextstep.jwp.RootController;
 import nextstep.jwp.StaticResourceController;
 import org.apache.coyote.ControllerMappings;
@@ -74,7 +75,7 @@ public class Connector implements Runnable {
         ResourceLocator resourceLocator = new ResourceLocator("/static");
         ControllerMappings controllerMappings = new ControllerMappings(
                 List.of(new LoginController(resourceLocator), new RootController(resourceLocator),
-                        new StaticResourceController(resourceLocator)));
+                        new StaticResourceController(resourceLocator), new RegisterController(resourceLocator)));
         WebConfig webConfig = new WebConfig(resourceLocator, controllerMappings);
         var processor = new Http11Processor(connection, webConfig);
         new Thread(processor).start();

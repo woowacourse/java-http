@@ -33,6 +33,15 @@ public class ResponseEntity {
         return this;
     }
 
+    public String getResponse(final HttpHeader httpHeader) throws IOException {
+        if (this.body == null) {
+            this.body = getContent(path);
+        }
+
+        final String header = httpHeader.getResponseHeader(statusCode, body.getBytes().length, cookie);
+        return String.join("\r\n", header, body);
+    }
+
     protected String getContent(final String path) throws FileNotFoundException, IOException {
         final URL resource = getClass()
                 .getClassLoader()
@@ -49,15 +58,6 @@ public class ResponseEntity {
             return "";
         }
         return EXTENSION_DELIMITER + DEFAULT_EXTENSION;
-    }
-
-    public String getResponse(final HttpHeader httpHeader) throws IOException {
-        if (this.body == null) {
-            this.body = getContent(path);
-        }
-
-        final String header = httpHeader.getResponseHeader(statusCode, body.getBytes().length, cookie);
-        return String.join("\r\n", header, body);
     }
 
     public StatusCode getStatusCode() {

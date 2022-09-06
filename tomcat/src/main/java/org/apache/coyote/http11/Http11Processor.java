@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.application.LoginService;
+import nextstep.jwp.application.AuthService;
 import nextstep.jwp.exception.InvalidLoginFormatException;
 import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.MemberNotFoundException;
@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
-    private final LoginService loginService = LoginService.instance();
+    private final AuthService authService = AuthService.instance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -105,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String accessPostMethod(final String url, final String requestBody) {
         if (url.equals(LOGIN_PATH)) {
-            String location = loginService.login(requestBody);
+            String location = authService.login(requestBody);
             return toFoundResponse(location);
         }
         return toFoundResponse(NOT_FOUND_PATH);

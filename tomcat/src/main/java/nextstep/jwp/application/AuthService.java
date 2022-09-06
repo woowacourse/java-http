@@ -1,23 +1,49 @@
 package nextstep.jwp.application;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.exception.InvalidLoginFormatException;
 import nextstep.jwp.exception.InvalidPasswordException;
+import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.QueryParams;
 
-public class LoginService {
+public class AuthService {
 
-    private LoginService() {
+    private AuthService() {
     }
 
-    private static class LoginServiceHolder {
-        private static final LoginService instance = new LoginService();
+    private static class AuthServiceHolder {
+        private static final AuthService instance = new AuthService();
     }
 
-    public static LoginService instance() {
-        return LoginServiceHolder.instance;
+    public static AuthService instance() {
+        return AuthServiceHolder.instance;
+    }
+
+    public String signUp(final String requestBody) {
+        QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        String email = queryParams.get("email");
+        validateSignUpFormat(account, password, email);
+        validateAccountUnique(account);
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return "/index.html";
+    }
+
+    private void validateSignUpFormat(final String account, final String password, final String email) {
+        if (account == null || password == null || email == null) {
+            throw new InvalidSignUpFormatException();
+        }
+    }
+
+    private void validateAccountUnique(final String account) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new DuplicateAccountException();
+        }
     }
 
     public String login(final String requestBody) {

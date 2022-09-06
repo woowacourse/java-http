@@ -5,25 +5,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import javassist.NotFoundException;
 
 public class HttpRequest {
 
     private static final String QUERY_DELIMETER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String INDEX_DELIMITER = "?";
+
     private final HttpMethod httpMethod;
     private final String url;
-
     private final Map<String, String> query;
+    private final Header header;
+    private final String body;
 
 
-    public HttpRequest(final String request) {
-        final String[] parseRequest = request.split(" ");
+    public HttpRequest(final String requestLine, Header header, String body) {
+        final String[] parseRequest = requestLine.split(" ");
         this.httpMethod = HttpMethod.from(parseRequest[0]);
         final Integer index = parseRequest[1].indexOf(INDEX_DELIMITER);
         this.url = parseUrl(parseRequest[1], index);
         this.query = parseQuery(parseRequest[1], index);
+        this.header = header;
+        this.body = body;
     }
 
     private String parseUrl(final String uri, final Integer index) {
@@ -58,8 +61,8 @@ public class HttpRequest {
         return value;
     }
 
-    private void validateNull(String key, String value){
-        if(value == null){
+    private void validateNull(String key, String value) {
+        if (value == null) {
             throw new NoSuchElementException(String.format("%s의 값을 찾을 수 없습니다.", key));
         }
     }

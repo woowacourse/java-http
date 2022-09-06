@@ -29,7 +29,7 @@ public class Registry {
         }
     }
 
-    public static HttpResponse handle(final HttpRequest httpRequest){
+    public static HttpResponse handle(final HttpRequest httpRequest) {
         return findHandler(httpRequest).handle(httpRequest);
     }
 
@@ -59,6 +59,10 @@ public class Registry {
         }
 
         return new NotFoundRequestHandler();
+    }
+
+    public static void clear() {
+        requestMap = new HashMap<>();
     }
 
     private static boolean isMethodRequest(Handler handler) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http.HttpRequestBuilder.makeRequest;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,9 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String request = bufferedReader.readLine();
-
-            final HttpRequest httpRequest = new HttpRequest(request);
+            final HttpRequest httpRequest = makeRequest(bufferedReader);
             final HttpResponse response = Registry.handle(httpRequest);
 
             outputStream.write(makeHttpMessage(response).getBytes());

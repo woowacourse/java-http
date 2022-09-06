@@ -2,7 +2,7 @@ package nextstep.jwp.vo;
 
 import java.util.Map;
 
-import static nextstep.jwp.vo.HttpHeader.*;
+import static nextstep.jwp.vo.HttpHeader.JSESSION_ID;
 
 
 public class HttpCookie {

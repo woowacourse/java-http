@@ -5,7 +5,7 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.vo.Response;
 import nextstep.jwp.vo.ResponseStatus;
 
-import static nextstep.jwp.vo.HttpHeader.*;
+import static nextstep.jwp.vo.HttpHeader.LOCATION;
 
 public class RegisterService {
 

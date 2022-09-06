@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("경로를 설정하지 않고 요청을 보내면 기본 지정 응답을 반환한다.")
     void process() {
         // given
         final var socket = new StubSocket();
@@ -34,6 +36,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("index.html 파일에 대해 요청을 받으면 index.html 파일을 반환한다.")
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",

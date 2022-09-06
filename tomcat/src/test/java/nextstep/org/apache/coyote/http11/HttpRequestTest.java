@@ -31,8 +31,8 @@ class HttpRequestTest {
         final HttpRequest httpRequest = new HttpRequest(httpReader);
 
         // when
-        final String account = httpRequest.getQueryString("account");
-        final String password = httpRequest.getQueryString("password");
+        final String account = httpRequest.getQueryStringValue("account");
+        final String password = httpRequest.getQueryStringValue("password");
 
         // then
         assertAll(

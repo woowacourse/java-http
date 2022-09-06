@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
@@ -41,11 +42,12 @@ public class Http11Processor implements Runnable, Processor {
             String uri = UrlParser.extractUri(request);
             HttpMethod httpMethod = UrlParser.extractMethod(request);
             HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
+
             String requestBody = extractRequestBody(bufferedReader, httpHeaders, httpMethod);
 
-            Url url = HandlerMapping.from(uri, httpMethod);
+            Url url = HandlerMapping.from(uri, new Http11Request(httpHeaders, httpMethod));
 
-            Http11Response resource = url.getResource(httpHeaders, requestBody);
+            Http11Response resource = url.handle(httpHeaders, requestBody);
             String response = resource.toResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();

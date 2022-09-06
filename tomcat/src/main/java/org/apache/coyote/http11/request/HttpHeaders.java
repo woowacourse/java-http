@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpHeaders {
-    final Map<String, String> header;
+    private final Map<String, String> header;
 
-    public HttpHeaders(Map<String, String> header) {
+    private HttpHeaders(Map<String, String> header) {
         this.header = header;
     }
 
@@ -23,6 +23,10 @@ public class HttpHeaders {
             mp.put(header[0], header[1]);
         }
         return new HttpHeaders(mp);
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        header.put("Set-Cookie", cookie.getValues());
     }
 
     public String get(String key) {

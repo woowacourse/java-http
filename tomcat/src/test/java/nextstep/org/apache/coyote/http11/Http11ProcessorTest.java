@@ -230,4 +230,32 @@ class Http11ProcessorTest {
                 () -> assertThat(socket.output()).isEqualTo(expected)
         );
     }
+
+    @DisplayName("로그인에 성공하면 쿠키를 만들어 보낸다.")
+    @Test
+    void loginAndCreateCookie() {
+        // given
+        String content = "account=gugu&password=password";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
+                "",
+                content);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        User user = InMemoryUserRepository.findByAccount("gugu").get();
+        assertAll(
+                () -> assertThat(user.getPassword()).isEqualTo("password"),
+                () -> assertThat(socket.output()).contains("Set-Cookie")
+        );
+    }
 }

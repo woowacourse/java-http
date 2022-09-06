@@ -22,7 +22,7 @@ public class RequestMappingInfo {
     }
 
     public static RequestMappingInfo from(final HttpRequest httpRequest) {
-        return new RequestMappingInfo(httpRequest.getHttpMethod(), httpRequest.getRequestURI());
+        return new RequestMappingInfo(httpRequest.getHttpMethod(), httpRequest.getRequestURIWithoutQueryParams());
     }
 
     public HttpMethod getHttpMethod() {

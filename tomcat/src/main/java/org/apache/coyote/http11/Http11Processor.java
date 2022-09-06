@@ -8,7 +8,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import javassist.NotFoundException;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.Cookie;
@@ -18,6 +21,7 @@ import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.QueryParams;
 import nextstep.jwp.http.StatusCode;
+import nextstep.jwp.model.User;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.coyote.Processor;
 import org.apache.session.Session;
@@ -118,7 +122,10 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse login(HttpRequest httpRequest) {
         QueryParams queryParams = httpRequest.getFormData();
         if (LoginHandler.canLogin(queryParams)) {
+            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                .orElseThrow(UserNotFoundException::new);
             Session session = sessionManager.generateNewSession();
+            session.createAttribute("user", user);
             sessionManager.add(session);
             Cookie cookie = Cookie.fromJSessionId(session.getId());
             return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,

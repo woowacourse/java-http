@@ -3,7 +3,6 @@ package nextstep.jwp;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ class UserServiceTest {
         final var id = "gugu";
         final var password = "password";
 
-        assertDoesNotThrow(() -> userService.login(Map.of("account", id, "password", password)));
+        assertDoesNotThrow(() -> userService.login(new LoginRequest(id, password)));
     }
 
     @DisplayName("존재하지 않는 아이디로 조회 시 예외 발생")
@@ -31,7 +30,7 @@ class UserServiceTest {
 
         assertThrowsExactly(
                 NoSuchElementException.class,
-                () -> userService.login(Map.of("account", unavailableId, "password", password))
+                () -> userService.login(new LoginRequest(unavailableId, password))
         );
     }
 
@@ -45,7 +44,7 @@ class UserServiceTest {
 
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> userService.login(Map.of("account", id, "password", wrongPassword))
+                () -> userService.login(new LoginRequest(id, wrongPassword))
         );
     }
 }

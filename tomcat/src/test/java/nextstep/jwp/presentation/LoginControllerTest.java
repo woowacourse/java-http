@@ -1,7 +1,9 @@
 package nextstep.jwp.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -9,7 +11,7 @@ import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class RegisterControllerTest {
+class LoginControllerTest {
 
     private StubSocket httpGet(final String url) {
         final String httpRequest = String.join("\r\n",
@@ -33,9 +35,9 @@ class RegisterControllerTest {
     }
 
     @Test
-    void GET_register_를_호출하면_회원가입_페이지로_이동한다() {
+    void GET_login_를_호출하면_로그인_페이지로_이동한다() throws IOException {
         // given
-        final var socket = httpGet("/register");
+        final var socket = httpGet("/login");
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -47,24 +49,11 @@ class RegisterControllerTest {
     }
 
     @Test
-    void POST_register_를_호출과_회원정보를_입력하면_회원가입이_완료되고_메인페이지로_이동한다() {
-        // given
-        final var socket = httpPost("/register", "account=rookie&password=password&email=rookie%40woowahan.com ");
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final String httpResponse = socket.output();
-        assertThat(httpResponse).contains("302 FOUND");
-    }
-
-    @Test
-    void POST_register_를_호출과_중복되는_회원정보를_입력하면_회원가입_페이지로_이동한다() {
+    void POST_login_호출과_로그인_정보를_입력하면_로그인이_완료되고_메인페이지로_이동한다() throws IOException {
         // given
         InMemoryUserRepository.save(new User(1L, "gugu", "password", "hkkang@woowahan.com"));
-        final var socket = httpPost("/register", "account=gugu&password=password&email=hkkang%40woowahan.com ");
+
+        final var socket = httpPost("/login", "account=gugu&password=password");
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -72,6 +61,10 @@ class RegisterControllerTest {
 
         // then
         final String httpResponse = socket.output();
-        assertThat(httpResponse).contains("302 FOUND");
+
+        assertAll(
+            () -> assertThat(httpResponse).contains("200 OK"),
+            () -> assertThat(httpResponse).contains("Set-Cookie")
+        );
     }
 }

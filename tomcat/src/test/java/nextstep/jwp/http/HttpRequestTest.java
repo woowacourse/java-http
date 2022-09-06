@@ -29,4 +29,19 @@ class HttpRequestTest {
 
         assertThat(actual).isTrue();
     }
+
+    @Test
+    @DisplayName("Content-Type이 application/x-www-form-urlencoded이면 RequestBody를 QueryParams 형식으로 가져온다.")
+    void getFormData_success() {
+        String requestLine = "POST /login HTTP/1.1 ";
+        HttpRequest httpRequest = HttpRequest.of(requestLine,
+            HttpHeaders.parse(List.of("Content-Type: application/x-www-form-urlencoded")),
+            "key=value");
+
+        QueryParams actual = httpRequest.getFormData();
+
+        QueryParams expected = QueryParams.from("key=value");
+        assertThat(actual).usingRecursiveComparison()
+            .isEqualTo(expected);
+    }
 }

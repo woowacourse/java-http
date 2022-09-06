@@ -3,11 +3,12 @@ package org.apache.coyote.http11.handler.ApiHandler;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
@@ -33,14 +34,21 @@ public class LoginApiHandler implements Handler {
         final String password = parameters.get("password");
 
         Map<String, String> headers = new LinkedHashMap<>();
-        final User user = findUser(account);
-        if (user.checkPassword(password)) {
-            log.info("로그인 성공! 아이디: " + user.getAccount());
-            headers.put("Location", "/index.html ");
-            return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
+        Optional<User> user = findUser(account);
+
+        if (user.isEmpty()) {
+            return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "", ContentType.HTML);
         }
 
-        return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "/401.html", ContentType.HTML);
+        User existedUser = user.orElseThrow();
+
+        if (!existedUser.checkPassword(password)) {
+            return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "", ContentType.HTML);
+        }
+
+        log.info("로그인 성공! 아이디: " + existedUser.getAccount());
+        headers.put("Location", "/index.html ");
+        return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
     }
 
     private Map<String, String> getParameters(RequestBody requestBody) {
@@ -58,9 +66,8 @@ public class LoginApiHandler implements Handler {
         return parameters;
     }
 
-    private User findUser(String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 account 입니다."));
+    private Optional<User> findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account);
     }
 }
 

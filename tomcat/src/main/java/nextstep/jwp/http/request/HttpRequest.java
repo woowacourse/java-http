@@ -33,10 +33,6 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public String getRequestExtension() {
-        return requestLine.getRequestExtension();
-    }
-
     public Optional<String> getJSessionValue() {
         if (!requestHeaders.isExistCookie()) {
             return Optional.empty();

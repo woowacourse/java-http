@@ -19,6 +19,7 @@ public class AuthController implements Controller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
     private static final String REDIRECT_URL = "/index.html";
+    private static final String LOGIN_URL = "/login.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
 
@@ -37,7 +38,7 @@ public class AuthController implements Controller {
                 return requireAuthByRequestInfo(httpHeader, httpBody);
             }
             if (session == null && httpHeader.getMethod().equals("GET")) {
-                return new ResponseEntity(StatusCode.OK, REDIRECT_URL);
+                return new ResponseEntity(StatusCode.OK, LOGIN_URL);
             }
             if (session.hasAttribute("user")) {
                 return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, REDIRECT_URL).setCookie(session);
@@ -45,7 +46,7 @@ public class AuthController implements Controller {
         }
 
         if (httpHeader.getMethod().equals("GET")) {
-            return new ResponseEntity(StatusCode.OK, REDIRECT_URL);
+            return new ResponseEntity(StatusCode.OK, LOGIN_URL);
         }
         return requireAuthByRequestInfo(httpHeader, httpBody);
     }

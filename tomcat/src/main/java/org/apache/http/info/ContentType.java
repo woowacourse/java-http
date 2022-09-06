@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.http.info;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -11,6 +11,7 @@ public enum ContentType {
     IMAGE_GIF("gif", "image/gif"),
     IMAGE_PNG("png", "image/png"),
     IMAGE_SVG("svg", "image/svg"),
+    FAVICON("ico", "image/x-icon"),
     ;
 
     private final String suffix;
@@ -29,6 +30,6 @@ public enum ContentType {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 }

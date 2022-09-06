@@ -48,4 +48,9 @@ public class HttpHeaders {
         boolean exist = headers.containsKey(SET_COOKIE);
         return exist;
     }
+
+    public boolean isExistCookie() {
+        boolean exist = headers.containsKey(COOKIE);
+        return exist;
+    }
 }

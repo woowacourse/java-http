@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.http.common.HttpCookie;
@@ -31,6 +32,15 @@ public class LoginController extends AbstractController {
 
     @Override
     void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        Optional<String> sessionValue = httpRequest.getJSessionValue();
+        if (sessionValue.isPresent()) {
+            Optional<Session> session = SessionManager.findSession(sessionValue.get());
+            if (session.isPresent()) {
+                File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/index.html").getFile());
+                httpResponse.addResponseBody(file);
+                return;
+            }
+        }
         File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/login.html").getFile());
         httpResponse.addResponseBody(file);
     }

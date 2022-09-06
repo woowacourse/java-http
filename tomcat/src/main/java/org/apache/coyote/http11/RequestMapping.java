@@ -10,11 +10,11 @@ public class RequestMapping {
 
     private static final List<Controller> controllers = new ArrayList<>();
 
-    public static void addController(Controller controller) {
+    public static void addController(final Controller controller) {
         controllers.add(controller);
     }
 
-    public static Controller getController(HttpRequest httpRequest) {
+    public static Controller getController(final HttpRequest httpRequest) {
         return controllers.stream()
                 .filter(controller -> controller.canHandle(httpRequest))
                 .findFirst()

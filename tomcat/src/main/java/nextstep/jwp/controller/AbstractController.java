@@ -21,7 +21,7 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedMethodException();
     }
 
-    protected abstract HttpResponse doGet(HttpRequest httpRequest) throws Exception;
+    protected abstract HttpResponse doGet(final HttpRequest httpRequest) throws Exception;
 
-    protected abstract HttpResponse doPost(HttpRequest httpRequest) throws Exception;
+    protected abstract HttpResponse doPost(final HttpRequest httpRequest) throws Exception;
 }

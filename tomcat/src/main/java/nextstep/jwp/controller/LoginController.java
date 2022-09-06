@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     private static final String PATH_REDIRECT = "/index.html";
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException, URISyntaxException {
+    protected HttpResponse doGet(final HttpRequest httpRequest) throws IOException, URISyntaxException {
         if (hasLoggedIn(httpRequest)) {
             return HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
         }

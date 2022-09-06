@@ -91,7 +91,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("로그인 페이지를 응답한다.")
+    @DisplayName("로그인 성공 시 메인 페이지를 응답한다.")
     void login() {
         // given
         final String httpRequest = String.join(CRLF,
@@ -108,12 +108,36 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK " + CRLF +
-                "Content-Type: text/html;charset=utf-8 " + CRLF +
-                "Content-Length: 3796 " + CRLF +
+        var expected = "HTTP/1.1 302 Found " + CRLF +
+                "Location: /index.html " + CRLF +
                 CRLF +
-                getBody(resource);
+                "";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("로그인 실패 시 401 페이지를 응답한다.")
+    void login_401() {
+        // given
+        final String httpRequest = String.join(CRLF,
+                "GET /login?account=gugu2&password=nono HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found " + CRLF +
+                "Location: /401.html " + CRLF +
+                CRLF +
+                "";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

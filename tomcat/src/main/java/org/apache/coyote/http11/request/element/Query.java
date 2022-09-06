@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.element;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -17,14 +18,30 @@ public class Query {
     }
 
     private Map<String, String> extractQuery(String uri) {
+        if (!uri.contains(PATH_DELIMITER)) {
+            return new HashMap<>();
+        }
         String[] query = uri.substring(uri.indexOf(PATH_DELIMITER) + 1)
                 .split(QUERY_DELIMITER);
+
         return Arrays.stream(query)
                 .map(element -> element.split(PARAM_DELIMITER))
                 .collect(Collectors.toMap(split -> split[0], split -> split[1]));
     }
 
+    public boolean contains(String param) {
+        return params.containsKey(param);
+    }
+
     public String find(String param) {
         return params.get(param);
+    }
+
+    public boolean isEmpty() {
+        return params.isEmpty();
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 }

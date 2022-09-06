@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.request.element.Query;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
 import servlet.mapping.ResponseEntity;
@@ -21,9 +22,8 @@ public class Controller {
         return new ResponseEntity(method, "/login.html", HttpStatus.OK);
     }
 
-    public ResponseEntity login(HttpMethod method, String path) {
-        userService.login(path);
-        return new ResponseEntity(method, "/index.html", HttpStatus.FOUND);
+    public ResponseEntity login(Query query) {
+        return userService.login(query);
     }
 
     public ResponseEntity findResource(HttpMethod method, String path) {

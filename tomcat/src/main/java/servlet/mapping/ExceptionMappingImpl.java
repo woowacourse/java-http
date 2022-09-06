@@ -19,7 +19,7 @@ public class ExceptionMappingImpl implements ExceptionMapping {
 
     @Override
     public ResponseEntity map(Exception exception) {
-        LOG.error(exception.getMessage(), exception);
+        LOG.error(String.valueOf(exception.getClass()), exception);
         try {
             throw exception;
         } catch (NoSuchElementException e) {

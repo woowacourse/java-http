@@ -12,7 +12,7 @@ class QueryTest {
     @Test
     @DisplayName("쿼리를 매핑한 후 조회할 수 있다.")
     void find() {
-        Query query = new Query("login?name=hunch&password=1234");
+        Query query = new Query("/login?name=hunch&password=1234");
 
         assertThat(query.find("name")).isEqualTo("hunch");
         assertThat(query.find("password")).isEqualTo("1234");

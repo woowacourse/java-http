@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.element.Query;
 import org.apache.coyote.http11.response.element.HttpMethod;
 
 public class HandlerMappingImpl implements HandlerMapping {
@@ -21,15 +22,16 @@ public class HandlerMappingImpl implements HandlerMapping {
     public ResponseEntity map(HttpRequest request) {
         HttpMethod method = request.getMethod();
         String path = request.getPath();
+        Query query = request.getQuery();
 
         if (method == GET && List.of("/", "").contains(path)) {
             return controller.welcome(method);
         }
-        if (method == GET && path.equals("/login")) {
+        if (method == GET && path.equals("/login") && query.isEmpty()) {
             return controller.goLoginPage(method);
         }
-        if (method == GET && path.split("\\?")[0].equals("/login")) {
-            return controller.login(method, path);
+        if (method == GET && path.equals("/login") && query.contains("account") && query.contains("password")) {
+            return controller.login(query);
         }
         if (method == GET && getClass().getClassLoader().getResource(ROOT + path) != null) {
             return controller.findResource(method, path);

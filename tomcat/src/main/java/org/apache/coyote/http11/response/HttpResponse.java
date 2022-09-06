@@ -21,6 +21,12 @@ public class HttpResponse {
         return new HttpResponse(header, responseBody);
     }
 
+    public static HttpResponse found(String uri) {
+        HttpResponseHeader header = new HttpResponseHeader(HttpStatus.FOUND)
+                .addLocation(uri);
+        return new HttpResponse(header, HttpResponseBody.empty());
+    }
+
     public HttpResponseBody getBody() {
         return body;
     }

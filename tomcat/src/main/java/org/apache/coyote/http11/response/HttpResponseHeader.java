@@ -27,4 +27,9 @@ public class HttpResponseHeader {
         headers.add("Content-Length: " + contentLength + " ");
         return this;
     }
+
+    public HttpResponseHeader addLocation(String uri) {
+        headers.add("Location: " + uri + " ");
+        return this;
+    }
 }

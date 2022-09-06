@@ -169,10 +169,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n";
+        var expectedResponseLine = "HTTP/1.1 302 Found";
+        var expectedLocationHeader = "Location: /index.html";
+        var expectedCookiesHeader = "Set-Cookie: JSESSIONID=";
         System.out.println(socket.output());
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+                .contains(expectedResponseLine, expectedLocationHeader, expectedCookiesHeader);
     }
 
     @DisplayName("로그인에 실패한다.")

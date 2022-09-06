@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.coyote.exception.InvalidHttpRequestException;
+import org.apache.coyote.http11.model.HttpCookie;
+import org.apache.coyote.http11.model.HttpHeaderType;
 
 public class HttpRequestHeader {
 
@@ -13,12 +15,24 @@ public class HttpRequestHeader {
     private static final int VALUE = 1;
 
     private final Map<String, String> values;
+    private final HttpCookie httpCookie;
 
-    public HttpRequestHeader(List<String> headerValues) {
-        this.values = parseHeaderValues(headerValues);
+    private HttpRequestHeader(Map<String, String> values, HttpCookie httpCookie) {
+        this.values = values;
+        this.httpCookie = httpCookie;
     }
 
-    private Map<String, String> parseHeaderValues(List<String> headerValues) {
+    public static HttpRequestHeader from(List<String> headerValues) {
+        Map<String, String> headers = parseHeaderValues(headerValues);
+        if (headers.containsKey(HttpHeaderType.COOKIE)) {
+            String cookiesBeforeParsed = headers.remove(HttpHeaderType.COOKIE);
+            HttpCookie cookie = HttpCookie.of(cookiesBeforeParsed);
+            return new HttpRequestHeader(headers, cookie);
+        }
+        return new HttpRequestHeader(headers, HttpCookie.empty());
+    }
+
+    private static Map<String, String> parseHeaderValues(List<String> headerValues) {
         validateEmptyHeader(headerValues);
         Map<String, String> values = new HashMap<>();
         for (String headerValue : headerValues) {
@@ -40,5 +54,13 @@ public class HttpRequestHeader {
 
     public boolean hasNotHeader(String key) {
         return !values.containsKey(key);
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
+    }
+
+    public String getCookieValue(String key) {
+        return httpCookie.getValue(key);
     }
 }

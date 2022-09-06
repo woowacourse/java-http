@@ -20,6 +20,7 @@ class HttpRequestTest {
                 + "Connection: keep-alive\n"
                 + "Content-Length: 58\n"
                 + "Content-Type: application/x-www-form-urlencoded\n"
+                + "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n"
                 + "Accept: */*\n"
                 + "\n"
                 + "account=gugu&password=password&email=hkkang%40woowahan.com\n";
@@ -37,7 +38,11 @@ class HttpRequestTest {
                 () -> assertThat(httpRequest.getHeaderValue("Accept")).isEqualTo("*/*"),
                 () -> assertThat(httpRequest.getBodyValue("account")).isEqualTo("gugu"),
                 () -> assertThat(httpRequest.getBodyValue("password")).isEqualTo("password"),
-                () -> assertThat(httpRequest.getBodyValue("email")).isEqualTo("hkkang%40woowahan.com")
+                () -> assertThat(httpRequest.getBodyValue("email")).isEqualTo("hkkang%40woowahan.com"),
+                () -> assertThat(httpRequest.getCookieValue("yummy_cookie")).isEqualTo("choco"),
+                () -> assertThat(httpRequest.getCookieValue("tasty_cookie")).isEqualTo("strawberry"),
+                () -> assertThat(httpRequest.getCookieValue("JSESSIONID")).isEqualTo(
+                        "656cef62-e3c4-40bc-a8df-94732920ed46")
         );
     }
 
@@ -63,7 +68,7 @@ class HttpRequestTest {
 
     @DisplayName("Request body가 없는 요청으로 HttpRequest 객체를 올바르게 생성한다.")
     @Test
-    void createHttpRequestWithNoBody() throws IOException {
+    void createHttpRequestWithoutBody() throws IOException {
         String request = "POST /register HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";

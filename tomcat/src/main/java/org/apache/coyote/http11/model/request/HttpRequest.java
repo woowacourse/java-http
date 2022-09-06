@@ -46,7 +46,7 @@ public class HttpRequest {
         List<String> requestHeader = reader.lines()
                 .takeWhile(line -> !EMPTY_LINE.equals(line))
                 .collect(Collectors.toList());
-        return new HttpRequestHeader(requestHeader);
+        return HttpRequestHeader.from(requestHeader);
     }
 
     public HttpMethod getMethod() {
@@ -67,5 +67,9 @@ public class HttpRequest {
 
     public String getBodyValue(String key) {
         return requestBody.getBodyValue(key);
+    }
+
+    public String getCookieValue(String key) {
+        return requestHeader.getCookieValue(key);
     }
 }

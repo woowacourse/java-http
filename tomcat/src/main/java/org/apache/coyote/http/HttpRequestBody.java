@@ -14,7 +14,7 @@ public class HttpRequestBody {
         this.values = values;
     }
 
-    public static HttpRequestBody from(final BufferedReader bufferedReader, final int contentLength)
+    public static HttpRequestBody of(final BufferedReader bufferedReader, final int contentLength)
             throws IOException {
         if (contentLength == 0) {
             return new HttpRequestBody(Collections.emptyMap());

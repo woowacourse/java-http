@@ -12,7 +12,7 @@ public class GetHomeServlet implements Servlet {
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
         return HttpResponse.init(HttpStatusCode.OK)
-                .setResponseBody(WELCOME_MESSAGE);
+                .setBody(WELCOME_MESSAGE);
     }
 
     @Override

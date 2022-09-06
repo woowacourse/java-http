@@ -10,7 +10,7 @@ public class GetIndexServlet implements Servlet {
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
         return HttpResponse.init(HttpStatusCode.OK)
-                .setResponseBodyByPath("/index.html");
+                .setBodyByPath("/index.html");
     }
 
     @Override

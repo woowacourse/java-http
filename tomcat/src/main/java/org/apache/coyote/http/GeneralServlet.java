@@ -5,7 +5,7 @@ public class GeneralServlet implements Servlet {
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
         return HttpResponse.init(HttpStatusCode.OK)
-                .setResponseBodyByPath(httpRequest.getPath());
+                .setBodyByPath(httpRequest.getPath());
     }
 
     @Override

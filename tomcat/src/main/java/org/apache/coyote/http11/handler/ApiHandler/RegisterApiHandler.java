@@ -35,7 +35,7 @@ public class RegisterApiHandler implements Handler {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
         } catch (Exception e) {
-            return ApiHandlerResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, headers, "/500.html", ContentType.HTML);
+            return ApiHandlerResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, headers, "", ContentType.HTML);
         }
 
         headers.put("Location", "/index.html ");

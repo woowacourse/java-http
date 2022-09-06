@@ -20,6 +20,10 @@ public class Cookie {
         cookies.put(cookieKey, cookieValue);
     }
 
+    public String getCookie(String cookieKey) {
+        return cookies.get(cookieKey);
+    }
+
     public boolean isEmpty() {
         return cookies.isEmpty();
     }

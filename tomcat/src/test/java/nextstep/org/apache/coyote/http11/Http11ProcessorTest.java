@@ -128,7 +128,7 @@ class Http11ProcessorTest {
         final URL resource = getClass()
                 .getClassLoader()
                 .getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
@@ -164,7 +164,7 @@ class Http11ProcessorTest {
         String cookie = output.split("\r\n")[1];
         assertThat(cookie.contains("Set-Cookie: JSESSIONID=")).isTrue();
 
-        String expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 cookie + "\r\n"+
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
@@ -226,7 +226,7 @@ class Http11ProcessorTest {
                 .getClassLoader()
                 .getResource("static/index.html");
 
-        String expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+

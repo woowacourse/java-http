@@ -1,16 +1,35 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Servlet;
+import org.apache.http.BasicHttpRequest;
+import org.apache.http.HttpRequest;
+import org.reflections.Reflections;
+import org.richard.utils.CustomReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_SPRING_SERVLET_PACKAGE = "org.springframework.servlet";
+    private static final List<Servlet> servlets;
+
+    static {
+        servlets = new Reflections(DEFAULT_SPRING_SERVLET_PACKAGE)
+                .getSubTypesOf(Servlet.class)
+                .stream()
+                .map(CustomReflectionUtils::newInstance)
+                .collect(Collectors.toList());
+    }
 
     private final Socket connection;
 
@@ -25,22 +44,39 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream();
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        ) {
+            final var requestHttpMessage = parseRequest(bufferedReader);
+            final var httpRequest = BasicHttpRequest.from(requestHttpMessage);
+            final var supportServlet = findSupportServlet(httpRequest);
+            final var httpResponse = supportServlet.doService(httpRequest);
+            final var responseHttpMessage = httpResponse.getResponseHttpMessage();
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            bufferedWriter.write(responseHttpMessage);
+            bufferedWriter.flush();
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Servlet findSupportServlet(final HttpRequest httpRequest) {
+        return servlets.stream()
+                .filter(servlet -> servlet.support(httpRequest))
+                .findAny()
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    private String parseRequest(final BufferedReader bufferedReader) throws IOException {
+        final var request = new StringBuilder();
+
+        while (bufferedReader.ready()) {
+            request.append(String.format("%s%s", bufferedReader.readLine(), System.lineSeparator()));
+        }
+
+        return request.toString();
     }
 }

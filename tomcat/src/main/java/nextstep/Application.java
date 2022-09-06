@@ -10,7 +10,7 @@ public class Application {
 
     public static void main(String[] args) {
         log.info("web server start.");
-        final var tomcat = new Tomcat();
+        final Tomcat tomcat = new Tomcat();
         tomcat.start();
     }
 }

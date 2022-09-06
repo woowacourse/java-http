@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dto.ResponseComponent;
@@ -46,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info(http11Request.getUri());
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
-            ResponseComponent responseComponent = http11Handler.handle(log, http11Request.getUri());
+            ResponseComponent responseComponent = http11Handler.handle(http11Request);
 
             final var response = http11ResponseHandler.makeResponse(responseComponent);
 

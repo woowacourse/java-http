@@ -21,15 +21,14 @@ public class QueryStringProcessor {
         return uri.split(QUERY_STRING_IDENTIFIER_FOR_SPLIT)[RESOURCE_INDEX];
     }
 
-    public Map<String, String> extractQueryString(String uri) {
-        String queryString = parseQueryString(uri);
+    public Map<String, String> extractQueryStringDatas(String queryString) {
         List<String> queryStringElements = List.of(queryString.split(QUERY_STRING_ELEMENT_DELIMITER));
         return queryStringElements.stream()
                 .map(it -> it.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
-    private String parseQueryString(String uri) {
+    public String parseQueryString(String uri) {
         return uri.split(QUERY_STRING_IDENTIFIER_FOR_SPLIT)[QUERY_STRING_INDEX];
     }
 }

@@ -7,10 +7,23 @@ public class Http11ResponseHandler {
     private static final String LINE = "\r\n";
 
     public String makeResponse(ResponseComponent responseComponent) {
+        if (responseComponent.getLocation() != null) {
+            return makeRedirectResponse(responseComponent);
+        }
         return String.join(LINE,
                 String.format("HTTP/1.1 %d %s ", responseComponent.getStatusCode().getCode(), responseComponent.getStatusCode()),
                 String.format("Content-Type: %s;charset=utf-8 ", responseComponent.getContentType()),
                 String.format("Content-Length: %s ", responseComponent.getContentLength()),
+                "",
+                responseComponent.getBody());
+    }
+
+    private String makeRedirectResponse(ResponseComponent responseComponent) {
+        return String.join(LINE,
+                String.format("HTTP/1.1 %d %s ", responseComponent.getStatusCode().getCode(), responseComponent.getStatusCode()),
+                String.format("Content-Type: %s;charset=utf-8 ", responseComponent.getContentType()),
+                String.format("Content-Length: %s ", responseComponent.getContentLength()),
+                String.format("Location: %s ", responseComponent.getLocation()),
                 "",
                 responseComponent.getBody());
     }

@@ -5,7 +5,6 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.dto.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11request.Http11Request;
-import org.slf4j.Logger;
 
 public class DefaultPageHandler implements Http11Handler {
 
@@ -18,7 +17,7 @@ public class DefaultPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Logger log, String uri) {
+    public ResponseComponent handle(Http11Request http11Request) {
         return new ResponseComponent(
                 StatusCode.OK,
                 ExtensionContentType.HTML.getContentType(),

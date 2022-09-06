@@ -8,7 +8,6 @@ import org.apache.coyote.http11.http11handler.login.LoginService;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
 import org.apache.coyote.http11.http11request.Http11Request;
-import org.slf4j.Logger;
 
 public class LoginPageHandler implements Http11Handler {
 
@@ -29,9 +28,11 @@ public class LoginPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Logger log, String uri) {
+    public ResponseComponent handle(Http11Request http11Request) {
+        String uri = http11Request.getUri();
         if (queryStringProcessor.existQueryString(uri)) {
-            Map<String, String> queryStrings = queryStringProcessor.extractQueryString(uri);
+            String queryString = queryStringProcessor.parseQueryString(uri);
+            Map<String, String> queryStrings = queryStringProcessor.extractQueryStringDatas(queryString);
             return makeResponseComponentAccordingToLogin(queryStrings);
         }
 

@@ -6,7 +6,6 @@ import org.apache.coyote.http11.dto.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11request.Http11Request;
-import org.slf4j.Logger;
 
 public class RegisterPageHandler implements Http11Handler {
 
@@ -21,9 +20,8 @@ public class RegisterPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Logger log, String uri) {
-
-        uri = handlerSupporter.addHtmlExtension(uri);
+    public ResponseComponent handle(Http11Request http11Request) {
+        String uri = handlerSupporter.addHtmlExtension(http11Request.getUri());
         return handlerSupporter.extractElements(uri, StatusCode.OK);
     }
 }

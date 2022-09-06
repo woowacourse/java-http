@@ -6,7 +6,6 @@ import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
 import org.apache.coyote.http11.http11request.Http11Request;
-import org.slf4j.Logger;
 
 public class IndexPageHandler implements Http11Handler {
 
@@ -23,7 +22,8 @@ public class IndexPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Logger log, String uri) {
+    public ResponseComponent handle(Http11Request http11Request) {
+        String uri = http11Request.getUri();
         if (handlerSupporter.noExtension(uri)) {
             uri = handlerSupporter.addHtmlExtension(uri);
         }

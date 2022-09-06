@@ -9,6 +9,7 @@ public class HttpRequest {
 
     private static final String BLANK = " ";
     private static final int REQUEST_LINE_COUNT = 3;
+    private static final int REQUEST_LINE_HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_LINE_URI_INDEX = 1;
 
     private static final String URI_QUERY_PARAM_DELIMITER = "?";
@@ -19,26 +20,39 @@ public class HttpRequest {
 
     private static final String EMPTY_QUERY_PARAMETER = "";
 
+    private final HttpMethod httpMethod;
     private final String path;
     private final RequestParams queryParams;
     private final ContentType contentType;
+    private final HttpRequestHeaders httpRequestHeaders;
+    private final HttpCookie httpCookie;
+    private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final String path, final RequestParams queryParams,
-                       final ContentType contentType) {
+    public HttpRequest(final HttpMethod httpMethod, final String path, final RequestParams queryParams,
+                       final ContentType contentType, final HttpRequestHeaders httpRequestHeaders,
+                       final HttpCookie httpCookie, final HttpRequestBody httpRequestBody) {
+        this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
+        this.httpRequestHeaders = httpRequestHeaders;
+        this.httpCookie = httpCookie;
+        this.httpRequestBody = httpRequestBody;
     }
 
-    public static HttpRequest from(final String requestLine) {
+    public static HttpRequest of(final String requestLine, final HttpRequestHeaders httpRequestHeaders,
+                                 final HttpRequestBody httpRequestBody) {
         String[] requestLineValues = splitRequestLine(requestLine);
 
+        HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
         String uri = requestLineValues[REQUEST_LINE_URI_INDEX];
         String path = parsePath(uri);
         RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
         ContentType contentType = parseContentType(path);
+        HttpCookie httpCookie = HttpCookie.from(httpRequestHeaders.getCookie());
 
-        return new HttpRequest(path, queryParams, contentType);
+        return new HttpRequest(httpMethod, path, queryParams, contentType, httpRequestHeaders, httpCookie,
+                httpRequestBody);
     }
 
     private static String[] splitRequestLine(final String requestLine) {
@@ -85,6 +99,18 @@ public class HttpRequest {
         return path.contains(STATIC_EXTENTION_DOT);
     }
 
+    public boolean isEmptySessionId() {
+        return httpCookie.isEmptySessionId();
+    }
+
+    public boolean isGetMethod() {
+        return httpMethod == HttpMethod.GET;
+    }
+
+    public boolean isPostMethod() {
+        return httpMethod == HttpMethod.POST;
+    }
+
     public String getFilePath() {
         if (path.contains(STATIC_EXTENTION_DOT)) {
             return path;
@@ -94,6 +120,10 @@ public class HttpRequest {
 
     public boolean isRootPath() {
         return path.equals(ROOT_PATH);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
     }
 
     public String getPath() {
@@ -106,6 +136,14 @@ public class HttpRequest {
 
     public ContentType getContentType() {
         return contentType;
+    }
+
+    public String getJsessionId() {
+        return httpCookie.getJsessionId();
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
     }
 
     @Override

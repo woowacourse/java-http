@@ -10,6 +10,7 @@ public enum ContentType {
     TEXT_CSS("css", "text/css"),
     APPLICATION_JAVASCRIPT("js", "application/javascript"),
     IMAGE_X_ICON("ico", "image/x-icon"),
+    APPLICATION_JSON("json", "application/json"),
     ;
 
     private final String extension;

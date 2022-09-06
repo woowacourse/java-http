@@ -49,10 +49,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void route(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-        if (httpRequest.isEmpty()) {
-            log.info("isEmpty = {}", httpRequest);
-            return;
-        }
         ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(httpRequest);
         if (apiHandlerMethod != null) {
             log.info("API Request = {}", httpRequest);

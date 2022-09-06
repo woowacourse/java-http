@@ -15,13 +15,13 @@ public class Headers {
     public Headers(final BufferedReader reader) {
         try {
             while (reader.ready()) {
-                final String headerKeyValue = reader.readLine();
-                if (headerKeyValue.contains(HEADER_DELIMINATOR)) {
-                    final String[] keyValue = headerKeyValue.split(HEADER_DELIMINATOR);
-                    final String key = keyValue[0];
-                    final String value = keyValue[1];
+                final String keyValueString = reader.readLine();
+                if (keyValueString.contains(HEADER_DELIMINATOR)) {
+                    final String[] keyValuePair = keyValueString.split(HEADER_DELIMINATOR);
+                    final String key = keyValuePair[0];
+                    final String value = keyValuePair[1];
                     keyValues.put(key, value);
-                } else if (StringUtils.isEmpty(headerKeyValue)) {
+                } else if (StringUtils.isEmpty(keyValueString)) {
                     break;
                 }
             }

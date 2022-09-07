@@ -6,6 +6,7 @@ public class Cookie {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String JSESSIONID = "JSESSIONID";
+    private static final int NO_VALUE_IN_COOKIE_SIZE = 1;
 
     private final String key;
     private final String value;
@@ -17,6 +18,7 @@ public class Cookie {
 
     public static Cookie from(String cookie) {
         final String[] splitCookie = cookie.split(COOKIE_DELIMITER);
+        checkCookieValue(splitCookie);
 
         return new Cookie(splitCookie[KEY_INDEX], splitCookie[VALUE_INDEX]);
     }
@@ -47,5 +49,11 @@ public class Cookie {
 
     public String getValue() {
         return value;
+    }
+
+    private static void checkCookieValue(final String[] splitCookie) {
+        if (splitCookie.length == NO_VALUE_IN_COOKIE_SIZE) {
+            throw new IllegalArgumentException("쿠키 값이 존재하지 않습니다.");
+        }
     }
 }

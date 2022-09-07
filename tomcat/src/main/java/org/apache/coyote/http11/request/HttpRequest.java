@@ -50,7 +50,6 @@ public class HttpRequest {
     }
 
     private static String readRequestBody(final BufferedReader reader, final String contentLength) throws IOException {
-        log.info("content=length ::: {}", contentLength);
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         reader.read(buffer, 0, length);
@@ -77,7 +76,6 @@ public class HttpRequest {
             requestHeaders.append(line)
                     .append("\r\n");
         }
-        log.info("request-headers ::: {}", requestHeaders.toString());
         return parseHeaders(requestHeaders.toString());
     }
 
@@ -92,7 +90,6 @@ public class HttpRequest {
     }
 
     private static String parseUrl(final String requestHeader) {
-        log.info("requestHeader::: {}", requestHeader);
         return requestHeader.split(" ")[1]
                 .split("\\?")[0];
     }
@@ -133,5 +130,13 @@ public class HttpRequest {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

@@ -8,7 +8,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
@@ -56,10 +58,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getResponse(final HttpRequest httpRequest) throws IOException {
-        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
+        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams(), httpRequest.getRequestBody());
     }
 
-    private HttpResponse getResponse(final String url, final Map<String, String> requestParam) throws IOException {
+    private HttpResponse getResponse(final String url, final Map<String, String> requestParam, final String requestBody)
+            throws IOException {
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
             final Map<String, String> headers = Map.of(CONTENT_TYPE, "text/html");
@@ -76,17 +79,18 @@ public class Http11Processor implements Runnable, Processor {
                 return createUserSuccessResponse();
             }
 
-            return createLoginFailResponse();
+            return create401Response();
         }
 
-        if ("/register".equals(url) && requestParam.isEmpty()) {
+        if ("/register".equals(url) && requestBody.isEmpty()) {
             return createStaticFileResponse(url + ".html");
         }
 
         if ("/register".equals(url)) {
-            if (RegisterHandler.handle(requestParam)) {
+            if (RegisterHandler.handle(parse(requestBody))) {
                 return createUserSuccessResponse();
             }
+            return create401Response();
         }
 
         if (url.contains(".")) {
@@ -94,6 +98,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+    }
+
+    private Map<String, String> parse(final String requestBody) {
+        return Arrays.stream(requestBody.split("&"))
+                .map(data -> data.split("="))
+                .collect(Collectors.toMap(data -> data[0], data -> data[1]));
     }
 
     private HttpResponse createStaticFileResponse(final String url) throws IOException {
@@ -112,7 +122,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.create302Response(Map.of(CONTENT_TYPE, Files.probeContentType(path)), responseBody);
     }
 
-    private HttpResponse createLoginFailResponse() throws IOException {
+    private HttpResponse create401Response() throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));

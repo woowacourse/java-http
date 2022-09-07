@@ -11,8 +11,12 @@ public class RegisterHandler {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public static boolean handle(Map<String, String> requestParam) {
-        User user = new User(requestParam.get("account"), requestParam.get("password"), requestParam.get("email"));
+    public static boolean handle(Map<String, String> body) {
+        String account = body.get("account");
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return false;
+        }
+        User user = new User(account, body.get("password"), body.get("email"));
         InMemoryUserRepository.save(user);
 
         return true;

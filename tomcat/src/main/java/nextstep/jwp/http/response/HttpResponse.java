@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import nextstep.jwp.http.common.ContentType;
 import nextstep.jwp.http.common.HttpCookie;
@@ -86,8 +85,7 @@ public class HttpResponse {
         this.responseBody = new ResponseBody(new String(Files.readAllBytes(file.toPath())));
     }
 
-    @Override
-    public String toString() {
+    public String getHttpResponse() {
         if (httpHeaders.isExistSetCookie()) {
             String response = String.join("\r\n",
                 "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,

@@ -45,6 +45,6 @@ public class LoginService {
     }
 
     public boolean isAlreadyLogin(final Session session) {
-        return sessionManager.findSession(session.getId()) != null;
+        return session.getId() != null && sessionManager.findSession(session.getId()) != null;
     }
 }

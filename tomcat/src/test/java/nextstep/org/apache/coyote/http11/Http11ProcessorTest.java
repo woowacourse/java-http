@@ -144,4 +144,58 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("로그인에 성공하면 index.html로 리다이렉트한다.")
+    void login_success() {
+        // given
+        String account = "gugu";
+        String passowrd = "password";
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=" + account + "&password=" + passowrd + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다.")
+    void login_fail() {
+        // given
+        String account = "gugu";
+        String password = "wrongPassword";
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=" + account + "&password=" + password + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /401.html";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

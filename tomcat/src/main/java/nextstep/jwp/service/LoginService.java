@@ -9,12 +9,9 @@ import org.slf4j.LoggerFactory;
 public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
+    private static final String LOGIN_ERROR_MESSAGE = "비밀번호가 맞지 않습니다.";
 
-    public void login(Map<String, String> queryParams) {
-        if (queryParams.isEmpty()) {
-            return;
-        }
-
+    public boolean login(Map<String, String> queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
@@ -22,12 +19,14 @@ public class LoginService {
 
         if (checkValidPassword(user, password)) {
             log.info(user.toString());
+            return true;
         }
+        return false;
     }
 
     private boolean checkValidPassword(User user, String password) {
         if (!user.checkPassword(password)) {
-            log.warn("비밀번호가 맞지 않습니다.");
+            log.warn(LOGIN_ERROR_MESSAGE);
             return false;
         }
         return true;

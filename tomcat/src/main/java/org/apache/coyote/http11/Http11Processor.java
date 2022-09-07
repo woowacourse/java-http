@@ -21,7 +21,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String HTML_MIME_TYPE = "text/html";
     private static final String RESOURCES_PREFIX = "static";
-
+    private static final String LOGIN_SUCCESS_REDIRECT_PAGE = "/index.html";
+    private static final String LOGIN_FAIL_REDIRECT_PAGE = "/401.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -67,9 +68,11 @@ public class Http11Processor implements Runnable, Processor {
             return toResponse(responseBody, HTML_MIME_TYPE);
         }
 
-        if (HttpMethod.GET.equals(httpMethod) && httpUrl.startsWith("/login")) {
+        if (HttpMethod.GET.equals(httpMethod) && httpUrl.startsWith("/login") && !queryParams.isEmpty()) {
             LoginService loginService = new LoginService();
-            loginService.login(queryParams);
+            boolean loginResult = loginService.login(queryParams);
+            String page = getLoginRedirectPage(loginResult);
+            return toRedirectResponse(page);
         }
 
         String fileName = ViewResolver.convert(httpUrl);
@@ -77,6 +80,13 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = toResponseBody(file);
         FileType fileType = FileType.from(fileName);
         return toResponse(responseBody, fileType.getMimeType());
+    }
+
+    private String getLoginRedirectPage(boolean loginResult) {
+        if (loginResult) {
+            return LOGIN_SUCCESS_REDIRECT_PAGE;
+        }
+        return LOGIN_FAIL_REDIRECT_PAGE;
     }
 
     private File getFile(String fileName) throws URISyntaxException {
@@ -106,5 +116,11 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String toRedirectResponse(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + redirectUrl);
     }
 }

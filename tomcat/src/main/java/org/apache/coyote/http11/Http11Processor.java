@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static nextstep.jwp.http.StatusCode.NOT_FOUND;
 import static nextstep.jwp.http.StatusCode.matchStatusCode;
 
 import java.io.BufferedReader;
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -34,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String ACCOUNT_KEY = "account";
 
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
@@ -93,6 +96,13 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.matches("/", HttpMethod.GET)) {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_PLAIN, "Hello world!");
         }
+        if (httpRequest.matches("/register", HttpMethod.GET)) {
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource("/register.html")));
+        }
+        if (httpRequest.matches("/register", HttpMethod.POST)) {
+            return signUp(httpRequest);
+        }
         if (httpRequest.matches("/login", HttpMethod.GET)) {
             return handleLoginPage(httpRequest);
         }
@@ -108,6 +118,25 @@ public class Http11Processor implements Runnable, Processor {
         return readFile(httpRequest);
     }
 
+    private HttpResponse signUp(HttpRequest httpRequest) {
+        QueryParams queryParams = httpRequest.getFormData();
+        try {
+            String account = queryParams.get(ACCOUNT_KEY);
+            String email = queryParams.get("email");
+            String password = queryParams.get("password");
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                User savedUser = new User(account, password, email);
+                InMemoryUserRepository.save(savedUser);
+                return HttpResponse.of(StatusCode.CREATED, ContentType.TEXT_HTML,
+                    FileUtils.readFile(getResource("/index.html")), setCookie(savedUser));
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("이미 존재하는 회원이거나 모든 파라미터가 입력되지 않아 회원가입에 실패하였습니다." , e);
+        }
+        return HttpResponse.of(NOT_FOUND, ContentType.TEXT_HTML, FileUtils.readFile(getResource("404.html")));
+    }
+
     private HttpResponse handleLoginPage(HttpRequest httpRequest) {
         if (httpRequest.isLoggedInUser(sessionManager)) {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
@@ -120,17 +149,20 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse login(HttpRequest httpRequest) {
         QueryParams queryParams = httpRequest.getFormData();
         if (LoginHandler.canLogin(queryParams)) {
-            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+            User user = InMemoryUserRepository.findByAccount(queryParams.get(ACCOUNT_KEY))
                 .orElseThrow(UserNotFoundException::new);
-            Session session = sessionManager.generateNewSession();
-            session.createAttribute("user", user);
-            sessionManager.add(session);
-            Cookie cookie = Cookie.fromJSessionId(session.getId());
             return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
-                FileUtils.readFile(getResource("/index.html")), cookie);
+                FileUtils.readFile(getResource("/index.html")), setCookie(user));
         }
         return HttpResponse.of(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML,
             FileUtils.readFile(getResource("/401.html")));
+    }
+
+    private Cookie setCookie(User user) {
+        Session session = sessionManager.generateNewSession();
+        session.createAttribute("user", user);
+        sessionManager.add(session);
+        return Cookie.fromJSessionId(session.getId());
     }
 
     private HttpResponse readFile(HttpRequest httpRequest) {

@@ -42,7 +42,7 @@ http://localhost:8080/register으로 접속하면 회원가입 페이지(registe
 회원가입을 완료하면 `index.html`로 리다이렉트한다.
 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
 ```
-- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [x] 로그인에 성공하면 HTTP Response의 헤더에 Set-Cookie가 존재한다.
 ```text
 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
 HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.

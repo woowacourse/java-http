@@ -11,6 +11,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -60,7 +61,6 @@ public class Http11Processor implements Runnable, Processor {
             final RequestLine requestLine = httpRequest.getRequestLine();
             final String uri = requestLine.getUri();
             final String path = rewrite(getPath(uri), requestLine.getMethod());
-            final Parameters queryParameters = Parameters.fromUri(uri);
 
             final String response = handle(path, httpRequest);
             outputStream.write(response.getBytes());
@@ -97,6 +97,8 @@ public class Http11Processor implements Runnable, Processor {
             if (user.checkPassword(loginParameters.get(PASSWORD))) {
                 log.info(user.toString());
                 headers.put("Location", "/index.html");
+                final UUID uuid = UUID.randomUUID();
+                headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             }
             return getResponse(path, statusLine, headers);
         }
@@ -117,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String get(final String path, final HttpRequest httpRequest, final String httpVersion) throws IOException {
-        StatusLine statusLine = new StatusLine(httpVersion, 200, "OK");
+        final StatusLine statusLine = new StatusLine(httpVersion, 200, "OK");
         final Map<String, String> headers = new HashMap<>();
         final String responseBody = getResponseBody(path);
 

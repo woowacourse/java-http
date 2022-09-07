@@ -3,6 +3,8 @@ package org.apache.coyote.http11.http11request;
 import java.util.Map;
 import org.apache.coyote.http11.HeaderElement;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.http11handler.exception.CookieNotFoundException;
 
 public class Http11Request {
 
@@ -30,8 +32,13 @@ public class Http11Request {
         return header;
     }
 
-    public String getCookie() {
-        return header.get(HeaderElement.COOKIE.getValue());
+    public HttpCookie getCookie() throws CookieNotFoundException {
+        try {
+            String rawCookie = header.get(HeaderElement.COOKIE.getValue());
+            return HttpCookie.of(rawCookie);
+        } catch (NullPointerException e) {
+            throw new CookieNotFoundException();
+        }
     }
 
     public String getBody() {

@@ -21,7 +21,7 @@ public class LoginPageHandler implements Http11Handler {
     private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
 
     private HandlerSupporter handlerSupporter = new HandlerSupporter();
-    private SessionManager sessionManager = SessionManager.of();
+    private SessionManager sessionManager = SessionManager.connect();
     private LoginService loginService = new LoginService();
 
     @Override
@@ -41,8 +41,7 @@ public class LoginPageHandler implements Http11Handler {
         if (!http11Request.hasCookie()) {
             return false;
         }
-        String cookie = http11Request.getCookie();
-        HttpCookie httpCookie = HttpCookie.of(cookie);
+        HttpCookie httpCookie = http11Request.getCookie();
         if (!httpCookie.hasJessionId()) {
             return false;
         }

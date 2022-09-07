@@ -5,11 +5,8 @@ import java.util.Map;
 
 public class QueryParameters {
 
-    private static final int NOT_EXIST_QUERY_PARAMETER_CHARACTER = -1;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
 
     private final Map<String, String> values;
 
@@ -26,22 +23,15 @@ public class QueryParameters {
         return values.isEmpty();
     }
 
-    public String getAccount() {
-        return values.get(ACCOUNT);
-    }
-
-    public String getPassword() {
-        return values.get(PASSWORD);
-    }
-
     private static Map<String, String> processQueryParameters(String uri) {
         Map<String, String> queryParameters = new HashMap<>();
 
-        int queryParameterIndex = uri.indexOf("?");
-        if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
-            String queryParameter = uri.substring(queryParameterIndex + 1);
-            putKeyValues(queryParameters, queryParameter);
+        if (!uri.contains("?")) {
+            return queryParameters;
         }
+        int queryParameterIndex = uri.indexOf("?");
+        String queryParameter = uri.substring(queryParameterIndex + 1);
+        putKeyValues(queryParameters, queryParameter);
         return queryParameters;
     }
 
@@ -49,7 +39,15 @@ public class QueryParameters {
         String[] eachQueryParameters = queryParameter.split("&");
         for (String q : eachQueryParameters) {
             String[] keyValues = q.split("=");
+            if (keyValues.length == 1) {
+                queryParameters.put(keyValues[KEY_INDEX], null);
+                continue;
+            }
             queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
         }
+    }
+
+    public String get(String name) {
+        return values.get(name);
     }
 }

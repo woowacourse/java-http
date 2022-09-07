@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/register.html");
+        return HttpResponse.of(HttpStatusCode.OK, "/register.html");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 
-        return generateSuccessResponse(httpRequest);
+        return generateSuccessResponse();
     }
 
     private User createUser(final HttpRequestBody requestBody) {
@@ -39,8 +39,8 @@ public class RegisterController extends AbstractController {
         return new User(account, password, email);
     }
 
-    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/register.html");
+    private HttpResponse generateSuccessResponse() {
+        final HttpResponse response = HttpResponse.of(HttpStatusCode.FOUND, "/register.html");
         response.addLocation("/login.html");
         return response;
     }

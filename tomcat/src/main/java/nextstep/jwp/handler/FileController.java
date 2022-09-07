@@ -26,6 +26,6 @@ public class FileController extends AbstractController {
     }
 
     private HttpResponse generateResponse(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, HttpStatusCode.OK, httpRequest.getUrl());
+        return HttpResponse.of(HttpStatusCode.OK, httpRequest.getUrl());
     }
 }

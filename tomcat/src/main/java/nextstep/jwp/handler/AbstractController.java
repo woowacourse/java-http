@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
             return doPost(httpRequest);
         }
 
-        return new HttpResponse(httpRequest, HttpStatusCode.NOT_FOUND, "text/html", "/404.html");
+        return new HttpResponse(HttpStatusCode.NOT_FOUND, "text/html", "/404.html");
     }
 
     protected abstract HttpResponse doGet(final HttpRequest httpRequest);

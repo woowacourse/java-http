@@ -17,15 +17,15 @@ public class DefaultController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return generateResponse(httpRequest);
+        return generateResponse();
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        return generateResponse(httpRequest);
+        return generateResponse();
     }
 
-    private HttpResponse generateResponse(final HttpRequest httpRequest) {
-        return new HttpResponse(httpRequest, HttpStatusCode.OK, "text/plain", "Hello world!");
+    private HttpResponse generateResponse() {
+        return new HttpResponse(HttpStatusCode.OK, "text/plain", "Hello world!");
     }
 }

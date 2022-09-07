@@ -38,14 +38,14 @@ public class LoginController extends AbstractController {
                 .findJSessionId();
 
         if (jSessionId.isEmpty()) {
-            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+            return HttpResponse.of(HttpStatusCode.OK, "/login.html");
         }
 
-        return generateSuccessResponse(httpRequest);
+        return generateSuccessResponse();
     }
 
-    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
+    private HttpResponse generateSuccessResponse() {
+        final HttpResponse response = HttpResponse.of(HttpStatusCode.FOUND, "/login.html");
         response.addLocation("/index.html");
         return response;
     }
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
             return login(httpRequest);
         } catch (UserNotFoundException | UnAuthorizedException e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
+            return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
     }
 
@@ -71,7 +71,9 @@ public class LoginController extends AbstractController {
 
         setUpSession(user, httpRequest.getHeaders());
 
-        return generateSuccessResponse(httpRequest);
+        final HttpResponse response = generateSuccessResponse();
+        response.addJSessionId(UuidUtil.randomUuidString());
+        return response;
     }
 
     private void validatePassword(final User user, final HttpRequestBody requestBody) {

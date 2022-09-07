@@ -17,15 +17,15 @@ public class ErrorController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return generateResponse(httpRequest);
+        return generateResponse();
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        return generateResponse(httpRequest);
+        return generateResponse();
     }
 
-    private HttpResponse generateResponse(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, HttpStatusCode.NOT_FOUND, "/404.html");
+    private HttpResponse generateResponse() {
+        return HttpResponse.of(HttpStatusCode.NOT_FOUND, "/404.html");
     }
 }

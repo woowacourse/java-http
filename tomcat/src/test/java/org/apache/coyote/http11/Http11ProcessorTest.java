@@ -64,38 +64,13 @@ class Http11ProcessorTest {
         assertThat(actual).contains(expectedFileContents);
     }
 
-    @DisplayName("JSESSIONID를 포함하지 않고 요청보내는 경우")
+
+    @DisplayName("JSESSIONID를 포함해 로그인 요청보내는 경우")
     @Test
-    void generateJSessionId() {
+    void requestWithJSESSIONID() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final String actual = socket.output();
-        final String expectedStatusLine = "HTTP/1.1 200 OK ";
-        final String expectedSetCookie = "Set-Cookie: JSESSIONID=";
-
-        assertThat(actual).contains(expectedStatusLine);
-        assertThat(actual).contains(expectedSetCookie);
-    }
-
-    @DisplayName("JSESSIONID를 포함하여 요청보내는 경우")
-    @Test
-    void doNotGenerateJSessionId() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
@@ -110,7 +85,7 @@ class Http11ProcessorTest {
 
         // then
         final String actual = socket.output();
-        final String expectedStatusLine = "HTTP/1.1 200 OK ";
+        final String expectedStatusLine = "HTTP/1.1 302 ";
         final String expectedSetCookie = "Set-Cookie: JSESSIONID=";
 
         assertThat(actual).contains(expectedStatusLine);

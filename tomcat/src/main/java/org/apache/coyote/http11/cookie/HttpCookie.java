@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.cookie;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
-import org.apache.catalina.session.Session;
 
 public class HttpCookie {
 
@@ -60,17 +58,5 @@ public class HttpCookie {
 
     public boolean hasAttribute(String key) {
         return values.containsKey(key);
-    }
-
-    public void setAttribute(String key, String value) {
-        if (hasAttribute(key)) {
-            values.replace(key, value);
-            return;
-        }
-        values.put(key, value);
-    }
-
-    public String getAttribute(String jsessionId) {
-        return values.get(jsessionId);
     }
 }

@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.http11handler;
 
 import nextstep.jwp.model.visitor.Visitor;
-import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11request.Http11Request;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 
 public interface Http11Handler {
 

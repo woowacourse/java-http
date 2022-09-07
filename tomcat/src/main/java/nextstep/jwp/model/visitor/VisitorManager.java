@@ -1,7 +1,5 @@
 package nextstep.jwp.model.visitor;
 
-import org.apache.catalina.session.Session;
-
 public class VisitorManager {
 
     public Visitor identify(String sessionId) {

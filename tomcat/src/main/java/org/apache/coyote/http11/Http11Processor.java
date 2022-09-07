@@ -4,11 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.frontcontroller.FrontController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
+import org.apache.coyote.http11.session.Cookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +37,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
+            setCookieAndSession(httpRequest, httpResponse);
 
             FrontController frontController = new FrontController();
             frontController.doDispatch(httpRequest, httpResponse);
@@ -42,5 +47,32 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void setCookieAndSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        String cookieValue = httpRequest.getCookieValue();
+        Cookie cookie = Cookie.of(cookieValue);
+        Manager sessionManager = new SessionManager();
+
+        if (!cookie.hasJSessionId()) {
+            UUID uuid = UUID.randomUUID();
+            httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+            Session session = new Session(uuid.toString());
+            sessionManager.add(session);
+            httpRequest.setSession(session);
+            return;
+        }
+        Session session = getSession(cookie, sessionManager);
+        httpRequest.setSession(session);
+    }
+
+    private static Session getSession(Cookie cookie, Manager sessionManager) throws IOException {
+        Session session = sessionManager.findSession(cookie.getSessionKey());
+
+        if (session == null) {
+            session = new Session(cookie.getSessionKey());
+            sessionManager.add(session);
+        }
+        return session;
     }
 }

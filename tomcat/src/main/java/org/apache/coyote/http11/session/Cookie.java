@@ -37,6 +37,10 @@ public class Cookie {
         return cookies.containsKey(JSESSIONID);
     }
 
+    public String getSessionKey() {
+        return (String) cookies.get(JSESSIONID);
+    }
+
     @Override
     public String toString() {
         return cookies.entrySet()

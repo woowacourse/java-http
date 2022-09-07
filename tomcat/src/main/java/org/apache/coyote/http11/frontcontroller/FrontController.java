@@ -3,12 +3,10 @@ package org.apache.coyote.http11.frontcontroller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
 import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
 import org.apache.coyote.http11.handlermapper.HandlerMapper;
-import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.httpmessage.request.Http11Version;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -20,7 +18,6 @@ public class FrontController {
     private static final List<HandlerMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
 
     public void doDispatch(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        setCookie(httpRequest, httpResponse);
 
         Handler handler = getHandler(httpRequest);
         Object handlerResponse = handler.handle(httpRequest);
@@ -29,15 +26,6 @@ public class FrontController {
         setHttpResponse(httpResponse, modelAndView);
 
         httpResponse.write();
-    }
-
-    private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        String cookieValue = httpRequest.getCookieValue();
-        Cookie cookie = Cookie.of(cookieValue);
-
-        if (!cookie.hasJSessionId()) {
-            httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-        }
     }
 
     private Handler getHandler(HttpRequest httpRequest) {

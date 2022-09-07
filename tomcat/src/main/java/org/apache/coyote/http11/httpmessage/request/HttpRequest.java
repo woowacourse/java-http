@@ -6,17 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody requestBody;
+    private Session session;
 
-    private HttpRequest(RequestLine requestLine, Headers headers, RequestBody requestBody) {
+    private HttpRequest(RequestLine requestLine, Headers headers, RequestBody requestBody, Session session) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
+        this.session = session;
     }
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
@@ -24,7 +27,7 @@ public class HttpRequest {
         Headers headers = Headers.of(extractHeaders(bufferedReader));
         RequestBody requestBody = new RequestBody(extractBody(bufferedReader, headers));
 
-        return new HttpRequest(requestLine, headers, requestBody);
+        return new HttpRequest(requestLine, headers, requestBody, null);
     }
 
     private static List<String> extractHeaders(BufferedReader bufferedReader) throws IOException {
@@ -63,5 +66,13 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

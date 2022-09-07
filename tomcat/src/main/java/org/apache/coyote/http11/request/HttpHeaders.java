@@ -12,10 +12,6 @@ public class HttpHeaders {
         this.values = new LinkedHashMap<>(values);
     }
 
-    public void setLocation(final String location) {
-        values.put("Location", location);
-    }
-
     public String toTextHeader() {
         StringBuilder sb = new StringBuilder();
         for (String s : values.keySet()) {
@@ -32,6 +28,10 @@ public class HttpHeaders {
         return values.get("Location");
     }
 
+    public void setLocation(final String location) {
+        values.put("Location", location);
+    }
+
     public Map<String, String> getValues() {
         return values;
     }
@@ -40,12 +40,16 @@ public class HttpHeaders {
         return values.get("Content-Length");
     }
 
+    public void setContentLength(final int contentLength) {
+        values.put("Content-Length", String.valueOf(contentLength));
+    }
+
     public void setContentType(final String contentType) {
         values.put("Content-Type", contentType + ";charset=utf-8");
     }
 
-    public void setContentLength(final int contentLength) {
-        values.put("Content-Length", String.valueOf(contentLength));
+    public String getCookie() {
+        return values.get("Cookie");
     }
 
     public void setCookie(final Cookie cookie) {

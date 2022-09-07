@@ -55,7 +55,6 @@ public class Request {
     }
 
     private static RequestHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
-        bufferedReader.readLine();
         String headerKeyValue = bufferedReader.readLine();
         final HashMap<String, String> headers = new HashMap<>();
         while (!headerKeyValue.isBlank()) {
@@ -67,9 +66,9 @@ public class Request {
     }
 
     private static RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
-        final char[] chars = new char[contentLength];
-        bufferedReader.read(chars, 0, contentLength);
-        return new RequestBody(String.valueOf(chars));
+        final char[] body = new char[contentLength];
+        bufferedReader.read(body);
+        return new RequestBody(String.valueOf(body));
     }
 
     public boolean isForStaticFile() {

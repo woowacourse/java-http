@@ -1,5 +1,7 @@
 package org.apache.coyote.request.startline;
 
+import org.apache.coyote.request.HttpRequestPath;
+
 public class StartLine {
 
     private static final int START_LINE_ELEMENT_SIZE = 3;
@@ -10,12 +12,12 @@ public class StartLine {
     private static final String START_LINE_DELIMITER = " ";
 
     private final HttpMethod method;
-    private final String uri;
+    private final HttpRequestPath requestPath;
     private final HttpVersion httpVersion;
 
     private StartLine(HttpMethod method, String requestUri, String httpVersion) {
         this.method = method;
-        this.uri = requestUri;
+        this.requestPath = HttpRequestPath.from(requestUri);
         this.httpVersion = HttpVersion.from(httpVersion);
     }
 
@@ -33,8 +35,8 @@ public class StartLine {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getRequestPath() {
+        return requestPath.getUri();
     }
 
     private static String[] splitStartLine(String startLine) {

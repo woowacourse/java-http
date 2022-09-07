@@ -44,7 +44,7 @@ public class HttpRequest {
     }
 
     public String getRequestUrl() {
-        String requestUrl = startLine.getUri();
+        String requestUrl = startLine.getRequestPath();
         requestUrl = makeDefaultRequestUrl(requestUrl);
 
         return requestUrl;

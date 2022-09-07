@@ -8,10 +8,12 @@ import org.apache.coyote.util.StringParser;
 
 public class HttpRequest {
 
+    private static final String START_LINE_DELIMITER = " ";
     private static final String QUERY_STRING_PREFIX = "?";
+    private static final String QUERY_STRING_FIELD_DELIMITER = "&";
+    private static final String QUERY_STRING_KEY_VALUE_DELIMITER = "=";
     private static final int METHOD = 0;
     private static final int PATH = 1;
-    private static final String START_LINE_DELIMITER = " ";
 
     private final HttpMethod httpMethod;
     private final String path;
@@ -55,7 +57,7 @@ public class HttpRequest {
         final int prefixIndex = uri.indexOf(QUERY_STRING_PREFIX);
         final String queryString = uri.substring(prefixIndex + PATH);
 
-        return StringParser.toMap(queryString);
+        return StringParser.split(queryString, QUERY_STRING_FIELD_DELIMITER, QUERY_STRING_KEY_VALUE_DELIMITER);
     }
 
     private static boolean hasQueryString(final String uri) {

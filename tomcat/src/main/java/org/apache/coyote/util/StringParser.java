@@ -6,15 +6,13 @@ import java.util.stream.Collectors;
 
 public class StringParser {
 
-    private static final String ELEMENT_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
-
     private StringParser() {
     }
 
-    public static Map<String, String> toMap(final String source) {
-        return Arrays.stream(source.split(ELEMENT_DELIMITER))
-                .map(it -> it.split(KEY_VALUE_DELIMITER))
+    public static Map<String, String> split(final String source, final String fieldDelimiter,
+                                            final String keyValueDelimiter) {
+        return Arrays.stream(source.split(fieldDelimiter))
+                .map(it -> it.split(keyValueDelimiter))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
     }
 }

@@ -13,7 +13,7 @@ import org.apache.coyote.http11.util.FileReader;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String NOT_FOUND_REDIRECT_LOCATION = "http://localhost:8080/404.html";
+    private static final String NOT_FOUND_REDIRECT_LOCATION = "/404.html";
 
     @Override
     public final void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

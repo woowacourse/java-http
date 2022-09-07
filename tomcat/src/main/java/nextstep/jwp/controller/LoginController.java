@@ -26,8 +26,8 @@ public class LoginController extends AbstractController {
     private static final String PATH = "/login";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
-    private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
-    private static final String LOGIN_FAILURE_REDIRECT_URI = "http://localhost:8080/401.html";
+    private static final String LOGIN_SUCCESS_REDIRECT_URI = "/index.html";
+    private static final String LOGIN_FAILURE_REDIRECT_URI = "/401.html";
     private static final String JSESSION_COOKIE_KEY = "JSESSIONID";
     private static final String USER_SESSION_NAME = "user";
 

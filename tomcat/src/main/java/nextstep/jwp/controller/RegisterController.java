@@ -16,7 +16,7 @@ import org.apache.coyote.http11.response.header.Location;
 public class RegisterController extends AbstractController {
 
     private static final String PATH = "/register";
-    private static final String REGISTER_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
+    private static final String REGISTER_SUCCESS_REDIRECT_URI = "/index.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String EMAIL_KEY = "email";

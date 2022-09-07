@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.header.Location;
 
 public class NotFoundController implements Controller {
 
-    private static final String NOT_FOUND_REDIRECT_LOCATION = "http://localhost:8080/404.html";
+    private static final String NOT_FOUND_REDIRECT_LOCATION = "/404.html";
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {

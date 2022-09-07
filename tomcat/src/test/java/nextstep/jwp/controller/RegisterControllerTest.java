@@ -75,6 +75,6 @@ class RegisterControllerTest {
 
         assertThat(httpResponse.getResponse())
                 .contains("302 Found")
-                .contains("Location: http://localhost:8080/index.html");
+                .contains("Location: /index.html");
     }
 }

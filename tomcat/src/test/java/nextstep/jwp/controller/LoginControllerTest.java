@@ -87,14 +87,14 @@ class LoginControllerTest {
         // then
         assertThat(httpResponse.getResponse())
                 .contains("302 Found")
-                .contains("Location: http://localhost:8080/index.html");
+                .contains("Location: /index.html");
     }
 
     @DisplayName("로그인에 성공하면 세션을 반환한다.")
     @ParameterizedTest
-    @CsvSource({"account=gugu&password=password, 30, http://localhost:8080/index.html, true",
-            "account=gugu12&password=password, 32, http://localhost:8080/401.html, false",
-            "account=gugu&password=password12, 32, http://localhost:8080/401.html, false"
+    @CsvSource({"account=gugu&password=password, 30, /index.html, true",
+            "account=gugu12&password=password, 32, /401.html, false",
+            "account=gugu&password=password12, 32, /401.html, false"
     })
     void service_Post(String requestBody, String contentLength,
                       String expectedLocation, boolean expectedCookie) throws IOException {

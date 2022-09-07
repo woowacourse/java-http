@@ -106,6 +106,6 @@ class Http11ProcessorTest {
         // then
         String response = socket.output();
         assertThat(response).contains("302 Found ")
-                .contains("Location: http://localhost:8080/index.html");
+                .contains("Location: /index.html");
     }
 }

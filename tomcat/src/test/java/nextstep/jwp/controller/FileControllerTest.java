@@ -90,6 +90,6 @@ class FileControllerTest {
 
         assertThat(httpResponse.getResponse())
                 .contains("302 Found")
-                .contains("Location: http://localhost:8080/404.html");
+                .contains("Location: /404.html");
     }
 }

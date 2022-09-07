@@ -25,17 +25,19 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private final UserService userService = new UserService();
+    private final UserService userService = UserService.getInstance();
     private final AuthService authService = new AuthService();
 
     @RequestMapping(method = HttpMethod.GET, uri = "/login")
+    public HttpResponse loginPage(final HttpRequest httpRequest) {
+        return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login");
+    }
+
+    @RequestMapping(method = HttpMethod.POST, uri = "/login")
     public HttpResponse login(final HttpRequest httpRequest) {
         final RequestParams getRequestParams = httpRequest.getRequestParams();
         final Optional<String> account = getRequestParams.getValue("account");
         final Optional<String> password = getRequestParams.getValue("password");
-        if (account.isEmpty() && password.isEmpty()) {
-            return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login");
-        }
         try {
             final String accountValue = account
                     .orElseThrow(LoginFailException::new);

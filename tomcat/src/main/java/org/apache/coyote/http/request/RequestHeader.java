@@ -28,7 +28,7 @@ public class RequestHeader {
         while (!"".equals((header = bufferedReader.readLine()))) {
             final String[] splitHeader = header.split(HEADER_DELIMITER);
             if (splitHeader[KEY].equals(COOKIE.getValue())) {
-                final RequestCookie cookie = RequestCookie.from(splitHeader[VALUE]);
+                final RequestCookie cookie = RequestCookie.from(splitHeader[VALUE].trim());
                 values.put(splitHeader[KEY], cookie);
                 continue;
             }
@@ -53,6 +53,10 @@ public class RequestHeader {
     }
 
     public int getContentLength() {
-        return (int) values.get(CONTENT_LENGTH.getValue());
+        final Object contentLength = values.get(CONTENT_LENGTH.getValue());
+        if (contentLength instanceof Integer) {
+            return (int) contentLength;
+        }
+        return Integer.parseInt((String) contentLength);
     }
 }

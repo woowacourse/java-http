@@ -37,7 +37,7 @@ public class ResponseHeader {
     public String toHeaderString() {
         return values.entrySet()
                 .stream()
-                .map(it -> it.getKey() + HEADER_DELIMITER + it.getValue() + " ")
+                .map(it -> it.getKey().getValue() + HEADER_DELIMITER + it.getValue() + " ")
                 .collect(Collectors.joining(NEW_LINE, "", NEW_LINE));
     }
 }

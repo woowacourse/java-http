@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http11.request.Extension;
+import org.apache.coyote.http11.request.startline.Extension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.HttpHeaders;
+import org.apache.coyote.http11.request.startline.Path;
+import org.apache.coyote.http11.request.startline.StartLine;
 
 public class HttpRequest {
 
@@ -36,8 +40,7 @@ public class HttpRequest {
         while(!"".equals(line = bufferedReader.readLine())){
             headers.add(line);
         }
-        final HttpHeaders httpHeaders = HttpHeaders.from(headers);
-        return httpHeaders;
+        return HttpHeaders.from(headers);
     }
 
     private static RequestBody extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
@@ -45,8 +48,7 @@ public class HttpRequest {
         final int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length").trim());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        final RequestBody requestBody = RequestBody.from(new String(buffer));
-        return requestBody;
+        return RequestBody.from(new String(buffer));
     }
 
     public Path getPath() {

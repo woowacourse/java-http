@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.header;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,6 +6,9 @@ import java.util.Map;
 import org.apache.coyote.http11.response.HttpCookie;
 
 public class HttpHeaders {
+
+    private static final String COOKIE = "Cookie";
+    private static final String HEADER_DELIMITER = ": ";
 
     private final Map<String, String> values;
     private final HttpCookie cookie;
@@ -18,7 +21,7 @@ public class HttpHeaders {
     public static HttpHeaders from(List<String> headers){
         final Map<String, String> values = new HashMap<>();
         for (final String header : headers) {
-            final String[] split = header.split(": ");
+            final String[] split = header.split(HEADER_DELIMITER);
             values.put(split[0], split[1]);
         }
         final HttpCookie httpCookie = extractCookie(values);
@@ -26,8 +29,8 @@ public class HttpHeaders {
     }
 
     private static HttpCookie extractCookie(Map<String, String> values) {
-        if (values.containsKey("Cookie")) {
-            return HttpCookie.from(values.get("Cookie"));
+        if (values.containsKey(COOKIE)) {
+            return HttpCookie.from(values.get(COOKIE));
         }
         return HttpCookie.empty();
     }

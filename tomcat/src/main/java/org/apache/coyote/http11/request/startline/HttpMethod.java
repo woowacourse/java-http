@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.startline;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.UncheckedServletException;

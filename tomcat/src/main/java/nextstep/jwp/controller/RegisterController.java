@@ -4,14 +4,16 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.Extension;
+import org.apache.coyote.http11.request.startline.Extension;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Path;
+import org.apache.coyote.http11.request.startline.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 
 public class RegisterController implements Controller {
+
+    private static final String REDIRECT_PATH = "/index.html";
 
     @Override
     public HttpResponse service(HttpRequest request) {
@@ -47,7 +49,7 @@ public class RegisterController implements Controller {
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
-                .location("/index.html")
+                .location(REDIRECT_PATH)
                 .build();
     }
 }

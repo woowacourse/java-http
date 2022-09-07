@@ -1,28 +1,30 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionFactory;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.Extension;
+import org.apache.coyote.http11.request.startline.Extension;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Path;
+import org.apache.coyote.http11.request.startline.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 
 public class LoginController implements Controller {
 
+    private static final String REDIRECT_PATH = "/index.html";
+    private static final String KEY_SESSION = "JSESSIONID=";
+
     @Override
     public HttpResponse service(HttpRequest request) {
         if (request.isGetMethod()) {
             return doGet(request);
         }
-
         if (request.isPostMethod()) {
             return doPost(request);
         }
@@ -49,7 +51,7 @@ public class LoginController implements Controller {
         if (session != null) {
             return new HttpResponse.Builder()
                     .status(HttpStatus.FOUND)
-                    .location("/index.html")
+                    .location(REDIRECT_PATH)
                     .build();
         }
         return new HttpResponse.Builder()
@@ -60,13 +62,11 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {
-        final Session session = new Session(UUID.randomUUID().toString());
-        final SessionManager sessionManager = new SessionManager();
-        sessionManager.add(session);
+        final Session session = SessionFactory.create();
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.OK)
-                .cookie("JSESSIONID=" + session.getId())
+                .cookie(KEY_SESSION + session.getId())
                 .contentType(path.getContentType())
                 .responseBody(responseBody)
                 .build();
@@ -77,7 +77,7 @@ public class LoginController implements Controller {
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
-                .location("/index.html")
+                .location(REDIRECT_PATH)
                 .build();
     }
 
@@ -94,6 +94,7 @@ public class LoginController implements Controller {
     private void setUserToSession(String sessionId, User user) {
         final SessionManager sessionManager = new SessionManager();
         final Session session = sessionManager.findSession(sessionId);
+
         if (session == null) {
             final Session newSession = new Session(sessionId);
             sessionManager.add(newSession);

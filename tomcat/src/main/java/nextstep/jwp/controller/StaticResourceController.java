@@ -1,16 +1,17 @@
 package nextstep.jwp.controller;
 
-import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Path;
+import org.apache.coyote.http11.request.startline.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 
 public class StaticResourceController implements Controller {
+
+    private static final String SESSION_KEY = "JSESSIONID=";
 
     @Override
     public HttpResponse service(HttpRequest request) {
@@ -45,13 +46,11 @@ public class StaticResourceController implements Controller {
     }
 
     private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {
-        final Session session = new Session(UUID.randomUUID().toString());
-        final SessionManager sessionManager = new SessionManager();
-        sessionManager.add(session);
+        final Session session = SessionFactory.create();
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.OK)
-                .cookie("JSESSIONID=" + session.getId())
+                .cookie(SESSION_KEY + session.getId())
                 .contentType(path.getContentType())
                 .responseBody(responseBody)
                 .build();

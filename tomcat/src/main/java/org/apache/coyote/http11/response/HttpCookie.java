@@ -6,6 +6,9 @@ import java.util.Map;
 public class HttpCookie {
 
     private static final String SESSION_KEY = "JSESSIONID";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_KEY_DELIMITER = "=";
+
     private final Map<String, String> values;
 
     private HttpCookie(Map<String, String> values) {
@@ -14,9 +17,9 @@ public class HttpCookie {
 
     public static HttpCookie from(String value) {
         final Map<String, String> values = new HashMap<>();
-        final String[] cookies = value.split("; ");
+        final String[] cookies = value.split(COOKIE_DELIMITER);
         for (String cookie : cookies) {
-            final String[] split = cookie.split("=");
+            final String[] split = cookie.split(COOKIE_KEY_DELIMITER);
             values.put(split[0], split[1]);
         }
         return new HttpCookie(values);
@@ -27,16 +30,13 @@ public class HttpCookie {
     }
 
     public boolean containsSession() {
-        if (values.containsKey(SESSION_KEY)) {
-            return true;
-        }
-        return false;
+        return values.containsKey(SESSION_KEY);
     }
 
     public String getSessionId() {
         if (!values.containsKey(SESSION_KEY)) {
             return null;
         }
-        return values.get("JSESSIONID");
+        return values.get(SESSION_KEY);
     }
 }

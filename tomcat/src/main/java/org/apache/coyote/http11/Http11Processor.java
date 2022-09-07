@@ -14,12 +14,14 @@ import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CONTENT_TYPE = "contentType";
 
     private final Socket connection;
 
@@ -46,22 +48,23 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = getResponse(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getResponse(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse getResponse(final HttpRequest httpRequest) throws IOException {
         return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
     }
 
-    private String getResponse(final String url, final Map<String, String> requestParam) throws IOException {
+    private HttpResponse getResponse(final String url, final Map<String, String> requestParam) throws IOException {
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
+            final Map<String, String> headers = Map.of(CONTENT_TYPE, "text/html");
 
-            return createResponse("text/html", responseBody);
+            return HttpResponse.create200Response(headers, responseBody);
         }
 
         if ("/login".equals(url) && requestParam.isEmpty()) {
@@ -93,47 +96,27 @@ public class Http11Processor implements Runnable, Processor {
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
     }
 
-    private String createStaticFileResponse(final String url) throws IOException {
+    private HttpResponse createStaticFileResponse(final String url) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + url);
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));
 
-        return createResponse(Files.probeContentType(path), responseBody);
+        return HttpResponse.create200Response(Map.of(CONTENT_TYPE, Files.probeContentType(path)), responseBody);
     }
 
-    private String createResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String createUserSuccessResponse() throws IOException {
+    private HttpResponse createUserSuccessResponse() throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));
 
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "Set-Cookie: JSESSIONID=" +
-                        "",
-                responseBody);
+        return HttpResponse.create302Response(Map.of(CONTENT_TYPE, Files.probeContentType(path)), responseBody);
     }
 
-    private String createLoginFailResponse() throws IOException {
+    private HttpResponse createLoginFailResponse() throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return HttpResponse.create200Response(Map.of(CONTENT_TYPE, Files.probeContentType(path)), responseBody);
     }
 }

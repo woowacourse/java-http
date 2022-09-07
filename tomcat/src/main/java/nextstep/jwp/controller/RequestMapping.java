@@ -13,6 +13,9 @@ public class RequestMapping {
         if (path.equals("/login")) {
             return new LoginController();
         }
+        if (path.equals("/register")) {
+            return new RegisterController();
+        }
         return new ResourceController();
     }
 }

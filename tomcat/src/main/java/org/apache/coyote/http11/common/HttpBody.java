@@ -27,9 +27,16 @@ public class HttpBody {
         for (final String body : bodyElements) {
             final String[] bodyElement = body.split(FORM_PARAMS_DELIMITER);
 
-            bodies.put(bodyElement[KEY], bodyElement[VALUE]);
+            bodies.put(bodyElement[KEY], readValue(bodyElement));
         }
         return new HttpBody(bodies);
+    }
+
+    private static String readValue(final String[] bodyElement) {
+        if (bodyElement.length < 2) {
+            return "";
+        }
+        return bodyElement[VALUE];
     }
 
     public Map<String, String> getValue() {

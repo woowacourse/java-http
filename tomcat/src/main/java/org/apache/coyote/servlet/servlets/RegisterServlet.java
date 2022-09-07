@@ -23,10 +23,17 @@ public class RegisterServlet extends Servlet {
         if (method.isGet()) {
             return doGet(httpRequest);
         }
+        if (method.isPost()) {
+            return doPost(httpRequest);
+        }
         return throwIfMethodDoesNotDefine(httpRequest, method);
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.of(httpRequest.getHttpVersion(), "/register.html", "200");
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
+        return HttpResponse.of(httpRequest.getHttpVersion(), "/index.html", "302");
     }
 }

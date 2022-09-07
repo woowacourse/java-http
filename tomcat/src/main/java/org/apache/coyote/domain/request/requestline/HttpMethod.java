@@ -1,4 +1,4 @@
-package org.apache.coyote.domain.request;
+package org.apache.coyote.domain.request.requestline;
 
 import java.util.Arrays;
 

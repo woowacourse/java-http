@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.domain.HttpCookie;
+import org.apache.coyote.domain.request.requestline.RequestLine;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
@@ -12,18 +13,14 @@ public class HttpRequest {
 
     private static final String HEADER_DELIMITER = " ";
 
-    private final String uri;
-    private final HttpMethod httpMethod;
-    private final QueryParam queryParam;
+    private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
     private final HttpCookie httpCookie;
 
-    private HttpRequest(HttpMethod httpMethod, String uri, QueryParam queryParam, RequestHeader requestHeader,
+    private HttpRequest(RequestLine requestLine, RequestHeader requestHeader,
                         RequestBody requestBody, HttpCookie httpCookie) {
-        this.httpMethod = httpMethod;
-        this.uri = uri;
-        this.queryParam = queryParam;
+        this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
         this.httpCookie = httpCookie;
@@ -32,28 +29,18 @@ public class HttpRequest {
     public static HttpRequest from(BufferedReader inputReader) {
         try {
             String startLine = inputReader.readLine();
-            String[] headers = startLine.split(HEADER_DELIMITER);
-            HttpMethod httpMethod = HttpMethod.get(headers[0]);
+            RequestLine requestLine = RequestLine.from(startLine);
             RequestHeader requestHeader = RequestHeader.from(inputReader);
             HttpCookie httpCookie = HttpCookie.from(requestHeader.getCookies());
             RequestBody requestBody = RequestBody.of(inputReader, requestHeader.getContentLength());
-            return new HttpRequest(httpMethod, headers[1], QueryParam.from(headers[1]), requestHeader, requestBody,
-                    httpCookie);
+            return new HttpRequest(requestLine, requestHeader, requestBody, httpCookie);
         } catch (IOException e) {
             throw new IllegalArgumentException("");
         }
     }
 
-    public String getUri() {
-        return uri;
-    }
-
-    public QueryParam getQueryParam() {
-        return queryParam;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public RequestHeader getRequestHeader() {

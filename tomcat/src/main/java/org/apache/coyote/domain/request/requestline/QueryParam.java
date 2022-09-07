@@ -1,11 +1,10 @@
-package org.apache.coyote.domain.request;
+package org.apache.coyote.domain.request.requestline;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class QueryParam {
 
-    private static final String QUERY_STRING_DELIMITER = "?";
     private static final String QUERY_STRING_REGEX = "&";
     private static final String QUERY_MAP_DELIMITER = "=";
 
@@ -15,13 +14,11 @@ public class QueryParam {
         this.queryParam = queryParam;
     }
 
-    public static QueryParam from(String uri) {
+    public static QueryParam from(String queryString) {
         Map<String, String> queryMap = new HashMap<>();
-        if (!uri.contains(QUERY_STRING_DELIMITER)) {
+        if (queryString.equals("")) {
             return new QueryParam(queryMap);
         }
-        String[] uriPaths = uri.split("\\?");
-        String queryString = uriPaths[1];
         String[] queryParams = queryString.split(QUERY_STRING_REGEX);
         for (String queryParam : queryParams) {
             String[] splitQuery = queryParam.split(QUERY_MAP_DELIMITER);
@@ -29,7 +26,6 @@ public class QueryParam {
         }
         return new QueryParam(queryMap);
     }
-
     public String getQueryValue(String key) {
         return queryParam.get(key);
     }

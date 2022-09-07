@@ -10,7 +10,7 @@ import org.apache.coyote.domain.response.MyHttpResponse;
 public class StaticFileHandler implements Handler {
     @Override
     public MyHttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
-        final FilePath filePath = FilePath.from(httpRequest.getUri());
+        final FilePath filePath = FilePath.from(httpRequest.getRequestLine().getPath().getPath());
         return MyHttpResponse.from(filePath, HttpStatusCode.OK);
     }
 }

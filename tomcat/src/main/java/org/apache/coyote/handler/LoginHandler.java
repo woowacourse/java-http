@@ -6,8 +6,8 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.domain.FilePath;
-import org.apache.coyote.domain.request.HttpMethod;
 import org.apache.coyote.domain.request.HttpRequest;
+import org.apache.coyote.domain.request.requestline.HttpMethod;
 import org.apache.coyote.domain.response.HttpStatusCode;
 import org.apache.coyote.domain.response.MyHttpResponse;
 import org.apache.coyote.domain.response.RedirectUrl;
@@ -23,21 +23,21 @@ public class LoginHandler implements Handler {
 
     @Override
     public MyHttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
-        final FilePath filePath = FilePath.from(httpRequest.getUri());
+        final FilePath filePath = FilePath.from(httpRequest.getRequestLine().getPath().getPath());
         if (httpRequest.getHttpCookie().hasJSESSIONID()) {
             if(httpRequest.checkSession()){
                 return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
                         .addRedirectUrlHeader(RedirectUrl.from("/index.html"));
             }
         }
-        if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && httpRequest.getQueryParam().isEmpty()) {
+        if (httpRequest.getRequestLine().getHttpMethod().equals(HttpMethod.GET) && httpRequest.getRequestLine().getPath().getQueryParam().isEmpty()) {
             return MyHttpResponse.from(filePath, HttpStatusCode.OK);
         }
         return login(httpRequest);
     }
 
     private static MyHttpResponse login(HttpRequest httpRequest) throws URISyntaxException, IOException {
-        final FilePath filePath = FilePath.from(httpRequest.getUri());
+        final FilePath filePath = FilePath.from(httpRequest.getRequestLine().getPath().getPath());
         Optional<User> user = InMemoryUserRepository.findByAccount(
                 httpRequest.getRequestBody().getRequestBody().get("account"));
         if (user.isPresent()) {

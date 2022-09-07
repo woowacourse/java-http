@@ -5,12 +5,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class LoginController extends AbstractController {
                 response.addCookie(SESSION_COOKIE_NAME, jSessionId);
                 response.statusCode(HttpStatus.REDIRECT);
                 response.addHeader("Location", "/index.html");
-                Session.put(jSessionId, userByAccount.get());
+                HttpSession.put(jSessionId, userByAccount.get());
                 return;
             }
         }

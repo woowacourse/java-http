@@ -1,8 +1,8 @@
-package org.apache.catalina;
-
-import jakarta.servlet.http.HttpSession;
+package org.apache.coyote.http11.session;
 
 import java.io.IOException;
+
+import org.apache.coyote.http11.session.HttpSession;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a

@@ -113,7 +113,7 @@ class HttpResponseTest {
             final byte[] response = httpResponse.toResponseBytes();
             final String actual = new String(response);
 
-            final String expected = readFile("index.html");
+            final String expected = readFile(HttpStatusCode.OK, "index.html");
 
             assertThat(actual).isEqualTo(expected);
         }
@@ -131,15 +131,15 @@ class HttpResponseTest {
             final byte[] response = httpResponse.toResponseBytes();
             final String actual = new String(response);
 
-            final String expected = readFile("404.html");
+            final String expected = readFile(HttpStatusCode.NOT_FOUND, "404.html");
 
             assertThat(actual).isEqualTo(expected);
         }
 
-        private String readFile(final String resourceFile) throws IOException {
+        private String readFile(final HttpStatusCode statusCode, final String resourceFile) throws IOException {
             final URL resource = getClass().getClassLoader().getResource("static/" + resourceFile);
             final String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return "HTTP/1.1 200 OK \r\n" +
+            return statusCode.getResponseStartLine() + " \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: " + expectedResponseBody.getBytes().length + " \r\n" +
                     "\r\n" +

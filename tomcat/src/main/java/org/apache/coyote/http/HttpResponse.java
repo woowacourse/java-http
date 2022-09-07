@@ -15,7 +15,7 @@ public class HttpResponse {
     private static final String TEXT_HTML = "text/html";
     private static final String NEW_LINE = "\r\n";
 
-    private final HttpStatusCode statusCode;
+    private HttpStatusCode statusCode;
     private final Map<String, String> headers;
     private String responseBody;
 
@@ -52,6 +52,7 @@ public class HttpResponse {
             return this;
         } catch (final Exception e) {
             e.printStackTrace();
+            changeStatusCode(HttpStatusCode.NOT_FOUND);
             return setBodyByPath("/404.html");
         }
     }
@@ -72,6 +73,10 @@ public class HttpResponse {
             resourcePath += ".html";
         }
         return resourcePath;
+    }
+
+    private void changeStatusCode(final HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public HttpResponse setLocationAsHome() {

@@ -1,15 +1,14 @@
 package org.apache.catalina.connector;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -20,7 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
-    private final ThreadPoolExecutor threadPoolExecutor;
+    private final ExecutorService threadPoolExecutor;
     private boolean stopped;
 
     public Connector() {
@@ -43,9 +42,9 @@ public class Connector implements Runnable {
         }
     }
 
-    private ThreadPoolExecutor createExecutorService(final int maxThreads) {
+    private ExecutorService createExecutorService(final int maxThreads) {
         final var checkedMaxThreads = checkMaxThreads(maxThreads);
-        return (ThreadPoolExecutor) Executors.newFixedThreadPool(checkedMaxThreads);
+        return Executors.newFixedThreadPool(checkedMaxThreads);
     }
 
     public void start() {

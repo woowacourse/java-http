@@ -26,6 +26,7 @@ public class LoginHandler implements Http11Handler {
     private final HandlerSupporter handlerSupporter = new HandlerSupporter();
     private final QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private final LoginService loginService = new LoginService();
+    private final SessionManager sessionManager = SessionManager.of();
 
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
@@ -36,15 +37,19 @@ public class LoginHandler implements Http11Handler {
     public ResponseComponent handle(Http11Request http11Request) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
-            return loginSuccessResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
+            return loginSuccessResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT, queryStringDatas.get(ACCOUNT_KEY));
         }
         return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.REDIRECT);
     }
 
-    private ResponseComponent loginSuccessResponseComponent(String uri, StatusCode statusCode) {
+    private ResponseComponent loginSuccessResponseComponent(String uri, StatusCode statusCode, String account) {
         ResponseComponent responseComponent = handlerSupporter.resourceResponseComponent(uri, statusCode);
+        User user = loginService.findUser(account);
+        Session session = sessionManager.generateSession(user);
+        sessionManager.add(session);
+
         HttpCookie httpCookie = new HttpCookie();
-        httpCookie.setJsessionId();
+        httpCookie.setJsessionId(session);
         responseComponent.setCookie(httpCookie.toString());
         return responseComponent;
     }

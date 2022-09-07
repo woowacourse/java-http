@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 import java.util.UUID;
+import org.apache.catalina.session.Session;
 
 public class HttpCookie {
 
@@ -14,8 +15,8 @@ public class HttpCookie {
 
     private final Map<String, String> cookie = new HashMap<>();
 
-    public void setJsessionId() {
-        cookie.put(JSESSIONID_KEY, UUID.randomUUID().toString());
+    public void setJsessionId(Session session) {
+        cookie.put(JSESSIONID_KEY, session.getId());
     }
 
     public String toString() {

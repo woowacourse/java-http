@@ -34,4 +34,10 @@ public class SessionManager implements Manager {
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
     }
+
+    public Session generateSession(User user) {
+        Session session = new Session();
+        session.setAttribute(USER_KEY, user);
+        return session;
+    }
 }

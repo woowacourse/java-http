@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.handler.Controller;
-import nextstep.jwp.handler.DefaultController;
-import nextstep.jwp.handler.ErrorController;
-import nextstep.jwp.handler.FileController;
-import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.DefaultController;
+import nextstep.jwp.controller.ErrorController;
+import nextstep.jwp.controller.FileController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 
 public class RequestMapping {
 

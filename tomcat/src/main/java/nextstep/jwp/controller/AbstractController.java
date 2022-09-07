@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;

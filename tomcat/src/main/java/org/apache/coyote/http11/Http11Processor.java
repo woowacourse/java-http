@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import nextstep.jwp.handler.Controller;
+import nextstep.jwp.controller.Controller;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;

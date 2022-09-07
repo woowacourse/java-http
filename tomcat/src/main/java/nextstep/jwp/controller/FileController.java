@@ -1,31 +1,31 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ErrorController extends AbstractController {
+public class FileController extends AbstractController {
 
-    private static final ErrorController INSTANCE = new ErrorController();
+    private static final Controller INSTANCE = new FileController();
 
     public static Controller getInstance() {
         return INSTANCE;
     }
 
-    private ErrorController() {
+    private FileController() {
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return generateResponse();
+        return generateResponse(httpRequest);
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        return generateResponse();
+        return generateResponse(httpRequest);
     }
 
-    private HttpResponse generateResponse() {
-        return HttpResponse.of(HttpStatusCode.NOT_FOUND, "/404.html");
+    private HttpResponse generateResponse(final HttpRequest httpRequest) {
+        return HttpResponse.of(HttpStatusCode.OK, httpRequest.getUrl());
     }
 }

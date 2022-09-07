@@ -3,12 +3,12 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
-import nextstep.jwp.handler.Controller;
-import nextstep.jwp.handler.DefaultController;
-import nextstep.jwp.handler.ErrorController;
-import nextstep.jwp.handler.FileController;
-import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.DefaultController;
+import nextstep.jwp.controller.ErrorController;
+import nextstep.jwp.controller.FileController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

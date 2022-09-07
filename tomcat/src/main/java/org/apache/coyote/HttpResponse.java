@@ -24,7 +24,7 @@ public class HttpResponse {
     private final HttpHeaders headers;
 
     public HttpResponse() {
-        body = "";
+        this.body = "";
         this.status = HttpStatus.OK;
         this.headers = new HttpHeaders(new LinkedHashMap<>());
     }
@@ -49,7 +49,7 @@ public class HttpResponse {
         this.body = new String(responseBody);
     }
 
-    public void setStatus(final HttpStatus status){
+    public void setStatus(final HttpStatus status) {
         this.status = status;
     }
 
@@ -61,6 +61,10 @@ public class HttpResponse {
         headers.addHeader(key, value);
     }
 
+    public void addSetCookie(final String key, final String value) {
+        headers.addCookie(key, value);
+    }
+
     public byte[] toBytes() {
         final String response = toString();
 
@@ -69,6 +73,8 @@ public class HttpResponse {
 
     @Override
     public String toString() {
+        addHeader("Set-Cookie", headers.getAllCookie());
+
         final String statusLine = HTTP_VERSION + status.getStatusCode() + BLANK + status.getStatusMessage();
         return String.join("\r\n",
                 statusLine,

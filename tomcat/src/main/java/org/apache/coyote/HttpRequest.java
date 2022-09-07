@@ -47,4 +47,8 @@ public class HttpRequest {
     public String getBodyParam(final String param) {
         return body.getParam(param);
     }
+
+    public String getCookie(final String key) {
+        return headers.getCookie(key);
+    }
 }

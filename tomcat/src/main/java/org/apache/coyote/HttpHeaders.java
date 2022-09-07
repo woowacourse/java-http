@@ -9,6 +9,7 @@ public class HttpHeaders {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String EMPTY_STRING = "";
@@ -16,14 +17,21 @@ public class HttpHeaders {
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
+    private final HttpCookie cookie;
     private final Map<String, String> values;
 
     public HttpHeaders(final Map<String, String> values) {
+        this(HttpCookie.from(""), values);
+    }
+
+    private HttpHeaders(final HttpCookie cookie, final Map<String, String> values) {
+        this.cookie = cookie;
         this.values = values;
     }
 
     public static HttpHeaders from(final List<String> rawHeaders) {
         final Map<String, String> headers = new HashMap<>();
+        HttpCookie cookie = HttpCookie.from("");
 
         for (final String header : rawHeaders) {
             if (EMPTY_STRING.equals(header)) {
@@ -31,14 +39,30 @@ public class HttpHeaders {
             }
 
             final String[] headerKeyValue = header.split(HEADER_DELIMITER);
+            if (COOKIE.equals(headerKeyValue[KEY])) {
+                cookie = HttpCookie.from(headerKeyValue[VALUE]);
+            }
+
             headers.put(headerKeyValue[KEY], headerKeyValue[VALUE].trim());
         }
 
-        return new HttpHeaders(headers);
+        return new HttpHeaders(cookie, headers);
+    }
+
+    public void addCookie(final String key, final String value) {
+        cookie.add(key, value);
     }
 
     public void addHeader(final String key, final String value) {
         values.put(key, value);
+    }
+
+    public String getCookie(final String key) {
+        return cookie.get(key);
+    }
+
+    public String getAllCookie() {
+        return cookie.getAllCookies();
     }
 
     public String getHeader(final String header) {

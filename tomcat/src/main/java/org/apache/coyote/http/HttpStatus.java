@@ -3,7 +3,9 @@ package org.apache.coyote.http;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    NOT_FOUND(404, "NOT FOUND");
+    NOT_FOUND(404, "NOT FOUND"),
+    FOUND(302, "FOUND"),
+    UNAUTHORIZED(401, "UNAUTHORIZED");
 
     private Integer code;
     private String message;

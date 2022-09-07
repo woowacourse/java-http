@@ -23,9 +23,14 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder header(final Header inputHeader) {
-        for (Entry<String, String> value : inputHeader.values().entrySet()) {
+        for (Entry<String, String> value : inputHeader.getHeaderMap().entrySet()) {
             header.put(value.getKey(), value.getValue());
         }
+        return this;
+    }
+
+    public HttpResponseBuilder header(final String key, final String value) {
+        header.put(key, value);
         return this;
     }
 
@@ -50,8 +55,8 @@ public class HttpResponseBuilder {
         if (httpStatus == HttpStatus.NOT_FOUND) {
             body(Paths.get(Objects.requireNonNull(
                     getClass()
-                            .getClassLoader()
-                            .getResource("static/404.html"))
+                    .getClassLoader()
+                    .getResource("static/404.html"))
                     .getPath()));
         }
         return new HttpResponse(httpStatus, header, body);

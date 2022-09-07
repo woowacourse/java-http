@@ -14,7 +14,7 @@ public class PageMapper {
         return getPath(fileName);
     }
 
-    private static Path getPath(String url) {
+    public static Path getPath(String url) {
         return Paths.get(Objects.requireNonNull(
                 PageMapper.class
                 .getClassLoader()

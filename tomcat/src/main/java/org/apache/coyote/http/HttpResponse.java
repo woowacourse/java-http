@@ -1,6 +1,9 @@
 package org.apache.coyote.http;
 
 
+import static org.apache.coyote.page.PageMapper.getFilePath;
+import static org.apache.coyote.page.PageMapper.getPath;
+
 import java.util.Map;
 
 public class HttpResponse {
@@ -23,6 +26,11 @@ public class HttpResponse {
         return new HttpResponseBuilder(HttpStatus.NOT_FOUND);
     }
 
+    public static HttpResponseBuilder redirect(final String url) {
+        return new HttpResponseBuilder(HttpStatus.FOUND)
+                .header("Location", url)
+                .body(getPath(url));
+    }
 
     public String getHttpStatus() {
         return httpStatus.getCode() + " " + httpStatus.getMessage();

@@ -46,7 +46,7 @@ public class Registry {
     }
 
     private static Handler findHandler(final HttpRequest httpRequest) {
-        final String url = httpRequest.getUrl();
+        final String url = httpRequest.getUri();
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final Handler handler = requestMap.get(new Mapping(url, httpMethod));
 

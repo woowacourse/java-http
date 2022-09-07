@@ -22,7 +22,10 @@ public class HttpRequestBuilder {
     private static Map<String, String> makeHeader(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headerMap = new HashMap<>();
         String reader;
-        while (!(reader = bufferedReader.readLine()).equals(EMPTY)) {
+        while ((reader = bufferedReader.readLine()) != null) {
+            if(reader.equals(EMPTY)){
+                break;
+            }
             final Integer index = reader.indexOf(DELIMITER);
             headerMap.put(reader.substring(START, index), reader.substring(index + 1).replace(BLANK, EMPTY));
         }
@@ -32,7 +35,7 @@ public class HttpRequestBuilder {
     private static String makeBody(final BufferedReader bufferedReader,
                                    Map<String, String> headerMap) throws IOException {
         final String contentLength = headerMap.get("Content-Length");
-        if(!hasBody(contentLength)){
+        if (!hasBody(contentLength)) {
             return EMPTY;
         }
         final int contentLengthSize = Integer.parseInt(contentLength);

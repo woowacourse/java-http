@@ -37,6 +37,10 @@ public class Http11Request {
         return new String(buffer);
     }
 
+    public boolean hasNoJssesionIdCookie() {
+        return requestHead.hasNoCookieNamed("JSESSIONID");
+    }
+
     public boolean isGetMethod() {
         return startLine.isGetMethod();
     }

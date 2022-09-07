@@ -29,7 +29,7 @@
 
 - [x] HTTP Status Code 302
 - [x] POST 방식으로 회원가입
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기
 
 리팩터링
@@ -43,5 +43,6 @@
 - [ ] 회원 정보 필드가 비어있는 경우 발생하는 예외 수정
 - [x] 리다이렉트 시 location을 할당하여 해당 url로 리다이렉트 되도록 수정
 - [x] Url 내부의 Function 로직을 Handler 클래스로 분리
+- [ ] 로그인 요청을 POST 로 메서드 변경
 
 </details>

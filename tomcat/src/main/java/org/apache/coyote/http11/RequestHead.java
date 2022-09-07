@@ -34,4 +34,13 @@ public class RequestHead {
         }
         return Integer.parseInt(contentLength);
     }
+
+    public boolean hasNoCookieNamed(String cookieName) {
+        String cookieHeaderContent = headers.get("Cookie");
+        if (cookieHeaderContent == null) {
+            return true;
+        }
+        HttpCookie cookieHeader = HttpCookie.from(cookieHeaderContent);
+        return cookieHeader.hasNoNamed(cookieName);
+    }
 }

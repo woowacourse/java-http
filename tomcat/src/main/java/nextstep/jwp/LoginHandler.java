@@ -3,12 +3,15 @@ package nextstep.jwp;
 import static org.apache.coyote.http11.StatusCode.FOUND;
 import static org.apache.coyote.http11.StatusCode.OK;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11QueryParams;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +26,10 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
             return Http11Response.of(OK, "/login.html");
         }
         if (isLoginSuccess(queryParams)) {
+            if (request.hasNoJssesionIdCookie()) {
+                HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", UUID.randomUUID().toString()));
+                return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
+            }
             return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
         }
         return Http11Response.withLocation(FOUND, "/login.html", "/401.html");

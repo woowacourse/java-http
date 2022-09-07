@@ -26,9 +26,9 @@ public enum Url {
             return Http11Response.of(OK, "/login.html");
         }
         if (isLoginSuccess(queryParams)) {
-            return Http11Response.of(FOUND, "/index.html");
+            return Http11Response.withLocation(FOUND, "/login.html","/index.html");
         }
-        return Http11Response.of(FOUND, "/401.html");
+        return Http11Response.withLocation(FOUND, "/login.html", "/401.html");
     }),
     REGISTER("/register"::equals, request -> {
         if (request.isGetMethod()) {
@@ -37,9 +37,9 @@ public enum Url {
         if (request.isPostMethod()) {
             final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
             registerUser(queryParams);
-            return Http11Response.of(FOUND, "/index.html");
+            return Http11Response.withLocation(FOUND, "/register.html", "/index.html");
         }
-        return Http11Response.of(FOUND, "/404.html");
+        return Http11Response.withLocation(FOUND, "/register.html", "/404.html");
     }),
     RESOURCE(url -> isMatchRegex(".*\\..*", url), request -> Http11Response.of(OK, request.getRequestUrl()));
 

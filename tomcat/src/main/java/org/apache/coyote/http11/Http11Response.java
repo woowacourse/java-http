@@ -16,13 +16,17 @@ public class Http11Response {
     private final StatusCode statusCode;
     private final String contentType;
     private final String responseBody;
-    private final String resourcePath;
+    private final String location;
 
-    private Http11Response(StatusCode statusCode, String contentType, String responseBody, String resourcePath) {
+    private Http11Response(StatusCode statusCode, String contentType, String responseBody, String location) {
         this.statusCode = statusCode;
         this.contentType = contentType;
         this.responseBody = responseBody;
-        this.resourcePath = resourcePath;
+        this.location = location;
+    }
+
+    public static Http11Response withResponseBody(StatusCode statusCode, String contentType, String responseBody) {
+        return new Http11Response(statusCode, contentType, responseBody, null);
     }
 
     public static Http11Response of(StatusCode statusCode, String resourcePath) {
@@ -33,11 +37,18 @@ public class Http11Response {
 
         final String responseBody = getResponseBody(resource);
         final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(statusCode, contentType, responseBody, resourcePath);
+        return new Http11Response(statusCode, contentType, responseBody, null);
     }
 
-    public static Http11Response withResponseBody(StatusCode statusCode, String contentType, String responseBody) {
-        return new Http11Response(statusCode, contentType, responseBody, null);
+    public static Http11Response withLocation(StatusCode statusCode, String resourcePath, String location) {
+        final URL resource = Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("static" + resourcePath);
+        validateResourcePath(resource);
+
+        final String responseBody = getResponseBody(resource);
+        final String contentType = resourcePath.split("\\.")[1];
+        return new Http11Response(statusCode, contentType, responseBody, location);
     }
 
     private static void validateResourcePath(URL resource) {
@@ -74,7 +85,7 @@ public class Http11Response {
                 startLineToString(),
                 contentTypeToString(),
                 contentLengthToString(),
-                locationToString(resourcePath),
+                locationToString(location),
                 "",
                 responseBody);
     }

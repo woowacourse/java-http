@@ -5,7 +5,7 @@ import java.util.function.Function;
 public enum StatusCode {
 
     OK("200", Http11Response::getOkResponse),
-    FOUND("302", response -> response.getFoundResponse("/index.html"));
+    FOUND("302", Http11Response::getFoundResponse);
 
     private final String value;
     private final Function<Http11Response, String> responseContentExtractor;

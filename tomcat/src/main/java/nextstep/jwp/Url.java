@@ -19,19 +19,27 @@ import org.slf4j.LoggerFactory;
 
 public enum Url {
 
-    DEFAULT("/"::equals, request -> new Http11Response(OK, "html", "Hello world!")),
+    DEFAULT("/"::equals, request -> Http11Response.withResponseBody(OK, "html", "Hello world!")),
     LOGIN(url -> isMatchRegex("/login.*", url), request -> {
         final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestUrl());
         if (!queryParams.hasParam()) {
-            return Http11Response.from(OK, "/login.html");
+            return Http11Response.of(OK, "/login.html");
         }
         if (isLoginSuccess(queryParams)) {
-            return Http11Response.from(FOUND, "/index.html");
+            return Http11Response.of(FOUND, "/index.html");
         }
-        return Http11Response.from(OK, "/401.html");
+        return Http11Response.of(FOUND, "/401.html");
     }),
-    REGISTER("/register"::equals, request -> Http11Response.from(OK, "/register.html")),
-    RESOURCE(url -> isMatchRegex(".*\\..*", url), request -> Http11Response.from(OK, request.getRequestUrl()));
+    REGISTER("/register"::equals, request -> {
+        if (request.isGetMethod()) {
+            return Http11Response.of(OK, "/register.html");
+        }
+        if (request.isPostMethod()) {
+            return Http11Response.of(FOUND, "/index.html");
+        }
+        return Http11Response.of(FOUND, "/404.html");
+    }),
+    RESOURCE(url -> isMatchRegex(".*\\..*", url), request -> Http11Response.of(OK, request.getRequestUrl()));
 
     private static final Logger log = LoggerFactory.getLogger(Url.class);
 

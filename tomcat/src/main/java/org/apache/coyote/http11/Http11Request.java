@@ -41,6 +41,14 @@ public class Http11Request {
         }
     }
 
+    public boolean isGetMethod() {
+        return requestMethod.equals(RequestMethod.GET);
+    }
+
+    public boolean isPostMethod() {
+        return requestMethod.equals(RequestMethod.POST);
+    }
+
     public String getRequestUrl() {
         return requestUrl;
     }

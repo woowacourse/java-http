@@ -16,14 +16,16 @@ public class Http11Response {
     private final StatusCode statusCode;
     private final String contentType;
     private final String responseBody;
+    private final String resourcePath;
 
-    public Http11Response(StatusCode statusCode, String contentType, String responseBody) {
+    private Http11Response(StatusCode statusCode, String contentType, String responseBody, String resourcePath) {
         this.statusCode = statusCode;
         this.contentType = contentType;
         this.responseBody = responseBody;
+        this.resourcePath = resourcePath;
     }
 
-    public static Http11Response from(StatusCode statusCode, String resourcePath) {
+    public static Http11Response of(StatusCode statusCode, String resourcePath) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -31,7 +33,11 @@ public class Http11Response {
 
         final String responseBody = getResponseBody(resource);
         final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(statusCode, contentType, responseBody);
+        return new Http11Response(statusCode, contentType, responseBody, resourcePath);
+    }
+
+    public static Http11Response withResponseBody(StatusCode statusCode, String contentType, String responseBody) {
+        return new Http11Response(statusCode, contentType, responseBody, null);
     }
 
     private static void validateResourcePath(URL resource) {
@@ -63,12 +69,12 @@ public class Http11Response {
                 responseBody);
     }
 
-    public String getFoundResponse(String locationUrl) {
+    public String getFoundResponse() {
         return String.join("\r\n",
                 startLineToString(),
                 contentTypeToString(),
                 contentLengthToString(),
-                locationToString(locationUrl),
+                locationToString(resourcePath),
                 "",
                 responseBody);
     }

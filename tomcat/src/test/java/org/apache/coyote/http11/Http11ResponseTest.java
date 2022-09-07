@@ -12,7 +12,7 @@ class Http11ResponseTest {
     @DisplayName("존재하지 않는 경로를 요청하면 예외를 반환한다.")
     @Test
     void getResponse_ResourcePathNotFoundException() {
-        assertThatThrownBy(() -> Http11Response.from(OK, "야호"))
+        assertThatThrownBy(() -> Http11Response.of(OK, "야호"))
                 .isInstanceOf(ResourcePathNotFoundException.class);
     }
 }

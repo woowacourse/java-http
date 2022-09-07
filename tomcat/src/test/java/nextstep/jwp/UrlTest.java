@@ -97,7 +97,7 @@ class UrlTest {
 
     @DisplayName("회원가입 페이지에 대한 응답을 반환한다.")
     @Test
-    void getResponse_register() throws IOException {
+    void getResponse_register_get() throws IOException {
         final InputStream inputStream = new ByteArrayInputStream("GET /register HTTP/1.1".getBytes());
         final Http11Response response = Url.getResponseFrom(Http11Request.of(inputStream));
 
@@ -107,6 +107,26 @@ class UrlTest {
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입 요청에 대한 응답을 반환한다.")
+    @Test
+    void getResponse_register_post() throws IOException {
+        final InputStream inputStream = new ByteArrayInputStream("POST /register HTTP/1.1".getBytes());
+        final Http11Response response = Url.getResponseFrom(Http11Request.of(inputStream));
+
+        final String actual = response.getOkResponse();
+
+        final java.net.URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

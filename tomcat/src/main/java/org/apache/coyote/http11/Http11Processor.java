@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int PATH_INDEX = 1;
 
     private final Socket connection;
 
@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = executeRequestAndGetResponse(httpRequest);
 
-            outputStream.write(httpResponse.getResponse().getBytes());
+            outputStream.write(httpResponse.makeResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestPath = uri.getPath();
 
         if ("/".equals(requestPath)) {
-            return new HttpResponse(StatusCode.getStatusCode(200), ContentType.HTML.getContentType(), "Hello world!");
+            return HttpResponse.of(StatusCode.getStatusCode(200), ContentType.HTML.getContentType(), "Hello world!");
         }
 
         if ("/login".equals(requestPath)) {
@@ -77,12 +77,12 @@ public class Http11Processor implements Runnable, Processor {
         }
         if ("POST".equals(httpRequest.getRequestLine().getMethod())) {
             String body = httpRequest.getRequestBody().getBody();
-            return doLoginRequest(new QueryMapper(body));
+            return doLoginRequest(new QueryMapper(body), httpRequest);
         }
-        return doLoginRequest(new QueryMapper(uri));
+        return doLoginRequest(new QueryMapper(uri), httpRequest);
     }
 
-    private HttpResponse doLoginRequest(QueryMapper queryMapper) throws IOException {
+    private HttpResponse doLoginRequest(QueryMapper queryMapper, HttpRequest httpRequest) throws IOException {
         Map<String, String> parameters = queryMapper.getParameters();
 
         User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
@@ -90,9 +90,18 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.checkPassword(parameters.get("password"))) {
             log.info("user : " + user);
-            return HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
+            return checkCookieAndReturnResponse(httpRequest);
         }
         return HttpResponse.of(StatusCode.getStatusCode(200), "/401.html");
+    }
+
+    private HttpResponse checkCookieAndReturnResponse(HttpRequest httpRequest) throws IOException {
+        if (!httpRequest.getRequestHeaders().isExistCookie()) {
+            HttpResponse response = HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
+            response.addHeader("Set-Cookie: JSESSIONID=" + UUID.randomUUID());
+            return response;
+        }
+        return HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
     }
 
     private HttpResponse doRegisterRequest(HttpRequest httpRequest, URI uri) throws IOException {

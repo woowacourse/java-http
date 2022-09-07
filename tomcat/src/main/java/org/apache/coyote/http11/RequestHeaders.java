@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class RequestHeaders {
 
-    Map<String, String> headers;
+    private final Map<String, String> headers;
 
     private RequestHeaders(Map<String, String> headers) {
         this.headers = headers;
@@ -26,6 +26,10 @@ public class RequestHeaders {
             return Integer.parseInt(headers.get("Content-Length"));
         }
         return 0;
+    }
+
+    public boolean isExistCookie() {
+        return headers.containsKey("Cookie");
     }
 
     public Map<String, String> getHeaders() {

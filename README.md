@@ -28,7 +28,7 @@
 구현 기능 목록
 
 - [x] HTTP Status Code 302
-- [ ] POST 방식으로 회원가입
+- [x] POST 방식으로 회원가입
 - [ ] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기
 
@@ -38,5 +38,7 @@
 - [x] Http11Response 내부와 테스트에서만 사용되는 getOkResponse() 메서드 private으로 수정  
       -> StatusCode 클래스에서 사용되어 public으로 유지
 - [ ] response header, response body를 클래스로 분리
+- [ ] request header, request body를 클래스로 분리
+- [ ] 로그인 페이지에서 패스워드를 입력하지 않으면 발생하는 예외 수정
 
 </details>

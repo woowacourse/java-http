@@ -35,6 +35,8 @@ public enum Url {
             return Http11Response.of(OK, "/register.html");
         }
         if (request.isPostMethod()) {
+            final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
+            registerUser(queryParams);
             return Http11Response.of(FOUND, "/index.html");
         }
         return Http11Response.of(FOUND, "/404.html");
@@ -44,8 +46,8 @@ public enum Url {
     private static final Logger log = LoggerFactory.getLogger(Url.class);
 
     private final Predicate<String> condition;
-    private final Function<Http11Request, Http11Response> resourcePathExtractor;
 
+    private final Function<Http11Request, Http11Response> resourcePathExtractor;
     Url(Predicate<String> condition, Function<Http11Request, Http11Response> resourcePathExtractor) {
         this.condition = condition;
         this.resourcePathExtractor = resourcePathExtractor;
@@ -76,5 +78,14 @@ public enum Url {
             return true;
         }
         return false;
+    }
+
+    private static void registerUser(Http11QueryParams queryParams) {
+        String account = queryParams.getValueFrom("account");
+        String email = queryParams.getValueFrom("email");
+        String password = queryParams.getValueFrom("password");
+        User user = new User(account, email, password);
+        InMemoryUserRepository.save(user);
+        log.info(user.toString());
     }
 }

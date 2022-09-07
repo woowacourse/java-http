@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpCookieTest {
 
@@ -34,5 +35,15 @@ class HttpCookieTest {
 
         // when, then
         assertThat(given.parse()).isEqualTo(expected);
+    }
+
+    @Test
+    void 객체를_생성할_때_쿠키_정보가_올바르지_않으면_예외를_발생한다() {
+        // given
+        final String expected = "yummy_cookie=";
+
+        // when, then
+        assertThatThrownBy(() -> HttpCookie.create(expected))
+                .isInstanceOf(InvalidCookieException.class);
     }
 }

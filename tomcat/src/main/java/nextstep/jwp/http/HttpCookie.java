@@ -39,7 +39,7 @@ public class HttpCookie {
 
     private static void validateKeyValueSize(final String[] split) {
         if (split.length != KEY_VALUE_SIZE) {
-            throw new IllegalArgumentException("올바른 쿠키가 아님");
+            throw new InvalidCookieException();
         }
     }
 

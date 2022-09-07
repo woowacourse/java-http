@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.StatusCode.OK;
+import static org.apache.coyote.http11.response.StatusCode.OK;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.exception.NotFoundResourcePathException;
+import org.apache.coyote.http11.response.Http11Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

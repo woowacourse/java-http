@@ -1,10 +1,10 @@
 package nextstep.jwp;
 
-import static org.apache.coyote.http11.StatusCode.OK;
+import static org.apache.coyote.http11.response.StatusCode.OK;
 
 import java.util.function.Function;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

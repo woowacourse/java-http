@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.NotFoundResourcePathException;
+import org.apache.coyote.http11.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,23 +15,18 @@ public class Http11Response {
     private static final Logger log = LoggerFactory.getLogger(Http11Response.class);
 
     private final StatusCode statusCode;
-    private final String contentType;
+    private final ResponseHead responseHead;
     private final String responseBody;
-    private final String locationHeader;
-    private final String setCookieHeader;
 
-    private Http11Response(StatusCode statusCode, String contentType, String responseBody, String locationHeader,
-                           String setCookieHeader) {
+    private Http11Response(StatusCode statusCode, ResponseHead responseHead, String responseBody) {
         this.statusCode = statusCode;
-        this.contentType = contentType;
+        this.responseHead = responseHead;
         this.responseBody = responseBody;
-        this.locationHeader = locationHeader;
-        this.setCookieHeader = setCookieHeader;
     }
 
     public static Http11Response withResponseBody(final StatusCode statusCode, final String contentType,
                                                   final String responseBody) {
-        return new Http11Response(statusCode, contentType, responseBody, null, null);
+        return new Http11Response(statusCode, ResponseHead.fromContentType(contentType), responseBody);
     }
 
     public static Http11Response of(final StatusCode statusCode, final String resourcePath) {
@@ -40,8 +36,7 @@ public class Http11Response {
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
-        final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(statusCode, contentType, responseBody, null, null);
+        return new Http11Response(statusCode, ResponseHead.fromResourcePath(resourcePath), responseBody);
     }
 
     public static Http11Response withLocation(final StatusCode statusCode, final String resourcePath, String location) {
@@ -51,21 +46,22 @@ public class Http11Response {
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
-        final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(statusCode, contentType, responseBody, location, null);
+        return new Http11Response(statusCode, ResponseHead.withLocation(resourcePath, location), responseBody);
     }
 
-    public static Http11Response withLocationAndSetJsessionIdCookie(final StatusCode statusCode,
-                                                                    final String resourcePath,
-                                                                    final String location, final HttpCookie cookie) {
+    public static Http11Response withLocationAndSetCookie(final StatusCode statusCode,
+                                                          final String resourcePath,
+                                                          final String location,
+                                                          final HttpCookie cookie,
+                                                          final String cookieName) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
-        final String contentType = resourcePath.split("\\.")[1];
-        return new Http11Response(statusCode, contentType, responseBody, location, cookie.cookieToString("JSESSIONID"));
+        return new Http11Response(statusCode,
+                ResponseHead.withLocationAndSetCookie(resourcePath, location, cookie, cookieName), responseBody);
     }
 
     private static void validateResourcePath(final URL resource) {
@@ -89,13 +85,13 @@ public class Http11Response {
     }
 
     public boolean hasSetCookieHeader() {
-        return setCookieHeader != null;
+        return responseHead.hasSetCookieHeader();
     }
 
     public String getOkResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                contentTypeToString(),
+                responseHead.contentTypeToString(),
                 contentLengthToString(),
                 "",
                 responseBody);
@@ -104,9 +100,9 @@ public class Http11Response {
     public String getFoundResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                contentTypeToString(),
+                responseHead.contentTypeToString(),
                 contentLengthToString(),
-                locationToString(locationHeader),
+                responseHead.locationToString(),
                 "",
                 responseBody);
     }
@@ -114,10 +110,10 @@ public class Http11Response {
     public String getFoundResponseWithSetCookie() {
         return String.join("\r\n",
                 startLineToString(),
-                contentTypeToString(),
+                responseHead.contentTypeToString(),
                 contentLengthToString(),
-                locationToString(locationHeader),
-                setCookieToString(setCookieHeader),
+                responseHead.locationToString(),
+                responseHead.setCookieToString(),
                 "",
                 responseBody);
     }
@@ -126,19 +122,7 @@ public class Http11Response {
         return String.format("HTTP/1.1 %s ", statusCode.statusCodeToString());
     }
 
-    private String contentTypeToString() {
-        return String.format("Content-Type: text/%s;charset=utf-8 ", contentType);
-    }
-
     private String contentLengthToString() {
         return String.format("Content-Length: %s ", responseBody.getBytes().length);
-    }
-
-    private CharSequence locationToString(String locationUrl) {
-        return String.format("Location: %s ", locationUrl);
-    }
-
-    private CharSequence setCookieToString(String cookie) {
-        return String.format("Set-Cookie: %s ", cookie);
     }
 }

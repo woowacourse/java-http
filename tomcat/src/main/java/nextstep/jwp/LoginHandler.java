@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
-import static org.apache.coyote.http11.StatusCode.FOUND;
-import static org.apache.coyote.http11.StatusCode.OK;
+import static org.apache.coyote.http11.response.StatusCode.FOUND;
+import static org.apache.coyote.http11.response.StatusCode.OK;
 
 import java.util.List;
 import java.util.Map;
@@ -12,11 +12,11 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11QueryParams;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
             UUID uuid = UUID.randomUUID();
             startSession(user, uuid);
             HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", uuid.toString()));
-            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, LOGIN_HTML, INDEX_HTML, cookie);
+            return Http11Response.withLocationAndSetCookie(FOUND, LOGIN_HTML, INDEX_HTML, cookie, "JSESSIONID");
         }
         return Http11Response.withLocation(FOUND, LOGIN_HTML, "/401.html");
     }

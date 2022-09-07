@@ -158,7 +158,10 @@ class UrlTest {
     @DisplayName(".css 파일에 대한 응답을 반환한다.")
     @Test
     void getResponse_css() throws IOException {
-        final InputStream inputStream = new ByteArrayInputStream("GET /css/styles.css HTTP/1.1".getBytes());
+        String request = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 \n",
+                "");
+        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final Http11Response response = Url.getResponseFrom(Http11Request.of(inputStream));
 
         final String actual = response.getOkResponse();

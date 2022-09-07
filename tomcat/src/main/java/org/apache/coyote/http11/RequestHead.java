@@ -15,7 +15,7 @@ public class RequestHead {
 
     private final Map<String, String> headers;
 
-    public RequestHead(Map<String, String> headers) {
+    private RequestHead(Map<String, String> headers) {
         this.headers = headers;
     }
 

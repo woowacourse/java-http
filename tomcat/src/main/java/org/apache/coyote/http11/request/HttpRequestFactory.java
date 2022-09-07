@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.request.RequestHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HeaderField.CONTENT_LENGTH;
 
 import java.io.BufferedReader;
 import java.io.IOException;

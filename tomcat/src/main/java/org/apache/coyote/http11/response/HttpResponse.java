@@ -1,11 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.Collections;
+import org.apache.coyote.http11.request.HttpHeaders;
 
 public class HttpResponse {
 
-    private StatusLine statusLine;
     private final HttpHeaders httpHeaders;
+    private StatusLine statusLine;
     private String body;
     private String viewName;
 

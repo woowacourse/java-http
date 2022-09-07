@@ -1,11 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.LoginController;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class FrontServlet {
 

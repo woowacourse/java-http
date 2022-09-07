@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.controller.support.ErrorResponse;
 import nextstep.jwp.controller.support.FileReader;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
@@ -23,8 +24,7 @@ public class IndexController extends AbstractController {
         if (httpRequest.matchRequestMethod(Method.GET)) {
             return doGet(httpRequest);
         }
-        String body = FileReader.getFile("/404.html", getClass());
-        return HttpResponse.of(ResponseStatusCode.NOT_FOUND, httpRequest.getVersion(), ContentType.HTML, body);
+        return ErrorResponse.getNotFound(getClass(), httpRequest);
     }
 
     @Override

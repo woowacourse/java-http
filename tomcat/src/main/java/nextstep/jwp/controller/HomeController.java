@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.support.FileReader;
+import nextstep.jwp.controller.support.ErrorResponse;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.ContentType;
@@ -22,8 +22,7 @@ public class HomeController extends AbstractController {
         if (httpRequest.matchRequestMethod(Method.GET)) {
             return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, RESPONSE_BODY);
         }
-        String body = FileReader.getFile("/404.html", getClass());
-        return HttpResponse.of(ResponseStatusCode.NOT_FOUND, httpRequest.getVersion(), ContentType.HTML, body);
+        return ErrorResponse.getNotFound(getClass(), httpRequest);
     }
 
     @Override

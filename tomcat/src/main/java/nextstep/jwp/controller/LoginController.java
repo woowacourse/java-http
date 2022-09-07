@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -40,24 +41,22 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse doPost(HttpRequest request) {
-        final String responseBody = login(request.getBody());
+        login(request.getBody());
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
                 .contentType(Extension.HTML.getContentType())
                 .location("/index.html")
-                .responseBody(responseBody)
+                .cookie("JSESSIONID=" + UUID.randomUUID())
                 .build();
     }
 
-    private String login(Map<String, String> params) {
+    private void login(Map<String, String> params) {
         final String account = params.get("account");
         final String password = params.get("password");
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(LoginFailedException::new);
 
         user.checkPassword(password);
-
-        return ResourceFindUtils.getResourceFile("/index.html");
     }
 }

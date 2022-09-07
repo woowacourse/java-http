@@ -48,6 +48,11 @@ public class HttpResponse {
             return this;
         }
 
+        public Builder cookie(String sessionId) {
+            headers.put("Set-Cookie", sessionId);
+            return this;
+        }
+
         public Builder addHeader(String key, String value) {
             headers.put(key, value);
             return this;

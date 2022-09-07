@@ -22,20 +22,31 @@ public class HttpRequest {
     public static HttpRequest from(BufferedReader bufferedReader) {
         try{
             final StartLine startLine = StartLine.from(bufferedReader.readLine());
-            final List<String> headers = new ArrayList<>();
-            String line;
-            while(!"".equals(line = bufferedReader.readLine())){
-                headers.add(line);
-            }
-            final HttpHeaders httpHeaders = HttpHeaders.from(headers);
-            final int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length").trim());
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            final String requestBody = new String(buffer);
-            return new HttpRequest(startLine, httpHeaders, RequestBody.from(requestBody));
+            final HttpHeaders httpHeaders = extractHeaders(bufferedReader);
+            final RequestBody requestBody = extractRequestBody(bufferedReader, httpHeaders);
+            return new HttpRequest(startLine, httpHeaders, requestBody);
         } catch (IOException exception) {
             throw new UncheckedServletException("유효하지 않은 요청입니다.");
         }
+    }
+
+    private static HttpHeaders extractHeaders(BufferedReader bufferedReader) throws IOException {
+        final List<String> headers = new ArrayList<>();
+        String line;
+        while(!"".equals(line = bufferedReader.readLine())){
+            headers.add(line);
+        }
+        final HttpHeaders httpHeaders = HttpHeaders.from(headers);
+        return httpHeaders;
+    }
+
+    private static RequestBody extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
+            throws IOException {
+        final int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length").trim());
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        final RequestBody requestBody = RequestBody.from(new String(buffer));
+        return requestBody;
     }
 
     public Path getPath() {

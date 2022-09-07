@@ -7,10 +7,13 @@ public class HttpStatusLine {
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
     private final String protocolVersion;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
-    public HttpStatusLine(HttpStatus httpStatus) {
+    public HttpStatusLine() {
         this.protocolVersion = PROTOCOL_VERSION;
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 

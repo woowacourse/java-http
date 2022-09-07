@@ -1,73 +1,40 @@
 package org.apache.coyote.http11.model.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.apache.coyote.http11.model.HttpHeaderType;
 import org.apache.coyote.http11.model.HttpStatus;
 
 public class HttpResponse {
 
-    private static final String JSESSIONID_HEADER_PREFIX = "JSESSIONID=";
-
     private final HttpStatusLine statusLine;
     private final HttpResponseHeader headers;
-    private final String responseBody;
+    private String responseBody;
 
-    public HttpResponse(Builder builder) {
-        this.statusLine = new HttpStatusLine(builder.statusCode);
-        this.headers = new HttpResponseHeader(builder.headers);
-        this.responseBody = builder.responseBody;
+    public HttpResponse() {
+        this.statusLine = new HttpStatusLine();
+        this.headers = new HttpResponseHeader();
     }
 
-    public static class Builder {
-        private HttpStatus statusCode;
-        private Map<String, String> headers;
-
-        private String responseBody;
-
-        public Builder() {
-            this.headers = new LinkedHashMap<>();
-        }
-
-        public Builder statusCode(HttpStatus statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder header(String headerName, String headerValue) {
-            this.headers.put(headerName, headerValue);
-            return this;
-        }
-
-        public Builder addCookie(String cookie) {
-            this.headers.put(HttpHeaderType.SET_COOKIE, JSESSIONID_HEADER_PREFIX + cookie);
-            return this;
-        }
-
-        public Builder responseBody(String responseBody) {
-            this.responseBody = responseBody;
-            int contentLength = responseBody.getBytes().length;
-            this.headers.put(HttpHeaderType.CONTENT_LENGTH, String.valueOf(contentLength));
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(this);
-        }
+    public static void redirect(HttpResponse response, String page) {
+        response.statusCode(HttpStatus.FOUND);
+        response.addHeader(HttpHeaderType.LOCATION, page);
     }
 
-    public static HttpResponse redirect(String redirectUrl) {
-        return new HttpResponse.Builder()
-                .statusCode(HttpStatus.FOUND)
-                .header(HttpHeaderType.LOCATION, redirectUrl)
-                .build();
+    public void statusCode(HttpStatus httpStatus) {
+        this.statusLine.setStatus(httpStatus);
     }
 
-    public static HttpResponse notFound() {
-        return new HttpResponse.Builder()
-                .statusCode(HttpStatus.NOT_FOUND)
-                .build();
+    public void addHeader(String headerName, String headerValue) {
+        this.headers.addValue(headerName, headerValue);
+    }
+
+    public void addCookie(String cookie) {
+        this.headers.addCookie(cookie);
+    }
+
+    public void responseBody(String responseBody) {
+        this.responseBody = responseBody;
+        int contentLength = responseBody.getBytes().length;
+        addHeader(HttpHeaderType.CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public byte[] toResponse() {

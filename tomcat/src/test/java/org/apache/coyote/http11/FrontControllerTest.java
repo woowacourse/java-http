@@ -16,18 +16,19 @@ class FrontControllerTest {
 
     private final FrontController frontController = new FrontController();
 
-    @DisplayName("처리할 수 없는 요청이 올 경우 경우 Not Found 응답을 한다.")
+    @DisplayName("처리할 수 없는 요청이 올 경우 경우 Method Not Allowed 응답을 한다.")
     @Test
     void responseBadRequestWhenRequestThatCannotBePerform() throws IOException {
         String request = "GET /wrongUrl HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = frontController.performRequest(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        frontController.performRequest(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND)
+                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
         );
     }
 }

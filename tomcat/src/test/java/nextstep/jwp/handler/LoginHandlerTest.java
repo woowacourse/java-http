@@ -24,12 +24,14 @@ class LoginHandlerTest {
     @DisplayName("GET /login 경로로 요청시 200 OK와 함께 Register 페이지를 반환한다.")
     @Test
     void performGetMethod() throws IOException {
+        LoginHandler loginHandler = new LoginHandler();
         String request = "GET /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.service(httpRequest, httpResponse);
 
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -47,6 +49,7 @@ class LoginHandlerTest {
     @DisplayName("GET /login 경로로 요청시 Session 정보가 있다면 302 Found와 함께 index 페이지를 반환한다.")
     @Test
     void performGetMethodWithSession() throws IOException {
+        LoginHandler loginHandler = new LoginHandler();
         String session = login();
         String request = "GET /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
@@ -54,7 +57,8 @@ class LoginHandlerTest {
                 + "Cookie: " + session + "\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.service(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
@@ -66,6 +70,7 @@ class LoginHandlerTest {
     @DisplayName("Put /login 경로로 로그인이 성공하면 302 Found와 함께 Index 페이지를 반환한다.")
     @Test
     void performPutMethod() throws IOException {
+        LoginHandler loginHandler = new LoginHandler();
         String request = "POST /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
@@ -76,7 +81,8 @@ class LoginHandlerTest {
                 + "account=rex&password=password\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.service(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
@@ -100,6 +106,7 @@ class LoginHandlerTest {
     @DisplayName("Put /login 경로로 로그인이 실패하면 302 Found와 함께 401 페이지를 반환한다.")
     @Test
     void performPutMethodWithWrongPassword() throws IOException {
+        LoginHandler loginHandler = new LoginHandler();
         String request = "POST /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
@@ -110,7 +117,8 @@ class LoginHandlerTest {
                 + "account=rex&password=password123\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.service(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
@@ -120,6 +128,7 @@ class LoginHandlerTest {
     }
 
     String login() throws IOException {
+        LoginHandler loginHandler = new LoginHandler();
         String request = "POST /login HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
@@ -130,7 +139,8 @@ class LoginHandlerTest {
                 + "account=rex&password=password\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.service(httpRequest, httpResponse);
         return httpResponse.getHeader("Set-Cookie");
     }
 }

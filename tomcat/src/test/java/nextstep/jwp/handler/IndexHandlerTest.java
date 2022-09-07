@@ -25,7 +25,8 @@ class IndexHandlerTest {
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = frontController.performRequest(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        frontController.performRequest(httpRequest, httpResponse);
 
         String expectedResponseBody = "Hello world!";
 

@@ -22,8 +22,10 @@ class ResourceHandlerTest {
     @DisplayName("정적 파일을 읽어와 HttpResponse를 반환한다.")
     @Test
     void staticFileRequest() throws IOException {
+        ResourceHandler resourceHandler = new ResourceHandler();
         String fileName = "/js/scripts.js";
-        HttpResponse httpResponse = ResourceHandler.returnResource(fileName);
+        HttpResponse httpResponse = new HttpResponse();
+        resourceHandler.returnResource(fileName, httpResponse);
 
         URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -42,8 +44,10 @@ class ResourceHandlerTest {
     @DisplayName("존재하지 않는 정적 파일을 요청할 경우 Not Found 응답을 한다.")
     @Test
     void responseBadRequestWhenRequestInvalidStaticFile() {
+        ResourceHandler resourceHandler = new ResourceHandler();
         String fileName = "/rex/rex.js";
-        HttpResponse httpResponse = ResourceHandler.returnResource(fileName);
+        HttpResponse httpResponse = new HttpResponse();
+        resourceHandler.returnResource(fileName, httpResponse);
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND)

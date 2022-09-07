@@ -33,8 +33,12 @@ public class HttpRequestLine {
         }
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public boolean isGet() {
+        return method.isGet();
+    }
+
+    public boolean isPost() {
+        return method.isPost();
     }
 
     public String getUri() {

@@ -6,21 +6,14 @@ import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-public class IndexHandler {
+public class IndexHandler extends AbstractController {
 
-    public static HttpResponse perform(HttpRequest request) {
-        if (request.getMethod().isGet()) {
-            return doGet();
-        }
-        return HttpResponse.notFound();
-    }
-
-    private static HttpResponse doGet() {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String contentType = ContentType.HTML.getContentType();
-        return new HttpResponse.Builder()
-                .statusCode(HttpStatus.OK)
-                .header(HttpHeaderType.CONTENT_TYPE, contentType)
-                .responseBody("Hello world!")
-                .build();
+
+        response.statusCode(HttpStatus.OK);
+        response.addHeader(HttpHeaderType.CONTENT_TYPE, contentType);
+        response.responseBody("Hello world!");
     }
 }

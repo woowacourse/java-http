@@ -57,4 +57,12 @@ public class HttpRequest {
     public RequestBody getRequestBody() {
         return requestBody;
     }
+
+    public boolean hasSessionCookie() {
+        return requestHeaders.hasSessionCookie();
+    }
+
+    public String getCookie() {
+        return requestHeaders.getCookie();
+    }
 }

@@ -62,7 +62,6 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest generateRequest(final BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         RequestHeaders requestHeaders = generateRequestHeaders(bufferedReader);
-        System.out.println(requestHeaders);
         RequestBody requestBody = null;
         if (requestLine.getMethod().equalsIgnoreCase("POST")) {
             requestBody = generateRequestBody(bufferedReader, requestHeaders);
@@ -83,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private RequestBody generateRequestBody(BufferedReader bufferedReader,
                                             RequestHeaders requestHeaders) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.get("Content-Length:"));
+        int contentLength = Integer.parseInt((String) requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
@@ -94,6 +93,7 @@ public class Http11Processor implements Runnable, Processor {
                                     final HttpResponse httpResponse) throws IOException {
         return String.join("\r\n",
                 httpResponse.getStatusLine().getValue(),
+                "Set-Cookie: " + httpRequest.getCookie(),
                 httpRequest.getContentType(),
                 "Content-Length: " + httpResponse.getResponseBody().getBytes().length + " ",
                 "",

@@ -1,5 +1,6 @@
 package org.apache.coyote.http.response;
 
+import java.util.UUID;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpVersion;
@@ -12,8 +13,7 @@ public class HttpResponse {
     private final HttpHeader httpHeader;
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String responseBody) {
-        this(HttpVersion.HTTP11, httpStatus, responseBody,
-                HttpHeader.init(contentType, responseBody));
+        this(HttpVersion.HTTP11, httpStatus, responseBody, HttpHeader.init(contentType, responseBody));
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String responseBody,
@@ -41,4 +41,8 @@ public class HttpResponse {
         return httpHeader.print();
     }
 
+    public void addJSessionId() {
+        final String jSessionId = UUID.randomUUID().toString();
+        httpHeader.addJSessionId(jSessionId);
+    }
 }

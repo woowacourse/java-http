@@ -60,4 +60,16 @@ public class HttpHeader {
                 .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(System.lineSeparator()));
     }
+
+    public String getJSessionId() {
+        return getCookiesData().getJSessionId();
+    }
+
+    public void addJSessionId(final String jSessionId) {
+        values.put("Set-Cookie", "JSESSIONID=" + jSessionId);
+    }
+
+    public HttpCookie getCookiesData() {
+        return HttpCookie.from(values.get("Cookie"));
+    }
 }

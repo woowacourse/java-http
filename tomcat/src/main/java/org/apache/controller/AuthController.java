@@ -31,7 +31,10 @@ public class AuthController extends AbstractController {
                 .orElseThrow();
 
         if (user.checkPassword(password)) {
-            return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, "/index.html");
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody,
+                    "/index.html");
+            httpResponse.addJSessionId();
+            return httpResponse;
         }
         return new HttpResponse(HttpStatus.OK, ContentType.HTML, responseBody, "/401.html");
     }

@@ -2,6 +2,7 @@ package nextstep.jwp.view;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -13,10 +14,10 @@ import org.apache.coyote.common.response.Response;
 import org.apache.coyote.common.response.Status;
 import org.utils.ResourceGenerator;
 
-public class LoginHandler implements Function<Request, Response> {
+public class LoginHandler implements BiFunction<Request, Response, Response> {
 
     @Override
-    public Response apply(final Request request) {
+    public Response apply(final Request request, final Response response) {
         final String password = request.getBodyValue("password")
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         final Optional<User> user = findUser(request);
@@ -30,12 +31,11 @@ public class LoginHandler implements Function<Request, Response> {
             statusCode = Status.UNAUTHORIZED;
         }
 
-        return Response.builder(HttpVersion.HTTP11, statusCode)
-                .setContentType(MediaType.TEXT_HTML, Charset.UTF8)
+        return response.setContentType(MediaType.TEXT_HTML, Charset.UTF8)
+                .setStatus(statusCode)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setLocation(locationUrl)
-                .setBody(responseBody)
-                .build();
+                .setBody(responseBody);
     }
 
     private Optional<User> findUser(final Request request) {

@@ -34,7 +34,6 @@ class CookieTest {
                 .setExpires(360)
                 .setSecure()
                 .asString();
-
         assertThat(actual).isNotNull();
     }
 }

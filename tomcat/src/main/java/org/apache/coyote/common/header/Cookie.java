@@ -7,12 +7,16 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Cookie {
+
+    public  static final String SESSION_ID_COOKIE_KEY = "JSESSIONID";
 
     private static final String ATTRIBUTE_KEY_VALUE_DELIMITER = "=";
     private static final String ATTRIBUTE_DELIMITER = "; ";
@@ -26,18 +30,34 @@ public class Cookie {
     }
 
     private Map<String, String> parseRawCookie(final String rawCookie) {
+        if (rawCookie.isEmpty()) {
+            return new HashMap<>();
+        }
         String[] cookiePairs = rawCookie.split(ATTRIBUTE_DELIMITER);
         return Arrays.stream(cookiePairs)
+                .filter(cookiePair -> cookiePair.contains(ATTRIBUTE_KEY_VALUE_DELIMITER))
                 .map(cookiePair -> cookiePair.split(ATTRIBUTE_KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(cookiePair -> cookiePair[KEY_INDEX], cookiePair -> cookiePair[VALUE_INDEX]));
     }
 
-    public static SetCookieBuilder setCookieBuilder(final String key, final String value, final String path) {
-        return new SetCookieBuilder(key, value, path);
+    public static SetCookieBuilder setCookieBuilder(final String key, final String value) {
+        return new SetCookieBuilder(key, value);
     }
 
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(parsedCookie.get(key));
+    }
+
+    public String generateSessionIdCookie() {
+        final String cookieValue = parsedCookie.get(SESSION_ID_COOKIE_KEY);
+        if (cookieValue == null) {
+            final String sessionId = UUID.randomUUID().toString();
+            parsedCookie.put(SESSION_ID_COOKIE_KEY, sessionId);
+            return String.join(ATTRIBUTE_KEY_VALUE_DELIMITER,
+                    SESSION_ID_COOKIE_KEY,
+                    parsedCookie.get(SESSION_ID_COOKIE_KEY));
+        }
+        return cookieValue;
     }
 
     public static class SetCookieBuilder {
@@ -57,7 +77,7 @@ public class Cookie {
         private String secure;
         private String httpOnly;
 
-        SetCookieBuilder(final String key, final String value, final String path) {
+        SetCookieBuilder(final String key, final String value) {
             this.key = key;
             this.value = value;
             try {
@@ -66,7 +86,7 @@ public class Cookie {
             } catch (UnknownHostException e) {
                 throw new IllegalArgumentException("Unknown local host name.");
             }
-            this.path = makeAttribute(PATH, path);
+            this.path = makeAttribute(PATH, "\\");
             expires = "";
             secure = "";
             httpOnly = HTTP_ONLY;

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import nextstep.jwp.view.LoginHandler;
 import nextstep.jwp.view.RegisterHandler;
@@ -9,7 +10,7 @@ import org.apache.coyote.common.response.Response;
 
 public class HandlerMapper {
 
-    private static final Map<String, Function<Request, Response>> cache;
+    private static final Map<String, BiFunction<Request, Response, Response>> cache;
     private static final StaticResourceHandler staticResourceHandler;
 
     static {
@@ -20,7 +21,7 @@ public class HandlerMapper {
         staticResourceHandler = new StaticResourceHandler();
     }
 
-    public static Function<Request, Response> of(final Request request) {
+    public static BiFunction<Request, Response, Response> of(final Request request) {
         return cache.getOrDefault(request.getRequestIdentifier(), staticResourceHandler);
     }
 }

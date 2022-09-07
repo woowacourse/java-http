@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.common.header.Header;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
+import org.apache.coyote.common.header.Cookie;
+import org.apache.coyote.common.header.Header;
 import org.apache.coyote.common.request.parser.UrlParser;
 import org.apache.coyote.common.request.parser.bodyparser.BodyParserMapper;
 
@@ -30,6 +31,7 @@ public class Request {
     private final Map<String, String> queryString;
     private final Map<String, String> headers;
     private final Map<String, String> body;
+    private final Cookie cookie;
 
     public Request(final String rawRequest) {
         final String[] parsedRequest = rawRequest.split("\r\n");
@@ -44,6 +46,7 @@ public class Request {
 
         final int headerBodyDelimiterIndex = getHeaderBodyDelimiterIndex(parsedRequest);
         this.headers = parseHeaders(parsedRequest, headerBodyDelimiterIndex);
+        this.cookie = parseCookie(headers);
         this.body = parseBody(parsedRequest, headerBodyDelimiterIndex,
                 MediaType.of(headers.get(Header.CONTENT_TYPE.getValue())));
     }
@@ -52,7 +55,7 @@ public class Request {
         final int index = Arrays.asList(parsedRequest)
                 .indexOf(HEADER_BODY_DELIMITER);
         if (index == -1) {
-            return parsedRequest.length - 1;
+            return parsedRequest.length;
         }
         return index;
     }
@@ -65,10 +68,15 @@ public class Request {
                 .collect(Collectors.toMap(parsedHeader -> parsedHeader[0], parseHeader -> parseHeader[1]));
     }
 
+    private Cookie parseCookie(final Map<String, String> headers) {
+        final String rawCookie = headers.getOrDefault(Header.COOKIE.getValue(), "");
+        return new Cookie(rawCookie);
+    }
+
     private Map<String, String> parseBody(final String[] parsedRequest,
                                           final int headerBodyDelimiterIndex,
                                           final MediaType mediaType) {
-        if (parsedRequest.length <= headerBodyDelimiterIndex) {
+        if (headerBodyDelimiterIndex <= 0 || parsedRequest.length <= headerBodyDelimiterIndex) {
             return new HashMap<>();
         }
         final String rawBody = String.join("", Arrays.asList(parsedRequest)
@@ -87,6 +95,10 @@ public class Request {
 
     public Optional<String> getBodyValue(final String key) {
         return Optional.ofNullable(body.get(key));
+    }
+
+    public Cookie getCookie() {
+        return cookie;
     }
 
     public String getRequestIdentifier() {

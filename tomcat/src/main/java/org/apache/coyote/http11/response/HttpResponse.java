@@ -11,7 +11,6 @@ public class HttpResponse {
     private final ResponseBody body;
     private final ResponseHeaders headers;
 
-
     public HttpResponse(String responseLine, ResponseBody body, ResponseHeaders header) {
         this.responseLine = responseLine;
         this.body = body;
@@ -21,14 +20,21 @@ public class HttpResponse {
     public static HttpResponse createWithBody(HttpStatus httpStatus, String url) throws IOException {
         final String responseLine = HTTP_VERSION + httpStatus.code;
         final ResponseBody body = ResponseBody.from(url);
-        final ResponseHeaders header = new ResponseHeaders(url, body.getBody());
+        final ResponseHeaders header = ResponseHeaders.create(url, body.getBody());
         return new HttpResponse(responseLine, body, header);
     }
 
     public static HttpResponse createWithoutBody(HttpStatus httpStatus, String redirectUrl) {
         final String responseLine = HTTP_VERSION + httpStatus.code;
         final ResponseBody body = new ResponseBody();
-        final ResponseHeaders header = new ResponseHeaders(redirectUrl);
+        final ResponseHeaders header = ResponseHeaders.createWithLocation(redirectUrl);
+        return new HttpResponse(responseLine, body, header);
+    }
+
+    public static HttpResponse createWithoutBodyForJSession(HttpStatus httpStatus, String redirectUrl, String uuid) {
+        final String responseLine = HTTP_VERSION + httpStatus.code;
+        final ResponseBody body = new ResponseBody();
+        final ResponseHeaders header = ResponseHeaders.createWithLocationAndJSessionId(redirectUrl, uuid);
         return new HttpResponse(responseLine, body, header);
     }
 

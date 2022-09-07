@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
@@ -19,16 +20,16 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
-    public boolean isExistQueryString() {
-        return requestLine.isExistQueryString();
-    }
-
     public String getQueryStringValue(String key) {
         return requestLine.getQueryStringValue(key);
     }
 
     public boolean containsUri(String uri) {
         return requestLine.containsUri(uri);
+    }
+
+    public HttpCookie getCookie() {
+        return requestHeaders.getCookie();
     }
 
     public String getBodyValue(String key) {

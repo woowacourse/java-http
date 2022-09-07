@@ -8,30 +8,43 @@ public class ResponseHeaders {
 
     private final String headers;
 
-    public ResponseHeaders(String url, String body) {
-        this.headers = createHeaders(url, body);
+    private ResponseHeaders(String headers) {
+        this.headers = headers;
     }
 
-    public ResponseHeaders(String redirectUrl) {
-        this.headers = createHeadersForRedirect(redirectUrl);
+    public static ResponseHeaders create(String url, String body) {
+        return new ResponseHeaders(createHeaders(url, body));
     }
 
-    private String createHeaders(String url, String body) {
+    public static ResponseHeaders createWithLocation(String redirectUrl) {
+        return new ResponseHeaders(createHeadersForRedirect(redirectUrl));
+    }
+
+    public static ResponseHeaders createWithLocationAndJSessionId(String redirectUrl, String jSessionId) {
+        String headers1 = String.join("\r\n",
+                LOCATION + ": " + redirectUrl,
+                "Set-Cookie: " + "JSESSIONID=" + jSessionId,
+                "");
+        System.out.println("headers1 = " + headers1);
+        return new ResponseHeaders(headers1);
+    }
+
+    private static String createHeaders(String url, String body) {
         String contentType = getContentType(url);
         String contentLength = body.getBytes().length + " ";
         return String.join("\r\n",
-                CONTENT_TYPE + contentType,
-                CONTENT_LENGTH + contentLength,
+                CONTENT_TYPE + ": " + contentType,
+                CONTENT_LENGTH + ": " + contentLength,
                 "");
     }
 
-    private String createHeadersForRedirect(String redirectUrl) {
+    private static String createHeadersForRedirect(String redirectUrl) {
         return String.join("\r\n",
-                LOCATION + redirectUrl,
+                LOCATION + ": " + redirectUrl,
                 "");
     }
 
-    private String getContentType(String requestUri) {
+    private static String getContentType(String requestUri) {
         return ContentType.find(requestUri) + ";charset=utf-8 ";
     }
 

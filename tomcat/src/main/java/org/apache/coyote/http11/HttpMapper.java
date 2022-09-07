@@ -19,7 +19,6 @@ public class HttpMapper {
 
         final String requestUri = httpRequest.getRequestLine();
         final Controller controller = ControllerMapper.findController(requestUri);
-
         return controller.getResponse(httpRequest);
     }
 }

@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,9 +55,11 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
+        final String JSessionId = socket.output().split("JSESSIONID=")[1].split(" ")[0];
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
@@ -149,5 +154,39 @@ class Http11ProcessorTest {
                 () -> assertThat(socket.output()).contains(expected),
                 () -> assertThat(user.get()).isNotNull()
         );
+    }
+
+    @DisplayName("이미 로그인한 사용자가 로그인 페이지에 접근하면 302 응답과 함께 /index.html로 리다이렉팅 한다.")
+    @Test
+    void get_Login_AlreadyLogined() {
+        //given
+        final String account = "east";
+        final String password = "password";
+        final String email = "xldk78@gmail.com";
+        final String JSessionId = UUID.randomUUID().toString();
+        final User user = new User(account, password, email);
+
+        final SessionManager sessionManager = new SessionManager();
+        final Session session = new Session(JSessionId);
+        sessionManager.add(session);
+        session.setAttribute("user", user);
+
+        final String getLoginRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: " + "JSESSIONID=" + JSessionId,
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(getLoginRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        final String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n";
+        assertThat(socket.output()).contains(expected);
     }
 }

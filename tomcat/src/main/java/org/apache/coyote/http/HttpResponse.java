@@ -70,10 +70,7 @@ public class HttpResponse {
     }
 
     private String toResourcePath(final String path) {
-        String resourcePath = "static/" + path;
-        if (!resourcePath.contains(FILE_EXTENSION)) {
-            resourcePath += ".html";
-        }
+        final String resourcePath = "static/" + path;
 
         return HttpResponse.class.getClassLoader()
                 .getResource(resourcePath)

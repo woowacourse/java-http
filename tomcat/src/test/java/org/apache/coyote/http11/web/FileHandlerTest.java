@@ -29,7 +29,7 @@ class FileHandlerTest {
                 new HttpResponse(HttpStatus.OK, responseHeaders, ResourceLoader.getContent("index.html"));
 
         // when
-        final HttpResponse actual = new FileHandler().handle(httpRequest);
+        final HttpResponse actual = new RequestHandler().handle(httpRequest);
 
         // then
         assertThat(actual).usingRecursiveComparison()

@@ -29,7 +29,6 @@ public enum HttpHeader {
                 .orElseThrow(InvalidHttpRequestException::new);
     }
 
-
     public static boolean contains(final String value) {
         return Arrays.stream(values())
                 .anyMatch(it -> it.value.equals(value));

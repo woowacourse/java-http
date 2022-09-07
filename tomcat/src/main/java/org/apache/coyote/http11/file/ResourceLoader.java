@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.file;
 
-import static java.util.Objects.requireNonNull;
-
+import nextstep.jwp.exception.NotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ResourceLoader {
 
@@ -24,7 +24,8 @@ public class ResourceLoader {
 
         final URL resource = ResourceLoader.class.getClassLoader()
                 .getResource(STATIC_RESOURCE_LOCATION + uri);
-        final Path path = new File(requireNonNull(resource).getPath()).toPath();
+        validateResourceExists(resource);
+        final Path path = new File(resource.getPath()).toPath();
         final byte[] bytes = Files.readAllBytes(path);
 
         return new String(bytes);
@@ -33,8 +34,15 @@ public class ResourceLoader {
     public static String getContentType(final String uri) throws IOException {
         final URL resource = ResourceLoader.class.getClassLoader()
                 .getResource(STATIC_RESOURCE_LOCATION + uri);
-        final Path path = new File(requireNonNull(resource).getPath()).toPath();
+        validateResourceExists(resource);
+        final Path path = new File(resource.getPath()).toPath();
 
         return Files.probeContentType(path);
+    }
+
+    private static void validateResourceExists(final URL resource) {
+        if (Objects.isNull(resource)) {
+            throw new NotFoundException("파일을 찾을 수 없습니다.");
+        }
     }
 }

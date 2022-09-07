@@ -3,10 +3,12 @@ package org.apache.coyote.http11.web.response;
 import static org.apache.coyote.http11.support.HttpHeader.*;
 import static org.apache.coyote.http11.support.HttpMime.TEXT_HTML;
 
+import org.apache.coyote.http11.file.ResourceLoader;
 import org.apache.coyote.http11.support.HttpCookie;
 import org.apache.coyote.http11.support.HttpHeader;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpStatus;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +44,13 @@ public class HttpResponse {
         httpHeaders.put(LOCATION, uri);
 
         return new HttpResponse(HttpStatus.FOUND, httpHeaders, EMPTY_BODY);
+    }
+
+    public static HttpResponse sendError(final HttpStatus httpStatus) throws IOException {
+        final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+        final String statusCode = httpStatus.getStatusCode();
+
+        return new HttpResponse(httpStatus, httpHeaders, ResourceLoader.getContent(statusCode + ".html"));
     }
 
     public String format() {

@@ -1,14 +1,12 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.support.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.http11.support.HttpStatus.NOT_FOUND;
 
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidHttpRequestException;
-import org.apache.coyote.http11.support.HttpHeaders;
-import org.apache.coyote.http11.support.HttpStatus;
 import org.apache.coyote.http11.web.AuthenticationInterceptor;
-import org.apache.coyote.http11.web.FileHandler;
 import org.apache.coyote.http11.web.RequestHandler;
 import org.apache.coyote.http11.web.request.HttpRequest;
 import org.apache.coyote.http11.web.request.HttpRequestParser;
@@ -20,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
@@ -53,26 +50,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handleRequest(final HttpRequest httpRequest) {
+    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
         final List<String> includeUris = List.of("/login", "/register");
         if (!new AuthenticationInterceptor(includeUris).preHandle(httpRequest)) {
             return HttpResponse.sendRedirect("/index.html");
         }
 
         try {
-            return chooseHandler(httpRequest);
-        } catch (final IOException e) {
-            final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
-            final HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
-            return new HttpResponse(httpStatus, httpHeaders, httpStatus.getStatusMessage());
-        }
-    }
+            return new RequestHandler().handle(httpRequest);
 
-    private HttpResponse chooseHandler(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isStaticResource()) {
-            return new FileHandler().handle(httpRequest);
+        } catch (final NotFoundException e) {
+            return HttpResponse.sendError(NOT_FOUND);
         }
-        return new RequestHandler().handle(httpRequest);
     }
 
     private void sendResponse(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {

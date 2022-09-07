@@ -13,6 +13,7 @@ import org.apache.catalina.utils.Parser;
 import org.apache.coyote.http11.exception.InternalException;
 import org.apache.coyote.http11.header.ContentType;
 import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
@@ -22,7 +23,7 @@ public class ResourceHandler implements Handler{
         return generateResourceResponse(httpRequest);
     }
 
-    protected HttpResponse generateResourceResponse(final HttpRequest httpRequest) {
+    private HttpResponse generateResourceResponse(final HttpRequest httpRequest) {
         final String path = httpRequest.getStartLine().getPath();
         final String fileName = Parser.convertResourceFileName(path);
         return generateResourceResponseByFileName(fileName);
@@ -40,6 +41,26 @@ public class ResourceHandler implements Handler{
             final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
 
             return HttpResponse.of(HTTP11, OK, body, contentType, contentLength);
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+            throw new InternalException("서버 에러가 발생했습니다.");
+        }
+    }
+
+    protected HttpResponse generateResourceResponseByFileName(final String fileName, final HttpHeader... headers) {
+        final HttpHeaders httpHeaders = HttpHeaders.of(headers);
+
+        final String fileType = Parser.parseFileType(fileName);
+        try {
+            final String body = IOUtils.readResourceFile(fileName);
+            final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE.getValue(), ContentType.of(fileType),
+                    UTF_8.getValue());
+            final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH.getValue(),
+                    String.valueOf(body.getBytes().length));
+
+            httpHeaders.put(contentType.getHttpHeaderType(), contentType);
+            httpHeaders.put(contentLength.getHttpHeaderType(), contentLength);
+            return HttpResponse.of(HTTP11, OK, body, httpHeaders);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             throw new InternalException("서버 에러가 발생했습니다.");

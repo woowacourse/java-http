@@ -52,6 +52,10 @@ public class HttpRequest {
         return startLine;
     }
 
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
     public String getBody() {
         return body;
     }

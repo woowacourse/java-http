@@ -76,4 +76,8 @@ public class HttpHeaders {
     public Set<String> keySet() {
         return headers.keySet();
     }
+
+    public void put(final String httpHeaderType, final HttpHeader httpHeader) {
+        headers.put(httpHeaderType, httpHeader);
+    }
 }

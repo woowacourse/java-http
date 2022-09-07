@@ -8,20 +8,22 @@ import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HomeHandler;
+import org.apache.coyote.http11.handler.IndexHandler;
+import org.apache.coyote.http11.handler.ResourceHandler;
 import org.apache.coyote.http11.handler.user.LoginHandler;
 import org.apache.coyote.http11.handler.user.LoginPageHandler;
 import org.apache.coyote.http11.handler.user.RegisterHandler;
 import org.apache.coyote.http11.handler.user.RegisterPageHandler;
-import org.apache.coyote.http11.handler.ResourceHandler;
 import org.apache.coyote.http11.http.request.HttpMethod;
 
 public enum HandlerMapper {
     HOME(GET, Constants.HOME_URL_REGEX, new HomeHandler()),
-    RESOURCE(GET, Constants.RESOURCE_URL_REGEX, new ResourceHandler()),
+    INDEX(GET, Pattern.compile("^(/index\\.html)"), new IndexHandler()),
     LOGIN_PAGE(GET, Constants.LOGIN_URL_REGEX, new LoginPageHandler()),
-    LOGIN(POST, Pattern.compile("^(/login)(\\?([^#\\s]*))?"), new LoginHandler()),
-    REGISTER_PAGE(GET, Pattern.compile("^(/register)(\\?([^#\\s]*))?"), new RegisterPageHandler()),
-    REGISTER(POST, Pattern.compile("^(/register)(\\?([^#\\s]*))?"), new RegisterHandler());
+    LOGIN(POST, Constants.LOGIN_REGEX, new LoginHandler()),
+    REGISTER_PAGE(GET, Constants.REGISTER_PAGE_REGEX, new RegisterPageHandler()),
+    REGISTER(POST, Constants.REGISTER_REGEX, new RegisterHandler()),
+    RESOURCE(GET, Constants.RESOURCE_URL_REGEX, new ResourceHandler());
 
     private final HttpMethod method;
     private final Pattern urlRegex;
@@ -45,6 +47,9 @@ public enum HandlerMapper {
         private static final Pattern HOME_URL_REGEX = Pattern.compile("^/$");
         private static final Pattern RESOURCE_URL_REGEX = Pattern.compile("^(/[a-z|A-Z|가-힣|ㄱ-ㅎ|_|0-9|\\-]*)+(\\.[a-z]*)$");
         private static final Pattern LOGIN_URL_REGEX = Pattern.compile("^(/login)(\\?([^#\\s]*))?");
+        private static final Pattern LOGIN_REGEX = Pattern.compile("^(/login)(\\?([^#\\s]*))?");
+        private static final Pattern REGISTER_PAGE_REGEX = Pattern.compile("^(/register)(\\?([^#\\s]*))?");
+        private static final Pattern REGISTER_REGEX = Pattern.compile("^(/register)(\\?([^#\\s]*))?");
     }
 
     private static boolean matchUrl(final String url, final HandlerMapper handlerMapper) {

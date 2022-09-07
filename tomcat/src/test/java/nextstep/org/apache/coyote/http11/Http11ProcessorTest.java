@@ -63,6 +63,29 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("세션ID 없이 method (GET), url(/index.html) 요청에 Set-Cookie: 에 JSESSIONID가 와야한다.")
+    void indexCreateCookie() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "Set-Cookie";
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
     @DisplayName("method (GET), url(/login) 요청에 login.html 응답이 와야한다.")
     void loginPage() throws IOException {
         // given

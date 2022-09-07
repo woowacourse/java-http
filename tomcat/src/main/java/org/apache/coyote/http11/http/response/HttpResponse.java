@@ -42,6 +42,13 @@ public class HttpResponse {
         return new HttpResponse(httpVersion, status, headers, "");
     }
 
+    public static HttpResponse of(final HttpVersion httpVersion,
+                                  final HttpStatus status,
+                                  final String body,
+                                  final HttpHeaders headers) {
+        return new HttpResponse(httpVersion, status, headers, body);
+    }
+
     public String getBody() {
         return body;
     }

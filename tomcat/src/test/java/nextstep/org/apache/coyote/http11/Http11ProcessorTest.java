@@ -139,10 +139,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found " + CRLF +
-                "Location: /401.html " + CRLF +
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        var expected = "HTTP/1.1 401 Unauthorized " + CRLF +
+                "Content-Type: text/html;charset=utf-8 " + CRLF +
+                "Content-Length: 2426 " + CRLF +
                 CRLF +
-                "";
+                getBody(resource);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -177,7 +179,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("회원가입 실패 시 회원가입 페이지를 응답한다.")
+    @DisplayName("회원가입 실패 시 500 페이지를 응답한다.")
     void register_fail() {
         // given
         final String httpRequest = String.join(CRLF,
@@ -197,10 +199,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found " + CRLF +
-                "Location: /register.html " + CRLF +
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        var expected = "HTTP/1.1 500 Internal Server Error " + CRLF +
+                "Content-Type: text/html;charset=utf-8 " + CRLF +
+                "Content-Length: 2357 " + CRLF +
                 CRLF +
-                "";
+                getBody(resource);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

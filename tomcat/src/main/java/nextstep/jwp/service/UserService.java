@@ -6,6 +6,7 @@ import nextstep.jwp.db.Cookies;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.NoUserException;
+import nextstep.jwp.exception.NotRegisterException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -20,24 +21,19 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     public ResponseEntity login(HttpRequest request) {
-        try {
-            Query query = Query.ofQuery(request.getBody());
+        Query query = Query.ofQuery(request.getBody());
 
-            User user = InMemoryUserRepository.findByAccount(query.find("account"))
-                    .orElseThrow(NoUserException::new);
-            validatePassword(query, user);
+        User user = InMemoryUserRepository.findByAccount(query.find("account"))
+                .orElseThrow(NoUserException::new);
+        validatePassword(query, user);
 
-            final var session = request.getSession();
-            addSession(user, session);
-            LOG.info("SessionCount: " + SessionManager.get().size());
+        final var session = request.getSession();
+        addSession(user, session);
+        LOG.info("SessionCount: " + SessionManager.get().size());
 
-            return ResponseEntity.found()
-                    .addLocation("/index.html")
-                    .addCookie(Cookies.ofJSessionId(session.getId()));
-        } catch (NoUserException | InvalidPasswordException e) {
-            return ResponseEntity.found()
-                    .addLocation("/401.html");
-        }
+        return ResponseEntity.found()
+                .addLocation("/index.html")
+                .addCookie(Cookies.ofJSessionId(session.getId()));
     }
 
     private void addSession(User user, Session session) {
@@ -65,10 +61,8 @@ public class UserService {
         Query query = Query.ofQuery(request.getBody());
 
         String account = query.find("account");
-        String path = request.getPath().getPath();
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return ResponseEntity.found()
-                    .addLocation("/register.html");
+            throw new NotRegisterException("중복된 account 입니다.");
         }
         User user = new User(account, query.find("password"), query.find("email"));
         InMemoryUserRepository.save(user);

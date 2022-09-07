@@ -8,7 +8,7 @@ import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
 import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
 import org.apache.coyote.http11.handlermapper.HandlerMapper;
-import org.apache.coyote.http11.httpmessage.Cookie;
+import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.httpmessage.request.Http11Version;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;

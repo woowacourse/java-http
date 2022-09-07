@@ -10,7 +10,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.ContentType;
-import org.apache.coyote.http11.httpmessage.Cookie;
+import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;

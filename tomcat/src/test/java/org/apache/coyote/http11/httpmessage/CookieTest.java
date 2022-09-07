@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.session.Cookie;
 import org.junit.jupiter.api.Test;
 
 class CookieTest {

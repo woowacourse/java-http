@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.session;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

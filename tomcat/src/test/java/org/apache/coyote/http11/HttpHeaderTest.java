@@ -12,9 +12,9 @@ class HttpHeaderTest {
     void validateHeaderFormat() {
         final HttpHeader httpHeader = new HttpHeader("GET / HTTP/1.1",
                 String.join("\r\n",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                ""));
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: 12 ",
+                        ""));
 
         assertThat(httpHeader.getResponseHeader(StatusCode.OK, "/", "Hello world!".getBytes().length, null))
                 .isEqualTo(String.join("\r\n",

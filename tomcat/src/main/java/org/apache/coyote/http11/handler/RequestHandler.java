@@ -12,8 +12,7 @@ public class RequestHandler {
     public static ResponseEntity handle(
             final Controller controller,
             final HttpHeader httpHeader,
-            final HttpBody httpBody) throws IOException
-    {
+            final HttpBody httpBody) throws IOException {
         return controller.run(httpHeader, httpBody);
     }
 }

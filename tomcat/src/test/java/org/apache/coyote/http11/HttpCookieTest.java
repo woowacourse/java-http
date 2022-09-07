@@ -13,8 +13,8 @@ class HttpCookieTest {
     void checkCookies() {
         final HttpCookie httpCookie = new HttpCookie(
                 "yummy_cookie=choco; "
-                + "tasty_cookie=strawberry; "
-                + "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+                        + "tasty_cookie=strawberry; "
+                        + "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
 
         assertThat(httpCookie.containsKey("yummy_cookie")).isTrue();
         assertThat(httpCookie.containsKey("tasty_cookie")).isTrue();

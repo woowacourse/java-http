@@ -17,7 +17,7 @@ public class PairConverter {
             return Map.of("", "");
         }
         Map<String, String> parameters = new HashMap<>();
-        for(String keyValue : target.split(pairDelimiter)) {
+        for (String keyValue : target.split(pairDelimiter)) {
             String key = keyValue.split(keyValueDelimiter)[KEY];
             String value = keyValue.split(keyValueDelimiter)[VALUE];
             parameters.put(key, value);

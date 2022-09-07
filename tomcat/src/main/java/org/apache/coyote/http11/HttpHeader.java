@@ -33,8 +33,8 @@ public class HttpHeader {
     }
 
     private String responseWithJSESIONID(final StatusCode statusCode,
-                                            final String path,
-                                            final int contentLength, String cookie) {
+                                         final String path,
+                                         final int contentLength, String cookie) {
         if (hasJSESSIONID() && getJSESSIONID().equals(cookie)) {
             return responseWithOutJSESIONID(statusCode, path, contentLength);
         }

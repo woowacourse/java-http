@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpBody getBody(final BufferedReader reader) throws IOException {
         StringBuilder payload = new StringBuilder();
-        while(reader.ready()) {
+        while (reader.ready()) {
             payload.append((char) reader.read());
         }
         return new HttpBody(payload.toString());

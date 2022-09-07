@@ -25,7 +25,7 @@ class AuthControllerTest {
                         "Content-Length: keep-alive "));
         final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
 
-       authController.run(httpHeader, httpBody);
+        authController.run(httpHeader, httpBody);
 
         final User user = InMemoryUserRepository.findByAccount("green").get();
 

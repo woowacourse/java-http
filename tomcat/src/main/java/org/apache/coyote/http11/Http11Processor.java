@@ -150,12 +150,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
         return new HttpHeaders()
-                .addHeader(CONTENT_TYPE, getContentType(httpRequest))
+                .addHeader(CONTENT_TYPE, ContentType.of(httpRequest.getFileExtension()).getValue())
                 .addHeader(CONTENT_LENGTH, responseBody.getBytes().length);
-    }
-
-    private String getContentType(final HttpRequest httpRequest) {
-        return "text/" + httpRequest.getFileExtension() + ";charset=utf-8";
     }
 
     private HttpResponse getOkHttpResponse(final String responseBody, final HttpHeaders httpHeaders) {

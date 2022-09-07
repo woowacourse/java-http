@@ -36,7 +36,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -64,7 +64,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
@@ -93,7 +93,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
@@ -122,7 +122,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/405.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         final String expected = "HTTP/1.1 405 Method Not Allowed \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -151,7 +151,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Type: text/css; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -180,7 +180,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -213,7 +213,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -329,7 +329,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         final String expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -392,7 +392,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         var expected = "HTTP/1.1 404 Not Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -421,7 +421,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);
@@ -479,7 +479,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/400.html");
         final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         final String expected = "HTTP/1.1 400 Bad Request \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + content.length + " \r\n" +
                 "\r\n" +
                 new String(content);

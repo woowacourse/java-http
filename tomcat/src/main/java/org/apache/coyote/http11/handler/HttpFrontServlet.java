@@ -5,8 +5,7 @@ import static org.apache.coyote.http11.HttpMethod.*;
 import java.io.IOException;
 import java.util.HashMap;
 import nextstep.jwp.handler.ServletAdvice;
-import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -39,7 +38,7 @@ public class HttpFrontServlet {
     private ServletResponseEntity handleRequest(final HttpRequest httpRequest) {
         final RequestServlet handler = requestHandlerMapping.getHandler(httpRequest.getPath());
 
-        final HttpHeader responseHeader = new HttpHeader(new HashMap<>());
+        final HttpResponseHeader responseHeader = new HttpResponseHeader(new HashMap<>());
         if (httpRequest.getHttpStatus().isSame(GET)) {
             return handler.doGet(httpRequest, responseHeader);
         }
@@ -55,6 +54,6 @@ public class HttpFrontServlet {
         if (FileHandler.isStaticFileResource(response.getResource())) {
             return FileHandler.createFileResponse(response);
         }
-        return ResponseEntity.createHtmlResponse(response);
+        return ResponseEntity.createTextHtmlResponse(response);
     }
 }

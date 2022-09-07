@@ -13,6 +13,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpFrontServlet;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -55,11 +56,11 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest createRequest(final BufferedReader bufferedReader) throws IOException {
         final Queue<String> rawRequestHeader = readHttpRequestHeader(bufferedReader);
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestHeader.remove());
-        final HttpHeader httpHeader = HttpHeader.of(rawRequestHeader);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);
 
-        final String requestBody = readHttpRequestBody(bufferedReader, httpHeader);
+        final String requestBody = readHttpRequestBody(bufferedReader, httpRequestHeader);
 
-        return HttpRequest.of(requestLine, httpHeader, requestBody);
+        return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
     private Queue<String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
@@ -74,13 +75,13 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private String readHttpRequestBody(final BufferedReader bufferedReader, final HttpHeader httpHeader)
+    private String readHttpRequestBody(final BufferedReader bufferedReader, final HttpRequestHeader httpRequestHeader)
             throws IOException {
-        if (!httpHeader.contains("Content-Length")) {
+        if (!httpRequestHeader.contains("Content-Length")) {
             return "";
         }
 
-        final int contentLength = Integer.parseInt(httpHeader.getHeader("Content-Length"));
+        final int contentLength = Integer.parseInt(httpRequestHeader.getHeader("Content-Length"));
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
 
@@ -92,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
         final String path = httpRequest.getPath();
 
         if (isRootPath(path)) {
-            return ResponseEntity.createHtmlResponse(ServletResponseEntity.createWithResource(ROOT_BODY));
+            return ResponseEntity.createTextHtmlResponse(ServletResponseEntity.createWithResource(ROOT_BODY));
         }
 
         if (FileHandler.isStaticFileResource(path)) {

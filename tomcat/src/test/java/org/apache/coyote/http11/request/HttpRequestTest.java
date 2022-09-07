@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import org.apache.coyote.http11.HttpHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,10 +22,10 @@ class HttpRequestTest {
             final HttpRequestLine httpRequestLine = HttpRequestLine.of("GET /path?id=yujeong HTTP/1.1");
             final Queue<String> rawRequest = new LinkedList<>();
             rawRequest.add("name: eve");
-            final HttpHeader httpHeader = HttpHeader.of(rawRequest);
+            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
 
             // when
-            final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpHeader, "");
+            final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpRequestHeader, "");
 
             // then
             assertAll(() -> {
@@ -45,10 +44,10 @@ class HttpRequestTest {
             final Queue<String> rawRequest = new LinkedList<>();
             rawRequest.add("name: eve");
             rawRequest.add("Content-Type: application/x-www-form-urlencoded");
-            final HttpHeader httpHeader = HttpHeader.of(rawRequest);
+            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
 
             // when
-            final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpHeader, "id=yujeong");
+            final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpRequestHeader, "id=yujeong");
 
             // then
             assertAll(() -> {

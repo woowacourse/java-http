@@ -13,12 +13,12 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.Queue;
 import nextstep.jwp.handler.ServletAdvice;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,9 +29,9 @@ class HttpFrontServletTest {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
         final Queue<String> rawRequest = new LinkedList<>();
         rawRequest.add("name: eve");
-        final HttpHeader httpHeader = HttpHeader.of(rawRequest);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
 
-        return HttpRequest.of(requestLine, httpHeader, requestBody);
+        return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
     private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(

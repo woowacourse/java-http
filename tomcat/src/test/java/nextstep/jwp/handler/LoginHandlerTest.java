@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import nextstep.jwp.exception.UnauthorizedException;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -25,9 +26,9 @@ class LoginHandlerTest {
         final Queue<String> rawRequestHeader = new LinkedList<>();
         rawRequestHeader.add("name: eve");
         rawRequestHeader.add("Content-Type: application/x-www-form-urlencoded");
-        final HttpHeader httpHeader = HttpHeader.of(rawRequestHeader);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);
 
-        return HttpRequest.of(requestLine, httpHeader, requestBody);
+        return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
     @Nested
@@ -39,10 +40,10 @@ class LoginHandlerTest {
         void success() {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /login HTTP/1.1", "account=gugu&password=password");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when
-            final ServletResponseEntity response = loginHandler.doPost(httpRequest, httpHeader);
+            final ServletResponseEntity response = loginHandler.doPost(httpRequest, httpResponseHeader);
 
             // then
             assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
@@ -54,10 +55,10 @@ class LoginHandlerTest {
         void exception_noParameter() {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /login HTTP/1.1", "account=gugu");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when & then
-            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpHeader))
+            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpResponseHeader))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("No Parameters");
         }
@@ -67,10 +68,10 @@ class LoginHandlerTest {
         void exception_userNotFound() {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /login HTTP/1.1", "account=eve&password=password");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when & then
-            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpHeader))
+            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpResponseHeader))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("User not found");
         }
@@ -80,10 +81,10 @@ class LoginHandlerTest {
         void exception_invalidPassword() {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /login HTTP/1.1", "account=gugu&password=wrong");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when & then
-            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpHeader))
+            assertThatThrownBy(() -> loginHandler.doPost(httpRequest, httpResponseHeader))
                     .isInstanceOf(UnauthorizedException.class)
                     .hasMessageContaining("User not found");
         }

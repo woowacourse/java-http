@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import java.net.URL;
@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.List;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -40,24 +39,6 @@ class FileHandlerTest {
         assertAll(() -> {
             assertThat(response).extracting("httpStatus", "body")
                     .containsExactly(HttpStatus.OK, file.get(0));
-            assertThat(response.getHttpHeader().getHeader("Content-Type")).isEqualTo(Files.probeContentType(path));
-        });
-    }
-
-    @Test
-    @DisplayName("createErrorFileResponse 메소드는 입력 받은 상태 코드에 해당하는 파일을 읽어와서 ResponseEntity로 반환한다.")
-    void createErrorFileResponse() throws IOException {
-        // when
-        final ResponseEntity response = FileHandler.createErrorFileResponse(HttpStatus.NOT_FOUND);
-
-        // then
-        final URL url = getClass().getClassLoader().getResource("static/404.html");
-        final Path path = Path.of(url.getPath());
-        final List<String> file = Files.readAllLines(path);
-
-        assertAll(() -> {
-            assertThat(response).extracting("httpStatus", "body")
-                    .containsExactly(HttpStatus.NOT_FOUND, file.get(0));
             assertThat(response.getHttpHeader().getHeader("Content-Type")).isEqualTo(Files.probeContentType(path));
         });
     }

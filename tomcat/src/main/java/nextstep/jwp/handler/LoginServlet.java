@@ -3,12 +3,11 @@ package nextstep.jwp.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.RequestServlet;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +18,12 @@ public class LoginServlet implements RequestServlet {
     private static final String PASSWORD_KEY = "password";
 
     @Override
-    public ServletResponseEntity doGet(final HttpRequest httpRequest, final HttpHeader responseHeader) {
+    public ServletResponseEntity doGet(final HttpRequest httpRequest, final HttpResponseHeader responseHeader) {
         return ServletResponseEntity.createWithResource("/login.html");
     }
 
     @Override
-    public ServletResponseEntity doPost(final HttpRequest request, final HttpHeader responseHeader) {
+    public ServletResponseEntity doPost(final HttpRequest request, final HttpResponseHeader responseHeader) {
         validateQueryParams(request);
 
         InMemoryUserRepository.findByAccount(request.getParameter(ACCOUNT_KEY))

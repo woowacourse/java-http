@@ -6,7 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,9 +25,9 @@ class RegisterServletTest {
         final Queue<String> rawRequestHeader = new LinkedList<>();
         rawRequestHeader.add("name: eve");
         rawRequestHeader.add("Content-Type: application/x-www-form-urlencoded");
-        final HttpHeader httpHeader = HttpHeader.of(rawRequestHeader);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);
 
-        return HttpRequest.of(requestLine, httpHeader, requestBody);
+        return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
     @Nested
@@ -39,10 +40,10 @@ class RegisterServletTest {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /register HTTP/1.1",
                     "account=gugu&password=password&email=abc@email.com");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when
-            final ServletResponseEntity response = registerServlet.doPost(httpRequest, httpHeader);
+            final ServletResponseEntity response = registerServlet.doPost(httpRequest, httpResponseHeader);
 
             // then
             assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
@@ -54,10 +55,10 @@ class RegisterServletTest {
         void exception_noParameter() {
             // given
             final HttpRequest httpRequest = getHttpFormDataRequest("POST /register HTTP/1.1", "account=gugu");
-            final HttpHeader httpHeader = new HttpHeader(new HashMap<>());
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when & then
-            assertThatThrownBy(() -> registerServlet.doPost(httpRequest, httpHeader))
+            assertThatThrownBy(() -> registerServlet.doPost(httpRequest, httpResponseHeader))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("No Parameters");
         }

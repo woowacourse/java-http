@@ -1,17 +1,16 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.HttpHeader;
 
 public class HttpResponse {
 
     private final HttpStatus httpStatus;
-    private final HttpHeader httpHeader;
+    private final HttpResponseHeader httpResponseHeader;
     private final String responseBody;
 
-    public HttpResponse(final HttpStatus httpStatus, final HttpHeader httpHeader, final String responseBody) {
+    public HttpResponse(final HttpStatus httpStatus, final HttpResponseHeader httpResponseHeader, final String responseBody) {
         this.httpStatus = httpStatus;
-        this.httpHeader = httpHeader;
+        this.httpResponseHeader = httpResponseHeader;
         this.responseBody = responseBody;
     }
 
@@ -23,7 +22,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getMessage() + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
-                httpHeader.toString(),
+                httpResponseHeader.toString(),
                 responseBody);
     }
 }

@@ -2,7 +2,7 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.RequestServlet;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
@@ -15,12 +15,12 @@ public class RegisterServlet implements RequestServlet {
     private static final String EMAIL_KEY = "email";
 
     @Override
-    public ServletResponseEntity doGet(final HttpRequest httpRequest, final HttpHeader responseHeader) {
+    public ServletResponseEntity doGet(final HttpRequest httpRequest, final HttpResponseHeader responseHeader) {
         return ServletResponseEntity.createWithResource("/register.html");
     }
 
     @Override
-    public ServletResponseEntity doPost(final HttpRequest request, final HttpHeader responseHeader) {
+    public ServletResponseEntity doPost(final HttpRequest request, final HttpResponseHeader responseHeader) {
         validateQueryParams(request);
 
         final User user = new User(request.getParameter(ACCOUNT_KEY), request.getParameter(PASSWORD_KEY),

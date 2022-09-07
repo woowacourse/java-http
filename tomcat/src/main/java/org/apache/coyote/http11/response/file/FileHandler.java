@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -28,27 +28,14 @@ public class FileHandler {
         return new ResponseEntity(OK, getFileHttpHeader(path), new String(fileBytes));
     }
 
-    private static HttpHeader getFileHttpHeader(final Path path) throws IOException {
+    private static HttpResponseHeader getFileHttpHeader(final Path path) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", Files.probeContentType(path));
 
-        return new HttpHeader(headers);
+        return new HttpResponseHeader(headers);
     }
 
     public static ResponseEntity createFileResponse(final ServletResponseEntity response) throws IOException {
-        final URL url = FileHandler.class.getClassLoader().getResource("static" + response.getResource());
-        final Path path = Path.of(url.getPath());
-        final byte[] fileBytes = Files.readAllBytes(path);
-
-        return new ResponseEntity(response.getHttpStatus(), getFileHttpHeader(path), new String(fileBytes));
-    }
-
-    public static ResponseEntity createErrorFileResponse(final HttpStatus httpStatus) throws IOException {
-        final URL url = FileHandler.class.getClassLoader()
-                .getResource("static/" + httpStatus.getStatusCode() + ".html");
-        final Path path = Path.of(url.getPath());
-        final byte[] fileBytes = Files.readAllBytes(path);
-
-        return new ResponseEntity(httpStatus, getFileHttpHeader(path), new String(fileBytes));
+        return createFileResponse(response.getResource());
     }
 }

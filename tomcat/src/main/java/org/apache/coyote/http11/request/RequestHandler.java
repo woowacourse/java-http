@@ -6,7 +6,6 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.coyote.http11.request.annotation.RequestMapping;
 import org.apache.coyote.http11.request.annotation.RequestParam;
@@ -24,62 +23,66 @@ public class RequestHandler {
     public String handle(final HttpRequest request) {
         Optional<Method> method = findRequestMappedMethod(request.getMethod(), request.getPath());
 
-        if (method.isEmpty()) {
-            return resource(request.getPath());
+        if (method.isPresent()) {
+            return service(method.get(), request);
         }
-
-        try {
-            Method m = method.get();
-
-            List<Parameter> parameters = List.of(m.getParameters());
-            if (parameters.isEmpty()) {
-                HttpResponse response = (HttpResponse) m.invoke(controller);
-                return response.asFormat();
-            }
-
-
-            if (request.getMethod().equals(RequestMethod.GET)) {
-                Params params = request.getParamsFromUri();
-                String[] args = parameters.stream()
-                        .map(parameter -> params.find(parameter.getDeclaredAnnotation(RequestParam.class).value()))
-                        .toArray(String[]::new);
-
-                HttpResponse response = (HttpResponse) m.invoke(controller, args);
-                return response.asFormat();
-            }
-
-            if (request.getMethod().equals(RequestMethod.POST)) {
-                Params params = request.getParamsFromBody();
-                String[] args = parameters.stream()
-                        .map(parameter -> params.find(parameter.getDeclaredAnnotation(RequestParam.class).value()))
-                        .toArray(String[]::new);
-
-                HttpResponse response = (HttpResponse) m.invoke(controller, args);
-                return response.asFormat();
-            }
-
-            throw new RuntimeException();
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
+        return resource(request.getPath());
     }
 
     private Optional<Method> findRequestMappedMethod(final RequestMethod requestMethod, final String path) {
-        final List<Method> methods = Arrays.stream(controller.getClass().getDeclaredMethods())
+        return Arrays.stream(controller.getClass().getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(RequestMapping.class))
-                .collect(Collectors.toUnmodifiableList());
-
-        return methods.stream()
                 .filter(method -> containsPath(method, requestMethod, path))
                 .findAny();
     }
 
     private boolean containsPath(final Method method, final RequestMethod requestMethod, final String path) {
         final RequestMapping annotation = method.getDeclaredAnnotation(RequestMapping.class);
+        return containsMethod(annotation, requestMethod) && containsPath(annotation, path);
+    }
+
+    private boolean containsMethod(final RequestMapping annotation, final RequestMethod requestMethod) {
         final List<RequestMethod> methods = List.of(annotation.method());
+        return methods.contains(requestMethod);
+    }
+
+    private boolean containsPath(final RequestMapping annotation, final String path) {
         final List<String> paths = List.of(annotation.value());
-        return methods.contains(requestMethod) && paths.contains(path);
+        return paths.contains(path);
+    }
+
+    private String service(final Method method, final HttpRequest request) {
+        try {
+            final List<Parameter> parameters = List.of(method.getParameters());
+            if (parameters.isEmpty()) {
+                HttpResponse response = (HttpResponse) method.invoke(controller);
+                return response.asFormat();
+            }
+
+            final Params params = getParamsByRequestMethod(request);
+            final String[] args = parameters.stream()
+                    .map(parameter -> parameter.getDeclaredAnnotation(RequestParam.class))
+                    .map(parameter -> params.find(parameter.value()))
+                    .toArray(String[]::new);
+
+            final HttpResponse response = (HttpResponse) method.invoke(controller, args);
+            return response.asFormat();
+
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    private Params getParamsByRequestMethod(final HttpRequest request) {
+        final RequestMethod requestMethod = request.getMethod();
+
+        if (requestMethod.equals(RequestMethod.GET)) {
+            return request.getParamsFromUri();
+        }
+        if (requestMethod.equals(RequestMethod.POST)) {
+            return request.getParamsFromBody();
+        }
+        throw new IllegalArgumentException();
     }
 
     private String resource(final String filePath) {

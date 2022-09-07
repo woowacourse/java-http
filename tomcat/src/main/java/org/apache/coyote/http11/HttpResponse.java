@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class HttpResponse {
 
+    private static final String PROTOCOL = "HTTP/1.1";
+
     private final HttpStatusCode statusCode;
     private final HttpHeaders httpHeaders;
     private final String body;
@@ -21,12 +23,12 @@ public class HttpResponse {
     private String encodingResponse() {
         if (Objects.isNull(body)) {
             return String.join("\r\n",
-                    "HTTP/1.1 " + statusCode.toHttpString() + " ",
+                    PROTOCOL + " " + statusCode.toHttpString() + " ",
                     httpHeaders.encodingToString(),
                     "");
         }
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.toHttpString() + " ",
+                PROTOCOL + " " + statusCode.toHttpString() + " ",
                 httpHeaders.encodingToString(),
                 "",
                 body);

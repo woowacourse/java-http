@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.coyote.http11.web.Cookie;
 import org.apache.coyote.http11.web.Session;
 import org.apache.coyote.http11.web.SessionManager;
 
@@ -78,5 +79,15 @@ public class HttpRequest {
         final Session session = new Session(id);
         SessionManager.add(session);
         return session;
+    }
+
+    public boolean hasCookie() {
+        return headers.hasCookie();
+    }
+
+    public Cookie getCookie() {
+        final String value = headers.getCookieValue();
+        final String[] pair = value.split("=");
+        return new Cookie(pair[0], pair[1]);
     }
 }

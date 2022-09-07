@@ -51,4 +51,12 @@ public class HttpHeaders {
     public void setCookie(final Cookie cookie) {
         values.put("Set-Cookie", cookie.toPair());
     }
+
+    public boolean hasCookie() {
+        return values.containsKey("Cookie");
+    }
+
+    public String getCookieValue() {
+        return values.get("Cookie");
+    }
 }

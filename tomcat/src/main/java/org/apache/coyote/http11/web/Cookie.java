@@ -16,6 +16,10 @@ public class Cookie {
         return key + "=" + value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

@@ -1,23 +1,19 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private HttpHeaders httpHeaders;
+    private final HttpHeaders httpHeaders;
     private String body;
+    private String viewName;
 
     public HttpResponse() {
         statusLine = new StatusLine(HttpStatus.OK);
         httpHeaders = new HttpHeaders(Collections.emptyMap());
         body = "";
+        viewName = null;
     }
 
     public String makeResponse() {
@@ -47,27 +43,10 @@ public class HttpResponse {
     }
 
     public void setView(final String viewName) {
-        URI uri = null;
-        try {
-            uri = getClass().getClassLoader().getResource("static/" + viewName + ".html").toURI();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        final Path path = Paths.get(uri);
+        this.viewName = viewName;
+    }
 
-        byte[] bytes = null;
-        try {
-            bytes = Files.readAllBytes(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        String contentType = null;
-        try {
-            contentType = Files.probeContentType(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        setBody(new String(bytes), contentType, bytes.length);
+    public String getViewName() {
+        return viewName;
     }
 }

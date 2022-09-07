@@ -1,30 +1,26 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ViewResolver {
 
-    private static final String STATIC_FILE_PATH = "static";
-    private static final String HTML_FILE_TYPE = ".html";
-    private static final String ROOT_PATH = "/";
-    private static final String FILE_DELIMITER = ".";
-    private final String requestUrl;
+    private final String filePath;
 
-    public ViewResolver(final String requestUrl) {
-        this.requestUrl = requestUrl;
+    public ViewResolver(final String filePath) {
+        this.filePath = filePath;
     }
 
-    public Optional<URI> resolveView() throws URISyntaxException {
-        if (ROOT_PATH.equals(requestUrl)) {
-            return Optional.empty();
-        }
-        if (requestUrl.contains(FILE_DELIMITER)) {
-            final URI uri = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl).toURI();
-            return Optional.of(uri);
-        }
-        final URI uri = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl + HTML_FILE_TYPE).toURI();
-        return Optional.of(uri);
+    public ViewInfo render() throws IOException, URISyntaxException {
+        final URI uri = getClass().getClassLoader().getResource("static/" + filePath).toURI();
+        final Path path = Paths.get(uri);
+        final byte[] bytes = Files.readAllBytes(path);
+        final String contentType = Files.probeContentType(path);
+
+        return new ViewInfo(new String(bytes), contentType, bytes.length);
     }
 }

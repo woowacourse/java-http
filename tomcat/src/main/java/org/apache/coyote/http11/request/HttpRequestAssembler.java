@@ -11,7 +11,6 @@ public class HttpRequestAssembler {
     private static final int URL_SEQUENCE = 1;
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
-    private static final String CRLF = "\r\n";
 
     public HttpRequest makeRequest(BufferedReader bufferedReader) throws IOException {
         String[] rawStart = bufferedReader.readLine()

@@ -13,8 +13,7 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(HttpSession session) {
-        String sessionID = UUID.randomUUID().toString();
-        sessions.put(sessionID, session);
+        sessions.put(session.getId(), session);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import nextstep.jwp.view.LoginHandler;
 import nextstep.jwp.view.RegisterHandler;
 import org.apache.coyote.common.request.Request;

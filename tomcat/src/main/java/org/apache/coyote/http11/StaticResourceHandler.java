@@ -2,15 +2,12 @@ package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import nextstep.jwp.view.UserOutput;
 import org.apache.coyote.common.Charset;
 import org.apache.coyote.common.FileExtension;
-import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
-import org.apache.coyote.common.response.Status;
 import org.utils.ResourceGenerator;
 
 public class StaticResourceHandler implements BiFunction<Request, Response, Response> {

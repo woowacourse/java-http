@@ -59,8 +59,8 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         final String actualWithoutSetCookie = Arrays.stream(socket.output().split("\r\n"))
-                        .filter(message -> !message.contains("Set-Cookie"))
-                        .collect(Collectors.joining("\r\n"));
+                .filter(message -> !message.contains("Set-Cookie"))
+                .collect(Collectors.joining("\r\n"));
         assertThat(actualWithoutSetCookie).isEqualTo(expected);
     }
 }

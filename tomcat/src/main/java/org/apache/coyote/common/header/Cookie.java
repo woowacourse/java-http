@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class Cookie {
 
-    public  static final String SESSION_ID_COOKIE_KEY = "JSESSIONID";
+    public static final String SESSION_ID_COOKIE_KEY = "JSESSIONID";
 
     private static final String ATTRIBUTE_KEY_VALUE_DELIMITER = "=";
     private static final String ATTRIBUTE_DELIMITER = "; ";
@@ -99,7 +99,7 @@ public class Cookie {
                     .name()
                     + ", "
                     + ZonedDateTime.of(expiresDateTime, ZoneId.of("UTC"))
-                        .format(DateTimeFormatter.ofPattern("dd-MM-yy hh:mm:ss"))
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yy hh:mm:ss"))
                     + "GMT");
             return this;
         }

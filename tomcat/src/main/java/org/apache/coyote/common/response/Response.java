@@ -2,13 +2,12 @@ package org.apache.coyote.common.response;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.common.Charset;
-import org.apache.coyote.common.header.Cookie;
-import org.apache.coyote.common.header.Header;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
+import org.apache.coyote.common.header.Cookie;
+import org.apache.coyote.common.header.Header;
 
 public class Response {
 
@@ -26,7 +25,8 @@ public class Response {
         return new ResponseBuilder(httpVersion);
     }
 
-    private Response(final HttpVersion httpVersion, final Status status, final Map<String, String> headers, final String body) {
+    private Response(final HttpVersion httpVersion, final Status status, final Map<String, String> headers,
+                     final String body) {
         this.httpVersion = httpVersion;
         this.status = status;
         this.headers = headers;

@@ -1,6 +1,5 @@
 package org.apache.coyote.common.session;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;

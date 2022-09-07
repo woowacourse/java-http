@@ -1,6 +1,5 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.apache.coyote.common.session.Session;
 
@@ -26,7 +25,7 @@ public interface Manager {
      * Add this Session to the set of active Sessions for this Manager.
      *
      * @param session Session to be added
-     * @param key key to find Session
+     * @param key     key to find Session
      */
     void add(String key, Session session);
 

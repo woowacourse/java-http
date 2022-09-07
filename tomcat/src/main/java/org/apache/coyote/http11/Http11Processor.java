@@ -6,13 +6,11 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
-import org.apache.coyote.common.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

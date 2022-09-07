@@ -8,13 +8,15 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import nextstep.jwp.handler.LoginHandler;
-import nextstep.jwp.handler.RegisterHandler;
+import nextstep.jwp.handler.Controller;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,19 +84,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse process(final HttpRequest httpRequest) {
         final String url = httpRequest.getUrl();
+        final Controller controller = RequestMapping.of(url);
 
-        if ("/".equals(url)) {
-            return new HttpResponse(httpRequest, HttpStatus.OK, "text/plain", "Hello world!");
-        }
-
-        if ("/login".equals(url)) {
-            return new LoginHandler(manager).login(httpRequest);
-        }
-
-        if ("/register".equals(url)) {
-            return new RegisterHandler().register(httpRequest);
-        }
-
-        return HttpResponse.of(httpRequest, HttpStatus.OK, url);
+        return controller.service(httpRequest);
     }
 }

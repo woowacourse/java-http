@@ -1,9 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http11.enums.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +22,6 @@ class HttpRequestTest {
                 EMPTY_REQUEST_BODY);
 
         // when & then
-        assertThat(httpRequest.isSameHttpMethod(HttpMethod.GET)).isTrue();
+        assertThat(httpRequest.isGetMethod()).isTrue();
     }
 }

@@ -63,7 +63,7 @@ class LoginControllerTest {
         final String httpResponse = socket.output();
 
         assertAll(
-            () -> assertThat(httpResponse).contains("200 OK"),
+            () -> assertThat(httpResponse).contains("302 FOUND"),
             () -> assertThat(httpResponse).contains("Set-Cookie")
         );
     }

@@ -3,8 +3,6 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.catalina.Manager;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
-    private static final Manager MANAGER = new SessionManager();
     private static final HttpRequestBody EMPTY_REQUEST_BODY = new HttpRequestBody("");
     private static final HttpRequestHeader EMPTY_REQUEST_HEADER = new HttpRequestHeader(List.of());
 
@@ -23,7 +20,7 @@ class LoginControllerTest {
     void login_page() {
         // given
         final HttpRequest request = new HttpRequest("GET /login HTTP/1.1 ", EMPTY_REQUEST_HEADER, EMPTY_REQUEST_BODY);
-        final LoginController loginController = new LoginController(MANAGER);
+        final Controller loginController = LoginController.getInstance();
 
         final String expected = "HTTP/1.1 200 OK ";
 
@@ -40,7 +37,7 @@ class LoginControllerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=password"));
-        final LoginController loginController = new LoginController(MANAGER);
+        final Controller loginController = LoginController.getInstance();
 
         final String expectedStatusCode = "HTTP/1.1 302";
         final String expectedLocation = "Location: /index.html ";
@@ -60,7 +57,7 @@ class LoginControllerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=notPassword"));
-        final LoginController loginController = new LoginController(MANAGER);
+        final Controller loginController = LoginController.getInstance();
 
         final String expected = "HTTP/1.1 401";
 

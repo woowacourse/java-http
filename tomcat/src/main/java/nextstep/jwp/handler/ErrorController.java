@@ -4,19 +4,19 @@ import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class DefaultController implements Controller {
+public class ErrorController implements Controller {
 
-    private static final Controller INSTANCE = new DefaultController();
+    private static final ErrorController INSTANCE = new ErrorController();
 
     public static Controller getInstance() {
         return INSTANCE;
     }
 
-    private DefaultController() {
+    private ErrorController() {
     }
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest) {
-        return new HttpResponse(httpRequest, HttpStatusCode.OK, "text/plain", "Hello world!");
+        return HttpResponse.of(httpRequest, HttpStatusCode.NOT_FOUND, "/404.html");
     }
 }

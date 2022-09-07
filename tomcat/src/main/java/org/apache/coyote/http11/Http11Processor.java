@@ -9,8 +9,6 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import nextstep.jwp.handler.Controller;
-import org.apache.catalina.Manager;
-import org.apache.catalina.SessionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,7 +22,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Manager manager = new SessionManager();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {

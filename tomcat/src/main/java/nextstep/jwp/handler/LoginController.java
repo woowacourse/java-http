@@ -6,8 +6,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
@@ -23,10 +23,13 @@ public class LoginController implements Controller {
     private static final String PASSWORD = "password";
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private final Manager manager;
+    private static final Controller INSTANCE = new LoginController();
 
-    public LoginController(final Manager manager) {
-        this.manager = manager;
+    public static Controller getInstance() {
+        return INSTANCE;
+    }
+
+    private LoginController() {
     }
 
     @Override
@@ -98,6 +101,6 @@ public class LoginController implements Controller {
     private void addSession(final User user, final String jSessionId) {
         Session session = new Session(jSessionId);
         session.addUser(user);
-        manager.add(session);
+        SessionManager.getInstance().add(session);
     }
 }

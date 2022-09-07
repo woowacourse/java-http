@@ -9,6 +9,15 @@ import org.apache.coyote.http11.enums.HttpStatusCode;
 
 public class RegisterController implements Controller {
 
+    private static final Controller INSTANCE = new RegisterController();
+
+    public static Controller getInstance() {
+        return INSTANCE;
+    }
+
+    private RegisterController() {
+    }
+
     @Override
     public HttpResponse service(final HttpRequest httpRequest) {
         if (httpRequest.isGetMethod()) {

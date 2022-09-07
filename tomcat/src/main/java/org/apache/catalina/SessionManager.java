@@ -5,7 +5,17 @@ import java.util.Map;
 
 public class SessionManager implements Manager {
 
+    private static final SessionManager INSTANCE = new SessionManager();
+
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
+    private SessionManager() {
+    }
 
     @Override
     public void add(final Session session) {

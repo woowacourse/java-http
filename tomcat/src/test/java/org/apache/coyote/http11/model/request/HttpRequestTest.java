@@ -18,7 +18,7 @@ class HttpRequestTest {
         String request = "POST /register HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
-                + "Content-Length: 58\n"
+                + "Content-Length: 58\n"`
                 + "Content-Type: application/x-www-form-urlencoded\n"
                 + "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n"
                 + "Accept: */*\n"
@@ -27,7 +27,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         assertAll(
-                () -> assertThat(httpRequest.getMethod().getValue()).isEqualTo("POST"),
+                () -> assertThat(httpRequest.getMethod().toString()).isEqualTo("POST"),
                 () -> assertThat(httpRequest.getUri()).isEqualTo("/register"),
                 () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHeaderValue("Host")).isEqualTo("localhost:8080"),
@@ -75,7 +75,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         assertAll(
-                () -> assertThat(httpRequest.getMethod().getValue()).isEqualTo("POST"),
+                () -> assertThat(httpRequest.getMethod().toString()).isEqualTo("POST"),
                 () -> assertThat(httpRequest.getUri()).isEqualTo("/register"),
                 () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHeaderValue("Host")).isEqualTo("localhost:8080"),

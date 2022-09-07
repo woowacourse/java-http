@@ -18,7 +18,7 @@ public class HttpRequestLine {
     public HttpRequestLine(String requestLine) {
         String[] requestLineValues = parseRequestLine(requestLine);
         validateRequestLineValues(requestLineValues);
-        this.method = HttpMethod.of(requestLineValues[REQUEST_METHOD]);
+        this.method = HttpMethod.valueOf(requestLineValues[REQUEST_METHOD]);
         this.uri = requestLineValues[REQUEST_URI];
         this.protocolVersion = requestLineValues[PROTOCOL_VERSION];
     }

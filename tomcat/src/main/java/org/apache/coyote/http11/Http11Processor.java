@@ -5,15 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.controller.BasicController;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,16 +32,15 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
-            final Controller controller = requestMapping(httpRequest.getUrl());
-            controller.process(httpRequest, httpResponse);
-
+            final FrontServlet servlet = new FrontServlet();
+            servlet.service(httpRequest, httpResponse);
             writeHttpResponse(httpResponse, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -61,18 +56,6 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.from(line, headerLines);
     }
 
-    private Controller requestMapping(final String url) {
-        Map<String, Controller> controllers = new HashMap<>();
-        controllers.put("/", new BasicController());
-        controllers.put("/login", new LoginController());
-
-        if (!controllers.containsKey(url)) {
-            return new ResourceController();
-        }
-
-        return controllers.get(url);
-    }
-
     private void writeHttpResponse(final HttpResponse httpResponse, final OutputStream outputStream) {
         final String response = httpResponse.makeResponse();
         try {
@@ -82,5 +65,4 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
-
 }

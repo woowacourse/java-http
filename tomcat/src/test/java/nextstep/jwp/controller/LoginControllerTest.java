@@ -19,7 +19,7 @@ class LoginControllerTest extends DatabaseIsolation {
 	@DisplayName("/login으로 GET 요청을 보내면 login.html을 반환한다.")
 	@Test
 	void login_html() throws IOException {
-		// given
+		// when
 		StubSocket socket = 로그인_페이지_요청();
 
 		// then

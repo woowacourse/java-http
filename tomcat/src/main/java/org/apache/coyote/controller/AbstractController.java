@@ -11,6 +11,7 @@ import org.apache.coyote.http11.util.StaticResourceUtil;
 public abstract class AbstractController implements Controller {
 
 	private static final String REDIRECT_URL = "/index.html";
+	private static final String METHOD_NOT_ALLOWED_HTML = "405.html";
 
 	@Override
 	public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -25,10 +26,12 @@ public abstract class AbstractController implements Controller {
 
 	@Override
 	public void doGet(HttpRequest request, HttpResponse response) {
+		handleHtml(HttpStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HTML, response);
 	}
 
 	@Override
 	public void doPost(HttpRequest request, HttpResponse response) {
+		handleHtml(HttpStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HTML, response);
 	}
 
 	protected void handleRedirect(HttpResponse response) {

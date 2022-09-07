@@ -63,13 +63,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Servlet findSupportServlet(final HttpRequest httpRequest) {
-        return servlets.stream()
-                .filter(servlet -> servlet.support(httpRequest))
-                .findAny()
-                .orElseThrow(IllegalArgumentException::new);
-    }
-
     private String parseRequest(final BufferedReader bufferedReader) throws IOException {
         final var request = new StringBuilder();
 
@@ -78,5 +71,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return request.toString();
+    }
+
+    private Servlet findSupportServlet(final HttpRequest httpRequest) {
+        return servlets.stream()
+                .filter(servlet -> servlet.support(httpRequest))
+                .findAny()
+                .orElseThrow(IllegalArgumentException::new);
     }
 }

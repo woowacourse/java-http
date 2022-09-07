@@ -1,29 +1,28 @@
 package org.apache.coyote.http11.response.header;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
 import org.apache.coyote.http11.exception.ContentTypeNotFoundException;
 
 public enum ContentType implements HttpResponseHeader {
 
-    TEXT_JS("text/js;charset=utf-8 ", filePath -> filePath.contains(".js")),
-    TEXT_CSS("text/css;charset=utf-8 ", filePath -> filePath.contains(".css")),
-    TEXT_HTML("text/html;charset=utf-8 ", filePath -> filePath.contains(".html")),
-    TEXT_PLAIN("text/plain;charset=utf-8 ", filePath -> false);;
+    TEXT_JS("text/javascript", "text/js;charset=utf-8 "),
+    TEXT_CSS("text/css", "text/css;charset=utf-8 "),
+    TEXT_HTML("text/html", "text/html;charset=utf-8 "),
+    TEXT_PLAIN("text/plain", "text/plain;charset=utf-8 ");
 
     private static final String HEADER_KEY = "Content-Type: ";
 
+    private final String key;
     private final String value;
-    private final Predicate<String> suitable;
 
-    ContentType(String value, Predicate<String> suitable) {
+    ContentType(String key, String value) {
+        this.key = key;
         this.value = value;
-        this.suitable = suitable;
     }
 
-    public static ContentType findByFilePath(String filePath) {
+    public static ContentType findByFilePath(String key) {
         return Arrays.stream(values())
-                .filter(contentType -> contentType.suitable.test(filePath))
+                .filter(contentType -> contentType.key.equals(key))
                 .findAny()
                 .orElseThrow(ContentTypeNotFoundException::new);
     }

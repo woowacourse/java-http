@@ -4,6 +4,8 @@ import static org.apache.coyote.http11.response.header.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.response.header.HttpStatusCode.OK;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -38,7 +40,8 @@ public abstract class AbstractController implements Controller {
         httpResponse.setHttpStatusCode(OK);
         String responseBody = fileReader.generate(path);
         httpResponse.setResponseBody(responseBody);
-        httpResponse.addHeader(ContentType.findByFilePath(path));
+        String contentType = Files.probeContentType(Path.of(path));
+        httpResponse.addHeader(ContentType.findByFilePath(contentType));
     }
 
     protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;

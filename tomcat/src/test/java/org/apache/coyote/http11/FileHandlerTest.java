@@ -19,7 +19,7 @@ class FileHandlerTest {
     @DisplayName("isStaticFileResource 메소드는 입력 받은 리소스가 정적 파일인지 판별한다.")
     void isStaticFileResource() {
         // when
-        final boolean isStaticFileResource = FileHandler.isStaticFileResource("/wooteco.txt");
+        final boolean isStaticFileResource = FileHandler.isStaticFilePath("/wooteco.txt");
 
         // then
         assertThat(isStaticFileResource).isTrue();

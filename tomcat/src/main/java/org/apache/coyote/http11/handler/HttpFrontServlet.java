@@ -47,12 +47,13 @@ public class HttpFrontServlet {
 
     private ResponseEntity createResponseEntity(final ServletResponseEntity response)
             throws IOException {
-        if (response.getResource() == null) {
+        if (response.isEmptyResource()) {
             return ResponseEntity.of(response);
         }
 
-        if (FileHandler.isStaticFileResource(response.getResource())) {
-            return FileHandler.createFileResponse(response);
+        final String resourcePath = response.getResource();
+        if (FileHandler.isStaticFilePath(resourcePath)) {
+            return FileHandler.createFileResponse(resourcePath);
         }
         return ResponseEntity.createTextHtmlResponse(response);
     }

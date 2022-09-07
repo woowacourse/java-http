@@ -16,7 +16,7 @@ public class QueryParameter {
 
     public static QueryParameter of(final String queryString) {
         final Map<String, String> queryParams = new HashMap<>();
-        if (!queryString.equals("")) {
+        if (!queryString.isEmpty()) {
             parseQueryString(queryParams, queryString);
         }
 

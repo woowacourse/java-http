@@ -41,10 +41,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(),
                 StandardCharsets.UTF_8)); final var outputStream = connection.getOutputStream()) {
-            final HttpFrontServlet httpRequestServlet = new HttpFrontServlet();
-
             final HttpRequest httpRequest = createRequest(bufferedReader);
-            final ResponseEntity response = handleRequest(httpRequest, httpRequestServlet);
+            final ResponseEntity response = handleRequest(httpRequest);
             final HttpResponse httpResponse = HttpResponse.of(response);
 
             writeResponse(outputStream, httpResponse.createResponse());
@@ -87,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private ResponseEntity handleRequest(final HttpRequest httpRequest, final HttpFrontServlet frontHandler)
+    private ResponseEntity handleRequest(final HttpRequest httpRequest)
             throws IOException {
         final String path = httpRequest.getPath();
 
@@ -95,11 +93,12 @@ public class Http11Processor implements Runnable, Processor {
             return ResponseEntity.createTextHtmlResponse(ServletResponseEntity.createWithResource(ROOT_BODY));
         }
 
-        if (FileHandler.isStaticFileResource(path)) {
+        if (FileHandler.isStaticFilePath(path)) {
             return FileHandler.createFileResponse(path);
         }
 
-        return frontHandler.service(httpRequest);
+        final HttpFrontServlet frontServlet = new HttpFrontServlet();
+        return frontServlet.service(httpRequest);
     }
 
     private boolean isRootPath(final String path) {

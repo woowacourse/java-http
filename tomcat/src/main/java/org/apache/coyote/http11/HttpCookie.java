@@ -20,7 +20,7 @@ public class HttpCookie {
     public static HttpCookie of(final String rawCookie) {
         final Map<String, String> parsedCookies = new HashMap<>();
 
-        if (!rawCookie.equals("")) {
+        if (!rawCookie.isEmpty()) {
             parseRawCookie(rawCookie, parsedCookies);
         }
 

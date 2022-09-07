@@ -9,12 +9,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.response.HttpResponseHeader;
-import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FileHandler {
 
-    public static boolean isStaticFileResource(final String resource) {
+    public static boolean isStaticFilePath(final String resource) {
         final URL url = FileHandler.class.getClassLoader().getResource("static" + resource);
         return url != null;
     }
@@ -32,9 +31,5 @@ public class FileHandler {
         headers.put("Content-Type", Files.probeContentType(path));
 
         return new HttpResponseHeader(headers);
-    }
-
-    public static ResponseEntity createFileResponse(final ServletResponseEntity response) throws IOException {
-        return createFileResponse(response.getResource());
     }
 }

@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -167,10 +169,13 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_postWithCookie() {
+    void login_getWithJSession() {
         // given
+        final SessionManager sessionManager = new SessionManager();
+        sessionManager.add(new Session("656cef62-e3c4-40bc-a8df-94732920ed46"));
+
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
@@ -193,14 +198,17 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_postWithNoCookie() {
+    void login_post() {
         // given
+        final String formDataBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + formDataBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "");
+                formDataBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

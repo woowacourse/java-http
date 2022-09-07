@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Collections;
+import java.util.Optional;
 import org.apache.coyote.http11.request.HttpHeaders;
 
 public class HttpResponse {
@@ -52,7 +53,11 @@ public class HttpResponse {
         httpHeaders.setLocation(location);
     }
 
-    public String getViewName() {
-        return viewName;
+    public Optional<String> getViewName() {
+        if (viewName == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(viewName);
     }
 }

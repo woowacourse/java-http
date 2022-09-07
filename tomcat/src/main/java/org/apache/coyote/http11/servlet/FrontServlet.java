@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -39,10 +40,13 @@ public class FrontServlet {
     }
 
     private void renderView(final HttpResponse httpResponse) throws IOException, URISyntaxException {
-        final String viewName = httpResponse.getViewName();
-        final ViewResolver viewResolver = new ViewResolver(viewName + ".html");
-        final ViewInfo viewInfo = viewResolver.render();
+        final Optional<String> viewName = httpResponse.getViewName();
+        if (viewName.isEmpty()) {
+            return;
+        }
 
+        final ViewResolver viewResolver = new ViewResolver(viewName.get() + ".html");
+        final ViewInfo viewInfo = viewResolver.render();
         httpResponse.setBody(viewInfo.getViewContent(), viewInfo.getContentType(), viewInfo.getContentLength());
     }
 

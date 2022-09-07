@@ -1,7 +1,9 @@
 package org.apache.coyote.common.session;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Session {
 
@@ -29,7 +31,9 @@ public class Session {
     }
 
     public void invalidate() {
-        for (String key : values.keySet()) {
+        final Set<String> keySet = new HashSet<>(values.keySet());
+
+        for (String key : keySet) {
             removeAttribute(key);
         }
     }

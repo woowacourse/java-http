@@ -7,6 +7,7 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
@@ -42,10 +43,10 @@ public class Http11Processor implements Runnable, Processor {
             String uri = UrlParser.extractUri(request);
             HttpMethod httpMethod = UrlParser.extractMethod(request);
             HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
-
+            HttpCookie cookie = HttpCookie.extract(httpHeaders);
             String requestBody = extractRequestBody(bufferedReader, httpHeaders, httpMethod);
 
-            Url url = HandlerMapping.from(uri, new Http11Request(httpHeaders, httpMethod));
+            Url url = HandlerMapping.from(uri, new Http11Request(httpHeaders, httpMethod, cookie));
 
             Http11Response resource = url.handle(httpHeaders, requestBody);
             String response = resource.toResponse();
@@ -55,7 +56,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
-
 
     private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, HttpMethod httpMethod)
             throws IOException {

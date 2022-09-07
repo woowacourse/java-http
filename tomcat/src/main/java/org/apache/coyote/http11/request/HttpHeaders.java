@@ -25,15 +25,7 @@ public class HttpHeaders {
         return new HttpHeaders(mp);
     }
 
-    public void addCookie(HttpCookie cookie) {
-        header.put("Set-Cookie", cookie.getValues());
-    }
-
     public String get(String key) {
         return header.get(key);
-    }
-
-    public Map<String, String> getHeader() {
-        return header;
     }
 }

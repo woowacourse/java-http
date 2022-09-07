@@ -35,7 +35,7 @@ public class Http11Response {
         }
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getName() + " ",
-                cookie.getResponse(),
+                "Set-Cookie: " + cookie.getResponse(),
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + resource.getBytes().length + " ",
                 "",

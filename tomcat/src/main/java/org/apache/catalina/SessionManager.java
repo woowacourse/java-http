@@ -9,7 +9,6 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-
     public static SessionManager getInstance() {
         return INSTANCE;
     }

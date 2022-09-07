@@ -8,33 +8,25 @@ import org.apache.coyote.http11.model.HttpStatus;
 
 public class HttpResponse {
 
-    private static final String PROTOCOL_VERSION = "HTTP/1.1";
     private static final String JSESSIONID_HEADER_PREFIX = "JSESSIONID=";
-    private static final String LINE_BREAK = " \r\n";
-    private static final String KEY_VALUE_SEPARATOR = ": ";
 
-    private final String protocolVersion;
-    private final HttpStatus statusCode;
-    private final Map<String, String> headers;
+    private final HttpStatusLine statusLine;
+    private final HttpResponseHeader headers;
     private final String responseBody;
 
     public HttpResponse(Builder builder) {
-        this.protocolVersion = builder.protocolVersion;
-        this.statusCode = builder.statusCode;
-        this.headers = builder.headers;
+        this.statusLine = new HttpStatusLine(builder.statusCode);
+        this.headers = new HttpResponseHeader(builder.headers);
         this.responseBody = builder.responseBody;
     }
 
     public static class Builder {
-
-        private String protocolVersion;
         private HttpStatus statusCode;
         private Map<String, String> headers;
 
         private String responseBody;
 
         public Builder() {
-            this.protocolVersion = PROTOCOL_VERSION;
             this.headers = new LinkedHashMap<>();
         }
 
@@ -81,36 +73,25 @@ public class HttpResponse {
     public byte[] toResponse() {
         if (responseBody == null) {
             return String.join("\r\n",
-                    protocolVersion + " " + statusCode.toResponseMessage() + " ",
-                    headersToResponse()).getBytes();
+                    statusLine.toResponse(),
+                    headers.toResponse()).getBytes();
         }
         return String.join("\r\n",
-                protocolVersion + " " + statusCode.toResponseMessage() + " ",
-                headersToResponse(),
+                statusLine.toResponse(),
+                headers.toResponse(),
                 responseBody).getBytes();
     }
 
-    private String headersToResponse() {
-        StringBuilder headerResponse = new StringBuilder();
-        for (String headerName : headers.keySet()) {
-            headerResponse.append(headerName)
-                    .append(KEY_VALUE_SEPARATOR)
-                    .append(headers.get(headerName))
-                    .append(LINE_BREAK);
-        }
-        return headerResponse.toString();
-    }
-
     public String getProtocolVersion() {
-        return protocolVersion;
+        return statusLine.getProtocolVersion();
     }
 
     public HttpStatus getStatusCode() {
-        return statusCode;
+        return statusLine.getHttpStatus();
     }
 
     public String getHeader(String headerName) {
-        return headers.get(headerName);
+        return headers.getHeader(headerName);
     }
 
     public String getResponseBody() {

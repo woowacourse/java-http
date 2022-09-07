@@ -80,6 +80,6 @@
 
 ### 체크리스트
 
-- [ ] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
+- [x] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
 
 <br/>

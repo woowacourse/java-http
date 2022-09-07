@@ -1,13 +1,13 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import nextstep.jwp.presentation.Controller;
+import org.apache.coyote.Controller;
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.StaticResourceController;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.util.RequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

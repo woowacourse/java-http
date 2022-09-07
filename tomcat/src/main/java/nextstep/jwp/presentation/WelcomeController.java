@@ -1,7 +1,7 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.common.HttpResponse;
 
 public class WelcomeController extends AbstractController {
 

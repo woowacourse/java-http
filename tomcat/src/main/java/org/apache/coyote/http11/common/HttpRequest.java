@@ -1,11 +1,11 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.common;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.constant.HttpMethod;
+import org.apache.coyote.http11.constant.HttpMethod;
 
 public class HttpRequest {
 

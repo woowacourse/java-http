@@ -6,10 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.presentation.Controller;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.common.HttpResponse;
+import org.apache.coyote.http11.util.RequestMapping;
+import org.apache.coyote.http11.util.RequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

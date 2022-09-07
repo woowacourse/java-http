@@ -27,7 +27,7 @@
   - [x] Set-Cookie를 구현한다.
 - [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
   - [x] Session, SessionManager 구현한다.
-  - [ ] 세션 존재 시 `GET /login` 요청 시 `/index` 로 리다이렉트 되도록 수정
+  - [x] 세션 존재 시 `GET /login` 요청 시 `/index` 로 리다이렉트 되도록 수정
 
 ## 3. 리팩토링
 
@@ -37,7 +37,7 @@
 - [x] 반복되는 상수를 Enum으로 처리하기
 - [x] loginController 악취 제거하기
   - [x] 컨트롤러 간 참조하는 구조 변경하기 ( LoginController, RegisterController,  -> StaticResourceController)
-- [ ] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기
+- [x] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기
 - [ ] HttpBody 와 HttpPath의 param 생성 로직이 겹친다. 이를 어떻게 처리할까?
 
 
@@ -54,3 +54,4 @@
   - [x] js 지원 테스트
   - [x] 404 페이지 테스트 ( + NotFound 응답 메세지 )
   - [x] HttpRequest 잘 만들어지는지 테스트
+  - [ ] 

@@ -1,13 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.util;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import nextstep.jwp.presentation.Controller;
+import org.apache.coyote.Controller;
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.RegisterController;
 import nextstep.jwp.presentation.StaticResourceController;
 import nextstep.jwp.presentation.WelcomeController;
-import org.apache.coyote.HttpRequest;
+import org.apache.coyote.http11.common.HttpRequest;
 
 public class RequestMapping {
 

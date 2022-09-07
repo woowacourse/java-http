@@ -1,14 +1,14 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.coyote.HttpHeaders.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_TYPE;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import org.apache.coyote.constant.HttpStatus;
-import org.apache.coyote.constant.MediaType;
+import org.apache.coyote.http11.constant.HttpStatus;
+import org.apache.coyote.http11.constant.MediaType;
 
 public class HttpResponse {
 

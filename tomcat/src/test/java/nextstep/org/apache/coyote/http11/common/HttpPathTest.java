@@ -1,9 +1,9 @@
-package nextstep.org.apache.coyote;
+package nextstep.org.apache.coyote.http11.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.HttpPath;
+import org.apache.coyote.http11.common.HttpPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

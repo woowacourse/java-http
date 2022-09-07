@@ -1,14 +1,15 @@
 package nextstep.jwp.presentation;
 
-import static nextstep.jwp.presentation.StaticResource.INDEX_PAGE;
+import static org.apache.coyote.http11.util.StaticResource.INDEX_PAGE;
 import static org.apache.catalina.Session.JSESSIONID;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.Session;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.constant.HttpStatus;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.common.HttpResponse;
+import org.apache.coyote.http11.constant.HttpStatus;
+import org.apache.coyote.http11.util.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

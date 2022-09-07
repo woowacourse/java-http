@@ -1,10 +1,12 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.exception.ResourceNotFoundException;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.constant.HttpMethod;
-import org.apache.coyote.constant.HttpStatus;
+import org.apache.coyote.Controller;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.common.HttpResponse;
+import org.apache.coyote.http11.constant.HttpMethod;
+import org.apache.coyote.http11.constant.HttpStatus;
+import org.apache.coyote.http11.util.StaticResource;
 
 public abstract class AbstractController implements Controller {
 

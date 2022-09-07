@@ -1,6 +1,6 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.common;
 
-import org.apache.coyote.constant.HttpMethod;
+import org.apache.coyote.http11.constant.HttpMethod;
 
 public class HttpStartLine {
 

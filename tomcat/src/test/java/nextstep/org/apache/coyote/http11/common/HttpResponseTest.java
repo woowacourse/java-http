@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote;
+package nextstep.org.apache.coyote.http11.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,8 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.coyote.HttpResponse;
-import org.apache.coyote.constant.HttpStatus;
+import org.apache.coyote.http11.common.HttpResponse;
+import org.apache.coyote.http11.constant.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

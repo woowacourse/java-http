@@ -1,10 +1,10 @@
-package nextstep.jwp.presentation;
+package org.apache.coyote.http11.util;
 
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import nextstep.jwp.exception.ResourceNotFoundException;
-import org.apache.coyote.HttpRequest;
+import org.apache.coyote.http11.common.HttpRequest;
 
 public class StaticResource {
 

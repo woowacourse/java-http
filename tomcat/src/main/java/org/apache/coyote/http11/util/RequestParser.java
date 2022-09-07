@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.util;
 
-import static org.apache.coyote.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_LENGTH;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.HttpBody;
-import org.apache.coyote.HttpHeaders;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpStartLine;
+import org.apache.coyote.http11.common.HttpBody;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpRequest;
+import org.apache.coyote.http11.common.HttpStartLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

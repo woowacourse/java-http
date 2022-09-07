@@ -51,6 +51,11 @@ public class HttpResponseBuilder {
         return this;
     }
 
+    public HttpResponseBuilder body(final Object object) {
+        this.body = object.toString();
+        return this;
+    }
+
     public HttpResponse build() {
         if (httpStatus == HttpStatus.NOT_FOUND) {
             body(Paths.get(Objects.requireNonNull(

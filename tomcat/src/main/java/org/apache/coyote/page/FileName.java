@@ -5,6 +5,7 @@ import java.util.Arrays;
 public enum FileName {
 
     LOGIN("/login", "login.html"),
+    REGISTER("/register", "register.html"),
     NOT_FOUND("", "404.html");
 
     private String url;

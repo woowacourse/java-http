@@ -5,6 +5,8 @@ import static org.apache.coyote.page.PageMapper.getFilePath;
 import static org.apache.coyote.page.PageMapper.getPath;
 
 import java.util.Map;
+import java.util.Objects;
+import nextstep.jwp.model.User;
 
 public class HttpResponse {
 
@@ -24,6 +26,12 @@ public class HttpResponse {
 
     public static HttpResponseBuilder notFound() {
         return new HttpResponseBuilder(HttpStatus.NOT_FOUND);
+    }
+
+    public static HttpResponseBuilder created(final Long id, final String redirectUrl){
+        return new HttpResponseBuilder(HttpStatus.CREATED)
+                .header("Location", String.valueOf(id))
+                .body(getPath(redirectUrl));
     }
 
     public static HttpResponseBuilder redirect(final String url) {

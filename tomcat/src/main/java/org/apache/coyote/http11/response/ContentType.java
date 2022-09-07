@@ -8,6 +8,7 @@ public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
     JS("application/x-javascript", "js"),
+    SVG("image/svg+xml", "svg"),
     ;
 
     private static final String FIELD_DELIMITER = ";";

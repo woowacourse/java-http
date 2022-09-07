@@ -6,7 +6,7 @@ public enum HttpHeader {
     LOCATION("Location", "%s: %s "),
     CONTENT_TYPE("Content-Type", "%s: %s;charset=utf-8 "),
     CONTENT_LENGTH("Content-Length", "%s: %s "),
-    SET_COOKIE("Set-Cookie", "%s: JSESSIONID=%s ");
+    SET_COOKIE("Set-Cookie", "%s: %s ");
 
     private final String type;
     private final String format;
@@ -26,5 +26,9 @@ public enum HttpHeader {
 
     public String apply(HttpCookie cookie) {
         return String.format(format, type, cookie.text());
+    }
+
+    public String apply(Session session) {
+        return String.format(format, type, Session.JSESSIONID + "=" + session.getId());
     }
 }

@@ -15,6 +15,7 @@ public class HttpRequest {
     private String uri = "";
     private Map<String, String> header = new HashMap<>();
     private String body = "";
+    private Session session;
 
 
     public HttpRequest(final BufferedReader reader) {
@@ -24,6 +25,22 @@ public class HttpRequest {
         uri = split[1];
         header = createHeader(reader);
         body = readBody(reader, header.get("Content-Length"));
+        session = getSessionOrNull();
+    }
+
+    private Session getSessionOrNull() {
+        final String jSessionId = header.get(HttpCookie.HEADER_CONSTANT);
+        if (jSessionId != null) {
+            return new Session(jSessionId);
+        }
+        return null;
+    }
+
+    private String readBody(final BufferedReader reader, final String contentLength) {
+        if (contentLength != null) {
+            return IoUtils.readUrlEncoded(reader, Integer.parseInt(contentLength));
+        }
+        return "";
     }
 
     private Map<String, String> createHeader(final BufferedReader reader) {
@@ -46,13 +63,6 @@ public class HttpRequest {
         }
     }
 
-    private String readBody(final BufferedReader reader, final String contentLength) {
-        if (contentLength != null) {
-            return IoUtils.readUrlEncoded(reader, Integer.parseInt(contentLength));
-        }
-        return "";
-    }
-
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -63,6 +73,27 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession(final boolean create) {
+        if (create) {
+            return createOrGetSession();
+        }
+        return nullOrGetSession();
+    }
+
+    private Session createOrGetSession() {
+        if (session != null) {
+            return session;
+        }
+        return new Session(new HttpCookie().getValue());
+    }
+
+    private Session nullOrGetSession() {
+        if (session != null) {
+            return session;
+        }
+        return null;
     }
 
     public boolean isSame(String httpMethod, String uri) {

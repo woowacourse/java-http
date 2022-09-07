@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
+import org.apache.coyote.support.HttpResponse;
 
 public class IoUtils {
 
@@ -96,6 +97,18 @@ public class IoUtils {
             throw new RuntimeException(e);
         }
     }
+
+    // TODO HttpResponse 기반으로 구현해야 함 !
+/*
+    public static void writeAndFlush(final BufferedWriter bufferedWriter, final HttpResponse response) {
+        try {
+            bufferedWriter.write();
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+*/
 
     private static Path getPath(final String fileName) {
         return Paths

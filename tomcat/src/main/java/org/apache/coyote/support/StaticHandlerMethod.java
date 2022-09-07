@@ -32,17 +32,44 @@ public enum StaticHandlerMethod {
         }
     }
 
-    public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-        final FileDto dto = new FileDto(httpRequest.getUri());
+    public void handle(final HttpRequest request, final BufferedWriter bufferedWriter) {
+        final FileDto dto = new FileDto(request.getUri());
         final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
 
-        final String response = HttpResponse.builder()
+        // TODO login폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
+        if (dto.fileName.contains("login") && isAlreadyLogin(request)) {
+            alreadyLoginEvent(bufferedWriter, request);
+        }
+
+        final String response = HttpResponseBuilder.builder()
                 .addStatus(HttpStatus.OK)
                 .add(HttpHeader.CONTENT_TYPE, contentType)
                 .body(responseBody)
                 .build();
 
         writeAndFlush(bufferedWriter, response);
+    }
+
+    private void alreadyLoginEvent(final BufferedWriter bufferedWriter, final HttpRequest request) {
+        final String response = HttpResponseBuilder.builder()
+                .addStatus(HttpStatus.FOUND)
+                .add(HttpHeader.LOCATION, "/index.html")
+                .addCooke(request.getSession(false))
+                .build();
+
+        writeAndFlush(bufferedWriter, response);
+        log.info("Redirect: /index.html");
+    }
+
+    private boolean isAlreadyLogin(final HttpRequest request) {
+        final Session foundSession = request.getSession(false);
+        if (foundSession == null) {
+            return false;
+        }
+        if (SessionManager.findSession(foundSession.getId()) == null) {
+            return false;
+        }
+        return true;
     }
 }

@@ -76,7 +76,7 @@ public class LoginController extends AbstractController {
             httpResponse.addHeader(new Location(LOGIN_FAILURE_REDIRECT_URI));
             return;
         }
-        serviceLoginSuccess(httpResponse, user);
+        serviceLoginSuccess(httpResponse, user.get());
         log.info(user.get().toString());
     }
 
@@ -86,9 +86,9 @@ public class LoginController extends AbstractController {
                         .checkPassword(password);
     }
 
-    private void serviceLoginSuccess(HttpResponse httpResponse, Optional<User> user) {
+    private void serviceLoginSuccess(HttpResponse httpResponse, User user) {
         httpResponse.addHeader(new Location(LOGIN_SUCCESS_REDIRECT_URI));
-        Session session = new Session(USER_SESSION_NAME, user.get());
+        Session session = new Session(USER_SESSION_NAME, user);
         sessionManager.add(session);
         httpResponse.addHeader(Cookie.fromResponse(JSESSION_COOKIE_KEY, session.getId()));
     }

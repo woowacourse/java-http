@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
@@ -17,21 +16,24 @@ public class HttpResponse {
     private static final String TEXT_HTML = "text/html";
     private static final String NEW_LINE = "\r\n";
     private static final String FILE_EXTENSION = ".";
+    private static final String HEADER_DELIMITER = ": ";
 
     private final Map<String, String> headers;
+    private final Cookie cookie;
     private HttpStatusCode statusCode;
     private String responseBody;
 
-    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> headers) {
+    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> headers, final Cookie cookie) {
         this.statusCode = statusCode;
         this.headers = headers;
+        this.cookie = cookie;
         this.responseBody = "";
     }
 
     public static HttpResponse init(final HttpStatusCode statusCode) {
         final Map<String, String> headers = new LinkedHashMap<>();
 
-        return new HttpResponse(statusCode, headers);
+        return new HttpResponse(statusCode, headers, Cookie.init());
     }
 
     public HttpResponse setBody(final String responseBody) {
@@ -93,28 +95,33 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setSessionId(final String sessionId) {
-        headers.put("Set-Cookie", "JSESSIONID=" + sessionId);
+    public HttpResponse addCookie(final String key, final String value) {
+        cookie.add(key, value);
         return this;
     }
 
     public byte[] toResponseBytes() {
-        final StringBuilder stringBuilder = new StringBuilder()
-                .append(statusCode.getResponseStartLine())
-                .append(" ")
-                .append(NEW_LINE);
-
-        for (final Entry<String, String> entry : headers.entrySet()) {
-            stringBuilder.append(entry.getKey())
-                    .append(": ")
-                    .append(entry.getValue())
-                    .append(" ")
-                    .append(NEW_LINE);
-        }
-
-        return stringBuilder.append(NEW_LINE)
+        return new StringBuilder()
+                .append(toStartLineString())
+                .append(toHeaderString())
+                .append(NEW_LINE)
                 .append(responseBody)
                 .toString()
                 .getBytes();
+    }
+
+    private String toStartLineString() {
+        return statusCode.getResponseStartLine() + " " + NEW_LINE;
+    }
+
+    private String toHeaderString() {
+        if (cookie.hasValue()) {
+            headers.put("Set-Cookie", cookie.toHeaderForm());
+        }
+
+        return headers.entrySet()
+                .stream()
+                .map(it -> it.getKey() + HEADER_DELIMITER + it.getValue() + " ")
+                .collect(Collectors.joining(NEW_LINE, "", NEW_LINE));
     }
 }

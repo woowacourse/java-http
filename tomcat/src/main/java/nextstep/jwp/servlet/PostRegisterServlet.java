@@ -26,7 +26,7 @@ public class PostRegisterServlet implements Servlet {
 
         return HttpResponse.init(HttpStatusCode.FOUND)
                 .setLocationAsHome()
-                .setSessionId(session.getId());
+                .addCookie("JSESSIONID", session.getId());
     }
 
     @Override

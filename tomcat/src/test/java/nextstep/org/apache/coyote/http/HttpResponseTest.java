@@ -57,14 +57,14 @@ class HttpResponseTest {
     }
 
     @Test
-    @DisplayName("setSessionId 메서드는 http 응답 Set-Cookie헤더에 JSESSIONID를 추가한다.")
-    void setSessionId() {
+    @DisplayName("addCookie 메서드는 http 응답 Set-Cookie헤더에 JSESSIONID를 추가한다.")
+    void addCookie() {
         // given
         final String sessionId = "1q2w3e4r";
         final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
 
         // when
-        httpResponse.setSessionId(sessionId);
+        httpResponse.addCookie("JSESSIONID", sessionId);
 
         // then
         final byte[] response = httpResponse.toResponseBytes();

@@ -45,7 +45,7 @@ public class PostLoginServlet implements Servlet {
         log.info("로그인 성공 [요청 account: {}]", account);
         return HttpResponse.init(HttpStatusCode.FOUND)
                 .setLocationAsHome()
-                .setSessionId(session.getId());
+                .addCookie("JSESSIONID", session.getId());
     }
 
     @Override

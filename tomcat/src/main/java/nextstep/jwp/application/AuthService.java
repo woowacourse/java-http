@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public void signUp(final String requestBody) {
-        QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
+        QueryParams queryParams = QueryParams.parse(requestBody);
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         String email = queryParams.get("email");
@@ -46,7 +46,7 @@ public class AuthService {
     }
 
     public User login(final String requestBody) {
-        QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
+        QueryParams queryParams = QueryParams.parse(requestBody);
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         validateLoginFormat(account, password);

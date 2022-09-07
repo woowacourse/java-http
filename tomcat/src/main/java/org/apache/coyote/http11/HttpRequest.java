@@ -1,12 +1,8 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.support.HttpRequestParser.parseHttpMethod;
-import static org.apache.coyote.support.HttpRequestParser.parseQueryString;
-import static org.apache.coyote.support.HttpRequestParser.parseUri;
-import static org.apache.coyote.support.HttpRequestParser.parseUrl;
-
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +17,7 @@ public class HttpRequest {
     private final String body;
 
     private HttpRequest(final HttpMethod httpMethod, final String url, final QueryParams queryParams,
-                        final Map<String, String> headers,
-                        final String body) {
+                        final Map<String, String> headers, final String body) {
         this.httpMethod = httpMethod;
         this.url = url;
         this.queryParams = queryParams;
@@ -31,16 +26,14 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        String startLine = bufferedReader.readLine();
-        HttpMethod httpMethod = parseHttpMethod(startLine);
-        String uri = parseUri(startLine);
-        String url = parseUrl(uri);
-        QueryParams queryParams = QueryParams.parseQueryParams(parseQueryString(uri));
+        HttpRequestStartLine startLine = HttpRequestStartLine.parse(bufferedReader.readLine());
+        URI uri = startLine.getUri();
+        QueryParams queryParams = QueryParams.parse(uri.getQuery());
         Map<String, String> headers = HttpRequestParser.parseHeaders(readHeaders(bufferedReader));
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         String body = readBody(bufferedReader, contentLength);
 
-        return new HttpRequest(httpMethod, url, queryParams, headers, body);
+        return new HttpRequest(startLine.getHttpMethod(), uri.getPath(), queryParams, headers, body);
     }
 
     private static List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {

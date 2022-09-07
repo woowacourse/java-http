@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
             return toFoundResponse(httpRequest, NOT_FOUND_PATH);
         } catch (InvalidHttpRequestFormatException | QueryStringFormatException | InvalidSignUpFormatException |
-                 DuplicateAccountException e) {
+                 DuplicateAccountException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(httpRequest, BAD_REQUEST_PATH);
         } catch (Exception e) {

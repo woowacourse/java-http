@@ -16,7 +16,7 @@ class QueryParamsTest {
         String queryString = "account=gugu&password=password";
 
         // when
-        QueryParams queryParams = QueryParams.parseQueryParams(queryString);
+        QueryParams queryParams = QueryParams.parse(queryString);
 
         // then
         assertAll(
@@ -31,7 +31,7 @@ class QueryParamsTest {
         String queryString = "";
 
         // when
-        QueryParams actual = QueryParams.parseQueryParams(queryString);
+        QueryParams actual = QueryParams.parse(queryString);
 
         // then
         assertThat(actual.exists()).isFalse();
@@ -43,7 +43,7 @@ class QueryParamsTest {
         String queryString = "a%b$c^d";
 
         // when, then
-        assertThatThrownBy(() -> QueryParams.parseQueryParams(queryString))
+        assertThatThrownBy(() -> QueryParams.parse(queryString))
                 .isExactlyInstanceOf(QueryStringFormatException.class);
     }
 }

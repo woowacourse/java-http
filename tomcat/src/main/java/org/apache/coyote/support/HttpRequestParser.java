@@ -40,22 +40,6 @@ public class HttpRequestParser {
         return parsedStartLine[URL_INDEX];
     }
 
-    public static String parseUrl(final String uri) {
-        int lastIndexOfQueryStringDelimiter = uri.lastIndexOf(QUERY_STRING_DELIMITER);
-        if (lastIndexOfQueryStringDelimiter == DELIMITER_NOT_FOUND) {
-            return uri;
-        }
-        return uri.substring(0, lastIndexOfQueryStringDelimiter);
-    }
-
-    public static String parseQueryString(final String uri) {
-        int lastIndexOfQueryStringDelimiter = uri.lastIndexOf(QUERY_STRING_DELIMITER);
-        if (lastIndexOfQueryStringDelimiter == DELIMITER_NOT_FOUND) {
-            return "";
-        }
-        return uri.substring(lastIndexOfQueryStringDelimiter + 1);
-    }
-
     public static Map<String, String> parseHeaders(final List<String> httpRequestLines) {
         Map<String, String> headers = new HashMap<>();
         int headerEndIndex = findHeaderEnd(httpRequestLines);

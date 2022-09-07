@@ -7,34 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
-import org.apache.coyote.http11.HttpMethod;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestParserTest {
-
-    @Test
-    void HTTP_메서드_파싱_테스트() {
-        // given
-        String line = "GET /url HTTP/1.1";
-
-        // when
-        HttpMethod httpMethod = HttpRequestParser.parseHttpMethod(line);
-
-        // then
-        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
-    }
-
-    @Test
-    void URI_파싱_테스트() {
-        // given
-        String line = "GET /url HTTP/1.1 ";
-
-        // when
-        String actual = HttpRequestParser.parseUri(line);
-
-        // then
-        assertThat(actual).isEqualTo("/url");
-    }
 
     @Test
     void 헤더_파싱_테스트() {
@@ -81,62 +56,8 @@ class HttpRequestParserTest {
         List<String> lines = List.of("invalid", "invalid", "invalid");
 
         // when, then
-        assertAll(
-                () -> assertThatThrownBy(() -> HttpRequestParser.parseHttpMethod(line))
-                        .isExactlyInstanceOf(InvalidHttpRequestFormatException.class),
-                () -> assertThatThrownBy(() -> HttpRequestParser.parseUri(line))
-                        .isExactlyInstanceOf(InvalidHttpRequestFormatException.class),
-                () -> assertThatThrownBy(() -> HttpRequestParser.parseHeaders(lines))
-                        .isExactlyInstanceOf(InvalidHttpRequestFormatException.class)
-        );
-    }
-
-    @Test
-    void URI에서_쿼리스트링_분리하고_URL_반환_테스트() {
-        // given
-        String uri = "/uri?query=a";
-
-        // when
-        String url = HttpRequestParser.parseUrl(uri);
-
-        // then
-        assertThat(url).isEqualTo("/uri");
-    }
-
-    @Test
-    void URL_파싱_시_쿼리스트링이_없으면_URI를_그대로_반환한다() {
-        // given
-        String uri = "/uri";
-
-        // when
-        String url = HttpRequestParser.parseUrl(uri);
-
-        // then
-        assertThat(url).isEqualTo("/uri");
-    }
-
-    @Test
-    void URI에서_쿼리스트링_추출_테스트() {
-        // given
-        String uri = "/uri?query=a";
-
-        // when
-        String queryString = HttpRequestParser.parseQueryString(uri);
-
-        // then
-        assertThat(queryString).isEqualTo("query=a");
-    }
-
-    @Test
-    void URI에_쿼리스트링이_없으면_쿼리스트링_추출_시_빈_쿼리스트링을_반환한다() {
-        // given
-        String uri = "/uri";
-
-        // when
-        String queryString = HttpRequestParser.parseQueryString(uri);
-
-        // then
-        assertThat(queryString).isEqualTo("");
+        assertThatThrownBy(() -> HttpRequestParser.parseHeaders(lines))
+                .isExactlyInstanceOf(InvalidHttpRequestFormatException.class);
     }
 
     @Test

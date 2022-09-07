@@ -17,8 +17,8 @@ public class QueryParams {
         this.params = params;
     }
 
-    public static QueryParams parseQueryParams(final String queryString) {
-        if (queryString.isBlank()) {
+    public static QueryParams parse(final String queryString) {
+        if (queryString == null || queryString.isBlank()) {
             return new QueryParams(new HashMap<>());
         }
         String[] queries = queryString.split(QUERY_PARAMS_DELIMITER);

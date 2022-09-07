@@ -1,18 +1,19 @@
 package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
 
     private final LinkedHashMap<String, String> values;
 
-    public HttpCookie() {
-        this(new LinkedHashMap<>());
-    }
-
     private HttpCookie(final LinkedHashMap<String, String> values) {
         this.values = values;
+    }
+
+    public static HttpCookie ofJSessionId(final String id) {
+        return new HttpCookie(new LinkedHashMap<>(Map.of("JSESSIONID", id)));
     }
 
     public static HttpCookie of(final String input) {

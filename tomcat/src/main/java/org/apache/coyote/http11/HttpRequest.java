@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.UUID;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
@@ -12,6 +14,10 @@ public class HttpRequest {
         this.requestParameters = RequestParameters.of(requestBody);
     }
 
+    public Session getSession() {
+        return new Session(UUID.randomUUID().toString());
+    }
+
     public RequestUri getRequestUri() {
         return requestLine.getRequestUri();
     }
@@ -21,6 +27,9 @@ public class HttpRequest {
     }
 
     public RequestParameters getRequestParameters() {
+        if (requestLine.getHttpMethod() == HttpMethod.GET) {
+            return requestLine.getRequestUri().getRequestParameters();
+        }
         return requestParameters;
     }
 }

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestParameters;
 import org.apache.coyote.http11.RequestUri;
+import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +22,7 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
         RequestUri requestUri = httpRequest.getRequestUri();
         if (requestUri.hasRequestParameters()) {
-            RequestParameters queryParameters = requestUri.getRequestParameters();
-            login(httpResponse, queryParameters);
+            login(httpRequest, httpResponse);
             return;
         }
         httpResponse.httpStatus(HttpStatus.OK)
@@ -31,18 +31,20 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        RequestParameters requestParameters = httpRequest.getRequestParameters();
-        login(httpResponse, requestParameters);
+        login(httpRequest, httpResponse);
     }
 
-    private void login(final HttpResponse httpResponse, final RequestParameters requestParameters) {
+    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
+            RequestParameters requestParameters = httpRequest.getRequestParameters();
             User user = getUserByAccount(requestParameters.get("account"));
             validatePassword(requestParameters, user);
-            log.info("user : " + user);
+            Session session = httpRequest.getSession();
+            session.addAttribute("user", user);
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .redirect("/index.html")
-                    .setCookie(new HttpCookie().add("JSESSIONID", UUID.randomUUID().toString()));
+                    .setCookie(HttpCookie.ofJSessionId(session.getId()));
+            log.info("user : " + user);
         } catch (NoSuchUserException e) {
             log.info(e.getMessage());
             httpResponse.httpStatus(HttpStatus.FOUND)

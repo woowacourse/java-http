@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import nextstep.Application;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.controller.Controller;
@@ -17,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LOGIN_RESOURCE = "/login.html";
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Socket connection;
 

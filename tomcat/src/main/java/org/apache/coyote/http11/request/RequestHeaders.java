@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Map;
-import org.apache.coyote.exception.JsessionidNotFoundException;
 
 public class RequestHeaders {
 
@@ -45,6 +44,6 @@ public class RequestHeaders {
         return Arrays.stream(cookie.split("; "))
                 .filter(tuple -> tuple.contains("JSESSIONID="))
                 .findFirst()
-                .orElseThrow(JsessionidNotFoundException::new);
+                .orElse("");
     }
 }

@@ -87,6 +87,9 @@ public class Request {
         return headers.getJsessionid();
     }
 
+    public boolean hasJsessionid() {
+        return headers.hasJsessionid();
+    }
     public HttpMethod getMethod() {
         return method;
     }

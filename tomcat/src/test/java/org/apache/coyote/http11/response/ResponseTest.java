@@ -36,12 +36,12 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(httpRequest, responseEntity);
+        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "html" + ";charset=utf-8 ";
         String expectedContentLength = "Content-Length: " + expectedBody.getBytes().length + " ";
-        assertThat(response.asString()).contains(List.of(expectedContentType, expectedContentLength, expectedBody));
+        assertThat(httpResponse.asString()).contains(List.of(expectedContentType, expectedContentLength, expectedBody));
     }
 
     @Test
@@ -53,11 +53,11 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(httpRequest, responseEntity);
+        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "css" + ";charset=utf-8 ";
-        assertThat(response.asString()).contains(List.of(expectedContentType, expectedBody));
+        assertThat(httpResponse.asString()).contains(List.of(expectedContentType, expectedBody));
     }
 
     @Test
@@ -69,11 +69,11 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(httpRequest, responseEntity);
+        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "javascript" + ";charset=utf-8 ";
-        assertThat(response.asString()).contains(List.of(expectedContentType, expectedBody));
+        assertThat(httpResponse.asString()).contains(List.of(expectedContentType, expectedBody));
     }
 
     @Test
@@ -83,12 +83,12 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body);
 
         // when
-        Response response = Response.of(httpRequest, responseEntity);
+        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 200 + " " + "OK" + " ";
         String expectedCookieHeader = "Set-Cookie: JSESSIONID=";
-        assertThat(response.asString()).contains(expectedStartLine, expectedCookieHeader, body);
+        assertThat(httpResponse.asString()).contains(expectedStartLine, expectedCookieHeader, body);
     }
 
     @Test
@@ -98,7 +98,7 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
 
         // when
-        Response response = Response.of(httpRequest, responseEntity);
+        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 302 + " " + "FOUND" + " ",
                 "Location: index.html ",
@@ -109,6 +109,6 @@ class ResponseTest {
         // then
         String expectedStartLine = "HTTP/1.1 " + 302 + " " + "FOUND" + " ";
         String expectedLocationHeader = "Location: http://localhost:8080/index.html ";
-        assertThat(response.asString()).contains(List.of(expectedStartLine, expectedLocationHeader));
+        assertThat(httpResponse.asString()).contains(List.of(expectedStartLine, expectedLocationHeader));
     }
 }

@@ -2,22 +2,22 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class Response {
+public class HttpResponse {
 
     private final General general;
     private final ResponseHeaders headers;
     private final ResponseBody responseBody;
 
-    public Response(General general, ResponseHeaders headers, ResponseBody responseBody) {
+    public HttpResponse(General general, ResponseHeaders headers, ResponseBody responseBody) {
         this.general = general;
         this.headers = headers;
         this.responseBody = responseBody;
     }
 
-    public static Response of(HttpRequest httpRequest, ResponseEntity responseEntity) {
+    public static HttpResponse of(HttpRequest httpRequest, ResponseEntity responseEntity) {
         ResponseHeaders responseHeaders = ResponseHeaders.of(httpRequest.getRequestHeaders(), responseEntity);
         ResponseBody responseBody = ResponseBody.of(responseEntity, responseHeaders);
-        return new Response(new General(responseEntity.getHttpStatus()), responseHeaders, responseBody);
+        return new HttpResponse(new General(responseEntity.getHttpStatus()), responseHeaders, responseBody);
     }
 
     public String asString() {

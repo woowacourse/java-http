@@ -4,17 +4,17 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class ResponseProcessor {
 
-    private final Response response;
+    private final HttpResponse httpResponse;
 
-    public ResponseProcessor(Response response) {
-        this.response = response;
+    public ResponseProcessor(HttpResponse httpResponse) {
+        this.httpResponse = httpResponse;
     }
 
     public static ResponseProcessor of(HttpRequest httpRequest, ResponseEntity responseEntity) {
-        return new ResponseProcessor(Response.of(httpRequest, responseEntity));
+        return new ResponseProcessor(HttpResponse.of(httpRequest, responseEntity));
     }
 
     public String getResponse() {
-        return response.asString();
+        return httpResponse.asString();
     }
 }

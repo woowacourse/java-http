@@ -46,7 +46,6 @@ public class RegisterHandler extends AbstractHandler {
         String account = requestBody.getByKey(ACCOUNT);
         String password = requestBody.getByKey(PASSWORD);
         String email = requestBody.getByKey(EMAIL);
-        System.out.println(account);
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
     }

@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
 	private static final String LOGIN_USER = "user";
 
 	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
+	protected void doGet(HttpRequest request, HttpResponse response) {
 		Session session = request.getSession();
 		Optional<Object> sessionAttribute = session.getAttribute(LOGIN_USER);
 
@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
 	}
 
 	@Override
-	public void doPost(HttpRequest request, HttpResponse response) {
+	protected void doPost(HttpRequest request, HttpResponse response) {
 		String account = request.getQueryString("account");
 		String password = request.getQueryString("password");
 

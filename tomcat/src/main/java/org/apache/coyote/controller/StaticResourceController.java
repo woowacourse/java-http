@@ -12,7 +12,7 @@ public class StaticResourceController extends AbstractController {
 	private static final String NOT_FOUND_HTML = "404.html";
 
 	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
+	protected void doGet(HttpRequest request, HttpResponse response) {
 		try {
 			String responseBody = StaticResourceUtil.getContent(request.getUrl());
 			response.setStatus(HttpStatus.OK);

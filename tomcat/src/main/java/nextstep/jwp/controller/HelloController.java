@@ -10,7 +10,7 @@ import org.apache.coyote.http11.http.header.HttpHeader;
 public class HelloController extends AbstractController {
 
 	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
+	protected void doGet(HttpRequest request, HttpResponse response) {
 		response.setStatus(HttpStatus.OK);
 		response.setBody("Hello world!");
 		response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.value());

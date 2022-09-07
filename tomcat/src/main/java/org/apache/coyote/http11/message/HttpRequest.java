@@ -3,7 +3,10 @@ package org.apache.coyote.http11.message;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -12,32 +15,36 @@ public class HttpRequest {
     private final Map<String, String> queryParams;
     private final HttpHeaders headers;
     private final RequestBody requestBody;
+    private final HttpCookie httpCookie;
 
-    public HttpRequest(HttpMethod httpMethod, String requestUri, HttpHeaders headers, RequestBody requestBody) {
-        this(httpMethod, requestUri, Map.of(), headers, requestBody);
+    public HttpRequest(HttpMethod httpMethod, String requestUri, HttpHeaders headers, RequestBody requestBody,
+                       HttpCookie httpCookie) {
+        this(httpMethod, requestUri, Map.of(), headers, requestBody, httpCookie);
     }
 
     public HttpRequest(HttpMethod httpMethod, String requestUri, Map<String, String> queryParams, HttpHeaders headers,
-                       RequestBody requestBody) {
+                       RequestBody requestBody, HttpCookie httpCookie) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.queryParams = queryParams;
         this.headers = headers;
         this.requestBody = requestBody;
+        this.httpCookie = httpCookie;
     }
 
-    public static HttpRequest of(String startLine, HttpHeaders headers, RequestBody requestBody) throws IOException {
+    public static HttpRequest of(String startLine, HttpHeaders headers, RequestBody requestBody, HttpCookie httpCookie)
+            throws IOException {
         String[] splitLine = startLine.split(" ");
         HttpMethod httpMethod = HttpMethod.valueOf(splitLine[0]);
 
         if (!containsQueryString(startLine)) {
-            return new HttpRequest(httpMethod, splitLine[1], headers, requestBody);
+            return new HttpRequest(httpMethod, splitLine[1], headers, requestBody, httpCookie);
         }
 
         int queryDelimiterIndex = splitLine[1].indexOf("?");
         String requestUri = splitLine[1].substring(0, queryDelimiterIndex);
         String queryString = splitLine[1].substring(queryDelimiterIndex + 1);
-        return new HttpRequest(httpMethod, requestUri, toQueryMap(queryString), headers, requestBody);
+        return new HttpRequest(httpMethod, requestUri, toQueryMap(queryString), headers, requestBody, httpCookie);
     }
 
     private static boolean containsQueryString(String startLine) {
@@ -72,5 +79,16 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        String uuid = UUID.randomUUID().toString();
+        Session session = new Session(uuid);
+        SessionManager.add(session);
+        return session;
+    }
+
+    public String getJSessionId() {
+        return httpCookie.getJSessionId();
     }
 }

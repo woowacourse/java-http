@@ -10,7 +10,7 @@ import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.RequestBody;
-import org.apache.coyote.http11.message.HttpCookie;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.util.FileUtil;
 
 public class LoginHandler implements RequestHandler {
@@ -27,6 +27,10 @@ public class LoginHandler implements RequestHandler {
     }
 
     private ResponseEntity doGet(HttpRequest httpRequest) {
+        if (SessionManager.contains(httpRequest.getJSessionId())) {
+            return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML,
+                    new HttpHeaders(Map.of("Location", "/index.html")));
+        }
         return new ResponseEntity(HttpStatus.OK, FileUtil.readAllBytes(httpRequest.getRequestUri() + ".html"),
                 ContentType.HTML);
     }
@@ -42,8 +46,10 @@ public class LoginHandler implements RequestHandler {
         if (foundUser.isPresent()) {
             User user = foundUser.get();
             if (user.checkPassword(requestBody.get("password"))) {
+                final var session = httpRequest.getSession();
+                session.setAttribute("user", user);
                 Map<String, String> headers = Map.of("Location", "/index.html", "Set-Cookie",
-                        "JSESSIONID=" + HttpCookie.create());
+                        "JSESSIONID=" + session.getId());
                 return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(headers));
             }
         }

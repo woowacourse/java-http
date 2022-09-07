@@ -4,11 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.FrontRequestHandler;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpResponse;
@@ -44,7 +47,17 @@ public class Http11Processor implements Runnable, Processor {
             if (httpHeaders.containsKey("Content-Length")) {
                 requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
             }
-            final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders, requestBody);
+
+            HttpCookie httpCookie = new HttpCookie();
+            if (httpHeaders.containsKey("Cookie")) {
+                String cookieValue = httpHeaders.get("Cookie");
+                Map<String, String> cookieValueMap = Arrays.stream(cookieValue.split("; "))
+                        .map(it -> it.split("="))
+                        .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+
+                httpCookie.putAll(cookieValueMap);
+            }
+            final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders, requestBody, httpCookie);
 
             FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
             final ResponseEntity responseEntity = frontRequestHandler.handle(httpRequest);

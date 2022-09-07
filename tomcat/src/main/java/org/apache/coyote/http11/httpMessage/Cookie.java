@@ -6,16 +6,35 @@ import java.util.stream.Collectors;
 
 public class Cookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     public Cookie(Map<String, String> cookies) {
         this.cookies = cookies;
     }
 
-    public static Cookie of(String key, String value) {
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put(key, value);
-        return new Cookie(headers);
+    public static Cookie of(String cookieValue) {
+        Map<String, String> cookies = new LinkedHashMap<>();
+        String[] cookieValues = cookieValue.split("; ");
+        for (String cookie : cookieValues) {
+            putCookie(cookies, cookie);
+        }
+
+        return new Cookie(cookies);
+    }
+
+    private static void putCookie(Map<String, String> cookies, String cookie) {
+        int index = cookie.indexOf("=");
+        if (index != -1) {
+            String key = cookie.substring(0, index);
+            String value = cookie.substring(index + 1);
+            cookies.put(key, value);
+        }
+    }
+
+    public boolean hasJSessionId() {
+        return cookies.containsKey(JSESSIONID);
     }
 
     @Override

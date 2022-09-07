@@ -2,17 +2,20 @@ package org.apache.coyote.http11.httpmessage.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.coyote.http11.httpmessage.request.Headers;
 
 public class HttpResponse {
 
     private final OutputStream outputStream;
+    private final Headers headers;
     private StatusLine statusLine;
-    private Headers headers;
     private String responseBody;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
+        this.headers = new Headers(new LinkedHashMap<>());
     }
 
     public HttpResponse setStatusLine(StatusLine statusLine) {
@@ -20,8 +23,14 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse addHeader(String key, Object value) {
+        Map<String, Object> header = Map.of(key, value);
+        headers.putAll(header);
+        return this;
+    }
+
     public HttpResponse setHeaders(Headers headers) {
-        this.headers = headers;
+        this.headers.putAll(headers.getHeaders());
         return this;
     }
 

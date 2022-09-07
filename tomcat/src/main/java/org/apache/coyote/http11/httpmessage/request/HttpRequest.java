@@ -53,6 +53,10 @@ public class HttpRequest {
         return requestLine.matchHttpMethod(httpMethod) && requestLine.matchUri(uriPattern);
     }
 
+    public String getCookieValue() {
+        return (String) headers.getHeader("Cookie").orElse("");
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

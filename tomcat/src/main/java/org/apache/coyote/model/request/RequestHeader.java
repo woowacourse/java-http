@@ -8,18 +8,20 @@ public class RequestHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     public static final String COOKIE = "Cookie";
+    public static final int KEY = 0;
+    public static final int VALUE = 1;
     private final Map<String, String> requestHeader;
 
-    private RequestHeader(Map<String, String> requestHeader) {
+    private RequestHeader(final Map<String, String> requestHeader) {
         this.requestHeader = requestHeader;
     }
 
-    public static RequestHeader of(List<String> input) {
-        Map<String, String> requestHeader = new HashMap<>();
+    public static RequestHeader of(final List<String> input) {
+        final Map<String, String> requestHeader = new HashMap<>();
         for (String header : input) {
-            String[] contents = header.split(" ");
-            String key = contents[0].substring(0, contents[0].lastIndexOf(":"));
-            String value = contents[1].trim();
+            final String[] contents = header.split(" ");
+            final String key = contents[KEY].substring(KEY, contents[KEY].lastIndexOf(":"));
+            final String value = contents[VALUE].trim();
             requestHeader.put(key, value);
         }
         return new RequestHeader(requestHeader);
@@ -29,7 +31,7 @@ public class RequestHeader {
         return Integer.parseInt(requestHeader.getOrDefault(CONTENT_LENGTH, "0"));
     }
 
-    public boolean existKey(String key) {
+    public boolean existKey(final String key) {
         return requestHeader.containsKey(key);
     }
 

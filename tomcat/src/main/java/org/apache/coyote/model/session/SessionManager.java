@@ -15,8 +15,4 @@ public class SessionManager {
     public static void add(final String key, final Session session) {
         sessions.put(key, session);
     }
-
-    public static void remove(final String key) {
-        sessions.remove(key);
-    }
 }

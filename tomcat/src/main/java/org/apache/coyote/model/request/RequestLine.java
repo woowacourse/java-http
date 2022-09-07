@@ -11,6 +11,8 @@ import static org.apache.coyote.utils.RequestUtil.getParam;
 
 public class RequestLine {
 
+    public static final int METHOD_INDEX = 0;
+    public static final int PARAM_INDEX = 1;
     private final Method method;
     private final Map<String, String> queryParams;
     private final String path;
@@ -25,19 +27,15 @@ public class RequestLine {
 
     public static RequestLine of(final String readLine) {
         final List<String> requests = Arrays.asList(Objects.requireNonNull(readLine).split(" "));
-        final var method = Method.of(requests.get(0));
-        final var httpParams = getParam(requests.get(1));
-        final var path = calculatePath(requests.get(1));
+        final var method = Method.of(requests.get(METHOD_INDEX));
+        final var httpParams = getParam(requests.get(PARAM_INDEX));
+        final var path = calculatePath(requests.get(PARAM_INDEX));
         final var contentType = ContentType.getType(getExtension(path));
 
         return new RequestLine(method, httpParams, path, contentType);
     }
 
-    public boolean isEmptyParam() {
-        return queryParams.isEmpty();
-    }
-
-    public boolean checkMethod(Method method) {
+    public boolean checkMethod(final Method method) {
         return this.method.equals(method);
     }
 
@@ -51,9 +49,5 @@ public class RequestLine {
 
     public String getPath() {
         return path;
-    }
-
-    public String getContentType() {
-        return contentType;
     }
 }

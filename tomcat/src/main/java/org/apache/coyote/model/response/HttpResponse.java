@@ -11,25 +11,25 @@ public class HttpResponse {
     private final ResponseHeader responseHeader;
     private final String body;
 
-    private HttpResponse(ResponseLine responseLine, ResponseHeader responseHeader, String body) {
+    private HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader, final String body) {
         this.responseLine = responseLine;
         this.responseHeader = responseHeader;
         this.body = body;
     }
 
-    public static HttpResponse of(final String extension, final String body, ResponseLine responseLine) {
-        ResponseHeader responseHeader = createHeaders(extension, body);
+    public static HttpResponse of(final String extension, final String body, final ResponseLine responseLine) {
+        final ResponseHeader responseHeader = createHeaders(extension, body);
         return new HttpResponse(responseLine, responseHeader, body);
     }
 
-    private static ResponseHeader createHeaders(String extension, String body) {
-        Map<String, String> headers = new HashMap<>();
+    private static ResponseHeader createHeaders(final String extension, final String body) {
+        final Map<String, String> headers = new HashMap<>();
         headers.put(ResponseHeader.CONTENT_TYPE, extension);
         headers.put(ResponseHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return ResponseHeader.of(headers);
     }
 
-    public void addCookie(Cookie cookie) {
+    public void addCookie(final Cookie cookie) {
         responseHeader.addCookie(cookie);
     }
 
@@ -43,14 +43,6 @@ public class HttpResponse {
 
     private String getResponseHeaders() {
         return responseHeader.getResponseHeaders();
-    }
-
-    public ResponseLine getResponseLine() {
-        return responseLine;
-    }
-
-    public ResponseHeader getResponseHeader() {
-        return responseHeader;
     }
 
     public String getBody() {

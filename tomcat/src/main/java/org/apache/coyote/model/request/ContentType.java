@@ -16,12 +16,12 @@ public enum ContentType {
     private final String extension;
     private final String type;
 
-    ContentType(String extension, String type) {
+    ContentType(final String extension, final String type) {
         this.extension = extension;
         this.type = type;
     }
 
-    public static String getType(String extension) {
+    public static String getType(final String extension) {
         Objects.requireNonNull(extension);
         return Arrays.stream(values())
                 .filter(it -> it.extension.equals(extension))

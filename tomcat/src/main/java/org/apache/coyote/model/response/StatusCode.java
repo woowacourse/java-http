@@ -10,7 +10,7 @@ public enum StatusCode {
 
     private final String statusCode;
 
-    StatusCode(String statusCode) {
+    StatusCode(final String statusCode) {
         this.statusCode = statusCode;
     }
 

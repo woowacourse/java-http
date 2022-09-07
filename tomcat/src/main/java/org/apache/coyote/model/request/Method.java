@@ -17,11 +17,11 @@ public enum Method {
 
     private final String method;
 
-    Method(String method) {
+    Method(final String method) {
         this.method = method;
     }
 
-    public static Method of(String method) {
+    public static Method of(final String method) {
         Objects.requireNonNull(method);
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.method.equals(method))

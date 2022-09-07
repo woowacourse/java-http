@@ -14,27 +14,16 @@ public class ResponseHeader {
 
     private final Map<String, String> responseHeader;
 
-    private ResponseHeader(Map<String, String> responseHeader) {
+    private ResponseHeader(final Map<String, String> responseHeader) {
         this.responseHeader = responseHeader;
     }
 
-    public static ResponseHeader of(Map<String, String> responseHeader) {
+    public static ResponseHeader of(final Map<String, String> responseHeader) {
         return new ResponseHeader(responseHeader);
     }
 
-    public void addCookie(Cookie cookie) {
+    public void addCookie(final Cookie cookie) {
         responseHeader.put(SET_COOKIE, cookie.toString());
-    }
-
-    public String getByKey(String key) {
-        return responseHeader.get(key);
-    }
-
-    @Override
-    public String toString() {
-        return "ResponseHeader{" +
-                "responseHeader=" + responseHeader +
-                '}';
     }
 
     public String getResponseHeaders() {

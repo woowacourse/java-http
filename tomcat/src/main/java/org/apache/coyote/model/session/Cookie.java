@@ -11,10 +11,6 @@ public class Cookie {
         this.uuid = UUID.randomUUID();
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
     @Override
     public String toString() {
         return JSESSIONID + "=" + uuid.toString();

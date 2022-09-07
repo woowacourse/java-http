@@ -37,7 +37,7 @@ public class HttpRequest {
 
     private static RequestBody createBody(final BufferedReader reader, final int contentLength) {
         try {
-            char[] buffer = new char[contentLength];
+            final char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return RequestBody.of(new String(buffer));
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class HttpRequest {
         }
     }
 
-    public boolean checkMethod(Method method) {
+    public boolean checkMethod(final Method method) {
         return requestLine.checkMethod(method);
     }
 
@@ -53,7 +53,7 @@ public class HttpRequest {
         return requestLine.getQueryParams();
     }
 
-    public boolean existCookie(String cookie) {
+    public boolean existCookie(final String cookie) {
         return requestHeader.existKey(cookie);
     }
 
@@ -67,10 +67,6 @@ public class HttpRequest {
 
     public Method getHttpMethod() {
         return requestLine.getMethod();
-    }
-
-    public RequestLine getRequestLine() {
-        return requestLine;
     }
 
     public RequestHeader getRequestHeader() {

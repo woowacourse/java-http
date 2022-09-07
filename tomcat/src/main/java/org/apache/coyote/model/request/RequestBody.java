@@ -10,7 +10,7 @@ public class RequestBody {
     public static final int VALUE = 1;
     private final Map<String, String> requestBody;
 
-    private RequestBody(Map<String, String> requestBody) {
+    private RequestBody(final Map<String, String> requestBody) {
         this.requestBody = requestBody;
     }
 
@@ -21,11 +21,11 @@ public class RequestBody {
         return createBody(input);
     }
 
-    private static RequestBody createBody(String input) {
-        Map<String, String> requestBody = new HashMap<>();
-        String[] body = input.split("&");
+    private static RequestBody createBody(final String input) {
+        final Map<String, String> requestBody = new HashMap<>();
+        final String[] body = input.split("&");
         for (String value : body) {
-            String[] contents = value.split("=");
+            final String[] contents = value.split("=");
             requestBody.put(contents[KEY], contents[VALUE]);
         }
         return new RequestBody(requestBody);
@@ -33,9 +33,5 @@ public class RequestBody {
 
     public String getByKey(String key) {
         return requestBody.get(key);
-    }
-
-    public Map<String, String> getRequestBody() {
-        return requestBody;
     }
 }

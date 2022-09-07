@@ -1,6 +1,7 @@
 package org.apache.coyote.cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,5 +60,12 @@ class CookieTest {
 
         //then
         assertThat(result).isTrue();
+    }
+
+    @DisplayName("쿠키에 값이 비어있는 경우 예외처리를 한다.")
+    @Test
+    void invalidCookieValue() {
+        assertThatThrownBy(() -> Cookie.from("JSESSIONID="))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

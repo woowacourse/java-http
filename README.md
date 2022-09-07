@@ -30,3 +30,8 @@
 - Session 구현
     - [x] 로그인된 상태(JSESSIONID가 존재하는 경우)에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트
     - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장
+
+### 3단계 
+- [ ] HttpRequest 클래스 생성
+- [ ] HttpResponse 클래스 생성
+- [ ] Controller 인터페이스 생성

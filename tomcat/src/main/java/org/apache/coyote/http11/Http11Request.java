@@ -7,49 +7,49 @@ import java.io.InputStreamReader;
 
 public class Http11Request {
 
-    private static final int REQUEST_METHOD_INDEX = 0;
-    private static final int REQUEST_URL_INDEX = 1;
+    private final RequestStartLine startLine;
+    private final RequestHead requestHead;
+    private final String requestBody;
 
-    private final RequestMethod requestMethod;
-    private final String requestUrl;
-
-    private Http11Request(String requestMethod, String requestUrl) {
-        this(RequestMethod.find(requestMethod), requestUrl);
-    }
-
-    private Http11Request(RequestMethod requestMethod, String requestUrl) {
-        this.requestMethod = requestMethod;
-        this.requestUrl = requestUrl;
+    private Http11Request(RequestStartLine startLine, RequestHead requestHead, String requestBody) {
+        this.startLine = startLine;
+        this.requestHead = requestHead;
+        this.requestBody = requestBody;
     }
 
     public static Http11Request of(final InputStream inputStream) throws IOException {
-        final String startLine = getStartLine(inputStream);
-        final String[] startLineParts = startLine.split(" ");
-        validateUrl(startLineParts);
-        return new Http11Request(startLineParts[REQUEST_METHOD_INDEX], startLineParts[REQUEST_URL_INDEX]);
-    }
-
-    private static String getStartLine(InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        RequestStartLine startLine = RequestStartLine.from(getStartLine(bufferedReader));
+        RequestHead requestHeaders = RequestHead.of(bufferedReader);
+        String requestBody = getRequestBody(bufferedReader, requestHeaders.getContentLength());
+        return new Http11Request(startLine, requestHeaders, requestBody);
+    }
+
+    private static String getStartLine(final BufferedReader bufferedReader) throws IOException {
         return bufferedReader.readLine().trim();
     }
 
-    private static void validateUrl(String[] startLineParts) {
-        if (startLineParts[REQUEST_URL_INDEX] == null) {
-            throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
-        }
+    private static String getRequestBody(BufferedReader bufferedReader, int contentLength)
+            throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public boolean isGetMethod() {
-        return requestMethod.equals(RequestMethod.GET);
+        return startLine.isGetMethod();
     }
 
     public boolean isPostMethod() {
-        return requestMethod.equals(RequestMethod.POST);
+        return startLine.isPostMethod();
     }
 
     public String getRequestUrl() {
-        return requestUrl;
+        return startLine.getRequestUrl();
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

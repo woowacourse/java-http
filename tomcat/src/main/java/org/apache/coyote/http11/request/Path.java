@@ -27,10 +27,6 @@ public class Path {
         return value.substring(EXCLUDE_SLASH_INDEX);
     }
 
-    public String value() {
-        return value;
-    }
-
     public boolean checkRequest(String path) {
         return value.equals(path);
     }

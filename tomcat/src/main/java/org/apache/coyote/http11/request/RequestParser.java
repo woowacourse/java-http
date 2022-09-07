@@ -32,8 +32,8 @@ public class RequestParser {
     private static List<String> readRequestHeaders(BufferedReader bufferedReader) throws IOException {
         String line;
         List<String> requestHeaders = new ArrayList<>();
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
-            requestHeaders.add(line);
+        while (bufferedReader.ready()) {
+            requestHeaders.add(bufferedReader.readLine());
         }
         return requestHeaders;
     }

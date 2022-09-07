@@ -34,21 +34,22 @@ public class QueryParameters {
         return values.get(PASSWORD);
     }
 
-    private static void putKeyValues(String[] eachQueryParameters) {
-
-    }
-
     private static Map<String, String> processQueryParameters(String uri) {
         Map<String, String> queryParameters = new HashMap<>();
+
         int queryParameterIndex = uri.indexOf("?");
         if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
             String queryParameter = uri.substring(queryParameterIndex + 1);
-            String[] eachQueryParameters = queryParameter.split("&");
-            for (String q : eachQueryParameters) {
-                String[] keyValues = q.split("=");
-                queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
-            }
+            putKeyValues(queryParameters, queryParameter);
         }
         return queryParameters;
+    }
+
+    private static void putKeyValues(Map<String, String> queryParameters, String queryParameter) {
+        String[] eachQueryParameters = queryParameter.split("&");
+        for (String q : eachQueryParameters) {
+            String[] keyValues = q.split("=");
+            queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
+        }
     }
 }

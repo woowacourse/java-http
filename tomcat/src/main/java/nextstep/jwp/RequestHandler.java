@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import java.io.IOException;
+import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.MainController;
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.service.UserService;
@@ -19,6 +20,7 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final MainController mainController = new MainController();
     private final UserController userController = new UserController();
+    private final LoginController loginController = new LoginController();
 
     public HttpResponse process(final HttpRequest request) {
         try {
@@ -37,7 +39,7 @@ public class RequestHandler {
             return mainController.index();
         }
         if (request.getUrl().equals(URL_LOGIN)) {
-            return userController.login(request);
+            return loginController.login(request);
         }
         if (request.getUrl().equals(URL_REGISTER)) {
             return userController.register(request);

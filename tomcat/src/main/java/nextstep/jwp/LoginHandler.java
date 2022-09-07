@@ -4,14 +4,18 @@ import static org.apache.coyote.http11.StatusCode.FOUND;
 import static org.apache.coyote.http11.StatusCode.OK;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11QueryParams;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,34 +26,46 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
     @Override
     public Http11Response apply(Http11Request request) {
         if (request.isGetMethod()) {
-            return Http11Response.of(OK, "/login.html");
+            return getLoginPageResponse(request);
         }
 
-        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestUrl());
-        if (request.isPostMethod() && isLoginSuccess(queryParams)) {
-            return getLoginResponse(request);
+        if (request.isPostMethod() && successLogin(request)) {
+            User user = getUser(request);
+            log.info(user.toString());
+            UUID uuid = UUID.randomUUID();
+            startSession(user, uuid);
+            HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", uuid.toString()));
+            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
         }
         return Http11Response.withLocation(FOUND, "/login.html", "/401.html");
     }
 
-    private boolean isLoginSuccess(Http11QueryParams queryParams) {
+    private Http11Response getLoginPageResponse(Http11Request request) {
+        if (request.hasNoJsessionIdCookie()) {
+            return Http11Response.of(OK, "/login.html");
+        }
+        return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
+    }
+
+    private boolean successLogin(Http11Request request) {
+        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
         final String account = queryParams.getValueFrom("account");
         final String password = queryParams.getValueFrom("password");
 
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
-            return true;
-        }
-        return false;
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        return user.isPresent() && user.get().checkPassword(password);
     }
 
-    private static Http11Response getLoginResponse(Http11Request request) {
-        if (request.hasNoJssesionIdCookie()) {
-            HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", UUID.randomUUID().toString()));
-            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
-        }
-        return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
+    private static User getUser(Http11Request request) {
+        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
+        final String account = queryParams.getValueFrom("account");
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(NotFoundUserException::new);
+    }
+
+    private static void startSession(User user, UUID uuid) {
+        Session session = new Session(uuid);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
     }
 }

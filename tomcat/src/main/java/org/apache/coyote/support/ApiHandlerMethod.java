@@ -68,7 +68,9 @@ public enum ApiHandlerMethod {
         private void loginSuccessEvent(final BufferedWriter bufferedWriter, final HttpRequest request, final User user) {
             // 이미 기 세션이 있다면 지울 것!
             final Session alreadyExistSession = request.getSession(false);
-            SessionManager.remove(alreadyExistSession);
+            if (alreadyExistSession != null) {
+                SessionManager.remove(alreadyExistSession);
+            }
 
             // TODO login 폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
             final Session session = request.getSession(true);

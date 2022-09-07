@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class HttpCookie {
 
-    private static final String COOKIES_DELIMITER = ": ";
+    private static final String COOKIES_DELIMITER = "; ";
     private static final String COOKIE_DELIMITER = "=";
     private static final int KEY = 0;
     private static final int VALUE = 1;
@@ -47,6 +47,23 @@ public class HttpCookie {
 
     public boolean hasSessionId() {
         return cookies.containsKey(SESSION_ID);
+    }
+
+    public String toMessage() {
+        final StringBuilder message = new StringBuilder();
+        for (Map.Entry<String, String> entry : cookies.entrySet()) {
+            message.append(entry.getKey())
+                .append(COOKIE_DELIMITER)
+                .append(entry.getValue())
+                .append(COOKIES_DELIMITER);
+        }
+        excludeLastEmpty(message);
+        return new String(message);
+    }
+
+    private void excludeLastEmpty(final StringBuilder message) {
+        message.deleteCharAt(message.length() - 1);
+        message.deleteCharAt(message.length() - 1);
     }
 
     public String getSessionId() {

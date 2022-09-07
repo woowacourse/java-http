@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.common;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -19,7 +21,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders request(final List<String> messages) {
-        final Map<HeaderKeys, String> headers = new LinkedHashMap<>();
+        final Map<HeaderKeys, String> headers = new HashMap<>();
         HttpCookie cookie = HttpCookie.empty();
         for (final String message : messages) {
             final String[] headerElement = message.split(KEY_VALUE_DELIMITER);
@@ -33,7 +35,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders response() {
-        return new HttpHeaders(new LinkedHashMap<>(), HttpCookie.empty());
+        return new HttpHeaders(new HashMap<>(), HttpCookie.empty());
     }
 
     public HttpHeaders add(final HeaderKeys key, final String value) {
@@ -52,8 +54,8 @@ public class HttpHeaders {
 
     public String toMessage() {
         final StringBuilder message = new StringBuilder();
-        for (Map.Entry<HeaderKeys, String> entry : headers.entrySet()) {
-            message.append(entry.getKey().getName())
+        for (Map.Entry<String, String> entry : getAllHeaders().entrySet()) {
+            message.append(entry.getKey())
                 .append(KEY_VALUE_DELIMITER)
                 .append(entry.getValue())
                 .append(HttpMessageDelimiter.WORD.getValue())
@@ -61,6 +63,18 @@ public class HttpHeaders {
         }
         excludeLastEmpty(message);
         return new String(message);
+    }
+
+    private Map<String, String> getAllHeaders() {
+        final Map<String, String> allHeaders = headers.entrySet().stream()
+            .collect(Collectors.toMap(
+                header -> header.getKey().getName(),
+                Map.Entry::getValue
+            ));
+        if (cookie.hasSessionId()) {
+            allHeaders.put(HeaderKeys.SET_COOKIE.getName(), cookie.toMessage());
+        }
+        return allHeaders;
     }
 
     private void excludeLastEmpty(final StringBuilder message) {

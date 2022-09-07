@@ -71,7 +71,7 @@ public class AuthController implements Controller {
             LOGGER.info(user.get().toString());
 
             final Session session = SessionManager.add(HttpCookie.makeJSESSIONID());
-            session.addAttribute("user", user);
+            session.addAttribute("user", user.get());
             return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, REDIRECT_URL).setCookie(session);
         }
         return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, "/401.html");

@@ -9,8 +9,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.LoginResult;
+import nextstep.jwp.model.StatusLine;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.Parameters;
@@ -26,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String PASSWORD = "password";
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final User EMPTY_USER = new User(null, null, null);
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
 
@@ -48,15 +54,30 @@ public class Http11Processor implements Runnable, Processor {
             final String path = rewrite(getPath(uri));
             final Parameters queryParameters = Parameters.fromUri(uri);
 
-            writeLogging(path, queryParameters);
-
-            final String response = getResponse(path);
-
+            final String response = handle(path, queryParameters);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String handle(final String path, final Parameters parameters) throws IOException {
+        StatusLine statusLine = new StatusLine(HTTP_VERSION, "200", "OK");
+        final Map<String, String> headers = new HashMap<>();
+
+        if (path.equals(LOGIN_PAGE_URL)) {
+            final LoginResult loginResult = LoginResult
+                    .from(getUser(parameters.get(ACCOUNT)), parameters.get(PASSWORD));
+            headers.put("Location", loginResult.getLocation());
+            statusLine = new StatusLine(HTTP_VERSION, loginResult.getStatusCode(), loginResult.getReasonPhrase());
+        }
+
+        final String responseBody = getResponseBody(path);
+        headers.put("contentType", getContentType(path) + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        return getResponse(path, statusLine, headers);
     }
 
     private String getUri(final BufferedReader bufferedReader) throws IOException {
@@ -75,14 +96,19 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private String getResponse(final String path) throws IOException {
-        final String contentType = getContentType(path);
+    private String getResponse(final String path, final StatusLine statusLine, final Map<String, String> headers)
+            throws IOException {
         final String responseBody = getResponseBody(path);
+        headers.put("contentType", getContentType(path) + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        final String header = headers.keySet().stream()
+                .map(it -> it + ": " + headers.get(it))
+                .collect(Collectors.joining("\r\n"));
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                statusLine.getResponse() + " ",
+                header,
                 "",
                 responseBody);
     }
@@ -95,13 +121,6 @@ public class Http11Processor implements Runnable, Processor {
         return readFile(path);
     }
 
-    private void writeLogging(final String path, final Parameters parameters) {
-        if (path.equals(LOGIN_PAGE_URL)) {
-            final User user = getUser(parameters.get(ACCOUNT));
-            loggingAccount(user, parameters);
-        }
-    }
-
     private User getUser(final String account) {
         if (account == null || account.isBlank()) {
             return EMPTY_USER;
@@ -112,13 +131,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IllegalArgumentException e) {
             log.info(e.getMessage());
             return EMPTY_USER;
-        }
-    }
-
-    private void loggingAccount(final User user, final Parameters parameters) {
-        final String password = parameters.get(PASSWORD);
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
         }
     }
 

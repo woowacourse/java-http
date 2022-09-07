@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class Path {
 
@@ -27,12 +27,11 @@ public class Path {
         return value.substring(EXCLUDE_SLASH_INDEX);
     }
 
-    public String extractContentType() {
-        ContentType contentType = ContentType.findContentType(value);
-        return contentType.name().toLowerCase();
-    }
-
     public String value() {
         return value;
+    }
+
+    public boolean checkRequest(String path) {
+        return value.equals(path);
     }
 }

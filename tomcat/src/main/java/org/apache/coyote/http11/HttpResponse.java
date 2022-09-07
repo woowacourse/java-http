@@ -1,55 +1,73 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
-import static org.apache.coyote.http11.HttpStatus.OK;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.Collections;
 
 public class HttpResponse {
 
-    private static final String DEFAULT_BODY = "Hello world!";
+    private StatusLine statusLine;
+    private HttpHeaders httpHeaders;
+    private String body;
 
-    private final String body;
-
-    public HttpResponse(final String body) {
-        this.body = body;
+    public HttpResponse() {
+        statusLine = new StatusLine(HttpStatus.OK);
+        httpHeaders = new HttpHeaders(Collections.emptyMap());
+        body = "";
     }
 
-    public static HttpResponse of(final Optional<URI> uri) throws URISyntaxException, IOException {
-        if (uri.isEmpty()) {
-            return defaultResponse();
+    public String makeResponse() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(statusLine.getStatusLine()).append(" \r\n")
+                .append(httpHeaders.toTextHeader()).append("\r\n")
+                .append(body);
+
+        return sb.toString();
+    }
+
+    public void setStatus(final HttpStatus httpStatus) {
+        this.statusLine = new StatusLine(httpStatus);
+    }
+
+    public void setBody(final String value) {
+        body += value;
+        httpHeaders.setContentType("text/html");
+        httpHeaders.setContentLength(body.length());
+    }
+
+    public void setBody(final String value, final String contentType, final int contentLength) {
+        body += value;
+        httpHeaders.setContentType(contentType);
+        httpHeaders.setContentLength(contentLength);
+    }
+
+    public void setView(final String viewName) {
+        URI uri = null;
+        try {
+            uri = getClass().getClassLoader().getResource("static/" + viewName + ".html").toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
-        final Path path = Paths.get(uri.get());
-        final byte[] bytes = Files.readAllBytes(path);
-        final String contentType = Files.probeContentType(path);
-        final String response = makeResponse(contentType, bytes);
+        final Path path = Paths.get(uri);
 
-        return new HttpResponse(response);
-    }
+        byte[] bytes = null;
+        try {
+            bytes = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    private static String makeResponse(final String contentType, final byte[] bytes) {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 " + OK.toStatusFormat(),
-                CONTENT_TYPE.getValue() + ": " + contentType + ";charset=utf-8 ",
-                CONTENT_LENGTH.getValue() + ": " + bytes.length + " ",
-                "",
-                new String(bytes));
-        return response;
-    }
-
-    private static HttpResponse defaultResponse() {
-        final String response = makeResponse("text/html", DEFAULT_BODY.getBytes());
-        return new HttpResponse(response);
-    }
-
-    public String getBody() {
-        return body;
+        String contentType = null;
+        try {
+            contentType = Files.probeContentType(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        setBody(new String(bytes), contentType, bytes.length);
     }
 }

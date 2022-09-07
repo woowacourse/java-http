@@ -52,6 +52,10 @@ public class Headers {
         return this;
     }
 
+    public HttpCookie getCookie() {
+        return HttpCookie.from(value.get("Cookie"));
+    }
+
     public String getHeaders() {
         return value.entrySet()
                 .stream()

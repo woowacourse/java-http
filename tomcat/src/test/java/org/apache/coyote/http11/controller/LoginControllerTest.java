@@ -23,7 +23,7 @@ class LoginControllerTest {
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -42,7 +42,7 @@ class LoginControllerTest {
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -55,12 +55,28 @@ class LoginControllerTest {
     }
 
     @Test
+    void pageAfterLogin() {
+        String httpRequest = HttpMessageFactory.getWithCookie("/login");
+
+        BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+
+        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusLine().getStatusLine())
+                        .isEqualTo("HTTP/1.1 302 Found "),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Location"))
+                        .isEqualTo("/index.html")
+        );
+    }
+
+    @Test
     void wrongPassword() {
         String httpRequest = HttpMessageFactory.post("/login", "account=gugu&password=wrong");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -76,7 +92,7 @@ class LoginControllerTest {
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
-        HttpResponse httpResponse = ((Controller) CONTROLLER).service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())

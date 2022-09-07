@@ -9,6 +9,7 @@ import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.apache.coyote.http11.http.domain.Headers;
+import org.apache.coyote.http11.http.domain.HttpCookie;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
@@ -54,7 +55,16 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
+        HttpCookie cookie = httpRequest.getHeaders().getCookie();
+        if (cookie.containsJSESSIONID()) {
+            return HttpResponse.found(
+                    Headers.builder()
+                            .location("/index.html"),
+                    new MessageBody(""));
+        }
+        String uri = httpRequest.getRequestLine()
+                .getRequestTarget()
+                .getUri();
         String responseBody = FileReader.read(uri + ".html");
         return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }

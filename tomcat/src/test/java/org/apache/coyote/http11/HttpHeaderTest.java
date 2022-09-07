@@ -16,7 +16,7 @@ class HttpHeaderTest {
                 "Content-Length: 12 ",
                 ""));
 
-        assertThat(httpHeader.getResponseHeader(StatusCode.OK, "Hello world!".getBytes().length, null))
+        assertThat(httpHeader.getResponseHeader(StatusCode.OK, "/", "Hello world!".getBytes().length, null))
                 .isEqualTo(String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 ",

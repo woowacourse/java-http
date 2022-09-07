@@ -131,6 +131,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Location: /index.html \r\n"+
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -168,6 +169,7 @@ class Http11ProcessorTest {
                 cookie + "\r\n"+
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
@@ -175,7 +177,7 @@ class Http11ProcessorTest {
 
     @DisplayName("로그인이 성공하면 session이 정상적으로 생성되고, sessionId가 session에 저장되어있는지 검증한다.")
     @Test
-    void userLoginValidateSession() throws IOException {
+    void userLoginValidateSession() {
         //given
         final String httpRequest = String.join("\r\n",
                 "POST /login?account=gugu&password=password HTTP/1.1 ",
@@ -229,6 +231,7 @@ class Http11ProcessorTest {
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
@@ -258,9 +261,10 @@ class Http11ProcessorTest {
         final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         var expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " ",
+                "Location: /401.html ",
                 "",
                 content);
 
@@ -291,9 +295,10 @@ class Http11ProcessorTest {
         final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         var expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
+                "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " ",
+                "Location: /401.html ",
                 "",
                 content);
 

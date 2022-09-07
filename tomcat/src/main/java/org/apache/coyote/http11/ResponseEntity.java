@@ -38,7 +38,7 @@ public class ResponseEntity {
             this.body = getContent(path);
         }
 
-        final String header = httpHeader.getResponseHeader(statusCode, body.getBytes().length, cookie);
+        final String header = httpHeader.getResponseHeader(statusCode, path, body.getBytes().length, cookie);
         return String.join("\r\n", header, body);
     }
 

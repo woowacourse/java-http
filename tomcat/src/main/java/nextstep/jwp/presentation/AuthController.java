@@ -41,7 +41,8 @@ public class AuthController implements Controller {
                 return new ResponseEntity(StatusCode.OK, LOGIN_URL);
             }
             if (session.hasAttribute("user")) {
-                return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, REDIRECT_URL).setCookie(session);
+                return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, REDIRECT_URL)
+                        .setCookie(session);
             }
         }
 
@@ -73,7 +74,7 @@ public class AuthController implements Controller {
             session.addAttribute("user", user);
             return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, REDIRECT_URL).setCookie(session);
         }
-        return new ResponseEntity(StatusCode.UNAUTHORIZED, "/401.html");
+        return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, "/401.html");
     }
 
     private ResponseEntity register(final HttpHeader httpHeader, final HttpBody httpBody) {

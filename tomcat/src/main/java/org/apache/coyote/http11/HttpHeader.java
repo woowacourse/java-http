@@ -7,6 +7,7 @@ public class HttpHeader {
 
     private static final String EXTENSION_DELIMITER = ".";
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String NEW_LINE = "\r\n";
 
     private final String requestStartLine;
     private final Map<String, String> requestHeaders;
@@ -16,28 +17,45 @@ public class HttpHeader {
         this.requestHeaders = PairConverter.toMap(requestHeaders, "\n", ": ");
     }
 
-    public String getResponseHeader(final StatusCode statusCode, final int contentLength, final String cookie) {
-        if (getMethod().equals("POST") && getUrl().startsWith("/login")
-                && statusCode.isEqual(StatusCode.MOVED_TEMPORARILY)) {
-            return responseCookieIfNotExist(statusCode, contentLength, cookie);
+    public String getResponseHeader(final StatusCode statusCode,
+                                    final String path,
+                                    final int contentLength, final String cookie) {
+        if (isValidLoginRequest(path) && statusCode.isEqual(StatusCode.MOVED_TEMPORARILY)) {
+            return responseWithJSESIONID(statusCode, path, contentLength, cookie);
         }
-        return responseWithOutJSESIONID(statusCode, contentLength);
+        return responseWithOutJSESIONID(statusCode, path, contentLength);
     }
 
-    private String responseCookieIfNotExist(final StatusCode statusCode, final int contentLength, String cookie) {
+    private boolean isValidLoginRequest(final String path) {
+        return getMethod().equals("POST")
+                && getUrl().startsWith("/login")
+                && path.startsWith("/index");
+    }
+
+    private String responseWithJSESIONID(final StatusCode statusCode,
+                                            final String path,
+                                            final int contentLength, String cookie) {
         if (hasJSESSIONID() && getJSESSIONID().equals(cookie)) {
-            return responseWithOutJSESIONID(statusCode, contentLength);
+            return responseWithOutJSESIONID(statusCode, path, contentLength);
         }
         if (cookie == null) {
             throw new RuntimeException("cookie가 존재하지 않습니다.");
         }
 
-        return String.join("\r\n",
+        return String.join(NEW_LINE,
                 HTTP_VERSION + statusCode.getStatusMessage(),
                 "Set-Cookie: JSESSIONID=" + cookie,
                 "Content-Type: " + getResponseContentType().getMIMEType() + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
-                "");
+                locationHeader(statusCode, path)
+        );
+    }
+
+    private String locationHeader(final StatusCode statusCode, final String path) {
+        if (statusCode.isEqual(StatusCode.MOVED_TEMPORARILY)) {
+            return "Location: " + path + " " + NEW_LINE;
+        }
+        return "";
     }
 
     public boolean hasJSESSIONID() {
@@ -60,12 +78,12 @@ public class HttpHeader {
         throw new RuntimeException("JSESSIONID가 없습니다.");
     }
 
-    private String responseWithOutJSESIONID(final StatusCode statusCode, final int contentLength) {
-        return String.join("\r\n",
+    private String responseWithOutJSESIONID(final StatusCode statusCode, final String path, final int contentLength) {
+        return String.join(NEW_LINE,
                 HTTP_VERSION + statusCode.getStatusMessage(),
                 "Content-Type: " + getResponseContentType().getMIMEType() + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
-                "");
+                locationHeader(statusCode, path));
     }
 
     private ContentType getResponseContentType() {

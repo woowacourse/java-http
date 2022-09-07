@@ -2,7 +2,8 @@ package org.apache.coyote.http11.http11handler.login;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.model.user.User;
+import nextstep.jwp.model.user.exception.UserNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

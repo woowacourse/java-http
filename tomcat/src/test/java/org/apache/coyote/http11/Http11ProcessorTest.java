@@ -257,7 +257,7 @@ class Http11ProcessorTest {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
 
-        assertThat(message).isEqualTo(user.toString());
+        assertThat(message).isEqualTo("User : " + user);
         assertThat(level).isEqualTo(INFO);
     }
 
@@ -427,7 +427,7 @@ class Http11ProcessorTest {
         final HttpResponse response = LoginHandler.login(httpRequest);
 
         final Cookie cookie = response.getCookie();
-        final Session session = SessionManager.findSession(cookie.getValue()).orElseThrow();
+        final Session session = SessionManager.findSession(cookie.getValue());
 
 
         final String httpRequestMessage = String.join("\r\n",

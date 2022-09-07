@@ -2,7 +2,6 @@ package org.apache.coyote.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class SessionManager {
 
@@ -15,10 +14,10 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Optional<Session> findSession(final String id) {
+    public static Session findSession(final String id) {
         if (SESSIONS.containsKey(id)) {
-            return Optional.of(SESSIONS.get(id));
+            return SESSIONS.get(id);
         }
-        return Optional.empty();
+        throw new IllegalArgumentException("올바르지 않은 세션 ID 입니다.");
     }
 }

@@ -47,7 +47,7 @@ class LoginHandlerTest {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
 
-        assertThat(message).isEqualTo(user.toString());
+        assertThat(message).isEqualTo("User : " + user);
         assertThat(level).isEqualTo(INFO);
     }
 
@@ -121,7 +121,7 @@ class LoginHandlerTest {
 
         //then
         final Cookie cookie = response.getCookie();
-        final Session session = SessionManager.findSession(cookie.getValue()).orElseThrow();
+        final Session session = SessionManager.findSession(cookie.getValue());
         final User user = (User) session.getAttribute("user");
         assertThat(user.getAccount()).isEqualTo(account);
     }

@@ -45,10 +45,8 @@ public class LoginHandler {
                 .orElseThrow(NoSuchUserException::new);
 
         if (user.checkPassword(password)) {
-            final String userInformation = user.toString();
-            log.info(userInformation);
+            log.info("User : {}", user);
             final Session session = saveUserInSession(user);
-
             return makeLoginSuccessResponse(request, session);
         }
 
@@ -56,11 +54,9 @@ public class LoginHandler {
     }
 
     private static void handleSession(Cookie cookie) {
-        final Optional<Session> session = SessionManager.findSession(cookie.getValue());
-        if (session.isPresent()) {
-            final User user = (User) session.get().getAttribute("user");
-            log.info("User : {}", user);
-        }
+        final Session session = SessionManager.findSession(cookie.getValue());
+        final User user = (User) session.getAttribute("user");
+        log.info("User : {}", user);
     }
 
     private static Session saveUserInSession(User user) {

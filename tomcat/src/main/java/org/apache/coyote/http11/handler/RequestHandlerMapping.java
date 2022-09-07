@@ -20,7 +20,6 @@ public class RequestHandlerMapping {
         handlers.put(new HttpRequest("/login", "POST"), new AuthController());
         handlers.put(new HttpRequest("/login.html", "GET"), new AuthController());
         handlers.put(new HttpRequest("/login", "GET"), new AuthController());
-
         handlers.put(new HttpRequest("/index.html", "GET"), new DashBoardController());
         handlers.put(new HttpRequest("/", "GET"), new HomeController());
         handlers.put(new HttpRequest("/register.html", "GET"), new AuthController());
@@ -31,12 +30,12 @@ public class RequestHandlerMapping {
 
     public static Controller getHandler(String startLine) {
         final String method = getMethod(startLine);
-        final String uri= getUri(startLine);
+        final String url = getUri(startLine);
 
-        if (isHandler(uri, method)) {
+        if (isHandler(url, method)) {
             return handlers.keySet()
                     .stream()
-                    .filter(httpRequest -> httpRequest.equals(new HttpRequest(uri, method)))
+                    .filter(httpRequest -> httpRequest.equals(new HttpRequest(url, method)))
                     .map(httpRequest -> handlers.get(httpRequest))
                     .findAny()
                     .orElseThrow(NoHandlerFoundException::new);

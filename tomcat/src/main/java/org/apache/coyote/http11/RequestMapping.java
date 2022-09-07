@@ -11,14 +11,14 @@ import org.apache.coyote.HttpRequest;
 
 public class RequestMapping {
 
-    private static final Map<String, Controller> requestMapping;
+    private static final Map<String, Controller> REQUEST_MAPPING;
 
     private static final String WELCOME_PAGE_PATH = "/";
     private static final String LOGIN_PAGE_PATH = "/login";
     private static final String REGISTER_PAGE_PATH = "/register";
 
     static {
-        requestMapping = Map.of(
+        REQUEST_MAPPING = Map.of(
                 WELCOME_PAGE_PATH, WelcomeController.getInstance(),
                 LOGIN_PAGE_PATH, LoginController.getInstance(),
                 REGISTER_PAGE_PATH, RegisterController.getInstance()
@@ -29,7 +29,7 @@ public class RequestMapping {
     }
 
     public static Controller findController(final HttpRequest request) {
-        return requestMapping.entrySet()
+        return REQUEST_MAPPING.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().equals(request.getPath()))
                 .map(Entry::getValue)

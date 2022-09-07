@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final LoginController instance = new LoginController();
+    private static final LoginController INSTANCE = new LoginController();
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
     }
 
     public static LoginController getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class LoginController extends AbstractController {
         } catch (final UnauthorizedException unauthorizedException) {
             redirectNoAuth(response);
         } catch (final RuntimeException runtimeException) {
-            log.error(runtimeException.getMessage());
+            LOG.error(runtimeException.getMessage());
         }
 
         response.setBody(StaticResource.ofRequest(request));
@@ -85,7 +85,7 @@ public class LoginController extends AbstractController {
 
     private void logSuccessMessage(final User user) {
         final String msg = user.toString();
-        log.info(msg);
+        LOG.info(msg);
     }
 
     private void setLoginSession(final HttpRequest request, final HttpResponse response, final User user) {

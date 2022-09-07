@@ -9,7 +9,7 @@ public class HttpHeaders {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
+    public static final String COOKIE = "Cookie";
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String EMPTY_STRING = "";

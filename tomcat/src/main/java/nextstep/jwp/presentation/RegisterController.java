@@ -12,15 +12,15 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
-    private static final RegisterController instance = new RegisterController();
+    private static final RegisterController INSTANCE = new RegisterController();
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
 
     private RegisterController() {
     }
 
     public static RegisterController getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RegisterController extends AbstractController {
             InMemoryUserRepository.save(new User(account, password, email));
             redirectIndex(response);
         } catch (final RuntimeException e) {
-            log.error(e.getMessage());
+            LOG.error(e.getMessage());
             redirectRegister(response);
         }
     }

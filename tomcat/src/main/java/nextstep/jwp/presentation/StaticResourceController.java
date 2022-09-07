@@ -6,13 +6,13 @@ import org.apache.coyote.HttpResponse;
 
 public class StaticResourceController extends AbstractController {
 
-    private static final StaticResourceController instance = new StaticResourceController();
+    private static final StaticResourceController INSTANCE = new StaticResourceController();
 
     private StaticResourceController() {
     }
 
     public static StaticResourceController getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     @Override

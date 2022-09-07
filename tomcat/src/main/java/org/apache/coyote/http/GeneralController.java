@@ -1,6 +1,6 @@
 package org.apache.coyote.http;
 
-public class GeneralServlet implements Servlet {
+public class GeneralController implements Controller {
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {

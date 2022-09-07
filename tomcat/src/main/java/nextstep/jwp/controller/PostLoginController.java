@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet;
+package nextstep.jwp.controller;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -8,15 +8,15 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestBody;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.Servlet;
+import org.apache.coyote.http.Controller;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PostLoginServlet implements Servlet {
+public class PostLoginController implements Controller {
 
-    private final static Logger log = LoggerFactory.getLogger(PostLoginServlet.class);
+    private final static Logger log = LoggerFactory.getLogger(PostLoginController.class);
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {

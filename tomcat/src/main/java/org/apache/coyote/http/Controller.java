@@ -1,6 +1,6 @@
 package org.apache.coyote.http;
 
-public interface Servlet {
+public interface Controller {
 
     HttpResponse doService(HttpRequest httpRequest);
 

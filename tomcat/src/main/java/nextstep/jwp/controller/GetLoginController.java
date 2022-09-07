@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -7,11 +7,11 @@ import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.Servlet;
+import org.apache.coyote.http.Controller;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 
-public class GetLoginServlet implements Servlet {
+public class GetLoginController implements Controller {
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {

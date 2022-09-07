@@ -1,11 +1,11 @@
-package nextstep.jwp.servlet;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.Servlet;
+import org.apache.coyote.http.Controller;
 
-public class GetHomeServlet implements Servlet {
+public class GetHomeController implements Controller {
 
     private static final String WELCOME_MESSAGE = "Hello world!";
 

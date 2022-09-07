@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http.AbstractController;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.controller;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

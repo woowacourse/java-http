@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.IndexController;
-import org.apache.coyote.http.RequestMapping;
+import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

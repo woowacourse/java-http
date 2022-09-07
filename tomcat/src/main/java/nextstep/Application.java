@@ -6,7 +6,7 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http.RequestMapping;
+import org.apache.coyote.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

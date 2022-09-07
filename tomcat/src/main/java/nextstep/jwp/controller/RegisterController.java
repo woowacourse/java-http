@@ -2,19 +2,24 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.AbstractController;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestBody;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
-import org.apache.coyote.http.Controller;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 
-public class PostRegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        return HttpResponse.init(HttpStatusCode.OK)
+                .setBodyByPath("/register.html");
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         final HttpRequestBody requestBody = httpRequest.getRequestBody();
 
         final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
@@ -27,13 +32,5 @@ public class PostRegisterController implements Controller {
         return HttpResponse.init(HttpStatusCode.FOUND)
                 .setLocationAsHome()
                 .addCookie("JSESSIONID", session.getId());
-    }
-
-    @Override
-    public boolean isMatch(final HttpRequest httpRequest) {
-        final HttpMethod httpMethod = httpRequest.getHttpMethod();
-        final String path = httpRequest.getPath();
-
-        return httpMethod.isPost() && path.contains("register");
     }
 }

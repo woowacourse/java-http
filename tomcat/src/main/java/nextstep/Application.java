@@ -1,10 +1,10 @@
 package nextstep;
 
-import nextstep.jwp.controller.GetHomeController;
-import nextstep.jwp.controller.GetIndexController;
-import nextstep.jwp.controller.GetLoginController;
-import nextstep.jwp.controller.PostLoginController;
-import nextstep.jwp.controller.PostRegisterController;
+import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceController;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http.RequestMapping;
 import org.slf4j.Logger;
@@ -17,13 +17,13 @@ public class Application {
     public static void main(final String[] args) {
         log.info("web server start.");
 
-        final RequestMapping requestMapping = RequestMapping.of(
-                new GetIndexController(),
-                new GetHomeController(),
-                new PostLoginController(),
-                new GetLoginController(),
-                new PostRegisterController()
-        );
+        final RequestMapping requestMapping = RequestMapping.builder()
+                .add("/", new HomeController())
+                .add("/index.html", new IndexController())
+                .add("/login", new LoginController())
+                .add("/register", new RegisterController())
+                .addResourceController(new ResourceController())
+                .build();
 
         final var tomcat = new Tomcat();
         tomcat.start(requestMapping);

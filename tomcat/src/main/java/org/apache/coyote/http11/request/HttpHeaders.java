@@ -19,6 +19,10 @@ public class HttpHeaders {
         values.put("Content-Length", String.valueOf(contentLength));
     }
 
+    public void setLocation(final String location) {
+        values.put("Location", location);
+    }
+
     public String toTextHeader() {
         StringBuilder sb = new StringBuilder();
         for (String s : values.keySet()) {

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -49,7 +49,9 @@ public class Http11Processor implements Runnable, Processor {
 
 
     private String getResponse(HttpRequest httpRequest) throws IOException {
-        ResponseGenerator responseGenerator = ResponseGeneratorFinder.find(httpRequest);
+        ResponseGeneratorFinder responseGeneratorFinder =
+                ResponseGeneratorFinder.withSessionManager(SessionManager.getInstance());
+        ResponseGenerator responseGenerator = responseGeneratorFinder.find(httpRequest);
         try {
             HttpResponse httpResponse = responseGenerator.generate(httpRequest);
             return httpResponse.getResponse();

@@ -10,28 +10,31 @@ import java.util.Objects;
 
 public class HttpResponse {
 
+    private static final String VERSION_OF_PROTOCOL = "HTTP/1.1";
+
     private String statusLine;
-    private List<String> headers = new ArrayList<>();
+    private final List<String> headers = new ArrayList<>();
     private String body;
 
-    public HttpResponse() {}
+    public HttpResponse() {
+    }
 
     public void addStatusLine(String status) {
-        this.statusLine = "HTTP/1.1 " + status + " ";
+        this.statusLine = VERSION_OF_PROTOCOL + " " + status;
     }
 
     public void addContentTypeHeader(String contentType) {
-        this.headers.add("Content-Type: " + contentType + ";charset=utf-8 ");
+        this.headers.add("Content-Type: " + contentType + ";charset=utf-8");
     }
 
     public void addBody(String body) {
-        this.headers.add("Content-Length: " + body.getBytes().length + " ");
+        this.headers.add("Content-Length: " + body.getBytes().length);
         this.body = body;
     }
 
     public void addBodyFromFile(String fileName) {
         String body = readFile("static" + fileName);
-        this.headers.add("Content-Length: " + body.getBytes().length + " ");
+        this.headers.add("Content-Length: " + body.getBytes().length);
         this.body = body;
     }
 

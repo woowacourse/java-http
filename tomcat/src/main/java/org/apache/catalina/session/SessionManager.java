@@ -3,7 +3,7 @@ package org.apache.catalina.session;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
+import org.apache.coyote.http11.exception.unauthorized.InvalidSessionException;
 
 public class SessionManager implements Manager {
 

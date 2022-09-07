@@ -31,9 +31,9 @@ import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 import org.apache.coyote.http11.exception.methodnotallowed.MethodNotAllowedException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
 import org.apache.coyote.http11.exception.notfound.NotFoundUrlException;
-import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
-import org.apache.coyote.http11.exception.unauthorised.LoginFailException;
-import org.apache.coyote.http11.exception.unauthorised.UnAuthorisedException;
+import org.apache.coyote.http11.exception.unauthorized.InvalidSessionException;
+import org.apache.coyote.http11.exception.unauthorized.LoginFailException;
+import org.apache.coyote.http11.exception.unauthorized.UnAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +203,7 @@ public class Http11Processor implements Runnable, Processor {
         if (exception instanceof BadRequestException) {
             return getExceptionHttpResponse(httpRequest, BAD_REQUEST);
         }
-        if (exception instanceof UnAuthorisedException) {
+        if (exception instanceof UnAuthorizedException) {
             return getExceptionHttpResponse(httpRequest, UNAUTHORIZED);
         }
         if (exception instanceof NotFoundException) {

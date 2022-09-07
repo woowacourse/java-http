@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.util.StringUtils.CSS_FILE_EXTENSION;
 import static org.apache.coyote.http11.util.StringUtils.EMPTY;
+import static org.apache.coyote.http11.util.StringUtils.HTML_FILE_EXTENSION;
+import static org.apache.coyote.http11.util.StringUtils.JS_FILE_EXTENSION;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,5 +84,11 @@ public class HttpRequest {
 
     public String getCookieOf(String cookieName) {
         return httpRequestHeader.getCookieOf(cookieName);
+    }
+
+    public boolean isFileRequest() {
+        return requestPath.contains(JS_FILE_EXTENSION) ||
+                requestPath.contains(CSS_FILE_EXTENSION) ||
+                requestPath.contains(HTML_FILE_EXTENSION);
     }
 }

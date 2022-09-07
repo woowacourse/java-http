@@ -1,13 +1,17 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.header;
 
 import static org.apache.coyote.http11.util.StringUtils.NEW_LINE;
 
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.response.header.HttpResponseHeader;
 
 public class ResponseHeaders {
 
     private List<HttpResponseHeader> values;
+
+    public ResponseHeaders() {
+        this.values = new ArrayList<>();
+    }
 
     public ResponseHeaders(List<HttpResponseHeader> values) {
         this.values = values;
@@ -28,5 +32,9 @@ public class ResponseHeaders {
                     .append(NEW_LINE);
         }
         return responseFormat.toString();
+    }
+
+    public void add(HttpResponseHeader httpResponseHeader) {
+        values.add(httpResponseHeader);
     }
 }

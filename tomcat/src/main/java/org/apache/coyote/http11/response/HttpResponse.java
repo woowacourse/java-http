@@ -8,21 +8,27 @@ import static org.apache.coyote.http11.util.StringUtils.NEW_LINE;
 import org.apache.coyote.http11.response.header.ContentLength;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Cookie;
+import org.apache.coyote.http11.response.header.HttpResponseHeader;
 import org.apache.coyote.http11.response.header.HttpStatusCode;
 import org.apache.coyote.http11.response.header.Location;
+import org.apache.coyote.http11.response.header.ResponseHeaders;
 
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1 ";
 
-    private final HttpStatusCode httpStatusCode;
-    private final ResponseBody responseBody;
-    private final ResponseHeaders responseHeaders;
+    private HttpStatusCode httpStatusCode;
+    private ResponseBody responseBody;
+    private ResponseHeaders responseHeaders;
 
     public HttpResponse(HttpStatusCode httpStatusCode, ResponseHeaders responseHeaders, ResponseBody responseBody) {
         this.httpStatusCode = httpStatusCode;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
+    }
+
+    public static HttpResponse getNew() {
+        return new HttpResponse(OK, new ResponseHeaders(), ResponseBody.None());
     }
 
     public static HttpResponse ok(String responseBody, ContentType contentType) {
@@ -57,11 +63,24 @@ public class HttpResponse {
         );
     }
 
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = new ResponseBody(responseBody);
+        responseHeaders.add(ContentLength.from(responseBody));
+    }
+
     public String getResponse() {
         return String.join(
                 NEW_LINE,
                 HTTP_VERSION + httpStatusCode.getValue(),
                 responseHeaders.toResponseFormat(),
                 responseBody.getValue());
+    }
+
+    public void addHeader(HttpResponseHeader contentType) {
+        responseHeaders.add(contentType);
     }
 }

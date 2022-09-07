@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.QueryStringParser.hasQueryString;
+import static org.apache.coyote.QueryStringParser.parseQueryString;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +13,6 @@ public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
     private static final String URL_DELIMITER = "?";
-    private static final String REQUEST_PARAM_DELIMITER = "&";
-    private static final String VALUE_DELIMITER = "=";
 
     private final HttpMethod httpMethod;
     private final String url;
@@ -39,21 +40,6 @@ public class RequestLine {
         queryParams.putAll(parseQueryString(requestValues[1].substring(index + 1)));
 
         return new RequestLine(httpMethod, url, queryParams);
-    }
-
-    private static boolean hasQueryString(final String value) {
-        return value.contains(URL_DELIMITER);
-    }
-
-    private static Map<String, String> parseQueryString(final String queryString) {
-        final String[] queryPairs = queryString.split(REQUEST_PARAM_DELIMITER);
-
-        final Map<String, String> queryParams = new HashMap<>();
-        for (String queryPair : queryPairs) {
-            final String[] values = queryPair.split(VALUE_DELIMITER);
-            queryParams.put(values[0], values[1]);
-        }
-        return queryParams;
     }
 
     public boolean isGet() {

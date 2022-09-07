@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

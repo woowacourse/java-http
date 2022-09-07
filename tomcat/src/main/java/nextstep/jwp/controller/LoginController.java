@@ -1,9 +1,7 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.handler.StaticHandler;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -13,24 +11,30 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class LoginController extends Controller {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String INDEX_PAGE = "/index.html";
 
-    public static HttpResponse handle(HttpRequest request, HttpResponse response) throws IOException {
+    @Override
+    public void doGet(HttpRequest request, HttpResponse response) {
         QueryString queryString = request.queryString();
         if (queryString.isEmpty()) {
-            return StaticHandler.handle(INDEX_PAGE, response);
+            response.setStatus(HttpStatus.FOUND);
+            response.setHeader("Location", "/401.html");
+            return;
         }
         if (isValidUser(queryString.get("account"), queryString.get("password"))) {
             response.setStatus(HttpStatus.FOUND);
             response.setHeader("Location", "/index.html");
-            return response;
+            return;
         }
         response.setStatus(HttpStatus.FOUND);
         response.setHeader("Location", "/401.html");
-        return response;
+    }
+
+    @Override
+    public void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        super.doPost(request, response);
     }
 
     private static Boolean isValidUser(String account, String password) {

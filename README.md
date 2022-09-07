@@ -25,8 +25,8 @@
 ### 1. HTTP Status Code 302
 
 - /login 페이지에서 아이디는 gugu, 비밀번호는 password를 입력한다. ✅
-- 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
-- 로그인에 실패하면 401.html로 리다이렉트한다.
+- 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다. ✅
+- 로그인에 실패하면 401.html로 리다이렉트한다. ✅
 
 ## 🚀 3단계 - 리팩터링
 ### 1. HttpRequest 클래스 구현하기
@@ -40,3 +40,9 @@
 
 - Status-Line, Header, body를 가진다. ✅
 - Http Response의 규격에 맞는 문자열, 바이트 배열을 반환할 수 있다. ✅
+
+### 3. Controller 인터페이스 추가하기
+
+- `HandlerMapping` uri에 맞는 컨트롤러를 조회한다. ✅
+- `HandlerAdapter` http method에 맞는 메서드를 호출한다. ✅
+- `Controller` request에 맞는 비즈니스 로직을 수행한다. ✅

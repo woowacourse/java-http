@@ -22,7 +22,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> uri.endsWith(contentType.fileNameExtension))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(uri + "에 해당하는 contentType은 없습니다."));
+                .orElse(HTML);
     }
 
     public String value() {

@@ -1,14 +1,10 @@
 package org.apache.coyote.http11;
 
-import static nextstep.jwp.controller.FrontController.handle;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -37,11 +33,12 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest request = HttpRequest.from(bufferedReader);
-            HttpResponse response = handle(request);
+            HandlerAdapter handler = HandlerMapping.getMethodHandler(request);
+            HttpResponse response = handler.service();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

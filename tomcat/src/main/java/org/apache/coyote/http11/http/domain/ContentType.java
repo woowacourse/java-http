@@ -8,6 +8,7 @@ public enum ContentType {
     TEXT_HTML("text/html", "html"),
     TEXT_CSS("text/css", "css"),
     APPLICATION_JAVASCRIPT("application/javascript", "js"),
+    IMAGE_X_ICON("image/x-icon", "ico"),
     ;
 
     private static final String EXTENSION_DELIMITER = "\\.";

@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
@@ -33,39 +34,50 @@ public class LoginController extends AbstractController {
             return HttpResponse.found(
                     Headers.builder()
                             .location("/401.html"),
-                    new MessageBody(""));
+                    MessageBody.emptyBody());
         }
     }
 
     private HttpResponse login(final User user, final String password) {
         if (user.checkPassword(password)) {
-            log.info("User : {}", user);
-            UUID uuid = UUID.randomUUID();
+            log.info("User Login : {}", user);
+            Session session = Session.newSession();
+            session.setAttribute("user", user);
+            SessionManager.add(session);
             return HttpResponse.found(
                     Headers.builder()
-                            .setCookie(uuid)
+                            .setCookie(session.getId())
                             .location("/index.html"),
-                    new MessageBody(""));
+                    MessageBody.emptyBody());
         }
         return HttpResponse.found(
                 Headers.builder()
                         .location("/401.html"),
-                new MessageBody(""));
+                MessageBody.emptyBody());
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         HttpCookie cookie = httpRequest.getHeaders().getCookie();
-        if (cookie.containsJSESSIONID()) {
-            return HttpResponse.found(
-                    Headers.builder()
-                            .location("/index.html"),
-                    new MessageBody(""));
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        if (cookie.containsJSESSIONID() && SessionManager.contains(jsessionid)) {
+            return redirectResponse(cookie);
         }
         String uri = httpRequest.getRequestLine()
                 .getRequestTarget()
                 .getUri();
         String responseBody = FileReader.read(uri + ".html");
         return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+    }
+
+    private HttpResponse redirectResponse(final HttpCookie cookie) {
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        Session session = SessionManager.findSession(jsessionid);
+        User user = (User) session.getAttribute("user");
+        log.info("Login User : {}", user);
+        return HttpResponse.found(
+                Headers.builder()
+                        .location("/index.html"),
+                MessageBody.emptyBody());
     }
 }

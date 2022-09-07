@@ -2,8 +2,8 @@ package org.apache.coyote.http11.http.domain;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +27,10 @@ public class MessageBody {
         return new MessageBody(new String(body));
     }
 
+    public static MessageBody emptyBody() {
+        return new MessageBody("");
+    }
+
     public int length() {
         return value.getBytes().length;
     }
@@ -38,11 +42,7 @@ public class MessageBody {
     }
 
     private String decode(final String[] line) {
-        try {
-            return URLDecoder.decode(line[1], "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Parameter decoding failed");
-        }
+        return URLDecoder.decode(line[1], StandardCharsets.UTF_8);
     }
 
     public String getValue() {

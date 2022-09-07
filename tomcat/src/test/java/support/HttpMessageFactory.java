@@ -13,12 +13,12 @@ public class HttpMessageFactory {
                 "");
     }
 
-    public static String getWithCookie(final String requestTarget) {
+    public static String getWithCookie(final String requestTarget, final String cookie) {
         return String.join("\r\n",
                 "GET " + requestTarget + " HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
-                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Cookie: " + cookie,
                 "",
                 "");
     }

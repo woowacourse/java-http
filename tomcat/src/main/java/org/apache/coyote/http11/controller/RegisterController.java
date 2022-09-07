@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
         return HttpResponse.found(
                 Headers.builder()
                         .location("/index.html"),
-                new MessageBody("")
+                MessageBody.emptyBody()
         );
     }
 

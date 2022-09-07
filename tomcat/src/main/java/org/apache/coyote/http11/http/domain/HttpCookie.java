@@ -27,6 +27,10 @@ public class HttpCookie {
         return cookies.containsKey("JSESSIONID");
     }
 
+    public String getCookie(final String cookieKey) {
+        return cookies.get(cookieKey);
+    }
+
     public Map<String, String> getCookies() {
         return cookies;
     }

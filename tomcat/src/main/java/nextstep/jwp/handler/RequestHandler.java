@@ -1,5 +1,9 @@
 package nextstep.jwp.handler;
 
+import static nextstep.jwp.presentation.DefaultController.DEFAULT_PATH;
+import static nextstep.jwp.presentation.LoginController.LOGIN_PATH;
+import static nextstep.jwp.presentation.RegisterController.REGISTER_PATH;
+
 import java.util.Map;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.DefaultController;
@@ -13,9 +17,9 @@ public class RequestHandler {
 
     static {
         controllers = Map.of(
-            "/", DefaultController.getInstance(),
-            "/login", LoginController.getInstance(),
-            "/register", RegisterController.getInstance()
+            DEFAULT_PATH, DefaultController.getInstance(),
+            LOGIN_PATH, LoginController.getInstance(),
+            REGISTER_PATH, RegisterController.getInstance()
         );
     }
 

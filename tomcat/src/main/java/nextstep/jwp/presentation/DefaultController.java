@@ -6,6 +6,8 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public class DefaultController extends AbstractController {
 
+    public static final String DEFAULT_PATH = "/";
+
     public static DefaultController instance = new DefaultController();
 
     private DefaultController() {

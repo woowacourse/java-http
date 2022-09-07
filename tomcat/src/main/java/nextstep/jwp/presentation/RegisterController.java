@@ -14,6 +14,8 @@ public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
+    public static final String REGISTER_PATH = "/register";
+
     public static RegisterController instance = new RegisterController();
 
     private RegisterController() {

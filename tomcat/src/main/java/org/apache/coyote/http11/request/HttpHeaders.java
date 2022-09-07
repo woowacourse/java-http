@@ -48,10 +48,6 @@ public class HttpHeaders {
         values.put("Content-Type", contentType + ";charset=utf-8");
     }
 
-    public String getCookie() {
-        return values.get("Cookie");
-    }
-
     public void setCookie(final Cookie cookie) {
         values.put("Set-Cookie", cookie.toPair());
     }

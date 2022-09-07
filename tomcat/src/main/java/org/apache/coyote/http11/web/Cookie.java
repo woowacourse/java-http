@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.web;
 
+import java.util.Objects;
+
 public class Cookie {
 
     private final String key;
@@ -10,11 +12,24 @@ public class Cookie {
         this.value = value;
     }
 
-    public static Cookie ofJSessionId() {
-        return new Cookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
-    }
-
     public String toPair() {
         return key + "=" + value;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Cookie cookie = (Cookie) o;
+        return Objects.equals(key, cookie.key) && Objects.equals(value, cookie.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, value);
     }
 }

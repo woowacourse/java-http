@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.coyote.http11.web.Session;
+import org.apache.coyote.http11.web.SessionManager;
 
 public class HttpRequest {
 
@@ -68,5 +71,12 @@ public class HttpRequest {
 
     public Map<String, String> getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        final String id = String.valueOf(UUID.randomUUID());
+        final Session session = new Session(id);
+        SessionManager.add(session);
+        return session;
     }
 }

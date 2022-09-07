@@ -17,7 +17,7 @@ class RequestLineTest {
         final var requestLine = new RequestLine(rawRequestLine);
 
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
+                () -> assertThat(requestLine.getMethod()).isEqualTo(Method.GET),
                 () -> assertThat(requestLine.getUrl()).isEqualTo("/login"),
                 () -> assertThat(requestLine.getQueryParams()).isEmpty()
         );
@@ -31,10 +31,20 @@ class RequestLineTest {
         final var requestLine = new RequestLine(rawRequestLine);
 
         assertAll(
-                () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
+                () -> assertThat(requestLine.getMethod()).isEqualTo(Method.GET),
                 () -> assertThat(requestLine.getUrl()).isEqualTo("/login"),
                 () -> assertThat(requestLine.getQueryParams()).isEqualTo(
                         Map.of("account", "gugu", "password", "password"))
         );
+    }
+
+    @DisplayName("POST 요청의 메서드값을 파싱")
+    @Test
+    void extractPostMethod() {
+        final var rawRequestLine = "POST /login HTTP/1.1 ";
+
+        final var requestLine = new RequestLine(rawRequestLine);
+
+        assertThat(requestLine.getMethod()).isEqualTo(Method.POST);
     }
 }

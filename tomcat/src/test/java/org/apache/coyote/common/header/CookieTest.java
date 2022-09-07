@@ -29,7 +29,7 @@ class CookieTest {
     @DisplayName("응답 헤더에 사용될 Set-Cookie 값을 생성한다.")
     @Test
     void buildSetCookie() {
-        final String actual = Cookie.setCookieBuilder("name", "value", "/")
+        final String actual = Cookie.setCookieBuilder("name", "value")
                 .setDomain("domain.com")
                 .setExpires(360)
                 .setSecure()

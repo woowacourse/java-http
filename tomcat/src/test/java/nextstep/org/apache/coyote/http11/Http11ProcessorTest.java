@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -56,6 +58,9 @@ class Http11ProcessorTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        final String actualWithoutSetCookie = Arrays.stream(socket.output().split("\r\n"))
+                        .filter(message -> !message.contains("Set-Cookie"))
+                        .collect(Collectors.joining("\r\n"));
+        assertThat(actualWithoutSetCookie).isEqualTo(expected);
     }
 }

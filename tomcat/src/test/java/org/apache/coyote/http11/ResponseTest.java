@@ -29,6 +29,6 @@ class ResponseTest {
                 "",
                 "Hello world!");
 
-        assertThat(actual).contains(expected);
+        assertThat(actual).isEqualTo(expected);
     }
 }

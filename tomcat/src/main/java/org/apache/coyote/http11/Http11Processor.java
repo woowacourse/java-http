@@ -10,18 +10,20 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHandler;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestHandler REQUEST_HANDLER = new RequestHandler();
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
 
@@ -41,9 +43,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = readHttpRequest(bufferedReader);
-            final String response = REQUEST_HANDLER.handle(request);
+            final Controller controller = REQUEST_MAPPING.getController(request);
+            final HttpResponse response = controller.service(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.asFormat().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOG.error(e.getMessage(), e);

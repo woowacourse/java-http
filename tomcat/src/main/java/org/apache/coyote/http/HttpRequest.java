@@ -3,6 +3,7 @@ package org.apache.coyote.http;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -25,7 +26,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String findQueryByKey(String queryKey){
+    public Optional<String> findQueryByKey(String queryKey){
         if(hasQueryInUri(uri)){
             return findValue(queryKey, uri);
         }
@@ -47,12 +48,11 @@ public class HttpRequest {
         return uri.contains(URL_DELIMITER);
     }
 
-    private String findValue(String queryKey, String target){
+    private Optional<String> findValue(String queryKey, String target){
         final Map<String, String> queryMap = makeQueryMap(target);
 
         final String queryValue = queryMap.get(queryKey);
-        validateNullValue(queryKey, queryValue);
-        return queryValue;
+        return Optional.ofNullable(queryValue);
     }
 
     private Map<String, String> makeQueryMap(final String target) {
@@ -62,12 +62,6 @@ public class HttpRequest {
         return Arrays.stream(s)
                 .map(q -> q.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(key -> key[0], value -> value[1]));
-    }
-
-    private void validateNullValue(final String queryKey, final String queryValue) {
-        if (queryValue == null) {
-            throw new NoSuchElementException(String.format("%s의 값을 찾을 수 없습니다.", queryKey));
-        }
     }
 
     public HttpMethod getHttpMethod() {

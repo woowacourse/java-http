@@ -80,7 +80,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "Set-Cookie";
+        var expected = "Set-Cookie: JSESSIONID";
 
         assertThat(socket.output()).contains(expected);
     }

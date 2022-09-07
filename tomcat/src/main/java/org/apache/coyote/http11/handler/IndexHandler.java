@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.header.HttpHeaderType.COOKIE;
+
 import java.util.UUID;
+import org.apache.coyote.http11.header.HttpCookie;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.request.HttpRequest;
@@ -14,11 +17,21 @@ public class IndexHandler extends ResourceHandler {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
         final HttpHeaders headers = httpRequest.getHeaders();
-        if (!headers.contains("Cookie")) {
-            final HttpHeader httpHeader = HttpHeader.of("Set-Cookie", "JSESSIONID" + EQUAL_LETTER + UUID.randomUUID());
-            return generateResourceResponseByFileName(INDEX_HTML, httpHeader);
+
+        if (!headers.contains(COOKIE.getValue())) {
+            return generateResourceResponseWithCookie("JSESSIONID" + EQUAL_LETTER + UUID.randomUUID());
+        }
+
+        final HttpHeader httpHeader = headers.get(COOKIE.getValue());
+        if (!httpHeader.getValues().contains("JSESSIONID")) {
+            return generateResourceResponseWithCookie("JSESSIONID" + EQUAL_LETTER + UUID.randomUUID());
         }
 
         return generateResourceResponse(INDEX_HTML);
+    }
+
+    private HttpResponse generateResourceResponseWithCookie(final String value) {
+        final HttpHeader httpHeader = HttpCookie.generateResponseHeader(value);
+        return generateResourceResponseByFileName(INDEX_HTML, httpHeader);
     }
 }

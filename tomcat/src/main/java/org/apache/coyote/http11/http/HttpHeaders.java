@@ -65,12 +65,12 @@ public class HttpHeaders {
         }
     }
 
-    public boolean contains(final String contentLength) {
-        return headers.containsKey(contentLength);
+    public boolean contains(final String httpHeaderType) {
+        return headers.containsKey(httpHeaderType);
     }
 
-    public HttpHeader get(final String contentLength) {
-        return headers.get(contentLength);
+    public HttpHeader get(final String httpHeaderType) {
+        return headers.get(httpHeaderType);
     }
 
     public Set<String> keySet() {

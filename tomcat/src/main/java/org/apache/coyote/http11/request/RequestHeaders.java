@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class RequestHeaders {
 
@@ -10,7 +11,10 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public String getHeaderValue(String field) {
-        return headers.get(field);
+    public Optional<String> getHeaderValue(String field) {
+        if (headers.containsKey(field)) {
+            return Optional.of(headers.get(field));
+        }
+        return Optional.empty();
     }
 }

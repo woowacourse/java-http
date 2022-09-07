@@ -5,7 +5,7 @@ public class HttpResponse {
     private String protocol = null;
     private HttpStatus status = null;
     private String location = null;
-    private String cookie = null;
+    private Cookie cookie = null;
     private ContentType contentType = null;
     private String responseBody = null;
 
@@ -33,7 +33,7 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addCookie(String cookie) {
+    public HttpResponse addCookie(Cookie cookie) {
         this.cookie = cookie;
         return this;
     }
@@ -52,7 +52,7 @@ public class HttpResponse {
             sb.append("Location: ").append(location).append("\r\n");
         }
         if (cookie != null) {
-            sb.append("Set-Cookie: ").append(cookie).append("\r\n");
+            sb.append("Set-Cookie: ").append(cookie.parseToString()).append("\r\n");
         }
         if (responseBody != null) {
             sb.append("Content-Type: ").append(contentType.getType()).append(" ").append("\r\n");

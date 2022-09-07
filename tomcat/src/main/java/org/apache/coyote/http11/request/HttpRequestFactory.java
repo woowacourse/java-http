@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpRequestFactory {
@@ -22,7 +23,6 @@ public class HttpRequestFactory {
         try {
             RequestLine requestLine = parseToRequestLine(reader.readLine());
             RequestHeaders requestHeaders = parseToRequestHeaders(reader);
-
             return new HttpRequest(requestLine, requestHeaders, parseToRequestBody(reader, requestHeaders));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -52,11 +52,11 @@ public class HttpRequestFactory {
 
     private static RequestBody parseToRequestBody(BufferedReader reader, RequestHeaders requestHeaders)
             throws IOException {
-        String contentLengthValue = requestHeaders.getHeaderValue("Content-Length");
-        if (contentLengthValue == null) {
+        Optional<String> contentLengthValue = requestHeaders.getHeaderValue("Content-Length");
+        if (contentLengthValue.isEmpty()) {
             return new RequestBody(Map.of());
         }
-        int contentLength = Integer.parseInt(contentLengthValue);
+        int contentLength = Integer.parseInt(contentLengthValue.get());
         String requestBodyValue = parseToRequestBodyValue(reader, contentLength);
 
         return new RequestBody(parseToMap(requestBodyValue));

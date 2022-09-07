@@ -32,8 +32,8 @@ class RequestMappingTest {
                 Arguments.of("/", DefaultController.getInstance()),
                 Arguments.of("/login", LoginController.getInstance()),
                 Arguments.of("/register", RegisterController.getInstance()),
-                Arguments.of("file", FileController.getInstance()),
-                Arguments.of("error", ErrorController.getInstance())
+                Arguments.of("/index.html", FileController.getInstance()),
+                Arguments.of("", ErrorController.getInstance())
         );
     }
 }

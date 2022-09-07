@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.coyote.http11.common.HttpBody;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMessageDelimiter;
 import org.apache.coyote.http11.request.header.RequestLine;
@@ -18,7 +17,7 @@ public class HttpRequestGenerator {
     public static HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = createRequestLine(bufferedReader);
         final HttpHeaders headers = createHeaders(bufferedReader);
-        final HttpBody bodies = createBody(bufferedReader, headers);
+        final HttpRequestBody bodies = createBody(bufferedReader, headers);
 
         return HttpRequest.of(requestLine, headers, bodies);
     }
@@ -40,14 +39,14 @@ public class HttpRequestGenerator {
         }
     }
 
-    private static HttpBody createBody(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
+    private static HttpRequestBody createBody(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
         final int contentLength = headers.getContentLength();
         if (contentLength == 0) {
-            return HttpBody.empty();
+            return HttpRequestBody.empty();
         }
 
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        return HttpBody.formData(new String(buffer));
+        return HttpRequestBody.formData(new String(buffer));
     }
 }

@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpBody {
+public class HttpRequestBody {
 
     private static final String FORM_QUERY_DELIMITER = "&";
     private static final String FORM_PARAMS_DELIMITER = "=";
@@ -12,15 +12,15 @@ public class HttpBody {
 
     private final Map<String, String> value;
 
-    private HttpBody(final Map<String, String> value) {
+    private HttpRequestBody(final Map<String, String> value) {
         this.value = value;
     }
 
-    public static HttpBody empty() {
-        return new HttpBody(new HashMap<>());
+    public static HttpRequestBody empty() {
+        return new HttpRequestBody(new HashMap<>());
     }
 
-    public static HttpBody formData(final String message) {
+    public static HttpRequestBody formData(final String message) {
         final Map<String, String> bodies = new HashMap<>();
 
         final String[] bodyElements = message.split(FORM_QUERY_DELIMITER);
@@ -29,7 +29,7 @@ public class HttpBody {
 
             bodies.put(bodyElement[KEY], readValue(bodyElement));
         }
-        return new HttpBody(bodies);
+        return new HttpRequestBody(bodies);
     }
 
     private static String readValue(final String[] bodyElement) {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class Session {
 
+    private static final String JSESSIONID_PREFIX = "JSESSIONID=";
     private final String id;
     private final Map<String, Object> values;
 
@@ -13,8 +14,8 @@ public class Session {
         this.values = new HashMap<>();
     }
 
-    public String getId() {
-        return null;
+    public String parseJSessionId() {
+        return JSESSIONID_PREFIX + id;
     }
 
     public Object getAttribute(final String name) {
@@ -27,5 +28,9 @@ public class Session {
 
     public void removeAttribute(final String name) {
         values.remove(name);
+    }
+
+    public String getId() {
+        return id;
     }
 }

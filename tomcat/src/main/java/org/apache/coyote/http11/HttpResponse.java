@@ -10,6 +10,7 @@ public class HttpResponse {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private StatusLine statusLine;
     private Headers headers;
@@ -51,6 +52,9 @@ public class HttpResponse {
         return String.valueOf(contentLength);
     }
 
+    public void addCookie(final String cookie) {
+        headers.addHeader(SET_COOKIE, cookie);
+    }
 
     public void sendRedirect(final String path) {
         this.addStatusCode(StatusCode.FOUND);

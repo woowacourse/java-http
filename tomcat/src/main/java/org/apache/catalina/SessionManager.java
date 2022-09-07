@@ -19,6 +19,6 @@ public class SessionManager {
     }
 
     public static void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        SESSIONS.remove(session.parseJSessionId());
     }
 }

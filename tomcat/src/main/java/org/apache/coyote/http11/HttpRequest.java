@@ -1,9 +1,16 @@
 package org.apache.coyote.http11;
 
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 public class HttpRequest {
+
+    private static final String COOKIE = "Cookie";
 
     private RequestLine requestLine;
     private Headers headers;
+    private HttpCookie httpCookie;
     private String body;
     private RequestParameters requestParameters;
 
@@ -11,6 +18,7 @@ public class HttpRequest {
         String[] splitStartLine = startLine.split(" ");
         this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
         this.headers = new Headers();
+        this.httpCookie = new HttpCookie();
         this.body = "";
         this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
@@ -25,6 +33,10 @@ public class HttpRequest {
     }
 
     public void addHeader(final String key, final String value) {
+        if (COOKIE.equals(key)) {
+            httpCookie.addCookie(value.trim());
+        }
+
         headers.addHeader(key, value.trim());
     }
 
@@ -52,6 +64,18 @@ public class HttpRequest {
 
     public String getRequestParameter(final String key) {
         return requestParameters.getParameter(key);
+    }
+
+    public Session getSession() {
+        if (httpCookie.hasJSessionId()) {
+            String jSessionId = httpCookie.getJSessionId();
+            return SessionManager.findSession(jSessionId);
+        }
+
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid.toString());
+        SessionManager.add(session);
+        return session;
     }
 
     public RequestLine getRequestLine() {

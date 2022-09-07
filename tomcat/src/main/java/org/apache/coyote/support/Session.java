@@ -22,6 +22,10 @@ public class Session {
         return id;
     }
 
+    public String text() {
+        return JSESSIONID + "=" + id;
+    }
+
     public Object getAttribute(final String name) {
         return stores.get(name);
     }

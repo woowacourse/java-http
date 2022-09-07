@@ -1,8 +1,5 @@
 package org.apache.coyote.support;
 
-import static support.IoUtils.writeAndFlush;
-
-import java.io.BufferedWriter;
 import org.apache.constant.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,33 +29,36 @@ public enum StaticHandlerMethod {
         }
     }
 
-    public void handle(final HttpRequest request, final BufferedWriter bufferedWriter) {
+    public void handle(final HttpRequest request, final HttpResponse response) {
         final FileDto dto = new FileDto(request.getUri());
         final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
 
-        // TODO login폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
+        // TODO login 폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
         if (dto.fileName.contains("login") && isAlreadyLogin(request)) {
-            alreadyLoginEvent(bufferedWriter, request);
+            alreadyLoginEvent(request, response);
         }
 
-        final String response = HttpResponseBuilder.builder()
-                .addStatus(HttpStatus.OK)
-                .add(HttpHeader.CONTENT_TYPE, contentType)
-                .body(responseBody)
-                .build();
+//        final String response = HttpResponseBuilderOld.builder()
+//                .addStatus(HttpStatus.OK)
+//                .add(HttpHeader.CONTENT_TYPE, contentType)
+//                .body(responseBody)
+//                .build();
 
-        writeAndFlush(bufferedWriter, response);
+        response.addStatus(HttpStatus.OK)
+                .add(HttpHeader.CONTENT_TYPE, contentType)
+                .body(responseBody);
     }
 
-    private void alreadyLoginEvent(final BufferedWriter bufferedWriter, final HttpRequest request) {
-        final String response = HttpResponseBuilder.builder()
-                .addStatus(HttpStatus.FOUND)
-                .add(HttpHeader.LOCATION, "/index.html")
-                .addCooke(request.getSession(false))
-                .build();
+    private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {
+//        final String response = HttpResponseBuilderOld.builder()
+//                .addStatus(HttpStatus.FOUND)
+//                .add(HttpHeader.LOCATION, "/index.html")
+//                .addCooke(request.getSession(false))
+//                .build();
+        response.sendRedirect("/index.html")
+                .addCooke(request.getSession(false));
 
-        writeAndFlush(bufferedWriter, response);
         log.info("Redirect: /index.html");
     }
 

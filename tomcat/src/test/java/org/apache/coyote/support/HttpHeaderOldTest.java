@@ -5,15 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.Test;
 
-class HttpHeaderTest {
+class HttpHeaderOldTest {
 
+/*
     @Test
     void apply() {
-        final String statusFormat = HttpHeader.HTTP_1_1_STATUS.apply(HttpStatus.OK);
-        final String contentTypeFormat = HttpHeader.CONTENT_TYPE.apply("application/x-www-form-urlencoded");
+        final String statusFormat = HttpHeaderOld.HTTP_1_1_STATUS.apply(HttpStatus.OK);
+        final String contentTypeFormat = HttpHeaderOld.CONTENT_TYPE.apply("application/x-www-form-urlencoded");
         assertAll(
                 () -> assertThat(statusFormat).isEqualTo("HTTP/1.1 200 OK "),
                 () -> assertThat(contentTypeFormat).isEqualTo("Content-Type: application/x-www-form-urlencoded;charset=utf-8 ")
         );
     }
+*/
 }

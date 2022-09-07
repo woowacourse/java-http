@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static support.IoUtils.writeAndFlush;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.support.ApiHandlerMethod;
 import org.apache.coyote.support.HttpRequest;
+import org.apache.coyote.support.HttpResponse;
 import org.apache.coyote.support.StaticHandlerMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,20 +45,23 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));) {
 
             final HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            route(httpRequest, bufferedWriter);
+            final HttpResponse httpResponse = new HttpResponse();
+            route(httpRequest, httpResponse, bufferedWriter);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void route(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-        ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(httpRequest);
+    private void route(final HttpRequest request, final HttpResponse response,
+                       final BufferedWriter bufferedWriter) {
+        ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(request);
         if (apiHandlerMethod != null) {
-            log.info("API Request = {}", httpRequest);
-            apiHandlerMethod.handle(httpRequest, bufferedWriter);
-            return;
+            log.info("API Request = {}", request);
+            apiHandlerMethod.handle(request, response);
+        } else {
+            log.info("View Request = {}", request);
+            StaticHandlerMethod.INSTANCE.handle(request, response);
         }
-        log.info("View Request = {}", httpRequest);
-        StaticHandlerMethod.INSTANCE.handle(httpRequest, bufferedWriter);
+        writeAndFlush(bufferedWriter, response.toStringData());
     }
 }

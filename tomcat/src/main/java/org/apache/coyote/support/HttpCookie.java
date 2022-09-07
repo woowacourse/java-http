@@ -17,7 +17,7 @@ public class HttpCookie {
         return String.format("%s=%s", JSESSIONID_MESSAGE, value);
     }
 
-    public String getValue() {
+    public String value() {
         return value;
     }
 }

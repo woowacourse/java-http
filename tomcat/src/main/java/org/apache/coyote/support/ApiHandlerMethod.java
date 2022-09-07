@@ -1,9 +1,7 @@
 package org.apache.coyote.support;
 
 import static java.util.Arrays.stream;
-import static support.IoUtils.writeAndFlush;
 
-import java.io.BufferedWriter;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -14,24 +12,18 @@ import org.slf4j.LoggerFactory;
 public enum ApiHandlerMethod {
 
     HOME_GET(HttpMethod.GET, "/") {
-
         @Override
-        public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
+        public void handle(final HttpRequest httpRequest, final HttpResponse response) {
             final String welcomeMessage = "Hello world!";
-            final String response = HttpResponseBuilder.builder()
-                    .addStatus(HttpStatus.OK)
+            response.addStatus(HttpStatus.OK)
                     .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN.value())
-                    .body(welcomeMessage)
-                    .build();
-
-            writeAndFlush(bufferedWriter, response);
+                    .body(welcomeMessage);
         }
     },
 
     LOGIN_POST(HttpMethod.POST, "/login") {
-
         @Override
-        public void handle(final HttpRequest request, final BufferedWriter bufferedWriter) {
+        public void handle(final HttpRequest request, final HttpResponse response) {
             final Map<String, String> userMap = HttpParser.parseQueryString(request.getBody());
             final String account = userMap.get("account");
             final String password = userMap.get("password");
@@ -39,12 +31,12 @@ public enum ApiHandlerMethod {
 
             if (isLoginSuccess(foundUser, password)) {
                 log.info("Login Success! {}", foundUser);
-                loginSuccessEvent(bufferedWriter, request, foundUser);
+                loginSuccessEvent(foundUser, request, response);
                 return;
             }
 
+            loginFailEvent(request, response);
             log.info("Login Fail !");
-            loginFailEvent(bufferedWriter);
         }
 
         private User findUser(final String account) {
@@ -58,53 +50,28 @@ public enum ApiHandlerMethod {
             return findUser != null && findUser.checkPassword(password);
         }
 
-        /**
-         * final var session = request.getSession(true);
-         *     session.setAttribute("user", user);
-         *     response.addCookie(Cookies.ofJSessionId(session.getId()));
-         *     response.sendRedirect("/index.html");
-         *     return;
-         */
-        private void loginSuccessEvent(final BufferedWriter bufferedWriter, final HttpRequest request, final User user) {
-            // 이미 기 세션이 있다면 지울 것!
-            final Session alreadyExistSession = request.getSession(false);
-            if (alreadyExistSession != null) {
-                SessionManager.remove(alreadyExistSession);
-            }
-
-            // TODO login 폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
+        private void loginSuccessEvent(final User user, final HttpRequest request, final HttpResponse response) {
             final Session session = request.getSession(true);
             session.setAttribute("user", user);
             SessionManager.add(session);
 
-            final String response = HttpResponseBuilder.builder()
-                    .addStatus(HttpStatus.FOUND)
-                    .add(HttpHeader.LOCATION, "/index.html")
-                    .addCooke(session)
-                    .build();
+            response.sendRedirect("/index.html")
+                    .addCooke(session);
 
-            writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /index.html");
         }
 
-        private void loginFailEvent(final BufferedWriter bufferedWriter) {
-            final String response = HttpResponseBuilder.builder()
-                    .addStatus(HttpStatus.FOUND)
-                    .add(HttpHeader.LOCATION, "/401.html")
-                    .build();
+        private void loginFailEvent(final HttpRequest request, final HttpResponse response) {
+            response.sendRedirect("/index.html");
 
-            writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /401.html");
         }
-
-
     },
 
     REGISTER_POST(HttpMethod.POST, "/register") {
-
         @Override
-        public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-            final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getBody());
+        public void handle(final HttpRequest request, final HttpResponse response) {
+            final Map<String, String> userMap = HttpParser.parseQueryString(request.getBody());
             final String account = userMap.get("account");
             final String email = userMap.get("email");
             final String password = userMap.get("password");
@@ -114,12 +81,7 @@ public enum ApiHandlerMethod {
             InMemoryUserRepository.save(createUser);
             log.info("Create User: {}", createUser);
 
-            final String response = HttpResponseBuilder.builder()
-                    .addStatus(HttpStatus.FOUND)
-                    .add(HttpHeader.LOCATION, "/index.html")
-                    .build();
-
-            writeAndFlush(bufferedWriter, response);
+            response.sendRedirect("/index.html");
             log.info("Redirect: /index.html");
         }
     };
@@ -134,7 +96,7 @@ public enum ApiHandlerMethod {
         this.uri = uri;
     }
 
-    public abstract void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter);
+    public abstract void handle(final HttpRequest request, final HttpResponse httpResponse);
 
     public static ApiHandlerMethod find(final HttpRequest httpRequest) {
         return stream(values())

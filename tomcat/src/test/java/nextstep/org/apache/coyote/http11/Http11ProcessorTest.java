@@ -86,7 +86,8 @@ class Http11ProcessorTest {
     void login_AlreadyLoginUser_RedirectToIndexHtml() {
         User user = new User("chris", "password", "email@google.com");
         Session session = new Session("user", user);
-        SessionManager.add(session);
+        SessionManager.getInstance()
+                .add(session);
 
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",

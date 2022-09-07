@@ -5,8 +5,8 @@ import static org.apache.coyote.http11.request.HttpMethod.POST;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.Cookie;
@@ -23,6 +23,12 @@ public class LoginResponseGenerator implements ResponseGenerator {
     private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final String LOGIN_FAILURE_REDIRECT_URI = "http://localhost:8080/401.html";
     private static final String JSESSION_COOKIE_KEY = "JSESSIONID";
+
+    private final Manager sessionManager;
+
+    public LoginResponseGenerator(Manager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {
@@ -52,7 +58,7 @@ public class LoginResponseGenerator implements ResponseGenerator {
 
         if (!httpRequest.hasCookieOf(JSESSION_COOKIE_KEY)) {
             Session session = new Session("user", user);
-            SessionManager.add(session);
+            sessionManager.add(session);
             return HttpResponse.found(LOGIN_SUCCESS_REDIRECT_URI,
                     Cookie.fromResponse(JSESSION_COOKIE_KEY, session.getId()));
         }

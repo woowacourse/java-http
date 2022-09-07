@@ -14,12 +14,13 @@ class SessionManagerTest {
     void isValid() {
         User user = new User("chris", "password", "email@google.com");
         Session session = new Session("user", user);
-        SessionManager.add(session);
+        Manager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
         String invalidSessionId = "invalidSessionId";
 
         assertAll(
-                () -> assertThat(SessionManager.isValid(session.getId())).isTrue(),
-                () -> assertThat(SessionManager.isValid(invalidSessionId)).isFalse()
+                () -> assertThat(sessionManager.findSession(session.getId())).isEqualTo(session),
+                () -> assertThat(sessionManager.findSession(invalidSessionId)).isNull()
         );
     }
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class LoginResponseGeneratorTest {
 
-    private static final ResponseGenerator LOGIN_RESPONSE_GENERATOR = new LoginResponseGenerator();
+    private static final ResponseGenerator LOGIN_RESPONSE_GENERATOR =
+            new LoginResponseGenerator(SessionManager.getInstance());
 
     @DisplayName("처리할 수 있는 HttpRequest인지 반환한다.")
     @ParameterizedTest

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Stream;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -21,7 +22,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class HtmlResponseGeneratorTest {
 
-    private static final HtmlResponseGenerator HTML_RESPONSE_GENERATOR = new HtmlResponseGenerator();
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
+    private static final HtmlResponseGenerator HTML_RESPONSE_GENERATOR =
+            new HtmlResponseGenerator(SESSION_MANAGER);
 
     @DisplayName("처리할 수 있는 HttpRequest인지 반환한다.")
     @ParameterizedTest
@@ -74,7 +77,7 @@ class HtmlResponseGeneratorTest {
     void generate_RedirectToIndexHtml() throws IOException {
         User user = new User("chris", "password", "email@google.com");
         Session session = new Session("user", user);
-        SessionManager.add(session);
+        SESSION_MANAGER.add(session);
 
         String request = "GET /login HTTP/1.1\n" +
                 "Host: localhost:8080\n" +

@@ -3,17 +3,30 @@ package org.apache.catalina;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SessionManager {
+public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private final Map<String, Session> sessions = new HashMap<>();
+    private static final SessionManager INSTANCE = new SessionManager();
 
-    public static void add(Session session) {
-        SESSIONS.put(session.getId(), session);
+    public static SessionManager getInstance() {
+        return INSTANCE;
     }
 
-    public static boolean isValid(String sessionId) {
-        return SESSIONS.keySet()
-                .stream()
-                .anyMatch(sessionId::equals);
+    private SessionManager() {
+    }
+
+    @Override
+    public void add(Session session) {
+        sessions.put(session.getId(), session);
+    }
+
+    @Override
+    public Session findSession(String id) {
+        return sessions.get(id);
+    }
+
+    @Override
+    public void remove(Session session) {
+        sessions.remove(session.getId());
     }
 }

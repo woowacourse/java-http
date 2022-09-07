@@ -59,24 +59,30 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(requestPath)) {
-            return doLoginRequest(uri);
+            return getLoginResponse(httpRequest, uri);
         }
 
         if ("/register".equals(requestPath)) {
-            return HttpResponse.of(StatusCode.getStatusCode(200),
-                    uri.getPath().concat("." + ContentType.HTML.getExtension()));
+            return doRegisterRequest(httpRequest, uri);
         }
 
         return HttpResponse.of(StatusCode.getStatusCode(200), requestPath);
     }
 
-    private HttpResponse doLoginRequest(URI uri) throws IOException {
-        if (uri.getQuery() == null) {
+    private HttpResponse getLoginResponse(HttpRequest httpRequest, URI uri) throws IOException {
+        if ("GET".equals(httpRequest.getRequestLine().getMethod())
+                && uri.getQuery() == null) {
             return HttpResponse.of(StatusCode.getStatusCode(200),
                     uri.getPath().concat("." + ContentType.HTML.getExtension()));
         }
+        if ("POST".equals(httpRequest.getRequestLine().getMethod())) {
+            String body = httpRequest.getRequestBody().getBody();
+            return doLoginRequest(new QueryMapper(body));
+        }
+        return doLoginRequest(new QueryMapper(uri));
+    }
 
-        QueryMapper queryMapper = new QueryMapper(uri);
+    private HttpResponse doLoginRequest(QueryMapper queryMapper) throws IOException {
         Map<String, String> parameters = queryMapper.getParameters();
 
         User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
@@ -85,6 +91,24 @@ public class Http11Processor implements Runnable, Processor {
         if (user.checkPassword(parameters.get("password"))) {
             log.info("user : " + user);
             return HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
+        }
+        return HttpResponse.of(StatusCode.getStatusCode(200), "/401.html");
+    }
+
+    private HttpResponse doRegisterRequest(HttpRequest httpRequest, URI uri) throws IOException {
+        if ("GET".equals(httpRequest.getRequestLine().getMethod())
+                && uri.getQuery() == null) {
+            return HttpResponse.of(StatusCode.getStatusCode(200),
+                    uri.getPath().concat("." + ContentType.HTML.getExtension()));
+        }
+        if ("POST".equals(httpRequest.getRequestLine().getMethod())) {
+            String body = httpRequest.getRequestBody().getBody();
+            QueryMapper queryMapper = new QueryMapper(body);
+            Map<String, String> parameters = queryMapper.getParameters();
+
+            User user = new User(parameters.get("account"), parameters.get("password"), parameters.get("email"));
+            InMemoryUserRepository.save(user);
+            return HttpResponse.of(StatusCode.getStatusCode(200), "/index.html");
         }
         return HttpResponse.of(StatusCode.getStatusCode(200), "/401.html");
     }

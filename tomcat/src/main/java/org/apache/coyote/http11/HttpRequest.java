@@ -19,12 +19,9 @@ public class HttpRequest {
 
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
-        List<String> headers = extractHeaders(bufferedReader);
-        RequestHeaders requestHeaders = RequestHeaders.from(headers);
-        int contentLength = requestHeaders.getContentLength();
-        char[] body = new char[contentLength];
-        bufferedReader.read(body, 0, contentLength);
-        return new HttpRequest(requestLine, requestHeaders, RequestBody.from(body));
+        RequestHeaders requestHeaders = RequestHeaders.from(extractHeaders(bufferedReader));
+        RequestBody requestBody = RequestBody.from(extractBody(bufferedReader, requestHeaders));
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     private static List<String> extractHeaders(BufferedReader bufferedReader) throws IOException {
@@ -37,6 +34,13 @@ public class HttpRequest {
             headers.add(line);
         }
         return headers;
+    }
+
+    private static char[] extractBody(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
+        int contentLength = requestHeaders.getContentLength();
+        char[] body = new char[contentLength];
+        bufferedReader.read(body, 0, contentLength);
+        return body;
     }
 
     public RequestLine getRequestLine() {

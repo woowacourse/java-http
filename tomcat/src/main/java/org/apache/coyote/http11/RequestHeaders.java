@@ -22,8 +22,8 @@ public class RequestHeaders {
     }
 
     public int getContentLength() {
-        if (headers.containsKey("Content-length")) {
-            return Integer.parseInt(headers.get("Content-length"));
+        if (headers.containsKey("Content-Length")) {
+            return Integer.parseInt(headers.get("Content-Length"));
         }
         return 0;
     }

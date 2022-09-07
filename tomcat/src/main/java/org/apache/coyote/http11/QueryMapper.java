@@ -16,6 +16,10 @@ public class QueryMapper {
         this.query = uri.getQuery();
     }
 
+    public QueryMapper(String body) {
+        this.query = body;
+    }
+
     public Map<String, String> getParameters() {
         Map<String, String> result = new HashMap<>();
         List<String> parameterPairs = List.of(this.query.split("&"));

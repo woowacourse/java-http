@@ -16,7 +16,7 @@ class HttpRequestTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "");
+                "eee");
 
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

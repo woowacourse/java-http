@@ -41,6 +41,14 @@ public class Http11Request {
         }
     }
 
+    public void setCookie(HttpCookie httpCookie) {
+        if (hasCookie()) {
+            header.replace(HeaderElement.COOKIE.getValue(), httpCookie.toString());
+            return;
+        }
+        header.put(HeaderElement.COOKIE.getValue(), httpCookie.toString());
+    }
+
     public String getBody() {
         return body;
     }

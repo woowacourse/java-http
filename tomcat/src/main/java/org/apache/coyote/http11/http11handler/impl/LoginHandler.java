@@ -26,7 +26,7 @@ public class LoginHandler implements Http11Handler {
     private final HandlerSupporter handlerSupporter = new HandlerSupporter();
     private final QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private final LoginService loginService = new LoginService();
-    private final SessionManager sessionManager = SessionManager.of();
+    private final SessionManager sessionManager = SessionManager.connect();
 
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
@@ -49,7 +49,7 @@ public class LoginHandler implements Http11Handler {
         sessionManager.add(session);
 
         HttpCookie httpCookie = new HttpCookie();
-        httpCookie.setJsessionId(session);
+        httpCookie.setJsessionId(session.getId());
         responseComponent.setCookie(httpCookie.toString());
         return responseComponent;
     }

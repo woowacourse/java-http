@@ -34,8 +34,8 @@ public class HttpCookie {
         return new HttpCookie(values);
     }
 
-    public void setJsessionId(Session session) {
-        values.put(JSESSIONID_KEY, session.getId());
+    public void setJsessionId(String jsessionId) {
+        values.put(JSESSIONID_KEY, jsessionId);
     }
 
     public boolean hasJessionId() {

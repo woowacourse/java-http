@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
@@ -21,11 +23,13 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Http11RequestHandler http11RequestHandler;
     private final Http11HandlerSelector http11HandlerSelector;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.http11RequestHandler = new Http11RequestHandler();
         this.http11HandlerSelector = new Http11HandlerSelector();
+        this.sessionManager = SessionManager.connect();
     }
 
     @Override
@@ -40,6 +44,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
             Http11Request http11Request = http11RequestHandler.makeRequest(bufferedReader);
+            sessionManager.assignSessionIfAbsent(http11Request);
 
             log.info(http11Request.getUri());
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);

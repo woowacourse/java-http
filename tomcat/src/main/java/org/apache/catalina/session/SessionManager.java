@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.model.user.User;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.http11handler.exception.CookieNotFoundException;
+import org.apache.coyote.http11.http11request.Http11Request;
 
 public class SessionManager implements Manager {
 
@@ -16,7 +19,7 @@ public class SessionManager implements Manager {
 
     private SessionManager() {}
 
-    public static SessionManager of() {
+    public static SessionManager connect() {
         return sessionManager;
     }
 
@@ -39,5 +42,29 @@ public class SessionManager implements Manager {
         Session session = new Session();
         session.setAttribute(USER_KEY, user);
         return session;
+    }
+
+    public void assignSessionIfAbsent(Http11Request http11Request) {
+        try {
+            HttpCookie httpCookie = http11Request.getCookie();
+            if (!httpCookie.hasJessionId()) {
+                assignSession(http11Request, httpCookie);
+            }
+        } catch (CookieNotFoundException e) {
+            System.out.println("nocookie@@@@@@@");
+            assignCookieWithSession(http11Request);
+        }
+    }
+
+    private void assignCookieWithSession(Http11Request http11Request) {
+        HttpCookie httpCookie = new HttpCookie();
+        assignSession(http11Request, httpCookie);
+    }
+
+    private void assignSession(Http11Request http11Request, HttpCookie httpCookie) {
+        Session session = new Session();
+        add(session);
+        httpCookie.setJsessionId(session.getId());
+        http11Request.setCookie(httpCookie);
     }
 }

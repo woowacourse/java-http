@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHead {
 
+    private static final Logger log = LoggerFactory.getLogger(RequestHead.class);
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 

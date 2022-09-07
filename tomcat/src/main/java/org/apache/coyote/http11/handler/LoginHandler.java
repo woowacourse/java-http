@@ -22,10 +22,10 @@ public class LoginHandler extends Handler {
     public HandlerResult handle(final HttpRequest request) {
         try {
             final HttpRequestBody requestBody = request.getBody();
-            final User loginUser = InMemoryUserRepository.findByAccount(requestBody.getInfo("account"))
+            final User loginUser = InMemoryUserRepository.findByAccount(request.getBodyValue("account"))
                     .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
 
-            if (!loginUser.checkPassword(requestBody.getInfo("password"))) {
+            if (!loginUser.checkPassword(request.getBodyValue("password"))) {
                 throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
             }
 

@@ -27,7 +27,6 @@ public class HttpRequest {
         final Map<String, String> headers = new HashMap<>();
         while (!"".equals(line = reader.readLine()) && line != null) {
             final String[] header = line.split(": ");
-            System.out.println(header[0] + " " + header[1]);
             headers.put(header[0], header[1]);
         }
         final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
@@ -42,7 +41,6 @@ public class HttpRequest {
 
     private static String getRequestBody(final BufferedReader reader, final String contentLength) throws IOException {
         if (contentLength == null) {
-            System.out.println("sdads");
             return null;
         }
         final int contentSize = Integer.parseInt(contentLength);
@@ -80,5 +78,9 @@ public class HttpRequest {
 
     public String getProtocol() {
         return startLine.getProtocol();
+    }
+
+    public String getBodyValue(final String key) {
+        return body.getInfo(key);
     }
 }

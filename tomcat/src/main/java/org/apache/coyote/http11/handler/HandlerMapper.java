@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import static org.apache.coyote.http11.handler.HandlerForGetRequest.HANDLER_FOR_GET_REQUEST;
 import static org.apache.coyote.http11.handler.LoginHandler.LOGIN_HANDLER;
+import static org.apache.coyote.http11.handler.RegisterHandler.REGISTER_HANDLER;
 
 import java.util.Arrays;
 import org.apache.coyote.http11.HttpMethod;
@@ -10,7 +11,8 @@ import org.apache.coyote.http11.request.HttpRequestStartLine;
 
 public enum HandlerMapper {
 
-    LOGIN(HttpMethod.POST, "/login", LOGIN_HANDLER);
+    LOGIN(HttpMethod.POST, "/login", LOGIN_HANDLER),
+    REGISTER(HttpMethod.POST, "/register", REGISTER_HANDLER);
 
     private final HttpMethod httpMethod;
     private final String uri;

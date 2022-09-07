@@ -5,9 +5,9 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.header.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResourceAbstractServlet extends AbstractServlet {
+public class ResourceServlet extends AbstractServlet {
 
-    public ResourceAbstractServlet(final SessionFactory sessionFactory) {
+    public ResourceServlet(final SessionFactory sessionFactory) {
         super(sessionFactory);
     }
 

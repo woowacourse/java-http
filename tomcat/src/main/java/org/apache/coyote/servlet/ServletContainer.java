@@ -7,10 +7,10 @@ import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.ResourceSearcher;
-import org.apache.coyote.servlet.servlets.HelloWorldAbstractServlet;
-import org.apache.coyote.servlet.servlets.LoginAbstractServlet;
-import org.apache.coyote.servlet.servlets.RegisterAbstractServlet;
-import org.apache.coyote.servlet.servlets.ResourceAbstractServlet;
+import org.apache.coyote.servlet.servlets.HelloWorldServlet;
+import org.apache.coyote.servlet.servlets.LoginServlet;
+import org.apache.coyote.servlet.servlets.RegisterServlet;
+import org.apache.coyote.servlet.servlets.ResourceServlet;
 import org.apache.coyote.servlet.servlets.AbstractServlet;
 
 public class ServletContainer {
@@ -20,19 +20,19 @@ public class ServletContainer {
     private static final Set<Mapping> MAPPINGS = new HashSet<>();
 
     private final SessionFactory sessionFactory;
-    private final ResourceAbstractServlet resourceServlet;
+    private final ResourceServlet resourceServlet;
 
     private ServletContainer() {
         sessionFactory = SessionFactory.init();
-        resourceServlet = new ResourceAbstractServlet(sessionFactory);
+        resourceServlet = new ResourceServlet(sessionFactory);
     }
 
     public static ServletContainer init() {
         final ServletContainer servletContainer = SERVLET_CONTAINER;
 
-        mapUrlToServlet(new HelloWorldAbstractServlet(servletContainer.sessionFactory), "/");
-        mapUrlToServlet(new LoginAbstractServlet(servletContainer.sessionFactory), "/login");
-        mapUrlToServlet(new RegisterAbstractServlet(servletContainer.sessionFactory), "/register");
+        mapUrlToServlet(new HelloWorldServlet(servletContainer.sessionFactory), "/");
+        mapUrlToServlet(new LoginServlet(servletContainer.sessionFactory), "/login");
+        mapUrlToServlet(new RegisterServlet(servletContainer.sessionFactory), "/register");
 
         return servletContainer;
     }

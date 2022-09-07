@@ -1,22 +1,29 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResponseHeader {
 
-    private final ContentType contentType;
-    private final long contentLength;
+    private final Map<String, String> headers;
 
-    public ResponseHeader(ContentType contentType, long contentLength) {
-        this.contentType = contentType;
-        this.contentLength = contentLength;
+    public ResponseHeader(Map<String, String> headers) {
+        this.headers = headers;
     }
 
-    public String getContentType() {
-        return contentType.getContent();
+    public static ResponseHeader of(String contentType, String contentLength) {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", contentType);
+        header.put("Content-Length", contentLength);
+
+        return new ResponseHeader(header);
     }
 
-    public long getContentLength() {
-        return contentLength;
+    public void addHeader(String headerType, String headerValue) {
+        headers.put(headerType, headerValue);
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

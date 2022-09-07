@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 public enum ContentType {
 
-    HTML("text/html", ".html"),
-    CSS("text/css", ".css"),
-    JAVASCRIPT("text/javascript", ".js");
+    HTML("text/html;charset=utf-8", ".html"),
+    CSS("text/css;charset=utf-8", ".css"),
+    JAVASCRIPT("text/javascript;charset=utf-8", ".js");
 
     private final String content;
     private final String fileType;

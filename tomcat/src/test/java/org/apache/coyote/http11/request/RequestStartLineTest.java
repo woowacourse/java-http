@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class RequestStartLineTest {
 
     @Test
-    void startLineÀÌ_ÆÄ½ÌµÇ´ÂÁö_È®ÀÎÇÑ´Ù() {
+    void startLineì´_íŒŒì‹±ë˜ëŠ”ì§€_í™•ì¸í•œë‹¤() {
         String startLine = "POST /login?account=gugu&password=password";
         RequestStartLine requestStartLine = RequestStartLine.from(startLine);
 

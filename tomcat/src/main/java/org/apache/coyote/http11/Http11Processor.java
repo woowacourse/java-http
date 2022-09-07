@@ -39,23 +39,14 @@ public class Http11Processor implements Runnable, Processor {
             final var httpRequest = HttpRequest.read(bufferedReader);
             final var httpResponse = getHttpResponse(httpRequest);
 
-            outputStream.write(httpResponse.getHttpResponse().getBytes());
+            String httpResponse1 = httpResponse.getHttpResponse();
+            outputStream.write(httpResponse1.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private String readRequest(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder header = new StringBuilder();
-
-        while (bufferedReader.ready()) {
-            header.append(bufferedReader.readLine())
-                    .append("\r\n");
-        }
-        return header.toString();
     }
 
     private HttpResponse getHttpResponse(final HttpRequest httpRequest) throws Exception {

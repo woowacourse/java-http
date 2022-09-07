@@ -5,19 +5,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.apache.coyote.support.HttpRequestParser;
 
 public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final String url;
     private final QueryParams queryParams;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
     private final String body;
 
     private HttpRequest(final HttpMethod httpMethod, final String url, final QueryParams queryParams,
-                        final Map<String, String> headers, final String body) {
+                        final HttpHeaders headers, final String body) {
         this.httpMethod = httpMethod;
         this.url = url;
         this.queryParams = queryParams;
@@ -29,11 +27,11 @@ public class HttpRequest {
         HttpRequestStartLine startLine = HttpRequestStartLine.parse(bufferedReader.readLine());
         URI uri = startLine.getUri();
         QueryParams queryParams = QueryParams.parse(uri.getQuery());
-        Map<String, String> headers = HttpRequestParser.parseHeaders(readHeaders(bufferedReader));
-        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+        HttpHeaders httpHeaders = HttpHeaders.parse(readHeaders(bufferedReader));
+        int contentLength = Integer.parseInt(httpHeaders.getOrDefault("Content-Length", "0"));
         String body = readBody(bufferedReader, contentLength);
 
-        return new HttpRequest(startLine.getHttpMethod(), uri.getPath(), queryParams, headers, body);
+        return new HttpRequest(startLine.getHttpMethod(), uri.getPath(), queryParams, httpHeaders, body);
     }
 
     private static List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -67,7 +65,7 @@ public class HttpRequest {
         return queryParams;
     }
 
-    public Map<String, String> getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 

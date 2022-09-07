@@ -37,7 +37,7 @@ class HttpRequestTest {
                 () -> assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(httpRequest.getUrl()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getQueryParams().exists()).isFalse(),
-                () -> assertThat(httpRequest.getHeaders()).hasSize(2),
+                () -> assertThat(httpRequest.getHeaders().getAll()).hasSize(3),
                 () -> assertThat(httpRequest.getBody()).isEqualTo(
                         "requestBody1\r\nrequestBody2")
         );

@@ -4,19 +4,22 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.apache.coyote.util.StringParser;
 
 public class HttpResponse {
 
     private static final String TEXT_HTML = "text/html";
     private static final String NEW_LINE = "\r\n";
+    private static final String FILE_EXTENSION = ".";
 
-    private HttpStatusCode statusCode;
     private final Map<String, String> headers;
+    private HttpStatusCode statusCode;
     private String responseBody;
 
     public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> headers) {
@@ -48,7 +51,7 @@ public class HttpResponse {
                     .collect(Collectors.joining("\n"));
 
             this.responseBody = body + "\n";
-            addContentTypeAndLength(StringParser.toMimeType(path));
+            addContentTypeAndLength(toMimeType(path));
             return this;
         } catch (final Exception e) {
             e.printStackTrace();
@@ -59,20 +62,26 @@ public class HttpResponse {
 
     private BufferedReader toReaderByPath(final String path) throws FileNotFoundException {
         final String resourcePath = toResourcePath(path);
-        final String resource = HttpResponse.class.getClassLoader()
-                .getResource(resourcePath)
-                .getPath();
-        final File file = new File(resource);
+        final File file = new File(resourcePath);
 
         return new BufferedReader(new FileReader(file));
     }
 
     private String toResourcePath(final String path) {
         String resourcePath = "static/" + path;
-        if (!resourcePath.contains(".")) {
+        if (!resourcePath.contains(FILE_EXTENSION)) {
             resourcePath += ".html";
         }
-        return resourcePath;
+
+        return HttpResponse.class.getClassLoader()
+                .getResource(resourcePath)
+                .getPath();
+    }
+
+    private String toMimeType(final String path) throws IOException {
+        final Path resourcePath = Path.of(toResourcePath(path));
+
+        return Files.probeContentType(resourcePath);
     }
 
     private void changeStatusCode(final HttpStatusCode statusCode) {

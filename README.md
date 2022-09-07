@@ -1,88 +1,68 @@
-# 🐱 톰캣 구현하기 2단계 - 로그인 구현하기
+# 🐱 톰캣 구현하기 3단계 - 리팩터링
 
 ## 🚀 미션 설명
 
-서블릿을 도입해서 동적 페이지를 만들 수 있게 되었다.
+HTTP 서버를 구현한 코드의 복잡도가 높아졌다.
 
-이제 로그인과 회원가입 기능을 추가해보자.
-
-로그인에 필요한 쿠키와 세션도 같이 구현해보자.
+적절한 클래스를 추가하고 역할을 맡겨서 코드 복잡도를 낮춰보자.
 
 ## ⚙️ 기능 요구 사항
 
-### 1. HTTP Status Code 302
+### 1. HttpRequest 클래스 구현하기
 
-로그인 여부에 따라 다른 페이지로 이동시켜보자.
+HTTP 요청을 처리하는 클래스를 추가한다.
 
-/login 페이지에서 아이디는 gugu, 비밀번호는 password를 입력하자.
+HTTP 요청은 어떤 형태로 구성되어 있는가?
 
-로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
-로그인에 실패하면 401.html로 리다이렉트한다.
+클래스로 HTTP 요청을 어떻게 구성하면 좋을까?
 
-### 2. POST 방식으로 회원가입
+HTTP 요청 이미지를 참고해서 구현해보자
 
-http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+### 2. HttpResponse 클래스 구현하기
 
-회원가입 페이지를 보여줄 때는 GET을 사용한다.
+HTTP 응답을 처리하는 클래스를 추가한다.
 
-회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+HTTP 응답은 어떤 형태로 구성되어 있는가?
 
-회원가입을 완료하면 index.html로 리다이렉트한다.
+클라이언트에게 어떤 형태로 HTTP를 응답하면 좋을까?
 
-로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+### 3. Controller 인터페이스 추가하기
 
-### 3. Cookie에 JSESSIONID 값 저장하기
+HTTP 요청, 응답을 다른 객체에게 역할을 맡기고 나니까 uri 경로에 따른 if절 분기 처리가 남는다.
+if절 분기는 어떻게 리팩터링하는게 좋을까?
+컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들어보자.
 
-로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
 
-HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.
-세션을 구현하기 전에 먼저 쿠키를 구현해본다.
 
-자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.
-
-서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하고 JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 형태로 값을 전달하면 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
-
-서버로부터 쿠키 설정된 클라이언트의 HTTP Request Header 예시
-
-```text
-GET /index.html HTTP/1.1
-Host: localhost:8080
-Connection: keep-alive
-Accept: */*
-Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
+```java
+public interface Controller {
+    void service(HttpRequest request, HttpResponse response) throws Exception;
+}
 ```
 
-Cookie 클래스를 추가하고 HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
+```java
+public abstract class AbstractController implements Controller {
 
-```text
-HTTP/1.1 200 OK 
-Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
-Content-Length: 5571
-Content-Type: text/html;charset=utf-8;
+    @Override
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        // http method 분기문
+    }
+
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+}
 ```
-
-### 4. Session 구현하기
-
-쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
-로그인에 성공하면 Session 객체의 값으로 User 객체를 저장해보자.
-
-그리고 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
-
-
 
 ## 🖊 체크리스트
 
-- [x] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
-- [x] POST 로 들어온 요청의 Request Body를 파싱할 수 있다.
-- [x] 로그인에  성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
-- [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+- [x] HTTP Request, HTTP Response 클래스로 나눠서 구현했다.
+- [ ] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
 
 ## 🖥 기능 목록
 
-- [x] HTTP Status Code 302
-- [x] POST 방식으로 회원가입
-- [x] Cookie 에 JSESSIONID 값 저장하기
-- [x] Session 구현하기
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [ ] Controller 인터페이스 추가하기
 
 ## 🔥 리팩토링 목록
 

@@ -8,19 +8,19 @@ import org.apache.coyote.http11.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestHead {
+public class RequestHeaders {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHead.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestHeaders.class);
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
-    private RequestHead(Map<String, String> headers) {
+    private RequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static RequestHead of(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders of(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
@@ -28,7 +28,7 @@ public class RequestHead {
             requestHeaders.put(keyValue[REQUEST_HEADER_KEY_INDEX].trim(), keyValue[REQUEST_HEADER_VALUE_INDEX].trim());
             line = bufferedReader.readLine();
         }
-        return new RequestHead(requestHeaders);
+        return new RequestHeaders(requestHeaders);
     }
 
     public int getContentLength() {

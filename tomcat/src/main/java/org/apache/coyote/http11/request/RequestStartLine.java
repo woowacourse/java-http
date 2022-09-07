@@ -5,16 +5,16 @@ public class RequestStartLine {
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_URL_INDEX = 1;
 
-    private final RequestMethod requestMethod;
-    private final String requestUrl;
+    private final RequestMethod method;
+    private final String path;
 
-    private RequestStartLine(String requestMethod, String requestUrl) {
-        this(RequestMethod.find(requestMethod), requestUrl);
+    private RequestStartLine(String method, String path) {
+        this(RequestMethod.find(method), path);
     }
 
-    private RequestStartLine(RequestMethod requestMethod, String requestUrl) {
-        this.requestMethod = requestMethod;
-        this.requestUrl = requestUrl;
+    private RequestStartLine(RequestMethod method, String path) {
+        this.method = method;
+        this.path = path;
     }
 
     public static RequestStartLine from(final String startLine) {
@@ -30,14 +30,14 @@ public class RequestStartLine {
     }
 
     public boolean isGetMethod() {
-        return requestMethod.equals(RequestMethod.GET);
+        return method.equals(RequestMethod.GET);
     }
 
     public boolean isPostMethod() {
-        return requestMethod.equals(RequestMethod.POST);
+        return method.equals(RequestMethod.POST);
     }
 
-    public String getRequestUrl() {
-        return requestUrl;
+    public String getPath() {
+        return path;
     }
 }

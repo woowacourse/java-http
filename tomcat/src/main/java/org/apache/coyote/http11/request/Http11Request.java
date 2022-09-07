@@ -8,12 +8,12 @@ import java.io.InputStreamReader;
 public class Http11Request {
 
     private final RequestStartLine startLine;
-    private final RequestHead requestHead;
+    private final RequestHeaders requestHeaders;
     private final String requestBody;
 
-    private Http11Request(RequestStartLine startLine, RequestHead requestHead, String requestBody) {
+    private Http11Request(RequestStartLine startLine, RequestHeaders requestHeaders, String requestBody) {
         this.startLine = startLine;
-        this.requestHead = requestHead;
+        this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
     }
 
@@ -21,7 +21,7 @@ public class Http11Request {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         RequestStartLine startLine = RequestStartLine.from(getStartLine(bufferedReader));
-        RequestHead requestHeaders = RequestHead.of(bufferedReader);
+        RequestHeaders requestHeaders = RequestHeaders.of(bufferedReader);
         String requestBody = getRequestBody(bufferedReader, requestHeaders.getContentLength());
         return new Http11Request(startLine, requestHeaders, requestBody);
     }
@@ -38,7 +38,7 @@ public class Http11Request {
     }
 
     public boolean hasNoJsessionIdCookie() {
-        return requestHead.hasNoCookieNamed("JSESSIONID");
+        return requestHeaders.hasNoCookieNamed("JSESSIONID");
     }
 
     public boolean isGetMethod() {
@@ -50,7 +50,7 @@ public class Http11Request {
     }
 
     public String getRequestUrl() {
-        return startLine.getRequestUrl();
+        return startLine.getPath();
     }
 
     public String getRequestBody() {

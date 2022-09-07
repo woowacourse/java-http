@@ -1,18 +1,48 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import org.apache.coyote.http11.util.HttpMessageSupporter;
 import org.apache.coyote.http11.util.QueryStringResolver;
 
 public class Request {
     private static final String QUERY_PARAM_PREFIX = "?";
     private static final int NEXT_INDEX = 1;
+    private static final int FIRST_INDEX = 0;
+    private static final String BLANK = " ";
+    private static final String EMPTY = "";
 
     private final String requestURI;
-    private final Map<String, String> queryParams;
+    private final String httpMethod;
+    private Map<String, String> queryParams;
+    private String requestBody;
 
-    private Request(final String requestURI) {
-        this.requestURI = requestURI;
-        this.queryParams = parseURI(requestURI);
+    private Request(final String rowRequest) {
+        this.requestURI = HttpMessageSupporter.getRequestURI(rowRequest);
+        this.httpMethod = parseHttpMethod(rowRequest);
+        if (httpMethod.equalsIgnoreCase("get")) {
+            this.queryParams = parseURI(requestURI);
+            return;
+        }
+        if (httpMethod.equalsIgnoreCase("post")) {
+            this.queryParams = parseFormRequest(rowRequest);
+            return;
+        }
+        this.requestBody = parseRequestBody(rowRequest);
+    }
+
+    private String parseRequestBody(final String rowRequest) {
+        return rowRequest.split(System.lineSeparator() + System.lineSeparator())[1]
+                .replaceAll(System.lineSeparator(), EMPTY);
+    }
+
+    private Map<String, String> parseFormRequest(final String rowRequest) {
+        final String queryString = rowRequest.split(System.lineSeparator() + System.lineSeparator())[1]
+                .replaceAll(System.lineSeparator(), EMPTY);
+        return QueryStringResolver.resolve(queryString);
+    }
+
+    private String parseHttpMethod(final String rowRequest) {
+        return rowRequest.split(BLANK)[FIRST_INDEX];
     }
 
     private Map<String, String> parseURI(final String requestURI) {
@@ -28,8 +58,8 @@ public class Request {
         return requestURI.substring(index + NEXT_INDEX);
     }
 
-    public static Request from(final String requestURI) {
-        return new Request(requestURI);
+    public static Request from(final String rowRequest) {
+        return new Request(rowRequest);
     }
 
     public Map<String, String> getQueryParams() {
@@ -38,5 +68,13 @@ public class Request {
 
     public String getRequestURI() {
         return requestURI;
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

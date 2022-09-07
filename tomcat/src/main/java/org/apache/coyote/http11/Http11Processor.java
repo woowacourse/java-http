@@ -33,26 +33,26 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var requestLine = bufferedReader.readLine();
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var requestURI = HttpMessageSupporter.getRequestURI(requestLine);
+            final var http11request = Http11Request.from(bufferedReader);
+            final var http11response = new Http11Response();
+//            final var requestLine = http11request.getRequestLine();
 
             // 정적 파일 요청일 경우
-            if (isStaticResourceRequest(requestURI)) {
-                final var response = HttpMessageSupporter.getHttpMessageWithStaticResource(requestURI);
+            if (isStaticResourceRequest(http11request.getRequestLine().getRequestURI())) {
+                final var response = HttpMessageSupporter.getHttpMessageWithStaticResource(
+                        http11request.getRequestLine().getRequestURI());
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
-            // Request, Response 생성
-            final var servletRequest = Request.from(requestURI);
-            final var servletResponse = new Response();
-
             // servlet 요청 처리
-            chicChocServlet.doService(servletRequest, servletResponse);
-            final var response = HttpMessageSupporter.getHttpMessage(servletResponse);
+            chicChocServlet.doService(http11request, http11response);
+
+            final var response = HttpMessageSupporter.getHttpMessage(http11response);
+            System.out.println(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

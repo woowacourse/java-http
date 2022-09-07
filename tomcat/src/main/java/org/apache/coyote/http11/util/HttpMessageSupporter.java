@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.exception.NotFoundResourceException;
 
 public class HttpMessageSupporter {
@@ -36,7 +36,7 @@ public class HttpMessageSupporter {
                 responseBody);
     }
 
-    public static String getHttpMessage(final Response response) throws IOException {
+    public static String getHttpMessage(final Http11Response response) throws IOException {
         final String resourceURI = response.getResourceURI();
         if (!Objects.isNull(resourceURI)) {
             final var absolutePath = parsePath(resourceURI);
@@ -51,9 +51,8 @@ public class HttpMessageSupporter {
         return readResponse(response);
     }
 
-    private static String readResponse(final Response response) {
+    private static String readResponse(final Http11Response response) {
         final String responseBody = response.getResponseBody();
-
         if (Objects.isNull(responseBody)) {
             return String.join("\r\n",
                     "HTTP/1.1 " + response.getHttpStatusCode() + BLANK,

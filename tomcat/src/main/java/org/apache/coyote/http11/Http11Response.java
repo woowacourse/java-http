@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.exception.ResourcePathNotFoundException;
+import nextstep.jwp.exception.NotFoundResourcePathException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,8 @@ public class Http11Response {
         return new Http11Response(statusCode, contentType, responseBody, location, null);
     }
 
-    public static Http11Response withLocationAndSetJsessionIdCookie(StatusCode statusCode, String resourcePath, String location, HttpCookie cookie) {
+    public static Http11Response withLocationAndSetJsessionIdCookie(StatusCode statusCode, String resourcePath,
+                                                                    String location, HttpCookie cookie) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -67,7 +68,7 @@ public class Http11Response {
 
     private static void validateResourcePath(URL resource) {
         if (resource == null) {
-            throw new ResourcePathNotFoundException();
+            throw new NotFoundResourcePathException();
         }
     }
 

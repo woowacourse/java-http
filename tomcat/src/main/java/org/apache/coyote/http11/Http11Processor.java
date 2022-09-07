@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Url.LOGIN;
-
 import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.support.Controller;
+import org.apache.coyote.support.ControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,26 +32,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final Http11Request request = Http11Request.of(inputStream);
-            final String url = request.getRequestUrl();
-            final Http11Response response = Url.getResponseFrom(url);
-            if (Url.find(url).equals(LOGIN)) {
-                Http11QueryParams queryParams = Http11QueryParams.from(url);
-                logUserInfo(queryParams);
-            }
+            final Controller controller = ControllerMapper.getControllerFrom(request.getRequestUrl());
+            final Http11Response response = controller.service(request);
             response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private static void logUserInfo(Http11QueryParams queryParams) {
-        final String account = queryParams.getValueFrom("account");
-        final String password = queryParams.getValueFrom("password");
-
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
         }
     }
 }

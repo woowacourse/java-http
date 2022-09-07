@@ -13,7 +13,7 @@ import org.apache.coyote.http11.message.RequestBody;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.util.FileUtil;
 
-public class LoginHandler implements RequestHandler {
+public class LoginHandler extends AbstractRequestHandler {
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {

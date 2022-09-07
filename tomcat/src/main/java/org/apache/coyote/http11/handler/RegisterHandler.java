@@ -12,7 +12,7 @@ import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.RequestBody;
 import org.apache.coyote.util.FileUtil;
 
-public class RegisterHandler implements RequestHandler {
+public class RegisterHandler extends AbstractRequestHandler {
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {

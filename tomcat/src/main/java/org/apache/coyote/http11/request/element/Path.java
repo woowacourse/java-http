@@ -25,8 +25,12 @@ public class Path {
         return this.path.equals(path);
     }
 
-    public boolean contains(List<String> paths) {
+    public boolean isIn(List<String> paths) {
         return paths.contains(path);
+    }
+
+    public boolean contains(String element) {
+        return path.contains(element);
     }
 
     @Override

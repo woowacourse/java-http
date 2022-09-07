@@ -36,21 +36,10 @@ public class ViewResolver {
             Path path = new File(file).toPath();
 
             String contentType = Files.probeContentType(path);
-            return HttpResponse.from(new HttpResponseBody(bodyOf(ROOT + url)), status,
+            return HttpResponse.from(new HttpResponseBody(String.join(CRLF, new String(Files.readAllBytes(path)))), status,
                     contentType);
         } catch (NullPointerException | IOException e) {
             throw new NoSuchElementException("해당 페이지를 찾을 수 없습니다: " + url);
-        }
-    }
-
-    private String bodyOf(final String fileName) {
-        try {
-            URL url = HttpResponseBody.class.getClassLoader().getResource(fileName);
-            String file = Objects.requireNonNull(url).getFile();
-            Path path = new File(file).toPath();
-            return String.join(CRLF, new String(Files.readAllBytes(path)));
-        } catch (NullPointerException | IOException e) {
-            throw new NoSuchElementException("해당 이름의 파일을 찾을 수 없습니다: " + fileName);
         }
     }
 

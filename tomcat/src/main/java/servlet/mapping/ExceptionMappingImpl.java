@@ -1,33 +1,39 @@
 package servlet.mapping;
 
-import java.util.NoSuchElementException;
-import nextstep.jwp.controller.ExceptionHandler;
-import nextstep.jwp.exception.InvalidPasswordException;
-import nextstep.jwp.exception.NoUserException;
+import java.util.List;
+import nextstep.jwp.controller.exception.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExceptionMappingImpl implements ExceptionMapping {
 
+
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingImpl.class);
 
-    private final ExceptionHandler exceptionHandler;
+    private final List<ExceptionHandler> exceptionHandlers;
+    private final ExceptionHandler baseHandler;
 
-    public ExceptionMappingImpl(ExceptionHandler exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
+    public ExceptionMappingImpl(List<ExceptionHandler> exceptionHandlers,
+                                ExceptionHandler baseHandler) {
+        this.exceptionHandlers = exceptionHandlers;
+        this.baseHandler = baseHandler;
     }
 
     @Override
     public ResponseEntity map(Exception exception) {
         LOG.error(String.valueOf(exception.getClass()), exception);
-        try {
-            throw exception;
-        } catch (NoSuchElementException e) {
-            return exceptionHandler.notFound();
-        } catch (NoUserException | InvalidPasswordException e) {
-            return exceptionHandler.unauthorized();
-        } catch (Exception e) {
-            return exceptionHandler.internalServerError();
-        }
+
+        ExceptionHandler exceptionHandler = findHandler(exception);
+
+        ResponseEntity entity = new ResponseEntity();
+        exceptionHandler.service(exception, entity);
+        return entity;
+    }
+
+    private ExceptionHandler findHandler(Exception exception) {
+        return exceptionHandlers.stream()
+                .filter(element -> element.isMapped(exception))
+                .findFirst()
+                .orElse(baseHandler);
     }
 }

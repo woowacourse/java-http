@@ -23,7 +23,7 @@ import servlet.ServletImpl;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private final Servlet servlet = new ServletImpl();
+    private final Servlet servlet = ServletImpl.create();
 
     private final Socket connection;
 

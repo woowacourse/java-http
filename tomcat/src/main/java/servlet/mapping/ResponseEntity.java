@@ -7,9 +7,12 @@ import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class ResponseEntity {
 
-    private final String uri;
-    private final HttpStatus status;
-    private final Map<String, String> headers;
+    private String uri;
+    private HttpStatus status;
+    private Map<String, String> headers;
+
+    public ResponseEntity() {
+    }
 
     public ResponseEntity(String uri, HttpStatus status) {
         this.uri = uri;
@@ -46,5 +49,11 @@ public class ResponseEntity {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public void clone(ResponseEntity entity) {
+        this.uri = entity.getUri();
+        this.status = entity.getStatus();
+        this.headers = entity.getHeaders();
     }
 }

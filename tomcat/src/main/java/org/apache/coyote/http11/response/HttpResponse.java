@@ -4,6 +4,7 @@ import static org.apache.coyote.Constants.CRLF;
 
 import java.util.Map;
 import org.apache.coyote.http11.response.element.HttpStatus;
+import servlet.mapping.ResponseEntity;
 
 public class HttpResponse {
 

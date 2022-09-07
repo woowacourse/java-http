@@ -2,15 +2,11 @@ package servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import nextstep.jwp.controller.ControllerImpl;
-import nextstep.jwp.controller.ExceptionHandler;
-import nextstep.jwp.service.UserService;
+import nextstep.jwp.controller.exception.BaseHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.element.HttpRequestBody;
 import org.apache.coyote.http11.request.element.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import servlet.mapping.ExceptionMapping;
 import servlet.mapping.ExceptionMappingImpl;
 import servlet.mapping.HandlerMapping;
@@ -20,16 +16,23 @@ import servlet.view.ViewResolver;
 
 public class ServletImpl implements Servlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ServletImpl.class);
-
     private final ExceptionMapping exceptionMapping;
     private final HandlerMapping handlerMapping;
     private final ViewResolver viewResolver;
 
-    public ServletImpl() {
-        this.handlerMapping = new HandlerMappingImpl(new ControllerImpl(new UserService()));
-        this.viewResolver = new ViewResolver();
-        this.exceptionMapping = new ExceptionMappingImpl(new ExceptionHandler());
+    public ServletImpl(ExceptionMapping exceptionMapping, HandlerMapping handlerMapping,
+                       ViewResolver viewResolver) {
+        this.exceptionMapping = exceptionMapping;
+        this.handlerMapping = handlerMapping;
+        this.viewResolver = viewResolver;
+    }
+
+    public static Servlet create() {
+        Config config = Config.get();
+        HandlerMapping handlerMapping = new HandlerMappingImpl(config.getControllers());
+        ViewResolver viewResolver = new ViewResolver();
+        ExceptionMapping exceptionMapping = new ExceptionMappingImpl(config.getExceptionHandlers(), new BaseHandler());
+        return new ServletImpl(exceptionMapping, handlerMapping, viewResolver);
     }
 
     @Override

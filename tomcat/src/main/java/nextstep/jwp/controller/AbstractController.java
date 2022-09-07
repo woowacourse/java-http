@@ -1,15 +1,28 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.element.HttpMethod;
+import servlet.mapping.ResponseEntity;
 
 public class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        // http method 분기문
+    public void service(HttpRequest request, ResponseEntity entity) {
+        if (request.getMethod() == HttpMethod.GET) {
+            doGet(request, entity);
+        }
+        if (request.getMethod() == HttpMethod.POST) {
+            doPost(request, entity);
+        }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    @Override
+    public boolean isMapped(HttpRequest request) {
+        return false;
+    }
+
+
+    protected void doPost(HttpRequest request, ResponseEntity entity) { /* NOOP */ }
+
+    protected void doGet(HttpRequest request, ResponseEntity entity) { /* NOOP */ }
 }

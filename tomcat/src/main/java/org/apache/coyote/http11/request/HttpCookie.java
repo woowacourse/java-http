@@ -1,56 +1,49 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class HttpCookie {
 
-    private static final Map<String, String> VALUES = new HashMap<>();
-    private static boolean DOES_NEED_TO_SET_COOKIE = false;
+    private final Map<String, String> values;
+    private final boolean doesNeedToJSessionCookie;
+
+    public HttpCookie(Map<String, String> values, boolean doesNeedToJSessionCookie) {
+        this.values = values;
+        this.doesNeedToJSessionCookie = doesNeedToJSessionCookie;
+    }
 
     public static HttpCookie of(String rawCookies) {
+        Map<String, String> cookies = new LinkedHashMap<>();
         String[] splitCookies = rawCookies.split("; ");
         for (String splitCookie : splitCookies) {
             String[] cookieKeyValue = splitCookie.split("=");
-            VALUES.put(cookieKeyValue[0], cookieKeyValue[1]);
+            cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
         }
-        if (!VALUES.containsKey("JSESSIONID")) {
-            String jSessionId = String.valueOf(UUID.randomUUID());
-            VALUES.put("JSESSIONID", jSessionId);
-            SessionManager.addSession(new Session(jSessionId));
-            DOES_NEED_TO_SET_COOKIE = true;
-            return new HttpCookie();
+        if (cookies.containsKey("JSESSIONID")) {
+            return new HttpCookie(cookies, false);
         }
-        DOES_NEED_TO_SET_COOKIE = false;
-        return new HttpCookie();
+        return setJSessionIdCookie(cookies);
     }
 
     public static HttpCookie emptyCookie() {
+        Map<String, String> cookies = new LinkedHashMap<>();
+        return setJSessionIdCookie(cookies);
+    }
+
+    private static HttpCookie setJSessionIdCookie(Map<String, String> cookies) {
         String jSessionId = String.valueOf(UUID.randomUUID());
-        VALUES.put("JSESSIONID", jSessionId);
+        cookies.put("JSESSIONID", jSessionId);
         SessionManager.addSession(new Session(jSessionId));
-        DOES_NEED_TO_SET_COOKIE = true;
-        return new HttpCookie();
+        return new HttpCookie(cookies, true);
     }
 
-    public static boolean doesNeedToSetJSessionIdCookie() {
-        return DOES_NEED_TO_SET_COOKIE;
-    }
-
-    public static void completeSetJSessionIdCookie() {
-        DOES_NEED_TO_SET_COOKIE = false;
-    }
-
-    public boolean existsJSessionId() {
-        return VALUES.containsKey("JSESSIONID");
-    }
-
-    public static String ofJSessionId() {
-        return VALUES.get("JSESSIONID");
+    public boolean doesNeedToSetJSessionIdCookie() {
+        return doesNeedToJSessionCookie;
     }
 
     public String get(String name) {
-        return VALUES.get(name);
+        return values.get(name);
     }
 }

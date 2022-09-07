@@ -16,7 +16,7 @@ public class ResponseHeaders {
 
     public static ResponseHeaders of(RequestHeaders requestHeaders, ResponseEntity responseEntity) {
         Map<String, String> responseHeaders = new LinkedHashMap<>();
-        checkJSessionId(responseHeaders);
+        checkJSessionId(requestHeaders, responseHeaders);
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
             responseHeaders.put("Location", responseBody.split(":")[1]);
@@ -27,10 +27,9 @@ public class ResponseHeaders {
         return new ResponseHeaders(responseHeaders);
     }
 
-    private static void checkJSessionId(Map<String, String> responseHeaders) {
-        if (HttpCookie.doesNeedToSetJSessionIdCookie()) {
-            HttpCookie.completeSetJSessionIdCookie();
-            responseHeaders.put("Set-Cookie", "JSESSIONID=".concat(HttpCookie.ofJSessionId()));
+    private static void checkJSessionId(RequestHeaders requestHeaders, Map<String, String> responseHeaders) {
+        if (requestHeaders.doesNeedToSetJSessionIdCookie()) {
+            responseHeaders.put("Set-Cookie", "JSESSIONID=".concat(requestHeaders.getJSessionId()));
         }
     }
 

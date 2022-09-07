@@ -37,11 +37,11 @@ public class RequestHeaders {
         return headers.get(headerName);
     }
 
-    public boolean existsJSessionId() {
-        return this.cookie.existsJSessionId();
-    }
-
     public String getJSessionId() {
         return this.cookie.get("JSESSIONID");
+    }
+
+    public boolean doesNeedToSetJSessionIdCookie() {
+        return this.cookie.doesNeedToSetJSessionIdCookie();
     }
 }

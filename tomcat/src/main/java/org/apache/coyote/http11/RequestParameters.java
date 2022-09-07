@@ -5,10 +5,10 @@ import java.util.Map;
 
 public class RequestParameters {
 
-    private final Map<String, String> value;
+    private final Map<String, String> values;
 
-    private RequestParameters(final Map<String, String> value) {
-        this.value = value;
+    private RequestParameters(final Map<String, String> values) {
+        this.values = values;
     }
 
     public static RequestParameters empty() {
@@ -31,10 +31,10 @@ public class RequestParameters {
     }
 
     public String get(String key) {
-        return value.get(key);
+        return values.get(key);
     }
 
     public boolean isEmpty() {
-        return value.isEmpty();
+        return values.isEmpty();
     }
 }

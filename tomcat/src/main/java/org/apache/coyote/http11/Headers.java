@@ -5,14 +5,14 @@ import java.util.List;
 
 public class Headers {
 
-    private final LinkedHashMap<String, String> value;
+    private final LinkedHashMap<String, String> values;
 
     public Headers() {
         this(new LinkedHashMap<>());
     }
 
-    private Headers(final LinkedHashMap<String, String> value) {
-        this.value = value;
+    private Headers(final LinkedHashMap<String, String> values) {
+        this.values = values;
     }
 
     public static Headers of(final List<String> inputs) {
@@ -25,18 +25,18 @@ public class Headers {
     }
 
     public void add(final String key, final String value) {
-        this.value.put(key, value);
+        this.values.put(key, value);
     }
 
     public String get(final String key) {
-        return value.get(key);
+        return values.get(key);
     }
 
     public boolean contains(final String key) {
-        return value.containsKey(key);
+        return values.containsKey(key);
     }
 
-    public LinkedHashMap<String, String> getValue() {
-        return new LinkedHashMap<>(value);
+    public LinkedHashMap<String, String> getValues() {
+        return new LinkedHashMap<>(values);
     }
 }

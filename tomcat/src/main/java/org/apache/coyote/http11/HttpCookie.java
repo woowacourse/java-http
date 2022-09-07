@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-    private final LinkedHashMap<String, String> value;
+    private final LinkedHashMap<String, String> values;
 
     public HttpCookie() {
         this(new LinkedHashMap<>());
     }
 
-    private HttpCookie(final LinkedHashMap<String, String> value) {
-        this.value = value;
+    private HttpCookie(final LinkedHashMap<String, String> values) {
+        this.values = values;
     }
 
     public static HttpCookie of(final String input) {
@@ -25,12 +25,12 @@ public class HttpCookie {
     }
 
     public HttpCookie add(final String key, final String value) {
-        this.value.put(key, value);
+        values.put(key, value);
         return this;
     }
 
     public String joinToString() {
-        return value.entrySet().stream()
+        return values.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
     }

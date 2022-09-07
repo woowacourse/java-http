@@ -58,7 +58,7 @@ public class HttpResponse {
 
     private String toHeaders() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (Entry<String, String> header : headers.getValue().entrySet()) {
+        for (Entry<String, String> header : headers.getValues().entrySet()) {
             stringBuilder.append(header.getKey())
                     .append(": ")
                     .append(header.getValue())

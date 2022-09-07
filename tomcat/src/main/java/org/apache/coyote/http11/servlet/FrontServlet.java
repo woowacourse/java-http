@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -18,6 +19,7 @@ public class FrontServlet {
     public FrontServlet() {
         controllers = new HashMap<>();
         controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse)

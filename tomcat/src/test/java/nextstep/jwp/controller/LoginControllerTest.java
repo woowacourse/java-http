@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -30,12 +31,13 @@ public class LoginControllerTest {
         final HttpResponse httpResponse = new HttpResponse();
 
         // when
-        loginController.processPost(httpRequest, httpResponse);
+        loginController.process(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/index.html");
-
+        assertAll(
+                () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/index.html")
+        );
     }
 
     @DisplayName("로그인 기능을 실패하는 경우에 상태코드 302와 404.html 경로를 헤더로 보낸다.")
@@ -52,10 +54,29 @@ public class LoginControllerTest {
         final HttpResponse httpResponse = new HttpResponse();
 
         // when
-        loginController.processPost(httpRequest, httpResponse);
+        loginController.process(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/404.html");
+        assertAll(
+                () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/404.html")
+        );
+    }
+
+    @DisplayName("Get 요청을 보내면 로그인 페이지를 보여준다.")
+    @Test
+    void processGet() throws IOException {
+        // given
+        final Controller controller = new LoginController();
+        final String firstLine = "GET /login HTTP/1.1 ";
+        final List<String> lines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
+        final HttpRequest httpRequest = HttpRequest.from(firstLine, lines, null);
+        final HttpResponse httpResponse = new HttpResponse();
+
+        // when
+        controller.process(httpRequest, httpResponse);
+
+        // then
+        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK);
     }
 }

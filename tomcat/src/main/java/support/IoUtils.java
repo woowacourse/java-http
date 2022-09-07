@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -13,6 +15,20 @@ import java.util.stream.Collectors;
 public class IoUtils {
 
     private IoUtils() {
+    }
+
+    /**
+     * application/x-www-form-urlencoded
+     * -로 encoding된 문자열을 해석한다
+     * <p />
+     * 예) %40 -> @
+     */
+    public static String readUrlEncoded(final BufferedReader reader, final int length) {
+        try {
+            return URLDecoder.decode(readCertainLength(reader, length), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String readCertainLength(final BufferedReader reader, final int length) {

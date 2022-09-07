@@ -1,5 +1,6 @@
 package org.apache.coyote.support;
 
+import static java.lang.System.out;
 import static java.util.Arrays.stream;
 import static support.IoUtils.writeAndFlush;
 
@@ -28,6 +29,7 @@ public enum ApiHandlerMethod {
     },
 
     LOGIN_POST(HttpMethod.POST, "/login") {
+
         @Override
         public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getBody());
@@ -60,6 +62,7 @@ public enum ApiHandlerMethod {
             final String response = HttpResponse.builder()
                     .addStatus(HttpStatus.FOUND)
                     .add(HttpHeader.LOCATION, "/index.html")
+                    .addCooke()
                     .build();
 
             writeAndFlush(bufferedWriter, response);
@@ -74,6 +77,30 @@ public enum ApiHandlerMethod {
 
             writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /401.html");
+        }
+    },
+
+    REGISTER_POST(HttpMethod.POST, "/register") {
+
+        @Override
+        public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
+            final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getBody());
+            final String account = userMap.get("account");
+            final String email = userMap.get("email");
+            final String password = userMap.get("password");
+
+            final User createUser = new User(account, password, email);
+
+            InMemoryUserRepository.save(createUser);
+            log.info("Create User: {}", createUser);
+
+            final String response = HttpResponse.builder()
+                    .addStatus(HttpStatus.FOUND)
+                    .add(HttpHeader.LOCATION, "/index.html")
+                    .build();
+
+            writeAndFlush(bufferedWriter, response);
+            log.info("Redirect: /index.html");
         }
     };
 

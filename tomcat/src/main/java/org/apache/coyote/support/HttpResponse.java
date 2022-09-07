@@ -28,8 +28,19 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse add(String header, String value) {
+        responseHeaders.add(String.format("%s %s ", header, value));
+        return this;
+    }
+
     public HttpResponse addStatus(HttpStatus statusCode) {
         final String responseHeader = HTTP_1_1_STATUS.apply(statusCode);
+        responseHeaders.add(responseHeader);
+        return this;
+    }
+
+    public HttpResponse addCooke() {
+        final String responseHeader = HttpHeader.SET_COOKIE.apply(new HttpCookie());
         responseHeaders.add(responseHeader);
         return this;
     }

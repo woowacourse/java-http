@@ -48,7 +48,7 @@ public class HttpRequest {
 
     private String readBody(final BufferedReader reader, final String contentLength) {
         if (contentLength != null) {
-            return IoUtils.readCertainLength(reader, Integer.parseInt(contentLength));
+            return IoUtils.readUrlEncoded(reader, Integer.parseInt(contentLength));
         }
         return "";
     }

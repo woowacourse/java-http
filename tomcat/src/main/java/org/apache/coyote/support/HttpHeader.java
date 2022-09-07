@@ -5,7 +5,8 @@ public enum HttpHeader {
     HTTP_1_1_STATUS("HTTP/1.1", "%s %s "),
     LOCATION("Location", "%s: %s "),
     CONTENT_TYPE("Content-Type", "%s: %s;charset=utf-8 "),
-    CONTENT_LENGTH("Content-Length", "%s: %s ");
+    CONTENT_LENGTH("Content-Length", "%s: %s "),
+    SET_COOKIE("Set-Cookie", "%s: JSESSIONID=%s ");
 
     private final String type;
     private final String format;
@@ -21,5 +22,9 @@ public enum HttpHeader {
 
     public String apply(HttpStatus status) {
         return String.format(format, type, status.text());
+    }
+
+    public String apply(HttpCookie cookie) {
+        return String.format(format, type, cookie.text());
     }
 }

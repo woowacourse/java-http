@@ -2,6 +2,7 @@ package org.apache.coyote.http11.common;
 
 import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaders.SET_COOKIE;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,7 +68,7 @@ public class HttpResponse {
     @Override
     public String toString() {
         if (headers.hasCookie()) {
-            addHeader("Set-Cookie", headers.getAllCookie());
+            addHeader(SET_COOKIE, headers.getAllCookie());
         }
 
         final String statusLine = HTTP_VERSION + status.getStatusCode() + BLANK + status.getStatusMessage();

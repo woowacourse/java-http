@@ -8,6 +8,7 @@ public class HttpCookie {
 
     private static final String COOKIE_DELIMITER = "=";
     private static final String COOKIES_DELIMITER = ";";
+    private static final String EMPTY_STRING = "";
 
     private static final int KEY = 0;
     private static final int VALUE = 1;
@@ -20,7 +21,7 @@ public class HttpCookie {
 
     public static HttpCookie from(final String rawValue) {
         final HashMap<String, String> values = new HashMap<>();
-        if ("".equals(rawValue)) {
+        if (EMPTY_STRING.equals(rawValue)) {
             return new HttpCookie(values);
         }
         final String[] cookies = rawValue.split(COOKIES_DELIMITER);

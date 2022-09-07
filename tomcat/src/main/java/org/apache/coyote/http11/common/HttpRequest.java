@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.common;
 
+import static org.apache.catalina.Session.JSESSIONID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +65,7 @@ public class HttpRequest {
             sessionManager.add(session);
             return session;
         }
-        final String sessionId = getCookie("JSESSIONID");
+        final String sessionId = getCookie(JSESSIONID);
         return sessionManager.findSession(sessionId);
     }
 }

@@ -10,6 +10,7 @@ public class HttpHeaders {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String COOKIE = "Cookie";
+    public static final String SET_COOKIE = "Set-Cookie";
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String EMPTY_STRING = "";
@@ -31,7 +32,7 @@ public class HttpHeaders {
 
     public static HttpHeaders from(final List<String> rawHeaders) {
         final Map<String, String> headers = new HashMap<>();
-        HttpCookie cookie = HttpCookie.from("");
+        HttpCookie cookie = HttpCookie.from(EMPTY_STRING);
 
         for (final String header : rawHeaders) {
             if (EMPTY_STRING.equals(header)) {
@@ -43,7 +44,7 @@ public class HttpHeaders {
                 cookie = HttpCookie.from(headerKeyValue[VALUE]);
             }
 
-            headers.put(headerKeyValue[KEY], headerKeyValue[VALUE].trim());
+            headers.put(headerKeyValue[KEY], headerKeyValue[VALUE].strip());
         }
 
         return new HttpHeaders(cookie, headers);
@@ -69,6 +70,10 @@ public class HttpHeaders {
         return values.get(header);
     }
 
+    public boolean hasCookie() {
+        return !cookie.isEmpty();
+    }
+
     @Override
     public String toString() {
         return values.entrySet()
@@ -76,9 +81,5 @@ public class HttpHeaders {
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
                 .collect(Collectors.joining("\r\n"));
-    }
-
-    public boolean hasCookie() {
-        return !cookie.isEmpty();
     }
 }

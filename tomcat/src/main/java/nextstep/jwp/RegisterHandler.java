@@ -30,10 +30,10 @@ public class RegisterHandler implements Function<Http11Request, Http11Response> 
     }
 
     private void registerUser(Http11QueryParams queryParams) {
-        String account = queryParams.getValueFrom("account");
-        String email = queryParams.getValueFrom("email");
-        String password = queryParams.getValueFrom("password");
-        User user = new User(account, email, password);
+        final String account = queryParams.getValueFrom("account");
+        final String email = queryParams.getValueFrom("email");
+        final String password = queryParams.getValueFrom("password");
+        final User user = new User(account, email, password);
         InMemoryUserRepository.save(user);
         log.info(user.toString());
     }

@@ -10,10 +10,10 @@ public class RequestHead {
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 
-    private final Map<String, String> requestHeaders;
+    private final Map<String, String> headers;
 
-    public RequestHead(Map<String, String> requestHeaders) {
-        this.requestHeaders = requestHeaders;
+    public RequestHead(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     public static RequestHead of(final BufferedReader bufferedReader) throws IOException {
@@ -28,7 +28,7 @@ public class RequestHead {
     }
 
     public int getContentLength() {
-        String contentLength = requestHeaders.get("Content-Length");
+        String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return 0;
         }

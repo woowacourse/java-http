@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.apache.coyote.http11.context.Context;
+import org.apache.coyote.http11.context.HttpCookie;
 import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -20,11 +22,14 @@ public class HttpRequest {
     private final RequestGeneral requestGeneral;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
+    private final Context context;
 
-    private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody) {
+    private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody,
+                       Context context) {
         this.requestGeneral = requestGeneral;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
+        this.context = context;
     }
 
     public static HttpRequest parse(InputStream inputStream) {
@@ -33,8 +38,9 @@ public class HttpRequest {
         RequestGeneral general = readGeneralLine(reader);
         RequestHeaders headers = readHeaderLines(reader);
         RequestBody body = readBodyLines(reader, headers);
+        Context context = parseOrCreateContext(headers);
 
-        return new HttpRequest(general, headers, body);
+        return new HttpRequest(general, headers, body, context);
     }
 
     private static RequestGeneral readGeneralLine(BufferedReader reader) {
@@ -85,6 +91,14 @@ public class HttpRequest {
         }
     }
 
+    private static Context parseOrCreateContext(RequestHeaders headers) {
+        RequestHeader cookieHeader = headers.findHeader("Cookie");
+        if (cookieHeader == null) {
+            return new Context(new HttpCookie());
+        }
+        return new Context(HttpCookie.parse(cookieHeader.getValue()));
+    }
+
     public Session getSession(boolean isCreate) {
         if (isCreate) {
             Session session = new Session(UUID.randomUUID().toString());
@@ -110,6 +124,10 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody.getBody();
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     @Override

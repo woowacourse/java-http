@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.headers.RequestHeader;
 
 public class PostProcessMeta {
 
@@ -18,11 +16,7 @@ public class PostProcessMeta {
         return body.getAsString().length();
     }
 
-    public Optional<RequestHeader> findHeaderByField(String field) {
-        try {
-            return Optional.of(request.findHeader(field));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
+    public HttpRequest getRequest() {
+        return request;
     }
 }

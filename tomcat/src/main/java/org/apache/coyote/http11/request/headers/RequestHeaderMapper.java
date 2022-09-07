@@ -2,12 +2,10 @@ package org.apache.coyote.http11.request.headers;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;
-import org.apache.coyote.http11.header.HttpCookie;
 import org.apache.coyote.http11.response.headers.ContentLength;
 
 public enum RequestHeaderMapper {
 
-    COOKIE("Cookie", HttpCookie::parse),
     CONTENT_LENGTH("Content-Length", (String field, String value) -> new ContentLength(value)),
     ANONYMOUS("", AnonymousRequestHeader::new),
     ;

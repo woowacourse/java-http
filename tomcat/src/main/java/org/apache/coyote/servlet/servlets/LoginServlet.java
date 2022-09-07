@@ -40,15 +40,23 @@ public class LoginServlet extends Servlet {
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
         final Map<String, String> bodies = httpRequest.getBodies();
-        if (!bodies.containsKey("account") || !bodies.containsKey("password")) {
+        if (isNotContainEssentialParams(bodies)) {
             return HttpResponse.of(httpRequest, "/404.html", "404");
         }
         final Optional<User> user = UserService.find(bodies.get("account"), bodies.get("password"));
 
         if (user.isPresent()) {
             log.info("login success to ID : {}", user.get().getAccount());
-            return HttpResponse.cookie(httpRequest, "/index.html", "302");
+            final HttpResponse httpResponse = HttpResponse.cookie(httpRequest, "/index.html", "302");
+
+            sessionFactory.add(user.get(), httpResponse);
+
+            return httpResponse;
         }
         return HttpResponse.of(httpRequest, "/401.html", "401");
+    }
+
+    private boolean isNotContainEssentialParams(final Map<String, String> bodies) {
+        return !bodies.containsKey("account") || !bodies.containsKey("password");
     }
 }

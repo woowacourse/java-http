@@ -79,4 +79,8 @@ public class HttpResponse {
             body.getValue()
         );
     }
+
+    public String getSessionId() {
+        return httpHeaders.getSessionId();
+    }
 }

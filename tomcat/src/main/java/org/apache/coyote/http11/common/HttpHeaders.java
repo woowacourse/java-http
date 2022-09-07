@@ -71,4 +71,8 @@ public class HttpHeaders {
         }
         return Integer.parseInt(contentLength);
     }
+
+    public String getSessionId() {
+        return cookie.getSessionId();
+    }
 }

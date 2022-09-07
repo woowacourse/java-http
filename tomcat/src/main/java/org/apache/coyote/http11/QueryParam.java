@@ -17,7 +17,7 @@ public class QueryParam {
     }
 
     private String toQueryString(final String path) {
-        return path.split("\\"+ QUERY_PARAM_DELIMITER)[QUERY_PARAM];
+        return path.split("\\" + QUERY_PARAM_DELIMITER)[QUERY_PARAM];
     }
 
     public static boolean isQueryParam(String path) {

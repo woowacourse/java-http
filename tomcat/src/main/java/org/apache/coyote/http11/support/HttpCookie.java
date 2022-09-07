@@ -19,4 +19,8 @@ public class HttpCookie {
     public String format() {
         return key + "=" + value;
     }
+
+    public String getValue() {
+        return value;
+    }
 }

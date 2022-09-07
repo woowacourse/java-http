@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request.spec;
 
 import java.util.List;
-import java.util.Map;
 
 public class StartLine {
 
@@ -47,24 +46,8 @@ public class StartLine {
         return protocol;
     }
 
-    public Map<String, String> getParams() {
-        return requestUrl.getParams();
-    }
-
-    public void setPath(String pathName) {
-        requestUrl.setPath(pathName);
-    }
-
     public boolean isPathEqualTo(String path) {
         return requestUrl.isPathEqualTo(path);
-    }
-
-    public boolean isGet() {
-        return this.method.equals(HttpMethod.GET);
-    }
-
-    public boolean isPost() {
-        return this.method.equals(HttpMethod.POST);
     }
 
     public boolean isStaticResourcePath() {

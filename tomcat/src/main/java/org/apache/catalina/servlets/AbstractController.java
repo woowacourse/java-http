@@ -11,6 +11,10 @@ import org.apache.coyote.http11.response.spec.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
+    public static final String PARAM_DELIMITER = "&";
+    public static final String KEY_VALUE_DELIMITER = "=";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
     protected final ResourceLocator resourceLocator;
 
     protected AbstractController(ResourceLocator resourceLocator) {
@@ -63,6 +67,25 @@ public abstract class AbstractController implements Controller {
         }
     }
 
+    protected Map<String, String> parseFormPayload(HttpRequest request, HttpResponse response) {
+        HttpHeaders headers = request.getHeaders();
+        String contentType = headers.get("Content-Type");
+        if (!contentType.equals("application/x-www-form-urlencoded")) {
+            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+            return null;
+        }
+        String body = request.getBody();
+        Map<String, String> data = new HashMap<>();
+        String[] components = body.split(PARAM_DELIMITER);
+        for (String component : components) {
+            String[] keyVal = component.split(KEY_VALUE_DELIMITER);
+            String key = keyVal[KEY_INDEX];
+            String value = keyVal[VALUE_INDEX];
+            data.put(key, value);
+        }
+        return data;
+    }
+
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -93,24 +116,5 @@ public abstract class AbstractController implements Controller {
 
     protected void doTrace(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
-    protected Map<String, String> parseFormPayload(HttpRequest request, HttpResponse response) {
-        HttpHeaders headers = request.getHeaders();
-        String contentType = headers.get("Content-Type");
-        if (!contentType.equals("application/x-www-form-urlencoded")) {
-            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-            return null;
-        }
-        String body = request.getBody();
-        Map<String, String> data = new HashMap<>();
-        String[] components = body.split("&");
-        for (String component : components) {
-            String[] keyVal = component.split("=");
-            String key = keyVal[0];
-            String value = keyVal[1];
-            data.put(key, value);
-        }
-        return data;
     }
 }

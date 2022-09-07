@@ -17,7 +17,7 @@ class HttpResponseTest {
         HttpResponse response = new HttpResponse(HttpStatus.OK);
 
         // then
-        byte[] expected = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n\r\n"
+        byte[] expected = "HTTP/1.1 200 OK\r\n\r\n\r\n"
                 .getBytes(StandardCharsets.UTF_8);
 
         assertThat(response.getBytes()).isEqualTo(expected);

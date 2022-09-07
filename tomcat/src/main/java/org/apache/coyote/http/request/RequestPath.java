@@ -1,7 +1,5 @@
 package org.apache.coyote.http.request;
 
-import java.util.Map;
-
 public class RequestPath {
 
     private static final String QUERY_IDENTIFIER = "?";
@@ -33,10 +31,6 @@ public class RequestPath {
             return url.substring(index + 1);
         }
         return BLANK_QUERY_STRING;
-    }
-
-    public Map<String, String> getQueryParams() {
-        return queryParams.getParams();
     }
 
     public String getPath() {

@@ -1,4 +1,4 @@
-package org.apache.util;
+package nextstep.jwp.util;
 
 import java.net.URISyntaxException;
 import java.net.URL;

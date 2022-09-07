@@ -1,4 +1,4 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +11,7 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
 import org.apache.coyote.http.session.Session;
 import org.apache.coyote.http.session.SessionManager;
-import org.apache.util.PathUtils;
+import nextstep.jwp.util.PathUtils;
 
 public class AuthController extends AbstractController {
 

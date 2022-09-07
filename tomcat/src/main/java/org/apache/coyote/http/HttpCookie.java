@@ -7,8 +7,9 @@ public class HttpCookie {
 
     private static final int PARAM_INFO_INDEX = 0;
     private static final int PARAM_VALUE_INDEX = 1;
+    public static final String JSESSIONID = "JSESSIONID";
 
-    private Map<String, String> cookies;
+    private final Map<String, String> cookies;
 
     public HttpCookie(final Map<String, String> cookies) {
         this.cookies = cookies;
@@ -32,12 +33,12 @@ public class HttpCookie {
     }
 
     public boolean hasJSessionId() {
-        return cookies.containsKey("JSESSIONID");
+        return cookies.containsKey(JSESSIONID);
     }
 
     public String getJSessionId() {
         if (hasJSessionId()) {
-            return cookies.get("JSESSIONID");
+            return cookies.get(JSESSIONID);
         }
         return "";
     }

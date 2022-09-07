@@ -1,14 +1,13 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.controller.Controller;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
-import org.apache.util.PathUtils;
+import nextstep.jwp.util.PathUtils;
 
 public class AbstractController implements Controller {
 
@@ -30,7 +29,7 @@ public class AbstractController implements Controller {
         return notFound();
     }
 
-    private HttpResponse notFound() throws IOException, URISyntaxException {
+    private HttpResponse notFound() throws Exception {
         final Path path = PathUtils.load(NOT_FOUND_PAGE);
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.HTML, responseBody);

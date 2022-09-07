@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class RequestBody {
 
-    private Map<String, String> values;
+    private final Map<String, String> values;
 
     private RequestBody(final Map<String, String> values) {
         this.values = values;

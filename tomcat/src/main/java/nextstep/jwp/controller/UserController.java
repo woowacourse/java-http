@@ -1,4 +1,4 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,7 +9,7 @@ import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
-import org.apache.util.PathUtils;
+import nextstep.jwp.util.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

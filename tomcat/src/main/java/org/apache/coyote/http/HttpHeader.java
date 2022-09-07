@@ -15,7 +15,7 @@ public class HttpHeader {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private Map<String, String> values;
+    private final Map<String, String> values;
 
     private HttpHeader(final Map<String, String> headers) {
         this.values = headers;
@@ -32,19 +32,23 @@ public class HttpHeader {
 
     public static HttpHeader init(final ContentType contentType, final String responseBody) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", contentType.getContentType() + ";charset-utf-8");
+        headers.put("Content-Type", contentType.getType() + ";charset-utf-8");
         headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         return new HttpHeader(headers);
     }
 
     public static HttpHeader init(final ContentType contentType, final String responseBody, final String redirectUrl) {
-        final HttpHeader headers = init(contentType, responseBody);
+        HttpHeader headers = init(contentType, responseBody);
         headers.addHeader("Location", redirectUrl);
         return headers;
     }
 
     private void addHeader(final String key, final String value) {
         values.put(key, value);
+    }
+
+    public void addJSessionId(final Session session) {
+        values.put("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     public boolean isContainContentLength() {
@@ -64,10 +68,6 @@ public class HttpHeader {
 
     public String getJSessionId() {
         return getCookiesData().getJSessionId();
-    }
-
-    public void addJSessionId(final Session session) {
-        values.put("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     public HttpCookie getCookiesData() {

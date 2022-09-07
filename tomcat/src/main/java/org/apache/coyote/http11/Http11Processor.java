@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.controller.Controller;
-import org.apache.controller.RequestMapping;
+import nextstep.jwp.controller.RequestMapping;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.coyote.Processor;

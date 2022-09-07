@@ -1,13 +1,12 @@
 package org.apache.coyote.http.request;
 
-import java.util.Map;
 import org.apache.coyote.http.HttpVersion;
 
 public class HttpRequestLine {
 
-    private RequestMethod method;
-    private RequestPath path;
-    private HttpVersion version;
+    private final RequestMethod method;
+    private final RequestPath path;
+    private final HttpVersion version;
 
     private HttpRequestLine(final RequestMethod method, final RequestPath path, final HttpVersion version) {
         this.method = method;
@@ -22,14 +21,6 @@ public class HttpRequestLine {
 
     public String getPath() {
         return path.getPath();
-    }
-
-    public Map<String, String> getQueryParams() {
-        return path.getQueryParams();
-    }
-
-    public RequestMethod getMethod() {
-        return method;
     }
 
     public boolean isGet() {

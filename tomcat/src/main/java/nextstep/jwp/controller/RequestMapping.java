@@ -1,7 +1,8 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.controller.Controller;
 
 public class RequestMapping {
 

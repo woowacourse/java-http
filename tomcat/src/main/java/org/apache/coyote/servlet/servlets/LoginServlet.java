@@ -51,9 +51,9 @@ public class LoginServlet extends Servlet {
             return HttpResponse.of(httpRequest.getHttpVersion(), "/404.html", "404");
         }
         final Optional<User> user = UserService.findUser(bodies.get("account"), bodies.get("password"));
-        log.info("user : {}", user);
 
         if (user.isPresent()) {
+            log.info("login success to ID : {}", user.get().getAccount());
             return HttpResponse.of(httpRequest.getHttpVersion(), "/index.html", "302");
         }
         return HttpResponse.of(httpRequest.getHttpVersion(), "/401.html", "401");

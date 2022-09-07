@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.4'
+
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     implementation 'org.reflections:reflections:0.10.2'
 

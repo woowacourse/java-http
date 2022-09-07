@@ -1,7 +1,10 @@
 package org.springframework.servlet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -17,23 +20,37 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.reflections.Reflections;
 import org.richard.utils.CustomReflectionUtils;
-import org.springframework.RequestMappingInfo;
 import org.springframework.annotation.Controller;
 import org.springframework.annotation.RequestMapping;
+import org.springframework.config.ApplicationConfig;
 
 public class DispatcherServlet implements Servlet {
 
     private static final String NOT_FOUND_PAGE = "static/404.html";
+    private static final String DEFAULT_CONFIG_FILE = "application.yml";
 
     private final Map<RequestMappingInfo, Function<HttpRequest, HttpResponse>> requestMapping;
 
     public DispatcherServlet() {
-        this.requestMapping = new Reflections("nextstep")
+        this.requestMapping = new Reflections(parseBasePackage())
                 .getTypesAnnotatedWith(Controller.class)
                 .stream()
                 .filter(this::hasAnyMethodWithRequestMappingAnnotation)
                 .flatMap(this::entry)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private String parseBasePackage() {
+        final var objectMapper = new ObjectMapper(new YAMLFactory());
+        final var resource = getClass().getClassLoader().getResource(DEFAULT_CONFIG_FILE);
+        try {
+            final var uri = resource.toURI();
+            final var applicationConfig = objectMapper.readValue(new File(uri), ApplicationConfig.class);
+
+            return applicationConfig.getBasePackage();
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private boolean hasAnyMethodWithRequestMappingAnnotation(final Class<?> controller) {

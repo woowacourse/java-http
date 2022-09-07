@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,10 +36,8 @@ public class LoginController extends AbstractController {
 
         if (userByAccount.isPresent()) {
             log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
-            if (!cookie.hasCookie(SESSION_COOKIE_NAME)) {
-                processLogin(response, userByAccount);
-                return;
-            }
+            processLogin(response, userByAccount);
+            return;
         }
 
         response.loadResource("/401.html");
@@ -59,13 +58,22 @@ public class LoginController extends AbstractController {
         String jSessionId = request.getCookies().getCookie("JSESSIONID");
 
         if (jSessionId != null) {
-            User user = (User) sessionManager.findSession(jSessionId).get("user");
-            log.info("로그인 성공!" + " 아이디: " + user.getAccount());
-            response.statusCode(HttpStatus.REDIRECT);
-            response.addHeader("Location", "/index.html");
+            processSessionLogin(response, jSessionId);
             return;
         }
 
         response.loadResource("/login.html");
+    }
+
+    private void processSessionLogin(HttpResponse response, String jSessionId) throws IOException {
+        HttpSession session = sessionManager.findSession(jSessionId);
+        if (session == null || session.get("user") == null) {
+            response.loadResource("/login.html");
+            return;
+        }
+        User user = (User) session.get("user");
+        log.info("로그인 성공!" + " 아이디: " + user.getAccount());
+        response.statusCode(HttpStatus.REDIRECT);
+        response.addHeader("Location", "/index.html");
     }
 }

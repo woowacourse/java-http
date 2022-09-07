@@ -22,7 +22,7 @@ public class HttpRequest {
     public boolean isResource() {
         String url = getUrl();
 
-        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
+        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js") || url.endsWith(".ico");
     }
 
     public boolean hasCookie() {

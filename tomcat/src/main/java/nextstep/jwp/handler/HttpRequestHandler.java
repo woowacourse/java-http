@@ -6,8 +6,4 @@ import nextstep.jwp.http.response.HttpResponse;
 public interface HttpRequestHandler {
 
     HttpResponse handleHttpRequest(HttpRequest httpRequest);
-
-    HttpResponse handleHttpGetRequest(HttpRequest httpRequest);
-
-    HttpResponse handleHttpPostRequest(HttpRequest httpRequest);
 }

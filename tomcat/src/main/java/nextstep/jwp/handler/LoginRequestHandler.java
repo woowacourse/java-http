@@ -22,7 +22,7 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
     }
 
     @Override
-    public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
+    protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
         if (!httpRequest.isEmptySessionId()) {
             return SessionManager.findSession(httpRequest.getJsessionId())
                     .map(session -> HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html")))
@@ -32,7 +32,7 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
     }
 
     @Override
-    public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
+    protected HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = HttpCookie.empty();
         HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
 

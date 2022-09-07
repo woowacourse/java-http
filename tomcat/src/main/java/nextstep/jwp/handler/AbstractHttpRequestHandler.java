@@ -16,4 +16,12 @@ public abstract class AbstractHttpRequestHandler implements HttpRequestHandler {
         }
         throw new UncheckedServletException("지원하는 method가 존재하지 않습니다.");
     }
+
+    protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
+        throw new UncheckedServletException("지원하지 않는 method입니다.");
+    }
+
+    protected HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
+        throw new UncheckedServletException("지원하지 않는 method입니다.");
+    }
 }

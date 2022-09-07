@@ -20,13 +20,13 @@ public final class RegisterRequestHandler extends AbstractHttpRequestHandler {
     }
 
     @Override
-    public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
+    protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
         return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
     }
 
     @Override
-    public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
+    protected HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
         HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
         registerUser(httpRequestBody);
 

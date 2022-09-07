@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.coyote.utils.RequestUtil.calculatePath;
-import static org.apache.coyote.utils.RequestUtil.getExtension;
-import static org.apache.coyote.utils.RequestUtil.getParam;
+import static org.apache.coyote.utils.Util.calculatePath;
+import static org.apache.coyote.utils.Util.getExtension;
+import static org.apache.coyote.utils.Util.getParam;
 
 public class RequestLine {
 

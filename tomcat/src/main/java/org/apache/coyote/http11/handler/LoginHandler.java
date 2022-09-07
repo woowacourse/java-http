@@ -12,7 +12,7 @@ import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.model.session.Cookie;
 import org.apache.coyote.model.session.Session;
 import org.apache.coyote.model.session.SessionManager;
-import org.apache.coyote.utils.RequestUtil;
+import org.apache.coyote.utils.Util;
 
 import java.util.Optional;
 
@@ -38,21 +38,21 @@ public class LoginHandler implements Handler {
         if (httpRequest.checkMethod(Method.POST) && checkUser(httpRequest.getRequestBody())) {
             return calculateWhenPostMethod();
         }
-        return createResponse(StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_401, getClass()))
+        return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
                 .getResponse();
     }
 
     private String calculateWhenGetMethod() {
         if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
-            return createResponse(StatusCode.OK, RequestUtil.getResponseBody(INDEX_HTML, getClass()))
+            return createResponse(StatusCode.OK, Util.getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
         }
-        return createResponse(StatusCode.OK, RequestUtil.getResponseBody(LOGIN_HTML, getClass()))
+        return createResponse(StatusCode.OK, Util.getResponseBody(LOGIN_HTML, getClass()))
                 .getResponse();
     }
 
     private String calculateWhenPostMethod() {
-        HttpResponse httpResponse = createResponse(StatusCode.FOUND, RequestUtil.getResponseBody(INDEX_HTML, getClass()));
+        HttpResponse httpResponse = createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()));
         if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
             Cookie cookie = new Cookie();
             RequestBody requestBody = httpRequest.getRequestBody();

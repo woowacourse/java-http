@@ -15,7 +15,7 @@ import java.util.Objects;
 
 import static org.apache.coyote.model.request.ContentType.HTML;
 
-public class RequestUtil {
+public class Util {
 
     public static final String DEFAULT_EXTENSION = ".html";
     public static final String DEFAULT_INDEX = "/";

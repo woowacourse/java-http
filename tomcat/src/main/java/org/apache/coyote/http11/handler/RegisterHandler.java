@@ -6,7 +6,7 @@ import org.apache.coyote.model.request.HttpRequest;
 import org.apache.coyote.model.request.Method;
 import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.StatusCode;
-import org.apache.coyote.utils.RequestUtil;
+import org.apache.coyote.utils.Util;
 
 import static org.apache.coyote.http11.handler.LoginHandler.createResponse;
 
@@ -25,15 +25,15 @@ public class RegisterHandler implements Handler {
     @Override
     public String getResponse() {
         if (httpRequest.checkMethod(Method.GET)) {
-            return createResponse(StatusCode.OK, RequestUtil.getResponseBody(REGISTER_HTML, getClass()))
+            return createResponse(StatusCode.OK, Util.getResponseBody(REGISTER_HTML, getClass()))
                     .getResponse();
         }
         if (httpRequest.checkMethod(Method.POST)) {
             saveUser();
-            return createResponse(StatusCode.FOUND, RequestUtil.getResponseBody(INDEX_HTML, getClass()))
+            return createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
         }
-        return createResponse(StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_404, getClass()))
+        return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_404, getClass()))
                 .getResponse();
     }
 

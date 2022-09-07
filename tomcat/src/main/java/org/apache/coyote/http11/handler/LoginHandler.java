@@ -7,7 +7,6 @@ import org.apache.coyote.model.request.Method;
 import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseHeader;
-import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.model.session.Cookie;
 import org.apache.coyote.model.session.Session;
@@ -16,7 +15,7 @@ import org.apache.coyote.utils.Util;
 
 import java.util.Optional;
 
-import static org.apache.coyote.model.request.ContentType.HTML;
+import static org.apache.coyote.utils.Util.createResponse;
 
 
 public class LoginHandler implements Handler {
@@ -60,11 +59,6 @@ public class LoginHandler implements Handler {
             httpResponse.addCookie(cookie);
         }
         return httpResponse.getResponse();
-    }
-
-    protected static HttpResponse createResponse(final StatusCode statusCode, final String responseBody) {
-        ResponseLine responseLine = ResponseLine.of(statusCode);
-        return HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
     }
 
     private boolean checkUser(final RequestBody params) {

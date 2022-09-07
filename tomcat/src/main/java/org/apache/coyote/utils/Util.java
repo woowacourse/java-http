@@ -1,6 +1,9 @@
 package org.apache.coyote.utils;
 
 import org.apache.coyote.exception.NotFoundFileException;
+import org.apache.coyote.model.response.HttpResponse;
+import org.apache.coyote.model.response.ResponseLine;
+import org.apache.coyote.model.response.StatusCode;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -74,5 +77,10 @@ public class Util {
             queryParams.put(query.get(KEY), query.get(VALUE));
         }
         return queryParams;
+    }
+
+    public static HttpResponse createResponse(final StatusCode statusCode, final String responseBody) {
+        ResponseLine responseLine = ResponseLine.of(statusCode);
+        return HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
     }
 }

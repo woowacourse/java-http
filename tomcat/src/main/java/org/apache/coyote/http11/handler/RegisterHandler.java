@@ -8,7 +8,7 @@ import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.utils.Util;
 
-import static org.apache.coyote.http11.handler.LoginHandler.createResponse;
+import static org.apache.coyote.utils.Util.createResponse;
 
 public class RegisterHandler implements Handler {
 

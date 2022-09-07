@@ -32,12 +32,12 @@ public class HttpRequest {
         return startLine.isPost();
     }
 
-    public String getUrl() {
-        return startLine.getPath().getUrl();
+    public boolean containSession() {
+        return header.isContainSession();
     }
 
-    public Map<String, String> getParams() {
-        return startLine.getPath().getRequestParams();
+    public String getUrl() {
+        return startLine.getPath().getUrl();
     }
 
     public Map<String, String> getBody() {

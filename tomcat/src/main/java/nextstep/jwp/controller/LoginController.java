@@ -13,7 +13,7 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse process(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isGet()) {
-            return doGet();
+            return doGet(httpRequest);
         }
         if (httpRequest.isPost()) {
             return doPost(httpRequest);
@@ -21,7 +21,10 @@ public class LoginController implements Controller {
         return HttpResponse.notFound();
     }
 
-    private HttpResponse doGet() throws IOException {
+    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.containSession()) {
+            return HttpResponse.found("/index.html");
+        }
         return HttpResponse.ok("/login.html");
     }
 

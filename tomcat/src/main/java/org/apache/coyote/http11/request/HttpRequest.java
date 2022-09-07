@@ -4,10 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.apache.coyote.http11.utils.QueryParamsParser;
+import java.util.Optional;
+import nextstep.jwp.model.User;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
+
+    private static final Logger log = LoggerFactory.getLogger(SessionManager.class);
 
     private static final int REQUEST_START_INDEX = 0;
 
@@ -26,25 +32,14 @@ public class HttpRequest {
         final List<String> lines = readAllLines(reader);
         int emptyLineIndex = getEmptyLineIndex(lines);
         final HttpRequestLine httpRequestLine = HttpRequestLine.parse(lines.get(REQUEST_START_INDEX));
-        final HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.parse(
-                lines.subList(REQUEST_START_INDEX + 1, emptyLineIndex));
+        final HttpRequestHeaders httpRequestHeaders =
+                HttpRequestHeaders.parse(lines.subList(REQUEST_START_INDEX + 1, emptyLineIndex));
         final String requestBody = findRequestBody(reader, httpRequestHeaders);
         return new HttpRequest(
                 httpRequestLine,
                 httpRequestHeaders,
                 requestBody
         );
-    }
-
-    private static String findRequestBody(final BufferedReader reader,
-                                          final HttpRequestHeaders httpRequestHeaders) throws IOException {
-        if (httpRequestHeaders.hasRequestBody()) {
-            final int contentLength = httpRequestHeaders.getContentLength();
-            final char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
     }
 
     private static List<String> readAllLines(final BufferedReader reader) {
@@ -73,6 +68,28 @@ public class HttpRequest {
         return emptyLineIndex;
     }
 
+    private static String findRequestBody(final BufferedReader reader,
+                                          final HttpRequestHeaders httpRequestHeaders) throws IOException {
+        if (httpRequestHeaders.hasRequestBody()) {
+            final int contentLength = httpRequestHeaders.getContentLength();
+            final char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
+    }
+
+    public Optional<User> findUserByJSessionId() {
+        try {
+            final String jSessionId = headers.getJSessionId();
+            log.info("Request JSessionId={}", jSessionId);
+            final Session session = SessionManager.findSession(jSessionId);
+            return Optional.ofNullable((User) session.getAttribute("user"));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
     public HttpMethod getHttpMethod() {
         return line.getHttpMethod();
     }
@@ -83,18 +100,6 @@ public class HttpRequest {
 
     public String getRequestUrl() {
         return line.getRequestUrl();
-    }
-
-    public Map<String, String> queryParamsData() {
-        return QueryParamsParser.parseByUrl(line.getRequestUrl());
-    }
-
-    public HttpRequestLine getLine() {
-        return line;
-    }
-
-    public HttpRequestHeaders getHeaders() {
-        return headers;
     }
 
     public String getRequestBody() {

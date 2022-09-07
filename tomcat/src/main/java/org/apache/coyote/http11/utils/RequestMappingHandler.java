@@ -1,71 +1,58 @@
 package org.apache.coyote.http11.utils;
 
 import java.util.Arrays;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.FileGetResponseMaker;
-import org.apache.coyote.http11.LoginGetResponseMaker;
-import org.apache.coyote.http11.LoginPostResponseMaker;
-import org.apache.coyote.http11.RegisterGetResponseMaker;
-import org.apache.coyote.http11.RegisterPostResponseMaker;
-import org.apache.coyote.http11.ResponseMaker;
-import org.apache.coyote.http11.HelloResponseMaker;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.FileController;
+import nextstep.jwp.controller.HelloController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMappingHandler {
 
-    STRING(RequestMappingHandler::isStringGetUrl, new HelloResponseMaker()),
-    FILE(RequestMappingHandler::isFileGetUrl, new FileGetResponseMaker()),
-    LOGIN_GET(RequestMappingHandler::isLoginGetUrl, new LoginGetResponseMaker()),
-    LOGIN_POST(RequestMappingHandler::isLoginPostUrl, new LoginPostResponseMaker()),
-    REGISTER_GET(RequestMappingHandler::isRegisterGetUrl, new RegisterGetResponseMaker()),
-    REGISTER_POST(RequestMappingHandler::isRegisterPostUrl, new RegisterPostResponseMaker());
+    STRING(RequestMappingHandler::isStringUrl, new HelloController()),
+    FILE(RequestMappingHandler::isFileUrl, new FileController()),
+    LOGIN_GET(RequestMappingHandler::isLoginUrl, new LoginController()),
+    REGISTER_GET(RequestMappingHandler::isRegisterUrl, new RegisterController());
 
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
 
-    private final BiPredicate<String, String> condition;
-    private final ResponseMaker responseMaker;
+    private final Predicate<String> condition;
+    private final Controller controller;
 
-    RequestMappingHandler(final BiPredicate<String, String> condition, final ResponseMaker responseMaker) {
+    RequestMappingHandler(final Predicate<String> condition, final Controller controller) {
         this.condition = condition;
-        this.responseMaker = responseMaker;
+        this.controller = controller;
     }
 
-    public static ResponseMaker findResponseMaker(final HttpRequest httpRequest) {
+    public static Controller findResponseMaker(final HttpRequest httpRequest) {
         final String requestUrl = httpRequest.getRequestUrl();
-        final String requestMethod = httpRequest.getMethod();
         return Arrays.stream(values())
-                .filter(value -> value.condition.test(requestUrl, requestMethod))
+                .filter(value -> value.condition.test(requestUrl))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 url 요청입니다."))
-                .getResponseMaker();
+                .getController();
     }
 
-    public static boolean isFileGetUrl(final String requestUrl, final String requestMethod) {
-        return FILE_REGEX.matcher(requestUrl).matches() && requestMethod.equals("GET");
+    public static boolean isFileUrl(final String requestUrl) {
+        return FILE_REGEX.matcher(requestUrl).matches();
     }
 
-    public static boolean isStringGetUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.equals("/") && requestMethod.equals("GET");
+    public static boolean isStringUrl(final String requestUrl) {
+        return requestUrl.equals("/");
     }
 
-    private static boolean isRegisterGetUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.equals("/register") && requestMethod.equals("GET");
+    private static boolean isRegisterUrl(final String requestUrl) {
+        return requestUrl.equals("/register");
     }
 
-    private static boolean isRegisterPostUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.equals("/register") && requestMethod.equals("POST");
+    public static boolean isLoginUrl(final String requestUrl) {
+        return requestUrl.startsWith("/login");
     }
 
-    public static boolean isLoginGetUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/login") && requestMethod.equals("GET");
-    }
-
-    public static boolean isLoginPostUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/login") && requestMethod.equals("POST");
-    }
-
-    public ResponseMaker getResponseMaker() {
-        return responseMaker;
+    public Controller getController() {
+        return controller;
     }
 }

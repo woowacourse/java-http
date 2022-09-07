@@ -37,8 +37,4 @@ public class HttpRequestLine {
     public String getRequestUrl() {
         return requestUrl;
     }
-
-    public String getVersion() {
-        return version;
-    }
 }

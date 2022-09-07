@@ -3,6 +3,8 @@ package org.apache.coyote.http11.response;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
@@ -35,21 +37,21 @@ public class HttpResponse {
         header.put("Location", redirectUrl);
     }
 
+    public void addJSessionId(final Session session) {
+        header.put("Set-Cookie", "JSESSIONID=" + session.getId());
+    }
+
     @Override
     public String toString() {
         return String.join("\r\n",
                 line + " ",
-                "Content-Type: " + header.get("Content-Type") + " ",
-                "Content-Length: " + header.get("Content-Length") + " \n",
+                printHeader() + "\n",
                 responseBody);
     }
 
-    public String toFoundString() {
-        return String.join("\r\n",
-                line + "\r",
-                "Location: " + header.get("Location") + "\r",
-                "Content-Type: " + header.get("Content-Type") + "\r",
-                "Content-Length: " + header.get("Content-Length") + "\r\n",
-                responseBody);
+    public String printHeader() {
+        return header.entrySet().stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }

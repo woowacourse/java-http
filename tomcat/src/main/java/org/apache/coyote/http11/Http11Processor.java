@@ -54,9 +54,9 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = handler.doService(httpRequest);
             return httpResponse;
         } catch (ResourceNotFoundException exception) {
-            return HandlerMapping.NOT_FOUND.doService(httpRequest);
+            return ErrorResponse.resourceNotFound();
         } catch (LoginFailedException exception) {
-            return HandlerMapping.LOGIN_FAILED.doService(httpRequest);
+            return ErrorResponse.loginFailed();
         }
     }
 }

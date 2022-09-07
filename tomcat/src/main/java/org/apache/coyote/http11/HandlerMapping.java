@@ -20,15 +20,15 @@ public enum HandlerMapping {
         final RegisterController registerController = new RegisterController();
         return registerController.service(httpRequest);
     }),
-    STATIC_RESOURCE(null, httpRequest -> {
+    STATIC_RESOURCE("null", httpRequest -> {
         final StaticResourceController staticResourceController = new StaticResourceController();
         return staticResourceController.service(httpRequest);
     }),
-    NOT_FOUND(null, httpRequest -> {
+    NOT_FOUND("null", httpRequest -> {
         final NotFoundController notFoundController = new NotFoundController();
         return notFoundController.service(httpRequest);
     }),
-    LOGIN_FAILED(null, httpRequest -> {
+    LOGIN_FAILED("null", httpRequest -> {
         final LoginFailedController loginFailedController = new LoginFailedController();
         return loginFailedController.service(httpRequest);
     })

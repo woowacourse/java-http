@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.coyote.http11.constant.HttpMethod;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

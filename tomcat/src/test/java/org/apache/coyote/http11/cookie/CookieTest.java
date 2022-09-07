@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.cookie;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.UUID;
 
@@ -39,6 +37,6 @@ class CookieTest {
         String uuid = UUID.randomUUID().toString();
         cookie.setCookie("JSESSIONID", uuid);
 
-        assertThat(cookie.generateCookieEntries()).isEqualTo("JSESSIONID="+uuid);
+        assertThat(cookie.generateCookieEntries()).isEqualTo("JSESSIONID=" + uuid);
     }
 }

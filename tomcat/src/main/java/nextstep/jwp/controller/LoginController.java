@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
@@ -43,6 +42,7 @@ public class LoginController extends AbstractController {
         response.loadResource("/401.html");
         response.statusCode(HttpStatus.REDIRECT);
     }
+
     private void processLogin(HttpResponse response, Optional<User> userByAccount) {
         HttpSession session = new HttpSession();
         session.put("user", userByAccount.get());

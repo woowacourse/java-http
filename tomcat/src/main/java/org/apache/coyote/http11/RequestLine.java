@@ -12,10 +12,17 @@ public class RequestLine {
 
     public static RequestLine from(final String line) {
         final String[] lines = line.split(" ");
-        final var httpMethod =  HttpMethod.from(lines[0]);
-        final String requestURI = lines[1];
+        final var httpMethod = HttpMethod.from(lines[0]);
+        final String requestURI = createRequestURI(lines[1]);
 
         return new RequestLine(httpMethod, requestURI);
+    }
+
+    private static String createRequestURI(final String line) {
+        if ("/".equals(line)) {
+            return "/index.html";
+        }
+        return line;
     }
 
     public HttpMethod getHttpMethod() {

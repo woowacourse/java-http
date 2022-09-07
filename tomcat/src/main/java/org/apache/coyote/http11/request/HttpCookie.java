@@ -24,7 +24,7 @@ public class HttpCookie {
         return new HttpCookie(new HashMap<>());
     }
 
-    public boolean validate() {
-        return !cookies.containsKey("JSESSIONID");
+    public boolean isJSessionId() {
+        return cookies.containsKey("JSESSIONID");
     }
 }

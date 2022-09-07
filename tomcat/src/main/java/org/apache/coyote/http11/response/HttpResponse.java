@@ -30,6 +30,16 @@ public class HttpResponse {
     }
 
     private String createResponse() {
+        if (headers.containsKey("Set-Cookie")) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
+                    "Content-Type: " + headers.get("contentType") + ";charset=utf-8 ",
+                    "Content-Length: " + body.getBytes().length + " ",
+                    "Set-Cookie: " + headers.get("Set-Cookie") + " ",
+                    "",
+                    body);
+        }
+
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
                 "Content-Type: " + headers.get("contentType") + ";charset=utf-8 ",
@@ -37,4 +47,9 @@ public class HttpResponse {
                 "",
                 body);
     }
+
+    public void setCookie() {
+        headers.put("Set-Cookie", JSessionId.create());
+    }
 }
+

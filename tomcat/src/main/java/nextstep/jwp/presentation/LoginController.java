@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import static nextstep.jwp.presentation.StaticResource.INDEX_PAGE;
 import static nextstep.jwp.presentation.StaticResource.UNAUTHORIZED_PAGE;
+import static org.apache.catalina.Session.JSESSIONID;
 
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -23,8 +24,6 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
-
-    private static final String JSESSIONID = "JSESSIONID";
 
     private LoginController() {
     }

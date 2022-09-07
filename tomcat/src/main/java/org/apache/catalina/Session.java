@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class Session {
 
+    public static final String JSESSIONID = "JSESSIONID";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 

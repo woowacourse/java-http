@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.net.URL;
@@ -44,28 +44,6 @@ public class HttpResponse {
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
-    }
-
-    private HttpResponse(String statusLine, List<String> headers, String body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    public static HttpResponse of(String statusCode, String contentType, String responseBody) {
-        return new HttpResponse("HTTP/1.1 " + statusCode + " ",
-                new ArrayList<>(List.of("Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ")),
-                responseBody);
-    }
-
-    public static HttpResponse of(String statusCode, String file) throws IOException {
-        String responseBody = "";
-        // final String responseBody = readFile("static" + file);
-        return new HttpResponse("HTTP/1.1 " + statusCode + " ",
-                new ArrayList<>(List.of("Content-Type: " + ContentType.findContentType(file) + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ")),
-                responseBody);
     }
 
     public void addHeader(String header) {

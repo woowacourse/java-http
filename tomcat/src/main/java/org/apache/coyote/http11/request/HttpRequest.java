@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,16 +43,16 @@ public class HttpRequest {
         return body;
     }
 
-    public String getPath() {
-        return requestLine.getPath();
-    }
-
     public boolean isGetMethod() {
         return "GET".equals(requestLine.getMethod());
     }
 
     public boolean isPostMethod() {
         return "POST".equals(requestLine.getMethod());
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public RequestLine getRequestLine() {

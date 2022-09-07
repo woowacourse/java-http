@@ -1,76 +1,83 @@
 package org.apache.coyote.http11.controller;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.QueryMapper;
+import org.apache.coyote.http11.Query;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String body = request.getRequestBody().getBody();
-        doLoginRequest(new QueryMapper(body), request, response);
-    }
-
-    @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException {
-        if (request.getRequestHeaders().isExistCookie()) {
-            HttpCookie cookie = request.getRequestHeaders().getCookie();
-            String jsessionid = cookie.getValues().get("JSESSIONID");
-            Session session = SessionManager.findSession(jsessionid);
-            if (session != null) {
-                response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
-                response.addContentTypeHeader(ContentType.HTML.getContentType());
-                response.addBodyFromFile("/index.html");
-                return;
-            }
-        }
-        createLoginPageResponse(request.getPath(), response);
-    }
-
-    private void doLoginRequest(QueryMapper queryMapper, HttpRequest request, HttpResponse response) {
-        Map<String, String> parameters = queryMapper.getParameters();
+        Query queryMapper = new Query(request.getRequestBody());
+        Map<String, String> parameters = queryMapper.getMappedQuery();
 
         User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
                 .orElseThrow(NoSuchElementException::new);
 
-        if (user.checkPassword(parameters.get("password"))) {
-            log.info("user : " + user);
-            checkCookieAndReturnResponse(request, response, user);
+        if (!user.checkPassword(parameters.get("password"))) {
+            response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+            response.addBodyFromFile("/401.html");
             return;
         }
 
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
-        response.addBodyFromFile("/401.html");
+        log.info("user : " + user);
+        addCookieToHeader(request, response, user);
+        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
+        response.addBodyFromFile("/index.html");
     }
 
-    private void checkCookieAndReturnResponse(HttpRequest request, HttpResponse response, User user) {
+    private void addCookieToHeader(HttpRequest request, HttpResponse response, User user) {
         if (!request.getRequestHeaders().isExistCookie()) {
             UUID uuid = UUID.randomUUID();
-            Session session = new Session(uuid.toString());
-            session.setAttribute("user", user);
-            SessionManager.add(session);
+            storeSession(uuid, user);
             response.addHeader("Set-Cookie: JSESSIONID=" + uuid);
         }
+    }
 
+    private void storeSession(UUID uuid, User user) {
+        Session session = new Session(uuid.toString());
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws IllegalAccessException {
+        if (isNotNullSession(request)) {
+            createIndexPageResponse(response);
+            return;
+        }
+        createLoginPageResponse(request.getPath(), response);
+    }
+
+    private boolean isNotNullSession(HttpRequest request) throws IllegalAccessException {
+        if (request.getRequestHeaders().isExistCookie()) {
+            HttpCookie cookie = request.getRequestHeaders().getCookie();
+            String jsessionid = cookie.getValues().get("JSESSIONID");
+            Session session = sessionManager.findSession(jsessionid);
+            return session != null;
+        }
+        return false;
+    }
+
+    private void createIndexPageResponse(HttpResponse response) {
         response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
+        response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBodyFromFile("/index.html");
     }
 

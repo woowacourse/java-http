@@ -1,11 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.RootController;
-import org.apache.coyote.http11.controller.StaticFileController;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMapping {
 

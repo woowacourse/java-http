@@ -1,10 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class RequestHeaders {
+
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -14,10 +18,12 @@ public class RequestHeaders {
 
     public static RequestHeaders from(List<String> headers) {
         Map<String, String> headerPairs = new HashMap<>();
+
         for (String header : headers) {
             String[] headerProperties = header.split(": ");
-            headerPairs.put(headerProperties[0], headerProperties[1]);
+            headerPairs.put(headerProperties[KEY_INDEX], headerProperties[VALUE_INDEX]);
         }
+
         return new RequestHeaders(headerPairs);
     }
 
@@ -32,7 +38,10 @@ public class RequestHeaders {
         return headers.containsKey("Cookie");
     }
 
-    public HttpCookie getCookie() {
+    public HttpCookie getCookie() throws IllegalAccessException {
+        if (!isExistCookie()) {
+            throw new IllegalAccessException();
+        }
         return HttpCookie.from(headers.get("Cookie"));
     }
 

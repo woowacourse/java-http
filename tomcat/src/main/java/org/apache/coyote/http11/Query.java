@@ -1,26 +1,22 @@
 package org.apache.coyote.http11;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.request.RequestBody;
 
-public class QueryMapper {
+public class Query {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
     private final String query;
 
-    public QueryMapper(URI uri) {
-        this.query = uri.getQuery();
+    public Query(RequestBody body) {
+        this.query = body.getBody();
     }
 
-    public QueryMapper(String body) {
-        this.query = body;
-    }
-
-    public Map<String, String> getParameters() {
+    public Map<String, String> getMappedQuery() {
         Map<String, String> result = new HashMap<>();
         List<String> parameterPairs = List.of(this.query.split("&"));
 

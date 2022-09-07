@@ -15,32 +15,39 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        final Path path = request.getPath();
         if (request.isGetMethod()) {
-            final String responseBody = ResourceFindUtils
-                    .getResourceFile(path.getResource() + Extension.HTML.getExtension());
-            return new HttpResponse.Builder()
-                    .status(HttpStatus.OK)
-                    .contentType(path.getContentType())
-                    .responseBody(responseBody)
-                    .build();
+            return doGet(request);
         }
-
         if (request.isPostMethod()) {
-            final Map<String, String> params = request.getBody();
-            final String account = params.get("account");
-            final String password = params.get("password");
-            final String email = params.get("email");
-            final User user = new User(account, password, email);
-
-            InMemoryUserRepository.save(user);
-
-            return new HttpResponse.Builder()
-                    .status(HttpStatus.FOUND)
-                    .location("/index.html")
-                    .build();
+            return doPost(request);
         }
 
         throw new UncheckedServletException("지원하지 않는 메서드입니다.");
+    }
+
+    private HttpResponse doGet(HttpRequest request) {
+        final Path path = request.getPath();
+        final String responseBody = ResourceFindUtils
+                .getResourceFile(path.getResource() + Extension.HTML.getExtension());
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .contentType(path.getContentType())
+                .responseBody(responseBody)
+                .build();
+    }
+
+    private HttpResponse doPost(HttpRequest request) {
+        final Map<String, String> params = request.getBody();
+        final String account = params.get("account");
+        final String password = params.get("password");
+        final String email = params.get("email");
+        final User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+
+        return new HttpResponse.Builder()
+                .status(HttpStatus.FOUND)
+                .location("/index.html")
+                .build();
     }
 }

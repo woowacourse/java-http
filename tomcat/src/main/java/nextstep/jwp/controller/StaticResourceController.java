@@ -14,38 +14,46 @@ public class StaticResourceController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        final Path path = request.getPath();
         if (request.isGetMethod()) {
-            if (path.isIcoContentType()) {
-                return new HttpResponse.Builder()
-                        .status(HttpStatus.OK)
-                        .contentType(path.getContentType())
-                        .responseBody("")
-                        .build();
-            }
+            return doGet(request);
+        }
 
-            final String responseBody = ResourceFindUtils.getResourceFile(path.getResource());
+        throw new UncheckedServletException("지원하지 않는 메서드입니다.");
+    }
 
-            if (request.containsSession()) {
-                return new HttpResponse.Builder()
-                        .status(HttpStatus.OK)
-                        .contentType(path.getContentType())
-                        .responseBody(responseBody)
-                        .build();
-            }
+    private HttpResponse doGet(HttpRequest request) {
+        final Path path = request.getPath();
 
-            final Session session = new Session(UUID.randomUUID().toString());
-            final SessionManager sessionManager = new SessionManager();
-            sessionManager.add(session);
-
+        if (path.isIcoContentType()) {
             return new HttpResponse.Builder()
                     .status(HttpStatus.OK)
-                    .cookie("JSESSIONID=" + session.getId())
+                    .contentType(path.getContentType())
+                    .responseBody("")
+                    .build();
+        }
+        final String responseBody = ResourceFindUtils.getResourceFile(path.getResource());
+
+        if (request.containsSession()) {
+            return new HttpResponse.Builder()
+                    .status(HttpStatus.OK)
                     .contentType(path.getContentType())
                     .responseBody(responseBody)
                     .build();
         }
 
-        throw new UncheckedServletException("지원하지 않는 메서드입니다.");
+        return toHttpResponseWithCreatingSession(path, responseBody);
+    }
+
+    private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {
+        final Session session = new Session(UUID.randomUUID().toString());
+        final SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
+
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .cookie("JSESSIONID=" + session.getId())
+                .contentType(path.getContentType())
+                .responseBody(responseBody)
+                .build();
     }
 }

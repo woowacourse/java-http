@@ -36,23 +36,30 @@ public class LoginController implements Controller {
                 .getResourceFile(path.getResource() + Extension.HTML.getExtension());
 
         if (request.containsSession()) {
-            final SessionManager sessionManager = new SessionManager();
-            final Session session = sessionManager.findSession(request.getSessionId());
-
-            if (session != null) {
-                return new HttpResponse.Builder()
-                        .status(HttpStatus.FOUND)
-                        .location("/index.html")
-                        .build();
-            }
-            return new HttpResponse.Builder()
-                    .status(HttpStatus.OK)
-                    .contentType(path.getContentType())
-                    .responseBody(responseBody)
-                    .build();
-
+            return toHttpResponseWithSession(request, path, responseBody);
         }
 
+        return toHttpResponseWithCreatingSession(path, responseBody);
+    }
+
+    private HttpResponse toHttpResponseWithSession(HttpRequest request, Path path, String responseBody) {
+        final SessionManager sessionManager = new SessionManager();
+        final Session session = sessionManager.findSession(request.getSessionId());
+
+        if (session != null) {
+            return new HttpResponse.Builder()
+                    .status(HttpStatus.FOUND)
+                    .location("/index.html")
+                    .build();
+        }
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .contentType(path.getContentType())
+                .responseBody(responseBody)
+                .build();
+    }
+
+    private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {
         final Session session = new Session(UUID.randomUUID().toString());
         final SessionManager sessionManager = new SessionManager();
         sessionManager.add(session);
@@ -81,6 +88,10 @@ public class LoginController implements Controller {
                 .orElseThrow(LoginFailedException::new);
 
         user.checkPassword(password);
+        setUserToSession(sessionId, user);
+    }
+
+    private void setUserToSession(String sessionId, User user) {
         final SessionManager sessionManager = new SessionManager();
         final Session session = sessionManager.findSession(sessionId);
         if (session == null) {

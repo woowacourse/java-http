@@ -1,6 +1,11 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+
 public class User {
+
+    private static final int NEXT_ID = 1;
+
 
     private final Long id;
     private final String account;
@@ -15,7 +20,7 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this(null, account, password, email);
+        this((long) (InMemoryUserRepository.count() + NEXT_ID), account, password, email);
     }
 
     public boolean checkPassword(String password) {

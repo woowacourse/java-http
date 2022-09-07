@@ -2,6 +2,7 @@ package org.apache.coyote.model.request;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RequestBody {
@@ -31,7 +32,11 @@ public class RequestBody {
         return new RequestBody(requestBody);
     }
 
-    public String getByKey(String key) {
+    public String getByKey(final String key) {
         return requestBody.get(key);
+    }
+
+    public boolean containsKey(final List<String> keys) {
+        return requestBody.containsKey(keys);
     }
 }

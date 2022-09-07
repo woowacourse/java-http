@@ -10,7 +10,7 @@ import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.QueryParams;
+import org.apache.coyote.query.QueryParams;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.Location;
 import org.apache.coyote.session.Session;

@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.query.QueryParam;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

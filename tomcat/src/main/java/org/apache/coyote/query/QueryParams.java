@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.coyote.query;
 
 import static java.util.stream.Collectors.toList;
 

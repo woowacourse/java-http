@@ -6,7 +6,7 @@ import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 
-public class SessionRepository {
+public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 

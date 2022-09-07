@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.servlet.Servlet;
-import org.apache.coyote.servlet.session.SessionRepository;
+import org.apache.coyote.servlet.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +18,18 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final Servlet servlet;
-    private final SessionRepository sessionRepository;
+    private final SessionManager sessionManager = new SessionManager();
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector(Servlet servlet, SessionRepository sessionRepository) {
-        this(servlet, sessionRepository, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(Servlet servlet) {
+        this(servlet, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
     public Connector(final Servlet servlet,
-                     final SessionRepository sessionRepository,
                      final int port,
                      final int acceptCount) {
         this.servlet = servlet;
-        this.sessionRepository = sessionRepository;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -73,7 +71,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection, servlet, sessionRepository);
+        var processor = new Http11Processor(connection, servlet, sessionManager);
         new Thread(processor).start();
     }
 

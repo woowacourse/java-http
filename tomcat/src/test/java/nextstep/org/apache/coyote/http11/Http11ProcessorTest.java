@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.servlet.CustomServlet;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.servlet.session.SessionRepository;
+import org.apache.coyote.servlet.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -20,7 +20,7 @@ class Http11ProcessorTest {
     void process() throws IOException {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new CustomServlet(), new SessionRepository());
+        final var processor = new Http11Processor(socket, new CustomServlet(), new SessionManager());
 
         // when
         processor.process(socket);
@@ -48,7 +48,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new CustomServlet(), new SessionRepository());
+        final Http11Processor processor = new Http11Processor(socket, new CustomServlet(), new SessionManager());
 
         // when
         processor.process(socket);

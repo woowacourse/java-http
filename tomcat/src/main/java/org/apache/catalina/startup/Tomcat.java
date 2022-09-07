@@ -3,7 +3,6 @@ package org.apache.catalina.startup;
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.servlet.Servlet;
-import org.apache.coyote.servlet.session.SessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,14 +10,8 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final SessionRepository sessionRepository;
-
-    public Tomcat(SessionRepository sessionRepository) {
-        this.sessionRepository = sessionRepository;
-    }
-
     public void start(Servlet servlet) {
-        final var connector = new Connector(servlet, sessionRepository);
+        final var connector = new Connector(servlet);
         connector.start();
 
         try {

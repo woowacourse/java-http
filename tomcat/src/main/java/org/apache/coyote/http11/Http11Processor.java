@@ -13,7 +13,7 @@ import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.RequestHeaders;
 import org.apache.coyote.servlet.request.StartLine;
 import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.session.SessionRepository;
+import org.apache.coyote.servlet.session.SessionManager;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +24,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Servlet servlet;
-    private final SessionRepository sessionRepository;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final Servlet servlet, final SessionRepository sessionRepository) {
+    public Http11Processor(final Socket connection, final Servlet servlet, final SessionManager sessionManager) {
         this.connection = connection;
         this.servlet = servlet;
-        this.sessionRepository = sessionRepository;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = toRequest(reader);
             final var response = new HttpResponse();
-            sessionRepository.updateSessionAndCookie(request, response);
+            sessionManager.updateSessionAndCookie(request, response);
             servlet.service(request, response);
 
             outputStream.write(response.toMessage().getBytes());

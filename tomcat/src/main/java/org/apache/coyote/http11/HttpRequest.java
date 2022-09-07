@@ -43,6 +43,18 @@ public class HttpRequest {
         return body;
     }
 
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public boolean isGetMethod() {
+        return "GET".equals(requestLine.getMethod());
+    }
+
+    public boolean isPostMethod() {
+        return "POST".equals(requestLine.getMethod());
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

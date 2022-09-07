@@ -11,8 +11,40 @@ import java.util.Objects;
 public class HttpResponse {
 
     private String statusLine;
-    private List<String> headers;
+    private List<String> headers = new ArrayList<>();
     private String body;
+
+    public HttpResponse() {}
+
+    public void addStatusLine(String status) {
+        this.statusLine = "HTTP/1.1 " + status + " ";
+    }
+
+    public void addContentTypeHeader(String contentType) {
+        this.headers.add("Content-Type: " + contentType + ";charset=utf-8 ");
+    }
+
+    public void addBody(String body) {
+        this.headers.add("Content-Length: " + body.getBytes().length + " ");
+        this.body = body;
+    }
+
+    public void addBodyFromFile(String fileName) {
+        String body = readFile("static" + fileName);
+        this.headers.add("Content-Length: " + body.getBytes().length + " ");
+        this.body = body;
+    }
+
+    private String readFile(String fileName) {
+        try {
+            URL resource = getClass().getClassLoader().getResource(fileName);
+            final Path path = Path.of(Objects.requireNonNull(resource).getPath());
+
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
+    }
 
     private HttpResponse(String statusLine, List<String> headers, String body) {
         this.statusLine = statusLine;
@@ -28,18 +60,12 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(String statusCode, String file) throws IOException {
-        final String responseBody = readFile("static" + file);
+        String responseBody = "";
+        // final String responseBody = readFile("static" + file);
         return new HttpResponse("HTTP/1.1 " + statusCode + " ",
                 new ArrayList<>(List.of("Content-Type: " + ContentType.findContentType(file) + ";charset=utf-8 ",
                         "Content-Length: " + responseBody.getBytes().length + " ")),
                 responseBody);
-    }
-
-    private static String readFile(String fileName) throws IOException {
-        URL resource = HttpResponse.class.getClassLoader().getResource(fileName);
-        final Path path = Path.of(Objects.requireNonNull(resource).getPath());
-
-        return Files.readString(path);
     }
 
     public void addHeader(String header) {

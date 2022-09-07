@@ -1,6 +1,8 @@
 package nextstep.jwp.controller;
 
 
+import java.util.NoSuchElementException;
+
 import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.request.annotation.RequestMapping;
 import org.apache.coyote.http11.request.annotation.RequestParam;
@@ -8,15 +10,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;
 
-import nextstep.jwp.service.Service;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 public class Controller {
-
-    private final Service service;
-
-    public Controller(final Service service) {
-        this.service = service;
-    }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public HttpResponse none() {
@@ -38,13 +35,14 @@ public class Controller {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public HttpResponse login(@RequestParam("account") final String account,
                               @RequestParam("password") final String password) {
-        try {
-            service.login(account, password);
-            return redirect("/index.html");
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(NoSuchElementException::new);
 
-        } catch (IllegalArgumentException e) {
+        if (!user.checkPassword(password)) {
             return redirect("/401.html");
         }
+
+        return redirect("/index.html");
     }
 
     private HttpResponse success(final String filePath) {

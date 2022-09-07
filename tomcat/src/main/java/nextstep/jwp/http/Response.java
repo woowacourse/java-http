@@ -8,11 +8,12 @@ public class Response {
 
     private static final HttpVersion DEFAULT_HTTP_VERSION = HttpVersion.HTTP11;
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.OK;
+    private static final String DEFAULT_CONTENT = "";
 
     private final Headers headers;
     private HttpVersion httpVersion = DEFAULT_HTTP_VERSION;
     private HttpStatus httpStatus = DEFAULT_HTTP_STATUS;
-    private String content;
+    private String content = DEFAULT_CONTENT;
 
     public Response(final Headers headers) {
         this.headers = headers;

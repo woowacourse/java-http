@@ -37,6 +37,10 @@ public class AuthService {
 
     public boolean alreadyLogin(final String sessionId) {
         final Session session = SessionManager.findSession(sessionId);
+        if (session == null) {
+            return false;
+        }
+
         final User user = (User) session.getAttribute("user");
         if (user == null) {
             return false;

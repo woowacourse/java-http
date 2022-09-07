@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.model.request.ContentType;
 import org.apache.coyote.model.request.HttpRequest;
@@ -9,12 +9,10 @@ import org.apache.coyote.utils.Util;
 
 import static org.apache.coyote.utils.Util.getExtension;
 
-public class DefaultHandler implements Handler {
+public class DefaultHandler extends AbstractHandler {
 
-    private final HttpRequest httpRequest;
-
-    public DefaultHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    public DefaultHandler(HttpRequest httpRequest) {
+        super(httpRequest);
     }
 
     @Override

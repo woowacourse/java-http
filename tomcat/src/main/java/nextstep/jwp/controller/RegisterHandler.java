@@ -1,41 +1,42 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.model.request.HttpRequest;
-import org.apache.coyote.model.request.Method;
 import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.utils.Util;
 
 import static org.apache.coyote.utils.Util.createResponse;
 
-public class RegisterHandler implements Handler {
+public class RegisterHandler extends AbstractHandler {
 
     public static final String REGISTER_HTML = "/register.html";
     public static final String INDEX_HTML = "/index.html";
-    private static final String CLIENT_ERROR_404 = "/404.html";
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
+    private static final String CLIENT_ERROR_404 = "/404.html";
 
-    private final HttpRequest httpRequest;
-
-    public RegisterHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    public RegisterHandler(HttpRequest httpRequest) {
+        super(httpRequest);
     }
 
     @Override
-    public String getResponse() {
-        if (httpRequest.checkMethod(Method.GET)) {
-            return createResponse(StatusCode.OK, Util.getResponseBody(REGISTER_HTML, getClass()))
-                    .getResponse();
-        }
-        if (httpRequest.checkMethod(Method.POST)) {
-            saveUser();
-            return createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()))
-                    .getResponse();
-        }
+    protected String getMethodResponse() {
+        return createResponse(StatusCode.OK, Util.getResponseBody(REGISTER_HTML, getClass()))
+                .getResponse();
+    }
+
+    @Override
+    protected String postMethodResponse() {
+        saveUser();
+        return createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()))
+                .getResponse();
+    }
+
+    @Override
+    protected String otherMethodResponse() {
         return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_404, getClass()))
                 .getResponse();
     }

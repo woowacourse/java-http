@@ -45,8 +45,12 @@ public class HttpRequest {
         }
     }
 
-    public boolean checkMethod(final Method method) {
-        return requestLine.checkMethod(method);
+    public boolean checkGetMethod() {
+        return requestLine.checkMethod(Method.GET);
+    }
+
+    public boolean checkPostMethod() {
+        return requestLine.checkMethod(Method.POST);
     }
 
     public Map<String, String> getParams() {

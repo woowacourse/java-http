@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.model.request.HttpRequest;
-import org.apache.coyote.model.request.Method;
 import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseHeader;
@@ -18,30 +17,18 @@ import java.util.Optional;
 import static org.apache.coyote.utils.Util.createResponse;
 
 
-public class LoginHandler implements Handler {
+public class LoginHandler extends AbstractHandler {
 
     private static final String LOGIN_HTML = "/login.html";
     private static final String INDEX_HTML = "/index.html";
     private static final String CLIENT_ERROR_401 = "/401.html";
-    private final HttpRequest httpRequest;
 
-    public LoginHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    public LoginHandler(HttpRequest httpRequest) {
+        super(httpRequest);
     }
 
     @Override
-    public String getResponse() {
-        if (httpRequest.checkMethod(Method.GET)) {
-            return calculateWhenGetMethod();
-        }
-        if (httpRequest.checkMethod(Method.POST) && checkUser(httpRequest.getRequestBody())) {
-            return calculateWhenPostMethod();
-        }
-        return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
-                .getResponse();
-    }
-
-    private String calculateWhenGetMethod() {
+    protected String getMethodResponse() {
         if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
             return createResponse(StatusCode.OK, Util.getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
@@ -50,7 +37,11 @@ public class LoginHandler implements Handler {
                 .getResponse();
     }
 
-    private String calculateWhenPostMethod() {
+    @Override
+    protected String postMethodResponse() {
+        if (!checkUser(httpRequest.getRequestBody())) {
+            throw new IllegalArgumentException("유저 정보가 올바르지 않습니다.");
+        }
         HttpResponse httpResponse = createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()));
         if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
             Cookie cookie = new Cookie();
@@ -59,6 +50,12 @@ public class LoginHandler implements Handler {
             httpResponse.addCookie(cookie);
         }
         return httpResponse.getResponse();
+    }
+
+    @Override
+    protected String otherMethodResponse() {
+        return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
+                .getResponse();
     }
 
     private boolean checkUser(final RequestBody params) {

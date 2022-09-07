@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.model.request.ContentType;
 import org.apache.coyote.model.request.HttpRequest;
@@ -6,13 +6,12 @@ import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
 
-public class HomeHandler implements Handler {
+public class HomeHandler extends AbstractHandler {
 
     public static final String HELLO_WORLD = "Hello world!";
-    private final HttpRequest httpRequest;
 
-    public HomeHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    public HomeHandler(HttpRequest httpRequest) {
+        super(httpRequest);
     }
 
     @Override

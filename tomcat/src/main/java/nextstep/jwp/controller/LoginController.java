@@ -45,21 +45,20 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (isLoginRequestOfAlreadyLoginUser(httpRequest)) {
+        if (isLoginPageRequest(httpRequest) && hasAlreadyLogin(httpRequest)) {
             redirectToIndexHtml(httpResponse);
             return;
         }
         super.readFile(PATH + HTML_FILE_EXTENSION, httpResponse);
     }
 
-    private boolean isLoginRequestOfAlreadyLoginUser(HttpRequest httpRequest) throws IOException {
-        return httpRequest.hasRequestPathOf(PATH) && httpRequest.hasHttpMethodOf(GET) &&
-                httpRequest.hasCookieOf(JSESSION_COOKIE_KEY) &&
-                isValidCookie(httpRequest.getCookieOf(JSESSION_COOKIE_KEY));
+    private boolean isLoginPageRequest(HttpRequest httpRequest) {
+        return httpRequest.hasRequestPathOf(PATH) && httpRequest.hasHttpMethodOf(GET);
     }
 
-    private boolean isValidCookie(String sessionId) throws IOException {
-        return sessionManager.findSession(sessionId) != null;
+    private boolean hasAlreadyLogin(HttpRequest httpRequest) throws IOException {
+        return httpRequest.hasCookieOf(JSESSION_COOKIE_KEY) &&
+                sessionManager.findSession(httpRequest.getCookieOf(JSESSION_COOKIE_KEY)) != null;
     }
 
     private void redirectToIndexHtml(HttpResponse httpResponse) {

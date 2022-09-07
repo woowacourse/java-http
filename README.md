@@ -37,5 +37,6 @@
 - [x] 패키지 구조에 맞게 application 영역과 framework 영역 분리하기
 - [x] Http11Response 내부와 테스트에서만 사용되는 getOkResponse() 메서드 private으로 수정  
       -> StatusCode 클래스에서 사용되어 public으로 유지
+- [ ] response header, response body를 클래스로 분리
 
 </details>

@@ -14,10 +14,11 @@ public class Http11Request {
         this.cookie = cookie;
     }
 
-    public HttpSession getSession(){
+    public HttpSession getSession() {
         SessionManager sessionManager = new SessionManager();
         return sessionManager.findSession(cookie.getSession());
     }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

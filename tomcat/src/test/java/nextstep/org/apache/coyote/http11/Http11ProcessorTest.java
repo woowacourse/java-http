@@ -16,6 +16,8 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static final String START_LINE_FOUND = "HTTP/1.1 302 Found \r\n";
+
     @DisplayName("요청이 들어오면 Hello world를 body로 응답한다.")
     @Test
     void process() {
@@ -135,7 +137,11 @@ class Http11ProcessorTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(socket.output().contains(START_LINE_FOUND)).isTrue(),
+                () -> assertThat(socket.output().contains("Content-Length: 5670 \r\n")).isTrue()
+        );
+
     }
 
     @DisplayName("login에 실패하면 401 Unauthorized를 헤더로 반환하고 401.html을 보여준다.")
@@ -257,5 +263,74 @@ class Http11ProcessorTest {
                 () -> assertThat(user.getPassword()).isEqualTo("password"),
                 () -> assertThat(socket.output()).contains("Set-Cookie")
         );
+    }
+
+    @DisplayName("로그인에 성공하면 쿠키에 세션을 담아 보낸다.")
+    @Test
+    void loginAndJSessionCookie() {
+        // given
+        String content = "account=gugu&password=password";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
+                "",
+                content);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        User user = InMemoryUserRepository.findByAccount("gugu").get();
+        assertAll(
+                () -> assertThat(user.getPassword()).isEqualTo("password"),
+                () -> assertThat(socket.output()).contains("Set-Cookie"),
+                () -> assertThat(socket.output()).contains("JSESSIONID")
+        );
+    }
+
+    @DisplayName("세션ID가 있을 때, 로그인하면 index.html로 리다이렉트한다.")
+    @Test
+    void loginAndRedirectIndexPage() throws IOException {
+        // given
+        String content = "account=gugu&password=password";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + content.getBytes().length,
+                "",
+                content);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        String oneMoreContent = "account=gugu&password=password";
+
+        final String oneMoreHttpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + oneMoreContent.getBytes().length,
+                "",
+                oneMoreContent);
+
+        final var oneMoreSocket = new StubSocket(oneMoreHttpRequest);
+        final Http11Processor oneMoreProcess = new Http11Processor(oneMoreSocket);
+
+        // when
+        oneMoreProcess.process(oneMoreSocket);
+
+        // then
+        assertThat(oneMoreSocket.output().contains("HTTP/1.1 302 Found")).isTrue();
     }
 }

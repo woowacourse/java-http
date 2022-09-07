@@ -27,10 +27,6 @@ public class HttpSession {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
-        values.remove(name);
-    }
-
     @Override
     public String toString() {
         return "HttpSession{" +

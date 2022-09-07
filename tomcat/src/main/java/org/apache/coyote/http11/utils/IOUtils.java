@@ -14,8 +14,8 @@ public class IOUtils {
 
     public static String readResourceFile(String url) {
         try {
+            log.info("정적 파일 읽기 요청 url : {}", url);
             String path = UrlParser.convertEmptyToHtml(url);
-            log.info("정적 파일 읽기 url : {}", url);
             URL resource = IOUtils.class
                     .getClassLoader()
                     .getResource(STATIC_DIRECTORY + path);

@@ -12,7 +12,6 @@ public class HttpCookie {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String REQUEST_COOKIE_NAME = "Cookie";
-    private static final String RESPONSE_COOKIE_NAME = "Set-Cookie: ";
     private static final String SESSION_ID = "JSESSIONID";
     private static final String KET_VALUE_STANDARD = "=";
 
@@ -48,7 +47,7 @@ public class HttpCookie {
 
     public String getResponse() {
         var sb = new StringBuilder();
-        for(var entry : values.entrySet()){
+        for (var entry : values.entrySet()) {
             sb.append(entry.getKey()).append("=").append(entry.getValue());
         }
         log.info("getResponse : {}", sb);

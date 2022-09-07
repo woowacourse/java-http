@@ -1,11 +1,15 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.COOKIE;
+import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 
 public class HttpHeaders {
 
@@ -52,6 +56,11 @@ public class HttpHeaders {
         return this;
     }
 
+    public HttpHeaders addCookie(final HttpCookie httpCookie) {
+        headers.put(SET_COOKIE, httpCookie.encodingToHttpHeader());
+        return this;
+    }
+
     public String encodingToString() {
         final List<String> headers = new ArrayList<>();
         for (Entry<HttpHeader, String> entry : this.headers.entrySet()) {
@@ -59,5 +68,19 @@ public class HttpHeaders {
             headers.add(join);
         }
         return String.join("\r\n", headers);
+    }
+
+    public String getValue(final HttpHeader httpHeader) {
+        if (headers.isEmpty() || !headers.containsKey(httpHeader)) {
+            throw new NotExistHeaderException();
+        }
+        return this.headers.get(httpHeader);
+    }
+
+    public HttpCookie getHttpCookie() {
+        if (headers.isEmpty() || !headers.containsKey(COOKIE)) {
+            throw new NotExistHeaderException();
+        }
+        return new HttpCookie(this.headers.get(COOKIE));
     }
 }

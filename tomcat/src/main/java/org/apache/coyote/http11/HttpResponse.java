@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+
 public class HttpResponse {
 
     private final HttpStatusCode statusCode;
@@ -13,12 +15,21 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        final String join = String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getValue() + " ",
+        return encodingResponse().getBytes();
+    }
+
+    private String encodingResponse() {
+        if (Objects.isNull(body)) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + statusCode.toHttpString() + " ",
+                    httpHeaders.encodingToString(),
+                    "");
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode.toHttpString() + " ",
                 httpHeaders.encodingToString(),
                 "",
                 body);
-        return join.getBytes();
     }
 
     public static class Builder {

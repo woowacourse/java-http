@@ -46,4 +46,18 @@ class HttpHeadersTest {
         // then
         assertThat(httpHeaders.encodingToString()).isEqualTo("Connection: keep-alive ");
     }
+
+    @Test
+    @DisplayName("주어진 헤더로 헤더의 값을 가져온다.")
+    void getValue() {
+        // given
+        final HttpHeaders httpHeaders = new HttpHeaders()
+                .addHeader(HttpHeader.CONNECTION, "keep-alive");
+
+        // when
+        final String value = httpHeaders.getValue(HttpHeader.CONNECTION);
+
+        // then
+        assertThat(value).isEqualTo("keep-alive");
+    }
 }

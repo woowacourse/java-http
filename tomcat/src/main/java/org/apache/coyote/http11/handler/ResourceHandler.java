@@ -1,9 +1,10 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.handler.support.FileReader;
-import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.http11.model.HttpRequest;
-import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.ContentType;
+import org.apache.coyote.http11.model.response.HttpResponse;
+import org.apache.coyote.http11.model.response.ResponseStatusCode;
 
 public class ResourceHandler implements Handler {
 
@@ -17,9 +18,9 @@ public class ResourceHandler implements Handler {
     public String getResponse() {
         String path = httpRequest.getRequestTarget();
         ContentType contentType = ContentType.from(path);
-
         String responseBody = FileReader.getFile(path, getClass());
-        HttpResponse httpResponse = HttpResponse.of(contentType, responseBody);
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), contentType
+                ,responseBody);
         return httpResponse.getResponse();
     }
 }

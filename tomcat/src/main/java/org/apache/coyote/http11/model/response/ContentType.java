@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.model;
+package org.apache.coyote.http11.model.response;
 
 import java.util.Arrays;
 

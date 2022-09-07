@@ -2,12 +2,12 @@ package org.apache.coyote.http11.handler;
 
 import java.util.Arrays;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.request.HttpRequest;
 
 public enum HandlerMapping {
 
     LOGIN("/login", LoginHandler::new),
+    REGISTER("/register", RegisterHandler::new),
     INDEX("/index.html", IndexHandler::new),
     HOME("/", HomeHandler::new),
     ;
@@ -21,16 +21,11 @@ public enum HandlerMapping {
     }
 
     public static Handler findHandler(final HttpRequest httpRequest) {
-        String path = httpRequest.getRequestTarget();
         return Arrays.stream(values())
-                .filter(matchHandler(path))
+                .filter(handler -> httpRequest.matchTarget(handler.path))
                 .findAny()
                 .map(mapToHandler(httpRequest))
                 .orElseGet(() -> new ResourceHandler(httpRequest));
-    }
-
-    private static Predicate<HandlerMapping> matchHandler(final String path) {
-        return handlerMapping -> path.equals(handlerMapping.path);
     }
 
     private static Function<HandlerMapping, Handler> mapToHandler(final HttpRequest httpRequest) {

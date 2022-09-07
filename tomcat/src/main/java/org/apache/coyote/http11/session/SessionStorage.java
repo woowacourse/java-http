@@ -10,6 +10,9 @@ public class SessionStorage {
 
     private static final Map<String, Session> store = new ConcurrentHashMap<>();
 
+    private SessionStorage() {
+    }
+
     public static Session createSession(HttpRequest request, HttpResponse response) {
         if (hasSession(request)) {
             return store.get(request.getCookie().getValue());
@@ -33,7 +36,4 @@ public class SessionStorage {
         return false;
     }
 
-    public static Session getSession(HttpRequest request) {
-        return store.get(request.getCookie().getValue());
-    }
 }

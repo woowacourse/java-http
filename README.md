@@ -39,7 +39,7 @@ start line = `HTTP Method + URL + HTTP version`
 [x] requestURI를 이용하여 resourceLocator 파일 찾기
 [x] 문서 이외의 확장자 처리
 [x] query param 처리
-[ ] login 페이지 응답 기능과 로그인 기능 분리
+[x] login 페이지 응답 기능과 로그인 기능 분리
 [ ] Content-Type 응답 리팩터링 (resource.getMimeType().getValue() 호출하는 부분)
 
 핸들러 매핑

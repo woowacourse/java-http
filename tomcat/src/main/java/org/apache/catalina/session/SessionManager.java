@@ -1,8 +1,8 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
@@ -11,7 +11,7 @@ public class SessionManager {
     private final Map<String, Session> sessions;
 
     private SessionManager() {
-        this.sessions = new HashMap<>();
+        this.sessions = new ConcurrentHashMap<>();
     }
 
     public static SessionManager instance() {

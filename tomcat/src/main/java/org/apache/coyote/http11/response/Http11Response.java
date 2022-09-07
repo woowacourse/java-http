@@ -15,18 +15,18 @@ public class Http11Response {
     private static final Logger log = LoggerFactory.getLogger(Http11Response.class);
 
     private final StatusCode statusCode;
-    private final ResponseHead responseHead;
+    private final ResponseHeaders responseHeaders;
     private final String responseBody;
 
-    private Http11Response(StatusCode statusCode, ResponseHead responseHead, String responseBody) {
+    private Http11Response(StatusCode statusCode, ResponseHeaders responseHeaders, String responseBody) {
         this.statusCode = statusCode;
-        this.responseHead = responseHead;
+        this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
     }
 
     public static Http11Response withResponseBody(final StatusCode statusCode, final String contentType,
                                                   final String responseBody) {
-        return new Http11Response(statusCode, ResponseHead.fromContentType(contentType), responseBody);
+        return new Http11Response(statusCode, ResponseHeaders.fromContentType(contentType), responseBody);
     }
 
     public static Http11Response of(final StatusCode statusCode, final String resourcePath) {
@@ -36,7 +36,7 @@ public class Http11Response {
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
-        return new Http11Response(statusCode, ResponseHead.fromResourcePath(resourcePath), responseBody);
+        return new Http11Response(statusCode, ResponseHeaders.fromResourcePath(resourcePath), responseBody);
     }
 
     public static Http11Response withLocation(final StatusCode statusCode, final String resourcePath, String location) {
@@ -46,7 +46,7 @@ public class Http11Response {
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
-        return new Http11Response(statusCode, ResponseHead.withLocation(resourcePath, location), responseBody);
+        return new Http11Response(statusCode, ResponseHeaders.withLocation(resourcePath, location), responseBody);
     }
 
     public static Http11Response withLocationAndSetCookie(final StatusCode statusCode,
@@ -61,7 +61,7 @@ public class Http11Response {
 
         final String responseBody = getResponseBody(resource);
         return new Http11Response(statusCode,
-                ResponseHead.withLocationAndSetCookie(resourcePath, location, cookie, cookieName), responseBody);
+                ResponseHeaders.withLocationAndSetCookie(resourcePath, location, cookie, cookieName), responseBody);
     }
 
     private static void validateResourcePath(final URL resource) {
@@ -85,13 +85,13 @@ public class Http11Response {
     }
 
     public boolean hasSetCookieHeader() {
-        return responseHead.hasSetCookieHeader();
+        return responseHeaders.hasSetCookieHeader();
     }
 
     public String getOkResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHead.contentTypeToString(),
+                responseHeaders.contentTypeToString(),
                 contentLengthToString(),
                 "",
                 responseBody);
@@ -100,9 +100,9 @@ public class Http11Response {
     public String getFoundResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHead.contentTypeToString(),
+                responseHeaders.contentTypeToString(),
                 contentLengthToString(),
-                responseHead.locationToString(),
+                responseHeaders.locationToString(),
                 "",
                 responseBody);
     }
@@ -110,10 +110,10 @@ public class Http11Response {
     public String getFoundResponseWithSetCookie() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHead.contentTypeToString(),
+                responseHeaders.contentTypeToString(),
                 contentLengthToString(),
-                responseHead.locationToString(),
-                responseHead.setCookieToString(),
+                responseHeaders.locationToString(),
+                responseHeaders.setCookieToString(),
                 "",
                 responseBody);
     }

@@ -2,36 +2,36 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpCookie;
 
-public class ResponseHead {
+public class ResponseHeaders {
 
     private final String contentType;
     private final String locationHeader;
     private final String setCookieHeader;
 
-    private ResponseHead(String contentType, String locationHeader, String setCookieHeader) {
+    private ResponseHeaders(String contentType, String locationHeader, String setCookieHeader) {
         this.contentType = contentType;
         this.locationHeader = locationHeader;
         this.setCookieHeader = setCookieHeader;
     }
 
-    public static ResponseHead fromContentType(final String contentType) {
-        return new ResponseHead(contentType, null, null);
+    public static ResponseHeaders fromContentType(final String contentType) {
+        return new ResponseHeaders(contentType, null, null);
     }
 
-    public static ResponseHead fromResourcePath(final String resourcePath) {
+    public static ResponseHeaders fromResourcePath(final String resourcePath) {
         final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHead(contentType, null, null);
+        return new ResponseHeaders(contentType, null, null);
     }
 
-    public static ResponseHead withLocation(final String resourcePath, final String location) {
+    public static ResponseHeaders withLocation(final String resourcePath, final String location) {
         final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHead(contentType, location, null);
+        return new ResponseHeaders(contentType, location, null);
     }
 
-    public static ResponseHead withLocationAndSetCookie(final String resourcePath, final String location,
-                                                        final HttpCookie cookie, final String cookieName) {
+    public static ResponseHeaders withLocationAndSetCookie(final String resourcePath, final String location,
+                                                           final HttpCookie cookie, final String cookieName) {
         final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHead(contentType, location, cookie.cookieToString(cookieName));
+        return new ResponseHeaders(contentType, location, cookie.cookieToString(cookieName));
     }
 
     public String contentTypeToString() {

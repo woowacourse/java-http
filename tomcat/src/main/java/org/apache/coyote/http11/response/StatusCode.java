@@ -12,11 +12,11 @@ public enum StatusCode {
         return response.getFoundResponse();
     });
 
-    private final String value;
+    private final String statusMessage;
     private final Function<Http11Response, String> responseContentExtractor;
 
-    StatusCode(String value, Function<Http11Response, String> responseContentExtractor) {
-        this.value = value;
+    StatusCode(String statusMessage, Function<Http11Response, String> responseContentExtractor) {
+        this.statusMessage = statusMessage;
         this.responseContentExtractor = responseContentExtractor;
     }
 
@@ -25,6 +25,6 @@ public enum StatusCode {
     }
 
     public CharSequence statusCodeToString() {
-        return String.format("%s %s", value, name());
+        return String.format("%s %s", statusMessage, name());
     }
 }

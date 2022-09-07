@@ -1,10 +1,10 @@
 package nextstep.jwp.handler;
 
+import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.enums.HttpStatusCode;
 
-public class FileController implements Controller {
+public class FileController extends AbstractController {
 
     private static final Controller INSTANCE = new FileController();
 
@@ -16,7 +16,16 @@ public class FileController implements Controller {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        return generateResponse(httpRequest);
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
+        return generateResponse(httpRequest);
+    }
+
+    private HttpResponse generateResponse(final HttpRequest httpRequest) {
         return HttpResponse.of(httpRequest, HttpStatusCode.OK, httpRequest.getUrl());
     }
 }

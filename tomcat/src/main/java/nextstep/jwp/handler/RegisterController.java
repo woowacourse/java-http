@@ -2,12 +2,12 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.enums.HttpStatusCode;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     private static final Controller INSTANCE = new RegisterController();
 
@@ -19,19 +19,12 @@ public class RegisterController implements Controller {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return doGet(httpRequest);
-        }
-
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/register.html");
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         final HttpRequestBody requestBody = httpRequest.getBody();
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);

@@ -17,7 +17,7 @@ import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -33,15 +33,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return doGet(httpRequest);
-        }
-
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         Optional<String> jSessionId = httpRequest.getHeaders()
                 .findJSessionId();
 
@@ -58,7 +50,8 @@ public class LoginController implements Controller {
         return response;
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         try {
             return login(httpRequest);
         } catch (UserNotFoundException | UnAuthorizedException e) {

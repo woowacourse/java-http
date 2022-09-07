@@ -11,8 +11,12 @@ import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.Servlet;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostLoginServlet implements Servlet {
+
+    private final static Logger log = LoggerFactory.getLogger(PostLoginServlet.class);
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
@@ -21,14 +25,24 @@ public class PostLoginServlet implements Servlet {
         final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(account);
 
         if (possibleUser.isEmpty()) {
+            log.info("존재하지 않는 유저 [요청 account: {}]", account);
+            return HttpResponse.init(HttpStatusCode.NOT_FOUND)
+                    .setBodyByPath("/404.html");
+        }
+
+        final User user = possibleUser.get();
+        final String password = requestBody.get("password");
+        if (!user.checkPassword(password)) {
+            log.info("비밀번호 불일치 [요청 account: {}]", account);
             return HttpResponse.init(HttpStatusCode.UNAUTHORIZED)
                     .setBodyByPath("/401.html");
         }
 
         final Session session = Session.generate();
-        session.setAttribute("user", possibleUser.get());
+        session.setAttribute("user", user);
         SessionManager.add(session);
 
+        log.info("로그인 성공 [요청 account: {}]", account);
         return HttpResponse.init(HttpStatusCode.FOUND)
                 .setLocationAsHome()
                 .setSessionId(session.getId());

@@ -23,8 +23,11 @@ public class HttpRequestHeader {
     }
 
     private HttpCookie getHttpCookie(final Map<String, String> value) {
-        final String cookie = value.get("cookie");
-        return HttpCookie.from(cookie);
+        if (value.containsKey("Cookie")) {
+            final String cookie = value.get("Cookie");
+            return HttpCookie.from(cookie);
+        }
+        return new HttpCookie();
     }
 
     public static HttpRequestHeader from(final BufferedReader bufferedReader) throws IOException {
@@ -50,5 +53,13 @@ public class HttpRequestHeader {
 
     public String getContentLength() {
         return value.getOrDefault("Content-Length", "0");
+    }
+
+    public boolean containsSession() {
+        return httpCookie.containsSession();
+    }
+
+    public String getSession() {
+        return httpCookie.getSession();
     }
 }

@@ -31,11 +31,19 @@ public class HttpRequest {
         return startLine.isGet();
     }
 
+    public boolean containsSession() {
+        return requestHeader.containsSession();
+    }
+
     public RequestURL getRequestURL() {
         return startLine.getRequestURL();
     }
 
     public String getHttpBody(String key) {
         return requestBody.get(key);
+    }
+
+    public String getSession() {
+        return requestHeader.getSession();
     }
 }

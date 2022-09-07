@@ -14,6 +14,10 @@ public class HttpCookie {
 
     private final Map<String, String> value;
 
+    public HttpCookie() {
+        value = new HashMap<>();
+    }
+
     public HttpCookie(final Map<String, String> value) {
         this.value = value;
     }
@@ -35,5 +39,13 @@ public class HttpCookie {
 
     public static String createJSessionId() {
         return UUID.randomUUID().toString();
+    }
+
+    public String getSession() {
+        return value.get("JSESSIONID");
+    }
+
+    public boolean containsSession() {
+        return value.containsKey("JSESSIONID");
     }
 }

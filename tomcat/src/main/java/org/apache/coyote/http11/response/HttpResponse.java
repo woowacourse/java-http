@@ -50,7 +50,7 @@ public class HttpResponse {
     public static HttpResponse notFound() {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", ContentType.HTML.getValue());
-        return new HttpResponse(StatusCode.NOT_FOUND, header, FileReader.read("/401.html"));
+        return new HttpResponse(StatusCode.NOT_FOUND, header, FileReader.read("/404.html"));
     }
 
     public void setCookie(String key, String value) {

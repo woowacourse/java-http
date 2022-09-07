@@ -124,7 +124,7 @@ public class Http11Processor implements Runnable, Processor {
                 .status(FOUND)
                 .header(LOCATION, "/index.html");
 
-        if (request.getHttpHeaders().hasHeader(COOKIE)) {
+        if (!request.getHttpHeaders().hasHeader(COOKIE)) {
             builder.setCookie(HttpCookie.sessionId(session.getId()));
         }
 

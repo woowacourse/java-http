@@ -44,7 +44,8 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              OutputStream outputStream = connection.getOutputStream()) {
 
-            URI uri = new URI(readRequestPath(bufferedReader));
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            URI uri = new URI(httpRequest.getRequestLine().getPath());
             final String response = executeRequestAndGetResponse(uri);
 
             outputStream.write(response.getBytes());
@@ -52,11 +53,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String readRequestPath(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        return line.split(" ")[PATH_INDEX];
     }
 
     private String executeRequestAndGetResponse(URI uri) throws IOException {
@@ -68,6 +64,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/login".equals(requestPath)) {
             return doLoginRequest(uri);
+        }
+
+        if ("/register".equals(requestPath)) {
+
+            return makeResponse(StatusCode.getStatusCode(200),
+                    uri.getPath().concat("." + ContentType.HTML.getExtension()));
         }
 
         return makeResponse(StatusCode.getStatusCode(200), requestPath);

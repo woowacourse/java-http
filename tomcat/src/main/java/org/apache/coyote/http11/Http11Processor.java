@@ -42,21 +42,9 @@ public class Http11Processor implements Runnable, Processor {
 
             String startLine = bufferedReader.readLine();
             HttpHeaders httpHeaders = extractHeaders(bufferedReader);
-            RequestBody requestBody = null;
+            RequestBody requestBody = extractBody(bufferedReader, httpHeaders);
+            HttpCookie httpCookie = extractCookie(httpHeaders);
 
-            if (httpHeaders.containsKey("Content-Length")) {
-                requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
-            }
-
-            HttpCookie httpCookie = new HttpCookie();
-            if (httpHeaders.containsKey("Cookie")) {
-                String cookieValue = httpHeaders.get("Cookie");
-                Map<String, String> cookieValueMap = Arrays.stream(cookieValue.split("; "))
-                        .map(it -> it.split("="))
-                        .collect(Collectors.toMap(it -> it[0], it -> it[1]));
-
-                httpCookie.putAll(cookieValueMap);
-            }
             final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders, requestBody, httpCookie);
 
             FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
@@ -76,6 +64,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private HttpCookie extractCookie(HttpHeaders httpHeaders) {
+        HttpCookie httpCookie = new HttpCookie();
+        if (httpHeaders.containsKey("Cookie")) {
+            String cookieValue = httpHeaders.get("Cookie");
+            Map<String, String> cookieValueMap = Arrays.stream(cookieValue.split("; "))
+                    .map(it -> it.split("="))
+                    .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+
+            httpCookie.putAll(cookieValueMap);
+        }
+        return httpCookie;
+    }
+
     private HttpHeaders extractHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
 
@@ -88,6 +89,14 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(split[0], split[1].trim());
         }
         return new HttpHeaders(headers);
+    }
+
+    private RequestBody extractBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
+        RequestBody requestBody = new RequestBody();
+        if (httpHeaders.containsKey("Content-Length")) {
+            requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
+        }
+        return requestBody;
     }
 
     private RequestBody extractRequestBody(int contentLength, BufferedReader bufferedReader) throws IOException {

@@ -1,12 +1,17 @@
 package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RequestBody {
 
     private final Map<String, String> values;
+
+    public RequestBody() {
+        this.values = new HashMap<>();
+    }
 
     public RequestBody(Map<String, String> values) {
         this.values = values;

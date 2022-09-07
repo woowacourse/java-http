@@ -36,6 +36,7 @@ public class HttpResponse {
 
         return new HttpResponse(HttpStatus.FOUND, httpHeaders, EMPTY_BODY);
     }
+
     public static HttpResponse sendRedirect(final String uri) {
         final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
         httpHeaders.put(LOCATION, uri);

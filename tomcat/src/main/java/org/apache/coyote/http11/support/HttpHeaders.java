@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.support;
 
-import static org.apache.coyote.http11.support.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.support.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.support.HttpHeader.*;
 
 import java.util.Map;
 import java.util.Objects;
@@ -14,20 +13,28 @@ public class HttpHeaders {
         this.values = values;
     }
 
-    public String getContentLength() {
-        return values.getOrDefault(CONTENT_LENGTH, "0");
+    public boolean existsContentType() {
+        return values.containsKey(CONTENT_TYPE);
+    }
+
+    public boolean existsCookie() {
+        return values.containsKey(COOKIE);
     }
 
     public void put(final HttpHeader httpHeader, final String value) {
         values.put(httpHeader, value);
     }
 
-    public Map<HttpHeader, String> getValues() {
-        return values;
+    public String getContentLength() {
+        return values.getOrDefault(CONTENT_LENGTH, "0");
     }
 
-    public boolean existsContentType() {
-        return values.containsKey(CONTENT_TYPE);
+    public String getCookie() {
+        return values.get(COOKIE);
+    }
+
+    public Map<HttpHeader, String> getValues() {
+        return values;
     }
 
     @Override

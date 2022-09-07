@@ -6,6 +6,8 @@ import nextstep.jwp.exception.PasswordNotMatchException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.support.HttpCookie;
+import org.apache.coyote.http11.support.session.Session;
+import org.apache.coyote.http11.support.session.SessionManager;
 import org.apache.coyote.http11.web.QueryParameters;
 import org.apache.coyote.http11.web.response.HttpResponse;
 import org.slf4j.Logger;
@@ -25,7 +27,10 @@ public class LoginController {
             log.info("user: {}", user);
             validatePassword(user, password);
 
-            return HttpResponse.sendRedirectWithCookie("/index.html", HttpCookie.create());
+            final HttpCookie httpCookie = HttpCookie.create();
+            addSession(user, httpCookie);
+
+            return HttpResponse.sendRedirectWithCookie("/index.html", httpCookie);
 
         } catch (EmptyParameterException e) {
             return HttpResponse.sendRedirect("/login.html");
@@ -44,5 +49,12 @@ public class LoginController {
         if (!user.checkPassword(password)) {
             throw new PasswordNotMatchException();
         }
+    }
+
+    private void addSession(final User user, final HttpCookie httpCookie) {
+        final Session session = new Session(httpCookie.getValue());
+        final SessionManager sessionManager = SessionManager.getInstance();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
     }
 }

@@ -40,12 +40,21 @@ public class HttpRequest {
         return httpStartLine.getUri().equals(uri);
     }
 
+    public boolean hasCookie() {
+        return httpHeaders.existsCookie();
+    }
+
     public String getUri() {
         return httpStartLine.getUri();
     }
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public String getSession() {
+        final String cookie = httpHeaders.getCookie();
+        return cookie.split("=")[1];
     }
 
     @Override

@@ -77,10 +77,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestBody(final List<String> headers, final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
-        if (headers.contains("Content-Length")) {
+        if (existBody(headers)) {
             addRequestBodyLine(bufferedReader, stringBuilder);
         }
         return stringBuilder.toString();
+    }
+
+    private boolean existBody(final List<String> headers) {
+        return headers.stream()
+                .anyMatch(header -> header.startsWith(HttpHeaders.CONTENT_LENGTH));
     }
 
     private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody)

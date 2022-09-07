@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -18,6 +20,9 @@ public class QueryParams {
     }
 
     public static QueryParams from(final String queryString) {
+        if (queryString.isEmpty()) {
+            return empty();
+        }
         final String[] rawQueryParams = queryString.split(QUERY_PARAM_SEPARATOR);
         final Map<String, String> queryParams = parseQueryStringToMap(rawQueryParams);
 
@@ -42,6 +47,14 @@ public class QueryParams {
 
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(queryParams.get(key));
+    }
+
+    public boolean isEmpty() {
+        return queryParams.isEmpty();
+    }
+
+    public Map<String, String> getContents() {
+        return new HashMap<>(queryParams);
     }
 
     @Override

@@ -20,8 +20,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "Content-Type: application/json"
         );
-        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        final HttpRequest request = HttpRequest.from(firstLine, headerPart, requestBody);
+        final HttpRequest request = HttpRequest.from(firstLine, headerPart, "");
         final QueryParams queryParams = request.getQueryParams();
         final HttpHeaders headers = request.getHeaders();
         assertAll(
@@ -44,8 +43,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "Content-Type: application/json"
         );
-        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        final HttpRequest request = HttpRequest.from(firstLine, headerPart, requestBody);
+        final HttpRequest request = HttpRequest.from(firstLine, headerPart, "");
         final QueryParams queryParams = request.getQueryParams();
         final HttpHeaders headers = request.getHeaders();
         assertAll(

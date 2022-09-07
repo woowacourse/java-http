@@ -2,73 +2,74 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String FIRST_LINE_SEPARATOR = " ";
-    private static final int FIRST_LINE_METHOD_INDEX = 0;
-    private static final int FIRST_LINE_URI_INDEX = 1;
-    private static final String QUERY_STRING_START_FLAG = "?";
-    private static final int INDEX_NOT_FOUND = -1;
-
-    private final HttpMethod method;
-    private final String uriPath;
-    private final QueryParams queryParams;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
+    private final RequestParams requestParams;
 
-    private HttpRequest(final HttpMethod method,
-                        final String uriPath,
-                        final QueryParams queryParams,
-                        final HttpHeaders headers) {
-        this.method = method;
-        this.uriPath = uriPath;
-        this.queryParams = queryParams;
+    private HttpRequest(final RequestLine requestLine,
+                        final HttpHeaders headers,
+                        final RequestParams requestParams) {
+        this.requestLine = requestLine;
         this.headers = headers;
+        this.requestParams = requestParams;
     }
 
     public static HttpRequest from(final String firstLine, final List<String> headers, final String requestBody) {
-        final String[] splitFirstLine = firstLine.split(FIRST_LINE_SEPARATOR);
+        final RequestLine requestLine = RequestLine.from(firstLine);
+        final HttpHeaders httpHeaders = HttpHeaders.from(headers);
+        final RequestParams requestParams = createRequestParams(requestLine, requestBody, httpHeaders);
 
-        final HttpMethod httpMethod = HttpMethod.from(splitFirstLine[FIRST_LINE_METHOD_INDEX]);
-
-        final String uriPathAndQueryString = splitFirstLine[FIRST_LINE_URI_INDEX];
-        final int queryStringFlagIndex = uriPathAndQueryString.indexOf(QUERY_STRING_START_FLAG);
-        final String uriPath = extractUriPath(uriPathAndQueryString, queryStringFlagIndex);
-        final QueryParams queryParams = extractQueryParams(uriPathAndQueryString, queryStringFlagIndex);
-
-        return new HttpRequest(httpMethod, uriPath, queryParams, HttpHeaders.from(headers));
+        return new HttpRequest(requestLine, httpHeaders, requestParams);
     }
 
-    private static String extractUriPath(final String uriPathAndQueryString, final int queryStringFlagIndex) {
-        if (queryStringFlagIndex == INDEX_NOT_FOUND) {
-            return uriPathAndQueryString;
+    private static RequestParams createRequestParams(final RequestLine requestLine,
+                                                     final String requestBody,
+                                                     final HttpHeaders httpHeaders) {
+        if (isFormUrlEncoded(requestLine.getMethod(), httpHeaders)) {
+            return RequestParams.fromUrlEncoded(requestBody);
         }
-        return uriPathAndQueryString.substring(0, queryStringFlagIndex);
+
+        return RequestParams.from(requestLine.getQueryParams());
     }
 
-    private static QueryParams extractQueryParams(final String uriPathAndQueryString, final int queryStringFlagIndex) {
-        if (queryStringFlagIndex == INDEX_NOT_FOUND) {
-            return QueryParams.empty();
-        }
-        return QueryParams.from(uriPathAndQueryString.substring(queryStringFlagIndex + 1));
+    private static boolean isFormUrlEncoded(final HttpMethod httpMethod, final HttpHeaders httpHeaders) {
+        return httpMethod == HttpMethod.POST
+                && getContentType(httpHeaders).equals(ContentType.APPLICATION_X_WWW_FORM_URLENCODED.getValue());
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    private static String getContentType(final HttpHeaders httpHeaders) {
+        return httpHeaders.getValue(HttpHeaders.CONTENT_TYPE)
+                .orElseThrow(() -> new IllegalArgumentException("필수 헤더가 들어오지 않았습니다." + HttpHeaders.CONTENT_TYPE));
     }
 
-    public String getUriPath() {
-        return uriPath;
-    }
-
-    public QueryParams getQueryParams() {
-        return queryParams;
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public RequestParams getRequestParams() {
+        return requestParams;
+    }
+
+    public QueryParams getQueryParams() {
+        return requestLine.getQueryParams();
+    }
+
+    public String getUriPath() {
+        return requestLine.getUriPath();
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     @Override
@@ -80,13 +81,12 @@ public class HttpRequest {
             return false;
         }
         final HttpRequest that = (HttpRequest) o;
-        return method == that.method
-                && Objects.equals(uriPath, that.uriPath)
-                && Objects.equals(queryParams, that.queryParams);
+        return Objects.equals(getRequestLine(), that.getRequestLine()) && Objects.equals(getHeaders(),
+                that.getHeaders()) && Objects.equals(getRequestParams(), that.getRequestParams());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(method, uriPath, queryParams);
+        return Objects.hash(getRequestLine(), getHeaders(), getRequestParams());
     }
 }

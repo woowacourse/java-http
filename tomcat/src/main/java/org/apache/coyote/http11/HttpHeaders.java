@@ -9,6 +9,12 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
+    public static final String LOCATION = "Location";
+    public static final String COOKIE = "Cookie";
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
+
     private static final String KEY_VALUE_SEPARATOR = ": ";
     private static final String CRLF = "\r\n";
     private static final int KEY_INDEX = 0;
@@ -25,7 +31,7 @@ public class HttpHeaders {
         rawHeaders.forEach(rawHeader -> {
             final String[] headerKeyValueSplit = rawHeader.split(KEY_VALUE_SEPARATOR);
             final String headerKey = headerKeyValueSplit[KEY_INDEX];
-            final String headerValue = headerKeyValueSplit[VALUE_INDEX];
+            final String headerValue = headerKeyValueSplit[VALUE_INDEX].trim();
             headers.put(headerKey, headerValue);
         });
         return new HttpHeaders(headers);
@@ -42,7 +48,7 @@ public class HttpHeaders {
     public String toHttpMessageHeader() {
         return headers.keySet()
                 .stream()
-                .map(key -> key + KEY_VALUE_SEPARATOR + headers.get(key))
+                .map(key -> key + KEY_VALUE_SEPARATOR + headers.get(key) + " ")
                 .collect(Collectors.joining(CRLF));
     }
 

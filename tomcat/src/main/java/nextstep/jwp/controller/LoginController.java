@@ -6,6 +6,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.Extension;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Path;
@@ -33,29 +35,60 @@ public class LoginController implements Controller {
         final String responseBody = ResourceFindUtils
                 .getResourceFile(path.getResource() + Extension.HTML.getExtension());
 
+        if (request.containsSession()) {
+            final SessionManager sessionManager = new SessionManager();
+            final Session session = sessionManager.findSession(request.getSessionId());
+
+            if (session != null) {
+                return new HttpResponse.Builder()
+                        .status(HttpStatus.FOUND)
+                        .location("/index.html")
+                        .build();
+            }
+            return new HttpResponse.Builder()
+                    .status(HttpStatus.OK)
+                    .contentType(path.getContentType())
+                    .responseBody(responseBody)
+                    .build();
+
+        }
+
+        final Session session = new Session(UUID.randomUUID().toString());
+        final SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
+
         return new HttpResponse.Builder()
                 .status(HttpStatus.OK)
+                .cookie("JSESSIONID=" + session.getId())
                 .contentType(path.getContentType())
                 .responseBody(responseBody)
                 .build();
     }
 
     private HttpResponse doPost(HttpRequest request) {
-        login(request.getBody());
+        login(request.getBody(), request.getSessionId());
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
                 .location("/index.html")
-                .cookie("JSESSIONID=" + UUID.randomUUID())
                 .build();
     }
 
-    private void login(Map<String, String> params) {
+    private void login(Map<String, String> params, String sessionId) {
         final String account = params.get("account");
         final String password = params.get("password");
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(LoginFailedException::new);
 
         user.checkPassword(password);
+        final SessionManager sessionManager = new SessionManager();
+        final Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            final Session newSession = new Session(sessionId);
+            sessionManager.add(newSession);
+            newSession.setAttribute("user", user);
+            return;
+        }
+        session.setAttribute("user", user);
     }
 }

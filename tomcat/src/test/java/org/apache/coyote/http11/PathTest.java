@@ -15,7 +15,7 @@ class PathTest {
     @Test
     void from() {
         final String uri = "/index.html";
-        final String expectedResource = "/index";
+        final String expectedResource = "/index.html";
         final String expectedContentType = "text/html";
 
         Path path = Path.from(uri);
@@ -31,7 +31,7 @@ class PathTest {
     @Test
     void from_With_QueryParam() {
         final String uri = "/index.html?username=east&password=password";
-        final String expectedResource = "/index";
+        final String expectedResource = "/index.html";
         final String expectedContentType = "text/html";
         final Map<String, String> expectedParams = new HashMap<>();
         expectedParams.put("username", "east");

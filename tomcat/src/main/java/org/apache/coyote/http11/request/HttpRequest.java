@@ -61,6 +61,10 @@ public class HttpRequest {
         return requestBody.getValues();
     }
 
+    public String getSessionId() {
+        return header.getSessionId();
+    }
+
     public boolean isGetMethod() {
         return startLine.isGet();
     }
@@ -71,5 +75,9 @@ public class HttpRequest {
 
     public boolean isStaticResource() {
         return getPath().isStaticResource();
+    }
+
+    public boolean containsSession() {
+        return header.containsSession();
     }
 }

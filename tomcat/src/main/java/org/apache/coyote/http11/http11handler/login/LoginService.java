@@ -20,4 +20,9 @@ public class LoginService {
         log.info(String.valueOf(user.get()));
         return true;
     }
+
+    public User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(UserNotFoundException::new);
+    }
 }

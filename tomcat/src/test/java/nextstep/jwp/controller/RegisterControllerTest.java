@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.*;
+import static support.RequestFixture.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,19 +20,8 @@ class RegisterControllerTest extends DatabaseIsolation {
 	@DisplayName("/register로 GET 요청이 들어오면 register.html을 반환한다.")
 	@Test
 	void register_html() throws IOException {
-		// given
-		final String httpRequest = String.join("\r\n",
-			"GET /register HTTP/1.1 ",
-			"Host: localhost:8080 ",
-			"Connection: keep-alive ",
-			"",
-			"");
-
-		final var socket = new StubSocket(httpRequest);
-		final Http11Processor processor = new Http11Processor(socket);
-
 		// when
-		processor.process(socket);
+		StubSocket socket = 회원가입_패이지_요청();
 
 		// then
 		final URL resource = getClass().getClassLoader().getResource("static/register.html");
@@ -48,22 +38,8 @@ class RegisterControllerTest extends DatabaseIsolation {
 	@DisplayName("/register로 POST 요청이 들어오면 회원 가입을 하고 index.html로 리다이렉트 한다.")
 	@Test
 	void register() {
-		// given
-		final String httpRequest = String.join("\r\n",
-			"POST /register HTTP/1.1 ",
-			"Host: localhost:8080 ",
-			"Connection: keep-alive ",
-			"Content-Type: application/x-www-form-urlencoded",
-			"Content-Length: 30",
-			"Accept: */*",
-			"",
-			"account=does&password=password&email=ldk980130@gmail.com");
-
-		final var socket = new StubSocket(httpRequest);
-		final Http11Processor processor = new Http11Processor(socket);
-
-		// when
-		processor.process(socket);
+		//when
+		StubSocket socket = 회원가입_요청("does", "does!", "does@mail.com");
 
 		// then
 		var expected = "HTTP/1.1 302 Found \r\n" +

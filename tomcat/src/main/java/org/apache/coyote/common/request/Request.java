@@ -101,6 +101,10 @@ public class Request {
         return cookie;
     }
 
+    public Optional<String> getCookie(final String key) {
+        return cookie.getValue(key);
+    }
+
     public String getRequestIdentifier() {
         if (queryString.size() != 0) {
             return String.join(" ", method.getValue(), path, PATH_QUERY_STRING_DELIMITER);

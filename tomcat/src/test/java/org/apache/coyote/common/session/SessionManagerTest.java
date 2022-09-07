@@ -16,7 +16,7 @@ class SessionManagerTest {
         final Session session = new Session("key");
         sessionManager.add("key", session);
 
-        assertThat(sessionManager.findSession("key")).isEqualTo(session);
+        assertThat(sessionManager.findSession("key").get()).isEqualTo(session);
     }
 
     @DisplayName("세션을 삭제한다.")
@@ -28,8 +28,6 @@ class SessionManagerTest {
 
         sessionManager.remove(session);
 
-        assertThatThrownBy(() -> sessionManager.findSession("key"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Session does not exist.");
+        assertThat(sessionManager.findSession("key").isPresent()).isFalse();
     }
 }

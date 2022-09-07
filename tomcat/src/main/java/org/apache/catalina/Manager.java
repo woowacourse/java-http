@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.coyote.common.session.Session;
 
 /**
@@ -39,7 +40,7 @@ public interface Manager {
      * @throws IllegalStateException if a new session cannot be instantiated for any reason
      * @throws IOException           if an input/output error occurs while processing this request
      */
-    Session findSession(String id) throws IOException;
+    Optional<Session> findSession(String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

@@ -2,6 +2,7 @@ package org.apache.coyote.common.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -15,12 +16,11 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) {
+    public Optional<Session> findSession(final String id) {
         return SESSIONS.values()
                 .stream()
                 .filter(session -> session.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Session does not exist."));
+                .findFirst();
     }
 
     @Override

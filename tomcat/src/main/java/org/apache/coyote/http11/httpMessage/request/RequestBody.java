@@ -10,7 +10,6 @@ public class RequestBody {
         this.body = body;
     }
 
-
     public String getBody() {
         return body;
     }
@@ -30,5 +29,10 @@ public class RequestBody {
     @Override
     public int hashCode() {
         return Objects.hash(body);
+    }
+
+    @Override
+    public String toString() {
+        return body;
     }
 }

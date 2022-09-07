@@ -42,21 +42,20 @@ public class ModelAndView {
         String responseBody = response.getBody();
         ContentType contentType = response.getContentType();
 
-        if (httpStatus.isFound()) {
-            return new ModelAndView(httpStatus, headers, responseBody, contentType);
-        }
-
         if (httpStatus.isError()) {
-            headers.putAll(new Headers(Map.of("Location", "/" + httpStatus.getValue() + ".html ")));
+            headers.putAll(Map.of("Location", "/" + httpStatus.getValue() + ".html "));
+            headers.putAll(getDefaultHeaders(contentType, ""));
             return new ModelAndView(HttpStatus.FOUND, headers, "", ContentType.HTML);
         }
 
-        if (responseBody.isBlank()) {
+        if (httpStatus.isFound() || responseBody.isBlank()) {
+            headers.putAll(getDefaultHeaders(contentType, responseBody));
             return new ModelAndView(httpStatus, headers, responseBody, contentType);
         }
 
         URL resource = getResource(responseBody);
         if (resource == null) {
+            headers.putAll(getDefaultHeaders(contentType, responseBody));
             return new ModelAndView(httpStatus, headers, responseBody, contentType);
         }
 
@@ -69,10 +68,11 @@ public class ModelAndView {
         final String path = response.getPath();
 
         if (httpStatus.isFound()) {
-            Map<String, String> location = new LinkedHashMap<>();
-            location.put("Location", path);
+            Map<String, Object> headers = new LinkedHashMap<>();
+            headers.put("Location", path);
+            headers.putAll(getDefaultHeaders(ContentType.HTML, ""));
 
-            return new ModelAndView(HttpStatus.FOUND, new Headers(location), "", ContentType.HTML);
+            return new ModelAndView(httpStatus, new Headers(headers), "", ContentType.HTML);
         }
 
         if (path.isBlank()) {
@@ -98,7 +98,17 @@ public class ModelAndView {
         String view = new String(Files.readAllBytes(path));
         ContentType contentType = ContentType.of(Files.probeContentType(path));
 
+        headers.putAll(getDefaultHeaders(contentType, view));
+
         return new ModelAndView(httpStatus, headers, view, contentType);
+    }
+
+    private static Map<String, Object> getDefaultHeaders(ContentType contentType, String view) {
+        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", contentType.getValue() + ";charset=utf-8 ");
+        headers.put("Content-Length", view.getBytes().length + " ");
+
+        return headers;
     }
 
     public HttpStatus getHttpStatus() {
@@ -111,9 +121,5 @@ public class ModelAndView {
 
     public String getView() {
         return view;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
     }
 }

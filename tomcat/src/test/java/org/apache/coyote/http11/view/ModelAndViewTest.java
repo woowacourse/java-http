@@ -21,7 +21,7 @@ class ModelAndViewTest {
     @Test
     void ApiHandlerResponse를_전달받았을_때_상태가_FOUND라면_ApiHandlerResponse내부_값을_그대로_사용한다() throws IOException {
         // given
-        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.FOUND, Map.of(), "/index.html",
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.FOUND, new LinkedHashMap<>(), "/index.html",
                 ContentType.HTML);
 
         // when
@@ -29,35 +29,40 @@ class ModelAndViewTest {
 
         // then
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.FOUND, new Headers(Map.of()), "/index.html", ContentType.HTML);
+                .containsExactly(HttpStatus.FOUND, getDefaultHeaders("/index.html"), "/index.html", ContentType.HTML);
     }
 
     @Test
     void ApiHandlerResponse를_전달받았을_때_ErrorCode를_가지고있다면_FOUND상태와_ErrorCodeHtml파일을_반환한다()
             throws IOException {
         // given
-        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.NOT_FOUND, new HashMap<>(), "", ContentType.HTML);
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.NOT_FOUND, new HashMap<>(), "",
+                ContentType.HTML);
 
         // when
         ModelAndView modelAndView = ModelAndView.of(response);
 
         // then
+        Headers expectedHeader = new Headers(new LinkedHashMap<>());
+        expectedHeader.putAll(Map.of("Location", "/404.html "));
+        expectedHeader.putAll(getDefaultHeaders("").getHeaders());
+
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.FOUND, new Headers(Map.of("Location", "/404.html ")), "", ContentType.HTML);
+                .containsExactly(HttpStatus.FOUND, expectedHeader, "", ContentType.HTML);
     }
 
     @Test
     void ApiHandlerResponse를_전달받았을_때_상태가_FOUND나_Error가_아니고_body에_빈_값이_존재하면_ApiHandlerResponse내부_값을_그대로_사용한다()
             throws IOException {
         // given
-        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "", ContentType.HTML);
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "", ContentType.HTML);
 
         // when
         ModelAndView modelAndView = ModelAndView.of(response);
 
         // then
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.OK, new Headers(Map.of()), "", ContentType.HTML);
+                .containsExactly(HttpStatus.OK, getDefaultHeaders(""), "", ContentType.HTML);
     }
 
 
@@ -65,20 +70,22 @@ class ModelAndViewTest {
     void ApiHandlerResponse를_전달받았을_때_FOUND나_Error가_아니고_body에_파일이_존재하지않으면_ApiHandlerResponse내부_값을_그대로_사용한다()
             throws IOException {
         // given
-        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "hello world!", ContentType.HTML);
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "hello world!",
+                ContentType.HTML);
 
         // when
         ModelAndView modelAndView = ModelAndView.of(response);
 
         // then
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.OK, new Headers(Map.of()), "hello world!", ContentType.HTML);
+                .containsExactly(HttpStatus.OK, getDefaultHeaders("hello world!"), "hello world!", ContentType.HTML);
     }
 
     @Test
     void ApiHandlerResponse를_전달받았을_때_FOUND나_Error가_아니고_body에_파일이_존재하면_파일을_읽어온다() throws IOException {
         // given
-        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, Map.of(), "/index.html", ContentType.HTML);
+        ApiHandlerResponse response = ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "/index.html",
+                ContentType.HTML);
 
         // when
         ModelAndView modelAndView = ModelAndView.of(response);
@@ -88,7 +95,7 @@ class ModelAndViewTest {
         String expect = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.OK, new Headers(Map.of()), expect, ContentType.HTML);
+                .containsExactly(HttpStatus.OK, getDefaultHeaders(expect), expect, ContentType.HTML);
     }
 
     @Test
@@ -130,6 +137,13 @@ class ModelAndViewTest {
         String expect = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(modelAndView).extracting("httpStatus", "headers", "view", "contentType")
-                .containsExactly(HttpStatus.OK, new Headers(new LinkedHashMap<>()), expect, ContentType.HTML);
+                .containsExactly(HttpStatus.OK, getDefaultHeaders(expect), expect, ContentType.HTML);
+    }
+
+    private Headers getDefaultHeaders(String expectedBody) {
+        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+        headers.putAll(Map.of("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ",
+                "Content-Length", expectedBody.getBytes().length + " "));
+        return new Headers(headers);
     }
 }

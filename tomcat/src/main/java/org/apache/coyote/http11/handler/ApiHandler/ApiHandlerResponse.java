@@ -20,7 +20,7 @@ public class ApiHandlerResponse {
     }
 
     public static ApiHandlerResponse of(HttpStatus httpStatus,
-                                        Map<String, String> headers,
+                                        Map<String, Object> headers,
                                         String body,
                                         ContentType contentType) {
         return new ApiHandlerResponse(httpStatus, new Headers(headers), body, contentType);

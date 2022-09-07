@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class HttpRequest {
@@ -36,12 +37,13 @@ public class HttpRequest {
     }
 
     private static String extractBody(BufferedReader bufferedReader, Headers headers) throws IOException {
-        String contentLengthValue = headers.getHeader("Content-Length");
-        if (contentLengthValue == null) {
+        Optional<Object> contentLengthValue = headers.getHeader("Content-Length");
+
+        if (contentLengthValue.isEmpty()) {
             return "";
         }
 
-        int contentLength = Integer.parseInt(contentLengthValue);
+        int contentLength = Integer.parseInt((String) contentLengthValue.get());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);

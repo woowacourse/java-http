@@ -4,18 +4,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Headers {
 
-    private final Map<String, String> headers;
+    private final Map<String, Object> headers;
 
-    public Headers(Map<String, String> headers) {
+    public Headers(Map<String, Object> headers) {
         this.headers = headers;
     }
 
     public static Headers of(List<String> headerLines) {
-        Map<String, String> headers = new LinkedHashMap<>();
+        Map<String, Object> headers = new LinkedHashMap<>();
 
         for (String header : headerLines) {
             String[] keyValue = header.split(": ");
@@ -25,9 +26,16 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public Optional<Object> getHeader(String key) {
+        return Optional.ofNullable(headers.get(key));
+    }
 
-    public void putAll(Headers other) {
-        headers.putAll(other.headers);
+    public void putAll(Map<String, Object> other) {
+        headers.putAll(other);
+    }
+
+    public Map<String, Object> getHeaders() {
+        return headers;
     }
 
     @Override
@@ -50,11 +58,7 @@ public class Headers {
     @Override
     public String toString() {
         return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + ": " + entry.getValue().toString())
                 .collect(Collectors.joining("\r\n"));
-    }
-
-    public String getHeader(String key) {
-        return headers.get(key);
     }
 }

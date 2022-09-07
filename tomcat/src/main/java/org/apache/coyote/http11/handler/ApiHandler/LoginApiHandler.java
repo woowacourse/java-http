@@ -29,11 +29,11 @@ public class LoginApiHandler implements Handler {
 
     @Override
     public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
-        Map<String, String> parameters = getParameters(httpRequest.getRequestBody());
-        final String account = parameters.get("account");
-        final String password = parameters.get("password");
+        Map<String, Object> parameters = getParameters(httpRequest.getRequestBody());
+        final String account = (String) parameters.get("account");
+        final String password = (String) parameters.get("password");
 
-        Map<String, String> headers = new LinkedHashMap<>();
+        Map<String, Object> headers = new LinkedHashMap<>();
         Optional<User> user = findUser(account);
 
         if (user.isEmpty()) {
@@ -51,11 +51,11 @@ public class LoginApiHandler implements Handler {
         return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
     }
 
-    private Map<String, String> getParameters(RequestBody requestBody) {
+    private Map<String, Object> getParameters(RequestBody requestBody) {
         String body = requestBody.getBody();
         String[] params = body.split("&");
 
-        HashMap<String, String> parameters = new HashMap<>();
+        HashMap<String, Object> parameters = new HashMap<>();
         for (String param : params) {
             int index = param.indexOf("=");
             String key = param.substring(0, index);

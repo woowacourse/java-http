@@ -26,12 +26,12 @@ public class RegisterApiHandler implements Handler {
     public Object getResponse(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
 
-        Map<String, String> headers = new LinkedHashMap<>();
+        Map<String, Object> headers = new LinkedHashMap<>();
         try {
-            Map<String, String> parameters = getParameters(requestBody);
-            String account = parameters.get("account");
-            String password = parameters.get("password");
-            String email = parameters.get("email");
+            Map<String, Object> parameters = getParameters(requestBody);
+            String account = (String) parameters.get("account");
+            String password = (String) parameters.get("password");
+            String email = (String) parameters.get("email");
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
         } catch (Exception e) {
@@ -42,11 +42,11 @@ public class RegisterApiHandler implements Handler {
         return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
     }
 
-    private Map<String, String> getParameters(RequestBody requestBody) {
+    private Map<String, Object> getParameters(RequestBody requestBody) {
         String body = requestBody.getBody();
         String[] params = body.split("&");
 
-        HashMap<String, String> parameters = new HashMap<>();
+        HashMap<String, Object> parameters = new HashMap<>();
         for (String param : params) {
             int index = param.indexOf("=");
             String key = param.substring(0, index);

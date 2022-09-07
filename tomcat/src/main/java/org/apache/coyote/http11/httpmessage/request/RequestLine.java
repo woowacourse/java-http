@@ -57,5 +57,6 @@ public class RequestLine {
     @Override
     public int hashCode() {
         return Objects.hash(method, uri, httpVersion);
+
     }
 }

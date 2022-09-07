@@ -63,10 +63,6 @@ public class HttpUri {
         return path;
     }
 
-    public Object getParameter(String key) {
-        return queryParams.get(key);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -1,37 +1,40 @@
 package org.apache.coyote.http11.httpmessage.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.OutputStream;
 import org.apache.coyote.http11.httpmessage.request.Headers;
-import org.apache.coyote.http11.httpmessage.request.Http11Version;
-import org.apache.coyote.http11.view.ModelAndView;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final Headers headers;
-    private final String responseBody;
+    private final OutputStream outputStream;
+    private StatusLine statusLine;
+    private Headers headers;
+    private String responseBody;
 
-    private HttpResponse(StatusLine statusLine, Headers headers, String responseBody) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.responseBody = responseBody;
+    public HttpResponse(OutputStream outputStream) {
+        this.outputStream = outputStream;
     }
 
-    public static HttpResponse of(ModelAndView modelAndView) {
-        Headers headers = modelAndView.getHeaders();
+    public HttpResponse setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
+        return this;
+    }
 
-        Map<String, String> addHeaders = new LinkedHashMap<>();
-        addHeaders.put("Content-Type", modelAndView.getContentType().getValue() + ";charset=utf-8 ");
-        addHeaders.put("Content-Length", modelAndView.getView().getBytes().length + " ");
+    public HttpResponse setHeaders(Headers headers) {
+        this.headers = headers;
+        return this;
+    }
 
-        headers.putAll(new Headers(addHeaders));
+    public HttpResponse setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+        return this;
+    }
 
-        return new HttpResponse(
-                new StatusLine(Http11Version.HTTP_11_VERSION, modelAndView.getHttpStatus()),
-                headers,
-                modelAndView.getView()
-        );
+    public void write() throws IOException {
+        String result = this.toString();
+
+        outputStream.write(result.getBytes());
+        outputStream.flush();
     }
 
     @Override

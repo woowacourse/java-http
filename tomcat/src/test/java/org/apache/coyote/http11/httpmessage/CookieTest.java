@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpmessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,9 @@ class CookieTest {
     @Test
     void cookie를_출력할_수_있다() {
         // given
-        Map<String, String> cookies = Map.of("JSESSIONID", "1234", "name", "park");
+        Map<String, String> cookies = new LinkedHashMap<>();
+        cookies.put("JSESSIONID", "1234");
+        cookies.put("name", "park");
 
         // when
         Cookie cookie = new Cookie(cookies);

@@ -52,7 +52,7 @@ class HeadersTest {
         Headers headers = Headers.of(List.of("key: value", "name: park"));
 
         // when
-        headers.putAll(new Headers(Map.of("age", "25", "Content-Type", "text/html")));
+        headers.putAll(Map.of("age", "25", "Content-Type", "text/html"));
 
         // then
         assertThat(headers).extracting("headers")

@@ -7,18 +7,24 @@ import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
 import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
 import org.apache.coyote.http11.handlermapper.HandlerMapper;
+import org.apache.coyote.http11.httpmessage.request.Http11Version;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
+import org.apache.coyote.http11.httpmessage.response.StatusLine;
 import org.apache.coyote.http11.view.ModelAndView;
 
 public class FrontController {
 
     private static final List<HandlerMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
 
-    public HttpResponse doDispatch(HttpRequest httpRequest) throws IOException {
+    public void doDispatch(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Handler handler = getHandler(httpRequest);
         Object handlerResponse = handler.getResponse(httpRequest);
-        return getHttp11Response(handlerResponse);
+        ModelAndView modelAndView = ModelAndView.of(handlerResponse);
+
+        setHttpResponse(httpResponse, modelAndView);
+
+        httpResponse.write();
     }
 
     private Handler getHandler(HttpRequest httpRequest) {
@@ -29,8 +35,10 @@ public class FrontController {
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 요청이 아닙니다."));
     }
 
-    private HttpResponse getHttp11Response(Object handlerResponse) throws IOException {
-        ModelAndView modelAndView = ModelAndView.of(handlerResponse);
-        return HttpResponse.of(modelAndView);
+    private void setHttpResponse(HttpResponse httpResponse, ModelAndView modelAndView) {
+        httpResponse
+                .setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, modelAndView.getHttpStatus()))
+                .setHeaders(modelAndView.getHeaders())
+                .setResponseBody(modelAndView.getView());
     }
 }

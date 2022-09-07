@@ -34,12 +34,11 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            FrontController frontController = new FrontController();
-            HttpResponse httpResponse = frontController.doDispatch(httpRequest);
-            String result = httpResponse.toString();
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            outputStream.write(result.getBytes());
-            outputStream.flush();
+            FrontController frontController = new FrontController();
+            frontController.doDispatch(httpRequest, httpResponse);
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

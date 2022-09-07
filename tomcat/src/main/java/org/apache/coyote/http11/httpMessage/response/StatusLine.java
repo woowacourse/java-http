@@ -8,7 +8,6 @@ public class StatusLine {
     private final Http11Version http11Version;
     private final HttpStatus httpStatus;
 
-
     public StatusLine(Http11Version http11Version, HttpStatus httpStatus) {
         this.http11Version = http11Version;
         this.httpStatus = httpStatus;

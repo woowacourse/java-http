@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httpmessage;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,12 @@ public class Cookie {
 
     public Cookie(Map<String, String> cookies) {
         this.cookies = cookies;
+    }
+
+    public static Cookie of(String key, String value) {
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(key, value);
+        return new Cookie(headers);
     }
 
     @Override

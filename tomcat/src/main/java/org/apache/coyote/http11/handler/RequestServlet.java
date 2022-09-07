@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public interface RequestServlet {
 
-    ServletResponseEntity doGet(HttpRequest httpRequest);
-    ServletResponseEntity doPost(HttpRequest httpRequest);
+    String EMPTY_BODY = "";
+
+    ServletResponseEntity doGet(HttpRequest httpRequest, HttpHeader responseHeader);
+    ServletResponseEntity doPost(HttpRequest httpRequest, HttpHeader responseHeader);
 }

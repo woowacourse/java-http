@@ -23,8 +23,7 @@ class HttpRequestLineTest {
             assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
             assertThat(requestLine.getPath()).isEqualTo("/path");
             assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
-            assertThat(requestLine.getQueryParams())
-                    .extractingByKey("name").isEqualTo("eve");
+            assertThat(requestLine.getQueryString()).isEqualTo("name=eve");
         });
     }
 }

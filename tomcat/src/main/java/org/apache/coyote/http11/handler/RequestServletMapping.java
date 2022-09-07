@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginServlet;
+import nextstep.jwp.handler.RegisterServlet;
 
 public class RequestServletMapping {
 
@@ -17,6 +18,7 @@ public class RequestServletMapping {
         final Map<String, RequestServlet> handlers = new HashMap<>();
 
         handlers.put("/login", new LoginServlet());
+        handlers.put("/register", new RegisterServlet());
 
         return new RequestServletMapping(handlers);
     }

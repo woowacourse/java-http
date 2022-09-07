@@ -1,14 +1,11 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpStatus.OK;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -16,6 +13,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpFrontServlet;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
@@ -44,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
                 StandardCharsets.UTF_8)); final var outputStream = connection.getOutputStream()) {
             final HttpFrontServlet httpRequestServlet = new HttpFrontServlet();
 
-            final HttpRequest httpRequest = HttpRequest.of(readHttpRequest(bufferedReader));
+            final HttpRequest httpRequest = createRequest(bufferedReader);
             final ResponseEntity response = handleRequest(httpRequest, httpRequestServlet);
             final HttpResponse httpResponse = HttpResponse.of(response);
 
@@ -54,7 +52,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Queue<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+    private HttpRequest createRequest(final BufferedReader bufferedReader) throws IOException {
+        final Queue<String> rawRequestHeader = readHttpRequestHeader(bufferedReader);
+        final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestHeader.remove());
+        final HttpHeader httpHeader = HttpHeader.of(rawRequestHeader);
+
+        final String requestBody = readHttpRequestBody(bufferedReader, httpHeader);
+
+        return HttpRequest.of(requestLine, httpHeader, requestBody);
+    }
+
+    private Queue<String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final Queue<String> httpRequest = new LinkedList<>();
 
         String line = bufferedReader.readLine();
@@ -64,6 +72,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return httpRequest;
+    }
+
+    private String readHttpRequestBody(final BufferedReader bufferedReader, final HttpHeader httpHeader)
+            throws IOException {
+        if (!httpHeader.contains("Content-Length")) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(httpHeader.getHeader("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     private ResponseEntity handleRequest(final HttpRequest httpRequest, final HttpFrontServlet frontHandler)

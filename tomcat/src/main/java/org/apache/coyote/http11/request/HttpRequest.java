@@ -1,35 +1,52 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Map;
-import java.util.Queue;
 import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
     private final HttpRequestLine requestLine;
-    private final HttpHeader header;
+    private final HttpHeader headers;
+    private final QueryParameter queryParameter;
+    private final String body;
 
-    private HttpRequest(final HttpRequestLine requestLine, final HttpHeader httpHeader) {
+    private HttpRequest(final HttpRequestLine requestLine, final HttpHeader httpHeader,
+                        final QueryParameter queryParameter, final String body) {
         this.requestLine = requestLine;
-        this.header = httpHeader;
+        this.headers = httpHeader;
+        this.queryParameter = queryParameter;
+        this.body = body;
     }
 
-    public static HttpRequest of(final Queue<String> rawRequest) {
-        final HttpRequestLine requestLine = HttpRequestLine.of(rawRequest.remove());
-        final HttpHeader httpHeader = HttpHeader.of(rawRequest);
+    public static HttpRequest of(final HttpRequestLine requestLine, final HttpHeader httpHeader,
+                                 final String requestBody) {
+        if (httpHeader.isFormDataType()) {
+            return new HttpRequest(requestLine, httpHeader, QueryParameter.of(requestBody), "");
+        }
+        return new HttpRequest(requestLine, httpHeader, QueryParameter.of(requestLine.getQueryString()), requestBody);
+    }
 
-        return new HttpRequest(requestLine, httpHeader);
+    public String getParameter(final String parameterName) {
+        return queryParameter.getParameter(parameterName);
+    }
+
+    public boolean containsParameter(final String parameterName) {
+        return queryParameter.contains(parameterName);
     }
 
     public String getPath() {
         return requestLine.getPath();
     }
 
-    public Map<String, String> getQueryParams() {
-        return requestLine.getQueryParams();
+    public HttpMethod getHttpStatus() {
+        return requestLine.getHttpMethod();
     }
 
     public String getHeader(final String header) {
-        return this.header.getHeader(header);
+        return this.headers.getHeader(header);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

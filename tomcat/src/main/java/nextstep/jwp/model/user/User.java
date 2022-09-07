@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.user;
 
 public class User {
 
@@ -24,6 +24,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     @Override

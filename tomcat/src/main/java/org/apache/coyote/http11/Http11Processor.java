@@ -4,17 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.model.visitor.NewVisitor;
+import nextstep.jwp.model.visitor.Visitor;
+import nextstep.jwp.model.visitor.VisitorManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.http11handler.Http11Handler;
+import org.apache.coyote.http11.http11handler.Http11HandlerSelector;
+import org.apache.coyote.http11.http11request.Http11Request;
+import org.apache.coyote.http11.http11request.Http11RequestHandler;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +22,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Http11RequestHandler http11RequestHandler;
+    private final Http11HandlerSelector http11HandlerSelector;
+    private final VisitorManager visitorManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.http11RequestHandler = new Http11RequestHandler();
+        this.http11HandlerSelector = new Http11HandlerSelector();
+        this.visitorManager = new VisitorManager();
     }
 
     @Override
@@ -36,72 +41,24 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String fileName = bufferedReader.readLine().split(" ")[1];
+            Http11Request http11Request = http11RequestHandler.makeRequest(bufferedReader);
+            Visitor visitor = visitorManager.identify(http11Request.getSessionId());
 
-            final var response = makeResponse(fileName);
+            log.info(http11Request.getUri());
+            Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
+            ResponseComponent responseComponent = http11Handler.handle(http11Request, visitor);
 
+            if (visitor instanceof NewVisitor) {
+                responseComponent.setSession(visitor.getSessionId());
+            }
+            final var response = responseComponent.toString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String makeResponse(String fileName) throws IOException {
-        String contentType = "text/html";
-        if (isCss(fileName)) {
-            contentType = "text/css";
-        }
-        if (hasQueryString(fileName)) {
-            Map<String, String> queryStrings = getQueryStrings(fileName.split("\\?")[1]);
-            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                    .orElseThrow(LoginFailedException::new);
-            if (!user.checkPassword(queryStrings.get("password"))) {
-                throw new LoginFailedException();
-            }
-            System.out.println(user);
-            fileName = fileName.split("\\?")[0];
-        }
-        System.out.println("fileName: " + fileName);
-
-        String responseBody = getResponseBody(fileName);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private Map<String, String> getQueryStrings(String data) {
-        return Arrays.stream(data.split("&"))
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
-    }
-
-    private boolean hasQueryString(String fileName) {
-        return fileName.contains("?");
-    }
-
-    private boolean isCss(String fileName) {
-        return fileName.contains("/css/");
-    }
-
-    private String getResponseBody(String fileName) throws IOException {
-        if (fileName.equals("/") || fileName.isEmpty()) {
-            return "Hello world!";
-        }
-        return getContent(fileName);
-    }
-
-    private String getContent(String fileName) throws IOException {
-        if (!fileName.contains(".")) {
-            fileName = fileName + ".html";
-        }
-        Path path = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName))
-                .getFile());
-        return Files.readString(path);
     }
 }

@@ -39,3 +39,8 @@
   - [x] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부를 체크한다.
   - [x] 로그인에 성공하면 Session 객체의 값으로 User객체를 저장한다.
   - [x] 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 `index.html` 페이지로 리다이렉트 처리한다.
+
+## 3단계 - 리팩터링
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [x] Controller 인터페이스 추가하기

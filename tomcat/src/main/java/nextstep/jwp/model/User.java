@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import java.util.Objects;
+import nextstep.jwp.exception.UnauthorizedException;
+
 public class User {
 
     private final Long id;
@@ -18,12 +21,22 @@ public class User {
         this(null, account, password, email);
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public void checkPassword(String password) {
+        if(!this.password.equals(password)){
+            throw new UnauthorizedException();
+        }
     }
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override
@@ -34,5 +47,22 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

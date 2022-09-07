@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public class HttpRequestHeaders {
 
     private static final Pattern HEADER_PATTERN = Pattern.compile("(?<info>[a-zA-Z\\- ]+): ?(?<value>.+)");
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, String> headers;
 
@@ -27,7 +29,7 @@ public class HttpRequestHeaders {
     }
 
     public boolean hasRequestBody() {
-        return headers.containsKey("Content-Length");
+        return headers.containsKey(CONTENT_LENGTH);
     }
 
     public String getJSessionId() {
@@ -35,10 +37,10 @@ public class HttpRequestHeaders {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.get("Content-Length"));
+        return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 
     public HttpCookie getCookiesData() {
-        return HttpCookie.from(headers.get("Cookie"));
+        return HttpCookie.from(headers.get(COOKIE));
     }
 }

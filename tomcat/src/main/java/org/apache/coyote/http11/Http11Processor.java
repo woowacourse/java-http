@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.RequestHandler;
 import nextstep.jwp.presentation.Controller;
@@ -40,11 +38,11 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(
                      new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), getHeaderLines(bufferedReader));
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
             final Controller controller = RequestHandler.from(httpRequest.getRequestURL().getPath());
             final HttpResponse httpResponse = getHttpResponse(httpRequest, controller);
 
-            String responseMessage = httpResponse.getMessage();
+            final String responseMessage = httpResponse.getMessage();
             outputStream.write(responseMessage.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -52,22 +50,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getHttpResponse(HttpRequest httpRequest, Controller controller) throws IOException {
+    private HttpResponse getHttpResponse(
+            final HttpRequest httpRequest,
+            final Controller controller
+    ) throws IOException {
         try {
-            HttpResponse process = controller.process(httpRequest);
-            return process;
+            return controller.process(httpRequest);
         } catch (RuntimeException e) {
             return HttpResponse.notFound();
         }
-    }
-
-    private List<String> getHeaderLines(final BufferedReader bufferedReader) throws IOException {
-        final List<String> headerLines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            headerLines.add(line);
-            line = bufferedReader.readLine();
-        }
-        return headerLines;
     }
 }

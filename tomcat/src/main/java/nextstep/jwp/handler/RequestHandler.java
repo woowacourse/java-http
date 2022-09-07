@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.LoginController;
+import nextstep.jwp.presentation.RegisterController;
 import nextstep.jwp.presentation.ResourceController;
 import nextstep.jwp.presentation.RootController;
 
@@ -14,7 +15,8 @@ public class RequestHandler {
     static {
         controllers = Map.of(
                 "/", new RootController(),
-                "/login", new LoginController()
+                "/login", new LoginController(),
+                "/register", new RegisterController()
         );
     }
 

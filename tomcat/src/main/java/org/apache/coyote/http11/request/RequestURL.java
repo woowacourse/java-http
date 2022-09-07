@@ -10,7 +10,6 @@ public class RequestURL {
     private static final String KEY_AND_VALUE_REGEX = "=";
     private static final String MAIN_REQUEST_URL = "/";
     private static final String LOGIN_REQUEST_URL = "/login";
-    private static final String HTML_EXTENSION = ".html";
 
     private String path;
     private final Map<String, String> queryParams;
@@ -31,7 +30,7 @@ public class RequestURL {
         return new RequestURL(requestURL, Collections.emptyMap());
     }
 
-    private static Map<String, String> parsingQueryString(String queryString) {
+    public static Map<String, String> parsingQueryString(String queryString) {
         Map<String, String> params = new HashMap<>();
         String[] paramsLine = queryString.split(PARAM_REGEX);
         for (int i = 0; i < paramsLine.length; i++) {
@@ -39,20 +38,6 @@ public class RequestURL {
             params.put(paramsKeyAndValue[0], paramsKeyAndValue[1]);
         }
         return params;
-    }
-
-    public void changeRequestURL() {
-        if (LOGIN_REQUEST_URL.equals(path)) {
-            path += HTML_EXTENSION;
-        }
-    }
-
-    public boolean isMainRequest() {
-        return MAIN_REQUEST_URL.equals(path);
-    }
-
-    public boolean isLoginRequest() {
-        return path.equals(LOGIN_REQUEST_URL) && !queryParams.isEmpty();
     }
 
     public String getParamValue(String paramKey) {

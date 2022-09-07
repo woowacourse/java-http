@@ -34,14 +34,6 @@ public class StartLine {
         }
     }
 
-    public boolean isMainRequest() {
-        return requestURL.isMainRequest();
-    }
-
-    public boolean isLoginRequest() {
-        return requestURL.isLoginRequest();
-    }
-
     public boolean isGet() {
         return httpMethod.equals("GET");
     }

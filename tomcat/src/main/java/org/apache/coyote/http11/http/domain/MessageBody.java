@@ -45,6 +45,10 @@ public class MessageBody {
         return URLDecoder.decode(line[1], StandardCharsets.UTF_8);
     }
 
+    public String getParameter(final String key) {
+        return getParameters().get(key);
+    }
+
     public String getValue() {
         return value;
     }

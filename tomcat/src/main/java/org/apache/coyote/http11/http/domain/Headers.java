@@ -27,7 +27,7 @@ public class Headers {
                 .collect(Collectors.toMap(line -> line[HEADER_KEY], line -> line[HEADER_VALUE])));
     }
 
-    public static Headers builder() {
+    public static Headers emptyHeaders() {
         return new Headers(new LinkedHashMap<>());
     }
 
@@ -36,13 +36,13 @@ public class Headers {
         return this;
     }
 
-    public Headers contentType(final ContentType contentType) {
-        value.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+    public Headers contentLength(final int length) {
+        value.put("Content-Length", String.valueOf(length));
         return this;
     }
 
-    public Headers contentLength(final int length) {
-        value.put("Content-Length", String.valueOf(length));
+    public Headers contentType(final ContentType contentType) {
+        value.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         return this;
     }
 

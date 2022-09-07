@@ -22,7 +22,7 @@ class RegisterControllerTest {
     private static final Controller CONTROLLER = new RegisterController();
 
     @Test
-    void page() throws Exception {
+    void page() {
         String httpRequest = HttpFactory.get("/register");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();
@@ -40,7 +40,7 @@ class RegisterControllerTest {
     }
 
     @Test
-    void register() throws Exception {
+    void register() {
         String httpRequest = HttpFactory.post("/register", "account=id&email=email%40email.com&password=pw");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();

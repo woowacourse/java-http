@@ -5,6 +5,7 @@ import nextstep.jwp.exception.NotFoundException;
 
 public enum ContentType {
 
+    TEXT_PLAIN("text/plain", "txt"),
     TEXT_HTML("text/html", "html"),
     TEXT_CSS("text/css", "css"),
     APPLICATION_JAVASCRIPT("application/javascript", "js"),

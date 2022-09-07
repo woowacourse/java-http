@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
@@ -9,7 +8,6 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
-import org.apache.coyote.http11.http.domain.Headers;
 import org.apache.coyote.http11.http.domain.HttpCookie;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
@@ -23,58 +21,76 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
-            Map<String, String> parameters = httpRequest.getMessageBody()
-                    .getParameters();
-            String account = parameters.get("account");
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NotFoundException("User not found."));
-            String password = parameters.get("password");
+            MessageBody messageBody = httpRequest.getMessageBody();
+            User user = findUser(messageBody);
+            String password = messageBody.getParameter("password");
             login(user, password, httpResponse);
         } catch (NotFoundException e) {
-            httpResponse.found(Headers.builder()
-                            .location("/401.html"),
-                    MessageBody.emptyBody());
+            httpResponse.found()
+                    .location("/401.html")
+                    .flushBuffer();
         }
     }
 
+    private User findUser(final MessageBody messageBody) {
+        String account = messageBody.getParameter("account");
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NotFoundException("User not found."));
+    }
+
     private void login(final User user, final String password, final HttpResponse httpResponse) {
+        Session session = createSession(user);
         if (user.checkPassword(password)) {
-            log.info("User Login : {}", user);
-            Session session = Session.newSession();
-            session.setAttribute("user", user);
             SessionManager.add(session);
-            httpResponse.found(
-                    Headers.builder()
-                            .setCookie(session.getId())
-                            .location("/index.html"),
-                    MessageBody.emptyBody());
+            log.info("User Login : {}", user);
+            httpResponse.found()
+                    .setCookie(session)
+                    .location("/index.html")
+                    .flushBuffer();
             return;
         }
-        httpResponse.found(Headers.builder()
-                        .location("/401.html"),
-                MessageBody.emptyBody());
+        httpResponse.found()
+                .location("/401.html")
+                .flushBuffer();
+    }
+
+    private Session createSession(final User user) {
+        Session session = Session.newSession();
+        session.setAttribute("user", user);
+        return session;
     }
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         HttpCookie cookie = httpRequest.getHeaders().getCookie();
         String jsessionid = cookie.getCookie("JSESSIONID");
-        if (cookie.containsJSESSIONID() && SessionManager.contains(jsessionid)) {
-            redirectResponse(cookie, httpResponse);
+        if (isLoggedIn(cookie, jsessionid)) {
+            redirectToHomePage(cookie, httpResponse);
             return;
         }
-        String uri = httpRequest.getUri();
-        String responseBody = FileReader.read(uri + ".html");
-        httpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+        getLoginPage(httpRequest, httpResponse);
     }
 
-    private void redirectResponse(final HttpCookie cookie, final HttpResponse httpResponse) {
+    private boolean isLoggedIn(final HttpCookie cookie, final String jsessionid) {
+        return cookie.containsJSESSIONID() && SessionManager.contains(jsessionid);
+    }
+
+    private void redirectToHomePage(final HttpCookie cookie, final HttpResponse httpResponse) {
         String jsessionid = cookie.getCookie("JSESSIONID");
         Session session = SessionManager.findSession(jsessionid);
         User user = (User) session.getAttribute("user");
         log.info("Login User : {}", user);
-        httpResponse.found(Headers.builder()
-                        .location("/index.html"),
-                MessageBody.emptyBody());
+        httpResponse.found()
+                .location("/index.html")
+                .flushBuffer();
+    }
+
+    private void getLoginPage(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        String uri = httpRequest.getUri();
+        String responseBody = FileReader.read(uri + ".html");
+        httpResponse.ok()
+                .contentType(ContentType.from(uri))
+                .body(responseBody)
+                .flushBuffer();
     }
 }

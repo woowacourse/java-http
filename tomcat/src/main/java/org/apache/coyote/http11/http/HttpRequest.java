@@ -33,12 +33,6 @@ public class HttpRequest {
         }
     }
 
-    public boolean hasQueryString() {
-        return !requestLine.getRequestTarget()
-                .getQueryParameters()
-                .isEmpty();
-    }
-
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }

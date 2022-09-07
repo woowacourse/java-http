@@ -16,7 +16,7 @@ class HomeControllerTest {
     private static final Controller CONTROLLER = new HomeController();
 
     @Test
-    void handle() throws Exception {
+    void handle() {
         String httpRequest = HttpFactory.get("/index.html");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
@@ -26,7 +26,7 @@ class HomeControllerTest {
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),
                 () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(
-                        ContentType.TEXT_HTML.getValue()),
+                        ContentType.TEXT_PLAIN.getValue()),
                 () -> assertThat(httpResponse.getMessageBody().getValue()).isEqualTo("Hello world!")
         );
     }

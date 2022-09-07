@@ -18,7 +18,7 @@ class ResourceControllerTest {
     private static final Controller CONTROLLER = new ResourceController();
 
     @Test
-    void handle() throws Exception {
+    void handle() {
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",

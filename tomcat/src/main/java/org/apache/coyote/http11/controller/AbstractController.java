@@ -17,14 +17,17 @@ public abstract class AbstractController implements Controller {
             doPost(httpRequest, httpResponse);
             return;
         }
-        httpResponse.methodNotAllowed();
+        httpResponse.methodNotAllowed()
+                .flushBuffer();
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.methodNotAllowed();
+        httpResponse.methodNotAllowed()
+                .flushBuffer();
     }
 
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.methodNotAllowed();
+        httpResponse.methodNotAllowed()
+                .flushBuffer();
     }
 }

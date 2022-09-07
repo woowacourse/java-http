@@ -16,7 +16,7 @@ class MessageBodyTest {
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader("String");
         MessageBody messageBody = MessageBody.from(
                 bufferedReader,
-                Headers.builder()
+                Headers.emptyHeaders()
                         .contentLength(8));
 
         assertThat(messageBody.length()).isEqualTo("String\r\n".getBytes().length);

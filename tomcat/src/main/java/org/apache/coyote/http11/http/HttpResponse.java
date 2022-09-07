@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.http;
 
 import java.io.BufferedWriter;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.apache.coyote.http11.http.domain.Headers;
 import org.apache.coyote.http11.http.domain.HttpConstants;
-import org.apache.coyote.http11.http.domain.HttpVersion;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.http.domain.StatusCode;
 import org.apache.coyote.http11.http.domain.StatusLine;
@@ -14,44 +14,63 @@ public class HttpResponse {
 
     private final BufferedWriter bufferedWriter;
     private StatusLine statusLine;
-    private Headers headers;
+    private final Headers headers;
     private MessageBody messageBody;
 
-    private HttpResponse(final BufferedWriter bufferedWriter) {
+    private HttpResponse(final BufferedWriter bufferedWriter, final StatusLine statusLine, final Headers headers,
+                         final MessageBody messageBody) {
         this.bufferedWriter = bufferedWriter;
+        this.statusLine = statusLine;
+        this.headers = headers;
+        this.messageBody = messageBody;
     }
 
     public static HttpResponse from(final BufferedWriter bufferedWriter) {
-        return new HttpResponse(bufferedWriter);
+        return new HttpResponse(bufferedWriter, null, Headers.emptyHeaders(), MessageBody.emptyBody());
     }
 
-    public void ok(final ContentType contentType, final MessageBody messageBody) {
-        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
-        this.headers = Headers.builder()
-                .contentType(contentType)
-                .contentLength(messageBody.length());
-        this.messageBody = messageBody;
-        writeAndFlush();
+    public HttpResponse ok() {
+        this.statusLine = StatusLine.http11(StatusCode.OK);
+        return this;
     }
 
-    public void methodNotAllowed() {
+    public HttpResponse found() {
+        this.statusLine = StatusLine.http11(StatusCode.FOUND);
+        return this;
+    }
+
+    public HttpResponse methodNotAllowed() {
         MessageBody messageBody = new MessageBody(FileReader.read("405.html"));
-        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.METHOD_NOT_ALLOWED);
-        this.headers = Headers.builder()
-                .contentType(ContentType.TEXT_HTML)
+        this.statusLine = StatusLine.http11(StatusCode.METHOD_NOT_ALLOWED);
+        this.headers.contentType(ContentType.TEXT_HTML)
                 .contentLength(messageBody.length());
         this.messageBody = messageBody;
-        writeAndFlush();
+        return this;
     }
 
-    public void found(final Headers headers, final MessageBody messageBody) {
-        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
-        this.headers = headers;
+    public HttpResponse setCookie(final Session session) {
+        this.headers.setCookie(session.getId());
+        return this;
+    }
+
+    public HttpResponse contentType(final ContentType contentType) {
+        this.headers.contentType(contentType);
+        return this;
+    }
+
+    public HttpResponse location(final String value) {
+        this.headers.location(value);
+        return this;
+    }
+
+    public HttpResponse body(final String body) {
+        MessageBody messageBody = new MessageBody(body);
+        this.headers.contentLength(messageBody.length());
         this.messageBody = messageBody;
-        writeAndFlush();
+        return this;
     }
 
-    private void writeAndFlush() {
+    public void flushBuffer() {
         char[] httpMessage = String.join(HttpConstants.CRLF,
                 statusLine.getStatusLine(),
                 headers.getHeaders(),

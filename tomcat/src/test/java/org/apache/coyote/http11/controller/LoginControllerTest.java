@@ -22,7 +22,7 @@ class LoginControllerTest {
     private static final Controller CONTROLLER = new LoginController();
 
     @Test
-    void get() throws Exception {
+    void get() {
         String httpRequest = HttpFactory.get("/login");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();
@@ -40,7 +40,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void post() throws Exception {
+    void post() {
         String httpRequest = HttpFactory.post("/login", "account=gugu&password=password");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();
@@ -57,7 +57,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void getAfterLogin() throws Exception {
+    void getAfterLogin() {
         User gugu = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
@@ -78,7 +78,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void getWithInvalidJsessionid() throws Exception {
+    void getWithInvalidJsessionid() {
         User gugu = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
         Session session = new Session("something-different-jsessionid");
@@ -102,7 +102,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void wrongPassword() throws Exception {
+    void wrongPassword() {
         String httpRequest = HttpFactory.post("/login", "account=gugu&password=wrong");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();
@@ -117,7 +117,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void wrongUserId() throws Exception {
+    void wrongUserId() {
         String httpRequest = HttpFactory.post("/login", "account=fufu&password=password");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
         HttpResponse httpResponse = HttpFactory.create();

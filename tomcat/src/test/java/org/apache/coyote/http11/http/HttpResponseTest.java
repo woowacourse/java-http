@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.http.domain.ContentType;
-import org.apache.coyote.http11.http.domain.MessageBody;
 import org.junit.jupiter.api.Test;
 import support.HttpFactory;
 
@@ -13,7 +12,9 @@ class HttpResponseTest {
     @Test
     void ok() {
         HttpResponse httpResponse = HttpFactory.create();
-        httpResponse.ok(ContentType.TEXT_HTML, new MessageBody("Message Body"));
+        httpResponse.ok()
+                .contentType(ContentType.TEXT_HTML)
+                .body("Message Body");
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),

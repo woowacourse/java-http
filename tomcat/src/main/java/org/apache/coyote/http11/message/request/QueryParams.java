@@ -1,9 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.message.Regex;
 
 public class QueryParams {
 
@@ -17,8 +19,9 @@ public class QueryParams {
     }
 
     public static QueryParams from(final String queryString) {
-        final Map<String, String> values = Arrays.stream(queryString.split(Regex.QUERY_PARAM.getValue()))
-                .map(param -> param.split(Regex.QUERY_VALUE.getValue(), 2))
+        final String decodedQueryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+        final Map<String, String> values = Arrays.stream(decodedQueryString.split(Regex.QUERY_PARAM.getValue()))
+                .map(param -> param.split(Regex.KEY_VALUE.getValue(), 2))
                 .filter(param -> param.length == 2)
                 .collect(Collectors.toMap(
                         param -> param[INDEX_KEY],
@@ -33,10 +36,6 @@ public class QueryParams {
 
     public String get(String key) {
         return values.get(key);
-    }
-
-    public boolean isEmpty() {
-        return values.isEmpty();
     }
 
     public boolean containsKey(String key) {

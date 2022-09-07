@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.response.header;
+package org.apache.coyote.http11.message.response.header;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.message.Regex;
+import org.apache.coyote.http11.message.header.Header;
 
 public class Headers {
 
@@ -18,6 +19,10 @@ public class Headers {
         headers.put(Header.CONTENT_TYPE, contentType.toString());
         headers.put(Header.CONTENT_LENGTH, Integer.toString(body.getBytes().length));
         return new Headers(headers);
+    }
+
+    public void put(Header header, String value) {
+        values.put(header, value);
     }
 
     public void putAll(Map<Header, String> values) {

@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.request.header;
+package org.apache.coyote.http11.message.request.header;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.message.Regex;
+import org.apache.coyote.http11.message.header.Header;
 
 public class Headers {
 
@@ -27,7 +28,19 @@ public class Headers {
         return new Headers(values);
     }
 
+    public Cookie getCookie() {
+        final Optional<String> rawCookie = get(Header.COOKIE);
+        if (rawCookie.isEmpty()) {
+            return Cookie.ofEmpty();
+        }
+        return Cookie.from(rawCookie.get());
+    }
+
     public Optional<String> get(final Header header) {
-        return Optional.ofNullable(values.get(header.getName()));
+        final String key = header.getName();
+        if (values.containsKey(key)) {
+            return Optional.of(values.get(key));
+        }
+        return Optional.empty();
     }
 }

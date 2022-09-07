@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.ResourceType;
 import org.apache.coyote.http11.common.HeaderKeys;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMessageDelimiter;
@@ -38,7 +38,7 @@ public class HttpResponse {
     private static String selectContentType(final String resource) {
         final String[] fileElements = resource.split(FILE_REGEX);
 
-        return ContentType.getContentType(fileElements[EXTENSION_LOCATION]);
+        return ResourceType.getContentType(fileElements[EXTENSION_LOCATION]);
     }
 
     private static String loadResourceContent(final String resource) {

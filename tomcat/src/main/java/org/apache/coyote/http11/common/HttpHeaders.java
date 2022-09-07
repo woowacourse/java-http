@@ -51,4 +51,12 @@ public class HttpHeaders {
         message.deleteCharAt(message.length() - 1);
         message.deleteCharAt(message.length() - 1);
     }
+
+    public int getContentLength() {
+        final String contentLength = value.get("Content-Length");
+        if (contentLength == null) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength);
+    }
 }

@@ -33,17 +33,24 @@ public class LoginServlet extends Servlet {
         if (method.isGet()) {
             return doGet(httpRequest);
         }
+        if (method.isPost()) {
+            return doPost(httpRequest);
+        }
         throw new IllegalArgumentException(
             String.format("정의되지 않은 method 입니다. [%s, %s]", httpRequest.getUrl(), method)
         );
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        final Map<String, String> queries = httpRequest.getQueries();
-        if (!queries.containsKey("account")) {
-            return HttpResponse.of(httpRequest.getHttpVersion(), "/login.html", "200");
+        return HttpResponse.of(httpRequest.getHttpVersion(), "/login.html", "200");
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
+        final Map<String, String> bodies = httpRequest.getBodies();
+        if (!bodies.containsKey("account") || !bodies.containsKey("password")) {
+            return HttpResponse.of(httpRequest.getHttpVersion(), "/404.html", "404");
         }
-        final Optional<User> user = UserService.findUser(queries.get("account"), queries.get("password"));
+        final Optional<User> user = UserService.findUser(bodies.get("account"), bodies.get("password"));
         log.info("user : {}", user);
 
         if (user.isPresent()) {

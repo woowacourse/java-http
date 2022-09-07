@@ -11,6 +11,7 @@ public enum StatusCode {
     FOUND(302, "Found"),
 
     UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found"),
     ;
 
     private final int code;

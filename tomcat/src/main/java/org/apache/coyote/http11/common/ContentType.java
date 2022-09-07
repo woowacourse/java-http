@@ -1,28 +1,20 @@
 package org.apache.coyote.http11.common;
 
-import java.util.Arrays;
-
 public enum ContentType {
 
-    HTML("html", "text/html"),
-    CSS("css", "text/css"),
-    JAVASCRIPT("js", "text/javascript"),
-    SVG("svg", "image/svg+xml"),
+    TEXT_HTML("text/html"),
+    TEXT_CSS("text/css"),
+    TEXT_JAVASCRIPT("text/javascript"),
+    IMAGE_SVG("image/svg+xml"),
     ;
 
-    private final String extension;
-    private final String contentType;
+    private final String value;
 
-    ContentType(final String extension, final String contentType) {
-        this.extension = extension;
-        this.contentType = contentType;
+    ContentType(final String value) {
+        this.value = value;
     }
 
-    public static String getContentType(String extension) {
-        return Arrays.stream(values())
-            .filter(value -> value.extension.equals(extension))
-            .map(value -> value.contentType)
-            .findFirst()
-            .orElseGet(() -> HTML.contentType);
+    public String getValue() {
+        return value;
     }
 }

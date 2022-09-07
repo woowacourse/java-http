@@ -7,6 +7,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidHttpRequestException;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpStatus;
+import org.apache.coyote.http11.web.AuthenticationInterceptor;
 import org.apache.coyote.http11.web.FileHandler;
 import org.apache.coyote.http11.web.RequestHandler;
 import org.apache.coyote.http11.web.request.HttpRequest;
@@ -20,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -52,6 +54,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(final HttpRequest httpRequest) {
+        final List<String> includeUris = List.of("/login", "/register");
+        if (!new AuthenticationInterceptor(includeUris).preHandle(httpRequest)) {
+            return HttpResponse.sendRedirect("/index.html");
+        }
+
         try {
             return chooseHandler(httpRequest);
         } catch (final IOException e) {

@@ -32,6 +32,6 @@
     - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장
 
 ### 3단계 
-- [ ] HttpRequest 클래스 생성
-- [ ] HttpResponse 클래스 생성
+- [x] HttpRequest 클래스 생성
+- [x] HttpResponse 클래스 생성
 - [ ] Controller 인터페이스 생성

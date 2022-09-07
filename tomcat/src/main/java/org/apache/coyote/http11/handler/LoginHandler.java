@@ -1,11 +1,14 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.authorization.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class LoginHandler extends Handler {
@@ -33,11 +36,20 @@ public class LoginHandler extends Handler {
                 throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
             }
 
+            final String jSessionId = String.valueOf(UUID.randomUUID());
+            createSession(jSessionId, loginUser);
+
             log.info("user : " + loginUser);
-            return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, String.valueOf(UUID.randomUUID()));
+            return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, jSessionId);
         } catch (IllegalArgumentException e) {
             return createHandlerResult(HttpStatusCode.FOUND, FAIL_REDIRECT_URI);
         }
+    }
+
+    private void createSession(final String jSessionId, final User user) {
+        final Session session = new Session(jSessionId);
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
     }
 
     private HandlerResult createHandlerResult(final HttpStatusCode statusCode, final String redirectUri,

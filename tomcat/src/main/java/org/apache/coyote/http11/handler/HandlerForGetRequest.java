@@ -14,7 +14,7 @@ public class HandlerForGetRequest extends Handler {
 
     static final HandlerForGetRequest HANDLER_FOR_GET_REQUEST = new HandlerForGetRequest();
 
-    private HandlerForGetRequest() {
+    HandlerForGetRequest() {
     }
 
     @Override
@@ -34,7 +34,7 @@ public class HandlerForGetRequest extends Handler {
         return header;
     }
 
-    private String getContentType(final String uri) {
+    String getContentType(final String uri) {
         if (uri.contains(".css")) {
             return "text/css";
         }
@@ -46,7 +46,7 @@ public class HandlerForGetRequest extends Handler {
         return "text/html";
     }
 
-    private String getResponseBody(String requestUri) throws IOException {
+    String getResponseBody(String requestUri) throws IOException {
         if (requestUri.equals("/")) {
             return "Hello world!";
         }

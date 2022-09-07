@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.authorization.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RegisterHandler extends Handler {
@@ -31,14 +34,23 @@ public class RegisterHandler extends Handler {
             final String password = request.getBodyValue("password");
             final String email = request.getBodyValue("email");
 
-            final User newUser = new User(account, password, email);
-            InMemoryUserRepository.save(newUser);
+            InMemoryUserRepository.save(new User(account, password, email));
+            final User savedUser = InMemoryUserRepository.findByAccount(account).get();
+            log.info("user : " + savedUser);
 
-            log.info("user : " + newUser);
-            return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, String.valueOf(UUID.randomUUID()));
+            final String jSessionId = String.valueOf(UUID.randomUUID());
+            createSession(jSessionId, savedUser);
+
+            return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, jSessionId);
         } catch (IllegalArgumentException e) {
             return createHandlerResult(HttpStatusCode.FOUND, FAIL_REDIRECT_URI);
         }
+    }
+
+    private void createSession(final String jSessionId, final User user) {
+        final Session session = new Session(jSessionId);
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
     }
 
     private HandlerResult createHandlerResult(final HttpStatusCode statusCode, final String redirectUri,

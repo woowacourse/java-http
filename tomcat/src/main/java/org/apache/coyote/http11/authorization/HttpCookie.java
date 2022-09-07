@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.authorization;
 
 import java.util.HashMap;
 import java.util.Map;

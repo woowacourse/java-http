@@ -45,6 +45,11 @@ public class RequestHeaders {
         return httpCookie.getAllCookies();
     }
 
+    public String getCookieSessionID() {
+        HttpCookie httpCookie = (HttpCookie) values.get("Cookie");
+        return httpCookie.getSessionId();
+    }
+
     @Override
     public String toString() {
         return "RequestHeaders{" +

@@ -20,12 +20,15 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -67,7 +70,10 @@ public class Http11Processor implements Runnable, Processor {
             requestBody = generateRequestBody(bufferedReader, requestHeaders);
         }
 
-        return new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
+        Session session = sessionManager.getSession(httpRequest);
+        httpRequest.addSession(session);
+        return httpRequest;
     }
 
     private RequestHeaders generateRequestHeaders(BufferedReader bufferedReader) throws IOException {

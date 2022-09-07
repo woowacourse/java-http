@@ -11,19 +11,20 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusLine;
+import org.apache.coyote.http11.session.Session;
 
 public class LoginController extends AbstractController {
-
 
     private static final String REQUEST_URI = "/login";
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        String responseBody = readFile(httpRequest, "/login.html");
-        httpResponse
-                .setStatusLine(new StatusLine(httpRequest.getProtocolVersion(), OK.getNumber(), "OK"));
-        httpResponse.setResponseBody(responseBody);
+        Session session = httpRequest.getSession();
+        if (session.getAttribute("login") != null) {
+            httpResponse.send("/index.html", OK);
+            return;
+        }
+        httpResponse.send("/login.html", OK);
     }
 
 
@@ -33,23 +34,21 @@ public class LoginController extends AbstractController {
         Map<String, String> parsedBody = requestBody.getParsedBody();
 
         if (InMemoryUserRepository.login(parsedBody.get("account"), parsedBody.get("password"))) {
-            String responseBody = readFile(request, "/index.html");
-            response
-                    .setStatusLine(new StatusLine(request.getProtocolVersion(), FOUND.getNumber(), "FOUND"));
-            response.setResponseBody(responseBody);
+            Session session = request.getSession();
+            if (session != null) {
+                User user = InMemoryUserRepository
+                        .findByAccountAndPassword(parsedBody.get("account"), parsedBody.get("password"));
+                session.setAttribute("login", user);
+            }
+            response.send("/index.html", FOUND);
             return;
         }
 
-        String responseBody = readFile(request, "/401.html");
-        response.setStatusLine(
-                new StatusLine(request.getProtocolVersion(), UNAUTHORIZED.getNumber(), "UNAUTHORIZED"));
-        response.setResponseBody(responseBody);
+        response.send("/401.html", UNAUTHORIZED);
     }
 
     @Override
     public boolean canHandle(HttpRequest request) {
         return REQUEST_URI.equals(request.getResource());
     }
-
-
 }

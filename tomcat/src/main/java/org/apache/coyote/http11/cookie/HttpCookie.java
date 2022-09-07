@@ -55,4 +55,8 @@ public class HttpCookie {
     public boolean hasSessionCookie() {
         return values.containsKey(SESSION_PREFIX);
     }
+
+    public String getSessionId() {
+        return values.get(SESSION_PREFIX);
+    }
 }

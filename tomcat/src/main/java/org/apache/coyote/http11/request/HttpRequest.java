@@ -1,12 +1,14 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
 
     private RequestLine requestLine;
     private RequestHeaders requestHeaders;
     private RequestBody requestBody;
+    private Session session;
 
     public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
@@ -64,5 +66,17 @@ public class HttpRequest {
 
     public String getCookie() {
         return requestHeaders.getCookie();
+    }
+
+    public String extractSessionId() {
+        return requestHeaders.getCookieSessionID();
+    }
+
+    public void addSession(Session session) {
+        this.session = session;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

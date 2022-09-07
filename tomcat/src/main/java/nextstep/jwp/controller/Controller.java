@@ -9,6 +9,7 @@ public abstract class Controller {
     public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }
+
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
     }

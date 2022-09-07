@@ -53,7 +53,6 @@ public class RegisterControllerTest extends ControllerTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Connection: keep-alive ",
                 "Content-Length: 80 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
@@ -68,7 +67,7 @@ public class RegisterControllerTest extends ControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
-        assertThat(response.getHeader("Location")).isEqualTo("/static/400.html");
+        assertThat(response.getHeader("Location")).isEqualTo("/400.html");
         assertThat(InMemoryUserRepository.findByAccount("tonic")).isPresent();
     }
 

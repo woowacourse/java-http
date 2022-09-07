@@ -40,8 +40,15 @@
 ### 3. Cookie에 JESSIONID 값 저장하기
 
 - 로그인 요청이 오면 Set-Cookie에 JESSIONID 값을 담아 응답한다. ✅
-- Cookie 구현
+- Cookie 구현 ✅
   - Cookie에 JESSIONID가 없으면 Set-Cookie에 JESSIONID 값을 담아 응답한다.
+
+### 4. Session 구현하기
+
+- 로그인을 한 유저는 JSESSIONID 값을 Session에 저장한다. ✅
+- 로그인 요청 시 ✅
+  - 로그인 한 유저는 `index.html`로 리다이렉트 한다.
+  - 로그인을 하지 않은 유저는 `login.html`로 리다이렉트 한다.
 
 ## 🚀 3단계 - 리팩터링
 ### 1. HttpRequest 클래스 구현하기

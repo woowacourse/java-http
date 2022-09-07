@@ -6,27 +6,39 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class LoginControllerTest extends ControllerTest {
 
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.clear();
+    }
+
     @DisplayName("로그인에 성공하면 302, index.html을 응답한다.")
     @Test
     void login_success() throws Exception {
         // given
-        URL resource = getClass().getClassLoader().getResource("static/index.html");
+        InMemoryUserRepository.save(new User("gugu", "password", "gugu@gmail.com"));
+        String body = "account=gugu&password=password";
         String requestValue = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Accept: text/html ",
+                "Content-Length: " + body.length() + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
                 "",
-                "");
+                body);
         HttpRequest request = HttpRequest.from(toBufferedReader(requestValue));
 
         // when
@@ -42,14 +54,15 @@ public class LoginControllerTest extends ControllerTest {
     @Test
     void login_fail() throws Exception {
         // given
-        URL resource = getClass().getClassLoader().getResource("static/401.html");
         String requestValue = String.join("\r\n",
-                "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Accept: text/html ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
                 "",
-                "");
+                "account=gugu&password=invalidPassword");
         HttpRequest request = HttpRequest.from(toBufferedReader(requestValue));
 
         // when

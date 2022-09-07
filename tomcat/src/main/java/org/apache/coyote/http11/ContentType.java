@@ -8,8 +8,7 @@ public enum ContentType {
     CSS("text/css", ".css"),
     JAVASCRIPT("application/js", ".js"),
     SVG("image/svg+xml", ".svg"),
-    APPLICATION_FORM("application/x-www-form-urlencoded", "form")
-    ;
+    APPLICATION_FORM("application/x-www-form-urlencoded", "form");
 
     private final String value;
     private final String fileNameExtension;

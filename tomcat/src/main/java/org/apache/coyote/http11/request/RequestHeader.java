@@ -5,18 +5,26 @@ import java.util.Map;
 public class RequestHeader {
 
     private final Map<String, String> value;
-    private final Cookie cookie;
+    private final HttpCookie httpCookie;
 
-    public RequestHeader(Map<String, String> value, Cookie cookie) {
+    public RequestHeader(Map<String, String> value, HttpCookie httpCookie) {
         this.value = value;
-        this.cookie = cookie;
+        this.httpCookie = httpCookie;
     }
 
     public static RequestHeader from(Map<String, String> header) {
-        Cookie cookie = Cookie.empty();
+        HttpCookie httpCookie = HttpCookie.empty();
         if (header.containsKey("Cookie")) {
-            cookie = Cookie.from(header.remove("Cookie"));
+            httpCookie = HttpCookie.from(header.remove("Cookie"));
         }
-        return new RequestHeader(header, cookie);
+        return new RequestHeader(header, httpCookie);
+    }
+
+    public boolean hasCookie() {
+        return httpCookie.exists();
+    }
+
+    public String getCookieValue(String key) {
+        return httpCookie.getValue(key);
     }
 }

@@ -44,7 +44,7 @@ public class HttpRequest {
         if (!header.containsKey("Content-Length")) {
             return new Body("");
         }
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
+        int contentLength = Integer.parseInt(header.get("Content-Length").trim());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
@@ -65,5 +65,13 @@ public class HttpRequest {
 
     public Body body() {
         return body;
+    }
+
+    public boolean hasCookie() {
+        return header.hasCookie();
+    }
+
+    public String getCookieValue(String key) {
+        return header.getCookieValue(key);
     }
 }

@@ -20,6 +20,10 @@ public class HttpRequest {
         return new HttpRequest(new RequestLine(requestLine), Headers.of(headerLines));
     }
 
+    public boolean hasHeader(final Header header) {
+        return headers.hasHeader(header);
+    }
+
     public Method getMethod() {
         return startLine.getMethod();
     }

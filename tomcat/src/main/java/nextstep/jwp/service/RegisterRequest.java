@@ -1,8 +1,6 @@
 package nextstep.jwp.service;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RegisterRequest {
 
@@ -16,11 +14,8 @@ public class RegisterRequest {
         this.password = password;
     }
 
-    public static RegisterRequest of(final String body) {
-        Map<String, String> fields = Arrays.stream(body.split("&"))
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
-        return new RegisterRequest(fields.get("account"), fields.get("email"), fields.get("password"));
+    public static RegisterRequest of(final Map<String, String> body) {
+        return new RegisterRequest(body.get("account"), body.get("email"), body.get("password"));
     }
 
     public String getAccount() {

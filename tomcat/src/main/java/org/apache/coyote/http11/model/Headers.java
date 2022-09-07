@@ -45,6 +45,10 @@ public class Headers {
         return headers.containsKey(Header.COOKIE.getKey());
     }
 
+    public boolean hasHeader(final Header header) {
+        return headers.containsKey(header.getKey());
+    }
+
     public void add(final String key, final String value) {
         this.headers.put(key, value);
     }

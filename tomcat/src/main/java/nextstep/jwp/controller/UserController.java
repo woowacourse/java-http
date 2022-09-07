@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import nextstep.jwp.MessageConverter;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginRequest;
 import nextstep.jwp.service.RegisterRequest;
@@ -51,7 +52,8 @@ public class UserController {
 
     private static HttpResponse postLogin(final HttpRequest request) throws IOException {
         try {
-            User user = userService.login(LoginRequest.of(request.getBody()));
+            LoginRequest loginRequest = LoginRequest.of(MessageConverter.convert(request.getBody()));
+            User user = userService.login(loginRequest);
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
 
@@ -81,7 +83,7 @@ public class UserController {
     }
 
     private static HttpResponse postRegister(final HttpRequest request) {
-        RegisterRequest registerRequest = RegisterRequest.of(request.getBody());
+        RegisterRequest registerRequest = RegisterRequest.of(MessageConverter.convert(request.getBody()));
         userService.register(registerRequest);
         HttpResponse response = HttpResponse.of(Status.FOUND);
         response.addHeader(Header.LOCATION, "/index.html");

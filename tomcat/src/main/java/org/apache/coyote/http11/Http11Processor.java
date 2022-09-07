@@ -12,7 +12,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
-import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
         List<String> headerLines = readHeaders(reader);
         HttpRequest request = HttpRequest.from(requestLine, headerLines);
 
-        if (request.getMethod() == Method.POST) {
+        if (request.hasHeader(Header.CONTENT_LENGTH)) {
             readBody(reader, request);
         }
         return request;

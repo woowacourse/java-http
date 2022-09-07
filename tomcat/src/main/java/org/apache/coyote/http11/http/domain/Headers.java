@@ -3,6 +3,7 @@ package org.apache.coyote.http11.http.domain;
 import java.io.BufferedReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Headers {
@@ -29,6 +30,11 @@ public class Headers {
 
     public static Headers builder() {
         return new Headers(new LinkedHashMap<>());
+    }
+
+    public Headers setCookie(final UUID uuid) {
+        value.put("Set-Cookie", "JSESSIONID=" + uuid.toString());
+        return this;
     }
 
     public Headers contentType(final ContentType contentType) {

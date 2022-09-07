@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
@@ -38,8 +39,10 @@ public class LoginController extends AbstractController {
     private HttpResponse login(final User user, final String password) {
         if (user.checkPassword(password)) {
             log.info("User : {}", user);
+            UUID uuid = UUID.randomUUID();
             return HttpResponse.found(
                     Headers.builder()
+                            .setCookie(uuid)
                             .location("/index.html"),
                     new MessageBody(""));
         }

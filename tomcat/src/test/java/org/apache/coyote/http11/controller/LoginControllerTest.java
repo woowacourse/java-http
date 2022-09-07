@@ -48,7 +48,9 @@ class LoginControllerTest {
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
                         .isEqualTo("HTTP/1.1 302 Found "),
                 () -> assertThat(httpResponse.getHeaders().getValue().get("Location"))
-                        .isEqualTo("/index.html")
+                        .isEqualTo("/index.html"),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Set-Cookie"))
+                        .startsWith("JSESSIONID")
         );
     }
 

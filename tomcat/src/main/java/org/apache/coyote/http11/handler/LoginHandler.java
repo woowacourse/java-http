@@ -28,8 +28,8 @@ public class LoginHandler implements RequestHandler {
         if (foundUser.isPresent()) {
             User user = foundUser.get();
             if (user.checkPassword(queryParams.get("password"))) {
-                return new ResponseEntity(HttpStatus.FOUND, FileUtil.readAllBytes("/index.html"), ContentType.HTML,
-                        new HttpHeaders(Map.of("Location", "/index.html")));}
+                return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(Map.of("Location", "/index.html")));
+            }
         }
 
         return new ResponseEntity(HttpStatus.UNAUTHORIZED, FileUtil.readAllBytes("/401.html"), ContentType.HTML);

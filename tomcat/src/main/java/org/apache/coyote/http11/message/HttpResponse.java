@@ -34,6 +34,9 @@ public class HttpResponse {
         }
 
         public Builder body(String body) {
+            if (body == null) {
+                return this;
+            }
             this.body = body;
             headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
             return this;

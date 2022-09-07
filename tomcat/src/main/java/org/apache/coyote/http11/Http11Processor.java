@@ -10,13 +10,16 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.exception.ResourceNotFoundException;
 import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.StaticResource;
 import org.apache.coyote.HttpBody;
 import org.apache.coyote.HttpHeaders;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.HttpStartLine;
 import org.apache.coyote.Processor;
+import org.apache.coyote.constant.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +83,7 @@ public class Http11Processor implements Runnable, Processor {
         return rawHttpRequest;
     }
 
-    private static String readBody(final BufferedReader bufferedReader, final HttpHeaders headers)
-            throws IOException {
+    private static String readBody(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
         final String header = headers.getHeader(CONTENT_LENGTH);
         if (header == null) {
             return null;
@@ -91,14 +93,19 @@ public class Http11Processor implements Runnable, Processor {
         final char[] buffer = new char[contentLength];
         if (bufferedReader.ready()) {
             bufferedReader.read(buffer);
-
         }
+
         return new String(buffer);
     }
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Controller controller = RequestMapping.findController(request);
-        controller.service(request, response);
+        try {
+            final Controller controller = RequestMapping.findController(request);
+            controller.service(request, response);
+        } catch (final ResourceNotFoundException notFoundException) {
+            response.setBody(StaticResource.notFound());
+            response.setStatus(HttpStatus.NOT_FOUND);
+        }
     }
 
     private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {

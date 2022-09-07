@@ -1,8 +1,12 @@
 package nextstep.jwp.presentation;
 
-import java.util.NoSuchElementException;
+import static nextstep.jwp.presentation.StaticResource.INDEX_PAGE;
+import static nextstep.jwp.presentation.StaticResource.UNAUTHORIZED_PAGE;
+
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.coyote.HttpRequest;
@@ -37,36 +41,24 @@ public class LoginController extends AbstractController {
             redirectIndex(response);
         }
 
-        final Controller staticResourceController = StaticResourceController.getInstance();
-        staticResourceController.service(request, response);
+        response.setBody(StaticResource.ofRequest(request));
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         try {
-            final String account = request.getBodyParam(ACCOUNT_PARAM);
-            final String password = request.getBodyParam(PASSWORD_PARAM);
-            Objects.requireNonNull(account, "null이면 안됨 ㅋ");
-            Objects.requireNonNull(password, "null이면 안됨 ㅋ");
+            final User user = login(request);
 
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(NoSuchElementException::new);
-            if (user.checkPassword(password)) {
-                log.info(user.toString());
-
-                final Session session = request.getSession(true);
-                session.setAttribute("user", user);
-                response.addSetCookie(JSESSIONID, session.getId());
-                redirectIndex(response);
-            } else {
-                redirectNoAuth(response);
-            }
-        } catch (final RuntimeException e) {
-            log.error(e.getMessage());
+            logSuccessMessage(user);
+            setLoginSession(request, response, user);
+            redirectIndex(response);
+        } catch (final UnauthorizedException unauthorizedException) {
+            redirectNoAuth(response);
+        } catch (final RuntimeException runtimeException) {
+            log.error(runtimeException.getMessage());
         }
 
-        final Controller staticResourceController = StaticResourceController.getInstance();
-        staticResourceController.service(request, response);
+        response.setBody(StaticResource.ofRequest(request));
     }
 
     private User getUser(final Session session) {
@@ -76,13 +68,39 @@ public class LoginController extends AbstractController {
         return (User) session.getAttribute("user");
     }
 
-    private static void redirectNoAuth(final HttpResponse response) {
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation("/401.html");
+    private User login(final HttpRequest request) {
+        final String account = request.getBodyParam(ACCOUNT_PARAM);
+        final String password = request.getBodyParam(PASSWORD_PARAM);
+
+        Objects.requireNonNull(account, "account는 null이면 안됩니다.");
+        Objects.requireNonNull(password, "password는 null이면 안됩니다.");
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(UserNotFoundException::new);
+        if (!user.checkPassword(password)) {
+            throw new UnauthorizedException();
+        }
+        return user;
     }
 
-    private static void redirectIndex(final HttpResponse response) {
+    private void logSuccessMessage(final User user) {
+        final String msg = user.toString();
+        log.info(msg);
+    }
+
+    private void setLoginSession(final HttpRequest request, final HttpResponse response, final User user) {
+        final Session session = request.getSession(true);
+        session.setAttribute("user", user);
+        response.addSetCookie(JSESSIONID, session.getId());
+    }
+
+    private void redirectNoAuth(final HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation("/index.html");
+        response.setLocation(UNAUTHORIZED_PAGE);
+    }
+
+    private void redirectIndex(final HttpResponse response) {
+        response.setStatus(HttpStatus.FOUND);
+        response.setLocation(INDEX_PAGE);
     }
 }

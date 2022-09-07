@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.constant.HttpStatus;
@@ -38,14 +40,16 @@ public class HttpResponseTest {
 
     @Test
     @DisplayName("body에 url이 들어올 경우 responseBody는 정적 리소스가 된다.")
-    void stringUrl() throws IOException {
+    void stringUrl() throws IOException, URISyntaxException {
         // given
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         Objects.requireNonNull(resource);
 
+        final Path path = Path.of(resource.toURI());
+
         // when
         final HttpResponse response = new HttpResponse();
-        response.setBody(resource);
+        response.setBody(path);
         response.setStatus(HttpStatus.OK);
 
         // then

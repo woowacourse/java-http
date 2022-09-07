@@ -3,13 +3,10 @@ package org.apache.coyote;
 import static org.apache.coyote.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.HttpHeaders.CONTENT_TYPE;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import java.util.Objects;
 import org.apache.coyote.constant.HttpStatus;
 import org.apache.coyote.constant.MediaType;
 
@@ -37,11 +34,7 @@ public class HttpResponse {
         headers.addHeader(CONTENT_LENGTH, String.valueOf(responseBody.length));
     }
 
-    public void setBody(final URL resource) throws IOException {
-        Objects.requireNonNull(resource);
-
-        final File file = new File(resource.getFile());
-        final Path path = file.toPath();
+    public void setBody(final Path path) throws IOException {
         final byte[] responseBody = Files.readAllBytes(path);
 
         headers.addHeader(CONTENT_TYPE, Files.probeContentType(path) + CHARSET_UTF_8);

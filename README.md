@@ -35,8 +35,8 @@
 - [x] 비즈니스 로직과 tomcat 기능을 분리하기
 - [x] HttpRequest에서 일급컬렉션 사용하기
 - [x] 반복되는 상수를 Enum으로 처리하기
-- [ ] loginController 악취 제거하기
-  - [ ] 컨트롤러 간 참조하는 구조 변경하기 ( LoginController, RegisterController,  -> StaticResourceController)
+- [x] loginController 악취 제거하기
+  - [x] 컨트롤러 간 참조하는 구조 변경하기 ( LoginController, RegisterController,  -> StaticResourceController)
 - [ ] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기
 - [ ] HttpBody 와 HttpPath의 param 생성 로직이 겹친다. 이를 어떻게 처리할까?
 

@@ -25,8 +25,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Controller staticResourceController = StaticResourceController.getInstance();
-        staticResourceController.service(request, response);
+        response.setBody(StaticResource.ofRequest(request));
     }
 
     @Override

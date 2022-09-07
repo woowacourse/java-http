@@ -1,7 +1,8 @@
-package org.apache.coyote.support;
+package org.apache.coyote.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.http.Session;
 
 public class SessionManager {
 

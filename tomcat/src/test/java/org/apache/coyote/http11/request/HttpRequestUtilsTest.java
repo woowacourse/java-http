@@ -7,9 +7,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import org.apache.coyote.http11.request.model.HttpMethod;
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.request.model.HttpVersion;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpVersion;
+import org.apache.coyote.util.HttpRequestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,7 +40,7 @@ public class HttpRequestUtilsTest {
 
             assertAll(
                     () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
-                    () -> assertThat(httpRequest.getUri().getValue()).isEqualTo("/index.html"),
+                    () -> assertThat(httpRequest.getPath().getValue()).isEqualTo("/index.html"),
                     () -> assertThat(httpRequest.getVersion()).isEqualTo(HttpVersion.HTTP_1_1)
             );
         }

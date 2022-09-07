@@ -9,9 +9,9 @@ import java.nio.file.Files;
 import java.util.UUID;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.support.Session;
-import org.apache.coyote.support.SessionManager;
+import org.apache.coyote.http11.http.ContentType;
+import org.apache.coyote.http11.http.Session;
+import org.apache.coyote.util.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,8 @@ class Http11ProcessorTest {
         // then
         String expected = 응답한다("200 OK", "Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(expected).contains("200 OK");
+        assertThat(expected).contains("Hello world!");
     }
 
     @Test
@@ -50,7 +51,7 @@ class Http11ProcessorTest {
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = 응답한다("200 OK", new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(expected).contains("200 OK");
     }
 
     @Test
@@ -65,13 +66,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        String response = socket.output();
 
-        String expected = 응답한다("200 OK",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())),
-                ContentType.TEXT_CSS_CHARSET_UTF_8);
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).contains("200 OK");
+        assertThat(response).contains("text/css;charset=utf-8");
     }
 
     @Test
@@ -86,12 +84,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        String expected = 응답한다("200 OK",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())),
-                ContentType.TEXT_JS_CHARSET_UTF_8);
+        String response = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(response).contains("200 OK");
+        assertThat(response).contains("text/js;charset=utf-8");
     }
 
     @Nested
@@ -110,10 +106,9 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            URL resource = getClass().getClassLoader().getResource("static/login.html");
-            String expected = 응답한다("200 OK", new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(response).contains("200 OK");
         }
 
         @Test
@@ -177,18 +172,11 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = "HTTP/1.1 302 Found \r\n"
-                    + "Location: /401.html \r\n"
-                    + "\r\n";
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(response).contains("401 Unauthorized");
+            assertThat(response).contains("Location: /401.html");
         }
-
-        private String getValue(final String response, final String jsessionid) {
-            System.out.println(response);
-            return null;
-        }
-
     }
 
     @Nested
@@ -198,8 +186,6 @@ class Http11ProcessorTest {
         @Test
         @DisplayName("GET 요청시 회원가입 페이지로 이동한다.")
         void get_register() throws IOException {
-            회원_가입을_한다("hoho");
-
             // given
             String request = 요청한다("GET", "/register.html");
             var socket = new StubSocket(request);
@@ -209,10 +195,9 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            URL resource = getClass().getClassLoader().getResource("static/register.html");
-            String expected = 응답한다("200 OK", new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(response).contains("200 OK");
         }
 
         @Test
@@ -227,11 +212,11 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = "HTTP/1.1 302 Found \r\n"
-                    + "Location: /index.html \r\n"
-                    + "\r\n";
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(response).contains("302 Found");
+            assertThat(response).contains("Location: /index.html");
+            assertThat(response).contains("Set-Cookie: JSESSIONID");
         }
 
         @Test
@@ -250,21 +235,12 @@ class Http11ProcessorTest {
             processor2.process(socket);
 
             // then
-            var expected = "HTTP/1.1 302 Found \r\n"
-                    + "Location: /404.html \r\n"
-                    + "\r\n";
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            System.out.println(response);
+            assertThat(response).contains("404 Not Found");
+            assertThat(response).contains("Location: /404.html");
         }
-    }
-
-    private String 회원_가입을_한다(String account) {
-        String request = 요청한다("POST", "/register",
-                "account=" + account + "&email=hoho@email.com&password=password");
-        var socket = new StubSocket(request);
-        Http11Processor processor = new Http11Processor(socket);
-        processor.process(socket);
-        return socket.output();
     }
 
     private String 요청한다(String method, String path) {

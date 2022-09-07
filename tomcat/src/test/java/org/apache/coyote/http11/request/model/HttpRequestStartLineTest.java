@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.http.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.model;
+package org.apache.coyote.http11.http;
 
 public class HttpRequestLine {
 

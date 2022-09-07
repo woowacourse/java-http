@@ -2,28 +2,28 @@ package nextstep.jwp.presentation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.model.HttpCookie;
-import org.apache.coyote.http11.model.HttpStatus;
-import org.apache.coyote.http11.request.HttpHeaders;
-import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.request.model.HttpVersion;
-import org.apache.coyote.support.Session;
-import org.apache.coyote.support.SessionManager;
-import org.apache.coyote.util.Cookies;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.HttpCookie;
+import org.apache.coyote.http11.http.HttpStatus;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.support.AbstractController;
+import org.apache.coyote.http11.http.Session;
+import org.apache.coyote.util.SessionManager;
+import org.apache.coyote.util.CookieUtils;
 import org.apache.coyote.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class LoginController extends AbstractController {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    public HttpResponse doGet(final HttpRequest httpRequest) {
-        HttpHeaders headers = httpRequest.getHeaders();
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        HttpHeaders headers = request.getHeaders();
         String cookie = headers.getValue("Cookie");
         if (cookie != null) {
             String[] split = cookie.split(";");
@@ -34,24 +34,23 @@ public class LoginController {
                     String sessionId = split1[1];
                     Session foundSession = SessionManager.findSession(sessionId);
                     if (foundSession != null) {
-                        return response("Location: /index.html");
+                        response.setStatus(HttpStatus.FOUND);
+                        response.redirect("/index.html");
+                        response.flush();
                     }
                 }
             }
         }
 
-        String body = FileUtils.readAllBytes(httpRequest.getUri().getValue());
-        return HttpResponse.builder()
-                .body(body)
-                .version(httpRequest.getVersion())
-                .status(HttpStatus.OK.getValue())
-                .headers("Content-Type: " + httpRequest.getUri().getContentType().getValue(),
-                        "Content-Length: " + body.getBytes().length)
-                .build();
+        String body = FileUtils.readAllBytes(request.getPath().getValue());
+        response.setStatus(HttpStatus.OK);
+        response.setBody(body);
+        response.flush();
     }
 
-    public HttpResponse doPost(final HttpRequest httpRequest) {
-        Map<String, String> values = getAccountAndPassword(httpRequest);
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        Map<String, String> values = getAccountAndPassword(request);
         String account = values.get("account");
         String password = values.get("password");
 
@@ -59,19 +58,23 @@ public class LoginController {
                 .orElseThrow(() -> new RuntimeException("not found account"));
 
         if (!user.checkPassword(password)) {
-            return response("Location: /401.html");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.redirect("/401.html");
+            response.flush();
+            return;
         }
 
         log.info(user.toString());
-        String cookie = Cookies.ofJSessionId();
+        String cookie = CookieUtils.ofJSessionId();
         Session session = new Session(cookie);
         session.setAttribute("user", user);
         SessionManager.add(session);
-        return HttpResponse.builder()
-                .version(HttpVersion.HTTP_1_1)
-                .status(HttpStatus.FOUND.getValue())
-                .headers("Location: /index.html", "Set-Cookie: " + HttpCookie.JSESSIONID + "=" + cookie)
-                .build();
+        response.setStatus(HttpStatus.FOUND);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.addLocation("/index.html ");
+        httpHeaders.addCookie(HttpCookie.JSESSIONID + "=" + cookie);
+        response.setHeaders(httpHeaders);
+        response.flush();
     }
 
     private Map<String, String> getAccountAndPassword(final HttpRequest httpRequest) {
@@ -83,32 +86,5 @@ public class LoginController {
             values.put(keyAndValue[0], keyAndValue[1]);
         }
         return values;
-    }
-
-    public HttpResponse register(final HttpRequest httpRequest) {
-        String body = httpRequest.getBody();
-        String[] split = body.split("&");
-        Map<String, String> values = new HashMap<>();
-        for (String value : split) {
-            String[] keyAndValue = value.split("=");
-            values.put(keyAndValue[0], keyAndValue[1]);
-        }
-        String account = values.get("account");
-        Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
-        if (byAccount.isPresent()) {
-            return response("Location: /404.html");
-        }
-        User user = new User(account, values.get("password"), values.get("email"));
-
-        InMemoryUserRepository.save(user);
-        return response("Location: /index.html");
-    }
-
-    private HttpResponse response(final String location) {
-        return HttpResponse.builder()
-                .version(HttpVersion.HTTP_1_1)
-                .status(HttpStatus.FOUND.getValue())
-                .headers(location)
-                .build();
     }
 }

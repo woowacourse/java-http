@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.model;
+package org.apache.coyote.http11.http;
 
 import java.util.Arrays;
 import org.apache.coyote.exception.MethodNotAllowedException;
@@ -23,5 +23,9 @@ public enum HttpMethod {
 
     public boolean isGet() {
         return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
     }
 }

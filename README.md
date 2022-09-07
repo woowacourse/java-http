@@ -40,5 +40,7 @@
 - [ ] response header, response body를 클래스로 분리
 - [ ] request header, request body를 클래스로 분리
 - [ ] 로그인 페이지에서 패스워드를 입력하지 않으면 발생하는 예외 수정
+- [ ] 회원 정보 필드가 비어있는 경우 발생하는 예외 수정
+- [ ] 리다이렉트 시 location을 할당하여 해당 url로 리다이렉트 되도록 수정
 
 </details>

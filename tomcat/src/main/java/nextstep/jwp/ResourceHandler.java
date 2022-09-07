@@ -13,7 +13,7 @@ public class ResourceHandler implements Function<Http11Request, Http11Response> 
     private static final Logger log = LoggerFactory.getLogger(ResourceHandler.class);
 
     @Override
-    public Http11Response apply(Http11Request request) {
+    public Http11Response apply(final Http11Request request) {
         return Http11Response.of(OK, request.getRequestUrl());
     }
 }

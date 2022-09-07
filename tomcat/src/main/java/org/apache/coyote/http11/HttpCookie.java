@@ -15,7 +15,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie from(String cookieHeaderContent) {
+    public static HttpCookie from(final String cookieHeaderContent) {
         Map<String, String> cookies = new HashMap<>();
         if (cookieHeaderContent == null) {
             return new HttpCookie(cookies);
@@ -28,11 +28,11 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public boolean hasNoNamed(String key) {
+    public boolean hasNoNamed(final String key) {
         return cookies.get(key) == null;
     }
 
-    public String cookieToString(String key) {
+    public String cookieToString(final String key) {
         String value = cookies.get(key);
         return String.format("%s=%s", key, value);
     }

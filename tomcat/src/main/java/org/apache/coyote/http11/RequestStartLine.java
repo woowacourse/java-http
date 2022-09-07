@@ -17,13 +17,13 @@ public class RequestStartLine {
         this.requestUrl = requestUrl;
     }
 
-    public static RequestStartLine from(String startLine) {
+    public static RequestStartLine from(final String startLine) {
         final String[] startLineParts = startLine.split(" ");
         validateUrl(startLineParts);
         return new RequestStartLine(startLineParts[REQUEST_METHOD_INDEX], startLineParts[REQUEST_URL_INDEX]);
     }
 
-    private static void validateUrl(String[] startLineParts) {
+    private static void validateUrl(final String[] startLineParts) {
         if (startLineParts[REQUEST_URL_INDEX] == null) {
             throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
         }

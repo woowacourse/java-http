@@ -69,7 +69,7 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
     }
 
     private static void startSession(final User user, final UUID uuid) {
-        Session session = new Session(uuid);
+        final Session session = new Session(uuid);
         session.setAttribute("user", user);
         SessionManager.add(session);
     }

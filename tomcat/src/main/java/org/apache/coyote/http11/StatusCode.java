@@ -20,7 +20,7 @@ public enum StatusCode {
         this.responseContentExtractor = responseContentExtractor;
     }
 
-    public String responseToString(Http11Response response) {
+    public String responseToString(final Http11Response response) {
         return this.responseContentExtractor.apply(response);
     }
 

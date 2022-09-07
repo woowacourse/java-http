@@ -28,11 +28,12 @@ public class Http11Response {
         this.setCookieHeader = setCookieHeader;
     }
 
-    public static Http11Response withResponseBody(StatusCode statusCode, String contentType, String responseBody) {
+    public static Http11Response withResponseBody(final StatusCode statusCode, final String contentType,
+                                                  final String responseBody) {
         return new Http11Response(statusCode, contentType, responseBody, null, null);
     }
 
-    public static Http11Response of(StatusCode statusCode, String resourcePath) {
+    public static Http11Response of(final StatusCode statusCode, final String resourcePath) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -43,7 +44,7 @@ public class Http11Response {
         return new Http11Response(statusCode, contentType, responseBody, null, null);
     }
 
-    public static Http11Response withLocation(StatusCode statusCode, String resourcePath, String location) {
+    public static Http11Response withLocation(final StatusCode statusCode, final String resourcePath, String location) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -54,8 +55,9 @@ public class Http11Response {
         return new Http11Response(statusCode, contentType, responseBody, location, null);
     }
 
-    public static Http11Response withLocationAndSetJsessionIdCookie(StatusCode statusCode, String resourcePath,
-                                                                    String location, HttpCookie cookie) {
+    public static Http11Response withLocationAndSetJsessionIdCookie(final StatusCode statusCode,
+                                                                    final String resourcePath,
+                                                                    final String location, final HttpCookie cookie) {
         final URL resource = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
@@ -66,13 +68,13 @@ public class Http11Response {
         return new Http11Response(statusCode, contentType, responseBody, location, cookie.cookieToString("JSESSIONID"));
     }
 
-    private static void validateResourcePath(URL resource) {
+    private static void validateResourcePath(final URL resource) {
         if (resource == null) {
             throw new NotFoundResourcePathException();
         }
     }
 
-    private static String getResponseBody(URL resource) {
+    private static String getResponseBody(final URL resource) {
         try {
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException e) {
@@ -81,7 +83,7 @@ public class Http11Response {
         }
     }
 
-    public void write(OutputStream outputStream) throws IOException {
+    public void write(final OutputStream outputStream) throws IOException {
         outputStream.write(statusCode.responseToString(this).getBytes());
         outputStream.flush();
     }

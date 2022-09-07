@@ -8,7 +8,7 @@ public enum RequestMethod {
     GET,
     POST;
 
-    public static RequestMethod find(String requestMethod) {
+    public static RequestMethod find(final String requestMethod) {
         return Arrays.stream(values())
                 .filter(value -> value.name().equalsIgnoreCase(requestMethod))
                 .findAny()

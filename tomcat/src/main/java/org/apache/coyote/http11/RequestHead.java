@@ -20,7 +20,7 @@ public class RequestHead {
     }
 
     public static RequestHead of(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
+        final Map<String, String> requestHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             String[] keyValue = line.split(":");
@@ -31,19 +31,19 @@ public class RequestHead {
     }
 
     public int getContentLength() {
-        String contentLength = headers.get("Content-Length");
+        final String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return 0;
         }
         return Integer.parseInt(contentLength);
     }
 
-    public boolean hasNoCookieNamed(String cookieName) {
-        String cookieHeaderContent = headers.get("Cookie");
+    public boolean hasNoCookieNamed(final String cookieName) {
+        final String cookieHeaderContent = headers.get("Cookie");
         if (cookieHeaderContent == null) {
             return true;
         }
-        HttpCookie cookieHeader = HttpCookie.from(cookieHeaderContent);
+        final HttpCookie cookieHeader = HttpCookie.from(cookieHeaderContent);
         return cookieHeader.hasNoNamed(cookieName);
     }
 }

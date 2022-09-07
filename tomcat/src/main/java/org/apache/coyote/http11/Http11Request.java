@@ -30,7 +30,7 @@ public class Http11Request {
         return bufferedReader.readLine().trim();
     }
 
-    private static String getRequestBody(BufferedReader bufferedReader, int contentLength)
+    private static String getRequestBody(final BufferedReader bufferedReader, final int contentLength)
             throws IOException {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

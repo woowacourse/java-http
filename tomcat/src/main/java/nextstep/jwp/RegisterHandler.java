@@ -25,7 +25,7 @@ public class RegisterHandler implements Function<Http11Request, Http11Response> 
             return Http11Response.of(OK, REGISTER_HTML);
         }
 
-        List<String> userInfo = List.of("account", "email", "password");
+        final List<String> userInfo = List.of("account", "email", "password");
         final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
         if (request.isPostMethod() && queryParams.hasQueryParams(userInfo)) {
             registerUser(queryParams);

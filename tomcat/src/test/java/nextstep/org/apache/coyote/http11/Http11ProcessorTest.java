@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,12 +105,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n" +
-                "";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output.contains("HTTP/1.1 302 Found \r\n")).isTrue(),
+                () -> assertThat(output.contains("Location: /index.html \r\n")).isTrue(),
+                () -> assertThat(output.contains("Set-Cookie: ")).isTrue()
+        );
     }
 
     @Test
@@ -156,11 +157,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n" +
-                "";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output.contains("HTTP/1.1 302 Found \r\n")).isTrue(),
+                () -> assertThat(output.contains("Location: /index.html \r\n")).isTrue(),
+                () -> assertThat(output.contains("Set-Cookie: ")).isTrue()
+        );
     }
 }

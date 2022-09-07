@@ -4,17 +4,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
+    private final HttpCookie cookie;
 
     private HttpRequest(HttpRequestStartLine startLine, HttpRequestHeader header,
-                        HttpRequestBody body) {
+                        HttpRequestBody body, HttpCookie cookie) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
@@ -36,7 +39,8 @@ public class HttpRequest {
 
         return new HttpRequest(HttpRequestStartLine.from(startLine),
                 httpRequestHeader,
-                new HttpRequestBody(getRequestBodyParams(bodyLine)));
+                new HttpRequestBody(getRequestBodyParams(bodyLine)),
+                HttpCookie.from(httpRequestHeader.getHeader("Cookie")));
     }
 
     private static String getRequestBody(final BufferedReader reader, final String contentLength) throws IOException {
@@ -82,5 +86,9 @@ public class HttpRequest {
 
     public String getBodyValue(final String key) {
         return body.getInfo(key);
+    }
+
+    public String getCookieValue(final String key) {
+        return cookie.getCookieValue(key);
     }
 }

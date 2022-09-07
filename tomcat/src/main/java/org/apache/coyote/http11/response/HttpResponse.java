@@ -39,11 +39,7 @@ public class HttpResponse {
     }
 
     public Optional<String> getViewName() {
-        if (viewName == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(viewName);
+        return Optional.ofNullable(viewName);
     }
 
     public HttpStatus getHttpStatus() {

@@ -4,11 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.application.LoginService;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.FileUtil;
+import org.apache.coyote.http11.handler.FrontRequestHandler;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,22 +32,22 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        try (final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
+            FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
 
-            final StartLine startLine = StartLine.of(bufferedReader.readLine());
-            final Map<String, String> queryParams = startLine.getQueryParams();
+            String startLine = bufferedReader.readLine();
+            HttpHeaders httpHeaders = extractHeaders(bufferedReader);
 
-            if (queryParams.containsKey("account")) {
-                LoginService.checkAccount(queryParams);
-            }
+            final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders);
+            final ResponseEntity responseEntity = frontRequestHandler.handle(httpRequest);
 
-            final ContentType contentType = ContentType.from(startLine.getRequestUri());
-            final String responseBody = getResponseBody(startLine.getRequestUri());
             final HttpResponse httpResponse = HttpResponse.builder()
-                    .contentType(contentType)
-                    .responseBody(responseBody)
+                    .httpStatus(responseEntity.getStatus())
+                    .contentType(responseEntity.getContentType())
+                    .body(responseEntity.getBody())
+                    .headers(responseEntity.getHeaders())
                     .build();
 
             outputStream.write(httpResponse.getValue().getBytes());
@@ -54,13 +57,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String requestUri) throws IOException {
-        if (requestUri.equals("/")) {
-            requestUri = "/index.html";
+    private HttpHeaders extractHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        while (bufferedReader.ready()) {
+            String line = bufferedReader.readLine();
+            if (line.isEmpty()) {
+                continue;
+            }
+            String[] split = line.split(":");
+            headers.put(split[0], split[1]);
         }
-        if (!requestUri.contains(".")) {
-            requestUri += ".html";
-        }
-        return FileUtil.readAllBytes(requestUri);
+        return new HttpHeaders(headers);
     }
 }

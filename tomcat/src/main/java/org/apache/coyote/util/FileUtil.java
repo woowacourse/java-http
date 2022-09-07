@@ -12,9 +12,18 @@ public class FileUtil {
     private FileUtil() {
     }
 
-    public static String readAllBytes(String uri) throws IOException {
+    public static String readAllBytes(String uri) {
+        try {
+            URL resource = FileUtil.class.getClassLoader().getResource("static" + uri);
+            Path filePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
+            return new String(Files.readAllBytes(filePath));
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static boolean existResource(String uri) {
         URL resource = FileUtil.class.getClassLoader().getResource("static" + uri);
-        Path filePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
-        return new String(Files.readAllBytes(filePath));
+        return resource != null;
     }
 }

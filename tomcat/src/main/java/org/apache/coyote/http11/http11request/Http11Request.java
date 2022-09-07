@@ -28,10 +28,6 @@ public class Http11Request {
         return uri;
     }
 
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
     public HttpCookie getCookie() throws CookieNotFoundException {
         try {
             String rawCookie = header.get(HeaderElement.COOKIE.getValue());
@@ -39,14 +35,6 @@ public class Http11Request {
         } catch (NullPointerException e) {
             throw new CookieNotFoundException();
         }
-    }
-
-    public void setCookie(HttpCookie httpCookie) {
-        if (hasCookie()) {
-            header.replace(HeaderElement.COOKIE.getValue(), httpCookie.toString());
-            return;
-        }
-        header.put(HeaderElement.COOKIE.getValue(), httpCookie.toString());
     }
 
     public String getBody() {
@@ -57,14 +45,14 @@ public class Http11Request {
         return header.containsKey(HeaderElement.COOKIE.getValue());
     }
 
-    public void setHeaderAttribute(String headerAttributeKey, String headerAttributeValue) {
-        if (header.containsKey(headerAttributeKey)) {
-            header.replace(headerAttributeKey, headerAttributeValue);
+    public String getSessionId() {
+        if (!header.containsKey(HeaderElement.COOKIE.getValue())) {
+            return null;
         }
-        header.put(headerAttributeKey, headerAttributeValue);
-    }
-
-    public String getHeaderAttribute(String headerAttributeKey) {
-        return header.get(headerAttributeKey);
+        HttpCookie httpCookie = HttpCookie.of(header.get(HeaderElement.COOKIE.getValue()));
+        if (httpCookie.hasJessionId()) {
+            return httpCookie.getJsessionId();
+        }
+        return null;
     }
 }

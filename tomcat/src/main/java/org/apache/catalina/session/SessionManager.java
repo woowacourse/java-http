@@ -38,27 +38,15 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
+    public String createSession() {
+        Session session = new Session();
+        add(session);
+        return session.getId();
+    }
+
     public Session generateSession(User user) {
         Session session = new Session();
         session.setAttribute(USER_KEY, user);
         return session;
-    }
-
-    public void addSessionIfAbsent(HttpCookie httpCookie) {
-        if (!httpCookie.hasAttribute(JSESSIONID)) {
-            Session session = new Session();
-            session.setAttribute(NEW_KEY, true);
-            add(session);
-            httpCookie.setAttribute(JSESSIONID, session.getId());
-        }
-    }
-
-    public void notifySessionIfNew(HttpCookie httpCookie, ResponseComponent responseComponent) {
-        String jsessionId = httpCookie.getAttribute(JSESSIONID);
-        Session session = findSession(jsessionId);
-        if ((boolean) session.getAttribute(NEW_KEY)) {
-            responseComponent.setCookie(httpCookie.toString());
-            session.setAttribute(NEW_KEY, false);
-        }
     }
 }

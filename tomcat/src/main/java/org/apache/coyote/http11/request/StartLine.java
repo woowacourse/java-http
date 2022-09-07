@@ -29,4 +29,8 @@ public class StartLine {
     public boolean isGet() {
         return HttpMethod.GET == httpMethod;
     }
+
+    public boolean isPost() {
+        return HttpMethod.POST == httpMethod;
+    }
 }

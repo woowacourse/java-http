@@ -54,6 +54,10 @@ public class HttpRequest {
         return startLine.isGet();
     }
 
+    public boolean isPostMethod() {
+        return startLine.isPost();
+    }
+
     public boolean isStaticResource() {
         return getPath().isStaticResource();
     }

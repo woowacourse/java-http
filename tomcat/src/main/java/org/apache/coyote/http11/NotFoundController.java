@@ -13,7 +13,7 @@ public class NotFoundController implements Controller{
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
                 .contentType("text/html")
-                .addHeader("Location", "/404.html")
+                .location("/404.html")
                 .responseBody(responseBody)
                 .build();
     }

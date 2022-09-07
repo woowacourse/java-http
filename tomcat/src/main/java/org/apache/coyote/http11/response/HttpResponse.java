@@ -43,6 +43,11 @@ public class HttpResponse {
             return this;
         }
 
+        public Builder location(String path) {
+            headers.put("Location", path);
+            return this;
+        }
+
         public Builder addHeader(String key, String value) {
             headers.put(key, value);
             return this;

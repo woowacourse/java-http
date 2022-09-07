@@ -13,7 +13,8 @@ class HttpCookieTest {
         String cookieValue = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
 
         // when
-        HttpCookie actual = new HttpCookie(cookieValue);
+        HttpCookie actual = new HttpCookie();
+        actual.addCookie(cookieValue);
 
         // then
         Assertions.assertThat(actual.getValues().size()).isEqualTo(3);

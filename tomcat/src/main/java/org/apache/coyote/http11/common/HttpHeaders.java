@@ -10,9 +10,9 @@ public class HttpHeaders {
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
-    private final Map<String, String> value;
+    private final Map<HeaderKeys, String> value;
 
-    private HttpHeaders(final Map<String, String> value) {
+    private HttpHeaders(final Map<HeaderKeys, String> value) {
         this.value = value;
     }
 
@@ -21,23 +21,23 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders from(final List<String> messages) {
-        final Map<String, String> headers = new LinkedHashMap<>();
+        final Map<HeaderKeys, String> headers = new LinkedHashMap<>();
         for (final String message : messages) {
             final String[] headerElement = message.split(KEY_VALUE_DELIMITER);
-            headers.put(headerElement[KEY], headerElement[VALUE]);
+            headers.put(HeaderKeys.from(headerElement[KEY]), headerElement[VALUE]);
         }
         return new HttpHeaders(headers);
     }
 
     public HttpHeaders add(final HeaderKeys key, final String value) {
-        this.value.put(key.getName(), value);
+        this.value.put(key, value);
         return this;
     }
 
     public String toMessage() {
         final StringBuilder message = new StringBuilder();
-        for (Map.Entry<String, String> entry : value.entrySet()) {
-            message.append(entry.getKey())
+        for (Map.Entry<HeaderKeys, String> entry : value.entrySet()) {
+            message.append(entry.getKey().getName())
                 .append(KEY_VALUE_DELIMITER)
                 .append(entry.getValue())
                 .append(HttpMessageDelimiter.WORD.getValue())
@@ -53,7 +53,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        final String contentLength = value.get("Content-Length");
+        final String contentLength = value.get(HeaderKeys.CONTENT_LENGTH);
         if (contentLength == null) {
             return 0;
         }

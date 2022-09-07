@@ -1,10 +1,9 @@
 package org.apache.coyote.http11.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import org.apache.coyote.http11.exception.notfound.NotFoundFileException;
 
@@ -20,7 +19,7 @@ public class FileLoader {
         if (Objects.isNull(url)) {
             throw new NotFoundFileException();
         }
-        final Path path = Paths.get(url.getPath());
-        return new String(Files.readAllBytes(path));
+        final File file = new File(url.getFile());
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }

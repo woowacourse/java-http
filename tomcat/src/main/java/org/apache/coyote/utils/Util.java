@@ -29,9 +29,6 @@ public class Util {
 
     public static String getResponseBody(final String uri, final Class<?> ClassType) {
         try {
-            if (uri.equals(DEFAULT_INDEX)) {
-                return "Hello world!";
-            }
             final URL url = Objects.requireNonNull(ClassType.getClassLoader().getResource(STATIC + uri));
             final Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path));
@@ -69,7 +66,8 @@ public class Util {
     }
 
     private static Map<String, String> calculateParam(final String uri) {
-        final List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1).split(PARAM_DELIMITER));
+        final List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1)
+                .split(PARAM_DELIMITER));
         final Map<String, String> queryParams = new HashMap<>();
         for (String input : inputs) {
             List<String> query = Arrays.asList(input.split(PARAM_COUPLER));

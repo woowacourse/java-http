@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 public enum HandlerMapper {
 
+    DEFAULT("/", HomeHandler::new),
     LOGIN("/login.html", LoginHandler::new),
     INDEX("/index.html", IndexHandler::new),
     REGISTER("/register.html", RegisterHandler::new),

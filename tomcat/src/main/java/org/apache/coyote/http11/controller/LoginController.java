@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
             Map<String, String> parameters = httpRequest.getMessageBody()
                     .getParameters();
@@ -29,54 +29,51 @@ public class LoginController extends AbstractController {
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new NotFoundException("User not found."));
             String password = parameters.get("password");
-            return login(user, password);
+            login(user, password, httpResponse);
         } catch (NotFoundException e) {
-            return HttpResponse.found(
-                    Headers.builder()
+            httpResponse.found(Headers.builder()
                             .location("/401.html"),
                     MessageBody.emptyBody());
         }
     }
 
-    private HttpResponse login(final User user, final String password) {
+    private void login(final User user, final String password, final HttpResponse httpResponse) {
         if (user.checkPassword(password)) {
             log.info("User Login : {}", user);
             Session session = Session.newSession();
             session.setAttribute("user", user);
             SessionManager.add(session);
-            return HttpResponse.found(
+            httpResponse.found(
                     Headers.builder()
                             .setCookie(session.getId())
                             .location("/index.html"),
                     MessageBody.emptyBody());
+            return;
         }
-        return HttpResponse.found(
-                Headers.builder()
+        httpResponse.found(Headers.builder()
                         .location("/401.html"),
                 MessageBody.emptyBody());
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         HttpCookie cookie = httpRequest.getHeaders().getCookie();
         String jsessionid = cookie.getCookie("JSESSIONID");
         if (cookie.containsJSESSIONID() && SessionManager.contains(jsessionid)) {
-            return redirectResponse(cookie);
+            redirectResponse(cookie, httpResponse);
+            return;
         }
-        String uri = httpRequest.getRequestLine()
-                .getRequestTarget()
-                .getUri();
+        String uri = httpRequest.getUri();
         String responseBody = FileReader.read(uri + ".html");
-        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+        httpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 
-    private HttpResponse redirectResponse(final HttpCookie cookie) {
+    private void redirectResponse(final HttpCookie cookie, final HttpResponse httpResponse) {
         String jsessionid = cookie.getCookie("JSESSIONID");
         Session session = SessionManager.findSession(jsessionid);
         User user = (User) session.getAttribute("user");
         log.info("Login User : {}", user);
-        return HttpResponse.found(
-                Headers.builder()
+        httpResponse.found(Headers.builder()
                         .location("/index.html"),
                 MessageBody.emptyBody());
     }

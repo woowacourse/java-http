@@ -9,11 +9,9 @@ import org.apache.coyote.http11.util.FileReader;
 public class ResourceController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        String uri = httpRequest.getRequestLine()
-                .getRequestTarget()
-                .getUri();
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        String uri = httpRequest.getUri();
         String responseBody = FileReader.read(uri);
-        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+        httpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 }

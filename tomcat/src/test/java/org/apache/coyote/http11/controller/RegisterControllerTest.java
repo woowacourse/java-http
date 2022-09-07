@@ -15,19 +15,18 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
-import support.HttpMessageFactory;
+import support.HttpFactory;
 
 class RegisterControllerTest {
 
-    private static final RegisterController CONTROLLER = new RegisterController();
+    private static final Controller CONTROLLER = new RegisterController();
 
     @Test
-    void page() {
-        String httpRequest = HttpMessageFactory.get("/register");
-
+    void page() throws Exception {
+        String httpRequest = HttpFactory.get("/register");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -41,12 +40,12 @@ class RegisterControllerTest {
     }
 
     @Test
-    void register() {
-        String httpRequest = HttpMessageFactory.post("/register", "account=id&email=email%40email.com&password=pw");
-
+    void register() throws Exception {
+        String httpRequest = HttpFactory.post("/register", "account=id&email=email%40email.com&password=pw");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
         Optional<User> registeredUser = InMemoryUserRepository.findByAccount("id");
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -59,12 +58,12 @@ class RegisterControllerTest {
 
     @Test
     void registerFail() {
-        String httpRequest = HttpMessageFactory.post("/register",
+        String httpRequest = HttpFactory.post("/register",
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
-
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
+        HttpResponse httpResponse = HttpFactory.create();
 
-        assertThatThrownBy(() -> CONTROLLER.service(HttpRequest.from(bufferedReader)))
+        assertThatThrownBy(() -> CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Account already exists");
     }

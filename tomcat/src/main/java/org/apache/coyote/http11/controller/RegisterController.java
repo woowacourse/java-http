@@ -13,13 +13,11 @@ import org.apache.coyote.http11.util.FileReader;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         register(httpRequest);
-        return HttpResponse.found(
-                Headers.builder()
+        httpResponse.found(Headers.builder()
                         .location("/index.html"),
-                MessageBody.emptyBody()
-        );
+                MessageBody.emptyBody());
     }
 
     private void register(final HttpRequest httpRequest) {
@@ -36,9 +34,9 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
         String responseBody = FileReader.read(uri + ".html");
-        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
+        httpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 }

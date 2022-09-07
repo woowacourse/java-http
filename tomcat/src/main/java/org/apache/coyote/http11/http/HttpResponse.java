@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http;
 
+import java.io.BufferedWriter;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.apache.coyote.http11.http.domain.Headers;
 import org.apache.coyote.http11.http.domain.HttpConstants;
@@ -11,48 +12,57 @@ import org.apache.coyote.http11.util.FileReader;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final Headers headers;
-    private final MessageBody messageBody;
+    private final BufferedWriter bufferedWriter;
+    private StatusLine statusLine;
+    private Headers headers;
+    private MessageBody messageBody;
 
-    private HttpResponse(final StatusLine statusLine, final Headers headers, final MessageBody messageBody) {
-        this.statusLine = statusLine;
+    private HttpResponse(final BufferedWriter bufferedWriter) {
+        this.bufferedWriter = bufferedWriter;
+    }
+
+    public static HttpResponse from(final BufferedWriter bufferedWriter) {
+        return new HttpResponse(bufferedWriter);
+    }
+
+    public void ok(final ContentType contentType, final MessageBody messageBody) {
+        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+        this.headers = Headers.builder()
+                .contentType(contentType)
+                .contentLength(messageBody.length());
+        this.messageBody = messageBody;
+        writeAndFlush();
+    }
+
+    public void methodNotAllowed() {
+        MessageBody messageBody = new MessageBody(FileReader.read("405.html"));
+        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.METHOD_NOT_ALLOWED);
+        this.headers = Headers.builder()
+                .contentType(ContentType.TEXT_HTML)
+                .contentLength(messageBody.length());
+        this.messageBody = messageBody;
+        writeAndFlush();
+    }
+
+    public void found(final Headers headers, final MessageBody messageBody) {
+        this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
         this.headers = headers;
         this.messageBody = messageBody;
+        writeAndFlush();
     }
 
-    public static HttpResponse ok(final ContentType contentType, final MessageBody messageBody) {
-        return new HttpResponse(
-                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK),
-                Headers.builder()
-                        .contentType(contentType)
-                        .contentLength(messageBody.length()),
-                messageBody);
-    }
-
-    public static HttpResponse methodNotAllowed() {
-        MessageBody messageBody = new MessageBody(FileReader.read("405.html"));
-        return new HttpResponse(
-                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.METHOD_NOT_ALLOWED),
-                Headers.builder()
-                        .contentType(ContentType.TEXT_HTML)
-                        .contentLength(messageBody.length()),
-                messageBody);
-    }
-
-    public static HttpResponse found(final Headers headers, final MessageBody messageBody) {
-        return new HttpResponse(
-                new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND),
-                headers,
-                messageBody);
-    }
-
-    public byte[] toBytes() {
-        return String.join(HttpConstants.CRLF,
+    private void writeAndFlush() {
+        char[] httpMessage = String.join(HttpConstants.CRLF,
                 statusLine.getStatusLine(),
                 headers.getHeaders(),
                 HttpConstants.BLANK,
-                messageBody.getValue()).getBytes();
+                messageBody.getValue()).toCharArray();
+        try {
+            bufferedWriter.write(httpMessage);
+            bufferedWriter.flush();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("HttpResponse failed.");
+        }
     }
 
     public StatusLine getStatusLine() {

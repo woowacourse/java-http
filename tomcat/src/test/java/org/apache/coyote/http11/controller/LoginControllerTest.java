@@ -15,19 +15,18 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
-import support.HttpMessageFactory;
+import support.HttpFactory;
 
 class LoginControllerTest {
 
-    private static final LoginController CONTROLLER = new LoginController();
+    private static final Controller CONTROLLER = new LoginController();
 
     @Test
-    void get() {
-        String httpRequest = HttpMessageFactory.get("/login");
-
+    void get() throws Exception {
+        String httpRequest = HttpFactory.get("/login");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -41,12 +40,11 @@ class LoginControllerTest {
     }
 
     @Test
-    void post() {
-        String httpRequest = HttpMessageFactory.post("/login", "account=gugu&password=password");
-
+    void post() throws Exception {
+        String httpRequest = HttpFactory.post("/login", "account=gugu&password=password");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -59,17 +57,17 @@ class LoginControllerTest {
     }
 
     @Test
-    void getAfterLogin() {
+    void getAfterLogin() throws Exception {
         User gugu = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
         session.setAttribute("user", gugu);
         SessionManager.add(session);
-        String httpRequest = HttpMessageFactory.getWithCookie("/login",
+        String httpRequest = HttpFactory.getWithCookie("/login",
                 "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -80,17 +78,17 @@ class LoginControllerTest {
     }
 
     @Test
-    void getWithInvalidJsessionid() {
+    void getWithInvalidJsessionid() throws Exception {
         User gugu = InMemoryUserRepository.findByAccount("gugu")
                 .orElseThrow();
         Session session = new Session("something-different-jsessionid");
         session.setAttribute("user", gugu);
         SessionManager.add(session);
-        String httpRequest = HttpMessageFactory.getWithCookie("/login",
+        String httpRequest = HttpFactory.getWithCookie("/login",
                 "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -104,12 +102,11 @@ class LoginControllerTest {
     }
 
     @Test
-    void wrongPassword() {
-        String httpRequest = HttpMessageFactory.post("/login", "account=gugu&password=wrong");
-
+    void wrongPassword() throws Exception {
+        String httpRequest = HttpFactory.post("/login", "account=gugu&password=wrong");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())
@@ -120,12 +117,11 @@ class LoginControllerTest {
     }
 
     @Test
-    void wrongUserId() {
-        String httpRequest = HttpMessageFactory.post("/login", "account=fufu&password=password");
-
+    void wrongUserId() throws Exception {
+        String httpRequest = HttpFactory.post("/login", "account=fufu&password=password");
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = CONTROLLER.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine())

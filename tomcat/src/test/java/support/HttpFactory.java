@@ -1,8 +1,12 @@
 package support;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.http.HttpResponse;
 
-public class HttpMessageFactory {
+public class HttpFactory {
 
     public static String get(final String requestTarget) {
         return String.join("\r\n",
@@ -33,5 +37,13 @@ public class HttpMessageFactory {
                 "Accept: */*",
                 "",
                 messageBody);
+    }
+
+
+    public static HttpResponse create() {
+        return HttpResponse.from(
+                new BufferedWriter(
+                        new OutputStreamWriter(
+                                new ByteArrayOutputStream())));
     }
 }

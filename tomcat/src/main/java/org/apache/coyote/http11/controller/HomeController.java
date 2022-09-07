@@ -8,8 +8,8 @@ import org.apache.coyote.http11.http.domain.MessageBody;
 public class HomeController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         MessageBody messageBody = new MessageBody("Hello world!");
-        return HttpResponse.ok(ContentType.TEXT_HTML, messageBody);
+        httpResponse.ok(ContentType.TEXT_HTML, messageBody);
     }
 }

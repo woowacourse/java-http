@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
-import support.HttpMessageFactory;
+import support.HttpFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -37,7 +37,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = HttpMessageFactory.get("/index.html");
+        final String httpRequest = HttpFactory.get("/index.html");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -61,7 +61,7 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest = HttpMessageFactory.get("/login");
+        final String httpRequest = HttpFactory.get("/login");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

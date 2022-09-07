@@ -7,22 +7,24 @@ import org.apache.coyote.http11.http.domain.HttpMethod;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
         if (httpMethod.equals(HttpMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (httpMethod.equals(HttpMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        return HttpResponse.methodNotAllowed();
+        httpResponse.methodNotAllowed();
     }
 
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
-        return HttpResponse.methodNotAllowed();
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.methodNotAllowed();
     }
 
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.methodNotAllowed();
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.methodNotAllowed();
     }
 }

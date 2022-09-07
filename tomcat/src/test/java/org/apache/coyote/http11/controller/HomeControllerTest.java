@@ -9,22 +9,24 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
-import support.HttpMessageFactory;
+import support.HttpFactory;
 
 class HomeControllerTest {
 
+    private static final Controller CONTROLLER = new HomeController();
+
     @Test
-    void handle() {
-        String httpRequest = HttpMessageFactory.get("/index.html");
+    void handle() throws Exception {
+        String httpRequest = HttpFactory.get("/index.html");
 
-        Controller controller = new HomeController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),
-                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(ContentType.TEXT_HTML.getValue()),
+                () -> assertThat(httpResponse.getHeaders().getValue().get("Content-Type")).contains(
+                        ContentType.TEXT_HTML.getValue()),
                 () -> assertThat(httpResponse.getMessageBody().getValue()).isEqualTo("Hello world!")
         );
     }

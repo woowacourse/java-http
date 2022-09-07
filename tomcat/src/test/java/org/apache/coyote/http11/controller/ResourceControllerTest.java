@@ -11,11 +11,14 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
+import support.HttpFactory;
 
 class ResourceControllerTest {
 
+    private static final Controller CONTROLLER = new ResourceController();
+
     @Test
-    void handle() {
+    void handle() throws Exception {
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -23,10 +26,9 @@ class ResourceControllerTest {
                 "",
                 "");
 
-        Controller controller = new ResourceController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
-
-        HttpResponse httpResponse = controller.service(HttpRequest.from(bufferedReader));
+        HttpResponse httpResponse = HttpFactory.create();
+        CONTROLLER.service(HttpRequest.from(bufferedReader), httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusLine().getStatusLine()).isEqualTo("HTTP/1.1 200 OK "),

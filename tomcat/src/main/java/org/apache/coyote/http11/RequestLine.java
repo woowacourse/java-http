@@ -55,6 +55,10 @@ public class RequestLine {
         return queryParams;
     }
 
+    public boolean isGet() {
+        return httpMethod == HttpMethod.GET;
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

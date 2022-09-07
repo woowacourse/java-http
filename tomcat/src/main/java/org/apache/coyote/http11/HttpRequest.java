@@ -7,9 +7,9 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
 
-    private HttpRequest(final RequestLine requestLine, final Map<String, String> headers) {
+    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers) {
         this.requestLine = requestLine;
         this.headers = headers;
     }
@@ -26,7 +26,13 @@ public class HttpRequest {
             final String[] header = value.split(": ");
             headers.put(header[0], header[1]);
         }
-        return new HttpRequest(requestLine, headers);
+
+        final HttpHeaders httpHeaders = new HttpHeaders(headers);
+        return new HttpRequest(requestLine, httpHeaders);
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
     }
 
     public String getUrl() {
@@ -38,6 +44,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return headers.getValues();
     }
 }

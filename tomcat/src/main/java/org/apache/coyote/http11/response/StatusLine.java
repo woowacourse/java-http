@@ -13,4 +13,8 @@ public class StatusLine {
     public String getStatusLine() {
         return String.join(" ", HTTP_VERSION, httpStatus.getStatusCode(), httpStatus.getText());
     }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -10,15 +10,16 @@ import org.apache.coyote.http11.response.HttpStatus;
 public class LoginController extends Controller {
     @Override
     public void processPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-
-        final Map<String, String> queryParams = httpRequest.getRequestLine().getQueryParams();
-        final User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+        final Map<String, String> body = httpRequest.getBody();
+        final User user = InMemoryUserRepository.findByAccount(body.get("account"))
                 .orElseThrow();
 
-        final boolean isSuccessLogin = user.checkPassword(queryParams.get("password"));
+        final boolean isSuccessLogin = user.checkPassword(body.get("password"));
         if (isSuccessLogin) {
+            httpResponse.sendRedirect("/index.html");
+            return;
         }
-
+        httpResponse.sendRedirect("/404.html");
     }
 
     @Override

@@ -28,6 +28,27 @@ public class HttpResponse {
         return sb.toString();
     }
 
+    public void sendRedirect(final String location) {
+        setStatus(HttpStatus.FOUND);
+        httpHeaders.setLocation(location);
+    }
+
+    public Optional<String> getViewName() {
+        if (viewName == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(viewName);
+    }
+
+    public HttpStatus getHttpStatus() {
+        return statusLine.getHttpStatus();
+    }
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
     public void setStatus(final HttpStatus httpStatus) {
         this.statusLine = new StatusLine(httpStatus);
     }
@@ -46,18 +67,5 @@ public class HttpResponse {
 
     public void setView(final String viewName) {
         this.viewName = viewName;
-    }
-
-    public void sendRedirect(final String location) {
-        setStatus(HttpStatus.FOUND);
-        httpHeaders.setLocation(location);
-    }
-
-    public Optional<String> getViewName() {
-        if (viewName == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(viewName);
     }
 }

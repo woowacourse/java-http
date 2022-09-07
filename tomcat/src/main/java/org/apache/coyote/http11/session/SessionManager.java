@@ -3,7 +3,6 @@ package org.apache.coyote.http11.session;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import nextstep.jwp.domain.model.User;
 
 public class SessionManager {
 
@@ -11,9 +10,9 @@ public class SessionManager {
 
     private static final long DEFAULT_TIMEOUT = 1800000;
 
-    private final ConcurrentHashMap<String, User> sessions;
+    private final ConcurrentHashMap<String, Long> sessions;
 
-    private SessionManager(final ConcurrentHashMap<String, User> sessions) {
+    private SessionManager(final ConcurrentHashMap<String, Long> sessions) {
         this.sessions = sessions;
     }
 
@@ -21,18 +20,18 @@ public class SessionManager {
         return instance;
     }
 
-    public String addSession(final User user) {
+    public String addSession(final Long userId) {
         final String jSessionId = UUID.randomUUID().toString();
         setSessionTimeout(jSessionId, DEFAULT_TIMEOUT);
-        sessions.put(jSessionId, user);
+        sessions.put(jSessionId, userId);
 
         return jSessionId;
     }
 
-    public String addSession(final User user, final long timeout) {
+    public String addSession(final Long userId, final long timeout) {
         final String jSessionId = UUID.randomUUID().toString();
         setSessionTimeout(jSessionId, timeout);
-        sessions.put(jSessionId, user);
+        sessions.put(jSessionId, userId);
 
         return jSessionId;
     }
@@ -51,7 +50,7 @@ public class SessionManager {
         sessionRemoveThread.start();
     }
 
-    public Optional<User> findSession(final String jSessionId) {
+    public Optional<Long> findSession(final String jSessionId) {
         return Optional.ofNullable(sessions.get(jSessionId));
     }
 

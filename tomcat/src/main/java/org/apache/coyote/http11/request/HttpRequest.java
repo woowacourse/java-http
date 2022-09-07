@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.cookie.Cookies;
 
 public class HttpRequest {
 
@@ -12,9 +13,9 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final RequestParams requestParams;
 
-    private HttpRequest(final RequestLine requestLine,
-                        final HttpHeaders headers,
-                        final RequestParams requestParams) {
+    public HttpRequest(final RequestLine requestLine,
+                       final HttpHeaders headers,
+                       final RequestParams requestParams) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestParams = requestParams;
@@ -48,6 +49,10 @@ public class HttpRequest {
                 .orElseThrow(() -> new IllegalArgumentException("필수 헤더가 들어오지 않았습니다." + HttpHeaders.CONTENT_TYPE));
     }
 
+    public boolean hasSession() {
+        return headers.hasSession();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -70,6 +75,10 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return requestLine.getMethod();
+    }
+
+    public Cookies getCookies() {
+        return headers.getCookies();
     }
 
     @Override

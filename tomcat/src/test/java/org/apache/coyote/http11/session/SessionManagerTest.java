@@ -1,10 +1,8 @@
 package org.apache.coyote.http11.session;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
-import nextstep.jwp.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,21 +19,13 @@ class SessionManagerTest {
     void saveAndFind() {
         final SessionManager sessionManager = SessionManager.getInstance();
         final long id = 1L;
-        final String account = "alex";
-        final String password = "password";
-        final String email = "alex@email.com";
 
-        final String jSessionId = sessionManager.addSession(new User(id, account, password, email));
+        final String jSessionId = sessionManager.addSession(id);
 
-        final User findUser = sessionManager.findSession(jSessionId)
+        final Long findUserId = sessionManager.findSession(jSessionId)
                 .get();
 
-        assertAll(
-                () -> assertThat(findUser.getId()).isEqualTo(id),
-                () -> assertThat(findUser.getAccount()).isEqualTo(account),
-                () -> assertThat(findUser.getPassword()).isEqualTo(password),
-                () -> assertThat(findUser.getEmail()).isEqualTo(email)
-        );
+        assertThat(findUserId).isEqualTo(id);
     }
 
     @Test
@@ -43,16 +33,13 @@ class SessionManagerTest {
     void setSessionTimeout() throws InterruptedException {
         final SessionManager sessionManager = SessionManager.getInstance();
         final long id = 1L;
-        final String account = "alex";
-        final String password = "password";
-        final String email = "alex@email.com";
 
-        final String jSessionId = sessionManager.addSession(new User(id, account, password, email), 0);
+        final String jSessionId = sessionManager.addSession(id, 0);
 
         Thread.sleep(10);
 
-        final Optional<User> findUser = sessionManager.findSession(jSessionId);
+        final Optional<Long> findUserId = sessionManager.findSession(jSessionId);
 
-        assertThat(findUser).isEmpty();
+        assertThat(findUserId).isEmpty();
     }
 }

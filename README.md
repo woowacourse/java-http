@@ -9,8 +9,9 @@
 
 ### step2
 - [x] HTTP Status Code 302
-- [ ] POST 방식으로 회원가입
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] POST 방식으로 회원가입
+- [x] Cookie에 JSESSIONID 값 저장하기
+- [x] Session 구현하기
 
 ### 학습 테스트
 - [x] FileTest

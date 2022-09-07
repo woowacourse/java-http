@@ -8,15 +8,14 @@ import nextstep.jwp.exception.LoginFailException;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.request.RequestParams;
 import org.apache.coyote.http11.request.mapping.controllerscan.Controller;
 import org.apache.coyote.http11.request.mapping.controllerscan.RequestMapping;
 import org.apache.coyote.http11.response.HtmlResponse;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.RedirectResponse;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +29,9 @@ public class AuthController {
 
     @RequestMapping(method = HttpMethod.GET, uri = "/login")
     public HttpResponse loginPage(final HttpRequest httpRequest) {
+        if (httpRequest.hasSession()) {
+            return RedirectResponse.of("/index.html");
+        }
         return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login");
     }
 
@@ -44,9 +46,20 @@ public class AuthController {
             final String passwordValue = password
                     .orElseThrow(LoginFailException::new);
             final UserDto loginUser = authService.login(accountValue, passwordValue);
-            return RedirectResponse.of("/index.html");
+
+            final RedirectResponse response = RedirectResponse.of("/index.html");
+            if (!httpRequest.hasSession()) {
+                setSession(loginUser.getId(), response);
+            }
+            return response;
         } catch (final LoginFailException e) {
             return HtmlResponse.of(HttpStatus.UNAUTHORIZED, HttpHeaders.empty(), "401");
         }
+    }
+
+    private void setSession(final Long userId, final RedirectResponse response) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final String sessionId = sessionManager.addSession(userId);
+        response.addSession(sessionId);
     }
 }

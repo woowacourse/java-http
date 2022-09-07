@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.cookie.Cookies;
 
 public class HttpHeaders {
 
@@ -14,7 +15,6 @@ public class HttpHeaders {
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
-
     private static final String KEY_VALUE_SEPARATOR = ": ";
     private static final String CRLF = "\r\n";
     private static final int KEY_INDEX = 0;
@@ -50,6 +50,30 @@ public class HttpHeaders {
                 .stream()
                 .map(key -> key + KEY_VALUE_SEPARATOR + headers.get(key) + " ")
                 .collect(Collectors.joining(CRLF));
+    }
+
+    public Cookies getCookies() {
+        return getValue(HttpHeaders.COOKIE)
+                .map(Cookies::from)
+                .orElse(Cookies.empty());
+    }
+
+    public Cookies getSetCookies() {
+        return getValue(HttpHeaders.SET_COOKIE)
+                .map(Cookies::from)
+                .orElse(Cookies.empty());
+    }
+
+    public boolean hasSession() {
+        return getCookies()
+                .getSessionId()
+                .isPresent();
+    }
+
+    public void addSetSession(final String jSessionId) {
+        final Cookies cookies = getSetCookies();
+        cookies.addSession(jSessionId);
+        headers.put(SET_COOKIE, cookies.toHeaderValueString());
     }
 
     @Override

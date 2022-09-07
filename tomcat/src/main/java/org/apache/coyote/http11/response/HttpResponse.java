@@ -28,7 +28,7 @@ public class HttpResponse {
         }
         return String.join("\r\n",
                 String.format("HTTP/1.1 %d %s ", status.getStatusCode(), status.getStatusName()),
-                String.format("%s: %s;charset=utf-8 ",HttpHeaders.CONTENT_TYPE, contentType.getValue()),
+                String.format("%s: %s;charset=utf-8 ", HttpHeaders.CONTENT_TYPE, contentType.getValue()),
                 String.format("%s: %d ", HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length),
                 headerMessage,
                 "",
@@ -38,9 +38,13 @@ public class HttpResponse {
     private String toNoContainUnnecessaryHeaderHttpMessage() {
         return String.join("\r\n",
                 String.format("HTTP/1.1 %d %s ", status.getStatusCode(), status.getStatusName()),
-                String.format("%s: %s;charset=utf-8 ",HttpHeaders.CONTENT_TYPE, contentType.getValue()),
+                String.format("%s: %s;charset=utf-8 ", HttpHeaders.CONTENT_TYPE, contentType.getValue()),
                 String.format("%s: %d ", HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length),
                 "",
                 responseBody);
+    }
+
+    public void addSession(final String jSessionId) {
+        unnecessaryHeaders.addSetSession(jSessionId);
     }
 }

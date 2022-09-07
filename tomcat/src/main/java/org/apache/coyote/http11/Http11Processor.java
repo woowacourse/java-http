@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private static final String LINE_BEFORE_READ = " ";
+    private static final int START_LINE = 0;
 
     private final Socket connection;
 
@@ -56,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> rawHeaders = readHeaders(bufferedReader);
 
-        final String rawStartLine = rawHeaders.remove(0);
+        final String rawStartLine = rawHeaders.remove(START_LINE);
         final HttpStartLine startLine = HttpStartLine.from(rawStartLine);
         final HttpHeaders headers = HttpHeaders.from(rawHeaders);
         final HttpBody body = HttpBody.from(readBody(bufferedReader, headers));

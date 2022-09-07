@@ -19,7 +19,7 @@ public class ResponseHeaders {
         checkJSessionId(requestHeaders, responseHeaders);
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
-            responseHeaders.put("Location", responseBody.split(":")[1]);
+            responseHeaders.put("Location", "http://localhost:8080/" + responseBody.split(":")[1]);
             return new ResponseHeaders(responseHeaders);
         }
         ContentType contentType = ContentType.findContentType(responseEntity.getResponseBody());

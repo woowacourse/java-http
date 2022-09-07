@@ -52,7 +52,7 @@ class ResponseHeadersTest {
         ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
 
         // then
-        assertThat(responseHeaders.asString()).contains("Location: index.html ");
+        assertThat(responseHeaders.asString()).contains("Location: http://localhost:8080/index.html ");
     }
 
     @Test

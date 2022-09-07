@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.QueryStringParser.hasQueryString;
-import static org.apache.coyote.QueryStringParser.parseQueryString;
+import static org.apache.coyote.http11.support.QueryStringParser.hasQueryString;
+import static org.apache.coyote.http11.support.QueryStringParser.parseQueryString;
 
 import java.util.Collections;
 import java.util.HashMap;

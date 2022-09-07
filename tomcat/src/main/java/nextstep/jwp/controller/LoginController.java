@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.web.Cookie;
 
 public class LoginController extends Controller {
     @Override
@@ -16,6 +17,7 @@ public class LoginController extends Controller {
 
         final boolean isSuccessLogin = user.checkPassword(body.get("password"));
         if (isSuccessLogin) {
+            httpResponse.addCookie(Cookie.ofJSessionId());
             httpResponse.sendRedirect("/index.html");
             return;
         }

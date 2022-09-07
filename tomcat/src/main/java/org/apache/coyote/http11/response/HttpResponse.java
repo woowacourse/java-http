@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.Collections;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.web.Cookie;
 
 public class HttpResponse {
 
@@ -31,6 +32,10 @@ public class HttpResponse {
     public void sendRedirect(final String location) {
         setStatus(HttpStatus.FOUND);
         httpHeaders.setLocation(location);
+    }
+
+    public void addCookie(final Cookie cookie) {
+        httpHeaders.setCookie(cookie);
     }
 
     public Optional<String> getViewName() {

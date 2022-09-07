@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.QueryStringParser.parseQueryString;
+import static org.apache.coyote.http11.support.QueryStringParser.parseQueryString;
 
 import java.io.BufferedReader;
 import java.io.IOException;

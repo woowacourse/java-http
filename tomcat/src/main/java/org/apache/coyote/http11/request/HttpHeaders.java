@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.web.Cookie;
 
 public class HttpHeaders {
 
@@ -45,5 +46,9 @@ public class HttpHeaders {
 
     public void setContentLength(final int contentLength) {
         values.put("Content-Length", String.valueOf(contentLength));
+    }
+
+    public void setCookie(final Cookie cookie) {
+        values.put("Set-Cookie", cookie.toPair());
     }
 }

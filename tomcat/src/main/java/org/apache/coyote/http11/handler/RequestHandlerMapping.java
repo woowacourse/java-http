@@ -32,15 +32,12 @@ public class RequestHandlerMapping {
         final String method = getMethod(startLine);
         final String url = getUri(startLine);
 
-        if (isHandler(url, method)) {
-            return handlers.keySet()
-                    .stream()
-                    .filter(httpRequest -> httpRequest.equals(new HttpRequest(url, method)))
-                    .map(httpRequest -> handlers.get(httpRequest))
-                    .findAny()
-                    .orElseThrow(NoHandlerFoundException::new);
-        }
-        return handlers.get(new HttpRequest("static-resource", "GET"));
+        return handlers.keySet()
+                .stream()
+                .filter(httpRequest -> httpRequest.equals(new HttpRequest(url, method)))
+                .map(httpRequest -> handlers.get(httpRequest))
+                .findAny()
+                .orElseGet(() -> handlers.get(new HttpRequest("static-resource", "GET")));
     }
 
     private static String getMethod(final String startLine) {
@@ -53,11 +50,5 @@ public class RequestHandlerMapping {
             return uri.split("\\?")[0];
         }
         return startLine.split(" ")[1];
-    }
-
-    private static boolean isHandler(final String uri, final String method) {
-        return handlers.keySet()
-                .stream()
-                .anyMatch(httpRequest -> httpRequest.equals(new HttpRequest(uri, method)));
     }
 }

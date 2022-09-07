@@ -12,6 +12,7 @@ import org.apache.coyote.http11.handler.FrontRequestHandler;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpResponse;
+import org.apache.coyote.http11.message.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +40,11 @@ public class Http11Processor implements Runnable, Processor {
 
             String startLine = bufferedReader.readLine();
             HttpHeaders httpHeaders = extractHeaders(bufferedReader);
-
-            final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders);
+            RequestBody requestBody = null;
+            if (httpHeaders.containsKey("Content-Length")) {
+                requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
+            }
+            final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders, requestBody);
             final ResponseEntity responseEntity = frontRequestHandler.handle(httpRequest);
 
             final HttpResponse httpResponse = HttpResponse.builder()
@@ -59,14 +63,22 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpHeaders extractHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
+
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
             if (line.isEmpty()) {
-                continue;
+                break;
             }
             String[] split = line.split(":");
-            headers.put(split[0], split[1]);
+            headers.put(split[0], split[1].trim());
         }
         return new HttpHeaders(headers);
+    }
+
+    private RequestBody extractRequestBody(int contentLength, BufferedReader bufferedReader) throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String request = new String(buffer);
+        return RequestBody.of(request);
     }
 }

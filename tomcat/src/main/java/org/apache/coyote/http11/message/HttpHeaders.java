@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.message;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,6 +34,17 @@ public class HttpHeaders {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public String get(String key) {
+        if (headers.containsKey(key)) {
+            return headers.get(key);
+        }
+        throw new IllegalArgumentException();
+    }
+
+    public boolean containsKey(String key) {
+        return headers.containsKey(key);
     }
 
     public String toMessage() {

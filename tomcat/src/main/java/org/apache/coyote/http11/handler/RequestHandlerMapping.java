@@ -15,6 +15,7 @@ public class RequestHandlerMapping {
         final Map<String, RequestHandler> handlers = new HashMap<>();
 
         handlers.put("/login", new LoginHandler());
+        handlers.put("/register", new RegisterHandler());
 
         return new RequestHandlerMapping(handlers);
     }

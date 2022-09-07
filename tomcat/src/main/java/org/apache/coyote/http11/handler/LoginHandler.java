@@ -9,29 +9,41 @@ import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.RequestBody;
 import org.apache.coyote.util.FileUtil;
 
 public class LoginHandler implements RequestHandler {
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {
-        Map<String, String> queryParams = httpRequest.getQueryParams();
-        if (queryParams.isEmpty()) {
-            return new ResponseEntity(HttpStatus.OK, FileUtil.readAllBytes(httpRequest.getRequestUri() + ".html"),
-                    ContentType.HTML);
+        if (httpRequest.getHttpMethod().isGet()) {
+            return doGet(httpRequest);
         }
-        if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {
-            throw new IllegalArgumentException("No Exist Parameter");
+        if (httpRequest.getHttpMethod().isPost()) {
+            return doPost(httpRequest);
+        }
+        return new ResponseEntity(HttpStatus.NOTFOUND, FileUtil.readAllBytes("/404.html"), ContentType.HTML);
+    }
+
+    private ResponseEntity doGet(HttpRequest httpRequest) {
+        return new ResponseEntity(HttpStatus.OK, FileUtil.readAllBytes(httpRequest.getRequestUri() + ".html"),
+                ContentType.HTML);
+    }
+
+    private ResponseEntity doPost(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
+
+        if (!requestBody.containsKey("account") || !requestBody.containsKey("password")) {
+            return new ResponseEntity(HttpStatus.NOTFOUND, FileUtil.readAllBytes("/404.html"), ContentType.HTML);
         }
 
-        Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+        Optional<User> foundUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
         if (foundUser.isPresent()) {
             User user = foundUser.get();
-            if (user.checkPassword(queryParams.get("password"))) {
+            if (user.checkPassword(requestBody.get("password"))) {
                 return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(Map.of("Location", "/index.html")));
             }
         }
-
         return new ResponseEntity(HttpStatus.UNAUTHORIZED, FileUtil.readAllBytes("/401.html"), ContentType.HTML);
     }
 }

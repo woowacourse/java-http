@@ -7,34 +7,37 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String requestUri;
     private final Map<String, String> queryParams;
     private final HttpHeaders headers;
+    private final RequestBody requestBody;
 
-    public HttpRequest(String httpMethod, String requestUri, HttpHeaders headers) {
-        this(httpMethod, requestUri, Map.of(), headers);
+    public HttpRequest(HttpMethod httpMethod, String requestUri, HttpHeaders headers, RequestBody requestBody) {
+        this(httpMethod, requestUri, Map.of(), headers, requestBody);
     }
 
-    public HttpRequest(String httpMethod, String requestUri, Map<String, String> queryParams, HttpHeaders headers) {
+    public HttpRequest(HttpMethod httpMethod, String requestUri, Map<String, String> queryParams, HttpHeaders headers,
+                       RequestBody requestBody) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.queryParams = queryParams;
         this.headers = headers;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(String startLine, HttpHeaders headers) throws IOException {
+    public static HttpRequest of(String startLine, HttpHeaders headers, RequestBody requestBody) throws IOException {
         String[] splitLine = startLine.split(" ");
-        String httpMethod = splitLine[0];
+        HttpMethod httpMethod = HttpMethod.valueOf(splitLine[0]);
 
         if (!containsQueryString(startLine)) {
-            return new HttpRequest(httpMethod, splitLine[1], headers);
+            return new HttpRequest(httpMethod, splitLine[1], headers, requestBody);
         }
 
         int queryDelimiterIndex = splitLine[1].indexOf("?");
         String requestUri = splitLine[1].substring(0, queryDelimiterIndex);
         String queryString = splitLine[1].substring(queryDelimiterIndex + 1);
-        return new HttpRequest(httpMethod, requestUri, toQueryMap(queryString), headers);
+        return new HttpRequest(httpMethod, requestUri, toQueryMap(queryString), headers, requestBody);
     }
 
     private static boolean containsQueryString(String startLine) {
@@ -47,7 +50,11 @@ public class HttpRequest {
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
-    public String getHttpMethod() {
+    public boolean isRoot() {
+        return requestUri.equals("/");
+    }
+
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
@@ -59,7 +66,11 @@ public class HttpRequest {
         return queryParams;
     }
 
-    public boolean isRoot() {
-        return requestUri.equals("/");
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

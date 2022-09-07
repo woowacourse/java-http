@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.NoSuchElementException;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,6 +19,10 @@ public class LoginController extends AbstractController {
     protected HttpResponse doPost(HttpRequest request) {
         final Params params = request.getParamsFromBody();
 
+        if (request.existSession()) {
+            return redirect("/index.html");
+        }
+
         try {
             final String account = params.find("account");
             final String password = params.find("password");
@@ -25,10 +30,17 @@ public class LoginController extends AbstractController {
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(UserNotFoundException::new);
 
-            if (!user.checkPassword(password)) {
-                return redirect("/401.html");
+            if (user.checkPassword(password)) {
+                final Session session = request.generateSession();
+                session.setAttribute("user", user);
+
+                return new HttpResponse()
+                        .status(HttpStatus.FOUND)
+                        .setCookie(session)
+                        .location("/index.html");
             }
-            return redirect("/index.html");
+
+            return redirect("/401.html");
 
         } catch (final UserNotFoundException e) {
             return redirect("/401.html");
@@ -40,6 +52,9 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
+        if (request.existSession()) {
+            return redirect("/index.html");
+        }
         return success("login.html");
     }
 

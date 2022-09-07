@@ -27,6 +27,10 @@ public class Params {
         return new Params(StringSplitter.getPairs(paramDelimiter, params));
     }
 
+    public static Params empty() {
+        return new Params(Collections.emptyMap());
+    }
+
     public String find(final String name) {
         validateParameterNameExist(name);
         return params.get(name);

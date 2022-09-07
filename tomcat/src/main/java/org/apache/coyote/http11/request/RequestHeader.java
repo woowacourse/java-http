@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import utils.StringSplitter;
@@ -33,5 +34,9 @@ public class RequestHeader {
 
     private static String trim(final String text) {
         return text.trim();
+    }
+
+    public Optional<String> find(final String name) {
+        return Optional.ofNullable(headers.get(name));
     }
 }

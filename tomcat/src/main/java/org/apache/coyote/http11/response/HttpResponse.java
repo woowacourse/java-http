@@ -3,6 +3,9 @@ package org.apache.coyote.http11.response;
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
+import static org.apache.coyote.http11.response.HttpResponseHeader.SET_COOKIE;
+
+import org.apache.catalina.session.Session;
 
 public class HttpResponse {
 
@@ -40,6 +43,14 @@ public class HttpResponse {
 
         final String statusDelimiter = " ";
         return String.join(statusDelimiter, HTTP_VERSION, String.valueOf(statusCode), reasonPhrase);
+    }
+
+    public HttpResponse setCookie(final Session session) {
+        final String line = session.asLine();
+
+        appendLineWithCRLF(SET_COOKIE.asLine(line));
+
+        return new HttpResponse(headers);
     }
 
     public HttpResponse location(final String location) {

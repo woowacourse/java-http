@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestCookie;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -57,8 +58,9 @@ public class Http11Processor implements Runnable, Processor {
         final RequestLine requestLine = RequestLine.parse(reader.readLine());
         final RequestHeader header = readHeaders(reader);
         final RequestBody body = readBody(reader);
+        final RequestCookie cookies = RequestCookie.parse(header);
 
-        return new HttpRequest(requestLine, header, body);
+        return new HttpRequest(requestLine, header, body, cookies);
     }
 
     private RequestHeader readHeaders(final BufferedReader reader) throws IOException {

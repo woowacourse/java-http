@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.cookie;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,9 @@ public class HttpCookie {
     }
 
     public static HttpCookie of(String cookie) {
+        if (cookie.isEmpty()) {
+            return new HttpCookie(new HashMap<>());
+        }
         Map<String, String> values = new HashMap<>();
         String[] cookieElements = cookie.split(COOKIE_ELEMENT_DELIMITER);
         for (String element : cookieElements) {
@@ -52,5 +56,21 @@ public class HttpCookie {
             stringJoiner.add(entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue());
         }
         return stringJoiner.toString();
+    }
+
+    public boolean hasAttribute(String key) {
+        return values.containsKey(key);
+    }
+
+    public void setAttribute(String key, String value) {
+        if (hasAttribute(key)) {
+            values.replace(key, value);
+            return;
+        }
+        values.put(key, value);
+    }
+
+    public String getAttribute(String jsessionId) {
+        return values.get(jsessionId);
     }
 }

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.exception.InvalidSessionIdException;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -46,7 +47,7 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    Session findSession(String id) throws IOException;
+    Session findSession(String id) throws InvalidSessionIdException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

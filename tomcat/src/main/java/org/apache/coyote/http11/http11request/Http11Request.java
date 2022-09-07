@@ -56,4 +56,15 @@ public class Http11Request {
     public boolean hasCookie() {
         return header.containsKey(HeaderElement.COOKIE.getValue());
     }
+
+    public void setHeaderAttribute(String headerAttributeKey, String headerAttributeValue) {
+        if (header.containsKey(headerAttributeKey)) {
+            header.replace(headerAttributeKey, headerAttributeValue);
+        }
+        header.put(headerAttributeKey, headerAttributeValue);
+    }
+
+    public String getHeaderAttribute(String headerAttributeKey) {
+        return header.get(headerAttributeKey);
+    }
 }

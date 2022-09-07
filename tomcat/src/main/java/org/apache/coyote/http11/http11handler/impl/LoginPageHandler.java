@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.model.user.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.catalina.session.exception.InvalidSessionIdException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.cookie.HttpCookie;
@@ -50,7 +51,7 @@ public class LoginPageHandler implements Http11Handler {
             Session session = sessionManager.findSession(jsessionId);
             User user = (User)session.getAttribute("user");
             return loginService.isExistUser(user);
-        } catch (IOException e) {
+        } catch (InvalidSessionIdException e) {
             return false;
         }
     }

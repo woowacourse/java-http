@@ -22,6 +22,10 @@ public class Session {
     }
 
     public void setAttribute(final String name, final Object value) {
+        if (values.containsKey(name)) {
+            values.replace(name, value);
+            return;
+        }
         values.put(name, value);
     }
 

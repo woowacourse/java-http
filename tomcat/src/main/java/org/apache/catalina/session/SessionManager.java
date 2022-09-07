@@ -1,21 +1,21 @@
 package org.apache.catalina.session;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.model.user.User;
 import org.apache.catalina.Manager;
+import org.apache.catalina.session.exception.InvalidSessionIdException;
 import org.apache.coyote.http11.cookie.HttpCookie;
-import org.apache.coyote.http11.http11handler.exception.CookieNotFoundException;
-import org.apache.coyote.http11.http11request.Http11Request;
+import org.apache.coyote.http11.http11response.ResponseComponent;
 
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
     private static final SessionManager sessionManager = new SessionManager();
     private static final String USER_KEY = "user";
+    private static final String NEW_KEY = "new";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private SessionManager() {}
 
@@ -29,7 +29,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(String id) throws IOException {
+    public Session findSession(String id) throws InvalidSessionIdException {
         return SESSIONS.get(id);
     }
 
@@ -44,27 +44,21 @@ public class SessionManager implements Manager {
         return session;
     }
 
-    public void assignSessionIfAbsent(Http11Request http11Request) {
-        try {
-            HttpCookie httpCookie = http11Request.getCookie();
-            if (!httpCookie.hasJessionId()) {
-                assignSession(http11Request, httpCookie);
-            }
-        } catch (CookieNotFoundException e) {
-            System.out.println("nocookie@@@@@@@");
-            assignCookieWithSession(http11Request);
+    public void addSessionIfAbsent(HttpCookie httpCookie) {
+        if (!httpCookie.hasAttribute(JSESSIONID)) {
+            Session session = new Session();
+            session.setAttribute(NEW_KEY, true);
+            add(session);
+            httpCookie.setAttribute(JSESSIONID, session.getId());
         }
     }
 
-    private void assignCookieWithSession(Http11Request http11Request) {
-        HttpCookie httpCookie = new HttpCookie();
-        assignSession(http11Request, httpCookie);
-    }
-
-    private void assignSession(Http11Request http11Request, HttpCookie httpCookie) {
-        Session session = new Session();
-        add(session);
-        httpCookie.setJsessionId(session.getId());
-        http11Request.setCookie(httpCookie);
+    public void notifySessionIfNew(HttpCookie httpCookie, ResponseComponent responseComponent) {
+        String jsessionId = httpCookie.getAttribute(JSESSIONID);
+        Session session = findSession(jsessionId);
+        if ((boolean) session.getAttribute(NEW_KEY)) {
+            responseComponent.setCookie(httpCookie.toString());
+            session.setAttribute(NEW_KEY, false);
+        }
     }
 }

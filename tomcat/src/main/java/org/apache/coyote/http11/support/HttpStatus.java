@@ -8,18 +8,18 @@ public enum HttpStatus {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private final int statusCode;
-    private final String value;
+    private final String statusMessage;
 
-    HttpStatus(final int statusCode, final String value) {
+    HttpStatus(final int statusCode, final String statusMessage) {
         this.statusCode = statusCode;
-        this.value = value;
+        this.statusMessage = statusMessage;
     }
 
     public String getStatusCode() {
         return String.valueOf(statusCode);
     }
 
-    public String getValue() {
-        return value;
+    public String getStatusMessage() {
+        return statusMessage;
     }
 }

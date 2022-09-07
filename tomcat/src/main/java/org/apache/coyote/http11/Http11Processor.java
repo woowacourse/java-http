@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException e) {
             final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
             final HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
-            return new HttpResponse(httpStatus, httpHeaders, httpStatus.getValue());
+            return new HttpResponse(httpStatus, httpHeaders, httpStatus.getStatusMessage());
         }
     }
 

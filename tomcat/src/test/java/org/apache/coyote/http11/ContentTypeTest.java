@@ -13,7 +13,7 @@ public class ContentTypeTest {
     @CsvSource({"/index.html, text/html;charset=utf-8", "/scripts.js, application/js", "/styles.css, text/css"})
     void returnContentType(String uri, String expected) {
         // when
-        ContentType contentType = ContentType.from(uri);
+        ContentType contentType = ContentType.fromUri(uri);
         // then
         assertThat(contentType.value()).isEqualTo(expected);
     }

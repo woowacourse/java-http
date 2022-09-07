@@ -28,7 +28,6 @@ public class HandlerAdapter {
             controller.doGet(request, response);
             return response;
         }
-
         if (method.equals(HttpMethod.POST)) {
             controller.doPost(request, response);
             return response;

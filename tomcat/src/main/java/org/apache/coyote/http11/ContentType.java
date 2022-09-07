@@ -7,7 +7,8 @@ public enum ContentType {
     HTML("text/html;charset=utf-8", ".html"),
     CSS("text/css", ".css"),
     JAVASCRIPT("application/js", ".js"),
-    SVG("image/svg+xml", ".svg")
+    SVG("image/svg+xml", ".svg"),
+    APPLICATION_FORM("application/x-www-form-urlencoded", "form")
     ;
 
     private final String value;
@@ -18,7 +19,7 @@ public enum ContentType {
         this.fileNameExtension = fileNameExtension;
     }
 
-    public static ContentType from(String uri) {
+    public static ContentType fromUri(String uri) {
         return Arrays.stream(values())
                 .filter(contentType -> uri.endsWith(contentType.fileNameExtension))
                 .findAny()

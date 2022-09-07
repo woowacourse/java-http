@@ -14,24 +14,41 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> header;
+    private final Body body;
 
-    private HttpRequest(RequestLine requestLine, Map<String, String> header) {
+    private HttpRequest(RequestLine requestLine, Map<String, String> header, Body body) {
         this.requestLine = requestLine;
         this.header = header;
+        this.body = body;
     }
 
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+        Map<String, String> header = extractHeader(bufferedReader);
+        Body body = extractBody(bufferedReader, header);
+        return new HttpRequest(requestLine, header, body);
+    }
+
+    private static Map<String, String> extractHeader(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestHeader = new HashMap<>();
-        while (bufferedReader.ready()) {
-            String line = bufferedReader.readLine();
-            if (line.equals(EMPTY_LINE)) {
-                break;
-            }
+        String line;
+        while (!(line = bufferedReader.readLine()).equals(EMPTY_LINE)) {
             String[] headerValue = line.split(HEADER_REGEX);
             requestHeader.put(headerValue[HEADER_KEY], headerValue[HEADER_VALUE]);
         }
-        return new HttpRequest(requestLine, requestHeader);
+        return requestHeader;
+    }
+
+    private static Body extractBody(BufferedReader bufferedReader,
+                                    Map<String, String> header) throws IOException {
+        if (!header.containsKey("Content-Length")) {
+            return new Body("");
+        }
+        int contentLength = Integer.parseInt(header.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return new Body(requestBody);
     }
 
     public String path() {
@@ -44,5 +61,9 @@ public class HttpRequest {
 
     public HttpMethod method() {
         return requestLine.method();
+    }
+
+    public Body body() {
+        return body;
     }
 }

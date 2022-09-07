@@ -13,7 +13,7 @@ public class StaticController extends Controller {
         String path = request.path();
         String body = new String(Files.readAllBytes(StaticFile.findByPath(path)
                 .toPath()));
-        response.setHeader("Content-Type", ContentType.from(path).value());
+        response.setHeader("Content-Type", ContentType.fromUri(path).value());
         response.setHeader("Content-Length", body.getBytes().length);
         response.body(body);
     }

@@ -34,7 +34,7 @@ public class RegisterServlet extends Servlet {
         if (method.isPost()) {
             return doPost(httpRequest);
         }
-        return throwIfMethodDoesNotDefine(httpRequest, method);
+        return createNotFoundResponse(httpRequest);
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {

@@ -23,9 +23,7 @@ public class ResourceServlet extends Servlet {
         if (method.isGet()) {
             return doGet(httpRequest);
         }
-        throw new IllegalArgumentException(
-            String.format("정의되지 않은 method 입니다. [%s, %s]", httpRequest.getUrl(), method)
-        );
+        return createNotFoundResponse(httpRequest);
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {

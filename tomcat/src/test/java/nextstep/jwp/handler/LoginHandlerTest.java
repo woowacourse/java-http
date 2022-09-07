@@ -56,9 +56,6 @@ class LoginHandlerTest {
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         HttpResponse httpResponse = LoginHandler.perform(httpRequest);
 
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),

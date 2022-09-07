@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-public class Request {
+public class HttpRequest {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
@@ -9,8 +9,8 @@ public class Request {
     private final RequestBody requestBody;
     private final Session session;
 
-    public Request(StartLine startLine, RequestHeaders requestHeaders,
-                   RequestBody requestBody) {
+    public HttpRequest(StartLine startLine, RequestHeaders requestHeaders,
+                       RequestBody requestBody) {
         this.startLine = startLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class ResponseProcessor {
 
@@ -10,8 +10,8 @@ public class ResponseProcessor {
         this.response = response;
     }
 
-    public static ResponseProcessor of(Request request, ResponseEntity responseEntity) {
-        return new ResponseProcessor(Response.of(request, responseEntity));
+    public static ResponseProcessor of(HttpRequest httpRequest, ResponseEntity responseEntity) {
+        return new ResponseProcessor(Response.of(httpRequest, responseEntity));
     }
 
     public String getResponse() {

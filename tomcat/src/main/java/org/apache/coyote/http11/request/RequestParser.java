@@ -10,11 +10,11 @@ public class RequestParser {
     private RequestParser() {
     }
 
-    public static Request createRequest(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest createRequest(BufferedReader bufferedReader) throws IOException {
         final StartLine startLine = new StartLine(bufferedReader.readLine());
 
         RequestHeaders requestHeaders = RequestHeaders.of(readRequestHeaders(bufferedReader));
-        return new Request(
+        return new HttpRequest(
                 startLine,
                 requestHeaders,
                 RequestBody.of(readRequestBody(requestHeaders, bufferedReader))

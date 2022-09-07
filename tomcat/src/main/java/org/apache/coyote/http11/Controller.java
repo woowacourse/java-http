@@ -14,7 +14,7 @@ import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Path;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.Session;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -43,21 +43,21 @@ public enum Controller {
         this.function = function;
     }
 
-    public static ResponseEntity processRequest(Request request) {
-        Path path = request.getPath();
+    public static ResponseEntity processRequest(HttpRequest httpRequest) {
+        Path path = httpRequest.getPath();
         if (path.isFileRequest()) {
             return ResponseEntity.body(path.getFileName());
         }
 
         return Arrays.stream(values())
-                .filter(api -> mapApi(api, request))
+                .filter(api -> mapApi(api, httpRequest))
                 .findFirst()
                 .orElseThrow(ResourceNotFoundException::new)
-                .function.apply(request);
+                .function.apply(httpRequest);
     }
 
-    private static boolean mapApi(Controller api, Request request) {
-        return api.httpMethod.equals(request.getHttpMethod()) && request.checkRequestPath(api.path);
+    private static boolean mapApi(Controller api, HttpRequest httpRequest) {
+        return api.httpMethod.equals(httpRequest.getHttpMethod()) && httpRequest.checkRequestPath(api.path);
     }
 
     private static ResponseEntity home(Object o) {
@@ -65,8 +65,8 @@ public enum Controller {
     }
 
     private static ResponseEntity loginGet(Object object) {
-        Request request = (Request) object;
-        Session session = request.getSession();
+        HttpRequest httpRequest = (HttpRequest) object;
+        Session session = httpRequest.getSession();
         if (session == null) {
             return ResponseEntity.body("login.html");
         }
@@ -77,17 +77,17 @@ public enum Controller {
     }
 
     private static ResponseEntity loginPost(Object o) {
-        Request request = (Request) o;
+        HttpRequest httpRequest = (HttpRequest) o;
         try {
-            validateUser(request);
+            validateUser(httpRequest);
         } catch (UserNotFoundException | AuthenticationException | InvalidRequestException e) {
             return ResponseEntity.body("redirect:401.html").status(HttpStatus.REDIRECT);
         }
         return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }
 
-    private static void validateUser(Request request) {
-        RequestBody requestBody = request.getRequestBody();
+    private static void validateUser(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
         if (requestBody.isEmpty()) {
             throw new InvalidRequestException();
         }
@@ -96,7 +96,7 @@ public enum Controller {
         if (!user.checkPassword(requestBody.get("password"))) {
             throw new AuthenticationException();
         }
-        Session session = request.getSession();
+        Session session = httpRequest.getSession();
         session.setAttribute("user", user);
         log.info(String.format("로그인 성공! 아이디: %s", user.getAccount()));
     }
@@ -106,8 +106,8 @@ public enum Controller {
     }
 
     private static ResponseEntity registerPost(Object o) {
-        Request request = (Request) o;
-        RequestBody requestBody = request.getRequestBody();
+        HttpRequest httpRequest = (HttpRequest) o;
+        RequestBody requestBody = httpRequest.getRequestBody();
         saveUser(requestBody);
         return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }

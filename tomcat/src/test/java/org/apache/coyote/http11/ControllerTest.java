@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import nextstep.jwp.exception.ResourceNotFoundException;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.StartLine;
@@ -23,10 +23,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("account=gugu&password=password");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity response = Controller.processRequest(request);
+        ResponseEntity response = Controller.processRequest(httpRequest);
 
         // then
         Assertions.assertAll(
@@ -42,10 +42,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("GET /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity response = Controller.processRequest(request);
+        ResponseEntity response = Controller.processRequest(httpRequest);
 
         // then
         Assertions.assertAll(
@@ -60,10 +60,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("account=eden&password=password");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity response = Controller.processRequest(request);
+        ResponseEntity response = Controller.processRequest(httpRequest);
 
         // then
         Assertions.assertAll(
@@ -78,10 +78,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("account=gugu&password=gugugugu");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity response = Controller.processRequest(request);
+        ResponseEntity response = Controller.processRequest(httpRequest);
 
         // then
         Assertions.assertAll(
@@ -96,10 +96,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("GET / HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity response = Controller.processRequest(request);
+        ResponseEntity response = Controller.processRequest(httpRequest);
 
         // then
         assertThat(response.getResponseBody()).isEqualTo("Hello world!");
@@ -111,10 +111,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("GET /eden HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when & then
-        assertThatThrownBy(() -> Controller.processRequest(request))
+        assertThatThrownBy(() -> Controller.processRequest(httpRequest))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -124,11 +124,11 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST /register HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("account=eden&email=eden@morak.com&password=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when & then
         assertThatNoException()
-                .isThrownBy(() -> Controller.processRequest(request));
+                .isThrownBy(() -> Controller.processRequest(httpRequest));
     }
 
     @Test
@@ -137,10 +137,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST / HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when & then
-        assertThatThrownBy(() -> Controller.processRequest(request))
+        assertThatThrownBy(() -> Controller.processRequest(httpRequest))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -150,10 +150,10 @@ class ControllerTest {
         StartLine startLine = new StartLine("POST /register HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Type: text/html"));
         RequestBody requestBody = RequestBody.of("account=eden&email=eden@morak.com&password=king");
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // when
-        ResponseEntity responseEntity = Controller.processRequest(request);
+        ResponseEntity responseEntity = Controller.processRequest(httpRequest);
 
         // then
         Assertions.assertAll(

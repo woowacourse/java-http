@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.StartLine;
@@ -20,11 +20,11 @@ class ResponseTest {
     private StartLine startLine = new StartLine("GET /eden HTTP/1.1 ");
     private RequestHeaders requestHeaders = RequestHeaders.of(List.of("JSESSIONID: eden"));
     private RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
-    private Request request;
+    private HttpRequest httpRequest;
 
     @BeforeEach
     void setUp() {
-        request = new Request(startLine, requestHeaders, requestBody);
+        httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
     }
 
     @Test
@@ -36,7 +36,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(request, responseEntity);
+        Response response = Response.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "html" + ";charset=utf-8 ";
@@ -53,7 +53,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(request, responseEntity);
+        Response response = Response.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "css" + ";charset=utf-8 ";
@@ -69,7 +69,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        Response response = Response.of(request, responseEntity);
+        Response response = Response.of(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "javascript" + ";charset=utf-8 ";
@@ -83,7 +83,7 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body);
 
         // when
-        Response response = Response.of(request, responseEntity);
+        Response response = Response.of(httpRequest, responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 200 + " " + "OK" + " ";
@@ -98,7 +98,7 @@ class ResponseTest {
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
 
         // when
-        Response response = Response.of(request, responseEntity);
+        Response response = Response.of(httpRequest, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 302 + " " + "FOUND" + " ",
                 "Location: index.html ",

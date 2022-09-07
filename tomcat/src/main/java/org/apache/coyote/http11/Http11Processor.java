@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestParser;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.ResponseProcessor;
@@ -37,9 +37,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedWriter bufferedWriter = new BufferedWriter(
                      new OutputStreamWriter(connection.getOutputStream()))) {
 
-            final Request request = RequestParser.createRequest(bufferedReader);
-            final ResponseEntity responseEntity = Controller.processRequest(request);
-            final ResponseProcessor responseProcessor = ResponseProcessor.of(request, responseEntity);
+            final HttpRequest httpRequest = RequestParser.createRequest(bufferedReader);
+            final ResponseEntity responseEntity = Controller.processRequest(httpRequest);
+            final ResponseProcessor responseProcessor = ResponseProcessor.of(httpRequest, responseEntity);
             final String response = responseProcessor.getResponse();
 
             bufferedWriter.write(response);

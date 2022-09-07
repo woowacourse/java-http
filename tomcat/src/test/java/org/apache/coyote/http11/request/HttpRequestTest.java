@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class RequestTest {
+class HttpRequestTest {
 
     @Test
     void request를_파싱한다() {
@@ -17,13 +17,13 @@ class RequestTest {
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
 
         // when
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // then
         Assertions.assertAll(
-                () -> assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(request.getPath()).isNotNull(),
-                () -> assertThat(request.getQueryParameters().isEmpty()).isTrue()
+                () -> assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(httpRequest.getPath()).isNotNull(),
+                () -> assertThat(httpRequest.getQueryParameters().isEmpty()).isTrue()
         );
     }
 
@@ -34,9 +34,9 @@ class RequestTest {
         RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
 
         // when
-        Request request = new Request(startLine, requestHeaders, requestBody);
+        HttpRequest httpRequest = new HttpRequest(startLine, requestHeaders, requestBody);
 
         // then
-        assertThat(request.checkRequestPath("/eden")).isTrue();
+        assertThat(httpRequest.checkRequestPath("/eden")).isTrue();
     }
 }

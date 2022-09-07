@@ -4,7 +4,7 @@ import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class AbstractServlet {
+public abstract class AbstractServlet implements Servlet {
 
     protected final SessionFactory sessionFactory;
 
@@ -12,6 +12,7 @@ public abstract class AbstractServlet {
         this.sessionFactory = sessionFactory;
     }
 
+    @Override
     public abstract HttpResponse service(final HttpRequest httpRequest);
 
     protected HttpResponse createNotFoundResponse(final HttpRequest httpRequest) {

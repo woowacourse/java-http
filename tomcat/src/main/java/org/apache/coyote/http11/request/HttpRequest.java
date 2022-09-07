@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.QueryStringParser.hasQueryString;
 import static org.apache.coyote.QueryStringParser.parseQueryString;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,32 +22,32 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final String firstLine, final List<String> values) {
+    public static HttpRequest from(final String firstLine, final List<String> values, final BufferedReader reader)
+            throws IOException {
         final RequestLine requestLine = RequestLine.of(firstLine);
 
-        final int index = values.indexOf("");
+        final HttpHeaders httpHeaders = toHttpHeaders(values);
 
+        final Map<String, String> body = new HashMap<>(Collections.EMPTY_MAP);
+        if (httpHeaders.hasContentLength()) {
+            final int contentLength = Integer.parseInt(httpHeaders.getContentLength());
+            final char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            final String requestBody = new String(buffer);
+            body.putAll(parseQueryString(requestBody));
+        }
+
+        return new HttpRequest(requestLine, httpHeaders, body);
+    }
+
+    private static HttpHeaders toHttpHeaders(final List<String> values) {
         final Map<String, String> headers = new HashMap<>();
-        final List<String> headerValues = values.subList(0, index);
-
-        for (String value : headerValues) {
+        for (String value : values) {
             final String[] header = value.split(": ");
             headers.put(header[0], header[1]);
         }
-
-        final List<String> bodyValues = values.subList(index + 1, values.size());
-        final Map<String, String> body = new HashMap<>();
-        for (String bodyValue : bodyValues) {
-            if (hasQueryString(bodyValue)) {
-                body.putAll(parseQueryString(bodyValue));
-                continue;
-            }
-            final String[] value = bodyValue.split(": ");
-            body.put(value[0], value[1]);
-        }
-
         final HttpHeaders httpHeaders = new HttpHeaders(headers);
-        return new HttpRequest(requestLine, httpHeaders, body);
+        return httpHeaders;
     }
 
     public boolean isGet() {

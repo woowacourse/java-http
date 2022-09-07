@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
@@ -52,11 +54,14 @@ public class Http11Processor implements Runnable, Processor {
         final String line = bufferedReader.readLine();
 
         final List<String> values = new ArrayList<>();
-        while (bufferedReader.ready()) {
-            values.add(bufferedReader.readLine());
+
+        String value = bufferedReader.readLine();
+        while (value != null && !"".equals(value)) {
+            values.add(value);
+            value = bufferedReader.readLine();
         }
 
-        return HttpRequest.from(line, values);
+        return HttpRequest.from(line, values, bufferedReader);
     }
 
     private void writeHttpResponse(final HttpResponse httpResponse, final OutputStream outputStream) {

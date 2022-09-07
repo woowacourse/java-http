@@ -15,10 +15,6 @@ public class HttpHeaders {
         values.put("Content-Type", contentType + ";charset=utf-8");
     }
 
-    public void setContentLength(final int contentLength) {
-        values.put("Content-Length", String.valueOf(contentLength));
-    }
-
     public void setLocation(final String location) {
         values.put("Location", location);
     }
@@ -33,5 +29,17 @@ public class HttpHeaders {
 
     public Map<String, String> getValues() {
         return values;
+    }
+
+    public String getContentLength() {
+        return values.get("Content-Length");
+    }
+
+    public void setContentLength(final int contentLength) {
+        values.put("Content-Length", String.valueOf(contentLength));
+    }
+
+    public boolean hasContentLength() {
+        return values.containsKey("Content-Length");
     }
 }

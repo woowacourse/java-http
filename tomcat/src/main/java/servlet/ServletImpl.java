@@ -47,7 +47,7 @@ public class ServletImpl implements Servlet {
         } catch (Exception e) {
             entity = exceptionMapping.map(e);
         }
-        HttpResponse httpResponse = viewResolver.getResponse(entity.getUri(), entity.getStatus(), entity.getHeaders());
+        HttpResponse httpResponse = viewResolver.getResponse(entity);
         return httpResponse.getResponse();
     }
 

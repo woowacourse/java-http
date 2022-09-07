@@ -8,23 +8,26 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.element.HttpStatus;
+import servlet.mapping.ResponseEntity;
 
 public class ViewResolver {
 
     public ViewResolver() {
     }
 
-    public HttpResponse getResponse(String url, HttpStatus status,
-                                    Map<String, String> headers) {
+    public HttpResponse getResponse(ResponseEntity entity) {
+        String url = entity.getUri();
+        HttpStatus status = entity.getStatus();
+        Map<String, String> headers = entity.getHeaders();
+
         if (status == HttpStatus.FOUND) {
-            return HttpResponse.found(url).addHeaders(headers);
+            return HttpResponse.found().addHeaders(headers);
         }
         return getStaticResponse(url, status).addHeaders(headers);
     }
@@ -44,6 +47,6 @@ public class ViewResolver {
     }
 
     public HttpResponse getResponse(String url) {
-        return getResponse(url, HttpStatus.OK, new HashMap<>());
+        return getResponse(ResponseEntity.ok(url));
     }
 }

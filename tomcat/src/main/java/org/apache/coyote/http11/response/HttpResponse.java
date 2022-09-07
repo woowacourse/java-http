@@ -4,7 +4,6 @@ import static org.apache.coyote.Constants.CRLF;
 
 import java.util.Map;
 import org.apache.coyote.http11.response.element.HttpStatus;
-import servlet.mapping.ResponseEntity;
 
 public class HttpResponse {
 
@@ -23,9 +22,8 @@ public class HttpResponse {
         return new HttpResponse(header, responseBody);
     }
 
-    public static HttpResponse found(String uri) {
-        HttpResponseHeader header = new HttpResponseHeader(HttpStatus.FOUND)
-                .addLocation(uri);
+    public static HttpResponse found() {
+        HttpResponseHeader header = new HttpResponseHeader(HttpStatus.FOUND);
         return new HttpResponse(header, HttpResponseBody.empty());
     }
 

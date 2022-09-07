@@ -1,6 +1,7 @@
 package servlet.mapping;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.db.HttpCookie;
 import org.apache.coyote.http11.response.element.HttpStatus;
@@ -17,7 +18,7 @@ public class ResponseEntity {
     public ResponseEntity(String uri, HttpStatus status) {
         this.uri = uri;
         this.status = status;
-        this.headers = new HashMap<>();
+        this.headers = new LinkedHashMap<>();
     }
 
     public ResponseEntity(String uri, HttpStatus status, Map<String, String> headers) {
@@ -30,12 +31,17 @@ public class ResponseEntity {
         return new ResponseEntity(uri, HttpStatus.OK);
     }
 
-     public static ResponseEntity found(String location) {
-        return new ResponseEntity(location, HttpStatus.FOUND);
+    public static ResponseEntity found() {
+        return new ResponseEntity(null, HttpStatus.FOUND);
     }
 
     public ResponseEntity addCookie(HttpCookie cookie) {
-        this.headers.put("Set-Cookie",  cookie.getResponse());
+        this.headers.put("Set-Cookie", cookie.getResponse());
+        return this;
+    }
+
+    public ResponseEntity addLocation(String location) {
+        this.headers.put("Location", location);
         return this;
     }
 

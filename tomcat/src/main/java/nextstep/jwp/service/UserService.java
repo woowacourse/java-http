@@ -31,10 +31,12 @@ public class UserService {
             addSession(user, session);
             LOG.info("SessionCount: " + SessionManager.get().size());
 
-            return ResponseEntity.found("/index.html")
+            return ResponseEntity.found()
+                    .addLocation("/index.html")
                     .addCookie(Cookies.ofJSessionId(session.getId()));
         } catch (NoUserException | InvalidPasswordException e) {
-            return ResponseEntity.found("/401.html");
+            return ResponseEntity.found()
+                    .addLocation("/401.html");
         }
     }
 
@@ -63,13 +65,16 @@ public class UserService {
         Query query = Query.ofQuery(request.getBody());
 
         String account = query.find("account");
+        String path = request.getPath().getPath();
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return ResponseEntity.found("/register.html");
+            return ResponseEntity.found()
+                    .addLocation("/register.html");
         }
         User user = new User(account, query.find("password"), query.find("email"));
         InMemoryUserRepository.save(user);
         LOG.info(CRLF + "회원가입 성공! id : " + user.getAccount() + CRLF);
 
-        return ResponseEntity.found("/index.html");
+        return ResponseEntity.found()
+                .addLocation("/index.html");
     }
 }

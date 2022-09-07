@@ -2,6 +2,12 @@ package org.apache.coyote.http11;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
+import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.LoginFailedController;
+import nextstep.jwp.controller.NotFoundController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.StaticResourceController;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 
-public class StaticResourceController implements Controller{
+public class StaticResourceController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) {

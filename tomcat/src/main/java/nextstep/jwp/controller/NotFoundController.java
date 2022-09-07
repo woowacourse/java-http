@@ -1,23 +1,19 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.request.Extension;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 
-public class LoginFailedController implements Controller{
-
-    private static final String PATH = "/401.html";
+public class NotFoundController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        final String responseBody = ResourceFindUtils.getResourceFile(PATH);
-
+        final String responseBody = ResourceFindUtils.getResourceFile("/404.html");
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
-                .contentType(Extension.HTML.getContentType())
-//                .location(PATH)
+                .contentType("text/html")
+                .location("/404.html")
                 .responseBody(responseBody)
                 .build();
     }

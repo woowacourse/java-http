@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.LoginFailedController;
@@ -10,59 +10,37 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticResourceController;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 
 public enum HandlerMapping {
 
-    HOME("/", httpRequest -> {
-        HomeController homeController = new HomeController();
-        return homeController.service(httpRequest);
-    }),
-    LOGIN("/login", httpRequest -> {
-        final LoginController loginController = new LoginController();
-        return loginController.service(httpRequest);
-    }),
-    REGISTER("/register", httpRequest -> {
-        final RegisterController registerController = new RegisterController();
-        return registerController.service(httpRequest);
-    }),
-    STATIC_RESOURCE("null", httpRequest -> {
-        final StaticResourceController staticResourceController = new StaticResourceController();
-        return staticResourceController.service(httpRequest);
-    }),
-    NOT_FOUND("null", httpRequest -> {
-        final NotFoundController notFoundController = new NotFoundController();
-        return notFoundController.service(httpRequest);
-    }),
-    LOGIN_FAILED("null", httpRequest -> {
-        final LoginFailedController loginFailedController = new LoginFailedController();
-        return loginFailedController.service(httpRequest);
-    })
+    HOME("/", new HomeController()),
+    LOGIN("/login", new LoginController()),
+    REGISTER("/register", new RegisterController()),
+    STATIC_RESOURCE("null", new StaticResourceController()),
+    NOT_FOUND("null", new NotFoundController()),
+    LOGIN_FAILED("null", new LoginFailedController()),
     ;
 
     private final String path;
-    private final Function<HttpRequest, HttpResponse> function;
+    private final Controller controller;
 
-    HandlerMapping(String path,
-                   Function<HttpRequest, HttpResponse> function) {
+    HandlerMapping(String path, Controller controller) {
         this.path = path;
-        this.function = function;
+        this.controller = controller;
     }
 
-    public static HandlerMapping findHandler(HttpRequest httpRequest) {
+    public static Controller findController(HttpRequest httpRequest) {
         final String resource = httpRequest.getPath().getResource();
 
         if (httpRequest.isStaticResource()) {
-            return STATIC_RESOURCE;
+            return STATIC_RESOURCE.controller;
         }
 
-        return Stream.of(values())
+        final HandlerMapping handlerMapping = Stream.of(values())
                 .filter(it -> it.path.equals(resource))
                 .findAny()
                 .orElseThrow(ResourceNotFoundException::new);
-    }
 
-    public HttpResponse doService(HttpRequest httpRequest) {
-        return function.apply(httpRequest);
+        return handlerMapping.controller;
     }
 }

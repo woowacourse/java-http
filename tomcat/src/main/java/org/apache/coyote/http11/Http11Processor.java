@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -51,8 +52,8 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse getHttpResponse(BufferedReader bufferedReader) {
         final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
         try {
-            final HandlerMapping handler = HandlerMapping.findHandler(httpRequest);
-            final HttpResponse httpResponse = handler.doService(httpRequest);
+            final Controller controller = HandlerMapping.findController(httpRequest);
+            final HttpResponse httpResponse = controller.service(httpRequest);
             return httpResponse;
         } catch (ResourceNotFoundException exception) {
             return ErrorResponse.resourceNotFound();

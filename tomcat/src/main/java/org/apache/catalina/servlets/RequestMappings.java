@@ -3,11 +3,11 @@ package org.apache.catalina.servlets;
 import java.util.List;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class ControllerMappings {
+public class RequestMappings {
 
     private final List<Controller> controllers;
 
-    public ControllerMappings(List<Controller> controllers) {
+    public RequestMappings(List<Controller> controllers) {
         this.controllers = controllers;
     }
 

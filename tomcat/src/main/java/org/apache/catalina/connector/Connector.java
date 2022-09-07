@@ -9,7 +9,7 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.RootController;
 import nextstep.jwp.controller.StaticResourceController;
-import org.apache.catalina.servlets.ControllerMappings;
+import org.apache.catalina.servlets.RequestMappings;
 import org.apache.coyote.WebConfig;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.ResourceLocator;
@@ -73,10 +73,10 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         ResourceLocator resourceLocator = new ResourceLocator("/static");
-        ControllerMappings controllerMappings = new ControllerMappings(
+        RequestMappings requestMappings = new RequestMappings(
                 List.of(new LoginController(resourceLocator), new RootController(resourceLocator),
                         new StaticResourceController(resourceLocator), new RegisterController(resourceLocator)));
-        WebConfig webConfig = new WebConfig(resourceLocator, controllerMappings);
+        WebConfig webConfig = new WebConfig(resourceLocator, requestMappings);
         var processor = new Http11Processor(connection, webConfig);
         new Thread(processor).start();
     }

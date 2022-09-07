@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.servlets.Controller;
-import org.apache.catalina.servlets.ControllerMappings;
+import org.apache.catalina.servlets.RequestMappings;
 import org.apache.coyote.Processor;
 import org.apache.coyote.WebConfig;
 import org.apache.coyote.http11.general.HttpHeaders;
@@ -28,12 +28,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final ResourceLocator resourceLocator;
-    private final ControllerMappings controllerMappings;
+    private final RequestMappings requestMappings;
 
     public Http11Processor(Socket connection, WebConfig webConfig) {
         this.connection = connection;
         this.resourceLocator = webConfig.getResourceLocator();
-        this.controllerMappings = webConfig.getControllerMappings();
+        this.requestMappings = webConfig.getControllerMappings();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void service(HttpRequest request, HttpResponse response) {
-        Controller controller = this.controllerMappings.getAdaptiveController(request);
+        Controller controller = this.requestMappings.getAdaptiveController(request);
         if (controller == null) {
             Resource resource = this.resourceLocator.locate("/404.html");
             response.setStatus(HttpStatus.NOT_FOUND);

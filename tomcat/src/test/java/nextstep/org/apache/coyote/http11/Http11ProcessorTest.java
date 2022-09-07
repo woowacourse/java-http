@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import org.apache.catalina.servlets.Controller;
-import org.apache.catalina.servlets.ControllerMappings;
+import org.apache.catalina.servlets.RequestMappings;
 import org.apache.coyote.WebConfig;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -28,7 +28,7 @@ class Http11ProcessorTest {
                 "Content-Length: " + body.getBytes().length,
                 "",
                 body));
-        WebConfig webConfig = new WebConfig(null, new ControllerMappings(List.of(new Controller() {
+        WebConfig webConfig = new WebConfig(null, new RequestMappings(List.of(new Controller() {
             @Override
             public boolean isProcessable(HttpRequest request) {
                 return true;

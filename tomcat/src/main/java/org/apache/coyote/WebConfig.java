@@ -1,23 +1,23 @@
 package org.apache.coyote;
 
-import org.apache.catalina.servlets.ControllerMappings;
+import org.apache.catalina.servlets.RequestMappings;
 import org.apache.coyote.http11.ResourceLocator;
 
 public class WebConfig {
 
     private final ResourceLocator resourceLocator;
-    private final ControllerMappings controllerMappings;
+    private final RequestMappings requestMappings;
 
-    public WebConfig(ResourceLocator resourceLocator, ControllerMappings controllerMappings) {
+    public WebConfig(ResourceLocator resourceLocator, RequestMappings requestMappings) {
         this.resourceLocator = resourceLocator;
-        this.controllerMappings = controllerMappings;
+        this.requestMappings = requestMappings;
     }
 
     public ResourceLocator getResourceLocator() {
         return resourceLocator;
     }
 
-    public ControllerMappings getControllerMappings() {
-        return controllerMappings;
+    public RequestMappings getControllerMappings() {
+        return requestMappings;
     }
 }

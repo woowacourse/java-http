@@ -6,10 +6,10 @@ import nextstep.jwp.utils.FileUtils;
 public enum StatusCode {
 
     OK(200, "OK"),
+    CREATED(201, "Created"),
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized"),
-    NOT_FOUND(404, "Not Found")
-    ;
+    NOT_FOUND(404, "Not Found");
 
     private static final String STATUS_FORMAT = "%d %s";
     private final int statusCode;

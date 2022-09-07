@@ -5,7 +5,12 @@ import java.util.function.Function;
 public enum StatusCode {
 
     OK("200", Http11Response::getOkResponse),
-    FOUND("302", Http11Response::getFoundResponse);
+    FOUND("302", response -> {
+        if (response.hasSetCookieHeader()) {
+            return response.getFoundResponseWithSetCookie();
+        }
+        return response.getFoundResponse();
+    });
 
     private final String value;
     private final Function<Http11Response, String> responseContentExtractor;

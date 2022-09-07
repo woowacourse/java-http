@@ -86,6 +86,10 @@ public class Http11Response {
         outputStream.flush();
     }
 
+    public boolean hasSetCookieHeader() {
+        return setCookieHeader != null;
+    }
+
     public String getOkResponse() {
         return String.join("\r\n",
                 startLineToString(),
@@ -96,6 +100,16 @@ public class Http11Response {
     }
 
     public String getFoundResponse() {
+        return String.join("\r\n",
+                startLineToString(),
+                contentTypeToString(),
+                contentLengthToString(),
+                locationToString(locationHeader),
+                "",
+                responseBody);
+    }
+
+    public String getFoundResponseWithSetCookie() {
         return String.join("\r\n",
                 startLineToString(),
                 contentTypeToString(),

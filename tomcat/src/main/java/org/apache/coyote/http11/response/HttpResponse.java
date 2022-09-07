@@ -36,13 +36,16 @@ public class HttpResponse {
         return new HttpResponse(statusLine, httpHeaders, body);
     }
 
-    public static HttpResponse cookie(
-        final HttpRequest httpRequest, final String resource, final String statusCode, final String cookie
-    ) {
-        final HttpResponse httpResponse = HttpResponse.of(httpRequest, resource, statusCode);
-        httpResponse.addHeader(HeaderKeys.SET_COOKIE, cookie);
+    public static HttpResponse cookie(final HttpRequest httpRequest, final String resource, final String statusCode) {
+        final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
 
-        return httpResponse;
+        final String contentType = selectContentType(resource);
+        final String body = loadResourceContent(resource);
+        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body)
+            .generateSessionId();
+        addLocation(httpHeaders, statusCode, resource);
+
+        return new HttpResponse(statusLine, httpHeaders, body);
     }
 
     private static String selectContentType(final String resource) {
@@ -57,13 +60,9 @@ public class HttpResponse {
 
     private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
         int length = body.getBytes().length;
-        return HttpHeaders.init()
+        return HttpHeaders.response()
             .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
             .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
-    }
-
-    private void addHeader(final HeaderKeys key, final String value) {
-        httpHeaders.add(key, value);
     }
 
     private static void addLocation(final HttpHeaders httpHeaders, final String statusCode, final String resource) {

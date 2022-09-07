@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.common;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class HttpCookie {
@@ -9,30 +11,36 @@ public class HttpCookie {
     public static final int KEY = 0;
     public static final int VALUE = 1;
 
-    private final String jSessionId;
+    private final Map<String, String> cookies;
 
-    private HttpCookie(final String jSessionId) {
-        this.jSessionId = jSessionId;
+    private HttpCookie(final Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
-    public static HttpCookie init() {
-        final UUID uuid = UUID.randomUUID();
-
-        return new HttpCookie(uuid.toString());
+    public static HttpCookie empty() {
+        return new HttpCookie(new HashMap<>());
     }
 
-    public static HttpCookie init(final String message) {
+    public static HttpCookie request(final String message) {
+        final Map<String, String> cookies = new HashMap<>();
         final String[] cookieElements = message.split(COOKIES_DELIMITER);
         for (final String cookie : cookieElements) {
             final String[] cookieElement = cookie.split(COOKIE_DELIMITER);
-            if (cookieElement[KEY].equals("JSESSIONID")) {
-                return new HttpCookie(cookieElement[VALUE]);
-            }
+            cookies.put(cookieElement[KEY], cookieElement[VALUE]);
         }
-        throw new IllegalArgumentException("session ID 가 존재하지 않습니다.");
+        return new HttpCookie(cookies);
     }
 
-    public String getJSessionId() {
-        return String.format("JSESSIONID=%s", jSessionId);
+    public static HttpCookie response(final String message) {
+        final Map<String, String> cookies = new HashMap<>();
+        cookies.put("JSESSIONID", message);
+        return new HttpCookie(cookies);
+    }
+
+    public void generateSessionId() {
+        if (cookies.containsKey("JSESSIONID")) {
+            throw new IllegalArgumentException(String.format("Cookie 가 중복적으로 저장되었습니다. [%s]", "JSESSIONID"));
+        }
+        cookies.put("JSESSIONID", UUID.randomUUID().toString());
     }
 }

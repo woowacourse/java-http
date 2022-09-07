@@ -34,7 +34,7 @@ public class HttpRequestGenerator {
         while (true) {
             message = bufferedReader.readLine();
             if (message == null || HttpMessageDelimiter.HEADER_BODY.isSame(message)) {
-                return HttpHeaders.from(headers);
+                return HttpHeaders.request(headers);
             }
             headers.add(message);
         }

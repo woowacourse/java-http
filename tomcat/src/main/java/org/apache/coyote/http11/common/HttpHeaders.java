@@ -18,17 +18,13 @@ public class HttpHeaders {
         this.cookie = cookie;
     }
 
-    public static HttpHeaders init() {
-        return new HttpHeaders(new LinkedHashMap<>(), HttpCookie.init());
-    }
-
-    public static HttpHeaders from(final List<String> messages) {
+    public static HttpHeaders request(final List<String> messages) {
         final Map<HeaderKeys, String> headers = new LinkedHashMap<>();
-        HttpCookie cookie = HttpCookie.init();
+        HttpCookie cookie = HttpCookie.empty();
         for (final String message : messages) {
             final String[] headerElement = message.split(KEY_VALUE_DELIMITER);
             if (HeaderKeys.isCookie(headerElement[KEY])) {
-                cookie = HttpCookie.init(headerElement[VALUE]);
+                cookie = HttpCookie.request(headerElement[VALUE]);
                 continue;
             }
             headers.put(HeaderKeys.from(headerElement[KEY]), headerElement[VALUE]);
@@ -36,8 +32,17 @@ public class HttpHeaders {
         return new HttpHeaders(headers, cookie);
     }
 
+    public static HttpHeaders response() {
+        return new HttpHeaders(new LinkedHashMap<>(), HttpCookie.empty());
+    }
+
     public HttpHeaders add(final HeaderKeys key, final String value) {
         this.headers.put(key, value);
+        return this;
+    }
+
+    public HttpHeaders generateSessionId() {
+        this.cookie.generateSessionId();
         return this;
     }
 

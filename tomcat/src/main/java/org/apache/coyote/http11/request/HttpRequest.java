@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ public class HttpRequest {
 
     public static HttpRequest of(String firstLine, List<String> headerLines) {
         StartLine startLine = StartLine.from(firstLine);
-        startLine.changeRequestURL();
+//        startLine.changeRequestURL();
         return new HttpRequest(startLine, headerLines);
     }
 
@@ -45,5 +45,9 @@ public class HttpRequest {
 
     public RequestURL getRequestURL() {
         return startLine.getRequestURL();
+    }
+
+    public boolean isGet() {
+        return startLine.isGet();
     }
 }

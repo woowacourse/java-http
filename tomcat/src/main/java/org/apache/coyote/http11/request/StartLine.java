@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class StartLine {
 
@@ -42,8 +42,8 @@ public class StartLine {
         return requestURL.isLoginRequest();
     }
 
-    public void changeRequestURL() {
-        requestURL.changeRequestURL();
+    public boolean isGet() {
+        return httpMethod.equals("GET");
     }
 
     public RequestURL getRequestURL() {

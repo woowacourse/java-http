@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class RequestURL {
     }
 
     public boolean isLoginRequest() {
-        return path.equals(LOGIN_REQUEST_URL + HTML_EXTENSION) && !queryParams.isEmpty();
+        return path.equals(LOGIN_REQUEST_URL) && !queryParams.isEmpty();
     }
 
     public String getParamValue(String paramKey) {

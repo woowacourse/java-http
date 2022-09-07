@@ -21,16 +21,13 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
 
     @Override
     public Http11Response apply(Http11Request request) {
-        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestUrl());
-        if (!queryParams.hasParam()) {
+        if (request.isGetMethod()) {
             return Http11Response.of(OK, "/login.html");
         }
-        if (isLoginSuccess(queryParams)) {
-            if (request.hasNoJssesionIdCookie()) {
-                HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", UUID.randomUUID().toString()));
-                return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
-            }
-            return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
+
+        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestUrl());
+        if (request.isPostMethod() && isLoginSuccess(queryParams)) {
+            return getLoginResponse(request);
         }
         return Http11Response.withLocation(FOUND, "/login.html", "/401.html");
     }
@@ -46,5 +43,13 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
             return true;
         }
         return false;
+    }
+
+    private static Http11Response getLoginResponse(Http11Request request) {
+        if (request.hasNoJssesionIdCookie()) {
+            HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", UUID.randomUUID().toString()));
+            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
+        }
+        return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
     }
 }

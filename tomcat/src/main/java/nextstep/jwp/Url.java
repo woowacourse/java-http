@@ -31,7 +31,7 @@ public enum Url {
         this.resourcePathExtractor = resourcePathExtractor;
     }
 
-    public static Http11Response getResponseFrom(Http11Request http11Request) {
+    public static Http11Response getResponseFrom(final Http11Request http11Request) {
         return Arrays.stream(values())
                 .filter(value -> value.condition.test(http11Request.getRequestUrl()))
                 .map(value -> value.resourcePathExtractor.apply(http11Request))
@@ -39,7 +39,7 @@ public enum Url {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 페이지입니다."));
     }
 
-    private static boolean isMatchRegex(String regex, String url) {
+    private static boolean isMatchRegex(final String regex, final String url) {
         final Pattern pattern = Pattern.compile(regex);
         final Matcher matcher = pattern.matcher(url);
         return matcher.find();

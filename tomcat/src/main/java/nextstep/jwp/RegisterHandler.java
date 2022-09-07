@@ -16,20 +16,22 @@ import org.slf4j.LoggerFactory;
 public class RegisterHandler implements Function<Http11Request, Http11Response> {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
+    private static final String REGISTER_HTML = "/register.html";
+    private static final String INDEX_HTML = "/index.html";
 
     @Override
     public Http11Response apply(final Http11Request request) {
         if (request.isGetMethod()) {
-            return Http11Response.of(OK, "/register.html");
+            return Http11Response.of(OK, REGISTER_HTML);
         }
 
         List<String> userInfo = List.of("account", "email", "password");
         final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
         if (request.isPostMethod() && queryParams.hasQueryParams(userInfo)) {
             registerUser(queryParams);
-            return Http11Response.withLocation(FOUND, "/register.html", "/index.html");
+            return Http11Response.withLocation(FOUND, REGISTER_HTML, INDEX_HTML);
         }
-        return Http11Response.withLocation(FOUND, "/register.html", "/404.html");
+        return Http11Response.withLocation(FOUND, REGISTER_HTML, "/404.html");
     }
 
     private void registerUser(final Http11QueryParams queryParams) {

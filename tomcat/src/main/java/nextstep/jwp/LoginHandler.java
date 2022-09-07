@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler implements Function<Http11Request, Http11Response> {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final String LOGIN_HTML = "/login.html";
+    private static final String INDEX_HTML = "/index.html";
 
     @Override
     public Http11Response apply(final Http11Request request) {
@@ -39,16 +41,16 @@ public class LoginHandler implements Function<Http11Request, Http11Response> {
             UUID uuid = UUID.randomUUID();
             startSession(user, uuid);
             HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", uuid.toString()));
-            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, "/login.html", "/index.html", cookie);
+            return Http11Response.withLocationAndSetJsessionIdCookie(FOUND, LOGIN_HTML, INDEX_HTML, cookie);
         }
-        return Http11Response.withLocation(FOUND, "/login.html", "/401.html");
+        return Http11Response.withLocation(FOUND, LOGIN_HTML, "/401.html");
     }
 
     private Http11Response getLoginPageResponse(final Http11Request request) {
         if (request.hasNoJsessionIdCookie()) {
-            return Http11Response.of(OK, "/login.html");
+            return Http11Response.of(OK, LOGIN_HTML);
         }
-        return Http11Response.withLocation(FOUND, "/login.html", "/index.html");
+        return Http11Response.withLocation(FOUND, LOGIN_HTML, INDEX_HTML);
     }
 
     private boolean successLogin(final Http11Request request) {

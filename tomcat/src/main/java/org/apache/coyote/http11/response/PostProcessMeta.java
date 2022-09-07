@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.context.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class PostProcessMeta {
@@ -18,5 +19,9 @@ public class PostProcessMeta {
 
     public HttpRequest getRequest() {
         return request;
+    }
+
+    public HttpCookie getCookie() {
+        return request.getCookie();
     }
 }

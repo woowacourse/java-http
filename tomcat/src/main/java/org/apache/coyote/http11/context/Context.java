@@ -1,23 +1,27 @@
 package org.apache.coyote.http11.context;
 
 import java.util.UUID;
-import org.apache.coyote.http11.response.PostProcessMeta;
 
 public class Context {
 
+    private final Session session;
     private final HttpCookie cookie;
 
-    public Context(HttpCookie cookie) {
+    public Context(Session session, HttpCookie cookie) {
+        this.session = session;
         this.cookie = cookie;
     }
 
-    public Context postProcess(PostProcessMeta meta) {
-        HttpCookie requestCookie = meta.getRequest().getContext().getCookie();
-        String jsesssionid = requestCookie.getCookies().get("JSESSIONID");
-        if (jsesssionid == null) {
-            this.cookie.getCookies().put("JSESSIONID", UUID.randomUUID().toString());
-        }
-        return new Context(this.cookie);
+    public static Context createNew() {
+        return new Context(new Session(UUID.randomUUID().toString()), new HttpCookie());
+    }
+
+    public static Context asResponse(Context requestContext) {
+        return new Context(requestContext.session, requestContext.cookie.asResponse(requestContext.session.getId()));
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     public HttpCookie getCookie() {

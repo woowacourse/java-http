@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.context.HttpCookie.SESSION_NAME;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +12,8 @@ import java.util.UUID;
 import org.apache.coyote.http11.context.Context;
 import org.apache.coyote.http11.context.HttpCookie;
 import org.apache.coyote.http11.request.headers.RequestHeader;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.context.Session;
+import org.apache.coyote.http11.context.SessionManager;
 import org.apache.exception.TempException;
 import org.apache.util.NumberUtil;
 
@@ -94,24 +96,23 @@ public class HttpRequest {
     private static Context parseOrCreateContext(RequestHeaders headers) {
         RequestHeader cookieHeader = headers.findHeader("Cookie");
         if (cookieHeader == null) {
-            return new Context(new HttpCookie());
+            return Context.createNew();
         }
-        return new Context(HttpCookie.parse(cookieHeader.getValue()));
+        HttpCookie cookie = HttpCookie.parse(cookieHeader.getValue());
+        return new Context(MANAGER.findSession(cookie.find(SESSION_NAME)), cookie);
     }
 
     public Session getSession(boolean isCreate) {
-        if (isCreate) {
-            Session session = new Session(UUID.randomUUID().toString());
-            MANAGER.add(session);
-            return session;
+        Session findSession = MANAGER.findSession(context.getSession().getId());
+        if (findSession != null) {
+            return findSession;
         }
-        RequestHeader cookie = this.requestHeaders.findHeader("Cookie");
-        return null;
-//        MANAGER.findSession();
-    }
-
-    public RequestHeader findHeader(String field) {
-        return requestHeaders.findHeader(field);
+        if (!isCreate) {
+            return null;
+        }
+        Session session = new Session(UUID.randomUUID().toString());
+        MANAGER.add(session);
+        return session;
     }
 
     public String getPath() {
@@ -128,6 +129,10 @@ public class HttpRequest {
 
     public Context getContext() {
         return context;
+    }
+
+    public HttpCookie getCookie() {
+        return context.getCookie();
     }
 
     @Override

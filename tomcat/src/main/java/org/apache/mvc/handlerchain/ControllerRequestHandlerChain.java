@@ -8,13 +8,10 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.response.headers.Location;
-import org.apache.coyote.http11.response.headers.ResponseHeader;
 import org.apache.mvc.Controller;
 import org.apache.mvc.ControllerParser;
 
 public class ControllerRequestHandlerChain implements RequestHandlerChain {
-
-    private static final String REDIRECT = "redirect:";
 
     private final RequestHandlerChain next;
     private final Map<RequestKey, RequestHandlerMethod> map;

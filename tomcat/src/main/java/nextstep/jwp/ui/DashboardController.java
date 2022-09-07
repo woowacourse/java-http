@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.context.Session;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMethod;
@@ -27,6 +28,10 @@ public class DashboardController implements Controller {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ResponseEntity showLogin(HttpRequest request) {
+        Session session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            return new ResponseEntity(HttpStatus.FOUND, "/index.html");
+        }
         return new ResponseEntity(HttpStatus.FOUND, "/login.html");
     }
 
@@ -35,6 +40,8 @@ public class DashboardController implements Controller {
         Map<String, String> userMap = UrlUtil.parseQueryString(request.getRequestBody());
         Optional<User> optionalUser = repository.findByAccount(userMap.get("account"));
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(userMap.get("password"))) {
+            Session session = request.getSession(true);
+            session.setAttribute("user", optionalUser.get());
             return new ResponseEntity(HttpStatus.FOUND, "/index.html");
         }
         return new ResponseEntity(HttpStatus.FOUND, "/401.html");

@@ -11,7 +11,7 @@ public class HttpCookie {
 
     private static final String DELIMITER = "; ";
     private static final Pattern PATTERN = Pattern.compile("(?<key>.+)=(?<value>.+)");
-    private static final String SESSION_ID = "JSESSIONID";
+    public static final String SESSION_NAME = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
@@ -41,12 +41,20 @@ public class HttpCookie {
                 ));
     }
 
-    public Map<String, String> getCookies() {
-        return cookies;
+    public HttpCookie asResponse(String uuid) {
+        if (cookies.get(SESSION_NAME) == null) {
+            return new HttpCookie(Map.of(SESSION_NAME, uuid));
+        }
+        return new HttpCookie();
+    }
+
+    public String find(String key) {
+        return cookies.get(key);
     }
 
     public String getAsString() {
-        String setCookie = cookies.get(SESSION_ID);
+        String setCookie = cookies.get(SESSION_NAME);
+        System.out.println("setCookie = " + setCookie);
         if (setCookie == null) {
             return "";
         }

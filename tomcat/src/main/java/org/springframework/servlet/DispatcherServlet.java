@@ -20,6 +20,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.reflections.Reflections;
 import org.richard.utils.CustomReflectionUtils;
+import org.richard.utils.YamlUtils;
 import org.springframework.annotation.Controller;
 import org.springframework.annotation.RequestMapping;
 import org.springframework.config.ApplicationConfig;
@@ -27,12 +28,16 @@ import org.springframework.config.ApplicationConfig;
 public class DispatcherServlet implements Servlet {
 
     private static final String NOT_FOUND_PAGE = "static/404.html";
-    private static final String DEFAULT_CONFIG_FILE = "application.yml";
+    private static final String DEFAULT_SPRING_CONFIG_FILE_NAME = "application.yml";
 
     private final Map<RequestMappingInfo, Function<HttpRequest, HttpResponse>> requestMapping;
 
     public DispatcherServlet() {
-        this.requestMapping = new Reflections(parseBasePackage())
+        final var config
+                = YamlUtils.readPropertyAsObject(DEFAULT_SPRING_CONFIG_FILE_NAME, ApplicationConfig.class);
+        final var basePackage = config.getBasePackage();
+
+        this.requestMapping = new Reflections(basePackage)
                 .getTypesAnnotatedWith(Controller.class)
                 .stream()
                 .filter(this::hasAnyMethodWithRequestMappingAnnotation)
@@ -42,7 +47,7 @@ public class DispatcherServlet implements Servlet {
 
     private String parseBasePackage() {
         final var objectMapper = new ObjectMapper(new YAMLFactory());
-        final var resource = getClass().getClassLoader().getResource(DEFAULT_CONFIG_FILE);
+        final var resource = getClass().getClassLoader().getResource(DEFAULT_SPRING_CONFIG_FILE_NAME);
         try {
             final var uri = resource.toURI();
             final var applicationConfig = objectMapper.readValue(new File(uri), ApplicationConfig.class);

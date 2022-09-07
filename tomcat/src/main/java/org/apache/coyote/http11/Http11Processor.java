@@ -10,21 +10,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Servlet;
+import org.apache.coyote.config.TomcatConfig;
 import org.apache.http.BasicHttpRequest;
 import org.apache.http.HttpRequest;
 import org.reflections.Reflections;
 import org.richard.utils.CustomReflectionUtils;
+import org.richard.utils.YamlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_SPRING_SERVLET_PACKAGE = "org.springframework.servlet";
+    private static final String DEFAULT_TOMCAT_CONFIG_FILE_NAME = "tomcat.yml";
     private static final List<Servlet> servlets;
 
     static {
-        servlets = new Reflections(DEFAULT_SPRING_SERVLET_PACKAGE)
+        final var config
+                = YamlUtils.readPropertyAsObject(DEFAULT_TOMCAT_CONFIG_FILE_NAME, TomcatConfig.class);
+        final var basePackage = config.getServletBasePackage();
+
+        servlets = new Reflections(basePackage)
                 .getSubTypesOf(Servlet.class)
                 .stream()
                 .map(CustomReflectionUtils::newInstance)

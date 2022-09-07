@@ -47,6 +47,11 @@ public class HttpResponse {
         this.viewName = viewName;
     }
 
+    public void sendRedirect(final String location) {
+        setStatus(HttpStatus.FOUND);
+        httpHeaders.setLocation(location);
+    }
+
     public String getViewName() {
         return viewName;
     }

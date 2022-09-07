@@ -39,7 +39,7 @@ public class Http11Request {
             return HttpHeaders.from(httpHeaders);
         }
 
-        while (line != "") {
+        while (!"".equals(line)) {
             httpHeaders.add(line);
             line = bufferedReader.readLine();
         }

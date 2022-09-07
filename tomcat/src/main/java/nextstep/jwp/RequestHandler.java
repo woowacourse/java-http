@@ -1,11 +1,14 @@
 package nextstep.jwp;
 
 import java.io.IOException;
+import java.util.List;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.MainController;
-import nextstep.jwp.controller.UserController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Status;
 import org.slf4j.Logger;
@@ -13,14 +16,10 @@ import org.slf4j.LoggerFactory;
 
 public class RequestHandler {
 
-    private static final String URL_INDEX = "/index.html";
-    private static final String URL_LOGIN = "/login";
-    private static final String URL_REGISTER = "/register";
-
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
-    private final MainController mainController = new MainController();
-    private final UserController userController = new UserController();
-    private final LoginController loginController = new LoginController();
+    private final List<Controller> controllers = List.of(
+            new MainController(), new RegisterController(), new LoginController()
+    );
 
     public HttpResponse process(final HttpRequest request) {
         try {
@@ -32,18 +31,17 @@ public class RequestHandler {
     }
 
     private HttpResponse match(final HttpRequest request) throws IOException {
-        if (request.getUrl().contains(".")) {
-            return mainController.template(request);
+        Controller controller = getController(request.getUrl());
+        if (request.getMethod() == Method.POST) {
+            return controller.doPost(request);
         }
-        if (request.getUrl().equals(URL_INDEX)) {
-            return mainController.index();
-        }
-        if (request.getUrl().equals(URL_LOGIN)) {
-            return loginController.login(request);
-        }
-        if (request.getUrl().equals(URL_REGISTER)) {
-            return userController.register(request);
-        }
-        return mainController.hello();
+        return controller.doGet(request);
+    }
+
+    private Controller getController(final String url) {
+        return controllers.stream()
+                .filter(controller -> controller.isUrlMatches(url))
+                .findFirst()
+                .orElseGet(MainController::new);
     }
 }

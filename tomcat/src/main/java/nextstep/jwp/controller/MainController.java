@@ -1,40 +1,31 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import org.apache.coyote.http11.model.ContentType;
+import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Status;
 
-public class MainController {
+public class MainController implements Controller {
 
-    public HttpResponse hello() throws IOException {
+    @Override
+    public boolean isUrlMatches(final String url) {
+        return false;
+    }
+
+    @Override
+    public HttpResponse doGet(final HttpRequest request) throws IOException {
         HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource("/hello.txt"));
+        String url = request.getUrl();
+        if (url.equals("/")) {
+            url = "/hello.txt";
+        }
+        response.addResource(ResourceLoader.load(url));
         return response;
     }
 
-    public HttpResponse index() throws IOException {
-        HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource("/index.html"));
-        return response;
-    }
-
-    public HttpResponse template(final HttpRequest request) throws IOException {
-        HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource(request.getUrl()));
-        return response;
-    }
-
-    private Resource findResource(final String url) throws IOException {
-        Path path = Path.of(MainController.class.getResource("/static" + url).getPath());
-        String body = Files.readString(path);
-
-        ContentType contentType = ContentType.findByExtension(url);
-
-        return new Resource(body, contentType);
+    @Override
+    public HttpResponse doPost(final HttpRequest request) throws IOException {
+        return null;
     }
 }

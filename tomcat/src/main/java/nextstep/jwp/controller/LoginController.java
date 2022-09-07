@@ -45,7 +45,6 @@ public class LoginController implements Controller {
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
-                .contentType(Extension.HTML.getContentType())
                 .location("/index.html")
                 .cookie("JSESSIONID=" + UUID.randomUUID())
                 .build();

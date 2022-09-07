@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.request.Extension;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -16,7 +15,6 @@ public class LoginFailedController implements Controller {
 
         return new HttpResponse.Builder()
                 .status(HttpStatus.FOUND)
-                .contentType(Extension.HTML.getContentType())
                 .responseBody(responseBody)
                 .build();
     }

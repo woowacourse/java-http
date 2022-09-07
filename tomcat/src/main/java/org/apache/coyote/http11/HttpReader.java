@@ -22,10 +22,11 @@ public class HttpReader {
     }
 
     private String extractStartLine(final BufferedReader bufferedReader) throws IOException {
-        if (!bufferedReader.ready()) {
+        final String startLine = bufferedReader.readLine();
+        if (startLine == null) {
             throw new IllegalArgumentException("요청 값이 없습니다.");
         }
-        return bufferedReader.readLine();
+        return startLine;
     }
 
     private List<String> extractHeaders(final BufferedReader bufferedReader) throws IOException {

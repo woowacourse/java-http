@@ -1,51 +1,55 @@
 package nextstep.jwp.controller;
 
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController {
+public class LoginController extends Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    public HttpResponse handle(final HttpRequest request) {
-        if (hasLoginRelatedParams(request)) {
-            final String account = request.getRequestParam("account");
-            final String password = request.getRequestParam("password");
-
-            return handleLoginProcess(account, password);
+    @Override
+    protected HttpResponse doGet(final HttpRequest request) {
+        if (request.hasHeader("Cookie")) {
+            final Session session = request.getSession();
+            log.info("Session Id: {}", session.getId());
+            log.info("Login User: {}", session.getAttribute("user"));
+            return HttpResponse.redirect("/index.html").build();
         }
 
         return HttpResponse.ok().fileBody("/login.html").build();
     }
 
-    private boolean hasLoginRelatedParams(HttpRequest request) {
-        return request.getRequestParam("account") != null &&
-                request.getRequestParam("password") != null;
+    @Override
+    protected HttpResponse doPost(final HttpRequest request) {
+        final String account = request.getRequestParam("account");
+        final String password = request.getRequestParam("password");
+
+        return createLoginResultResponse(account, password, request);
     }
 
-    private HttpResponse handleLoginProcess(final String account, final String password) {
-        try {
-            return login(account, password);
-        } catch (UnauthorizedException e) {
+    private HttpResponse createLoginResultResponse(final String account, final String password,
+                                                   final HttpRequest request) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isEmpty()) {
             return HttpResponse.redirect("/401.html").build();
         }
-    }
 
-    private HttpResponse login(final String account, String password) {
-        final User user = InMemoryUserRepository
-                .findByAccount(account)
-                .orElseThrow(UnauthorizedException::new);
-
-        if (user.checkPassword(password)) {
-            log.info("Login User: {}", user);
-            return HttpResponse.redirect("/index.html").build();
+        if (!user.get().checkPassword(password)) {
+            return HttpResponse.redirect("/401.html").build();
         }
 
-        throw new UnauthorizedException();
+        final Session session = request.getSession();
+        session.addAttribute("user", user.get());
+        log.info("Login User: {}", user.get());
+        return HttpResponse.redirect("/index.html").build();
     }
+
 }

@@ -1,12 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import nextstep.jwp.controller.HomeController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.StaticResourceController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,6 +13,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestConvertor httpRequestConvertor = new HttpRequestConvertor();
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -35,8 +31,6 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = httpRequestConvertor.convert(inputStream);
             final HttpResponse response = createResponse(request);
-            addContentTypeHeader(request, response);
-
             outputStream.write(response.writeValueAsBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -44,30 +38,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse createResponse(final HttpRequest request) throws IOException {
-        if (request.getUriPath().equals("/")) {
-            return new HomeController().handle(request);
-        }
+    private HttpResponse createResponse(final HttpRequest request) {
+        final Controller controller = requestMapping.findController(request);
+        final HttpResponse response = controller.doService(request);
 
-        if (request.getUriPath().equals("/login")) {
-            return new LoginController().handle(request);
-        }
+        addContentTypeToResponse(request, response);
+        addCookieForSessionToResponse(request, response);
 
-        if (hasStaticResourceFile(request.getUriPath())) {
-            return new StaticResourceController().handle(request);
-        }
-
-        return HttpResponse.notFound().build();
+        return response;
     }
 
-    private boolean hasStaticResourceFile(final String uri) {
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return resource != null && new File(resource.getFile()).isFile();
-    }
-
-    private void addContentTypeHeader(final HttpRequest request, final HttpResponse response) {
+    private void addContentTypeToResponse(final HttpRequest request, final HttpResponse response) {
         if (response.hasBody()) {
             response.addHeader("Content-Type", new ContentTypeExtractor().extract(request).getValue());
+        }
+    }
+
+    private void addCookieForSessionToResponse(final HttpRequest request, final HttpResponse response) {
+        if (request.hasSession()) {
+            response.addCookie("JSESSIONID", request.getSession().getId());
         }
     }
 }

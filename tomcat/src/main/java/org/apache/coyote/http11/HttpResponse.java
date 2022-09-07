@@ -2,13 +2,14 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Objects;
 
 public class HttpResponse {
 
-    private final String responseStartLine;
-    private final Map<String, String> responseHeaders;
-    private String responseBody;
+    private final String statusLine;
+    private final Map<String, String> headers;
+    private final Cookies cookies;
+    private String body;
 
     public static HttpResponseBuilder ok() {
         return new HttpResponseBuilder("HTTP/1.1 200 OK \r\n");
@@ -23,19 +24,28 @@ public class HttpResponse {
         return new HttpResponseBuilder("HTTP/1.1 404 Not Found \r\n");
     }
 
-    HttpResponse(String startLine) {
-        responseStartLine = startLine;
-        responseHeaders = new HashMap<>();
-        responseBody = "";
+    HttpResponse(String statusLine) {
+        this.statusLine = statusLine;
+        this.headers = new HashMap<>();
+        this.cookies = Cookies.empty();
+        this.body = "";
     }
 
     public void addBody(final String responseBody) {
-        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-        this.responseBody = responseBody;
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        this.body = responseBody;
     }
 
     public void addHeader(final String name, final String value) {
-        responseHeaders.put(name, value);
+        headers.put(name, value);
+    }
+
+    public void addCookie(final String name, final String value) {
+        cookies.addCookie(name, value);
+    }
+
+    public boolean hasBody() {
+        return body.length() > 0;
     }
 
     public byte[] writeValueAsBytes() {
@@ -43,16 +53,36 @@ public class HttpResponse {
     }
 
     public String writeValueAsString() {
-        String response = responseStartLine;
-        for (String key : responseHeaders.keySet()) {
-            response += key + ": " + responseHeaders.get(key) + " \r\n";
+        String response = statusLine;
+
+        for (String key : headers.keySet()) {
+            response += key + ": " + headers.get(key) + " \r\n";
         }
+
+        if (cookies.hasCookies()) {
+            response += "Set-Cookie: " + cookies.parseToHeaderValue() + " \r\n";
+        }
+
         response += "\r\n";
-        response += responseBody;
+        response += body;
         return response;
     }
 
-    public boolean hasBody() {
-        return responseBody.length() > 0;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HttpResponse that = (HttpResponse) o;
+        return Objects.equals(statusLine, that.statusLine) && Objects
+                .equals(headers, that.headers) && Objects.equals(body, that.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(statusLine, headers, body);
     }
 }

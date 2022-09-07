@@ -6,6 +6,7 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JAVASCRIPT("js", "text/javascript"),
+    FAVICON("ico", "image/vnd.microsoft.icon")
     ;
 
     private final String extension;

@@ -1,7 +1,6 @@
-package org.apache.utils;
+package org.apache.coyote.utils;
 
-import nextstep.jwp.exception.NotFoundFileException;
-import org.apache.coyote.utils.RequestUtil;
+import org.apache.coyote.exception.NotFoundFileException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class RequestUtilTest {
+class UtilTest {
 
     @Test
     @DisplayName("파일이름으로 파일내용을 읽는다.")
@@ -20,7 +19,7 @@ class RequestUtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = RequestUtil.getResponseBody(filename, this.getClass());
+        String actual = Util.getResponseBody(filename, this.getClass());
 
         // then
         assertThat(actual).isNotBlank();
@@ -33,7 +32,7 @@ class RequestUtilTest {
         String filename = "/nonFile";
 
         // when & then
-        assertThatThrownBy(() -> RequestUtil.getResponseBody(filename, this.getClass()))
+        assertThatThrownBy(() -> Util.getResponseBody(filename, this.getClass()))
                 .isInstanceOf(NotFoundFileException.class);
     }
 
@@ -44,7 +43,7 @@ class RequestUtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = RequestUtil.getExtension(filename);
+        String actual = Util.getExtension(filename);
 
         // then
         assertThat(actual).isEqualTo("html");
@@ -57,7 +56,7 @@ class RequestUtilTest {
         String filename = "/login?account=gugu&password=password";
 
         // when
-        String actual = RequestUtil.calculatePath(filename);
+        String actual = Util.calculatePath(filename);
 
         // then
         assertThat(actual).isEqualTo("/login.html");
@@ -73,7 +72,7 @@ class RequestUtilTest {
         expected.put("password", "password");
 
         // when
-        Map<String, String> actual = RequestUtil.getParam(filename);
+        Map<String, String> actual = Util.getParam(filename);
 
         // then
         assertThat(actual).isEqualTo(expected);

@@ -1,9 +1,7 @@
 package org.apache.coyote.utils;
 
-import nextstep.jwp.exception.NotFoundFileException;
+import org.apache.coyote.exception.NotFoundFileException;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.coyote.model.Content.HTML;
+import static org.apache.coyote.model.request.ContentType.HTML;
 
-public class RequestUtil {
+public class Util {
 
     public static final String DEFAULT_EXTENSION = ".html";
     public static final String DEFAULT_INDEX = "/";
@@ -37,7 +35,7 @@ public class RequestUtil {
             final URL url = Objects.requireNonNull(ClassType.getClassLoader().getResource(STATIC + uri));
             final Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path));
-        } catch (URISyntaxException | IOException | NullPointerException e) {
+        } catch (Exception e) {
             throw new NotFoundFileException("파일 찾기에 실패했습니다.");
         }
     }
@@ -71,7 +69,7 @@ public class RequestUtil {
     }
 
     private static Map<String, String> calculateParam(final String uri) {
-        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1).split(PARAM_DELIMITER));
+        final List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1).split(PARAM_DELIMITER));
         final Map<String, String> queryParams = new HashMap<>();
         for (String input : inputs) {
             List<String> query = Arrays.asList(input.split(PARAM_COUPLER));

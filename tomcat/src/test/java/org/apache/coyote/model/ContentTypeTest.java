@@ -1,14 +1,14 @@
-package nextstep.jwp.model;
+package org.apache.coyote.model;
 
-import nextstep.jwp.exception.NotFoundContentTypeException;
-import org.apache.coyote.model.Content;
+import org.apache.coyote.exception.NotFoundContentTypeException;
+import org.apache.coyote.model.request.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ContentTest {
+class ContentTypeTest {
 
     @Test
     @DisplayName("확장자에 맞는 contentType을 반환한다.")
@@ -17,7 +17,7 @@ class ContentTest {
         String extension = "html";
 
         // when
-        String contentType = Content.getType(extension);
+        String contentType = ContentType.getType(extension);
 
         // then
         assertThat(contentType).isEqualTo("text/html");
@@ -26,7 +26,7 @@ class ContentTest {
     @Test
     @DisplayName("등록되지 않은 확장자를 호출할 경우 예외가 발생한다.")
     void checkNonContentType() {
-        assertThatThrownBy(() -> Content.getType("hwp"))
+        assertThatThrownBy(() -> ContentType.getType("hwp"))
                 .isInstanceOf(NotFoundContentTypeException.class);
     }
 }

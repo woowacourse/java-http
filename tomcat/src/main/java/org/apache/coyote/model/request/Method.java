@@ -1,11 +1,11 @@
-package org.apache.coyote.model;
+package org.apache.coyote.model.request;
 
-import nextstep.jwp.exception.NotFoundHttpMethodException;
+import org.apache.coyote.exception.NotFoundHttpMethodException;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum HttpMethod {
+public enum Method {
 
     GET("GET"),
     POST("POST"),
@@ -17,11 +17,11 @@ public enum HttpMethod {
 
     private final String method;
 
-    HttpMethod(String method) {
+    Method(final String method) {
         this.method = method;
     }
 
-    public static HttpMethod of(String method) {
+    public static Method of(final String method) {
         Objects.requireNonNull(method);
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.method.equals(method))

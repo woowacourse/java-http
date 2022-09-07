@@ -1,6 +1,5 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -25,8 +24,8 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
+                "Content-Type: text/html",
                 "",
                 "Hello world!");
 

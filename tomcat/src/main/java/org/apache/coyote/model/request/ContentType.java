@@ -1,11 +1,11 @@
-package org.apache.coyote.model;
+package org.apache.coyote.model.request;
 
-import nextstep.jwp.exception.NotFoundContentTypeException;
+import org.apache.coyote.exception.NotFoundContentTypeException;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum Content {
+public enum ContentType {
 
     HTML("html", "text/html"),
     CSS("css", "text/css"),
@@ -16,12 +16,12 @@ public enum Content {
     private final String extension;
     private final String type;
 
-    Content(String extension, String type) {
+    ContentType(final String extension, final String type) {
         this.extension = extension;
         this.type = type;
     }
 
-    public static String getType(String extension) {
+    public static String getType(final String extension) {
         Objects.requireNonNull(extension);
         return Arrays.stream(values())
                 .filter(it -> it.extension.equals(extension))

@@ -32,6 +32,10 @@ public class RequestHeaders {
         return headers.containsKey("Cookie");
     }
 
+    public HttpCookie getCookie() {
+        return HttpCookie.from(headers.get("Cookie"));
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

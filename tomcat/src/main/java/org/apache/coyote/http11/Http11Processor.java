@@ -72,6 +72,14 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse getLoginResponse(HttpRequest httpRequest, URI uri) throws IOException {
         if ("GET".equals(httpRequest.getRequestLine().getMethod())
                 && uri.getQuery() == null) {
+            if (httpRequest.getRequestHeaders().isExistCookie()) {
+                HttpCookie cookie = httpRequest.getRequestHeaders().getCookie();
+                String jsessionid = cookie.getValues().get("JSESSIONID");
+                Session session = SessionManager.findSession(jsessionid);
+                if (session != null) {
+                    return HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
+                }
+            }
             return HttpResponse.of(StatusCode.getStatusCode(200),
                     uri.getPath().concat("." + ContentType.HTML.getExtension()));
         }
@@ -90,15 +98,19 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.checkPassword(parameters.get("password"))) {
             log.info("user : " + user);
-            return checkCookieAndReturnResponse(httpRequest);
+            return checkCookieAndReturnResponse(httpRequest, user);
         }
         return HttpResponse.of(StatusCode.getStatusCode(200), "/401.html");
     }
 
-    private HttpResponse checkCookieAndReturnResponse(HttpRequest httpRequest) throws IOException {
+    private HttpResponse checkCookieAndReturnResponse(HttpRequest httpRequest, User user) throws IOException {
         if (!httpRequest.getRequestHeaders().isExistCookie()) {
             HttpResponse response = HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");
-            response.addHeader("Set-Cookie: JSESSIONID=" + UUID.randomUUID());
+            UUID uuid = UUID.randomUUID();
+            Session session = new Session(uuid.toString());
+            session.setAttribute("user", user);
+            SessionManager.add(session);
+            response.addHeader("Set-Cookie: JSESSIONID=" + uuid);
             return response;
         }
         return HttpResponse.of(StatusCode.getStatusCode(302), "/index.html");

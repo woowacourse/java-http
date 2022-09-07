@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
-    @DisplayName("로그인 요청 시, Cookie를 전달한다.")
+    @DisplayName("로그인 성공 시, Cookie에 Session을 담아서 반환한다.")
     @Test
     void login_returnsResponseWithCookie() {
         // given

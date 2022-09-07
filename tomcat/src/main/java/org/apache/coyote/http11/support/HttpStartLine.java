@@ -21,14 +21,17 @@ public class HttpStartLine {
     private final QueryParameters queryParameters;
     private final HttpVersion httpVersion;
 
-    public HttpStartLine(final HttpMethod httpMethod, final String uri, final QueryParameters queryParameters, final HttpVersion httpVersion) {
+    private HttpStartLine(final HttpMethod httpMethod,
+                          final String uri,
+                          final QueryParameters queryParameters,
+                          final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.queryParameters = queryParameters;
         this.httpVersion = httpVersion;
     }
 
-    public HttpStartLine(final HttpMethod httpMethod, final String uri, final HttpVersion httpVersion) {
+    private HttpStartLine(final HttpMethod httpMethod, final String uri, final HttpVersion httpVersion) {
         this(httpMethod, uri, null, httpVersion);
     }
 

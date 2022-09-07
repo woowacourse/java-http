@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.web.request;
 
 import org.apache.coyote.http11.file.ResourceExtension;
+import org.apache.coyote.http11.support.HttpCookie;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpMethod;
 import org.apache.coyote.http11.support.HttpStartLine;
@@ -8,6 +9,8 @@ import org.apache.coyote.http11.web.QueryParameters;
 import java.util.Objects;
 
 public class HttpRequest {
+
+    public static final String J_SESSION = "JSESSIONID";
 
     private final HttpStartLine httpStartLine;
     private final HttpHeaders httpHeaders;
@@ -24,14 +27,6 @@ public class HttpRequest {
         return ResourceExtension.contains(uri);
     }
 
-    public HttpHeaders getHeaders() {
-        return httpHeaders;
-    }
-
-    public QueryParameters getQueryParameters() {
-        return httpStartLine.getQueryParameters();
-    }
-
     public boolean isMethod(final HttpMethod httpMethod) {
         return httpStartLine.getHttpMethod() == httpMethod;
     }
@@ -44,6 +39,14 @@ public class HttpRequest {
         return httpHeaders.existsCookie();
     }
 
+    public HttpHeaders getHeaders() {
+        return httpHeaders;
+    }
+
+    public QueryParameters getQueryParameters() {
+        return httpStartLine.getQueryParameters();
+    }
+
     public String getUri() {
         return httpStartLine.getUri();
     }
@@ -54,7 +57,8 @@ public class HttpRequest {
 
     public String getSession() {
         final String cookie = httpHeaders.getCookie();
-        return cookie.split("=")[1];
+        final HttpCookie httpCookie = HttpCookie.from(cookie);
+        return httpCookie.getJSessionId();
     }
 
     @Override

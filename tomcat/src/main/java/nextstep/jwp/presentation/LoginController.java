@@ -52,7 +52,7 @@ public class LoginController {
     }
 
     private void addSession(final User user, final HttpCookie httpCookie) {
-        final Session session = new Session(httpCookie.getValue());
+        final Session session = new Session(httpCookie.getJSessionId());
         final SessionManager sessionManager = SessionManager.getInstance();
         session.setAttribute("user", user);
         sessionManager.add(session);

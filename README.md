@@ -43,6 +43,13 @@
   - [X] Controller 인터페이스를 구현하는 AbstractController를 만들고 여기서 메서드에 따른 분기를 진행한다. 
   - [X] 각 Controller 구현체에는 doGet(), doPost() 만을 구현한다. 
 
+### 4단계 - 동시성 확장하기
+
+- [ ] 스레드 풀을 사용해 스레드를 재사용하도록 구현한다.
+  - [ ] acceptCount(최소 100), maxThreads(최소 200)를 설정한다.
+- [ ] SessionManager에서 session를 스레드 세이프하게 구현한다.
+  - [ ] 동시성 컬렉션(Concurrent Collections)를 적용한다.
+
 ### 추가로 고려해볼 수 있는 부분
 
 - [X] 예외 처리를 세분화 한다. 

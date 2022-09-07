@@ -17,23 +17,44 @@ public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final HttpHeader httpHeaders;
+    private final RequestBody requestBody;
 
-    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders) {
+    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders,
+                       final RequestBody requestBody) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
-        return new HttpRequest(createHttpRequestLine(bufferedReader), createHttpRequestHeader(bufferedReader));
+        final HttpRequestLine httpRequestLine = createHttpRequestLine(bufferedReader);
+        final HttpHeader httpRequestHeader = createHttpRequestHeader(bufferedReader);
+        final RequestBody requestBody = parseRequestBody(bufferedReader, httpRequestHeader);
+        return new HttpRequest(httpRequestLine, httpRequestHeader, requestBody);
+    }
+
+    private static RequestBody parseRequestBody(final BufferedReader bufferedReader, final HttpHeader httpRequestHeader)
+            throws IOException {
+        if (httpRequestHeader.isContainContentLength()) {
+            int contentLength = httpRequestHeader.getContentLength();
+            final char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return RequestBody.from(new String(buffer));
+        }
+        return RequestBody.empty();
     }
 
     private static HttpHeader createHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        List<String> headerList = new ArrayList<>();
-        final String line = bufferedReader.readLine();
-        while (line.isBlank()) {
-            headerList.add(bufferedReader.readLine());
+        List<String> headers = new ArrayList<>();
+        String line = bufferedReader.readLine();
+        if (line == null) {
+            return HttpHeader.from(headers);
         }
-        return HttpHeader.from(headerList);
+        while (!"".equals(line)) {
+            headers.add(line);
+            line = bufferedReader.readLine();
+        }
+        return HttpHeader.from(headers);
     }
 
     private static HttpRequestLine createHttpRequestLine(final BufferedReader bufferedReader) throws IOException {
@@ -45,10 +66,6 @@ public class HttpRequest {
         );
     }
 
-    public boolean hasQueryString() {
-        return httpRequestLine.hasQueryParams();
-    }
-
     public String getUrl() {
         return httpRequestLine.getPath();
     }
@@ -57,7 +74,11 @@ public class HttpRequest {
         return httpRequestLine.getQueryParams();
     }
 
-    public HttpVersion getVersion() {
-        return httpRequestLine.getVersion();
+    public String getParameter(String parameter) {
+        return requestBody.getValues().get(parameter);
+    }
+
+    public boolean isGet() {
+        return httpRequestLine.isGet();
     }
 }

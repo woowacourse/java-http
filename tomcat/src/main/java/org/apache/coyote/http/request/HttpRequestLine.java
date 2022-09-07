@@ -20,10 +20,6 @@ public class HttpRequestLine {
         return new HttpRequestLine(method, path, version);
     }
 
-    public boolean hasQueryParams() {
-        return path.hasQueryParams();
-    }
-
     public String getPath() {
         return path.getPath();
     }
@@ -32,7 +28,11 @@ public class HttpRequestLine {
         return path.getQueryParams();
     }
 
-    public HttpVersion getVersion() {
-        return version;
+    public RequestMethod getMethod() {
+        return method;
+    }
+
+    public boolean isGet() {
+        return method.equals(RequestMethod.GET);
     }
 }

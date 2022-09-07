@@ -17,11 +17,11 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public static HttpCookie of() {
+    public static HttpCookie create() {
         return new HttpCookie(new LinkedHashMap<>());
     }
 
-    public static HttpCookie of(final String raw) {
+    public static HttpCookie create(final String raw) {
         Map<String, String> value = new LinkedHashMap<>();
         if (raw != null) {
             putKeyValue(raw, value);
@@ -54,7 +54,7 @@ public class HttpCookie {
     public String parse() {
         final List<String> collect = value.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
                 .collect(Collectors.toList());
         return String.join(VALUE_DELIMITER, collect);
     }

@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import org.apache.http.HttpMethod;
+
 public class Request {
 
     private final RequestInfo requestInfo;
@@ -30,5 +32,9 @@ public class Request {
 
     public String getBody() {
         return body;
+    }
+
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return requestInfo.getHttpMethod().equals(httpMethod);
     }
 }

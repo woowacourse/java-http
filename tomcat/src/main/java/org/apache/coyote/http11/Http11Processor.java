@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.request.HttpMethod.GET;
-import static org.apache.coyote.request.HttpMethod.POST;
+import static org.apache.coyote.request.startline.HttpMethod.GET;
+import static org.apache.coyote.request.startline.HttpMethod.POST;
 import static org.apache.coyote.response.StatusCode.OK;
 
 import java.io.BufferedReader;
@@ -14,7 +14,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.request.HttpMethod;
+import org.apache.coyote.request.startline.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;

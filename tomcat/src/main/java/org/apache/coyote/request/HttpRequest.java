@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.cookie.Cookies;
+import org.apache.coyote.request.startline.HttpMethod;
+import org.apache.coyote.request.startline.StartLine;
 
 public class HttpRequest {
 

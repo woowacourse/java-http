@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.coyote.request.startline;
 
 public class StartLine {
 
@@ -11,12 +11,12 @@ public class StartLine {
 
     private final HttpMethod method;
     private final String uri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
     private StartLine(HttpMethod method, String requestUri, String httpVersion) {
         this.method = method;
         this.uri = requestUri;
-        this.httpVersion = httpVersion;
+        this.httpVersion = HttpVersion.from(httpVersion);
     }
 
     public static StartLine from(String startLine) {

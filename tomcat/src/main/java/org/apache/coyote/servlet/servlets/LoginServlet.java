@@ -48,7 +48,7 @@ public class LoginServlet extends Servlet {
         if (!bodies.containsKey("account") || !bodies.containsKey("password")) {
             return HttpResponse.of(httpRequest.getHttpVersion(), "/404.html", "404");
         }
-        final Optional<User> user = UserService.findUser(bodies.get("account"), bodies.get("password"));
+        final Optional<User> user = UserService.find(bodies.get("account"), bodies.get("password"));
 
         if (user.isPresent()) {
             log.info("login success to ID : {}", user.get().getAccount());

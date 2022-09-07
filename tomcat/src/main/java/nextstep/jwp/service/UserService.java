@@ -10,7 +10,15 @@ public class UserService {
     private UserService() {
     }
 
-    public static Optional<User> findUser(final String account, final String password) {
+    public static void save(final String account, final String password, final String email) {
+        final Optional<User> existUser = InMemoryUserRepository.findByAccount(account);
+        if (existUser.isPresent()) {
+            return;
+        }
+        InMemoryUserRepository.save(User.register(account, password, email));
+    }
+
+    public static Optional<User> find(final String account, final String password) {
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
             return user;

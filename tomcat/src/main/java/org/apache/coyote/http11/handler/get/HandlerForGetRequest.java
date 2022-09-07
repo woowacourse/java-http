@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.handler.get;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,11 +8,13 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerForGetRequest extends Handler {
 
-    static final HandlerForGetRequest HANDLER_FOR_GET_REQUEST = new HandlerForGetRequest();
+    public static final HandlerForGetRequest HANDLER_FOR_GET_REQUEST = new HandlerForGetRequest();
 
     HandlerForGetRequest() {
     }

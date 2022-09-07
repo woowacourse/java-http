@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.handler.get;
 
 import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
 
@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class LoginPageHandler extends HandlerForGetRequest {
 
-    static final LoginPageHandler LOGIN_PAGE_HANDLER = new LoginPageHandler();
+    public static final LoginPageHandler LOGIN_PAGE_HANDLER = new LoginPageHandler();
     private static String JSESSIONID = "JSESSIONID";
 
     private LoginPageHandler() {

@@ -9,7 +9,7 @@ public abstract class Handler {
 
     static final Logger log = LoggerFactory.getLogger(Handler.class);
 
-    Handler() {
+    public Handler() {
     }
 
     public abstract HandlerResult handle(final HttpRequest request) throws IOException;

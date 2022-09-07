@@ -1,4 +1,4 @@
-package org.springframework;
+package org.springframework.servlet;
 
 import java.util.Objects;
 import org.apache.http.HttpRequest;

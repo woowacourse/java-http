@@ -26,13 +26,19 @@ public class User {
         return account;
     }
 
+    public boolean isSameUser(String account, String password, String email) {
+        return this.account.equals(account)
+            && this.password.equals(password)
+            && this.email.equals(email);
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

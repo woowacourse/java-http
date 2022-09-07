@@ -37,8 +37,4 @@ public class Http11QueryParams {
         }
         return value;
     }
-
-    public boolean hasParam() {
-        return queryParams.size() != 0;
-    }
 }

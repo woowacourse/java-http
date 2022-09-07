@@ -14,6 +14,6 @@ public class StaticFileController implements Controller{
 
     @Override
     public void run(final Request request, final Response response) throws IOException, URISyntaxException {
-        response.write(HttpStatus.OK, request.getRequestURL());
+        response.write(HttpStatus.OK, request.getURL());
     }
 }

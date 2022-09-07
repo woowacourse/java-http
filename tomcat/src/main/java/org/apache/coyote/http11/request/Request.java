@@ -83,11 +83,15 @@ public class Request {
         return this.requestURL.hasPath(path);
     }
 
+    public String findJsessionid() {
+        return headers.getJsessionid();
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
 
-    public URL getRequestURL() {
+    public URL getURL() {
         return requestURL;
     }
 
@@ -101,9 +105,5 @@ public class Request {
 
     public RequestBody getBody() {
         return body;
-    }
-
-    public String findJsessionid() {
-        return headers.getJsessionid();
     }
 }

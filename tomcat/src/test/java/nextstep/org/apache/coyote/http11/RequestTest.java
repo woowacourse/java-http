@@ -34,13 +34,47 @@ class RequestTest {
 
     @Test
     void isForStaticFile() throws IOException {
+        // given
         final String requestString = RequestFixture.create(HttpMethod.GET, "/index.html", "");
         stubSocket = new StubSocket(requestString);
-
-        // when
         final Request request = Request.of(stubSocket.getInputStream());
 
+        // when
+        final boolean actual = request.isForStaticFile();
+
         // then
-        assertThat(request.isForStaticFile()).isTrue();
+        assertThat(actual).isTrue();
     }
+
+    @Test
+    void isDefaultUrl() throws IOException {
+        // given
+        final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
+        stubSocket = new StubSocket(requestString);
+        final Request request = Request.of(stubSocket.getInputStream());
+
+        // when
+        final boolean actual = request.isDefaultUrl();
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void findJsessionid() throws IOException {
+        // given
+        final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
+        stubSocket = new StubSocket(requestString);
+        final Request request = Request.of(stubSocket.getInputStream());
+        final String jsessionidValue = "some-jsessionid-exists";
+        request.getHeaders().add("JSESSIONID", jsessionidValue);
+
+        // when
+        final String actual = request.findJsessionid();
+
+        // then
+        assertThat(actual).isEqualTo(jsessionidValue);
+    }
+
+
 }

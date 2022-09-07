@@ -66,8 +66,8 @@ class RequestTest {
         final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
-        final String jsessionidValue = "some-jsessionid-exists";
-        request.getHeaders().add("JSESSIONID", jsessionidValue);
+        final String jsessionidValue = "JSESSIONID=some-jsessionid-exists";
+        request.getHeaders().add("Cookie", jsessionidValue);
 
         // when
         final String actual = request.findJsessionid();
@@ -75,6 +75,4 @@ class RequestTest {
         // then
         assertThat(actual).isEqualTo(jsessionidValue);
     }
-
-
 }

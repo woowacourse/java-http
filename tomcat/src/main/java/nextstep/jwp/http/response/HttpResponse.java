@@ -49,11 +49,7 @@ public class HttpResponse {
         String response = httpVersion.getValue() + " " + httpStatus.httpResponseHeaderStatus() + " ";
         httpResponseHeaders.addHeader("Content-Length", String.valueOf(contentLength()));
         response = joinOutputResponseFormat(response, httpResponseHeaders.toHeaderFormat());
-        String result = joinOutputResponseFormat(response, "", responseBody);
-        if (!result.contains("height: 20px !important;")) {
-            System.out.println(result);
-        }
-        return result;
+        return joinOutputResponseFormat(response, "", responseBody);
     }
 
     private String joinOutputResponseFormat(final String... response) {

@@ -1,9 +1,9 @@
 package org.apache.coyote.http.response;
 
-import java.util.UUID;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.session.Session;
 
 public class HttpResponse {
 
@@ -41,8 +41,7 @@ public class HttpResponse {
         return httpHeader.print();
     }
 
-    public void addJSessionId() {
-        final String jSessionId = UUID.randomUUID().toString();
-        httpHeader.addJSessionId(jSessionId);
+    public void addJSessionId(final Session session) {
+        httpHeader.addJSessionId(session);
     }
 }

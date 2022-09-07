@@ -1,10 +1,12 @@
 package org.apache.coyote.http;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
+
+    private static final int PARAM_INFO_INDEX = 0;
+    private static final int PARAM_VALUE_INDEX = 1;
 
     private Map<String, String> cookies;
 
@@ -13,9 +15,20 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String cookieHeader) {
-        return new HttpCookie(Arrays.stream(cookieHeader.split("; "))
-                .map(cookie -> cookie.split("="))
-                .collect(Collectors.toMap(e -> e[0], e -> e[1])));
+        final String[] params = cookieHeader.split("; ");
+        final HashMap<String, String> cookies = initCookies(params);
+        return new HttpCookie(cookies);
+    }
+
+    private static HashMap<String, String> initCookies(final String[] params) {
+        final HashMap<String, String> data = new HashMap<>();
+        for (final String param : params) {
+            final String[] splitParam = param.split("=");
+            final String paramInfo = splitParam[PARAM_INFO_INDEX];
+            final String paramValue = splitParam[PARAM_VALUE_INDEX];
+            data.put(paramInfo, paramValue);
+        }
+        return data;
     }
 
     public boolean hasJSessionId() {
@@ -24,7 +37,7 @@ public class HttpCookie {
 
     public String getJSessionId() {
         if (hasJSessionId()) {
-            return cookies.get("JESESSIONID");
+            return cookies.get("JSESSIONID");
         }
         return "";
     }

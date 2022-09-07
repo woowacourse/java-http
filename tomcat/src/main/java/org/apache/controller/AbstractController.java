@@ -12,6 +12,8 @@ import org.apache.util.PathUtils;
 
 public class AbstractController implements Controller {
 
+    private static final String NOT_FOUND_PAGE = "/404.html";
+
     @Override
     public HttpResponse service(final HttpRequest request) throws Exception {
         if (request.isGet()) {
@@ -29,7 +31,7 @@ public class AbstractController implements Controller {
     }
 
     private HttpResponse notFound() throws IOException, URISyntaxException {
-        final Path path = PathUtils.load("/404.html");
+        final Path path = PathUtils.load(NOT_FOUND_PAGE);
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.NOT_FOUND, ContentType.HTML, responseBody);
     }

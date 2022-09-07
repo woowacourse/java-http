@@ -10,12 +10,14 @@ import org.apache.util.PathUtils;
 
 public class FileController extends AbstractController {
 
+    public static final String FILE_DELIMITER = "\\.";
+
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
         final String url = request.getUrl();
         final Path path = PathUtils.load(url);
 
-        final String extension = url.split("\\.")[1];
+        final String extension = url.split(FILE_DELIMITER)[1];
         final String responseBody = new String(Files.readAllBytes(path));
         final ContentType contentType = ContentType.findContentType(extension);
 

@@ -16,11 +16,12 @@ import org.slf4j.LoggerFactory;
 public class UserController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    private static final String HTML_EXTENSION = ".html";
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
         final String url = request.getUrl();
-        final Path path = PathUtils.load(url + ".html");
+        final Path path = PathUtils.load(url + HTML_EXTENSION);
         saveUser(request);
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, "/index.html");
@@ -44,7 +45,7 @@ public class UserController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
         final String url = request.getUrl();
-        final Path path = PathUtils.load(url + ".html");
+        final Path path = PathUtils.load(url + HTML_EXTENSION);
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.OK, ContentType.HTML, responseBody);
     }

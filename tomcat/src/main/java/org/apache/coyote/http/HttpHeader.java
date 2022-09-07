@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.session.Session;
 
 public class HttpHeader {
 
@@ -65,8 +66,8 @@ public class HttpHeader {
         return getCookiesData().getJSessionId();
     }
 
-    public void addJSessionId(final String jSessionId) {
-        values.put("Set-Cookie", "JSESSIONID=" + jSessionId);
+    public void addJSessionId(final Session session) {
+        values.put("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     public HttpCookie getCookiesData() {

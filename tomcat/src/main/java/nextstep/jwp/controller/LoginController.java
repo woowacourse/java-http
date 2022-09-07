@@ -16,7 +16,15 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private final static Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final LoginController INSTANCE = new LoginController();
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {

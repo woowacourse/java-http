@@ -20,7 +20,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final RequestMapping requestMapping = RequestMapping.builder()
-                .add("/", new HomeController())
+                .add("/", HomeController.getInstance())
                 .build();
 
         final var processor = new Http11Processor(socket, requestMapping);
@@ -51,7 +51,7 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final RequestMapping requestMapping = RequestMapping.builder()
-                .add("/index.html", new IndexController())
+                .add("/index.html", IndexController.getInstance())
                 .build();
 
         final Http11Processor processor = new Http11Processor(socket, requestMapping);

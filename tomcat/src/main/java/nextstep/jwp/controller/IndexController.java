@@ -7,6 +7,15 @@ import org.apache.coyote.http.HttpStatusCode;
 
 public class IndexController extends AbstractController {
 
+    private static final IndexController INSTANCE = new IndexController();
+
+    private IndexController() {
+    }
+
+    public static IndexController getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.init(HttpStatusCode.OK)

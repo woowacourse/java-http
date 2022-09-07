@@ -18,11 +18,11 @@ public class Application {
         log.info("web server start.");
 
         final RequestMapping requestMapping = RequestMapping.builder()
-                .add("/", new HomeController())
-                .add("/index.html", new IndexController())
-                .add("/login", new LoginController())
-                .add("/register", new RegisterController())
-                .addResourceController(new ResourceController())
+                .add("/", HomeController.getInstance())
+                .add("/index.html", IndexController.getInstance())
+                .add("/login", LoginController.getInstance())
+                .add("/register", RegisterController.getInstance())
+                .addResourceController(ResourceController.getInstance())
                 .build();
 
         final var tomcat = new Tomcat();

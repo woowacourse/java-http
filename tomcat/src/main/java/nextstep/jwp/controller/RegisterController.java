@@ -12,6 +12,15 @@ import org.apache.coyote.http11.SessionManager;
 
 public class RegisterController extends AbstractController {
 
+    private static final RegisterController INSTANCE = new RegisterController();
+
+    private RegisterController() {
+    }
+
+    public static RegisterController getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.init(HttpStatusCode.OK)

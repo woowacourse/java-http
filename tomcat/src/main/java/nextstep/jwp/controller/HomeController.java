@@ -8,6 +8,14 @@ import org.apache.coyote.http.HttpStatusCode;
 public class HomeController extends AbstractController {
 
     private static final String WELCOME_MESSAGE = "Hello world!";
+    private static final HomeController INSTANCE = new HomeController();
+
+    private HomeController() {
+    }
+
+    public static HomeController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {

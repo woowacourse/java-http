@@ -31,7 +31,7 @@ public enum HandlerMapper {
 
     private static class Constants {
         private static final Pattern HOME_URL_REGEX = Pattern.compile("^/$");
-        private static final Pattern RESOURCE_URL_REGEX = Pattern.compile("^(/[a-z|A-Z|가-힣|ㄱ-ㅎ|_|\\-]*)+(\\.[a-z]*)$");
+        private static final Pattern RESOURCE_URL_REGEX = Pattern.compile("^(/[a-z|A-Z|가-힣|ㄱ-ㅎ|_|0-9|\\-]*)+(\\.[a-z]*)$");
         private static final Pattern LOGIN_URL_REGEX = Pattern.compile("^(/login)(\\?([^#\\s]*))?");
     }
 }

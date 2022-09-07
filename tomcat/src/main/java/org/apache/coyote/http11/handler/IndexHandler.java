@@ -10,7 +10,7 @@ import static org.apache.coyote.model.request.ContentType.HTML;
 
 public class IndexHandler implements Handler {
 
-    public static final String INDEX_HTML = "/index.html";
+    private static final String INDEX_HTML = "/index.html";
     private final HttpRequest httpRequest;
 
     public IndexHandler(final HttpRequest httpRequest) {

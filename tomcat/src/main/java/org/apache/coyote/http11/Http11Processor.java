@@ -44,8 +44,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(HttpRequest httpRequest) {
-        Handler handler = HandlerMapper.findHandler(httpRequest);
+    private String createResponse(final HttpRequest httpRequest) {
+        final Handler handler = HandlerMapper.findHandler(httpRequest);
         return handler.getResponse();
     }
 }

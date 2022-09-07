@@ -19,9 +19,9 @@ public class DefaultHandler implements Handler {
 
     @Override
     public String getResponse() {
-        String path = httpRequest.getPath();
-        String extension = ContentType.getType(getExtension(path));
-        String body = RequestUtil.getResponseBody(path, this.getClass());
+        final String path = httpRequest.getPath();
+        final String extension = ContentType.getType(getExtension(path));
+        final String body = RequestUtil.getResponseBody(path, this.getClass());
 
         return HttpResponse.of(extension, body, ResponseLine.of(StatusCode.OK))
                 .getResponse();

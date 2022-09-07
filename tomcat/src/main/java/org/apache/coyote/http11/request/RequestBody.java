@@ -1,12 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.apache.support.ParameterBinder;
 
 public class RequestBody {
-
-    private static final String QUERY_STRING_SEPARATOR = "&";
-    private static final String PARAMETER_DELIMITER = "=";
 
     private final Map<String, String> values;
 
@@ -15,20 +12,7 @@ public class RequestBody {
     }
 
     public static RequestBody from(String requestBody) {
-        if (requestBody == null || requestBody.isEmpty()) {
-            return new RequestBody(new HashMap<>());
-        }
-        final Map<String, String> values = new HashMap<>();
-        final String[] split = requestBody.split(QUERY_STRING_SEPARATOR);
-
-        for (String param : split) {
-            String[] splitParam = param.split(PARAMETER_DELIMITER);
-            final String key = splitParam[0];
-            final String value = splitParam[1];
-
-            values.put(key, value);
-        }
-        return new RequestBody(values);
+        return new RequestBody(ParameterBinder.bind(requestBody));
     }
 
     public Map<String, String> getValues() {

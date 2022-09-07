@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 
-public class LoginServlet extends Servlet {
+public class LoginAbstractServlet extends AbstractServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginAbstractServlet.class);
 
-    public LoginServlet(final SessionFactory sessionFactory) {
+    public LoginAbstractServlet(final SessionFactory sessionFactory) {
         super(sessionFactory);
     }
 

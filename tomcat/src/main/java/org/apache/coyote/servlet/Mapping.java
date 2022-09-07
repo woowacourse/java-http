@@ -2,15 +2,15 @@ package org.apache.coyote.servlet;
 
 import java.util.Objects;
 
-import org.apache.coyote.servlet.servlets.Servlet;
+import org.apache.coyote.servlet.servlets.AbstractServlet;
 
 public class Mapping {
 
-    private final Servlet servlet;
+    private final AbstractServlet abstractServlet;
     private final String url;
 
-    public Mapping(final Servlet servlet, final String url) {
-        this.servlet = servlet;
+    public Mapping(final AbstractServlet abstractServlet, final String url) {
+        this.abstractServlet = abstractServlet;
         this.url = url;
     }
 
@@ -18,8 +18,8 @@ public class Mapping {
         return this.url.equals(url);
     }
 
-    public Servlet getServlet() {
-        return servlet;
+    public AbstractServlet getServlet() {
+        return abstractServlet;
     }
 
     @Override
@@ -29,18 +29,18 @@ public class Mapping {
         if (o == null || getClass() != o.getClass())
             return false;
         Mapping mapping = (Mapping) o;
-        return Objects.equals(servlet, mapping.servlet) && Objects.equals(url, mapping.url);
+        return Objects.equals(abstractServlet, mapping.abstractServlet) && Objects.equals(url, mapping.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(servlet, url);
+        return Objects.hash(abstractServlet, url);
     }
 
     @Override
     public String toString() {
         return "Mapping{" +
-            "servlet=" + servlet +
+            "servlet=" + abstractServlet +
             ", url='" + url + '\'' +
             '}';
     }

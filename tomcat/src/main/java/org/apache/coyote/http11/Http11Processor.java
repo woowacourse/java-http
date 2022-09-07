@@ -36,15 +36,17 @@ public class Http11Processor implements Runnable, Processor {
         try (final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
-            FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
 
             String startLine = bufferedReader.readLine();
             HttpHeaders httpHeaders = extractHeaders(bufferedReader);
             RequestBody requestBody = null;
+
             if (httpHeaders.containsKey("Content-Length")) {
                 requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
             }
             final HttpRequest httpRequest = HttpRequest.of(startLine, httpHeaders, requestBody);
+
+            FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
             final ResponseEntity responseEntity = frontRequestHandler.handle(httpRequest);
 
             final HttpResponse httpResponse = HttpResponse.builder()

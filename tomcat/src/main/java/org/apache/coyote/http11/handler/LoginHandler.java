@@ -10,6 +10,7 @@ import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.RequestBody;
+import org.apache.coyote.http11.message.HttpCookie;
 import org.apache.coyote.util.FileUtil;
 
 public class LoginHandler implements RequestHandler {
@@ -41,7 +42,9 @@ public class LoginHandler implements RequestHandler {
         if (foundUser.isPresent()) {
             User user = foundUser.get();
             if (user.checkPassword(requestBody.get("password"))) {
-                return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(Map.of("Location", "/index.html")));
+                Map<String, String> headers = Map.of("Location", "/index.html", "Set-Cookie",
+                        "JSESSIONID=" + HttpCookie.create());
+                return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(headers));
             }
         }
         return new ResponseEntity(HttpStatus.UNAUTHORIZED, FileUtil.readAllBytes("/401.html"), ContentType.HTML);

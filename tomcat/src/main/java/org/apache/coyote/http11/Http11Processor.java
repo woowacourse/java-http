@@ -9,10 +9,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +39,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestHeader = readHttpRequest(bufferedReader);
+            final var request = readHttpRequest(bufferedReader);
 
-            if (requestHeader.isEmpty()) {
+            if (request.isEmpty()) {
                 return;
             }
 
-            final HttpRequest httpRequest = HttpRequest.from(requestHeader);
+            final HttpRequest httpRequest = HttpRequest.from(request, request);
             final var response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
@@ -57,6 +59,8 @@ public class Http11Processor implements Runnable, Processor {
         StringBuilder header = new StringBuilder();
 
         final var startLine = bufferedReader.readLine();
+        final var requestHeaders = readRequestHeaders(bufferedReader);
+        final HttpRequest httpRequest = HttpRequest.from(startLine, requestHeaders);
 
 //        while (bufferedReader.ready()) {
 //            header.append(bufferedReader.readLine())
@@ -69,6 +73,16 @@ public class Http11Processor implements Runnable, Processor {
 //        String requestBody = new String(buffer);
 
         return header.toString();
+    }
+
+    private String readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+        StringBuilder requestHeaders = new StringBuilder();
+        String line;
+        while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
+            requestHeaders.append(line)
+                    .append("\r\n");
+        }
+        return requestHeaders.toString();
     }
 
     private String getResponse(final HttpRequest httpRequest) throws IOException {

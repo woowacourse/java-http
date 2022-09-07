@@ -91,7 +91,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("method (GET), url(/login?account={account}&password={password}) 요청에 user정보 응답이 와야한다.")
+    @DisplayName("method (POST), url(/login) 요청이 올바르면 index.html 페이지로 redirect 응답이 와야한다.")
     void login(){
         // given
         final String httpRequest = String.join("\r\n",
@@ -118,6 +118,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (POST), url(/login) 요청이 올바르지 않으면 401.html 페이지로 redirect 응답이 와야한다.")
     void loginFail()  {
         // given
         final String httpRequest = String.join("\r\n",
@@ -144,6 +145,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (GET), url(/401.html) 요청에 401.html 응답이 와야한다.")
     void redirectLoginFail()  {
         // given
         final String httpRequest = String.join("\r\n",
@@ -170,6 +172,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (GET), url(/register) 요청에 register.html 응답이 와야한다.")
     void registerPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -197,6 +200,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (POST), url(/register) 요청에 정보가 올바르면 index.html redirect 응답이 와야한다.")
     void register()  {
         // given
         final String httpRequest = String.join("\r\n",

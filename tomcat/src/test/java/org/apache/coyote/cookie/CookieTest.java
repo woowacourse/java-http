@@ -11,27 +11,27 @@ class CookieTest {
     @DisplayName("비어있는 쿠키를 생성하고 검사할 수 있다.")
     @Test
     void emptyCookie() {
-        //given
+        // given
         final Cookie emptyCookie = Cookie.empty();
 
-        //when
+        // when
         final boolean result = emptyCookie.isEmpty();
 
-        //then
+        // then
         assertThat(result).isTrue();
     }
 
     @DisplayName("키 값이 동일한지를 검사할 수 있다.")
     @Test
     void isSameKey() {
-        //given
+        // given
         final Cookie cookie = new Cookie("key", "value");
 
-        //when
+        // when
         final boolean result = cookie.isSameKey("key");
         final boolean invalidResult = cookie.isSameKey("invalid");
 
-        //then
+        // then
         assertThat(result).isTrue();
         assertThat(invalidResult).isFalse();
     }
@@ -39,26 +39,26 @@ class CookieTest {
     @DisplayName("헤더 형식으로 쿠키를 반환할 수 있다.")
     @Test
     void toHeaderFormat() {
-        //given
+        // given
         final Cookie cookie = new Cookie("key", "value");
 
-        //when
+        // when
         final String result = cookie.toHeaderFormat();
 
-        //then
+        // then
         assertThat(result).isEqualTo("key=value");
     }
 
     @DisplayName("JSESSIONID 키 값을 가지는 쿠키인지를 판별할 수 있다.")
     @Test
     void isJSessionCookie() {
-        //given
+        // given
         final Cookie cookie = new Cookie("JSESSIONID", "value");
 
-        //when
+        // when
         final boolean result = cookie.isJSessionCookie();
 
-        //then
+        // then
         assertThat(result).isTrue();
     }
 

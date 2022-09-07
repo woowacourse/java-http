@@ -57,10 +57,10 @@ class RegisterHandlerTest {
     @DisplayName("이미 존재하는 account로 회원가입시 ExistUserException이 발생한다.")
     @Test
     void failToLogin() {
-        //given
+        // given
         final String requestBody = "account=gugu&password=password&email=gugu@email.com";
 
-        //when & then
+        // when & then
         Assertions.assertThatThrownBy(() -> RegisterHandler.register(requestBody))
                 .isInstanceOf(ExistUserException.class);
     }
@@ -68,13 +68,13 @@ class RegisterHandlerTest {
     @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
     @Test
     void returnLoginWhenWithoutQuery() {
-        //given
+        // given
         final String requestBody = "account=dwoo&password=1234&email=dwoo@email.com";
 
-        //when
+        // when
         final HttpResponse httpResponse = RegisterHandler.register(requestBody);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

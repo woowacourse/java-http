@@ -420,7 +420,7 @@ class Http11ProcessorTest {
     @DisplayName("로그인에 성공한 이후에 login으로 POST 요청시 index.html 로 리다이렉트한다.")
     @Test
     void redirectIndexWhenAfterLogin() throws IOException {
-        //given
+        // given
         final String account = "gugu";
         final String requestBody = "account=" + account + "&password=password";
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
@@ -447,7 +447,7 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
-        //then
+        // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +

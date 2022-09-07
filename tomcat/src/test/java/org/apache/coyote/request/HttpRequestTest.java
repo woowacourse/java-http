@@ -41,7 +41,7 @@ class HttpRequestTest {
     @DisplayName("헤더에서 쿠키 정보를 조회할 수 있다.")
     @Test
     void getCookies() {
-        //given
+        // given
         String startLine = "GET /index.html HTTP/1.1 ";
         final HttpRequest sut = HttpRequest.of(startLine, Map.of(
                 "Host", "localhost:8080",
@@ -50,10 +50,10 @@ class HttpRequestTest {
                 "Cookie", "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
         ), "");
 
-        //when
+        // when
         final Cookies cookies = sut.getCookies();
 
-        //then
+        // then
         final Cookie yummy_cookie = cookies.getCookie("yummy_cookie").orElseThrow();
         final Cookie tasty_cookie = cookies.getCookie("tasty_cookie").orElseThrow();
         final Cookie JSESSIONID = cookies.getCookie("JSESSIONID").orElseThrow();

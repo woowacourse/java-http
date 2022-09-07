@@ -54,72 +54,72 @@ class LoginHandlerTest {
     @DisplayName("로그인 실패시에는 401.html 을 반환한다.")
     @Test
     void failToLogin() {
-        //given
+        // given
         final String requestBody = "account=gugu&password=invalid";
 
-        //when
+        // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
         final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).contains("/401.html");
     }
 
     @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
     @Test
     void returnLoginWhenWithoutQuery() {
-        //given
+        // given
         final String requestBody = "account=gugu&password=password";
 
-        //when
+        // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
         final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 
     @DisplayName("로그인 성공 시에 Cookie에 JSESSIONID가 없으면 Cookie 를 담은 응답을 반환한다.")
     @Test
     void setCookie() {
-        //given
+        // given
         final String requestBody = "account=gugu&password=password";
 
-        //when
+        // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
         final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).contains("Set-Cookie: JSESSIONID");
     }
 
     @DisplayName("요청에 쿠키가 포함되어 있을 경우에는 Set-cookie 를 응답하지 않는다.")
     @Test
     void noSetCookieWhenExist() {
-        //given
+        // given
         final String requestBody = "account=gugu&password=password";
 
-        //when
+        // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of("Cookie", "JSESSIONID=randomid"),
                 requestBody);
         final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).doesNotContain("Set-Cookie: JSESSIONID");
     }
 
     @DisplayName("로그인 성공 시 세션 저장소(SessionManager)에 유저 정보를 저장한다.")
     @Test
     void saveSession() {
-        //given
+        // given
         final String account = "gugu";
         final String requestBody = "account=" + account + "&password=password";
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
 
-        //when
+        // when
         final HttpResponse response = LoginHandler.login(httpRequest);
 
-        //then
+        // then
         final Cookie cookie = response.getCookie();
         final Session session = SessionManager.findSession(cookie.getValue());
         final User user = (User) session.getAttribute("user");
@@ -129,7 +129,7 @@ class LoginHandlerTest {
     @DisplayName("로그인에 성공한 이후에는 index.html 로 리다이렉트한다.")
     @Test
     void redirectIndexWhenAfterLogin() {
-        //given
+        // given
         final String account = "gugu";
         final User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
@@ -141,10 +141,10 @@ class LoginHandlerTest {
         final HttpRequest httpRequest = HttpRequest.of("GET /login HTTP/1.1",
                 Map.of("Cookie", "JSESSIONID=" + sessionId), "");
 
-        //when
+        // when
         final HttpResponse httpResponse = LoginHandler.loginWithGet(httpRequest);
 
-        //then
+        // then
         assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

@@ -12,14 +12,13 @@ class HttpResponseTest {
     @DisplayName("302 Found 응답시에는 Location 헤더를 포함해서 응답한다.")
     @Test
     void returnWithLocation(){
-        //given
-        final StatusCode statusCode = FOUND;
-        final HttpResponse httpResponse = HttpResponse.of(statusCode, HTML, Location.from("/index.html"));
+        // given
+        final HttpResponse httpResponse = HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
 
-        //when
+        // when
         final String response = httpResponse.getResponse();
 
-        //then
+        // then
         assertThat(response).contains("Location: /index.html");
     }
 }

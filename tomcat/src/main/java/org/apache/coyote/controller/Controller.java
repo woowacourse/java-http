@@ -1,11 +1,11 @@
 package org.apache.coyote.controller;
 
-import java.io.IOException;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public interface Controller {
 
-    String service(HttpRequest httpRequest) throws IOException;
+    String service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
     boolean isRest();
 }

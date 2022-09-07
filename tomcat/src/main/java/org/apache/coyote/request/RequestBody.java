@@ -2,6 +2,8 @@ package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.coyote.exception.InvalidRequestException;
 
 public class RequestBody {
 
@@ -29,7 +31,8 @@ public class RequestBody {
         return new RequestBody(body);
     }
 
-    public Map<String, String> getValue() {
-        return value;
+    public String getValue(final String name) {
+        return Optional.ofNullable(value.get(name))
+                .orElseThrow(InvalidRequestException::new);
     }
 }

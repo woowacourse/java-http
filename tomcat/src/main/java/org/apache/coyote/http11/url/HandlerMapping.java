@@ -1,20 +1,21 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerMapping {
+    public static Url from(HttpRequest request) {
+        String path = request.getPath();
 
-    public static Url from(String uri, Http11Request request) {
-        if (isHomeUrl(uri)) {
-            return new HomePage(uri, request);
+        if (isHomeUrl(request.getPath())) {
+            return new HomePage(request);
         }
-        if (uri.startsWith("/login")) {
-            return new Login(uri, request);
+        if (path.startsWith("/login")) {
+            return new Login(request);
         }
-        if (uri.startsWith("/register")) {
-            return new Register(uri, request);
+        if (path.startsWith("/register")) {
+            return new Register(request);
         }
-        return new Empty(uri, request);
+        return new Empty(request);
     }
 
     private static boolean isHomeUrl(String uri) {

@@ -6,10 +6,11 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
@@ -38,15 +39,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-            String request = bufferedReader.readLine();
 
-            String uri = UrlParser.extractUri(request);
-            HttpMethod httpMethod = UrlParser.extractMethod(request);
+            RequestLine requestLine = RequestLine.extract(bufferedReader.readLine());
             HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
             HttpCookie cookie = HttpCookie.extract(httpHeaders);
-            String requestBody = extractRequestBody(bufferedReader, httpHeaders, httpMethod);
+            String requestBody = extractRequestBody(bufferedReader, httpHeaders, requestLine.getHttpMethod());
 
-            Url url = HandlerMapping.from(uri, new Http11Request(httpHeaders, httpMethod, cookie));
+            Url url = HandlerMapping.from(new HttpRequest(requestLine, httpHeaders, cookie));
 
             Http11Response resource = url.handle(httpHeaders, requestBody);
             String response = resource.toResponse();
@@ -64,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            requestBody = new String(buffer);
+            return new String(buffer);
         }
         log.info("requestBody : {}", requestBody);
         return requestBody;

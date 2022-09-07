@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
@@ -9,8 +9,8 @@ import org.apache.coyote.http11.utils.IOUtils;
 
 public class HomePage extends Url {
 
-    public HomePage(final String url, final Http11Request request) {
-        super(url, request);
+    public HomePage(final HttpRequest request) {
+        super(request);
     }
 
     @Override

@@ -5,7 +5,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.HttpSession;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpDataRequest;
 import org.apache.coyote.http11.request.HttpHeaders;
@@ -20,8 +20,8 @@ public class Login extends Url {
     private static final Logger log = LoggerFactory.getLogger(Login.class);
     private static final String SESSION_KEY = "user";
 
-    public Login(final String url, Http11Request request) {
-        super(url, request);
+    public Login(HttpRequest request) {
+        super(request);
     }
 
     @Override

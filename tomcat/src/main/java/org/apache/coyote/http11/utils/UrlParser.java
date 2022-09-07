@@ -14,8 +14,12 @@ public class UrlParser {
         return HttpMethod.valueOf(method);
     }
 
-    public static String extractUri(final String httpRequest) {
+    public static String extractPath(final String httpRequest) {
         return httpRequest.split(" ")[1];
+    }
+
+    public static String extractProtocolVersion(final String httpRequest) {
+        return httpRequest.split(" ")[2];
     }
 
     public static String convertEmptyToHtml(String url) {

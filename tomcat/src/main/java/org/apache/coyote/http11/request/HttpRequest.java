@@ -3,14 +3,14 @@ package org.apache.coyote.http11.request;
 import org.apache.catalina.HttpSession;
 import org.apache.catalina.SessionManager;
 
-public class Http11Request {
+public class HttpRequest {
+    private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
-    private final HttpMethod httpMethod;
     private final HttpCookie cookie;
 
-    public Http11Request(HttpHeaders httpHeaders, HttpMethod httpMethod, HttpCookie cookie) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpCookie cookie) {
+        this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
-        this.httpMethod = httpMethod;
         this.cookie = cookie;
     }
 
@@ -20,7 +20,11 @@ public class Http11Request {
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return requestLine.getHttpMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public HttpHeaders getHttpHeaders() {

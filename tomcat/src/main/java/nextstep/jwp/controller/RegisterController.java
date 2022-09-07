@@ -18,7 +18,7 @@ public class RegisterController implements Controller {
     @Override
     public Response execute(final Request request) {
         try {
-            final User user = convert(request.getBody());
+            final User user = convert(request.getContent());
             InMemoryUserRepository.save(user);
 
         } catch (NotEnoughConditionException e) {

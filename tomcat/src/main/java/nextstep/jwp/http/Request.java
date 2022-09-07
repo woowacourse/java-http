@@ -1,17 +1,15 @@
 package nextstep.jwp.http;
 
-import org.apache.http.HttpMethod;
-
 public class Request {
 
     private final RequestInfo requestInfo;
     private final Headers headers;
-    private final String body;
+    private final String content;
 
-    public Request(final RequestInfo requestInfo, final Headers headers, final String body) {
+    public Request(final RequestInfo requestInfo, final Headers headers, final String content) {
         this.requestInfo = requestInfo;
         this.headers = headers;
-        this.body = body;
+        this.content = content;
     }
 
     public String getUri() {
@@ -30,11 +28,7 @@ public class Request {
         return headers;
     }
 
-    public String getBody() {
-        return body;
-    }
-
-    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
-        return requestInfo.getHttpMethod().equals(httpMethod);
+    public String getContent() {
+        return content;
     }
 }

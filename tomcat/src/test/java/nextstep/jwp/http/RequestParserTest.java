@@ -63,6 +63,6 @@ class RequestParserTest {
         final Request actual = RequestParser.parse(bufferedReader);
 
         // then
-        assertThat(actual.getBody()).isEqualTo(expected);
+        assertThat(actual.getContent()).isEqualTo(expected);
     }
 }

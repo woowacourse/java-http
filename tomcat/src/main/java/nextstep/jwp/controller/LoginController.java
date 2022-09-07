@@ -29,7 +29,7 @@ public class LoginController implements Controller {
 
     @Override
     public Response execute(final Request request) {
-        final LoginRequest loginRequest = convert(request.getBody());
+        final LoginRequest loginRequest = convert(request.getContent());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
         if (wrappedUser.isPresent()) {
             final User user = wrappedUser.get();

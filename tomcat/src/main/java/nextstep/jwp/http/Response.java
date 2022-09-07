@@ -10,9 +10,9 @@ public class Response {
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.OK;
     private static final String DEFAULT_CONTENT = "";
 
-    private final Headers headers;
     private HttpVersion httpVersion = DEFAULT_HTTP_VERSION;
     private HttpStatus httpStatus = DEFAULT_HTTP_STATUS;
+    private final Headers headers;
     private String content = DEFAULT_CONTENT;
 
     public Response(final Headers headers) {

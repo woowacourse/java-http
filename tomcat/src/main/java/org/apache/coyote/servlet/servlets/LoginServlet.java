@@ -52,7 +52,9 @@ public class LoginServlet extends Servlet {
 
         if (user.isPresent()) {
             log.info("login success to ID : {}", user.get().getAccount());
-            return HttpResponse.of(httpRequest, "/index.html", "302");
+            return HttpResponse.cookie(
+                httpRequest, "/index.html", "302", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+            );
         }
         return HttpResponse.of(httpRequest, "/401.html", "401");
     }

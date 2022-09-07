@@ -36,6 +36,15 @@ public class HttpResponse {
         return new HttpResponse(statusLine, httpHeaders, body);
     }
 
+    public static HttpResponse cookie(
+        final HttpRequest httpRequest, final String resource, final String statusCode, final String cookie
+    ) {
+        final HttpResponse httpResponse = HttpResponse.of(httpRequest, resource, statusCode);
+        httpResponse.addHeader(HeaderKeys.SET_COOKIE, cookie);
+
+        return httpResponse;
+    }
+
     private static String selectContentType(final String resource) {
         final String[] fileElements = resource.split(FILE_REGEX);
 
@@ -51,6 +60,10 @@ public class HttpResponse {
         return HttpHeaders.init()
             .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
             .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
+    }
+
+    private void addHeader(final HeaderKeys key, final String value) {
+        httpHeaders.add(key, value);
     }
 
     private static void addLocation(final HttpHeaders httpHeaders, final String statusCode, final String resource) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.support;
+package nextstep.jwp.controller.support;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;

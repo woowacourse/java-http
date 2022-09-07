@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestHeader = readRequestHeader(bufferedReader);
+            final var requestHeader = readHttpRequest(bufferedReader);
 
             if (requestHeader.isEmpty()) {
                 return;
@@ -52,13 +53,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private String readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         StringBuilder header = new StringBuilder();
 
-        while (bufferedReader.ready()) {
-            header.append(bufferedReader.readLine())
-                    .append("\r\n");
-        }
+        final var startLine = bufferedReader.readLine();
+
+//        while (bufferedReader.ready()) {
+//            header.append(bufferedReader.readLine())
+//                    .append("\r\n");
+//        }
+
+//        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+//        char[] buffer = new char[contentLength];
+//        bufferedReader.read(buffer, 0, contentLength);
+//        String requestBody = new String(buffer);
 
         return header.toString();
     }
@@ -80,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/login".equals(url)) {
             if (LoginHandler.handle(requestParam)) {
-                return createLoginSuccessResponse();
+                return createUserSuccessResponse();
             }
 
             return createLoginFailResponse();
@@ -88,6 +96,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/register".equals(url) && requestParam.isEmpty()) {
             return createStaticFileResponse(url + ".html");
+        }
+
+        if ("/register".equals(url)) {
+            if (RegisterHandler.handle(requestParam)) {
+                return createUserSuccessResponse();
+            }
         }
 
         if (url.contains(".")) {
@@ -114,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createLoginSuccessResponse() throws IOException {
+    private String createUserSuccessResponse() throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));

@@ -16,6 +16,8 @@ public abstract class AbstractController implements Controller {
         try {
             if (HttpMethod.GET == method) {
                 doGet(request, response);
+            } else if (HttpMethod.POST == method) {
+                doPost(request, response);
             }
         } catch (final UncheckedServletException e) {
             log.error(e.getMessage(), e);

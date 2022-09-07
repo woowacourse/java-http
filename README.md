@@ -34,6 +34,7 @@
 - [x] 반복되는 상수를 Enum으로 처리하기
 - [ ] loginController 악취 제거하기
 - [ ] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기
+- [ ] HttpBody 와 HttpPath의 param 생성 로직이 겹친다. 이를 어떻게 처리할까?
 
 ## 2. 로그인 구현하기
 
@@ -43,6 +44,7 @@
 - [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
     - [x] `/register` 로 요청시 로그인 페이지 화면을 띄워준다.
     - [x] HttpRequest가 body의 값도 가져올 수 있도록 변경한다.
+    - [x] login 동작도 POST로 동작되도록 수정한다.
     - [ ] RegisterController `doPost()` 구현
 - [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie 가 존재한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

@@ -47,6 +47,10 @@ public class HttpBody {
         return queryParamKeyValue.length == EMPTY_VALUE_PARAM_LENGTH;
     }
 
+    public String getParam(final String param) {
+        return params.get(param);
+    }
+
     @Override
     public String toString() {
         return "HttpBody{" +

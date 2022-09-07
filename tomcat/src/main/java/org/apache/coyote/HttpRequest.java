@@ -43,4 +43,8 @@ public class HttpRequest {
     public String getParam(final String param) {
         return startLine.getParam(param);
     }
+
+    public String getBodyParam(final String param) {
+        return body.getParam(param);
+    }
 }

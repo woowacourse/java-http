@@ -28,9 +28,15 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Controller staticResourceController = StaticResourceController.getInstance();
+        staticResourceController.service(request, response);
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         try {
-            final String account = request.getParam(ACCOUNT_PARAM);
-            final String password = request.getParam(PASSWORD_PARAM);
+            final String account = request.getBodyParam(ACCOUNT_PARAM);
+            final String password = request.getBodyParam(PASSWORD_PARAM);
             Objects.requireNonNull(account, "null이면 안됨 ㅋ");
             Objects.requireNonNull(password, "null이면 안됨 ㅋ");
 

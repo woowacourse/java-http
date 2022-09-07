@@ -30,7 +30,7 @@
 - [x] HTTP Status Code 302
 - [x] POST 방식으로 회원가입
 - [x] Cookie에 JSESSIONID 값 저장하기
-- [ ] Session 구현하기
+- [x] Session 구현하기
 
 리팩터링
 
@@ -40,11 +40,12 @@
 - [ ] response header, response body를 클래스로 분리
 - [ ] request header, request body를 클래스로 분리
 - [x] 로그인 페이지에서 패스워드를 입력하지 않으면 발생하는 예외 수정
-- [ ] 회원 정보 필드가 비어있는 경우 발생하는 예외 수정
+- [x] 회원 정보 필드가 비어있는 경우 발생하는 예외 수정
 - [x] 리다이렉트 시 location을 할당하여 해당 url로 리다이렉트 되도록 수정
 - [x] Url 내부의 Function 로직을 Handler 클래스로 분리
 - [x] 로그인 요청을 POST 로 메서드 변경
 - [ ] null을 사용하는 부분 최대한 Optional 로 수정
 - [ ] response 에서 setCookie 부분을 JsessionId 에 의존적이지 않게 수정
+- [ ] 매직 넘버 상수로 분리하기
 
 </details>

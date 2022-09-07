@@ -49,5 +49,6 @@
 - [x] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie 가 존재한다.
   - [x] 쿠키 객체를 구현한다.
   - [x] Set-Cookie를 구현한다.
-- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+- [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
   - [x] Session, SessionManager 구현한다.
+  - [ ] 세션 존재 시 `GET /login` 요청 시 `/index` 로 리다이렉트 되도록 수정

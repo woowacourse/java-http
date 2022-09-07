@@ -2,9 +2,9 @@ package nextstep.jwp.presentation;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.constant.HttpStatus;
@@ -31,6 +31,12 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Session session = request.getSession(false);
+        final User user = getUser(session);
+        if (user != null) {
+            redirectIndex(response);
+        }
+
         final Controller staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
     }
@@ -46,9 +52,11 @@ public class LoginController extends AbstractController {
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(NoSuchElementException::new);
             if (user.checkPassword(password)) {
-                final String successMessage = user.toString();
-                log.info(successMessage);
-                response.addSetCookie(JSESSIONID, String.valueOf(UUID.randomUUID()));
+                log.info(user.toString());
+
+                final Session session = request.getSession(true);
+                session.setAttribute("user", user);
+                response.addSetCookie(JSESSIONID, session.getId());
                 redirectIndex(response);
             } else {
                 redirectNoAuth(response);
@@ -59,6 +67,13 @@ public class LoginController extends AbstractController {
 
         final Controller staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
+    }
+
+    private User getUser(final Session session) {
+        if (session == null) {
+            return null;
+        }
+        return (User) session.getAttribute("user");
     }
 
     private static void redirectNoAuth(final HttpResponse response) {

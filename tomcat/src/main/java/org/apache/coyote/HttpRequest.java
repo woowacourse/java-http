@@ -2,6 +2,9 @@ package org.apache.coyote;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.constant.HttpMethod;
 
 public class HttpRequest {
@@ -50,5 +53,17 @@ public class HttpRequest {
 
     public String getCookie(final String key) {
         return headers.getCookie(key);
+    }
+
+    public Session getSession(final boolean create) {
+        final SessionManager sessionManager = new SessionManager();
+
+        if (create) {
+            final Session session = new Session(String.valueOf(UUID.randomUUID()));
+            sessionManager.add(session);
+            return session;
+        }
+        final String sessionId = getCookie("JSESSIONID");
+        return sessionManager.findSession(sessionId);
     }
 }

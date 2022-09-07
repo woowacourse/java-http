@@ -29,8 +29,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final Http11Request request = Http11Request.of(inputStream);
-            final String url = request.getRequestUrl();
-            final Http11Response response = Url.getResponseFrom(url);
+            final Http11Response response = Url.getResponseFrom(request);
             response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

@@ -12,15 +12,16 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11QueryParams;
+import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public enum Url {
 
-    DEFAULT("/"::equals, url -> new Http11Response(OK, "html", "Hello world!")),
-    LOGIN(url -> isMatchRegex("/login.*", url), url -> {
-        final Http11QueryParams queryParams = Http11QueryParams.from(url);
+    DEFAULT("/"::equals, request -> new Http11Response(OK, "html", "Hello world!")),
+    LOGIN(url -> isMatchRegex("/login.*", url), request -> {
+        final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestUrl());
         if (!queryParams.hasParam()) {
             return Http11Response.from(OK, "/login.html");
         }
@@ -29,23 +30,23 @@ public enum Url {
         }
         return Http11Response.from(OK, "/401.html");
     }),
-    REGISTER("/register"::equals, url -> Http11Response.from(OK, "/register.html")),
-    RESOURCE(url -> isMatchRegex(".*\\..*", url), url -> Http11Response.from(OK, url));
+    REGISTER("/register"::equals, request -> Http11Response.from(OK, "/register.html")),
+    RESOURCE(url -> isMatchRegex(".*\\..*", url), request -> Http11Response.from(OK, request.getRequestUrl()));
 
     private static final Logger log = LoggerFactory.getLogger(Url.class);
 
     private final Predicate<String> condition;
-    private final Function<String, Http11Response> resourcePathExtractor;
+    private final Function<Http11Request, Http11Response> resourcePathExtractor;
 
-    Url(Predicate<String> condition, Function<String, Http11Response> resourcePathExtractor) {
+    Url(Predicate<String> condition, Function<Http11Request, Http11Response> resourcePathExtractor) {
         this.condition = condition;
         this.resourcePathExtractor = resourcePathExtractor;
     }
 
-    public static Http11Response getResponseFrom(String url) {
+    public static Http11Response getResponseFrom(Http11Request http11Request) {
         return Arrays.stream(values())
-                .filter(value -> value.condition.test(url))
-                .map(value -> value.resourcePathExtractor.apply(url))
+                .filter(value -> value.condition.test(http11Request.getRequestUrl()))
+                .map(value -> value.resourcePathExtractor.apply(http11Request))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 페이지입니다."));
     }

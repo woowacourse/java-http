@@ -122,6 +122,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         Session session = SessionManager.create();
+        session.setAttribute("user", user.get());
         HttpResponse.Builder builder = new HttpResponse.Builder()
                 .status(FOUND)
                 .header(LOCATION, "/index.html");

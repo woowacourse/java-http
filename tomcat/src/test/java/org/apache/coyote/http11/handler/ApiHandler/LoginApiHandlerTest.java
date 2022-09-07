@@ -73,7 +73,7 @@ class LoginApiHandlerTest {
         final LoginApiHandler loginApiHandler = new LoginApiHandler();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()
@@ -94,7 +94,7 @@ class LoginApiHandlerTest {
         final LoginApiHandler loginApiHandler = new LoginApiHandler();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()
@@ -115,7 +115,7 @@ class LoginApiHandlerTest {
         final LoginApiHandler loginApiHandler = new LoginApiHandler();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

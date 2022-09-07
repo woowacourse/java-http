@@ -18,7 +18,7 @@ public class RootApiHandler implements Handler {
     }
 
     @Override
-    public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
+    public ApiHandlerResponse handle(HttpRequest httpRequest) {
         return ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "Hello world!", ContentType.HTML);
     }
 }

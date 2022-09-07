@@ -70,7 +70,7 @@ class RegisterApiHandlerTest {
         RegisterApiHandler registerApiHandler = new RegisterApiHandler();
 
         // when
-        ApiHandlerResponse response = (ApiHandlerResponse) registerApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = (ApiHandlerResponse) registerApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()
@@ -88,7 +88,7 @@ class RegisterApiHandlerTest {
         RegisterApiHandler registerApiHandler = new RegisterApiHandler();
 
         // when
-        ApiHandlerResponse response = (ApiHandlerResponse) registerApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = (ApiHandlerResponse) registerApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

@@ -73,7 +73,7 @@ class RegisterPageApiHandlerTest {
         RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
 
         // when
-        ApiHandlerResponse response = registerPageApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = registerPageApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

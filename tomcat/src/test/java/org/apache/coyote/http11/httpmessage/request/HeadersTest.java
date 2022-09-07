@@ -58,4 +58,17 @@ class HeadersTest {
         assertThat(headers).extracting("headers")
                 .isEqualTo(Map.of("key", "value", "name", "park", "age", "25", "Content-Type", "text/html"));
     }
+
+    @Test
+    void 이미_존재하는_header가_들어오면_값이_업데이트된다() {
+        // given
+        Headers headers = Headers.of(List.of("key: value", "name: park"));
+
+        // when
+        headers.putAll(Map.of("name", "seong", "Content-Type", "text/html"));
+
+        // then
+        assertThat(headers).extracting("headers")
+                .isEqualTo(Map.of("key", "value", "name", "seong", "Content-Type", "text/html"));
+    }
 }

@@ -15,7 +15,7 @@ public class FileHandler implements Handler {
         return httpRequest.matchRequestLine(HttpMethod.GET, FILE_URI_PATTERN);
     }
 
-    public FileHandlerResponse getResponse(HttpRequest httpRequest) {
+    public FileHandlerResponse handle(HttpRequest httpRequest) {
         return new FileHandlerResponse(HttpStatus.OK, httpRequest.getPath());
     }
 }

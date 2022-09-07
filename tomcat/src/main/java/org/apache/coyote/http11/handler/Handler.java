@@ -6,6 +6,6 @@ public interface Handler {
 
     boolean canHandle(HttpRequest httpRequest);
 
-    Object getResponse(HttpRequest httpRequest);
+    Object handle(HttpRequest httpRequest);
 
 }

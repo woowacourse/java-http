@@ -28,7 +28,7 @@ public class LoginApiHandler implements Handler {
     }
 
     @Override
-    public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
+    public ApiHandlerResponse handle(HttpRequest httpRequest) {
         Map<String, Object> parameters = getParameters(httpRequest.getRequestBody());
         final String account = (String) parameters.get("account");
         final String password = (String) parameters.get("password");

@@ -23,7 +23,7 @@ public class RegisterApiHandler implements Handler {
     }
 
     @Override
-    public Object getResponse(HttpRequest httpRequest) {
+    public Object handle(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
 
         Map<String, Object> headers = new LinkedHashMap<>();

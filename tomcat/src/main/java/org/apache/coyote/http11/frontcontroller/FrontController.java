@@ -23,7 +23,7 @@ public class FrontController {
         setCookie(httpRequest, httpResponse);
 
         Handler handler = getHandler(httpRequest);
-        Object handlerResponse = handler.getResponse(httpRequest);
+        Object handlerResponse = handler.handle(httpRequest);
         ModelAndView modelAndView = ModelAndView.of(handlerResponse);
 
         setHttpResponse(httpResponse, modelAndView);

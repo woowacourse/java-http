@@ -73,7 +73,7 @@ class RootApiHandlerTest {
         RootApiHandler rootApiHandler = new RootApiHandler();
 
         // when
-        ApiHandlerResponse response = rootApiHandler.getResponse(httpRequest);
+        ApiHandlerResponse response = rootApiHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

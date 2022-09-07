@@ -55,7 +55,7 @@ class FileHandlerTest {
         FileHandler fileHandler = new FileHandler();
 
         // when
-        FileHandlerResponse response = fileHandler.getResponse(httpRequest);
+        FileHandlerResponse response = fileHandler.handle(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

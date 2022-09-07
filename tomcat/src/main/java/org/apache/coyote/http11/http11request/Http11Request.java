@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.http11request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HeaderElement;
 import org.apache.coyote.http11.HttpMethod;
 
 public class Http11Request {
@@ -29,7 +30,15 @@ public class Http11Request {
         return header;
     }
 
+    public String getCookie() {
+        return header.get(HeaderElement.COOKIE.getValue());
+    }
+
     public String getBody() {
         return body;
+    }
+
+    public boolean hasCookie() {
+        return header.containsKey(HeaderElement.COOKIE.getValue());
     }
 }

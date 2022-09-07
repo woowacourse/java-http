@@ -2,27 +2,28 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.http11.FileReader;
 
 public class HttpRequest {
 
     private final StartLine startLine;
-    private final HttpHeader header;
-    private final HttpBody body;
+    private final HttpRequestHeader requestHeader;
+    private final HttpRequestBody requestBody;
 
-    private HttpRequest(final StartLine startLine, final HttpHeader header, HttpBody body) {
+    private HttpRequest(final StartLine startLine,
+                        final HttpRequestHeader requestHeader,
+                        final HttpRequestBody requestBody
+    ) {
         this.startLine = startLine;
-        this.header = header;
-        this.body = body;
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final StartLine startLine = StartLine.from(bufferedReader.readLine());
-        final HttpHeader header = HttpHeader.from(bufferedReader);
+        final HttpRequestHeader header = HttpRequestHeader.from(bufferedReader);
 
-        String h = header.getContentLength();
-        final int contentLength = Integer.parseInt(h);
-        final HttpBody body = HttpBody.from(bufferedReader, contentLength);
+        final int contentLength = Integer.parseInt(header.getContentLength());
+        final HttpRequestBody body = HttpRequestBody.from(bufferedReader, contentLength);
         return new HttpRequest(startLine, header, body);
     }
 
@@ -35,6 +36,6 @@ public class HttpRequest {
     }
 
     public String getHttpBody(String key) {
-        return body.get(key);
+        return requestBody.get(key);
     }
 }

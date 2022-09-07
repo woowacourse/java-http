@@ -10,7 +10,7 @@ public class FileReader {
     private FileReader() {
     }
 
-    public static String read(String resource) {
+    public static String read(final String resource) {
         try {
             final Path path = Paths.get(ClassLoader
                     .getSystemResource("static" + resource)

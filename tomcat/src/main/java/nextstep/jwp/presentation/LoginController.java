@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.FileReader;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -23,7 +24,9 @@ public class LoginController implements Controller {
             final String account = httpRequest.getHttpBody("account");
             final String password = httpRequest.getHttpBody("password");
             checkUser(account, password);
-            return HttpResponse.found("/index.html", FileReader.read("/index.html"));
+            final HttpResponse httpResponse = HttpResponse.found("/index.html", FileReader.read("/index.html"));
+            httpResponse.setCookie("JSESSIONID", HttpCookie.createJSessionId());
+            return httpResponse;
         } catch (RuntimeException e) {
             return HttpResponse.unauthorized("/401.html", FileReader.read("/401.html"));
         }

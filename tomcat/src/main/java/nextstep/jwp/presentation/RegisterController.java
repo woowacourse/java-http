@@ -33,7 +33,7 @@ public class RegisterController implements Controller {
         if (InMemoryUserRepository.existByAccount(account)) {
             throw new RuntimeException("이미 존재하는 유저입니다.");
         }
-        User user = new User(account, email, password);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info(user.toString());
     }

@@ -10,11 +10,11 @@ public enum ContentType {
 
     private final String value;
 
-    ContentType(String value) {
+    ContentType(final String value) {
         this.value = value;
     }
 
-    public static ContentType from(String path) {
+    public static ContentType from(final String path) {
         if (path.equals("/")) {
             return HTML;
         }

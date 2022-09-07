@@ -31,6 +31,7 @@ public class QueryParameters {
 
         return new QueryParameters(values);
     }
+
     private static String getOrDefault(final String[] keyValue) {
         if (keyValue.length == VALUE_NOT_EXISTS_SIZE) {
             return EMPTY_STRING;

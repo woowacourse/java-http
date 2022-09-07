@@ -2,7 +2,6 @@ package nextstep.jwp.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.*;
 
 import nextstep.jwp.exception.EmptyParameterException;
 import org.junit.jupiter.api.DisplayName;

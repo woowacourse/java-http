@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpStartLine;
-import org.apache.coyote.http11.web.QueryParameters;
 import org.apache.coyote.http11.web.request.HttpRequest;
 import org.apache.coyote.http11.web.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.coyote.http11.support.HttpHeader;
 import org.apache.coyote.http11.support.HttpHeaders;
@@ -10,7 +9,7 @@ import org.apache.coyote.http11.web.request.HttpRequest;
 import org.apache.coyote.http11.web.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.io.*;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -89,7 +88,7 @@ class RequestHandlerTest {
                 "\r\n";
         assertThat(httpResponse.format()).startsWith(expected);
     }
-    
+
     @DisplayName("register로 유효한 POST 요청을 하면 index.html을 응답한다.")
     @Test
     void handle_returnsRegisterIndexResponse_whenPostAndRegisterUri() throws IOException {

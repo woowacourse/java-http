@@ -17,9 +17,9 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;
-    private final String body;
+    private final HttpResponseBody body;
 
-    private HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final String body) {
+    private HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final HttpResponseBody body) {
         this.statusLine = statusLine;
         this.httpHeaders = httpHeaders;
         this.body = body;
@@ -29,8 +29,8 @@ public class HttpResponse {
         final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
 
         final String contentType = selectContentType(resource);
-        final String body = loadResourceContent(resource);
-        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body);
+        final HttpResponseBody body = loadResourceContent(resource);
+        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body.getValue());
         addLocation(httpHeaders, statusCode, resource);
 
         return new HttpResponse(statusLine, httpHeaders, body);
@@ -40,8 +40,8 @@ public class HttpResponse {
         final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
 
         final String contentType = selectContentType(resource);
-        final String body = loadResourceContent(resource);
-        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body)
+        final HttpResponseBody body = loadResourceContent(resource);
+        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body.getValue())
             .generateSessionId();
         addLocation(httpHeaders, statusCode, resource);
 
@@ -54,8 +54,8 @@ public class HttpResponse {
         return ResourceType.getContentType(fileElements[EXTENSION_LOCATION]);
     }
 
-    private static String loadResourceContent(final String resource) {
-        return RESOURCE_SEARCHER.loadContent(resource);
+    private static HttpResponseBody loadResourceContent(final String resource) {
+        return new HttpResponseBody(RESOURCE_SEARCHER.loadContent(resource));
     }
 
     private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
@@ -76,7 +76,7 @@ public class HttpResponse {
             statusLine.toMessage(),
             httpHeaders.toMessage(),
             HttpMessageDelimiter.HEADER_BODY.getValue(),
-            body
+            body.getValue()
         );
     }
 }

@@ -21,31 +21,27 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final QueryParams queryParams = request.getQueryParams();
-
         final String account = queryParams.getValueFromKey("account");
         final String password = queryParams.getValueFromKey("password");
         final String email = queryParams.getValueFromKey("email");
 
-        System.out.println("account = " + account);
-
         checkAlreadyExistUser(account);
-
         final User user = new User(account, password, email);
-
         InMemoryUserRepository.save(user);
+        log.info("회원가입 성공! : {}", user);
 
-        final String userInformation = user.toString();
-        log.info("회원가입 성공! : {}", userInformation);
-
-        return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
+        response.setResponse(FOUND, HTML, Location.from("/index.html"));
+        response.print();
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String requestPath = request.getRequestPath();
-        return HttpResponse.of(OK, ContentType.from(requestPath), requestPath);
+
+        response.setResponse(OK, ContentType.from(requestPath), requestPath);
+        response.print();
     }
 
     private static void checkAlreadyExistUser(String account) {

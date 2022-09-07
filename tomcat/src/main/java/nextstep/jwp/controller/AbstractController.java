@@ -9,15 +9,21 @@ import org.apache.coyote.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         final HttpMethod method = request.getRequestMethod();
 
         if (method.equals(POST)) {
-            return doPost(request);
+            doPost(request, response);
         }
-        return doGet(request);
+        if (method.equals(GET)) {
+            doGet(request, response);
+        }
     }
 
-    protected abstract HttpResponse doPost(HttpRequest request);
-    protected abstract HttpResponse doGet(HttpRequest request);
+    protected void doPost(HttpRequest request, HttpResponse httpResponse) {
+        throw new UnsupportedOperationException();
+    }
+    protected void doGet(HttpRequest request, HttpResponse httpResponse) {
+        throw new UnsupportedOperationException();
+    }
 }

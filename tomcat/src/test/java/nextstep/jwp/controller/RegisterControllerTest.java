@@ -7,6 +7,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -44,8 +45,9 @@ class RegisterControllerTest {
                 Map.of(), requestBody);
 
         // when
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final RegisterController registerController = new RegisterController();
-        registerController.service(httpRequest);
+        registerController.service(httpRequest, httpResponse);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -68,24 +70,9 @@ class RegisterControllerTest {
                 Map.of(), requestBody);
 
         // when & then
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final RegisterController registerController = new RegisterController();
-        Assertions.assertThatThrownBy(() -> registerController.service(httpRequest))
+        Assertions.assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
                 .isInstanceOf(ExistUserException.class);
-    }
-
-    @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
-    @Test
-    void returnLoginWhenWithoutQuery() {
-        // given
-        final String requestBody = "account=dwoo&password=1234&email=dwoo@email.com";
-        final HttpRequest httpRequest = HttpRequest.of("POST /register HTTP/1.1",
-                Map.of(), requestBody);
-
-        // when
-        final RegisterController registerController = new RegisterController();
-        final HttpResponse httpResponse = registerController.service(httpRequest);
-
-        // then
-        assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

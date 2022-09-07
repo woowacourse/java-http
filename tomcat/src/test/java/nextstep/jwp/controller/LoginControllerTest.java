@@ -2,12 +2,12 @@ package nextstep.jwp.controller;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -38,8 +38,9 @@ class LoginControllerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
-        loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -53,36 +54,6 @@ class LoginControllerTest {
         assertThat(level).isEqualTo(INFO);
     }
 
-    @DisplayName("로그인 실패시에는 401.html 을 반환한다.")
-    @Test
-    void failToLogin() {
-        // given
-        final String requestBody = "account=gugu&password=invalid";
-
-        // when
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final LoginController loginController = new LoginController();
-        final HttpResponse httpResponse = loginController.service(httpRequest);
-
-        // then
-        assertThat(httpResponse.getResponse()).contains("/401.html");
-    }
-
-    @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
-    @Test
-    void returnLoginWhenWithoutQuery() {
-        // given
-        final String requestBody = "account=gugu&password=password";
-
-        // when
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final LoginController loginController = new LoginController();
-        final HttpResponse httpResponse = loginController.service(httpRequest);
-
-        // then
-        assertThat(httpResponse.getResponse()).contains("/index.html");
-    }
-
     @DisplayName("로그인 성공 시에 Cookie에 JSESSIONID가 없으면 Cookie 를 담은 응답을 반환한다.")
     @Test
     void setCookie() {
@@ -91,11 +62,12 @@ class LoginControllerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getResponse()).contains("Set-Cookie: JSESSIONID");
+        assertThat(httpResponse.getCookie().isJSessionCookie()).isTrue();
     }
 
     @DisplayName("요청에 쿠키가 포함되어 있을 경우에는 Set-cookie 를 응답하지 않는다.")
@@ -107,11 +79,12 @@ class LoginControllerTest {
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of("Cookie", "JSESSIONID=randomid"),
                 requestBody);
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getResponse()).doesNotContain("Set-Cookie: JSESSIONID");
+        assertThat(httpResponse.getCookie().isEmpty()).isTrue();
     }
 
     @DisplayName("로그인 성공 시 세션 저장소(SessionManager)에 유저 정보를 저장한다.")
@@ -123,36 +96,14 @@ class LoginControllerTest {
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
 
         // when
+        final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
-        final HttpResponse response = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
 
         // then
-        final Cookie cookie = response.getCookie();
+        final Cookie cookie = httpResponse.getCookie();
         final Session session = SessionManager.findSession(cookie.getValue());
         final User user = (User) session.getAttribute("user");
         assertThat(user.getAccount()).isEqualTo(account);
-    }
-
-    @DisplayName("로그인에 성공한 이후에는 index.html 로 리다이렉트한다.")
-    @Test
-    void redirectIndexWhenAfterLogin() {
-        // given
-        final String account = "gugu";
-        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-
-        final Session session = new Session();
-        session.setAttribute("user", user);
-        SessionManager.add(session);
-
-        final String sessionId = session.getId();
-        final HttpRequest httpRequest = HttpRequest.of("GET /login HTTP/1.1",
-                Map.of("Cookie", "JSESSIONID=" + sessionId), "");
-
-        // when
-        final LoginController loginController = new LoginController();
-        final HttpResponse httpResponse = loginController.service(httpRequest);
-
-        // then
-        assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

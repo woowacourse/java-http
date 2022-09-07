@@ -9,13 +9,11 @@ import org.apache.coyote.response.HttpResponse;
 public class ResourceController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
-        return doGet(request);
-    }
-
-    @Override
-    protected HttpResponse doGet(final HttpRequest request) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String requestPath = request.getRequestPath();
-        return HttpResponse.of(OK, ContentType.from(requestPath), requestPath);
+
+        response.setResponse(OK, ContentType.from(requestPath), requestPath);
+
+        response.print();
     }
 }

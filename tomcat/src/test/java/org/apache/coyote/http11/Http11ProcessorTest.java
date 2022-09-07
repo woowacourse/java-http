@@ -12,14 +12,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.cookie.Cookie;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -417,22 +413,17 @@ class Http11ProcessorTest {
         assertThat(socket.output()).startsWith(expected);
     }
 
-    @DisplayName("로그인에 성공한 이후에 login으로 POST 요청시 index.html 로 리다이렉트한다.")
+    @DisplayName("로그인에 성공한 이후에 login으로 GET 요청시 index.html 로 리다이렉트한다.")
     @Test
     void redirectIndexWhenAfterLogin() throws IOException {
         // given
-        final String account = "gugu";
-        final String requestBody = "account=" + account + "&password=password";
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final LoginController loginController = new LoginController();
-        final HttpResponse response = loginController.service(httpRequest);
-
-        final Cookie cookie = response.getCookie();
-        final Session session = SessionManager.findSession(cookie.getValue());
-
+        final User user = new User(1L, "gugu", "password", "email@email.com");
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
 
         final String httpRequestMessage = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 30 ",
@@ -440,9 +431,9 @@ class Http11ProcessorTest {
                 "Cookie: JSESSIONID=" + session.getId() + " ",
                 "Accept: */* ",
                 "",
-                "account=gugu&password=password");
+                "");
 
-        final var socket = new StubSocket(httpRequestMessage);
+        final StubSocket socket = new StubSocket(httpRequestMessage);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when

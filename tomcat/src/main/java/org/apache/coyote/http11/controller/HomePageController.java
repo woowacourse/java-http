@@ -9,6 +9,6 @@ public class HomePageController extends Controller {
 
     @Override
     public HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.createWithBody(HttpStatus.OK, httpRequest.getRequestUri());
+        return HttpResponse.createWithBody(HttpStatus.OK, httpRequest.getRequestLine());
     }
 }

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpStatus;
 
-public class Header {
+public class ResponseHeaders {
 
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String CONTENT_LENGTH = "Content-Length: ";
@@ -12,13 +12,13 @@ public class Header {
     private final String requestLine;
     private final String headers;
 
-    public Header(HttpStatus httpStatus, String url, String body) {
+    public ResponseHeaders(HttpStatus httpStatus, String url, String body) {
         this.requestLine = HTTP_VERSION + httpStatus.code;
         this.headers = createHeaders(url, body);
     }
 
     // TODO: 다양한 헤더 값에 적응할 수 있는 로직으로 대체
-    public Header(HttpStatus httpStatus, String redirectUrl) {
+    public ResponseHeaders(HttpStatus httpStatus, String redirectUrl) {
         this.requestLine = HTTP_VERSION + httpStatus.code;
         this.headers = createHeadersForRedirect(redirectUrl);
     }
@@ -43,7 +43,7 @@ public class Header {
     }
 
     public String getHeader() {
-        return String.join("\r\n", requestLine, headers);
+        return String.join("\r\n", requestLine, headers, "");
     }
 
     public String getRequestLine() {

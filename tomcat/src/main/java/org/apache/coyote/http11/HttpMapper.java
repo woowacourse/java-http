@@ -14,10 +14,10 @@ public class HttpMapper {
             isAuthorized = new LoginInterceptor().handle(httpRequest);
         }
         if (!isAuthorized) {
-            return ControllerAdvice.getLoginExceptionResponse();
+            return ControllerAdvice.handleUnauthorized();
         }
 
-        final String requestUri = httpRequest.getRequestUri();
+        final String requestUri = httpRequest.getRequestLine();
         final Controller controller = ControllerMapper.findController(requestUri);
 
         return controller.getResponse(httpRequest);

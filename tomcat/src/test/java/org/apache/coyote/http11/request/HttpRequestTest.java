@@ -27,7 +27,7 @@ class HttpRequestTest {
 
         //when,then
         assert httpRequest != null;
-        assertThat(httpRequest.getRequestUri()).isEqualTo("/index.html");
+        assertThat(httpRequest.getRequestLine()).isEqualTo("/index.html");
         final RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
         assertThat(requestHeaders.getRequestHeaders()).hasSize(2);
         assertThat(requestHeaders.getRequestHeaders().get("Host")).isEqualTo("localhost:8080");

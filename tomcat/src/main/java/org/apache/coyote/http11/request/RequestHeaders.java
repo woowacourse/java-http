@@ -5,6 +5,7 @@ import java.util.Map;
 public class RequestHeaders {
 
     private static final String ACCEPT = "Accept";
+    public static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> requestHeaders;
 

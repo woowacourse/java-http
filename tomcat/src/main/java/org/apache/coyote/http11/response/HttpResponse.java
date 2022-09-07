@@ -6,22 +6,22 @@ import org.apache.coyote.http11.HttpStatus;
 public class HttpResponse {
 
     private final Body body;
-    private final Header header;
+    private final ResponseHeaders header;
 
-    private HttpResponse(Body body, Header header) {
+    private HttpResponse(Body body, ResponseHeaders header) {
         this.body = body;
         this.header = header;
     }
 
     public static HttpResponse createWithBody(HttpStatus httpStatus, String url) throws IOException {
         final Body body = Body.from(url);
-        final Header header = new Header(httpStatus, url, body.getBody());
+        final ResponseHeaders header = new ResponseHeaders(httpStatus, url, body.getBody());
         return new HttpResponse(body, header);
     }
 
     public static HttpResponse createWithoutBody(HttpStatus httpStatus, String redirectUrl) {
         final Body body = new Body();
-        final Header header = new Header(httpStatus, redirectUrl);
+        final ResponseHeaders header = new ResponseHeaders(httpStatus, redirectUrl);
         return new HttpResponse(body, header);
     }
 
@@ -34,7 +34,7 @@ public class HttpResponse {
         return body;
     }
 
-    public Header getHeader() {
+    public ResponseHeaders getHeader() {
         return header;
     }
 }

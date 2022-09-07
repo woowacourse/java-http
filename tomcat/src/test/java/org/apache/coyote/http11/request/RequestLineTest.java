@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestUriTest {
+class RequestLineTest {
 
     @DisplayName("uri에 쿼리 스트링이 포함되어 있으면 false를 반환한다.")
     @Test
     void isExistQueryString_false() {
         //given
         final String requestLine = "GET /index.html HTTP/1.1";
-        RequestUri requestUri = RequestUri.from(requestLine);
+        RequestLine requestUri = RequestLine.from(requestLine);
 
         //when, then
         assertThat(requestUri.isExistQueryString()).isFalse();
@@ -23,7 +23,7 @@ class RequestUriTest {
     void isExistQueryString_true() {
         //given
         final String requestLine = "GET http://localhost:8080/login?account=gugu&password=password HTTP/1.1";
-        RequestUri requestUri = RequestUri.from(requestLine);
+        RequestLine requestUri = RequestLine.from(requestLine);
         System.out.println("requestUri = " + requestUri.getRequestUri());
         //when, then
         assertThat(requestUri.isExistQueryString()).isTrue();
@@ -34,7 +34,7 @@ class RequestUriTest {
     void getQueryStringValue() {
         //given
         final String requestLine = "GET http://localhost:8080/login?account=gugu&password=password HTTP/1.1 ";
-        RequestUri requestUri = RequestUri.from(requestLine);
+        RequestLine requestUri = RequestLine.from(requestLine);
 
         //when
         final String account = requestUri.getQueryStringValue("account");

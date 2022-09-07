@@ -8,8 +8,8 @@ import java.io.InputStream;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.Body;
-import org.apache.coyote.http11.response.Header;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +30,7 @@ class HttpMapperTest {
 
         //when
         HttpResponse response = HttpMapper.createResponse(httpRequest);
-        Header responseHeader = response.getHeader();
+        ResponseHeaders responseHeader = response.getHeader();
         Body responseBody = response.getBody();
 
         //then
@@ -55,7 +55,7 @@ class HttpMapperTest {
 
         //when
         HttpResponse response = HttpMapper.createResponse(httpRequest);
-        Header responseHeader = response.getHeader();
+        ResponseHeaders responseHeader = response.getHeader();
         Body responseBody = response.getBody();
 
         //then

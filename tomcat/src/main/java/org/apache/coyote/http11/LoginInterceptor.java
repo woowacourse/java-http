@@ -15,10 +15,9 @@ public class LoginInterceptor implements Interceptor {
 
     @Override
     public boolean handle(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isExistQueryString()) {
-            final String account = httpRequest.getQueryStringValue("account");
-            final String password = httpRequest.getQueryStringValue("password");
-
+        if (httpRequest.containsUri("/login") && (HttpMethod.POST == httpRequest.getHttpMethod())) {
+            final String account = httpRequest.getBodyValue("account");
+            final String password = httpRequest.getBodyValue("password");
             try {
                 loginService.validateAccount(account, password);
             } catch (LoginFailureException exception) {

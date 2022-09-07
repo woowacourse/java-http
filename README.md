@@ -19,6 +19,16 @@
 - [x] POST 방식 회원가입
   - [x] 회원 가입 완료 시 /index.html로 리다이렉트
   - [x] 로그인 버튼도 POST로 수정
-- [ ] Cookie - JSSESSIONID 저장 
-  - [ ] HTTP Reqeust Header의 Cookie에 JSSESSIONID 값이 없으면 Response Header에 `Set-Cookie` 반환 기능 구현
-- [ ] Session 구현 
+- [x] Cookie - JSSESSIONID 저장 
+  - [x] HTTP Reqeust Header의 Cookie에 JSSESSIONID 값이 없으면 Response Header에 `Set-Cookie` 반환 기능 구현
+- [x] Session 구현 
+
+### 3단계 - 리팩터링
+- [ ] HTTP Request 클래스 구현
+  - Request Line 
+    - Method
+    - Path
+    - version of the protocol
+  - Request Header
+- [ ] HTTP Response 클래스 구현
+- [ ] Controller Interface 추가

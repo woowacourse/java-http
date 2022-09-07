@@ -6,7 +6,6 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.service.dto.LoginDto;
 import nextstep.jwp.service.dto.SaveUserDto;
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.support.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +33,9 @@ public class UserService {
     }
 
     public void saveUser(SaveUserDto saveUserDto) {
-        String account = saveUserDto.getAccount();
-        final var user = userRepository.findByAccount(account);
-        if (user.isPresent()) {
-            throw HttpException.ofBadRequest();
-        }
+        final var account = saveUserDto.getAccount();
+        userRepository.findByAccount(account)
+                .orElseThrow(HttpException::ofBadRequest);
         final var savedUser = userRepository.save(new User(account, saveUserDto.getPassword(), saveUserDto.getEmail()));
         log.info("회원가입 성공! - {}", savedUser);
     }

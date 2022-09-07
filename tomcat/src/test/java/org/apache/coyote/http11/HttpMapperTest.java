@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
-import org.apache.coyote.http11.response.Body;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,11 +31,11 @@ class HttpMapperTest {
         //when
         HttpResponse response = HttpMapper.createResponse(httpRequest);
         ResponseHeaders responseHeader = response.getHeader();
-        Body responseBody = response.getBody();
+        ResponseBody responseBody = response.getBody();
 
         //then
         assertAll(
-                () -> responseHeader.getRequestLine().contains(HttpStatus.FOUND.code),
+                () -> response.getResponseLine().contains(HttpStatus.FOUND.code),
                 () -> responseHeader.getHeaders().contains("Location: 401.html")
         );
     }
@@ -56,11 +56,11 @@ class HttpMapperTest {
         //when
         HttpResponse response = HttpMapper.createResponse(httpRequest);
         ResponseHeaders responseHeader = response.getHeader();
-        Body responseBody = response.getBody();
+        ResponseBody responseBody = response.getBody();
 
         //then
         assertAll(
-                () -> responseHeader.getRequestLine().contains(HttpStatus.FOUND.code),
+                () -> response.getResponseLine().contains(HttpStatus.FOUND.code),
                 () -> responseHeader.getHeaders().contains("Location: index.html")
         );
     }

@@ -1,25 +1,18 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpStatus;
+import static org.apache.coyote.http11.HeaderField.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HeaderField.CONTENT_TYPE;
+import static org.apache.coyote.http11.HeaderField.LOCATION;
 
 public class ResponseHeaders {
 
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
-    private static final String CONTENT_LENGTH = "Content-Length: ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String LOCATION = "Location: ";
-
-    private final String requestLine;
     private final String headers;
 
-    public ResponseHeaders(HttpStatus httpStatus, String url, String body) {
-        this.requestLine = HTTP_VERSION + httpStatus.code;
+    public ResponseHeaders(String url, String body) {
         this.headers = createHeaders(url, body);
     }
 
-    // TODO: 다양한 헤더 값에 적응할 수 있는 로직으로 대체
-    public ResponseHeaders(HttpStatus httpStatus, String redirectUrl) {
-        this.requestLine = HTTP_VERSION + httpStatus.code;
+    public ResponseHeaders(String redirectUrl) {
         this.headers = createHeadersForRedirect(redirectUrl);
     }
 
@@ -42,12 +35,8 @@ public class ResponseHeaders {
         return ContentType.find(requestUri) + ";charset=utf-8 ";
     }
 
-    public String getHeader() {
-        return String.join("\r\n", requestLine, headers, "");
-    }
-
-    public String getRequestLine() {
-        return requestLine;
+    public String getHeadersToString() {
+        return String.join("\r\n", headers, "");
     }
 
     public String getHeaders() {

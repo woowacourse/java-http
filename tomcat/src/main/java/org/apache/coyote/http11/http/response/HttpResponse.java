@@ -63,7 +63,7 @@ public class HttpResponse {
     private String generateHeaderLine() {
         final List<String> headers = new ArrayList<>();
         for (String httpHeaderType : this.headers.keySet()) {
-            final String header = String.join(COLON_LETTER + BLANK_LETTER, httpHeaderType.getValue(),
+            final String header = String.join(COLON_LETTER + BLANK_LETTER, httpHeaderType,
                     String.join(SEMI_COLON_LETTER, this.headers.get(httpHeaderType).getValues()));
             headers.add(header + BLANK_LETTER);
         }

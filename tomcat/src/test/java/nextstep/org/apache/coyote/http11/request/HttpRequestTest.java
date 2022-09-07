@@ -15,11 +15,10 @@ class HttpRequestTest {
     @Test
     void parseHttpRequest() {
         String startLine = "GET / HTTP/1.1";
-        String headers = String.join("\r\n",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ");
+        Map<String, String> headers = Map.of("Content-Type", "text/html;charset=utf-8 ", "Content-Length", "12 ");
+        String requestBody = "request-body";
 
-        HttpRequest httpRequest = HttpRequest.from(startLine, headers);
+        HttpRequest httpRequest = HttpRequest.from(startLine, headers, requestBody);
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo("GET"),

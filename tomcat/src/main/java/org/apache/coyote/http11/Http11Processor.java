@@ -9,6 +9,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HandlerMapper;
+import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,11 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                      StandardCharsets.UTF_8))) {
             final HttpRequest request = HttpRequest.from(reader);
-//            final HttpRequestStartLine startLine = HttpRequestStartLine.from(reader);
-
             final Handler handler = HandlerMapper.findHandler(request);
-            handler.handle(request);
+            final HandlerResult handlerResult = handler.handle(request);
 
-            final HttpResponse httpResponse = HttpResponse.from(request);
-
+            final HttpResponse httpResponse = new HttpResponse(request, handlerResult);
+            System.out.println(httpResponse.getResponse());
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

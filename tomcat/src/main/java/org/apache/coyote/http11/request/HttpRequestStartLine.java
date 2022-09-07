@@ -12,14 +12,14 @@ public class HttpRequestStartLine {
 
     private final HttpMethod method;
     private final String uri;
-    private final String httpVersion;
+    private final String protocol;
     private final Map<String, String> queryParams;
 
-    public HttpRequestStartLine(final HttpMethod method, final String uri, final String httpVersion,
+    public HttpRequestStartLine(final HttpMethod method, final String uri, final String protocol,
                                 final Map<String, String> queryParams) {
         this.method = method;
         this.uri = uri;
-        this.httpVersion = httpVersion;
+        this.protocol = protocol;
         this.queryParams = queryParams;
     }
 
@@ -86,7 +86,7 @@ public class HttpRequestStartLine {
         return uri;
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+    public String getProtocol() {
+        return protocol;
     }
 }

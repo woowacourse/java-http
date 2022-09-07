@@ -9,4 +9,8 @@ public class HttpRequestHeader {
     public HttpRequestHeader(Map<String, String> headers) {
         this.headers = headers;
     }
+
+    public String getHeader(final String key) {
+        return headers.get(key);
+    }
 }

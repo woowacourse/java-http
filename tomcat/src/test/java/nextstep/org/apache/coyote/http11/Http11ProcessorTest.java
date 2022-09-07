@@ -60,14 +60,14 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "account=gugu&password=password");
+                "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -82,6 +82,32 @@ class Http11ProcessorTest {
                 "Content-Length: 3447 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: 30",
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n" +
+                "";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

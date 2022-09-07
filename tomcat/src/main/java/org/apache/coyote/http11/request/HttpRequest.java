@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
     private final HttpRequestStartLine startLine;
@@ -24,24 +23,35 @@ public class HttpRequest {
             throw new IllegalArgumentException("잘못된 요청입니다.");
         }
 
-        String header;
+        String line;
         final Map<String, String> headers = new HashMap<>();
-        while (!"".equals(header = reader.readLine())) {
-            final String[] keyAndValue = header.split(": ");
-            headers.put(keyAndValue[0], keyAndValue[1]);
+        while (!"".equals(line = reader.readLine()) && line != null) {
+            final String[] header = line.split(": ");
+            System.out.println(header[0] + " " + header[1]);
+            headers.put(header[0], header[1]);
         }
+        final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
-        String bodyLine = null;
-        if (reader.ready()) {
-            bodyLine = reader.readLine();
-        }
+        final String bodyLine = getRequestBody(reader,
+                httpRequestHeader.getHeader("Content-Length"));
 
         return new HttpRequest(HttpRequestStartLine.from(startLine),
-                new HttpRequestHeader(headers),
-                new HttpRequestBody(getRequestBody(bodyLine)));
+                httpRequestHeader,
+                new HttpRequestBody(getRequestBodyParams(bodyLine)));
     }
 
-    private static Map<String, String> getRequestBody(final String bodyLine) {
+    private static String getRequestBody(final BufferedReader reader, final String contentLength) throws IOException {
+        if (contentLength == null) {
+            System.out.println("sdads");
+            return null;
+        }
+        final int contentSize = Integer.parseInt(contentLength);
+        char[] buffer = new char[contentSize];
+        reader.read(buffer, 0, contentSize);
+        return new String(buffer);
+    }
+
+    private static Map<String, String> getRequestBodyParams(final String bodyLine) {
         final Map<String, String> body = new HashMap<>();
 
         if (bodyLine == null) {
@@ -60,28 +70,15 @@ public class HttpRequest {
         return startLine;
     }
 
-    public HttpRequestHeader getHeader() {
-        return header;
-    }
-
     public HttpRequestBody getBody() {
         return body;
-    }
-
-    public HttpMethod getMethod() {
-        return startLine.getMethod();
     }
 
     public String getUri() {
         return startLine.getUri();
     }
 
-    @Override
-    public String toString() {
-        return "HttpRequest{" +
-                "startLine=" + startLine +
-                ", header=" + header +
-                ", body=" + body +
-                '}';
+    public String getProtocol() {
+        return startLine.getProtocol();
     }
 }

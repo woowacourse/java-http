@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.DefaultHandler.DEFAULT_HANDLER;
+import static org.apache.coyote.http11.handler.HandlerForGetRequest.HANDLER_FOR_GET_REQUEST;
 import static org.apache.coyote.http11.handler.LoginHandler.LOGIN_HANDLER;
 
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 
 public enum HandlerMapper {
+
     LOGIN(HttpMethod.POST, "/login", LOGIN_HANDLER);
 
     private final HttpMethod httpMethod;
@@ -26,7 +27,7 @@ public enum HandlerMapper {
                 .filter(mapper -> mapHandler(request.getStartLine(), mapper))
                 .findAny()
                 .map(mapper -> mapper.handler)
-                .orElse(DEFAULT_HANDLER);
+                .orElse(HANDLER_FOR_GET_REQUEST);
     }
 
     private static boolean mapHandler(final HttpRequestStartLine startLine, final HandlerMapper mapper) {

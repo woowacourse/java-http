@@ -6,18 +6,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HeadersTest {
+class ResponseHeaderTest {
 
     @DisplayName("Response 규격에 맞게 문자열로 변환한다.")
     @Test
     void toResponseValue() {
         // given
-        Headers headers = Headers.empty();
-        headers.put("Content-Type", HTML.value());
-        headers.put("Content-Length", "5564");
+        ResponseHeader responseHeader = ResponseHeader.empty();
+        responseHeader.put("Content-Type", HTML.value());
+        responseHeader.put("Content-Length", "5564");
 
         // when
-        String actual = headers.toResponseValue();
+        String actual = responseHeader.toResponseValue();
         String expected = String.join("\r\n",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5564 ",

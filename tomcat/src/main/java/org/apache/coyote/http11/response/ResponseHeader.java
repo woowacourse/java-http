@@ -4,12 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Headers {
+public class ResponseHeader {
 
     private Map<String, String> value = new LinkedHashMap<>();
 
-    public static Headers empty() {
-        return new Headers();
+    public static ResponseHeader empty() {
+        return new ResponseHeader();
     }
 
     public void put(String key, String value) {

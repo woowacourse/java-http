@@ -7,21 +7,21 @@ public class HttpResponse {
     private static final String SPACE = " ";
 
     private HttpStatus status;
-    private final Headers headers;
+    private final ResponseHeader responseHeader;
     private final StringBuilder body;
 
-    public HttpResponse(HttpStatus status, Headers headers, StringBuilder body) {
+    public HttpResponse(HttpStatus status, ResponseHeader responseHeader, StringBuilder body) {
         this.status = status;
-        this.headers = headers;
+        this.responseHeader = responseHeader;
         this.body = body;
     }
 
     public static HttpResponse status(HttpStatus status) {
-        return new HttpResponse(status, Headers.empty(), new StringBuilder());
+        return new HttpResponse(status, ResponseHeader.empty(), new StringBuilder());
     }
 
     public static HttpResponse ok() {
-        return new HttpResponse(HttpStatus.OK, Headers.empty(), new StringBuilder());
+        return new HttpResponse(HttpStatus.OK, ResponseHeader.empty(), new StringBuilder());
     }
 
     public HttpResponse body(String body) {
@@ -31,14 +31,14 @@ public class HttpResponse {
     }
 
     public HttpResponse setHeader(String key, Object value) {
-        headers.put(key, value.toString());
+        responseHeader.put(key, value.toString());
         return this;
     }
 
     public byte[] getBytes() {
         return String.join(CRLF,
                 statusLine(),
-                headers.toResponseValue(),
+                responseHeader.toResponseValue(),
                 body).getBytes();
     }
 
@@ -59,6 +59,6 @@ public class HttpResponse {
     }
 
     public String getHeader(String key) {
-        return headers.get(key);
+        return responseHeader.get(key);
     }
 }

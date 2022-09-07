@@ -13,10 +13,10 @@ public class HttpRequest {
     private static final int HEADER_VALUE = 1;
 
     private final RequestLine requestLine;
-    private final Map<String, String> header;
+    private final RequestHeader header;
     private final Body body;
 
-    private HttpRequest(RequestLine requestLine, Map<String, String> header, Body body) {
+    private HttpRequest(RequestLine requestLine, RequestHeader header, Body body) {
         this.requestLine = requestLine;
         this.header = header;
         this.body = body;
@@ -26,7 +26,7 @@ public class HttpRequest {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         Map<String, String> header = extractHeader(bufferedReader);
         Body body = extractBody(bufferedReader, header);
-        return new HttpRequest(requestLine, header, body);
+        return new HttpRequest(requestLine, RequestHeader.from(header), body);
     }
 
     private static Map<String, String> extractHeader(BufferedReader bufferedReader) throws IOException {

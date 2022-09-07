@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import nextstep.jwp.exception.NoContentLengthException;
 
 public class HttpHeaders {
 
@@ -29,7 +29,7 @@ public class HttpHeaders {
         final Entry<String, String> contentLength = httpHeaders.entrySet().stream()
                 .filter(it -> it.getKey().equalsIgnoreCase("content-length"))
                 .findFirst()
-                .orElseThrow(NoContentLengthException::new);
+                .orElseGet(() -> new SimpleEntry<>("Content-length", "0"));
         return ContentLength.from(contentLength.getValue());
     }
 }

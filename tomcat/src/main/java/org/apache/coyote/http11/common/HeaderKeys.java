@@ -43,6 +43,10 @@ public enum HeaderKeys {
                 new IllegalArgumentException(String.format("정의되지 않은 Header key 입니다. [%s]", headerName)));
     }
 
+    public static boolean isCookie(final String headerName) {
+        return COOKIE.name.equals(headerName);
+    }
+
     public String getName() {
         return name;
     }

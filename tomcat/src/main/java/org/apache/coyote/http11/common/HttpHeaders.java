@@ -10,33 +10,40 @@ public class HttpHeaders {
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
-    private final Map<HeaderKeys, String> value;
+    private final Map<HeaderKeys, String> headers;
+    private final HttpCookie cookie;
 
-    private HttpHeaders(final Map<HeaderKeys, String> value) {
-        this.value = value;
+    private HttpHeaders(final Map<HeaderKeys, String> headers, final HttpCookie cookie) {
+        this.headers = headers;
+        this.cookie = cookie;
     }
 
     public static HttpHeaders init() {
-        return new HttpHeaders(new LinkedHashMap<>());
+        return new HttpHeaders(new LinkedHashMap<>(), HttpCookie.init());
     }
 
     public static HttpHeaders from(final List<String> messages) {
         final Map<HeaderKeys, String> headers = new LinkedHashMap<>();
+        HttpCookie cookie = HttpCookie.init();
         for (final String message : messages) {
             final String[] headerElement = message.split(KEY_VALUE_DELIMITER);
+            if (HeaderKeys.isCookie(headerElement[KEY])) {
+                cookie = HttpCookie.init(headerElement[VALUE]);
+                continue;
+            }
             headers.put(HeaderKeys.from(headerElement[KEY]), headerElement[VALUE]);
         }
-        return new HttpHeaders(headers);
+        return new HttpHeaders(headers, cookie);
     }
 
     public HttpHeaders add(final HeaderKeys key, final String value) {
-        this.value.put(key, value);
+        this.headers.put(key, value);
         return this;
     }
 
     public String toMessage() {
         final StringBuilder message = new StringBuilder();
-        for (Map.Entry<HeaderKeys, String> entry : value.entrySet()) {
+        for (Map.Entry<HeaderKeys, String> entry : headers.entrySet()) {
             message.append(entry.getKey().getName())
                 .append(KEY_VALUE_DELIMITER)
                 .append(entry.getValue())
@@ -53,7 +60,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        final String contentLength = value.get(HeaderKeys.CONTENT_LENGTH);
+        final String contentLength = headers.get(HeaderKeys.CONTENT_LENGTH);
         if (contentLength == null) {
             return 0;
         }

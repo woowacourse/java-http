@@ -8,14 +8,14 @@ public class Cookie {
 
     private static final String JSESSIONID = "JSESSIONID";
 
-    private final Map<String, String> cookies;
+    private final Map<String, Object> cookies;
 
-    public Cookie(Map<String, String> cookies) {
+    public Cookie(Map<String, Object> cookies) {
         this.cookies = cookies;
     }
 
     public static Cookie of(String cookieValue) {
-        Map<String, String> cookies = new LinkedHashMap<>();
+        Map<String, Object> cookies = new LinkedHashMap<>();
         String[] cookieValues = cookieValue.split("; ");
         for (String cookie : cookieValues) {
             putCookie(cookies, cookie);
@@ -24,7 +24,7 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
-    private static void putCookie(Map<String, String> cookies, String cookie) {
+    private static void putCookie(Map<String, Object> cookies, String cookie) {
         int index = cookie.indexOf("=");
         if (index != -1) {
             String key = cookie.substring(0, index);
@@ -41,11 +41,11 @@ public class Cookie {
     public String toString() {
         return cookies.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .map(entry -> entry.getKey() + "=" + entry.getValue().toString())
                 .collect(Collectors.joining("; ")) + " ";
     }
 
-    public Map<String, String> getCookies() {
+    public Map<String, Object> getCookies() {
         return cookies;
     }
 }

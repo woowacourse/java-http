@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.ContentType;
+import org.apache.coyote.http11.httpmessage.Cookie;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
@@ -48,6 +50,7 @@ public class LoginApiHandler implements Handler {
 
         log.info("로그인 성공! 아이디: " + existedUser.getAccount());
         headers.put("Location", "/index.html ");
+        headers.put("Set-Cookie", new Cookie(Map.of("JSESSIONID", UUID.randomUUID())));
         return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
     }
 

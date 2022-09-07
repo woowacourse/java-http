@@ -55,7 +55,7 @@ class CookieTest {
     @Test
     void cookie를_출력할_수_있다() {
         // given
-        Map<String, String> cookies = new LinkedHashMap<>();
+        Map<String, Object> cookies = new LinkedHashMap<>();
         cookies.put("JSESSIONID", "1234");
         cookies.put("name", "park");
 

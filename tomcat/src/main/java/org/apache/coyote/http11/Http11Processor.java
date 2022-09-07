@@ -20,6 +20,7 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestBody;
 import nextstep.jwp.http.request.HttpRequestHeaders;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseHeaders;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -79,7 +80,8 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequestHeaders;
     }
 
-    private HttpRequestBody parseHttpRequestBody(final BufferedReader reader, final HttpRequestHeaders httpRequestHeaders)
+    private HttpRequestBody parseHttpRequestBody(final BufferedReader reader,
+                                                 final HttpRequestHeaders httpRequestHeaders)
             throws IOException {
         if (httpRequestHeaders.isContainContentLength()) {
             int contentLength = httpRequestHeaders.contentLength();
@@ -114,7 +116,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
-        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, Location.empty(), HttpCookie.empty(), responseBody);
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK,
+                new HttpResponseHeaders(Location.empty(), contentType, HttpCookie.empty()), responseBody);
     }
 
     private boolean isLoginRequest(final String path) {

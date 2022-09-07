@@ -1,19 +1,14 @@
 package org.apache.coyote.servlet.servlets;
 
+import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.header.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class HelloWorldServlet extends Servlet {
 
-    private static HelloWorldServlet helloWorldServlet = new HelloWorldServlet();
-
-    public HelloWorldServlet() {
-    }
-
-    @Override
-    public Servlet init() {
-        return helloWorldServlet;
+    public HelloWorldServlet(final SessionFactory sessionFactory) {
+        super(sessionFactory);
     }
 
     @Override

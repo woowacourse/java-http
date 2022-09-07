@@ -3,6 +3,7 @@ package org.apache.coyote.servlet.servlets;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.header.Method;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,14 +17,8 @@ public class LoginServlet extends Servlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
-    private static LoginServlet loginServlet = new LoginServlet();
-
-    public LoginServlet() {
-    }
-
-    @Override
-    public Servlet init() {
-        return loginServlet;
+    public LoginServlet(final SessionFactory sessionFactory) {
+        super(sessionFactory);
     }
 
     @Override

@@ -1,20 +1,18 @@
 package org.apache.coyote.servlet.servlets;
 
+import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.header.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class Servlet {
 
-    private static Servlet servlet;
+    protected final SessionFactory sessionFactory;
 
-    public abstract Servlet init();
+    protected Servlet(final SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
     public abstract HttpResponse service(final HttpRequest httpRequest);
-
-    void destroy() {
-        servlet = null;
-    }
 
     protected HttpResponse createNotFoundResponse(final HttpRequest httpRequest) {
         return HttpResponse.of(httpRequest, "/404.html", "404");

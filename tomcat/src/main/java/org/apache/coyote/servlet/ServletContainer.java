@@ -3,6 +3,7 @@ package org.apache.coyote.servlet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.coyote.http11.SessionFactory;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.ResourceSearcher;
@@ -18,20 +19,27 @@ public class ServletContainer {
 
     private static final Set<Mapping> MAPPINGS = new HashSet<>();
 
+    private final SessionFactory sessionFactory;
+    private final ResourceServlet resourceServlet;
+
     private ServletContainer() {
+        sessionFactory = SessionFactory.init();
+        resourceServlet = new ResourceServlet(sessionFactory);
     }
 
     public static ServletContainer init() {
-        mapUrlToServlet(new HelloWorldServlet().init(), "/");
-        mapUrlToServlet(new LoginServlet().init(), "/login");
-        mapUrlToServlet(new RegisterServlet().init(), "/register");
+        final ServletContainer servletContainer = SERVLET_CONTAINER;
 
-        return SERVLET_CONTAINER;
+        mapUrlToServlet(new HelloWorldServlet(servletContainer.sessionFactory), "/");
+        mapUrlToServlet(new LoginServlet(servletContainer.sessionFactory), "/login");
+        mapUrlToServlet(new RegisterServlet(servletContainer.sessionFactory), "/register");
+
+        return servletContainer;
     }
 
     public HttpResponse service(final HttpRequest httpRequest) {
         if (isResource(httpRequest)) {
-            return new ResourceServlet().service(httpRequest);
+            return resourceServlet.service(httpRequest);
         }
 
         final Servlet servlet = search(httpRequest);

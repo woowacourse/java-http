@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.HttpHeaders.CONTENT_LENGTH;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,8 +11,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.presentation.Controller;
+import org.apache.coyote.HttpBody;
+import org.apache.coyote.HttpHeaders;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.HttpStartLine;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = toHttpRequest(bufferedReader);
+            final HttpRequest httpRequest = readHttpRequest(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
             doService(httpRequest, httpResponse);
@@ -48,12 +53,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final List<String> rawHttpRequest = readHttpRequest(bufferedReader);
-        return HttpRequest.from(rawHttpRequest);
+    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final List<String> rawHeaders = readHeaders(bufferedReader);
+
+        final String rawStartLine = rawHeaders.remove(0);
+        final HttpStartLine startLine = HttpStartLine.from(rawStartLine);
+        final HttpHeaders headers = HttpHeaders.from(rawHeaders);
+        final HttpBody body = HttpBody.from(readBody(bufferedReader, headers));
+
+        log.info("============= HTTP REQUEST =============");
+        log.info("{}\n{}\n\n{}", rawStartLine, headers, body);
+
+        return new HttpRequest(startLine, headers, body);
     }
 
-    private List<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+    private static List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {
         final List<String> rawHttpRequest = new ArrayList<>();
 
         String line = LINE_BEFORE_READ;
@@ -61,11 +75,23 @@ public class Http11Processor implements Runnable, Processor {
             line = bufferedReader.readLine();
             rawHttpRequest.add(line);
         }
-
-        log.info("============= HTTP REQUEST =============");
-        log.info(String.join("\n", rawHttpRequest));
-
         return rawHttpRequest;
+    }
+
+    private static String readBody(final BufferedReader bufferedReader, final HttpHeaders headers)
+            throws IOException {
+        final String header = headers.getHeader(CONTENT_LENGTH);
+        if (header == null) {
+            return null;
+        }
+
+        final int contentLength = Integer.parseInt(header);
+        final char[] buffer = new char[contentLength];
+        if (bufferedReader.ready()) {
+            bufferedReader.read(buffer);
+
+        }
+        return new String(buffer);
     }
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {

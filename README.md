@@ -42,6 +42,7 @@
     - [x] 로그인 실패 -> `401.html` 로 리다이렉트
 - [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
     - [x] `/register` 로 요청시 로그인 페이지 화면을 띄워준다.
+    - [x] HttpRequest가 body의 값도 가져올 수 있도록 변경한다.
     - [ ] RegisterController `doPost()` 구현
 - [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie 가 존재한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

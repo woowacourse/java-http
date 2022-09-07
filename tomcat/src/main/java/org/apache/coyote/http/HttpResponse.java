@@ -7,33 +7,27 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private static final String TEXT_HTML = "text/html";
     private static final String NEW_LINE = "\r\n";
-    private static final String FILE_EXTENSION = ".";
-    private static final String HEADER_DELIMITER = ": ";
 
-    private final Map<String, String> headers;
+    private final ResponseHeader header;
     private final Cookie cookie;
     private HttpStatusCode statusCode;
     private String responseBody;
 
-    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> headers, final Cookie cookie) {
+    private HttpResponse(final HttpStatusCode statusCode, final ResponseHeader header, final Cookie cookie) {
         this.statusCode = statusCode;
-        this.headers = headers;
+        this.header = header;
         this.cookie = cookie;
         this.responseBody = "";
     }
 
     public static HttpResponse init(final HttpStatusCode statusCode) {
-        final Map<String, String> headers = new LinkedHashMap<>();
-
-        return new HttpResponse(statusCode, headers, Cookie.init());
+        return new HttpResponse(statusCode, new ResponseHeader(), Cookie.init());
     }
 
     public HttpResponse setBody(final String responseBody) {
@@ -43,8 +37,8 @@ public class HttpResponse {
     }
 
     private void addContentTypeAndLength(final String mimeType) {
-        headers.put("Content-Type", mimeType + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        header.addContentType(mimeType);
+        header.addContentLength(responseBody.getBytes().length);
     }
 
     public HttpResponse setBodyByPath(final String path) {
@@ -88,7 +82,7 @@ public class HttpResponse {
     }
 
     public HttpResponse setLocationAsHome() {
-        headers.put("Location", "/index.html");
+        header.addLocation("/index.html");
         return this;
     }
 
@@ -113,12 +107,9 @@ public class HttpResponse {
 
     private String toHeaderString() {
         if (cookie.hasValue()) {
-            headers.put("Set-Cookie", cookie.toHeaderForm());
+            header.addCookie(cookie);
         }
 
-        return headers.entrySet()
-                .stream()
-                .map(it -> it.getKey() + HEADER_DELIMITER + it.getValue() + " ")
-                .collect(Collectors.joining(NEW_LINE, "", NEW_LINE));
+        return header.toHeaderString();
     }
 }

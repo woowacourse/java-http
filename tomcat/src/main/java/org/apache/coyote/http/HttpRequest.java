@@ -18,11 +18,11 @@ public class HttpRequest {
     private final HttpMethod httpMethod;
     private final String path;
     private final Map<String, String> queryParams;
-    private final HttpHeader header;
+    private final RequestHeader header;
     private final HttpRequestBody requestBody;
 
     private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryParams,
-                        final HttpHeader header, final HttpRequestBody requestBody) {
+                        final RequestHeader header, final HttpRequestBody requestBody) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
@@ -35,7 +35,7 @@ public class HttpRequest {
                 .split(START_LINE_DELIMITER);
         final String uri = startLine[PATH];
 
-        final HttpHeader header = HttpHeader.from(reader);
+        final RequestHeader header = RequestHeader.from(reader);
         final HttpRequestBody requestBody = HttpRequestBody.of(reader, header.getContentLength());
 
         return new HttpRequest(HttpMethod.from(startLine[METHOD]), toPath(uri), toQueryParams(uri), header,
@@ -64,7 +64,7 @@ public class HttpRequest {
         return uri.contains(QUERY_STRING_PREFIX);
     }
 
-    public HttpHeader getHeader() {
+    public RequestHeader getHeader() {
         return header;
     }
 

@@ -8,11 +8,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.RequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpHeaderTest {
+class RequestHeaderTest {
 
     @Test
     @DisplayName("from 정적 팩토리 메서드는 http 요청 메시지의 header를 파싱해서 Map에 저장한다.")
@@ -32,7 +32,7 @@ class HttpHeaderTest {
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         // when
-        final HttpHeader actual = HttpHeader.from(bufferedReader);
+        final RequestHeader actual = RequestHeader.from(bufferedReader);
 
         inputStream.close();
 

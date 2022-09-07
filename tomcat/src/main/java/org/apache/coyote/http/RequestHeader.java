@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHeader {
+public class RequestHeader {
 
     private final Map<String, String> values;
 
-    private HttpHeader(final Map<String, String> values) {
+    private RequestHeader(final Map<String, String> values) {
         this.values = values;
     }
 
-    public static HttpHeader from(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeader from(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> values = new HashMap<>();
 
         String header;
@@ -22,7 +22,7 @@ public class HttpHeader {
             values.put(splitHeader[0], splitHeader[1].trim());
         }
 
-        return new HttpHeader(values);
+        return new RequestHeader(values);
     }
 
     public boolean hasSessionId() {

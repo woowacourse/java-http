@@ -6,6 +6,7 @@ import nextstep.jwp.utils.FileReader;
 public class Body {
 
     private static final String DEFAULT_BODY = "Hello world!";
+    private static final String EMPTY_BODY = "";
 
     private final String body;
 
@@ -14,7 +15,7 @@ public class Body {
     }
 
     public Body() {
-        this.body = "";
+        this.body = EMPTY_BODY;
     }
 
     public static Body from(String url) throws IOException {

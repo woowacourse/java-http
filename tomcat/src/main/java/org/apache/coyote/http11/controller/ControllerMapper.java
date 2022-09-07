@@ -6,7 +6,9 @@ import java.util.function.Predicate;
 
 public enum ControllerMapper {
     LOGIN(url -> url.contains("/login"), controller -> new LoginController()),
-    HOME(url -> url.contains("/"), controller -> new HomePageController());
+    REGISTER(url -> url.contains("/register"), controller -> new RegisterController()),
+    HOME(url -> url.contains("/"), controller -> new HomePageController())
+    ;
 
     private final Predicate<String> findUrl;
     private final Function<String, Controller> findController;

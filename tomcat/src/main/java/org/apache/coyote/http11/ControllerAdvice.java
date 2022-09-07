@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import org.apache.coyote.http11.response.HttpResponse1;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class ControllerAdvice {
 
-    public static HttpResponse1 getLoginExceptionResponse() throws IOException {
-        return HttpResponse1.from(HttpStatus.FOUND, "/401");
+    public static HttpResponse getLoginExceptionResponse() throws IOException {
+        return HttpResponse.createWithoutBody(HttpStatus.FOUND, "/401");
     }
 }

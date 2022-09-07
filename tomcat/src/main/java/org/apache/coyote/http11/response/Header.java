@@ -43,6 +43,14 @@ public class Header {
     }
 
     public String getHeader() {
-        return String.join("\r\n", requestLine, headers, "");
+        return String.join("\r\n", requestLine, headers);
+    }
+
+    public String getRequestLine() {
+        return requestLine;
+    }
+
+    public String getHeaders() {
+        return headers;
     }
 }

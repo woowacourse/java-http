@@ -18,12 +18,4 @@ public class HttpCookie {
             }
         }
     }
-
-    public String getCookie(final String name) {
-        return values.get(name);
-    }
-
-    public void setCookie(final String name, final String value) {
-        values.put(name, value);
-    }
 }

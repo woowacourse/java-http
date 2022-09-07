@@ -30,6 +30,16 @@ public class HttpResponse {
         headers.addLocation(url);
     }
 
+    public void flush() throws IOException {
+        if (body != null) {
+            headers.addContentLength(body.getBytes().length);
+        }
+
+        outputStream.write(version.getValue() + " " + status.getValue() + " \r\n"
+                + headers.getAllToString() + " " + "\r\n"
+                + body);
+    }
+
     public void setStatus(final HttpStatus status) {
         this.status = status;
     }
@@ -40,15 +50,5 @@ public class HttpResponse {
 
     public void setBody(final String body) {
         this.body = body;
-    }
-
-    public void flush() throws IOException {
-        if (body != null) {
-            headers.addContentLength(body.getBytes().length);
-        }
-
-        outputStream.write(version.getValue() + " " + status.getValue() + " \r\n"
-                + headers.getAllToString() + " " + "\r\n"
-                + body);
     }
 }

@@ -37,16 +37,18 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
-
-            RequestMapping requestMapping = new RequestMapping();
-            HttpRequest request = HttpRequestUtils.newHttpRequest(bufferedReader);
-            Controller controller = requestMapping.getController(request.getPath());
-
-            controller.service(request, new HttpResponse(outputStream));
+            service(bufferedReader, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void service(final BufferedReader bufferedReader, final BufferedWriter outputStream) throws Exception {
+        RequestMapping requestMapping = new RequestMapping();
+        HttpRequest request = HttpRequestUtils.newHttpRequest(bufferedReader);
+        Controller controller = requestMapping.getController(request.getPath());
+        controller.service(request, new HttpResponse(outputStream));
     }
 }

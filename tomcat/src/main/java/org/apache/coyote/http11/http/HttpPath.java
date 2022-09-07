@@ -13,20 +13,20 @@ public class HttpPath {
         this.value = uri;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public ContentType getContentType() {
-        return RequestContentTypeUtils.find(value);
-    }
-
     public static HttpPath of(final String uri) {
         return new HttpPath(uri);
     }
 
     public boolean isQuery() {
         return value.contains(QUERY_PARAMETER);
+    }
+
+    public ContentType getContentType() {
+        return RequestContentTypeUtils.find(value);
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

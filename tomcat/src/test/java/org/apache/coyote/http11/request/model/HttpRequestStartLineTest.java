@@ -22,7 +22,7 @@ public class HttpRequestStartLineTest {
     void isEqualToUri() {
         HttpRequestLine request = new HttpRequestLine("GET", "/", "HTTP/1.1");
 
-        assertThat(request.isEqualToUri("/")).isTrue();
+        assertThat(request.isEqualToPath("/")).isTrue();
     }
 
     @Test

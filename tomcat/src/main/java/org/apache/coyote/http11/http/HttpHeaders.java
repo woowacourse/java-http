@@ -36,6 +36,20 @@ public class HttpHeaders {
         return values;
     }
 
+    private static String parseKey(final String key) {
+        return key.replace(DELIMITER, "");
+    }
+
+    private static String parseValue(final String[] value) {
+        return String.join("", getHeaderValues(value));
+    }
+
+    private static String[] getHeaderValues(final String[] value) {
+        String[] result = new String[value.length - 1];
+        System.arraycopy(value, 1, result, 0, value.length - 1);
+        return result;
+    }
+
     public void addContentType(final String value) {
         headers.put(CONTENT_TYPE, value);
     }
@@ -50,20 +64,6 @@ public class HttpHeaders {
 
     public void addCookie(final String cookie) {
         headers.put(COOKIE, cookie);
-    }
-
-    private static String parseKey(final String key) {
-        return key.replace(DELIMITER, "");
-    }
-
-    private static String parseValue(final String[] value) {
-        return String.join("", getHeaderValues(value));
-    }
-
-    private static String[] getHeaderValues(final String[] value) {
-        String[] result = new String[value.length - 1];
-        System.arraycopy(value, 1, result, 0, value.length - 1);
-        return result;
     }
 
     public String getValue(final String key) {

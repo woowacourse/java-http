@@ -20,8 +20,8 @@ public class HttpRequestLine {
         return method == httpMethod;
     }
 
-    public boolean isEqualToUri(final String uri) {
-        return this.path.equals(HttpPath.of(uri));
+    public boolean isEqualToPath(final String path) {
+        return this.path.equals(HttpPath.of(path));
     }
 
     public boolean isQueryString() {

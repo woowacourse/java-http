@@ -35,6 +35,9 @@ public class LoginServlet extends Servlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
+        if (sessionFactory.isLoginAccount(httpRequest)) {
+            return HttpResponse.of(httpRequest, "/index.html", "302");
+        }
         return HttpResponse.of(httpRequest, "/login.html", "200");
     }
 

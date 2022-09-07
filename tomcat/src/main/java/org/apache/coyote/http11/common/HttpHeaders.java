@@ -46,6 +46,10 @@ public class HttpHeaders {
         return this;
     }
 
+    public boolean hasSessionId() {
+        return cookie.hasSessionId();
+    }
+
     public String toMessage() {
         final StringBuilder message = new StringBuilder();
         for (Map.Entry<HeaderKeys, String> entry : headers.entrySet()) {

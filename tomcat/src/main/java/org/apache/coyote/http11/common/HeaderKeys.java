@@ -12,6 +12,7 @@ public enum HeaderKeys {
     COOKIE("Cookie"),
     HOST("Host"),
     ORIGIN("Origin"),
+    PRAGMA("Pragma"),
     REFERER("Referer"),
     SEC_CH_UA("sec-ch-ua"),
     SEC_CH_UA_MOBILE("sec-ch-ua-mobile"),

@@ -22,6 +22,10 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
+    public boolean doesNotHaveSessionId() {
+        return !headers.hasSessionId();
+    }
+
     public Method getMethod() {
         return requestLine.getMethod();
     }
@@ -32,6 +36,10 @@ public class HttpRequest {
 
     public String getHttpVersion() {
         return requestLine.getHttpVersion();
+    }
+
+    public String getSessionId() {
+        return headers.getSessionId();
     }
 
     public Map<String, String> getBodies() {

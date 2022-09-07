@@ -39,14 +39,18 @@ public class HttpCookie {
     }
 
     public void generateSessionId() {
-        if (cookies.containsKey(SESSION_ID)) {
+        if (hasSessionId()) {
             throw new IllegalArgumentException(String.format("Cookie 가 중복적으로 저장되었습니다. [%s]", SESSION_ID));
         }
         cookies.put(SESSION_ID, UUID.randomUUID().toString());
     }
 
+    public boolean hasSessionId() {
+        return cookies.containsKey(SESSION_ID);
+    }
+
     public String getSessionId() {
-        if (!cookies.containsKey(SESSION_ID)) {
+        if (!hasSessionId()) {
             throw new IllegalArgumentException("session id 가 저장되지 않았습니다.");
         }
         return cookies.get(SESSION_ID);

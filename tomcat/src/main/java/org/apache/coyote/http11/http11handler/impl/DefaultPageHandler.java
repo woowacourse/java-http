@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http11handler.impl;
 
+import nextstep.jwp.model.visitor.Visitor;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
@@ -19,7 +20,7 @@ public class DefaultPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Http11Request http11Request) {
+    public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
         return handlerSupporter.defaultResponseComponent(DEFAULT_MESSAGE, StatusCode.OK);
     }
 }

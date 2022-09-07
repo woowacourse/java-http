@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http11handler.impl;
 
+import nextstep.jwp.model.visitor.Visitor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11response.ResponseComponent;
@@ -21,7 +22,7 @@ public class RegisterPageHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Http11Request http11Request) {
+    public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
         return handlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }
 }

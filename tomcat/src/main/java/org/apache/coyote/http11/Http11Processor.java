@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info(http11Request.getUri());
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
-            ResponseComponent responseComponent = http11Handler.handle(http11Request);
+            ResponseComponent responseComponent = http11Handler.handle(http11Request, visitor);
 
             if (visitor instanceof NewVisitor) {
                 responseComponent.setSession(visitor.getSessionId());

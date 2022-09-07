@@ -49,4 +49,14 @@ public class SessionManager implements Manager {
         session.setAttribute(USER_KEY, user);
         return session;
     }
+
+    public void addUserInSession(String sessionId, User user) {
+        Session session = findSession(sessionId);
+        session.setAttribute(USER_KEY, user);
+    }
+
+    public boolean checkLogin(String sessionId) {
+        Session session = findSession(sessionId);
+        return session.hasAttribute(USER_KEY);
+    }
 }

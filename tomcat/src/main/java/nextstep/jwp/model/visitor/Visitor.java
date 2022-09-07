@@ -1,5 +1,6 @@
 package nextstep.jwp.model.visitor;
 
+import nextstep.jwp.model.user.User;
 import org.apache.catalina.session.SessionManager;
 
 public abstract class Visitor {
@@ -18,4 +19,8 @@ public abstract class Visitor {
     public String getSessionId() {
         return sessionId;
     }
+
+    public abstract void maintainLogin(User user);
+
+    public abstract boolean isLogin();
 }

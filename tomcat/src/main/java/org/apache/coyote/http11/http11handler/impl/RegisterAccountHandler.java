@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.http11handler.impl;
 
 import java.util.Map;
+import nextstep.jwp.model.visitor.Visitor;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11response.ResponseComponent;
@@ -31,7 +32,7 @@ public class RegisterAccountHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Http11Request http11Request) {
+    public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (userService.addNewUser(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(EMAIL_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_REGISTER_SUCCESS, StatusCode.REDIRECT);

@@ -29,11 +29,7 @@ public class Session {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
-        values.remove(name);
-
-    }
-
-    public void invalidate() {
+    public boolean hasAttribute(String key) {
+        return values.containsKey(key);
     }
 }

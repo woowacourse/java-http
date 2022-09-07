@@ -2,6 +2,7 @@ package org.apache.coyote.http11.http11handler.impl;
 
 import java.util.List;
 import java.util.Locale;
+import nextstep.jwp.model.visitor.Visitor;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
@@ -21,7 +22,7 @@ public class ResourceHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Http11Request http11Request) {
+    public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
         return handlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
     }
 }

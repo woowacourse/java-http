@@ -28,7 +28,7 @@ class Http11HandlerTest {
     void extractElements_DefaultPageHandler() {
         Http11Request http11Request = new Http11Request("get", "/", null, null);
         Http11Handler http11Handler = new DefaultPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         assertAll(
                 () -> assertThat(responseComponent.getStatusCode()).isEqualTo(StatusCode.OK),
@@ -45,7 +45,7 @@ class Http11HandlerTest {
     void extractElements_IndexPageHandler() {
         Http11Request http11Request = new Http11Request("get", "/index.html", null, null);
         Http11Handler http11Handler = new IndexPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertAll(
@@ -63,7 +63,7 @@ class Http11HandlerTest {
     void extractElements_ResourceHandle() {
         Http11Request http11Request = new Http11Request("get", "/css/styles.css", null, null);
         Http11Handler http11Handler = new ResourceHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/css/styles.css")).getFile()).length());
@@ -83,7 +83,7 @@ class Http11HandlerTest {
     void extractElements_LoginPageHandle() {
         Http11Request http11Request = new Http11Request("get", "/login", null, null);
         Http11Handler http11Handler = new LoginPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/login.html")).getFile()).length());
@@ -103,7 +103,7 @@ class Http11HandlerTest {
     void extractElements_LoginPageHandle_QueryString_Success() {
         Http11Request http11Request = new Http11Request("get", "/login?account=gugu&password=password", null, null);
         Http11Handler http11Handler = new LoginPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/index.html")).getFile()).length());
@@ -123,7 +123,7 @@ class Http11HandlerTest {
     void extractElements_LoginPageHandle_QueryString_Fail() {
         Http11Request http11Request = new Http11Request("get", "/login?account=gugu&password=1", null, null);
         Http11Handler http11Handler = new LoginPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/401.html")).getFile()).length());
@@ -143,7 +143,7 @@ class Http11HandlerTest {
     void extractElements_RegisterPageHandler() {
         Http11Request http11Request = new Http11Request("get", "/register", null, null);
         Http11Handler http11Handler = new RegisterPageHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/register.html")).getFile()).length());
@@ -164,7 +164,7 @@ class Http11HandlerTest {
         Http11Request http11Request = new Http11Request("post", "/register", null,
                 "account=josh&email=whgusrms96@gmail.com&password=password");
         Http11Handler http11Handler = new RegisterAccountHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/index.html")).getFile()).length());
@@ -187,7 +187,7 @@ class Http11HandlerTest {
         Http11Request http11Request = new Http11Request("post", "/register", null,
                 "account=gugu&email=whgusrms96@gmail.com&password=password");
         Http11Handler http11Handler = new RegisterAccountHandler();
-        ResponseComponent responseComponent = http11Handler.handle(http11Request);
+        ResponseComponent responseComponent = http11Handler.handle(http11Request, );
 
         String contentLength = Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static/register.html")).getFile()).length());

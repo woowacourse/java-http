@@ -8,6 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.ResourceSearcher;
 import org.apache.coyote.servlet.servlets.HelloWorldServlet;
 import org.apache.coyote.servlet.servlets.LoginServlet;
+import org.apache.coyote.servlet.servlets.RegisterServlet;
 import org.apache.coyote.servlet.servlets.ResourceServlet;
 import org.apache.coyote.servlet.servlets.Servlet;
 
@@ -23,6 +24,7 @@ public class ServletContainer {
     public static ServletContainer init() {
         mapUrlToServlet(new HelloWorldServlet().init(), "/");
         mapUrlToServlet(new LoginServlet().init(), "/login");
+        mapUrlToServlet(new RegisterServlet().init(), "/register");
 
         return SERVLET_CONTAINER;
     }

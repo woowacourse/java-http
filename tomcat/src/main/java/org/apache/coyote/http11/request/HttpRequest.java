@@ -20,15 +20,19 @@ public class HttpRequest {
     private final Map<String, String> requestParams;
     private final String protocolVersion;
     private final Map<String, String> headers;
+
+    private final HttpCookie httpCookie;
     private final String requestBody;
 
     private HttpRequest(final String method, final String requestUrl, final Map<String, String> requestParams,
-                        final String protocolVersion, final Map<String, String> headers, final String requestBody) {
+                        final String protocolVersion, final Map<String, String> headers, final HttpCookie httpCookie,
+                        final String requestBody) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.requestParams = requestParams;
         this.protocolVersion = protocolVersion;
         this.headers = headers;
+        this.httpCookie = httpCookie;
         this.requestBody = requestBody;
     }
 
@@ -56,8 +60,14 @@ public class HttpRequest {
 
     public static HttpRequest from(final String startLine, final Map<String, String> headers,
                                    final String requestBody) {
+        HttpCookie httpCookies = HttpCookie.empty();
+
+        if (headers.containsKey("Cookie")) {
+            httpCookies = HttpCookie.from(headers.get("Cookie"));
+        }
+
         return new HttpRequest(parseMethod(startLine), parseUrl(startLine), parseRequestParams(startLine),
-                parseProtocolVersion(startLine), headers, requestBody);
+                parseProtocolVersion(startLine), headers, httpCookies, requestBody);
     }
 
     private static Map<String, String> readRequestHeaders(final BufferedReader bufferedReader) throws IOException {

@@ -119,7 +119,8 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 302 Found ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
+                "Set-Cookie: JSESSIONID=" +
+                        "",
                 responseBody);
     }
 

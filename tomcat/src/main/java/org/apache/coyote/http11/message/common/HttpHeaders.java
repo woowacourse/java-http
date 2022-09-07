@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.ToString;
 
@@ -42,11 +41,7 @@ public class HttpHeaders {
 
     public Optional<String> getHeader(final String header) {
         String value = values.get(header);
-        if (Objects.isNull(value)) {
-            return Optional.empty();
-        }
-
-        return Optional.of(value);
+        return Optional.ofNullable(value);
     }
 
     public boolean hasHeader(final String header) {

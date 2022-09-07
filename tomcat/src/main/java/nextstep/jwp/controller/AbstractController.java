@@ -22,14 +22,14 @@ public abstract class AbstractController implements Controller {
     }
 
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        return NotFoundPage();
+        return defaultInternalServerErrorPage();
     }
 
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
-        return NotFoundPage();
+        return defaultInternalServerErrorPage();
     }
 
-    private HttpResponse NotFoundPage() throws URISyntaxException, IOException {
+    private HttpResponse defaultInternalServerErrorPage() throws URISyntaxException, IOException {
         final Path path = PathFinder.findPath("/404.html");
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, responseBody, ContentType.HTML);

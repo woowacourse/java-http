@@ -9,6 +9,7 @@ import org.apache.request.HttpRequest;
 import org.apache.request.RequestLine;
 import org.apache.request.RequestUri;
 import org.apache.response.HttpResponse;
+import org.apache.util.CookieParser;
 import org.apache.util.QueryStringParser;
 import session.Session;
 import session.SessionManager;
@@ -43,7 +44,7 @@ public class LoginController implements PathController {
     }
 
     private boolean isAlreadyLogin(final Optional<String> value) {
-        return value.isPresent() && SessionManager.containJSessionId(value.get());
+        return value.isPresent() && CookieParser.checkJSessionIdIsExist(value.get());
     }
 
     private void login(final HttpResponse httpResponse, final String body) {
@@ -51,19 +52,23 @@ public class LoginController implements PathController {
         String account = queryString.get("account").trim();
         String password = queryString.get("password").trim();
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
+        if (isPasswordMatched(password, user)) {
             httpResponse.set302Redirect("http://localhost:8080/index.html");
-            putCookies(httpResponse, user.get());
+            enrollJSessionId(httpResponse, user.get());
         } else {
             httpResponse.set302Redirect("http://localhost:8080/401.html");
         }
     }
 
-    private void putCookies(final HttpResponse httpResponse, final User user) {
+    private boolean isPasswordMatched(final String password, final Optional<User> user) {
+        return user.isPresent() && user.get().checkPassword(password);
+    }
+
+    private void enrollJSessionId(final HttpResponse httpResponse, final User user) {
         Session session = new Session();
         session.addCookie("JSESSIONID", UUID.randomUUID().toString());
         SessionManager.addSession(user, session);
-        httpResponse.putHeader("Set-Cookie", session.findAllCookies());
+        httpResponse.putHeader("Set-Cookie", CookieParser.joinAllCookiesToString(session.getCookies()));
     }
 
     @Override

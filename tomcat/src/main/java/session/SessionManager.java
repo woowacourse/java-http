@@ -1,13 +1,13 @@
 package session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 public class SessionManager {
 
-    private static final Map<User, Session> sessions = new HashMap<>();
+    private static final Map<User, Session> sessions = new ConcurrentHashMap<>();
 
     public static void addSession(final User user, final Session session) {
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
@@ -15,19 +15,4 @@ public class SessionManager {
         }
         sessions.put(user, session);
     }
-
-    public static boolean containJSessionId(final String cookieHeaderValue) {
-        return Cookie.parseCookies(cookieHeaderValue).containsKey("JSESSIONID");
-    }
-
-//    public static Optional<Session> findSession(final User user) {
-//        if (!sessions.containsKey(user)) {
-//            return Optional.empty();
-//        }
-//        return Optional.of(sessions.get(user));
-//    }
-
-//    public static void removeSession(final User user) {
-//        sessions.remove(user);
-//    }
 }

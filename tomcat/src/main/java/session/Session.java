@@ -1,28 +1,18 @@
 package session;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
-    public static final String COOKIE_DELIMITER = "; ";
-    private Map<String, Cookie> cookies = new HashMap<>();
+    private Map<String, Cookie> cookies = new ConcurrentHashMap<>();
 
     public void addCookie(final String key, final String value) {
         cookies.put(key, new Cookie(key, value));
     }
 
-//    public Optional<String> findCookie(final String key) {
-//        if (!cookies.containsKey(key)) {
-//            return Optional.empty();
-//        }
-//        return Optional.of(cookies.get(key));
-//    }
-
-    public String findAllCookies() {
-        return cookies.keySet().stream()
-                .map(i -> cookies.get(i).toStringForHeader())
-                .collect(Collectors.joining(COOKIE_DELIMITER));
+    public Map<String, Cookie> getCookies() {
+        return Collections.unmodifiableMap(cookies);
     }
 }

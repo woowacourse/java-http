@@ -36,11 +36,11 @@ public class RegisterController extends AbstractController {
             );
             InMemoryUserRepository.save(user);
             httpResponse.httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "/index.html");
+                    .redirect("/index.html");
         } catch (Exception e) {
             log.info(e.getMessage());
             httpResponse.httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "/401.html");
+                    .redirect("/401.html");
         }
     }
 }

@@ -31,6 +31,16 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse redirect(final String location) {
+        headers.add("Location", location);
+        return this;
+    }
+
+    public HttpResponse setCookie(final HttpCookie httpCookie) {
+        headers.add("Set-Cookie", httpCookie.joinToString());
+        return this;
+    }
+
     public HttpResponse body(final String body, final MediaType mediaType) {
         this.body = body;
         addHeader("Content-Type", mediaType.getValue());

@@ -60,7 +60,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_성공시_302를_반환하고_index_html로_리다이렉트한다() {
+    void login_성공시_302와_setCookie를_반환하고_index_html로_리다이렉트한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -78,10 +78,9 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n" +
-                "\r\n" +
-                "";
+                "Set-Cookie: ";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output().startsWith(expected)).isTrue();
     }
 
     @Test

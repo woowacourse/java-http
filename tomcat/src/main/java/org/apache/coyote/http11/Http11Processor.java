@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             httpResponse
                     .httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "404.html");
+                    .redirect("/404.html");
         }
     }
 }

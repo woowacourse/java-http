@@ -1,8 +1,10 @@
 package nextstep.jwp.controller;
 
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -39,11 +41,12 @@ public class LoginController extends AbstractController {
             validatePassword(requestParameters, user);
             log.info("user : " + user);
             httpResponse.httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "/index.html");
+                    .redirect("/index.html")
+                    .setCookie(new HttpCookie().add("JSESSIONID", UUID.randomUUID().toString()));
         } catch (NoSuchUserException e) {
             log.info(e.getMessage());
             httpResponse.httpStatus(HttpStatus.FOUND)
-                    .addHeader("Location", "/401.html");
+                    .redirect("/401.html");
         }
     }
 

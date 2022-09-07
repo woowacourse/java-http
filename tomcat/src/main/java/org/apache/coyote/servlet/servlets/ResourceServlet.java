@@ -27,6 +27,6 @@ public class ResourceServlet extends Servlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest.getHttpVersion(), httpRequest.getUrl(), "200");
+        return HttpResponse.of(httpRequest, httpRequest.getUrl(), "200");
     }
 }

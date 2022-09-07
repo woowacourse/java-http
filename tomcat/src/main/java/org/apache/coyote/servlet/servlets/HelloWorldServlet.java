@@ -27,6 +27,6 @@ public class HelloWorldServlet extends Servlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/helloWorld.html", "200");
+        return HttpResponse.of(httpRequest, "/helloWorld.html", "200");
     }
 }

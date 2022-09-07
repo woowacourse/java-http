@@ -4,6 +4,7 @@ import org.apache.coyote.http11.common.ResourceType;
 import org.apache.coyote.http11.common.HeaderKeys;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMessageDelimiter;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.apache.coyote.http11.response.header.StatusLine;
 import org.apache.coyote.http11.util.ResourceSearcher;
@@ -24,8 +25,8 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(final String httpVersion, final String resource, final String statusCode) {
-        final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.from(statusCode));
+    public static HttpResponse of(final HttpRequest httpRequest, final String resource, final String statusCode) {
+        final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
 
         final String contentType = selectContentType(resource);
         final String body = loadResourceContent(resource);

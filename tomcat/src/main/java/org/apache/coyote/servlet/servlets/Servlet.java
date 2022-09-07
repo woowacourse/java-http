@@ -17,6 +17,6 @@ public abstract class Servlet {
     }
 
     protected HttpResponse createNotFoundResponse(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/login.html", "200");
+        return HttpResponse.of(httpRequest, "/login.html", "200");
     }
 }

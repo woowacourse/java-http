@@ -40,20 +40,20 @@ public class LoginServlet extends Servlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/login.html", "200");
+        return HttpResponse.of(httpRequest, "/login.html", "200");
     }
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
         final Map<String, String> bodies = httpRequest.getBodies();
         if (!bodies.containsKey("account") || !bodies.containsKey("password")) {
-            return HttpResponse.of(httpRequest.getHttpVersion(), "/404.html", "404");
+            return HttpResponse.of(httpRequest, "/404.html", "404");
         }
         final Optional<User> user = UserService.find(bodies.get("account"), bodies.get("password"));
 
         if (user.isPresent()) {
             log.info("login success to ID : {}", user.get().getAccount());
-            return HttpResponse.of(httpRequest.getHttpVersion(), "/index.html", "302");
+            return HttpResponse.of(httpRequest, "/index.html", "302");
         }
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/401.html", "401");
+        return HttpResponse.of(httpRequest, "/401.html", "401");
     }
 }

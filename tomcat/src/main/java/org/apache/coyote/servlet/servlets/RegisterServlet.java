@@ -38,7 +38,7 @@ public class RegisterServlet extends Servlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/register.html", "200");
+        return HttpResponse.of(httpRequest, "/register.html", "200");
     }
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
@@ -46,6 +46,6 @@ public class RegisterServlet extends Servlet {
         UserService.save(bodies.get("account"), bodies.get("password"), bodies.get("email"));
         log.info("register success to ID : {}", bodies.get("account"));
 
-        return HttpResponse.of(httpRequest.getHttpVersion(), "/index.html", "302");
+        return HttpResponse.of(httpRequest, "/index.html", "302");
     }
 }

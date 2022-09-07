@@ -36,7 +36,7 @@ public class DispatcherServlet implements Servlet {
                 .getTypesAnnotatedWith(Controller.class)
                 .stream()
                 .filter(this::hasAnyMethodWithRequestMappingAnnotation)
-                .flatMap(this::entry)
+                .flatMap(this::createRequestMapping)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
@@ -58,7 +58,8 @@ public class DispatcherServlet implements Servlet {
                 .anyMatch(method -> Objects.nonNull(method.getAnnotation(RequestMapping.class)));
     }
 
-    private Stream<Entry<RequestMappingInfo, Function<HttpRequest, HttpResponse>>> entry(final Class<?> controller) {
+    private Stream<Entry<RequestMappingInfo, Function<HttpRequest, HttpResponse>>> createRequestMapping(
+            final Class<?> controller) {
         final var controllerInstance = CustomReflectionUtils.newInstance(controller);
 
         final var methods = Arrays.stream(controller.getMethods())

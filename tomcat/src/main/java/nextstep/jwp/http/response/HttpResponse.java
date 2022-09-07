@@ -29,6 +29,12 @@ public class HttpResponse {
                 new HttpResponseHeaders(Location.empty(), ContentType.TEXT_HTML, httpCookie), responseBody);
     }
 
+    public static HttpResponse ok(final HttpVersion httpVersion, final HttpCookie httpCookie,
+                                  final ContentType contentType, final String responseBody) {
+        return new HttpResponse(httpVersion, HttpStatus.OK,
+                new HttpResponseHeaders(Location.empty(), contentType, httpCookie), responseBody);
+    }
+
     public static HttpResponse found(final HttpVersion httpVersion, final HttpCookie httpCookie,
                                      final Location location) {
         return new HttpResponse(httpVersion, HttpStatus.FOUND,
@@ -43,7 +49,11 @@ public class HttpResponse {
         String response = httpVersion.getValue() + " " + httpStatus.httpResponseHeaderStatus() + " ";
         httpResponseHeaders.addHeader("Content-Length", String.valueOf(contentLength()));
         response = joinOutputResponseFormat(response, httpResponseHeaders.toHeaderFormat());
-        return joinOutputResponseFormat(response, "", responseBody);
+        String result = joinOutputResponseFormat(response, "", responseBody);
+        if (!result.contains("height: 20px !important;")) {
+            System.out.println(result);
+        }
+        return result;
     }
 
     private String joinOutputResponseFormat(final String... response) {

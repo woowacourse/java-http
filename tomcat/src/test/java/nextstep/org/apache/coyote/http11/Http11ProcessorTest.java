@@ -26,7 +26,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -86,6 +86,66 @@ class Http11ProcessorTest {
             "HTTP/1.1 200 OK ",
             "Content-Type: text/css;charset=utf-8 ",
             "Content-Length: 211991 ",
+            "",
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("로그인에 성공하면 302 상태코드를 반환한다.")
+    void login_success() throws IOException {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest= String.join("\r\n",
+            "POST /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/html,*/*;q=0.1",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Content-Length: " + requestBody.getBytes().length,
+            "Connection: keep-alive ",
+            "",
+            requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = "HTTP/1.1 302 Found ";
+        assertThat(socket.output().split("\r\n")[0]).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("로그인에 실패하면 401 상태코드를 반환하고 401.html로 이동한다.")
+    void login_fail() throws IOException {
+        // given
+        final String requestBody = "account=gugu&password=invalid";
+        final String httpRequest= String.join("\r\n",
+            "POST /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/html,*/*;q=0.1",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Content-Length: " + requestBody.getBytes().length,
+            "Connection: keep-alive ",
+            "",
+            requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+
+        var expected= String.join("\r\n",
+            "HTTP/1.1 401 Unauthorized ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 2426 ",
             "",
             new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 

@@ -13,10 +13,35 @@ class HttpRequestTest {
     void success() {
         String requestLine = "GET /login?key=value HTTP/1.1 ";
 
-        HttpRequest actual = HttpRequest.from(requestLine);
+        HttpRequest actual = HttpRequest.of(requestLine, HttpHeaders.parse(List.of()), "");
 
-        HttpRequest expected = new HttpRequest("GET", "/login?key=value",
-            "/login", new QueryParams(List.of(new QueryParam("key", "value"))));
+        HttpRequest expected = HttpRequest.of(requestLine, HttpHeaders.parse(List.of()), "");
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("httpMethod 와 경로가 일치하면 True를 반환한다.")
+    void matches_success() {
+        String requestLine = "GET /login?key=value HTTP/1.1 ";
+        HttpRequest httpRequest = HttpRequest.of(requestLine, HttpHeaders.parse(List.of()), "");
+
+        boolean actual = httpRequest.matches("/login", HttpMethod.GET);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @DisplayName("Content-Type이 application/x-www-form-urlencoded이면 RequestBody를 QueryParams 형식으로 가져온다.")
+    void getFormData_success() {
+        String requestLine = "POST /login HTTP/1.1 ";
+        HttpRequest httpRequest = HttpRequest.of(requestLine,
+            HttpHeaders.parse(List.of("Content-Type: application/x-www-form-urlencoded")),
+            "key=value");
+
+        QueryParams actual = httpRequest.getFormData();
+
+        QueryParams expected = QueryParams.from("key=value");
+        assertThat(actual).usingRecursiveComparison()
+            .isEqualTo(expected);
     }
 }

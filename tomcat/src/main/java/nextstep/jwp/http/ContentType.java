@@ -4,10 +4,12 @@ import java.util.Arrays;
 
 public enum ContentType {
 
+    TEXT_PLAIN("txt", "text", "plain"),
     TEXT_HTML("html", "text", "html"),
     TEXT_CSS("css", "text", "css"),
     APPLICATION_JAVASCRIPT("js", "application", "javascript"),
-    IMAGE_X_ICON("ico", "image", "x-icon")
+    IMAGE_X_ICON("ico", "image", "x-icon"),
+    SVG("svg", "image", "svg+xml"),
     ;
 
     private static final String MEDIA_TYPE_FORMAT = "%s/%s";
@@ -29,7 +31,7 @@ public enum ContentType {
             .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 확장자입니다."));
     }
 
-    public String getMediaType() {
+    public String writeMediaType() {
         return String.format(MEDIA_TYPE_FORMAT, type, subType);
     }
 

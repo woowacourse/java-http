@@ -1,6 +1,7 @@
 package org.apache.coyote.servlet.request;
 
 import org.apache.coyote.servlet.cookie.HttpCookie;
+import org.apache.coyote.servlet.session.NullSession;
 import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.support.HttpMethod;
 
@@ -9,7 +10,7 @@ public class HttpRequest {
     private final StartLine startLine;
     private final RequestHeaders headers;
     private final String body;
-    private Session session = null;
+    private Session session = new NullSession();
 
     public HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
         this.startLine = startLine;

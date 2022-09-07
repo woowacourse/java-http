@@ -25,14 +25,14 @@ public class UserController {
     private static final UserService userService = new UserService();
     public static final String SESSION_ID = "JSESSIONID";
 
-    public static HttpResponse login(final HttpRequest request) throws IOException {
+    public HttpResponse login(final HttpRequest request) throws IOException {
         if (request.getMethod() == Method.POST) {
             return postLogin(request);
         }
         return getLogin(request);
     }
 
-    private static HttpResponse getLogin(final HttpRequest request) throws IOException {
+    private HttpResponse getLogin(final HttpRequest request) throws IOException {
         if (loginAlready(request)) {
             String sessionId = request.getCookie().getValue(SESSION_ID);
             if (Sessions.find(sessionId).isPresent()) {
@@ -46,11 +46,11 @@ public class UserController {
         return response;
     }
 
-    private static boolean loginAlready(final HttpRequest request) {
+    private boolean loginAlready(final HttpRequest request) {
         return request.getCookie().hasKey(SESSION_ID);
     }
 
-    private static HttpResponse postLogin(final HttpRequest request) throws IOException {
+    private HttpResponse postLogin(final HttpRequest request) throws IOException {
         try {
             LoginRequest loginRequest = LoginRequest.of(MessageConverter.convert(request.getBody()));
             User user = userService.login(loginRequest);
@@ -69,20 +69,20 @@ public class UserController {
         }
     }
 
-    public static HttpResponse register(final HttpRequest request) throws IOException {
+    public HttpResponse register(final HttpRequest request) throws IOException {
         if (request.getMethod() == Method.POST) {
             return postRegister(request);
         }
         return getRegister();
     }
 
-    private static HttpResponse getRegister() throws IOException {
+    private HttpResponse getRegister() throws IOException {
         HttpResponse response = HttpResponse.of(Status.OK);
         response.addResource(findResource("/register.html"));
         return response;
     }
 
-    private static HttpResponse postRegister(final HttpRequest request) {
+    private HttpResponse postRegister(final HttpRequest request) {
         RegisterRequest registerRequest = RegisterRequest.of(MessageConverter.convert(request.getBody()));
         userService.register(registerRequest);
         HttpResponse response = HttpResponse.of(Status.FOUND);
@@ -90,7 +90,7 @@ public class UserController {
         return response;
     }
 
-    private static Resource findResource(String url) throws IOException {
+    private Resource findResource(String url) throws IOException {
         Path path = Path.of(MainController.class.getResource("/static" + url).getPath());
         String body = Files.readString(path);
 

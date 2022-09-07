@@ -17,8 +17,10 @@ public class RequestHandler {
     private static final String URL_REGISTER = "/register";
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final MainController mainController = new MainController();
+    private final UserController userController = new UserController();
 
-    public static HttpResponse process(final HttpRequest request) {
+    public HttpResponse process(final HttpRequest request) {
         try {
             return match(request);
         } catch (IOException e) {
@@ -27,19 +29,19 @@ public class RequestHandler {
         return HttpResponse.of(Status.INTERNAL_SERVER_ERROR);
     }
 
-    private static HttpResponse match(final HttpRequest request) throws IOException {
+    private HttpResponse match(final HttpRequest request) throws IOException {
         if (request.getUrl().contains(".")) {
-            return MainController.template(request);
+            return mainController.template(request);
         }
         if (request.getUrl().equals(URL_INDEX)) {
-            return MainController.index();
+            return mainController.index();
         }
         if (request.getUrl().equals(URL_LOGIN)) {
-            return UserController.login(request);
+            return userController.login(request);
         }
         if (request.getUrl().equals(URL_REGISTER)) {
-            return UserController.register(request);
+            return userController.register(request);
         }
-        return MainController.hello();
+        return mainController.hello();
     }
 }

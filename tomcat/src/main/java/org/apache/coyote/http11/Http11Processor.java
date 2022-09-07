@@ -21,6 +21,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestHandler requestHandler = new RequestHandler();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -38,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             HttpRequest request = readHttpRequest(reader);
-            HttpResponse response = RequestHandler.process(request);
+            HttpResponse response = requestHandler.process(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

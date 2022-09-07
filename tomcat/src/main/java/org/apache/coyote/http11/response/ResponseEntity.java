@@ -22,13 +22,13 @@ public class ResponseEntity {
     }
 
     public static ResponseEntity createTextHtmlResponse(final ServletResponseEntity response) {
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "text/html");
+        final HttpResponseHeader headers = response.getHttpHeader();
+        headers.addHeader("Content-Type", "text/html");
 
-        return new ResponseEntity(HttpStatus.OK, new HttpResponseHeader(headers), response.getResource());
+        return new ResponseEntity(HttpStatus.OK, headers, response.getResource());
     }
 
-    public static ResponseEntity createRedirectResponse(final HttpStatus httpStatus, final String location) {
+    public static ResponseEntity createErrorRedirectResponse(final HttpStatus httpStatus, final String location) {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Location", location);
 

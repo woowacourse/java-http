@@ -3,8 +3,8 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class HttpRequestTest {
         void success_queryString() {
             // given
             final HttpRequestLine httpRequestLine = HttpRequestLine.of("GET /path?id=yujeong HTTP/1.1");
-            final Queue<String> rawRequest = new LinkedList<>();
+            final List<String> rawRequest = new ArrayList<>();
             rawRequest.add("name: eve");
             final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
 
@@ -41,7 +41,7 @@ class HttpRequestTest {
         void success_formDataBody() {
             // given
             final HttpRequestLine httpRequestLine = HttpRequestLine.of("GET /path HTTP/1.1");
-            final Queue<String> rawRequest = new LinkedList<>();
+            final List<String> rawRequest = new ArrayList<>();
             rawRequest.add("name: eve");
             rawRequest.add("Content-Type: application/x-www-form-urlencoded");
             final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);

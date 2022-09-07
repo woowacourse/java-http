@@ -10,12 +10,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.handler.ServletAdvice;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
@@ -25,17 +24,18 @@ import org.junit.jupiter.api.Test;
 
 class HttpFrontServletTest {
 
+    private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(
+            RequestServletMapping.init(), ServletAdvice.init());
+
     private HttpRequest getHttpRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
-        final Queue<String> rawRequest = new LinkedList<>();
+        final List<String> rawRequest = new ArrayList<>();
         rawRequest.add("name: eve");
         final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
 
         return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
-    private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(
-            RequestServletMapping.init(), ServletAdvice.init());
     @Nested
     @DisplayName("handle 메소드는")
     class Handle {
@@ -99,6 +99,7 @@ class HttpFrontServletTest {
                         NOT_FOUND.getStatusCode() + ".html");
             });
         }
+
         @Test
         @DisplayName("매핑한 핸들러 실행 도중 IllegalArgumentException 예외가 발생하면 Redirect Not Found ResponseEntity를 반환한다.")
         void success_ServerErrorResponse() throws IOException {

@@ -167,12 +167,13 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_post() {
+    void login_postWithCookie() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "",
                 "");
 
@@ -189,6 +190,26 @@ class Http11ProcessorTest {
                 "\r\n" +
                 "";
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login_postWithNoCookie() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("JSESSIONID");
     }
 
     @Test

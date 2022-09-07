@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.response.HttpResponseHeader;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.response.ResponseEntity;
 

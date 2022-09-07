@@ -3,8 +3,10 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequestHeader;
@@ -23,7 +25,7 @@ class LoginHandlerTest {
 
     private HttpRequest getHttpFormDataRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
-        final Queue<String> rawRequestHeader = new LinkedList<>();
+        final List<String> rawRequestHeader = new ArrayList<>();
         rawRequestHeader.add("name: eve");
         rawRequestHeader.add("Content-Type: application/x-www-form-urlencoded");
         final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);

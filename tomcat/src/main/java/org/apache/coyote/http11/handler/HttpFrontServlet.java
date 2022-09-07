@@ -31,7 +31,7 @@ public class HttpFrontServlet {
             return createResponseEntity(response);
         } catch (final Exception exception) {
             final HttpStatus errorStatus = servletAdvice.getExceptionStatusCode(exception.getClass());
-            return ResponseEntity.createRedirectResponse(HttpStatus.FOUND, errorStatus.getStatusCode() + ".html");
+            return ResponseEntity.createErrorRedirectResponse(HttpStatus.FOUND, errorStatus.getStatusCode() + ".html");
         }
     }
 

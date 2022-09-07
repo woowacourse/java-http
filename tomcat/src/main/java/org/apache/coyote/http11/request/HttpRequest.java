@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.response.HttpResponseHeader;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
@@ -26,12 +26,12 @@ public class HttpRequest {
         return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.of(requestLine.getQueryString()), requestBody);
     }
 
-    public String getParameter(final String parameterName) {
-        return queryParameter.getParameter(parameterName);
-    }
-
     public boolean containsParameter(final String parameterName) {
         return queryParameter.contains(parameterName);
+    }
+
+    public String getParameter(final String parameterName) {
+        return queryParameter.getParameter(parameterName);
     }
 
     public String getPath() {
@@ -42,8 +42,12 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String getHeader(final String header) {
-        return this.headers.getHeader(header);
+    public String getHeader(final String headerName) {
+        return headers.getHeader(headerName);
+    }
+
+    public HttpCookie getCookies() {
+        return headers.getCookies();
     }
 
     public String getBody() {

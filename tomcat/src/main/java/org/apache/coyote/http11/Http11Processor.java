@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpFrontServlet;
@@ -54,17 +54,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createRequest(final BufferedReader bufferedReader) throws IOException {
-        final Queue<String> rawRequestHeader = readHttpRequestHeader(bufferedReader);
-        final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestHeader.remove());
-        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);
+        final HttpRequestLine requestLine = HttpRequestLine.of(bufferedReader.readLine());
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(readHttpRequestHeader(bufferedReader));
 
         final String requestBody = readHttpRequestBody(bufferedReader, httpRequestHeader);
 
         return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
 
-    private Queue<String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        final Queue<String> httpRequest = new LinkedList<>();
+    private List<String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final List<String> httpRequest = new ArrayList<>();
 
         String line = bufferedReader.readLine();
         while (line != null && !line.equals("")) {

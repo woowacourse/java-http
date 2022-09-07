@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.response.HttpResponseHeader;
+import java.util.List;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class RegisterServletTest {
 
     private HttpRequest getHttpFormDataRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
-        final Queue<String> rawRequestHeader = new LinkedList<>();
+        final List<String> rawRequestHeader = new LinkedList<>();
         rawRequestHeader.add("name: eve");
         rawRequestHeader.add("Content-Type: application/x-www-form-urlencoded");
         final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequestHeader);

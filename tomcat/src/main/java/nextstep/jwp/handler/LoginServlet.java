@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
@@ -31,7 +32,9 @@ public class LoginServlet implements RequestServlet {
                     throw new IllegalArgumentException("User not found");
                 });
 
+        checkJSessionId(request, responseHeader);
         responseHeader.addHeader("Location", "/index.html");
+
         return ServletResponseEntity.createResponseBody(HttpStatus.FOUND, responseHeader, EMPTY_BODY);
     }
 
@@ -47,5 +50,11 @@ public class LoginServlet implements RequestServlet {
         }
 
         log.info(user.toString());
+    }
+
+    private void checkJSessionId(final HttpRequest request, final HttpResponseHeader responseHeader) {
+        if (!request.getCookies().contains("JSESSIONID")) {
+            responseHeader.addCookie("JSESSIONID", UUID.randomUUID().toString());
+        }
     }
 }

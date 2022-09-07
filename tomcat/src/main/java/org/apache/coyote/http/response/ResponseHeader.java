@@ -1,34 +1,37 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
+
+import static org.apache.coyote.http.HttpHeaders.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.HttpHeaders;
 
 public class ResponseHeader {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String NEW_LINE = "\r\n";
 
-    private final Map<String, String> values;
+    private final Map<HttpHeaders, String> values;
 
     public ResponseHeader() {
         this.values = new LinkedHashMap<>();
     }
 
     public void addContentType(final String contentType) {
-        values.put("Content-Type", contentType + ";charset=utf-8");
+        values.put(CONTENT_TYPE, contentType + ";charset=utf-8");
     }
 
     public void addContentLength(final int contentLength) {
-        values.put("Content-Length", String.valueOf(contentLength));
+        values.put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public void addLocation(final String resource) {
-        values.put("Location", resource);
+        values.put(LOCATION, resource);
     }
 
-    public void addCookie(final Cookie cookie) {
-        values.put("Set-Cookie", cookie.toHeaderForm());
+    public void addCookie(final ResponseCookie cookie) {
+        values.put(SET_COOKIE, cookie.toHeaderForm());
     }
 
     public String toHeaderString() {

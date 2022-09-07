@@ -3,9 +3,9 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http.AbstractController;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestBody;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        final HttpRequestBody requestBody = httpRequest.getRequestBody();
+        final RequestBody requestBody = httpRequest.getRequestBody();
 
         final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);

@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.HttpStatusCode;
 
 public class HttpResponse {
 
@@ -15,11 +16,11 @@ public class HttpResponse {
     private static final String NEW_LINE = "\r\n";
 
     private final ResponseHeader header;
-    private final Cookie cookie;
+    private final ResponseCookie cookie;
     private HttpStatusCode statusCode;
     private String responseBody;
 
-    private HttpResponse(final HttpStatusCode statusCode, final ResponseHeader header, final Cookie cookie) {
+    private HttpResponse(final HttpStatusCode statusCode, final ResponseHeader header, final ResponseCookie cookie) {
         this.statusCode = statusCode;
         this.header = header;
         this.cookie = cookie;
@@ -27,7 +28,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse init(final HttpStatusCode statusCode) {
-        return new HttpResponse(statusCode, new ResponseHeader(), Cookie.init());
+        return new HttpResponse(statusCode, new ResponseHeader(), new ResponseCookie());
     }
 
     public HttpResponse setBody(final String responseBody) {

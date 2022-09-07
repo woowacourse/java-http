@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http.request.HttpRequest;
 
 public class RequestMapping {
 

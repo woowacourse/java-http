@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http.AbstractController;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 
 public class HomeController extends AbstractController {

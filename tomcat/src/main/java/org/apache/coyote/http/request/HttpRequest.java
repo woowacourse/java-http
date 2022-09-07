@@ -1,9 +1,10 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.util.StringParser;
 
 public class HttpRequest {
@@ -19,10 +20,10 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> queryParams;
     private final RequestHeader header;
-    private final HttpRequestBody requestBody;
+    private final RequestBody requestBody;
 
     private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryParams,
-                        final RequestHeader header, final HttpRequestBody requestBody) {
+                        final RequestHeader header, final RequestBody requestBody) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
@@ -36,7 +37,7 @@ public class HttpRequest {
         final String uri = startLine[PATH];
 
         final RequestHeader header = RequestHeader.from(reader);
-        final HttpRequestBody requestBody = HttpRequestBody.of(reader, header.getContentLength());
+        final RequestBody requestBody = RequestBody.of(reader, header.getContentLength());
 
         return new HttpRequest(HttpMethod.from(startLine[METHOD]), toPath(uri), toQueryParams(uri), header,
                 requestBody);
@@ -76,7 +77,7 @@ public class HttpRequest {
         return path;
     }
 
-    public HttpRequestBody getRequestBody() {
+    public RequestBody getRequestBody() {
         return requestBody;
     }
 }

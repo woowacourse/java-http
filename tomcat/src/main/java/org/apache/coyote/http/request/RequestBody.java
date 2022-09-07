@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,21 +6,21 @@ import java.util.Collections;
 import java.util.Map;
 import org.apache.coyote.util.StringParser;
 
-public class HttpRequestBody {
+public class RequestBody {
 
     private static final String FORM_FIELD_DELIMITER = "&";
     private static final String FORM_KEY_VALUE_DELIMITER = "=";
 
     private final Map<String, String> values;
 
-    private HttpRequestBody(final Map<String, String> values) {
+    private RequestBody(final Map<String, String> values) {
         this.values = values;
     }
 
-    public static HttpRequestBody of(final BufferedReader bufferedReader, final int contentLength)
+    public static RequestBody of(final BufferedReader bufferedReader, final int contentLength)
             throws IOException {
         if (contentLength == 0) {
-            return new HttpRequestBody(Collections.emptyMap());
+            return new RequestBody(Collections.emptyMap());
         }
 
         final char[] buffer = new char[contentLength];
@@ -29,7 +29,7 @@ public class HttpRequestBody {
 
         final Map<String, String> values = StringParser.split(requestBody, FORM_FIELD_DELIMITER,
                 FORM_KEY_VALUE_DELIMITER);
-        return new HttpRequestBody(values);
+        return new RequestBody(values);
     }
 
     public String get(final String key) {

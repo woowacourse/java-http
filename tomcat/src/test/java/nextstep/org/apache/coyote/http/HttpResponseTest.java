@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

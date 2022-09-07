@@ -5,17 +5,27 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    public static final String JSESSIONID = "JSESSIONID";
-
     private final Map<String, String> values = new HashMap<>();
 
-    public HttpCookie(final String cookies) {
-        String[] split = cookies.split(";");
-        for (String cookie : split) {
+    public HttpCookie() {
+    }
+
+    public HttpCookie(final String[] cookies) {
+        init(cookies);
+    }
+
+    private void init(final String[] cookies) {
+        for (String cookie : cookies) {
             String[] keyAndValue = cookie.split("=");
-            if (keyAndValue.length == 2) {
-                values.put(keyAndValue[0], keyAndValue[1]);
-            }
+            values.put(keyAndValue[0], keyAndValue[1]);
         }
+    }
+
+    public boolean has(final String cookie) {
+        return values.containsKey(cookie);
+    }
+
+    public String get(final String cookie) {
+        return values.get(cookie);
     }
 }

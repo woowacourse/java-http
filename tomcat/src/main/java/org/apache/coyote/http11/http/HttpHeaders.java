@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
-    public static final String COOKIE = "Set-Cookie";
+    public static final String COOKIE = "Cookie";
+    public static final String RESPONSE_COOKIE = "Set-Cookie";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String LOCATION = "Location";
@@ -63,7 +64,15 @@ public class HttpHeaders {
     }
 
     public void addCookie(final String cookie) {
-        headers.put(COOKIE, cookie);
+        headers.put(RESPONSE_COOKIE, cookie);
+    }
+
+    public HttpCookie getCookies() {
+        String cookies = headers.get(COOKIE);
+        if (cookies == null) {
+            return new HttpCookie();
+        }
+        return new HttpCookie(cookies.split(";"));
     }
 
     public String getValue(final String key) {

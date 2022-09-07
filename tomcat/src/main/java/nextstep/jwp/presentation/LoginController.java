@@ -1,19 +1,20 @@
 package nextstep.jwp.presentation;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpCookie;
-import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpRequest;
-import org.apache.coyote.support.AbstractController;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.Session;
-import org.apache.coyote.util.SessionManager;
+import org.apache.coyote.support.AbstractController;
 import org.apache.coyote.util.CookieUtils;
 import org.apache.coyote.util.FileUtils;
+import org.apache.coyote.util.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,24 +25,23 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         HttpHeaders headers = request.getHeaders();
-        String cookie = headers.getValue("Cookie");
-        if (cookie != null) {
-            String[] split = cookie.split(";");
-            for (String s : split) {
-                String[] split1 = s.split("=");
-                String session = split1[0];
-                if (session.equals("JSESSIONID")) {
-                    String sessionId = split1[1];
-                    Session foundSession = SessionManager.findSession(sessionId);
-                    if (foundSession != null) {
-                        response.setStatus(HttpStatus.FOUND);
-                        response.redirect("/index.html");
-                        response.flush();
-                    }
-                }
-            }
+        HttpCookie cookies = headers.getCookies();
+        Session session = getSession(cookies);
+        if (session != null) {
+            redirect(response, "/index.html");
+            return;
         }
+        write(request, response);
+    }
 
+    private Session getSession(final HttpCookie cookies) {
+        if (cookies.has(Session.JSESSIONID)) {
+            return SessionManager.findSession(cookies.get(Session.JSESSIONID));
+        }
+        return null;
+    }
+
+    private void write(final HttpRequest request, final HttpResponse response) throws IOException {
         String body = FileUtils.readAllBytes(request.getPath().getValue());
         response.setStatus(HttpStatus.OK);
         response.setBody(body);
@@ -58,22 +58,17 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new RuntimeException("not found account"));
 
         if (!user.checkPassword(password)) {
-            response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.redirect("/401.html");
-            response.flush();
+            redirect(response, "/401.html");
             return;
         }
 
         log.info(user.toString());
-        String cookie = CookieUtils.ofJSessionId();
-        Session session = new Session(cookie);
-        session.setAttribute("user", user);
-        SessionManager.add(session);
+        response(response, user);
+    }
+
+    private void redirect(final HttpResponse response, final String redirectUrl) throws IOException {
         response.setStatus(HttpStatus.FOUND);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.addLocation("/index.html ");
-        httpHeaders.addCookie(HttpCookie.JSESSIONID + "=" + cookie);
-        response.setHeaders(httpHeaders);
+        response.redirect(redirectUrl);
         response.flush();
     }
 
@@ -86,5 +81,24 @@ public class LoginController extends AbstractController {
             values.put(keyAndValue[0], keyAndValue[1]);
         }
         return values;
+    }
+
+    private void response(final HttpResponse response, final User user) throws IOException {
+        String cookie = CookieUtils.ofJSessionId();
+        setSession(user, cookie);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.addLocation("/index.html ");
+        httpHeaders.addCookie(Session.JSESSIONID + "=" + cookie);
+
+        response.setStatus(HttpStatus.FOUND);
+        response.setHeaders(httpHeaders);
+        response.flush();
+    }
+
+    private void setSession(final User user, final String cookie) {
+        Session session = new Session(cookie);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
     }
 }

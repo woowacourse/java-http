@@ -34,7 +34,7 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트 한다.
 로그인에 실패하면 `401.html`로 리다이렉트한다.
 ```
-- [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [x] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
 ```text
 http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
 회원가입 페이지를 보여줄 때는 GET을 사용한다.

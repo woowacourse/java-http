@@ -26,12 +26,12 @@ public class Parameters {
         return parseParameters(queryString);
     }
 
-    private static Parameters parseParameters(final String queryString) {
+    public static Parameters parseParameters(final String queryString) {
         final Map<String, String> parameters = new HashMap<>();
         Arrays.stream(queryString.split("&"))
                 .forEach(query -> {
                     final String[] entry = query.split("=");
-                    parameters.put(entry[0], entry[1]);
+            parameters.put(entry[0], entry[1]);
                 });
 
         return new Parameters(parameters);

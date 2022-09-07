@@ -7,6 +7,7 @@ import static org.apache.coyote.http11.message.common.HttpHeader.LOCATION;
 import static org.apache.coyote.http11.message.common.HttpMethod.GET;
 import static org.apache.coyote.http11.message.common.HttpMethod.POST;
 import static org.apache.coyote.http11.message.response.HttpStatus.FOUND;
+import static org.apache.coyote.http11.message.response.HttpStatus.NOT_FOUND;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidRequestException;
+import org.apache.coyote.http11.exception.StaticFileNotFoundException;
 import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -165,10 +167,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse staticFileResponse(final HttpRequest httpRequest) {
         RequestUri requestUri = httpRequest.getRequestUri();
-        return new HttpResponse.Builder()
-                .contentType(requestUri.getExtension())
-                .body(StaticFileUtil.readFile(requestUri.getPath()))
-                .build();
+
+        try {
+            String file = StaticFileUtil.readFile(requestUri.getPath());
+            return new HttpResponse.Builder()
+                    .contentType(requestUri.getExtension())
+                    .body(file)
+                    .build();
+
+        } catch (StaticFileNotFoundException e) {
+            return new HttpResponse.Builder()
+                    .status(NOT_FOUND)
+                    .build();
+        }
     }
 
     private HttpRequest generateHttpRequest(final BufferedReader bs) throws IOException {

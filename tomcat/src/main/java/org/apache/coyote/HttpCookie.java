@@ -19,17 +19,20 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String rawValue) {
-        final HashMap<String, String> value = new HashMap<>();
+        final HashMap<String, String> values = new HashMap<>();
+        if ("".equals(rawValue)) {
+            return new HttpCookie(values);
+        }
         final String[] cookies = rawValue.split(COOKIES_DELIMITER);
 
         for (final String cookie : cookies) {
             final String stripedCookie = cookie.strip();
             final String[] cookieKeyValue = stripedCookie.split(COOKIE_DELIMITER);
 
-            value.put(cookieKeyValue[KEY], cookieKeyValue[VALUE]);
+            values.put(cookieKeyValue[KEY], cookieKeyValue[VALUE]);
         }
 
-        return new HttpCookie(value);
+        return new HttpCookie(values);
     }
 
     public void add(final String key, final String value) {
@@ -45,5 +48,9 @@ public class HttpCookie {
                 .stream()
                 .map(entry -> entry.getKey() + COOKIE_DELIMITER + entry.getValue())
                 .collect(Collectors.joining(COOKIES_DELIMITER));
+    }
+
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 }

@@ -73,7 +73,9 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        addHeader("Set-Cookie", headers.getAllCookie());
+        if (headers.hasCookie()) {
+            addHeader("Set-Cookie", headers.getAllCookie());
+        }
 
         final String statusLine = HTTP_VERSION + status.getStatusCode() + BLANK + status.getStatusMessage();
         return String.join("\r\n",

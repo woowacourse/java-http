@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.HttpRequest;
@@ -18,6 +19,8 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     private LoginController() {
     }
@@ -45,6 +48,7 @@ public class LoginController extends AbstractController {
             if (user.checkPassword(password)) {
                 final String successMessage = user.toString();
                 log.info(successMessage);
+                response.addSetCookie(JSESSIONID, String.valueOf(UUID.randomUUID()));
                 redirectIndex(response);
             } else {
                 redirectNoAuth(response);

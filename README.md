@@ -46,7 +46,7 @@
     - [x] HttpRequest가 body의 값도 가져올 수 있도록 변경한다.
     - [x] login 동작도 POST로 동작되도록 수정한다.
     - [x] RegisterController `doPost()` 구현
-- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie 가 존재한다.
+- [x] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie 가 존재한다.
   - [x] 쿠키 객체를 구현한다.
-  - [ ] Set-Cookie를 구현한다.
+  - [x] Set-Cookie를 구현한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

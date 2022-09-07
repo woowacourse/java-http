@@ -77,4 +77,8 @@ public class HttpHeaders {
                 .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
                 .collect(Collectors.joining("\r\n"));
     }
+
+    public boolean hasCookie() {
+        return !cookie.isEmpty();
+    }
 }

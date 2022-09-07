@@ -1,41 +1,39 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.request;
 
-import java.util.List;
+import org.apache.coyote.exception.InvalidHttpRequestException;
+import org.apache.coyote.http11.model.HttpMethod;
 
-import org.apache.coyote.exception.InvalidRequestLineFormException;
+public class HttpRequestLine {
 
-public class HttpRequest {
-
+    private static final int NUM_OF_ELEMENTS = 3;
     private static final int REQUEST_METHOD = 0;
     private static final int REQUEST_URI = 1;
     private static final int PROTOCOL_VERSION = 2;
     private static final String REQUEST_LINE_SEPARATOR = " ";
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String protocolVersion;
-    private final HttpRequestHeader httpRequestHeader;
 
-    public HttpRequest(String requestLine, List<String> requestHeader) {
+    public HttpRequestLine(String requestLine) {
         String[] requestLineValues = parseRequestLine(requestLine);
         validateRequestLineValues(requestLineValues);
-        this.method = requestLineValues[REQUEST_METHOD];
+        this.method = HttpMethod.of(requestLineValues[REQUEST_METHOD]);
         this.uri = requestLineValues[REQUEST_URI];
         this.protocolVersion = requestLineValues[PROTOCOL_VERSION];
-        this.httpRequestHeader = new HttpRequestHeader(requestHeader);
-    }
-
-    private void validateRequestLineValues(String[] requestLineValues) {
-        if (requestLineValues.length != 3) {
-            throw new InvalidRequestLineFormException();
-        }
     }
 
     private String[] parseRequestLine(String requestLine) {
         return requestLine.split(REQUEST_LINE_SEPARATOR);
     }
 
-    public String getMethod() {
+    private void validateRequestLineValues(String[] requestLineValues) {
+        if (requestLineValues.length != NUM_OF_ELEMENTS) {
+            throw new InvalidHttpRequestException("잘못된 형식의 Request Line입니다.");
+        }
+    }
+
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -45,9 +43,5 @@ public class HttpRequest {
 
     public String getProtocolVersion() {
         return protocolVersion;
-    }
-
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
     }
 }

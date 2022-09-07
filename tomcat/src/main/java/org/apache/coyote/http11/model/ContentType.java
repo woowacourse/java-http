@@ -1,17 +1,18 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.util.stream.Stream;
 
-public enum FileExtension {
+public enum ContentType {
 
-    HTML("html", "text/html"),
-    JS("js", "text/javascript"),
-    CSS("css", "text/css");
+    HTML("html", "text/html;charset=utf-8"),
+    JS("js", "text/javascript;charset=utf-8"),
+    CSS("css", "text/css;charset=utf-8"),
+    ;
 
     private final String extension;
     private final String contentType;
 
-    FileExtension(String extension, String contentType) {
+    ContentType(String extension, String contentType) {
         this.extension = extension;
         this.contentType = contentType;
     }
@@ -19,7 +20,7 @@ public enum FileExtension {
     public static String findContentType(String uri) {
         String fileExtension = uri.split("\\.")[1];
 
-        return Stream.of(FileExtension.values())
+        return Stream.of(ContentType.values())
                 .filter(f -> f.extension.equals(fileExtension))
                 .map(f -> f.contentType)
                 .findFirst()
@@ -27,7 +28,7 @@ public enum FileExtension {
     }
 
     public static boolean hasFileExtension(String url) {
-        return Stream.of(FileExtension.values())
+        return Stream.of(ContentType.values())
                 .anyMatch(f -> url.endsWith(f.extension));
     }
 

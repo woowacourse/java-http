@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.StatusCode.OK;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.exception.ResourcePathNotFoundException;
+import nextstep.jwp.exception.NotFoundResourcePathException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +13,6 @@ class Http11ResponseTest {
     @Test
     void getResponse_ResourcePathNotFoundException() {
         assertThatThrownBy(() -> Http11Response.of(OK, "야호"))
-                .isInstanceOf(ResourcePathNotFoundException.class);
+                .isInstanceOf(NotFoundResourcePathException.class);
     }
 }

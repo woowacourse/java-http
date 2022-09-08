@@ -17,7 +17,7 @@ public abstract class AbstractController implements Controller {
             return handleGet(request);
         }
         if (request.matches(HttpMethod.POST)) {
-            handlePost(request);
+           return handlePost(request);
         }
         return notfound();
     }

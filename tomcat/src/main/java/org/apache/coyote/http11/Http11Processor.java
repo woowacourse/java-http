@@ -15,8 +15,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.HttpRequest;
 import nextstep.jwp.model.RequestLine;
+import nextstep.jwp.model.Session;
+import nextstep.jwp.model.SessionManager;
 import nextstep.jwp.model.StatusLine;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String LOGIN_PAGE_URL = "/login.html";
     private static final String LOGIN_PATH = "/login";
@@ -85,11 +89,11 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> headers = new HashMap<>();
         final String responseBody = getResponseBody(path);
 
-        headers.put("contentType", getContentType(path) + ";charset=utf-8");
+        headers.put("Content-Type", getContentType(path) + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         if (path.equals(LOGIN_PAGE_URL)) {
-            final Parameters loginParameters = Parameters.parseParameters(httpRequest.getRequestBody());
+            final Parameters loginParameters = Parameters.parseParameters(httpRequest.getRequestBody(), "&");
             final User user = getUser(loginParameters.get(ACCOUNT));
             statusLine = new StatusLine(httpVersion, 302, "Found");
             headers.put("Location", "/401.html");
@@ -97,13 +101,17 @@ public class Http11Processor implements Runnable, Processor {
             if (user.checkPassword(loginParameters.get(PASSWORD))) {
                 log.info(user.toString());
                 headers.put("Location", "/index.html");
+
                 final UUID uuid = UUID.randomUUID();
+                final Session session = new Session(uuid.toString());
+                session.setAttribute("user", user);
+                SESSION_MANAGER.add(session);
                 headers.put("Set-Cookie", "JSESSIONID=" + uuid);
             }
             return getResponse(path, statusLine, headers);
         }
         if (path.equals(REGISTER_PAGE_URL)) {
-            final Parameters loginParameters = Parameters.parseParameters(httpRequest.getRequestBody());
+            final Parameters loginParameters = Parameters.parseParameters(httpRequest.getRequestBody(), "&");
             final String account = loginParameters.get(ACCOUNT);
             final String password = loginParameters.get(PASSWORD);
             final String email = loginParameters.get(EMAIL);
@@ -119,14 +127,38 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String get(final String path, final HttpRequest httpRequest, final String httpVersion) throws IOException {
-        final StatusLine statusLine = new StatusLine(httpVersion, 200, "OK");
+        StatusLine statusLine = new StatusLine(httpVersion, 200, "OK");
         final Map<String, String> headers = new HashMap<>();
         final String responseBody = getResponseBody(path);
 
-        headers.put("contentType", getContentType(path) + ";charset=utf-8");
+        headers.put("Content-Type", getContentType(path) + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
+        if (path.equals(LOGIN_PAGE_URL)) {
+            final String jSessionId = getJSessionId(httpRequest);
+            if (jSessionId != null) {
+                final Session session = SESSION_MANAGER.findSession(jSessionId);
+                if (session != null) {
+                    final User user = getUser(session);
+                    if (!user.equals(EMPTY_USER)) {
+                        statusLine = new StatusLine(httpVersion, 302, "Found");
+                        headers.put("Location", "/index.html");
+                    }
+                }
+            }
+        }
+
         return getResponse(path, statusLine, headers);
+    }
+
+    private String getJSessionId(final HttpRequest httpRequest) {
+        final String cookieHeader = httpRequest.getRequestHeader().get("Cookie");
+        if (cookieHeader == null) {
+            return null;
+        }
+        final Parameters cookies = Parameters.parseParameters(cookieHeader, ";");
+        final HttpCookie httpCookie = HttpCookie.from(cookies);
+        return httpCookie.getJSessionId();
     }
 
     private String getPath(final String path) {
@@ -146,11 +178,11 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(final String path, final StatusLine statusLine, final Map<String, String> headers)
             throws IOException {
         final String responseBody = getResponseBody(path);
-        headers.put("contentType", getContentType(path) + ";charset=utf-8");
+        headers.put("Content-Type", getContentType(path) + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         final String header = headers.keySet().stream()
-                .map(it -> it + ": " + headers.get(it))
+                .map(it -> it + ": " + headers.get(it) + " ")
                 .collect(Collectors.joining("\r\n"));
 
         return String.join("\r\n",
@@ -179,6 +211,13 @@ public class Http11Processor implements Runnable, Processor {
             log.info(e.getMessage());
             return EMPTY_USER;
         }
+    }
+
+    private User getUser(final Session session) {
+        if (session.containsAttribute("user")) {
+            return (User) session.getAttribute("user");
+        }
+        return EMPTY_USER;
     }
 
     private String readFile(final String url) throws IOException {

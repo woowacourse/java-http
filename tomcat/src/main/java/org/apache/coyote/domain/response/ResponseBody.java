@@ -36,4 +36,10 @@ public class ResponseBody {
     public String getValue() {
         return value;
     }
+
+    public String getResponse(){
+        return "Content-Length: " + getValue().getBytes().length + " " + "\r\n"
+                + "\r\n"
+                + getValue();
+    }
 }

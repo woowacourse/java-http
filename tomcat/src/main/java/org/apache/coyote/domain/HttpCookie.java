@@ -2,9 +2,10 @@ package org.apache.coyote.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.domain.response.Header;
 import org.apache.coyote.session.Session;
 
-public class HttpCookie {
+public class HttpCookie implements Header {
 
     private final Map<String, String> httpCookie;
 
@@ -33,11 +34,12 @@ public class HttpCookie {
         return httpCookie.get("JSESSIONID");
     }
 
-    public String getHeader() {
-        return "Set-Cookie: JSESSIONID=" + this.getJSESSIONID();
-    }
-
     public void add(Session session) {
         httpCookie.put("JSESSIONID", session.getId());
+    }
+
+    @Override
+    public String getHeader() {
+        return "Set-Cookie: JSESSIONID=" + this.getJSESSIONID();
     }
 }

@@ -4,6 +4,9 @@ public class Path {
 
     private static final String QUERY_STRING_REGEX = "\\?";
     private static final String EMPTY_QUERY_STRING = "";
+    private static final String EXTENSION_REGEX = ".";
+    private static final String HOME_URI = "/";
+    private static final String HTML_EXTENSION = ".html";
     private static final int PATH_INDEX = 0;
     private static final int QUERY_STRING_INDEX = 1;
     private static final int ONLY_PATH_EXIST = 1;
@@ -37,5 +40,12 @@ public class Path {
 
     public QueryParam getQueryParam() {
         return queryParam;
+    }
+    
+    public String getFilePath(){
+        if (!path.contains(EXTENSION_REGEX) && !path.equals(HOME_URI)) {
+            return path+HTML_EXTENSION;
+        }
+        return path;
     }
 }

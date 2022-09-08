@@ -2,7 +2,7 @@ package org.apache.coyote.domain.response;
 
 import java.util.Arrays;
 
-public enum ContentType {
+public enum ContentType implements Header {
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
     JS(".js", "application/x-javascript"),
@@ -16,7 +16,7 @@ public enum ContentType {
         this.type = type;
     }
 
-    public static ContentType find(String filePath) {
+    public static ContentType from(String filePath) {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> filePath.contains(contentType.getExtension()))
                 .findFirst().orElse(ContentType.HTML);
@@ -28,5 +28,10 @@ public enum ContentType {
 
     public String getType() {
         return type;
+    }
+
+    @Override
+    public String getHeader() {
+        return "Content-Type: " + getType() + ";charset=utf-8 " + "\r\n";
     }
 }

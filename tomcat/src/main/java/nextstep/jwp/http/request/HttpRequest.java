@@ -1,8 +1,11 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
 
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.util.FileUtil;
 
 public class HttpRequest {

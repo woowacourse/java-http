@@ -2,45 +2,27 @@ package nextstep.jwp.handler;
 
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpRequestBody;
-import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.Location;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.HttpRequestBody;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.ResourcesUtil;
 
-public class RegisterRequestHandler implements HttpRequestHandler {
-
-    private static final String REGISTER_PATH = "/register";
-
-    private final HttpVersion httpVersion;
+public final class RegisterRequestHandler extends AbstractHttpRequestHandler {
 
     public RegisterRequestHandler(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        super(httpVersion);
     }
 
     @Override
-    public HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return handleHttpGetRequest(httpRequest);
-        }
-        if (httpRequest.isPostMethod()) {
-            return handleHttpPostRequest(httpRequest);
-        }
-        throw new UncheckedServletException("지원하는 method가 존재하지 않습니다.");
+    protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
+        return handleStaticResourceRequest(httpRequest);
     }
 
     @Override
-    public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
-        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
-    }
-
-    @Override
-    public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
+    protected HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
         HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
         registerUser(httpRequestBody);
 

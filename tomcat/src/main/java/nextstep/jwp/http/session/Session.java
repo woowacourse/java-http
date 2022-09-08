@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.session;
 
 import java.util.Map;
 import java.util.UUID;

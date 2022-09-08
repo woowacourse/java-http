@@ -13,6 +13,8 @@ public enum ContentType {
     APPLICATION_JSON("json", "application/json"),
     ;
 
+    private static final String HEADER_TEMPLATE = "Content-Type: %s;charset=utf-8 ";
+
     private final String extension;
     private final String type;
 
@@ -27,6 +29,10 @@ public enum ContentType {
                 .filter(value -> value.extension.equals(extension))
                 .findFirst()
                 .orElseThrow(NotFoundContentTypeException::new);
+    }
+
+    public String toHeaderFormat() {
+        return String.format(HEADER_TEMPLATE, type);
     }
 
     public String getType() {

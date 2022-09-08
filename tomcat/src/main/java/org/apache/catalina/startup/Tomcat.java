@@ -20,7 +20,7 @@ public class Tomcat {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
-            log.info("web server stop.");
+                 log.info("web server stop.");
             connector.stop();
         }
     }

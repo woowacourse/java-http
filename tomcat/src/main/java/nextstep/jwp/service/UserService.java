@@ -20,14 +20,23 @@ public class UserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
+    public ResponseEntity goLoginPage(HttpRequest request) {
+        if (request.isCookieExist()) {
+            Session session = request.getSession(true);
+            return ResponseEntity.found()
+                    .addLocation("/index.html")
+                    .addCookie(Cookies.ofJSessionId(session.getId()));
+        }
+        return ResponseEntity.ok("/login.html");
+    }
+
     public ResponseEntity login(HttpRequest request) {
         Query query = Query.of(request.getBody());
-
         User user = InMemoryUserRepository.findByAccount(query.find("account"))
                 .orElseThrow(NoUserException::new);
         validatePassword(query, user);
 
-        final var session = request.getSession();
+        final var session = request.getSession(false);
         addSession(user, session);
         LOG.info("SessionCount: " + SessionManager.get().size());
 

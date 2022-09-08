@@ -40,3 +40,4 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 - [x] Query 객체에서 value 를 가져오는 부분 예외처리
 - [x] 프린트문 제거
 - [x] GET, POST 메서드가 아닌 요청에 대한 예외 처리
+- [x] 이미 로그인한 사용자가 로그인 페이지에 접근했을 때 /index.html 로 리다이렉트 하는 기능 추가

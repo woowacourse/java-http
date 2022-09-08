@@ -6,7 +6,6 @@ import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.element.HttpRequestBody;
 import org.apache.coyote.http11.request.element.HttpRequestHeader;
 import org.apache.coyote.http11.request.element.Path;
-import org.apache.coyote.http11.request.element.Query;
 import org.apache.coyote.http11.response.element.HttpMethod;
 
 public class HttpRequest {
@@ -31,8 +30,15 @@ public class HttpRequest {
         return body.getBodyContext();
     }
 
-    public Session getSession() {
+    public Session getSession(boolean created) {
+        if (created) {
+            return new Session(header.find("Cookie").split("JSESSIONID=")[1]);
+        }
         return new Session(String.valueOf(UUID.randomUUID()));
+    }
+
+    public boolean isCookieExist() {
+        return header.find("Cookie") != null;
     }
 
     @Override

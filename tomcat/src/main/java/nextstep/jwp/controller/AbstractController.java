@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.List;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
@@ -15,7 +16,9 @@ public class AbstractController implements Controller {
         if (request.getMethod() == HttpMethod.POST) {
             doPost(request, entity);
         }
+        if (!List.of(HttpMethod.GET, HttpMethod.POST).contains(request.getMethod())) {
             throw new MethodNotAllowedException("매핑되는 메소드가 없습니다.");
+        }
     }
 
     @Override

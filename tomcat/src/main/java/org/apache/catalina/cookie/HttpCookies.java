@@ -1,4 +1,4 @@
-package org.apache.coyote.servlet.cookie;
+package org.apache.catalina.cookie;
 
 import java.util.Arrays;
 import java.util.List;

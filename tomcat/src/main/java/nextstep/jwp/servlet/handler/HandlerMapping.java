@@ -2,7 +2,7 @@ package nextstep.jwp.servlet.handler;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.servlet.request.HttpRequest;
+import org.apache.coyote.request.HttpRequest;
 
 public class HandlerMapping {
 

@@ -9,9 +9,9 @@ import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.ExceptionHandler;
 import nextstep.jwp.servlet.handler.HandlerMapping;
 import nextstep.jwp.servlet.view.ViewResolver;
-import org.apache.coyote.servlet.Servlet;
-import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.Servlet;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
 public class CustomServlet implements Servlet {

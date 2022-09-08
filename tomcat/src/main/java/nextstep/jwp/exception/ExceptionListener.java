@@ -2,7 +2,7 @@ package nextstep.jwp.exception;
 
 import java.util.Arrays;
 import nextstep.jwp.servlet.handler.ExceptionHandler;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 

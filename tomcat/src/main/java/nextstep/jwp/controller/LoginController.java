@@ -4,9 +4,9 @@ import nextstep.jwp.controller.dto.DtoAssembler;
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.Controller;
 import nextstep.jwp.servlet.handler.RequestMapping;
-import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.session.Session;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.HttpResponse;
+import org.apache.catalina.session.Session;
 
 @RequestMapping(path = "/login")
 public class LoginController extends Controller {

@@ -1,9 +1,9 @@
-package org.apache.coyote.servlet.request;
+package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.servlet.cookie.HttpCookies;
+import org.apache.catalina.cookie.HttpCookies;
 import org.apache.coyote.support.HttpException;
 
 public class RequestHeaders {

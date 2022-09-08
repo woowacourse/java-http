@@ -1,8 +1,8 @@
-package org.apache.coyote.servlet.request;
+package org.apache.coyote.request;
 
-import org.apache.coyote.servlet.cookie.HttpCookie;
-import org.apache.coyote.servlet.session.NullSession;
-import org.apache.coyote.servlet.session.Session;
+import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.session.NullSession;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {

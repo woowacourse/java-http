@@ -2,7 +2,7 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.servlet.Servlet;
+import org.apache.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

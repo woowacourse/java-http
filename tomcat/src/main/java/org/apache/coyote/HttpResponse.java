@@ -1,11 +1,11 @@
-package org.apache.coyote.servlet.response;
+package org.apache.coyote;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringJoiner;
-import org.apache.coyote.servlet.cookie.HttpCookie;
-import org.apache.coyote.servlet.cookie.HttpCookies;
+import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.cookie.HttpCookies;
 import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {

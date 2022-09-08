@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
 public class ViewResolver {

@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.servlet.CustomServlet;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.servlet.session.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

@@ -1,10 +1,10 @@
-package org.apache.coyote.servlet.session;
+package org.apache.catalina.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.servlet.cookie.HttpCookie;
-import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.catalina.cookie.HttpCookie;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.HttpResponse;
 
 public class SessionManager {
 

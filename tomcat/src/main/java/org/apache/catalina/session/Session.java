@@ -1,4 +1,4 @@
-package org.apache.coyote.servlet.session;
+package org.apache.catalina.session;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

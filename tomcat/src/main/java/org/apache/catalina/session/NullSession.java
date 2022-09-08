@@ -1,4 +1,4 @@
-package org.apache.coyote.servlet.session;
+package org.apache.catalina.session;
 
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;

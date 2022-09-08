@@ -1,6 +1,6 @@
-package org.apache.coyote.servlet.cookie;
+package org.apache.catalina.cookie;
 
-import org.apache.coyote.servlet.session.Session;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.support.HttpException;
 
 public class HttpCookie {

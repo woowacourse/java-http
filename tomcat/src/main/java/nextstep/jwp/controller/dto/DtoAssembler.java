@@ -2,7 +2,7 @@ package nextstep.jwp.controller.dto;
 
 import nextstep.jwp.service.dto.LoginDto;
 import nextstep.jwp.service.dto.SaveUserDto;
-import org.apache.coyote.servlet.request.HttpRequest;
+import org.apache.coyote.request.HttpRequest;
 
 public class DtoAssembler {
 

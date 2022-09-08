@@ -1,7 +1,7 @@
 package nextstep.jwp.servlet.handler;
 
-import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
 public abstract class Controller {

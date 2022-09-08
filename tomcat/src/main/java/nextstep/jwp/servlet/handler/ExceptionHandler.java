@@ -1,6 +1,6 @@
 package nextstep.jwp.servlet.handler;
 
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
 public abstract class ExceptionHandler {

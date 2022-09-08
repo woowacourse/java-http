@@ -2,8 +2,8 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.servlet.handler.Controller;
 import nextstep.jwp.servlet.handler.RequestMapping;
-import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.HttpResponse;
 
 @RequestMapping(path = {"/", "/index"})
 public class HomeController extends Controller {

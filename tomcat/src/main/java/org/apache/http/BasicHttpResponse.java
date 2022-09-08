@@ -8,6 +8,7 @@ import org.apache.http.info.ContentType;
 import org.apache.http.info.HttpHeaderName;
 import org.apache.http.info.HttpVersion;
 import org.apache.http.info.StatusCode;
+import org.springframework.http.Cookie;
 
 public class BasicHttpResponse implements HttpResponse {
 
@@ -102,8 +103,8 @@ public class BasicHttpResponse implements HttpResponse {
             return this;
         }
 
-        public BasicHttpResponseBuilder setCookie(final String cookie) {
-            headers.put(HttpHeaderName.SET_COOKIE.getName(), cookie);
+        public BasicHttpResponseBuilder setCookie(final Cookie cookie) {
+            headers.put(HttpHeaderName.SET_COOKIE.getName(), cookie.getCookieString());
             return this;
         }
 

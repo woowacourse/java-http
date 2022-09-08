@@ -1,24 +1,18 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.UUID;
 import nextstep.jwp.model.User;
-import org.apache.coyote.exception.InvalidLoginFomratException;
-import org.apache.coyote.exception.InvalidPasswordException;
-import org.apache.coyote.exception.MemberNotFoundException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -33,14 +27,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains("Hello world!")
+        );
     }
 
     @Test
@@ -62,13 +54,13 @@ class Http11ProcessorTest {
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
     }
 
     @Test
@@ -92,8 +84,12 @@ class Http11ProcessorTest {
         URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         assert resource != null;
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).contains(expectedResponseBody);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
     }
 
     @Test
@@ -115,13 +111,62 @@ class Http11ProcessorTest {
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
+    }
+
+    @Test
+    void 없는_리소스의_주소로_접근하면_404_페이지로_redirect한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /wrong HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /404.html")
+        );
+    }
+
+    @Test
+    void 회원가입_페이지_렌더링() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        assert resource != null;
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).contains(expectedResponseBody);
     }
 
     @Test
@@ -149,10 +194,178 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void query_string이_있어도_로그인_페이지를_렌더링한다() throws IOException {
+    void 회원가입에_성공하면_index_페이지로_redirect한다() {
+        String requestBody = "account=ohzzi&password=password&email=ohzzi@woowahan.com";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
+    }
+
+    @Test
+    void 회원가입_시_중복회원이_있으면_400_페이지로_redirect한다() {
+        String requestBody = "account=gugu&password=password&email=hkkang@woowahan.com";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /400.html")
+        );
+    }
+
+    @Test
+    void 회원가입_시_정보_누락이_있으면_400_페이지로_redirect한다() {
+        String requestBody = "query=invalid";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /400.html")
+        );
+    }
+
+    @Test
+    void 로그인에_성공하면_index_페이지로_redirect한다() {
+        // given
+        String sessionId = UUID.randomUUID().toString();
+        new SessionManager().add(new Session(sessionId));
+        String requestBody = "account=gugu&password=password";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
+    }
+
+    @Test
+    void 계정_정보가_올바르지_않으면_401_페이지로_redirect한다() {
+        // given
+        String requestBody = "account=invalid&password=password";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
+    }
+
+    @Test
+    void 비밀번호가_올바르지_않으면_401_페이지로_redirect한다() {
+        // given
+        String requestBody = "account=gugu&password=invalid";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
+    }
+
+    @Test
+    void 쿼리스트링에_account나_password가_들어있지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -165,18 +378,19 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        assert resource != null;
-        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).contains(expectedResponseBody);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
     }
 
     @Test
-    void 로그인_페이지로_접근_시_query_string으로_회원_정보를_찾아서_로그를_남긴다() {
+    void JSESSIONID가_없는_요청이_들어오면_새_세션을_만든다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -184,75 +398,45 @@ class Http11ProcessorTest {
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
-
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
-        logger.addAppender(listAppender);
-        listAppender.start();
 
         // when
         processor.process(socket);
-        List<ILoggingEvent> logs = listAppender.list;
-        String message = logs.get(0).getMessage();
 
         // then
-        User user = InMemoryUserRepository.findByAccount("gugu")
-                .orElseThrow(MemberNotFoundException::new);
+        String actual = socket.output();
 
-        assertThat(message).isEqualTo(user.toString());
+        assertThat(actual).contains("JSESSIONID=");
     }
 
     @Test
-    void 계정_정보가_올바르지_않으면_예외를_반환한다() {
+    void 로그인한_유저가_login_페이지에_접근하면_index_페이지로_redirect한다() {
         // given
+        SessionManager sessionManager = new SessionManager();
+        String sessionId = UUID.randomUUID().toString();
+        Session session = new Session(sessionId);
+        sessionManager.add(session);
+        session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+
         String httpRequest = String.join("\r\n",
-                "GET /login?account=invalid&password=password HTTP/1.1 ",
+                "GET /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + sessionId,
                 "",
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(MemberNotFoundException.class);
-    }
+        // when
+        processor.process(socket);
 
-    @Test
-    void 비밀번호가_올바르지_않으면_예외를_반환한다() {
-        // given
-        String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=invalid HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        // then
+        String actual = socket.output();
 
-        StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
-
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(InvalidPasswordException.class);
-    }
-
-    @Test
-    void 쿼리스트링에_account나_password가_들어있지_않으면_예외를_반환한다() {
-        // given
-        String httpRequest = String.join("\r\n",
-                "GET /login?query=invalid HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
-
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(InvalidLoginFomratException.class);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
     }
 }

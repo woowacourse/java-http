@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
@@ -13,6 +13,13 @@ public enum ContentType {
     ContentType(final String value, final String extension) {
         this.value = value;
         this.extension = extension;
+    }
+
+    public static ContentType fromValue(final String value) {
+        return Arrays.stream(values())
+                .filter(contentType -> contentType.value.equals(value))
+                .findAny()
+                .orElse(TEXT_HTML);
     }
 
     public static ContentType fromExtension(final String extension) {

@@ -1,14 +1,17 @@
 package org.apache.coyote.http11.model.session;
 
-import java.util.UUID;
-
 public class Cookie {
 
-    private static final String key = "JSESSIONID";
-    private final UUID value;
+    private final String key;
+    private final String value;
 
-    public Cookie() {
-        this.value = UUID.randomUUID();
+    public Cookie(final String key, final String value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public String getCookieToString() {

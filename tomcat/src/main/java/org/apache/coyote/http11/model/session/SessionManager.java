@@ -2,6 +2,7 @@ package org.apache.coyote.http11.model.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager  {
 
@@ -13,6 +14,11 @@ public class SessionManager  {
 
     public static boolean findSession(final String key) {
         return sessions.containsKey(key);
+    }
+
+    public static Cookie createCookie() {
+        UUID uuid = UUID.randomUUID();
+        return new Cookie("JSESSIONID", uuid.toString());
     }
 
     public static void remove(final String key) {

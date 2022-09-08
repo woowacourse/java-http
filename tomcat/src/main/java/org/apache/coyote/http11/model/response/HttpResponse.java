@@ -3,7 +3,6 @@ package org.apache.coyote.http11.model.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.model.session.Cookie;
 
 public class HttpResponse {
 
@@ -43,8 +42,8 @@ public class HttpResponse {
         return headers;
     }
 
-    public void addCookie(Cookie cookie) {
-        headers.put(SET_COOKIE, cookie.getCookieToString());
+    public void addCookie(String jSessionCookieValue) {
+        headers.put(SET_COOKIE, jSessionCookieValue);
     }
 
     public void addLocationHeader(final String location) {

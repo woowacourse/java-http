@@ -39,15 +39,19 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        if (SessionManager.findSession(httpRequest.getCookieKey())) {
+        Optional<String> jSessionCookieValue = httpRequest.getJSessionCookieValue();
+        if (alreadyLoginStatus(jSessionCookieValue)) {
             HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(),
                     ContentType.HTML);
             response.addLocationHeader(INDEX_RESOURCE_PATH);
             return response;
-
         }
         return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML,
                 FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
+    }
+
+    private boolean alreadyLoginStatus(final Optional<String> jSessionCookieValue) {
+        return jSessionCookieValue.isPresent() && SessionManager.findSession(jSessionCookieValue.get());
     }
 
     @Override
@@ -72,9 +76,9 @@ public class LoginController extends AbstractController {
     private HttpResponse successResponse(final User user) {
         HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(),
                 ContentType.HTML);
-        Cookie cookie = new Cookie();
-        SessionManager.add(cookie.getCookieToString(), new Session("user", user));
-        httpResponse.addCookie(cookie);
+        Cookie cookie = SessionManager.createCookie();
+        SessionManager.add(cookie.getValue(), new Session("user", user));
+        httpResponse.addCookie(cookie.getCookieToString());
         httpResponse.addLocationHeader(INDEX_RESOURCE_PATH);
         return httpResponse;
     }

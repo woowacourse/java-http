@@ -3,6 +3,7 @@ package org.apache.coyote.http11.model.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RequestHeader {
 
@@ -33,5 +34,13 @@ public class RequestHeader {
 
     public String getCookieKey() {
         return headers.get(COOKIE);
+    }
+
+    public Optional<String> getJSessionToString() {
+        if (!headers.containsKey(COOKIE)) {
+            return Optional.empty();
+        }
+        RequestCookie cookie = RequestCookie.from(headers.get(COOKIE));
+        return Optional.of(cookie.getJSessionValue());
     }
 }

@@ -96,7 +96,7 @@ class HttpRequestTest {
                 new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
         HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
         Session session = new Session("sessionId");
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.instance();
         sessionManager.add(session);
 
         // when

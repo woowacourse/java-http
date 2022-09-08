@@ -40,6 +40,7 @@ class DefaultControllerTest {
         String actual = httpResponse.toResponseFormat();
         assertAll(
                 () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains("Content-Type: text/css"),
                 () -> assertThat(actual).contains(expectedResponseBody)
         );
     }

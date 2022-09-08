@@ -55,10 +55,6 @@ public class HttpRequest {
     }
 
     public ContentType getAcceptContentType() {
-        String acceptValue = headers.get("Accept");
-        if (acceptValue != null) {
-            return ContentType.fromValue(acceptValue);
-        }
         return ContentType.fromExtension(ResourcesUtil.parseExtension(url));
     }
 
@@ -69,7 +65,7 @@ public class HttpRequest {
     public Session getSession() {
         HttpCookie cookie = getCookie();
         String sessionId = cookie.get(SESSION_COOKIE_NAME);
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.instance();
         if (sessionId == null) {
             return null;
         }

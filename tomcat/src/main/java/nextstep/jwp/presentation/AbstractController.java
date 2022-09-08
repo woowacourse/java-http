@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import java.io.IOException;
 import nextstep.jwp.exception.MethodNotAllowedException;
+import org.apache.catalina.RequestHandler;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
@@ -10,7 +11,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.support.ResourcesUtil;
 
-abstract class AbstractController implements Controller {
+abstract class AbstractController implements RequestHandler {
 
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";

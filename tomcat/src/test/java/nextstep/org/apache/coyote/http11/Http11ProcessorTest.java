@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.UUID;
+import nextstep.jwp.config.NextStepConfig;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Configuration;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -17,11 +19,13 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private final Configuration configuration = new NextStepConfig();
+
     @Test
     void process() {
         // given
         StubSocket socket = new StubSocket();
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -46,7 +50,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -75,7 +79,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -103,7 +107,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -131,7 +135,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -156,7 +160,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -180,7 +184,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -206,7 +210,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -233,7 +237,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -260,7 +264,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -278,7 +282,7 @@ class Http11ProcessorTest {
     void 로그인에_성공하면_index_페이지로_redirect한다() {
         // given
         String sessionId = UUID.randomUUID().toString();
-        new SessionManager().add(new Session(sessionId));
+        SessionManager.instance().add(new Session(sessionId));
         String requestBody = "account=gugu&password=password";
         int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
@@ -291,7 +295,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -319,7 +323,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -347,7 +351,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -372,7 +376,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -387,17 +391,19 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void JSESSIONID가_없는_요청이_들어오면_새_세션을_만든다() {
+    void 로그인할_때_새_세션을_만든다() {
         // given
+        String requestBody = "account=gugu&password=password";
         String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "");
+                requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);
@@ -411,7 +417,7 @@ class Http11ProcessorTest {
     @Test
     void 로그인한_유저가_login_페이지에_접근하면_index_페이지로_redirect한다() {
         // given
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.instance();
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         sessionManager.add(session);
@@ -426,7 +432,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
+        Http11Processor processor = new Http11Processor(socket, configuration);
 
         // when
         processor.process(socket);

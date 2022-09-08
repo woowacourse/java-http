@@ -62,7 +62,7 @@ public class Http11Response {
     }
 
     public void setSession(String sessionId) {
-        HttpCookie httpCookie = new HttpCookie();
+        HttpCookie httpCookie = HttpCookie.of();
         httpCookie.setJsessionId(sessionId);
         setCookie(httpCookie.toStringFormat());
     }

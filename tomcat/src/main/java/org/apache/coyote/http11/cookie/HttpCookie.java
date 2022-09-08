@@ -15,10 +15,6 @@ public class HttpCookie {
 
     private final Map<String, String> values;
 
-    public HttpCookie() {
-        values = new HashMap<>();
-    }
-
     private HttpCookie(Map<String, String> values) {
         this.values = values;
     }
@@ -34,6 +30,10 @@ public class HttpCookie {
             values.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
         return new HttpCookie(values);
+    }
+
+    public static HttpCookie of() {
+        return new HttpCookie(new HashMap<>());
     }
 
     public void setJsessionId(String jsessionId) {
@@ -54,9 +54,5 @@ public class HttpCookie {
             stringJoiner.add(entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue());
         }
         return stringJoiner.toString();
-    }
-
-    public boolean hasAttribute(String key) {
-        return values.containsKey(key);
     }
 }

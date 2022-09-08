@@ -26,3 +26,6 @@
 - [x] HTTP 응답을 처리하는 HTTP Response 클래스를 구현한다.
 - [x] Controller 인터페이스 추가한다.
   - HTTP 요청, 응답을 Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거한다.
+
+### 4단계 - 동시성 확장하기
+- [ ] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 한다.

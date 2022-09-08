@@ -1,7 +1,7 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -17,7 +17,7 @@ public class SessionManager implements Manager {
     }
 
     public static SessionManager init() {
-        return new SessionManager(new HashMap<>());
+        return new SessionManager(new ConcurrentHashMap<>());
     }
 
     @Override

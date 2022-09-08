@@ -3,7 +3,7 @@ package org.apache.coyote.http11.common;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
@@ -35,7 +35,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders response() {
-        return new HttpHeaders(new HashMap<>(), HttpCookie.empty());
+        return new HttpHeaders(new ConcurrentHashMap<>(), HttpCookie.empty());
     }
 
     public HttpHeaders add(final HeaderKeys key, final String value) {

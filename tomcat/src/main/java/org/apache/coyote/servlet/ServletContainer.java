@@ -1,7 +1,7 @@
 package org.apache.coyote.servlet;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,7 +17,7 @@ public class ServletContainer {
 
     private static final ServletContainer SERVLET_CONTAINER = new ServletContainer();
 
-    private static final Set<Mapping> MAPPINGS = new HashSet<>();
+    private static final Set<Mapping> MAPPINGS = ConcurrentHashMap.newKeySet();
 
     private final SessionManager sessionManager;
     private final ResourceServlet resourceServlet;

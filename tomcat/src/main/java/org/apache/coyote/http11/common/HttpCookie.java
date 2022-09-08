@@ -3,6 +3,7 @@ package org.apache.coyote.http11.common;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpCookie {
 
@@ -19,7 +20,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie empty() {
-        return new HttpCookie(new HashMap<>());
+        return new HttpCookie(new ConcurrentHashMap<>());
     }
 
     public static HttpCookie request(final String message) {

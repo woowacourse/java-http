@@ -22,7 +22,6 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         String response = String.join("\r\n", responseLine, headers.getStringHeaders(), body.getBody());
-        System.out.println("response = " + response);
         return response.getBytes();
     }
 

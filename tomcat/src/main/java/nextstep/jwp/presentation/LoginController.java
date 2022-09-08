@@ -1,7 +1,5 @@
 package nextstep.jwp.presentation;
 
-import static org.apache.coyote.http11.util.StaticResource.INDEX_PAGE;
-import static org.apache.coyote.http11.util.StaticResource.UNAUTHORIZED_PAGE;
 import static org.apache.catalina.Session.JSESSIONID;
 
 import nextstep.jwp.exception.UnauthorizedException;
@@ -48,10 +46,9 @@ public class LoginController extends AbstractController {
             final User user = userService.login(request);
             setLoginSession(request, response, user);
             redirectIndex(response);
-        } catch (final UnauthorizedException unauthorizedException) {
-            redirectNoAuth(response);
-        } catch (final RuntimeException runtimeException) {
-            LOG.error(runtimeException.getMessage());
+        } catch (final RuntimeException exception) {
+            LOG.error(exception.getMessage(), exception);
+            throw new UnauthorizedException();
         }
 
         response.setBody(StaticResource.ofRequest(request));
@@ -70,13 +67,8 @@ public class LoginController extends AbstractController {
         response.addSetCookie(JSESSIONID, session.getId());
     }
 
-    private void redirectNoAuth(final HttpResponse response) {
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation(UNAUTHORIZED_PAGE);
-    }
-
     private void redirectIndex(final HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation(INDEX_PAGE);
+        response.setLocation("/index");
     }
 }

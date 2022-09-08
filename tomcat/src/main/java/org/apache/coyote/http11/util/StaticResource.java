@@ -11,15 +11,14 @@ public class StaticResource {
     private static final String STATIC_PREFIX = "static";
     private static final String HTML_EXTENSION = ".html";
 
-    public static final String INDEX_PAGE = "static/index.html";
     public static final String UNAUTHORIZED_PAGE = "static/401.html";
     public static final String NOT_FOUND_PAGE = "static/404.html";
-    public static final String INTERNAL_SERVER_ERROR_PAGE = "Static/500.html";
+    public static final String INTERNAL_SERVER_ERROR_PAGE = "static/500.html";
 
     private StaticResource() {
     }
 
-    public static Path ofRequest(final HttpRequest request) throws URISyntaxException {
+    public static Path ofRequest(final HttpRequest request) {
         final String resourceName = readResourceName(request);
         return findPath(resourceName);
     }
@@ -33,21 +32,29 @@ public class StaticResource {
         return STATIC_PREFIX + resourceName;
     }
 
-    public static Path notFound() throws URISyntaxException {
+    public static Path notFound() {
         return findPath(NOT_FOUND_PAGE);
     }
 
-    public static Path internalServerError() throws URISyntaxException {
+    public static Path internalServerError() {
         return findPath(INTERNAL_SERVER_ERROR_PAGE);
     }
 
-    private static Path findPath(final String resourceName) throws URISyntaxException {
-        final URL resource = findResource(resourceName);
-        if (resource == null) {
+    public static Path unauthorized() {
+        return findPath(UNAUTHORIZED_PAGE);
+    }
+
+    private static Path findPath(final String resourceName) {
+        try {
+            final URL resource = findResource(resourceName);
+            if (resource == null) {
+                throw new ResourceNotFoundException();
+            }
+
+            return Path.of(resource.toURI());
+        } catch (final URISyntaxException e) {
             throw new ResourceNotFoundException();
         }
-
-        return Path.of(resource.toURI());
     }
 
     private static URL findResource(final String resourceName) {

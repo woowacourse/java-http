@@ -1,6 +1,7 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.exception.ResourceNotFoundException;
+import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.common.HttpRequest;
 import org.apache.coyote.http11.common.HttpResponse;
@@ -23,6 +24,9 @@ public abstract class AbstractController implements Controller {
         } catch (final ResourceNotFoundException notFoundException) {
             response.setBody(StaticResource.notFound());
             response.setStatus(HttpStatus.NOT_FOUND);
+        } catch (final UnauthorizedException unauthorizedException) {
+            response.setBody(StaticResource.unauthorized());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (final Exception exception) {
             response.setBody(StaticResource.internalServerError());
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);

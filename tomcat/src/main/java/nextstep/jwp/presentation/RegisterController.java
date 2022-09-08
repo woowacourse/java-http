@@ -1,6 +1,5 @@
 package nextstep.jwp.presentation;
 
-import static org.apache.coyote.http11.util.StaticResource.INDEX_PAGE;
 import static org.apache.catalina.Session.JSESSIONID;
 
 import nextstep.jwp.model.User;
@@ -55,6 +54,6 @@ public class RegisterController extends AbstractController {
 
     private void redirectIndex(final HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation(INDEX_PAGE);
+        response.setLocation("/index");
     }
 }

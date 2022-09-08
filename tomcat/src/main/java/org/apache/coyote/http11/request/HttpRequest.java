@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,14 +21,6 @@ public class HttpRequest {
         this.header = header;
         this.body = body;
         this.cookies = cookies;
-    }
-
-    public static HttpRequest parse(final String startLine, final List<String> header, final String body) {
-        final RequestLine requestLine = RequestLine.parse(startLine);
-        final RequestHeader requestHeader = RequestHeader.parse(header);
-        final RequestBody requestBody = RequestBody.parse(body);
-        final RequestCookie cookies = RequestCookie.parse(requestHeader);
-        return new HttpRequest(requestLine, requestHeader, requestBody, cookies);
     }
 
     public Session generateSession() {
@@ -56,10 +47,6 @@ public class HttpRequest {
         return Optional.ofNullable(cookies.getSessionId())
                 .map(SESSION_MANAGER::findSession)
                 .isPresent();
-    }
-
-    public Params getParamsFromUri() {
-        return requestLine.getParams();
     }
 
     public Params getParamsFromBody() {

@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.RequestMapping;
-import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.asFormat().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }

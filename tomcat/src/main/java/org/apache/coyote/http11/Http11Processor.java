@@ -40,11 +40,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpHeader httpHeader = getHeaders(reader, requestLine);
             final HttpBody httpBody = getBody(reader);
-
             final HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, httpBody);
 
             final HttpResponse httpResponse = RequestHandler.handle(handler, httpRequest, new HttpResponse());
-//            outputStream.write(responseEntity.getResponse(httpHeader).getBytes());
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | FileNotFoundException e) {

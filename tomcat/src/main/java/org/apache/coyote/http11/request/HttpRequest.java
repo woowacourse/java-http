@@ -58,10 +58,6 @@ public class HttpRequest {
         return requestPath.getValue();
     }
 
-    public boolean hasRequestPathIncluding(String value) {
-        return requestPath.contains(value);
-    }
-
     public boolean hasRequestPathOf(String requestPath) {
         return this.requestPath.isSameWith(requestPath);
     }

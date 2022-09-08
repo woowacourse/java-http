@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         RequestHeaders requestHeaders = generateRequestHeaders(bufferedReader);
         RequestBody requestBody = null;
-        if (requestLine.getMethod().equalsIgnoreCase("POST")) {
+        if (requestHeaders.getContentLength() > 0) {
             requestBody = generateRequestBody(bufferedReader, requestHeaders);
         }
 

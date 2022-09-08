@@ -27,6 +27,13 @@ public class RequestHeaders {
         }
     }
 
+    public int getContentLength() {
+        if (!values.containsKey("Content-Length")) {
+            return 0;
+        }
+        return (int) values.get("Content-Length");
+    }
+
     private HttpCookie createCookie(String unparsedCookies) {
         return new HttpCookie(unparsedCookies);
     }

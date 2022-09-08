@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             if (visitor.isNewVisitor()) {
                 http11Response.setSession(visitor.getSessionId());
             }
-            final var response = http11Response.toString();
+            final var response = http11Response.toResponseFormat();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

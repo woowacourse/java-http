@@ -44,7 +44,7 @@ public class Http11Response {
         headerElements.put(HeaderElement.SET_COOKIE, value);
     }
 
-    public String toString() {
+    public String toResponseFormat() {
         return String.join(LINE,
                 "HTTP/1.1 " + statusCode.getCode() + LINE_POSTFIX,
                 makeHead(),
@@ -64,6 +64,6 @@ public class Http11Response {
     public void setSession(String sessionId) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.setJsessionId(sessionId);
-        setCookie(httpCookie.toString());
+        setCookie(httpCookie.toStringFormat());
     }
 }

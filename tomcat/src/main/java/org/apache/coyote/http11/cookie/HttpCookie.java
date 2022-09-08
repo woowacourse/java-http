@@ -48,7 +48,7 @@ public class HttpCookie {
         return values.get(JSESSIONID_KEY);
     }
 
-    public String toString() {
+    public String toStringFormat() {
         StringJoiner stringJoiner = new StringJoiner(COOKIE_ELEMENT_DELIMITER);
         for (Entry<String, String> entry : values.entrySet()) {
             stringJoiner.add(entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue());

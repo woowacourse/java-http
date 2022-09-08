@@ -37,4 +37,4 @@
 - [x] Controller 인터페이스 생성
 
 ### 4단계
-- [ ] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리한다.
+- [x] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리한다.

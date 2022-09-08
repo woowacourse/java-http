@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.WrongInputException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.QueryParams;
@@ -30,7 +31,7 @@ public class RegisterController extends AbstractController {
         if (!queryParams.containsKey(KEY_ACCOUNT)
                 || !queryParams.containsKey(KEY_PASSWORD)
                 || !queryParams.containsKey(KEY_EMAIL)) {
-            throw new IllegalArgumentException("아이디와 비밀번호, 이메일을 모두 입력하세요.");
+            throw new WrongInputException("아이디와 비밀번호, 이메일을 모두 입력하세요.");
         }
     }
 

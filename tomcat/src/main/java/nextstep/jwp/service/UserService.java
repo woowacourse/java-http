@@ -3,6 +3,7 @@ package nextstep.jwp.service;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.WrongInputException;
 import nextstep.jwp.model.User;
 
 public class UserService {
@@ -27,13 +28,13 @@ public class UserService {
 
     private static void checkUniqueness(final String account) {
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new WrongInputException("이미 존재하는 아이디입니다.");
         }
     }
 
     private static void checkEmail(final String email) {
         if (!email.contains("@")) {
-            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
+            throw new WrongInputException("이메일 형식이 올바르지 않습니다.");
         }
     }
 }

@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UnsupportedMethodException;
+import nextstep.jwp.exception.WrongInputException;
 import org.apache.coyote.ExceptionHandler;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.header.StatusCode;
@@ -17,7 +18,7 @@ public class ErrorHandler implements ExceptionHandler {
             return new HttpResponse(StatusCode.NOT_FOUND, View.NOT_FOUND.getResource());
         }
 
-        if (e instanceof IllegalArgumentException) {
+        if (e instanceof WrongInputException) {
             return new HttpResponse(StatusCode.BAD_REQUEST, "잘못된 요청입니다: " + e.getMessage());
         }
 

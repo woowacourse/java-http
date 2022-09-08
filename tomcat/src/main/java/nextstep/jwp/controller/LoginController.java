@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import nextstep.jwp.exception.WrongInputException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
@@ -45,7 +46,7 @@ public class LoginController extends AbstractController {
 
     private void checkParams(final QueryParams queryParams) {
         if (!queryParams.containsKey(KEY_ACCOUNT) || !queryParams.containsKey(KEY_PASSWORD)) {
-            throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
+            throw new WrongInputException("계정과 비밀번호를 입력하세요.");
         }
     }
 

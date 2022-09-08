@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import nextstep.jwp.exception.StaticFileNotFoundException;
 
 public class URL {
@@ -74,5 +75,22 @@ public class URL {
 
     public boolean isForStaticFile() {
         return url.contains(".");
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final URL url1 = (URL) o;
+        return Objects.equals(url, url1.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(url);
     }
 }

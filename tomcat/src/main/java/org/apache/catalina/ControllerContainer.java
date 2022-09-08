@@ -8,20 +8,17 @@ import org.apache.coyote.ExceptionController;
 import org.apache.coyote.http11.request.Request;
 
 public class ControllerContainer implements ControllerFinder {
-    private final List<Controller> controllers;
+    private final RequestMapping requestMapping;
     private final List<ExceptionController> exceptionControllers;
 
-    public ControllerContainer(final List<Controller> controllers, final List<ExceptionController> exceptionControllers) {
-        this.controllers = controllers;
+    public ControllerContainer(final RequestMapping requestMapping, final List<ExceptionController> exceptionControllers) {
+        this.requestMapping = requestMapping;
         this.exceptionControllers = exceptionControllers;
     }
 
     @Override
     public Controller findController(final Request request) {
-        return controllers.stream()
-                .filter(controller -> controller.isRunnable(request))
-                .findFirst()
-                .orElseThrow(ControllerNotFoundException::new);
+        return requestMapping.map(request.getURL());
     }
 
     @Override

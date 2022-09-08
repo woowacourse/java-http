@@ -1,18 +1,17 @@
 package org.apache.catalina.connector;
 
-import java.util.List;
-import org.apache.catalina.ControllerContainer;
-import org.apache.catalina.ControllerFactory;
-import org.apache.coyote.Controller;
-import org.apache.coyote.ExceptionController;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import org.apache.catalina.ControllerContainer;
+import org.apache.catalina.ControllerFactory;
+import org.apache.catalina.RequestMapping;
+import org.apache.coyote.ExceptionController;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -70,9 +69,8 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        final List<Controller> controllers = ControllerFactory.createControllers();
         final List<ExceptionController> exceptionControllers = ControllerFactory.createExceptionControllers();
-        var processor = new Http11Processor(connection, new ControllerContainer(controllers, exceptionControllers));
+        var processor = new Http11Processor(connection, new ControllerContainer(new RequestMapping(), exceptionControllers));
         new Thread(processor).start();
     }
 

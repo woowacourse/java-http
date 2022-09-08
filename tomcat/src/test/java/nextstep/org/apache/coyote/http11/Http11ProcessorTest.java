@@ -9,13 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.ControllerContainer;
-import nextstep.jwp.controller.InternalServerExceptionController;
-import nextstep.jwp.controller.NotFoundExceptionController;
+import org.apache.catalina.ControllerFactory;
+import org.apache.catalina.RequestMapping;
 import org.apache.coyote.ControllerFinder;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -34,8 +30,7 @@ class Http11ProcessorTest {
     private StubSocket stubSocket;
     private MemoryAppender memoryAppender;
     private ControllerFinder controllerFinder = new ControllerContainer(
-            List.of(new LoginController(), new RegisterController(), new StaticFileController()),
-            List.of(new NotFoundExceptionController(), new InternalServerExceptionController())
+            new RequestMapping(), ControllerFactory.createExceptionControllers()
     );
 
     @BeforeEach

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.ControllerContainer;
+import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.http11.URL;
@@ -21,7 +22,7 @@ class ControllerContainerTest {
 
         // when
         final Controller actual =
-                new ControllerContainer(List.of(new StaticFileController()), List.of())
+                new ControllerContainer(new RequestMapping(), List.of())
                         .findController(request);
 
         // then

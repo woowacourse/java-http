@@ -6,10 +6,10 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 
 @Controller
-public class InitController{
+public class InitController {
 
     @RequestMapping
-    public HttpResponse home(final HttpRequest httpRequest){
+    public HttpResponse home(final HttpRequest httpRequest) {
         return HttpResponse.ok().body("Hello world!").build();
     }
 }

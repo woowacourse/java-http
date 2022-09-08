@@ -17,7 +17,7 @@ public class UserResponseDto {
         this.email = email;
     }
 
-    public static UserResponseDto from(final User user){
+    public static UserResponseDto from(final User user) {
         return new UserResponseDto(user.getId(), user.getAccount(), user.getPassword(), user.getEmail());
     }
 

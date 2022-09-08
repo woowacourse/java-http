@@ -10,11 +10,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponseBuilder {
 
+    private static String TYPE_UTF_8 = ";charset=utf-8 ";
+
     public static HttpResponse ok(HttpRequest request) throws IOException {
         final String requestUri = request.getRequestUri();
         final ResponseBody body = ResponseBody.from(requestUri);
         final ResponseHeaders headers = ResponseHeaders.create()
-                .addHeader(CONTENT_TYPE, ContentType.find(requestUri) + ";charset=utf-8 ")
+                .addHeader(CONTENT_TYPE, ContentType.find(requestUri) + TYPE_UTF_8)
                 .addHeader(CONTENT_LENGTH, body.getBody());
         return HttpResponse.create(HttpStatus.OK, headers, body);
     }

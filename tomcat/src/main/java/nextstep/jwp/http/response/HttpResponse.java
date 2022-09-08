@@ -2,16 +2,21 @@ package nextstep.jwp.http.response;
 
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_LENGTH;
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_TYPE;
+import static nextstep.jwp.http.common.HttpHeaders.LOCATION;
+import static nextstep.jwp.http.common.HttpHeaders.SET_COOKIE;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import nextstep.jwp.http.common.ContentType;
+import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpStatus;
+import nextstep.jwp.http.common.Session;
+import nextstep.jwp.http.common.SessionManager;
+import nextstep.jwp.http.util.FileReader;
 
 public class HttpResponse {
 
@@ -42,18 +47,56 @@ public class HttpResponse {
         this.responseBody = new ResponseBody(text);
     }
 
-    public void addResponseBody(final File file) throws IOException {
-        Path path = file.toPath();
+    public void addCookie(final Object object) {
+        HttpCookie httpCookie = SessionManager.createCookie();
+        Session session = new Session(httpCookie.getKey());
+        session.addAttribute("user", object);
+        SessionManager.addSession(httpCookie.getValue(), session);
+        httpHeaders.addSetCookie(httpCookie);
+    }
+
+    public void sendResource(final String path) throws IOException {
+        File file = FileReader.getFile(path);
         byte[] responseBody = Files.readAllBytes(file.toPath());
 
-        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(path));
+        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(file.toPath()));
         httpHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.length));
 
         this.responseBody = new ResponseBody(new String(responseBody));
     }
 
-    @Override
-    public String toString() {
+    public void sendRedirect(final HttpStatus httpStatus, final String path) throws IOException {
+        this.httpStatus = httpStatus;
+        File file = FileReader.getFile(path);
+
+        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(file.toPath()));
+        httpHeaders.add(LOCATION, path);
+
+        this.responseBody = new ResponseBody(new String(Files.readAllBytes(file.toPath())));
+    }
+
+    public void sendError(final HttpStatus httpStatus, final String path) throws IOException {
+        this.httpStatus = httpStatus;
+        File file = FileReader.getFile(path);
+
+        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(file.toPath()));
+        httpHeaders.add(LOCATION, path);
+
+        this.responseBody = new ResponseBody(new String(Files.readAllBytes(file.toPath())));
+    }
+
+    public String getHttpResponse() {
+        if (httpHeaders.isExistSetCookie()) {
+            String response = String.join("\r\n",
+                "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,
+                "Set-Cookie: " + httpHeaders.getHeader(SET_COOKIE),
+                "Content-Type: " + httpHeaders.getHeader(CONTENT_TYPE) + CHARSET_UTF_8,
+                "Content-Length: " + responseBody.getValue().getBytes().length + BLANK,
+                EMPTY,
+                responseBody.getValue());
+
+            return response;
+        }
         String response = String.join("\r\n",
             "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,
             "Content-Type: " + httpHeaders.getHeader(CONTENT_TYPE) + CHARSET_UTF_8,

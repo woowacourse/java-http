@@ -16,10 +16,20 @@ public abstract class AbstractController implements Controller {
             if (HttpMethod.GET.isSameMethod(httpMethod)) {
                 doGet(httpRequest, httpResponse);
             }
+
+            if (HttpMethod.POST.isSameMethod(httpMethod)) {
+                doPost(httpRequest, httpResponse);
+            }
         } catch (final UncheckedServletException | IOException e) {
 
         }
     }
 
-    abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

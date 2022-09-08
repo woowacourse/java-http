@@ -1,15 +1,11 @@
 package nextstep.jwp.presentation;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 
 public class ResourceController extends AbstractController {
-
-    private static final String PREFIX = "static";
 
     public static ResourceController instance = new ResourceController();
 
@@ -21,15 +17,11 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        URL url = Thread.currentThread().getContextClassLoader().getResource(PREFIX + httpRequest.getRequestUri());
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         try {
-            File file = new File(url.getFile());
-            httpResponse.addResponseBody(file);
+            httpResponse.sendResource(httpRequest.getRequestUri());
         } catch (NullPointerException e) {
-            httpResponse.addHttpStatus(HttpStatus.NOT_FOUND);
-            File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/404.html").getFile());
-            httpResponse.addResponseBody(file);
+            httpResponse.sendError(HttpStatus.NOT_FOUND, "/404.html");
         }
     }
 }

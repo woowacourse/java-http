@@ -6,6 +6,8 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public class DefaultController extends AbstractController {
 
+    public static final String DEFAULT_PATH = "/";
+
     public static DefaultController instance = new DefaultController();
 
     private DefaultController() {
@@ -16,7 +18,7 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         httpResponse.addHttpStatus(HttpStatus.OK);
         httpResponse.addResponseBody("Hello world!");
     }

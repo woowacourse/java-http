@@ -23,11 +23,17 @@ public class SessionManager implements Manager {
 
     @Override
     public Session findSession(final String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 
     @Override
     public void remove(final Session session) {
+        if (session == null) {
+            return;
+        }
         SESSIONS.remove(session.getId());
     }
 }

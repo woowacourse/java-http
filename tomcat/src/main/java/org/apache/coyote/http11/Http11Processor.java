@@ -1,11 +1,14 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,8 +67,8 @@ public class Http11Processor implements Runnable, Processor {
         try (
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream();
-                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
+                final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, UTF_8));
         ) {
             final var httpRequest = parseRequest(bufferedReader);
             final var supportServlet = findSupportServlet(httpRequest);
@@ -144,7 +147,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HashMap<>();
         }
 
-        final var rawBody = new String(chars, 0, charsRead);
+        final var rawBody = URLDecoder.decode(new String(chars, 0, charsRead), UTF_8);
         return parseFormUrlEncodedBody(rawBody);
     }
 

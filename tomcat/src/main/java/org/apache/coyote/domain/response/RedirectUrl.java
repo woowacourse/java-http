@@ -14,6 +14,6 @@ public class RedirectUrl implements Header{
 
     @Override
     public String getHeader() {
-        return "Location: " + redirectUrl;
+        return "Location: " + redirectUrl + "\r\n";
     }
 }

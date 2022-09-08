@@ -63,9 +63,11 @@ public class HttpResponse {
                 .append(responseLine.generateResponseString())
                 .append("\r\n");
         for (String header : responseHeader) {
-            stringBuilder.append(header).append("\r\n");
+            stringBuilder.append(header);
         }
-        stringBuilder.append(responseBody.getResponse());
+        if (responseBody != null) {
+            stringBuilder.append(responseBody.getResponse());
+        }
         return stringBuilder.toString();
     }
 }

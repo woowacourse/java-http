@@ -14,6 +14,6 @@ public class RequestMapping {
         return controllers.stream()
                 .filter(controller -> controller.handle(httpRequest))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("올바르지 않는 경로입니다."));
+                .orElse(new StaticFileController());
     }
 }

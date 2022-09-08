@@ -2,11 +2,11 @@ package org.apache.coyote.request;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.Session;
-import org.apache.coyote.SessionManager;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.cookie.Cookies;
 import org.apache.coyote.exception.InvalidRequestException;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 

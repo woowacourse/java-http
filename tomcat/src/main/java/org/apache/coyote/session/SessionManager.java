@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

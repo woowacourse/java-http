@@ -39,23 +39,6 @@ public class HttpResponse {
         return this;
     }
 
-    public static HttpResponse from(final HttpVersion httpVersion,
-                                    final FilePath filePath,
-                                    final HttpStatusCode httpStatusCode) throws URISyntaxException, IOException {
-        return new HttpResponse(ResponseLine.of(httpVersion, httpStatusCode),
-                ResponseBody.from(filePath.getValue()));
-    }
-
-    public HttpResponse addRedirectUrlHeader(RedirectUrl redirectUrl) {
-        responseHeader.add(redirectUrl.getHeader());
-        return this;
-    }
-
-    public HttpResponse addSetCookieHeader(HttpCookie httpCookie) {
-        responseHeader.add(httpCookie.getHeader());
-        return this;
-    }
-
     public String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\r\n")

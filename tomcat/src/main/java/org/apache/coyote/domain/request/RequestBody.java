@@ -7,6 +7,11 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private static final String BODY_REGEX = "&";
+    private static final String BODY_DELIMETER = "=";
+    private static final int BODY_KEY = 0;
+    private static final int BODY_VALUE = 1;
+
     private final Map<String, String> requestBody;
 
     public RequestBody(Map<String, String> requestBody) {
@@ -22,13 +27,13 @@ public class RequestBody {
 
     private static Map<String, String> generateBody(String body) {
         Map<String, String> requestBody = new HashMap<>();
-        if(body.length()==0){
+        if (body.length() == 0) {
             return requestBody;
         }
-        String[] bodies = body.split("&");
+        String[] bodies = body.split(BODY_REGEX);
         for (String data : bodies) {
-            String[] keyAndValue = data.split("=");
-            requestBody.put(keyAndValue[0], keyAndValue[1]);
+            String[] keyAndValue = data.split(BODY_DELIMETER);
+            requestBody.put(keyAndValue[BODY_KEY], keyAndValue[BODY_VALUE]);
         }
         return requestBody;
     }

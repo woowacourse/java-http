@@ -17,6 +17,11 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     private static final String URL = "/register";
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
+    private static final String EMAIL_KEY = "email";
+    private static final String INDEX_HTML = "/index.html";
+    private static final long INCREMENT_ID = 1L;
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
@@ -30,7 +35,7 @@ public class RegisterController extends AbstractController {
         response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
                 .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                 .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()))
-                .addRedirectUrlHeader(RedirectUrl.from(register(request)));
+                .header(RedirectUrl.from(register(request)));
     }
 
     @Override
@@ -40,11 +45,11 @@ public class RegisterController extends AbstractController {
 
     private static String register(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
-        String account = requestBody.getRequestBody().get("account");
-        String password = requestBody.getRequestBody().get("password");
-        String email = requestBody.getRequestBody().get("email");
-        User user = new User(InMemoryUserRepository.size() + 1L, account, password, email);
+        String account = requestBody.getRequestBody().get(ACCOUNT_KEY);
+        String password = requestBody.getRequestBody().get(PASSWORD_KEY);
+        String email = requestBody.getRequestBody().get(EMAIL_KEY);
+        User user = new User(InMemoryUserRepository.size() + INCREMENT_ID, account, password, email);
         InMemoryUserRepository.save(user);
-        return "/index.html";
+        return INDEX_HTML;
     }
 }

@@ -11,6 +11,7 @@ import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 
+    public static final String SESSION_USER_KEY = "user";
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -35,7 +36,7 @@ public class HttpRequest {
             final RequestBody requestBody = RequestBody.of(inputReader, requestHeader.getContentLength());
             return new HttpRequest(requestLine, requestHeader, requestBody, httpCookie);
         } catch (IOException e) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("올바르지 않은 HttpRequest입니다.");
         }
     }
 
@@ -68,7 +69,7 @@ public class HttpRequest {
         if (session.isEmpty()) {
             return false;
         }
-        Optional<Object> user = session.get().getAttribute("user");
+        Optional<Object> user = session.get().getAttribute(SESSION_USER_KEY);
         return user.isPresent();
     }
 }

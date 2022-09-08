@@ -19,12 +19,17 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final String URL = "/login";
+    private static final String INDEX_HTML = "/index.html";
+    private static final String USER_SESSION_KEY = "user";
+    private static final String HTML_401_PAGE = "/401.html";
+    private static final String PASSWORD_KEY = "password";
+    private static final String ACCOUNT_KEY = "account";
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (request.getHttpCookie().hasJSESSIONID() && request.checkSession()) {
             response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
-                    .header(RedirectUrl.from("/index.html"));
+                    .header(RedirectUrl.from(INDEX_HTML));
             log.info("[Login Controller] doGet - Exist Session ");
             return;
         }
@@ -37,16 +42,16 @@ public class LoginController extends AbstractController {
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Optional<User> user = InMemoryUserRepository.findByAccount(
-                request.getRequestBody().getRequestBody().get("account"));
+                request.getRequestBody().getRequestBody().get(ACCOUNT_KEY));
         if (user.isPresent()) {
             log.info(user.get().toString());
-            if (user.get().checkPassword(request.getRequestBody().getRequestBody().get("password"))) {
+            if (user.get().checkPassword(request.getRequestBody().getRequestBody().get(PASSWORD_KEY))) {
                 Session session = request.getSession();
-                session.setAttribute("user", user);
+                session.setAttribute(USER_SESSION_KEY, user);
                 SessionManager.add(session);
                 request.getHttpCookie().add(session);
                 response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
-                        .header(RedirectUrl.from("/index.html"))
+                        .header(RedirectUrl.from(INDEX_HTML))
                         .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                         .header(request.getHttpCookie());
                 log.info("[Login Controller] doPost - User Session Create & Login ");
@@ -54,7 +59,7 @@ public class LoginController extends AbstractController {
             }
         }
         response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
-                .header(RedirectUrl.from("/401.html"))
+                .header(RedirectUrl.from(HTML_401_PAGE))
                 .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                 .header(request.getHttpCookie());
         log.info("[Login Controller] doPost - Login Failed ");

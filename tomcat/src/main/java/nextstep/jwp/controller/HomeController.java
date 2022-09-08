@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.util.List;
-import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
 
@@ -18,6 +17,6 @@ public class HomeController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        throw new UnsupportedOperationException("API not implemented");
+        methodNotFound(response);
     }
 }

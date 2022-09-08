@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class RequestServletMappingTest {
 
-    private final RequestServletMapping requestServletMapping = RequestServletMapping.init();
+    private final RequestServletMapping requestServletMapping = new RequestServletMapping();
 
     @Test
     @DisplayName("입력 받은 path에 매핑되는 핸들러가 존재하지 않으면 예외가 발생한다.")

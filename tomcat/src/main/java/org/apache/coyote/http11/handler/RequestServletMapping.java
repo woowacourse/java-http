@@ -1,21 +1,18 @@
 package org.apache.coyote.http11.handler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginServlet;
-import nextstep.jwp.handler.RegisterServlet;
+import nextstep.jwp.handler.UserServlet;
 
 public class RequestServletMapping {
 
     private static final Map<String, RequestServlet> handlers = new ConcurrentHashMap<>();
 
-    public static RequestServletMapping init() {
+    static {
         handlers.put("/login", new LoginServlet());
-        handlers.put("/register", new RegisterServlet());
-
-        return new RequestServletMapping();
+        handlers.put("/register", new UserServlet());
     }
 
     public RequestServlet getHandler(final String path) {

@@ -17,7 +17,7 @@ public class HttpFrontServlet {
     private final ServletAdvice servletAdvice;
 
     public HttpFrontServlet() {
-        this(RequestServletMapping.init(), ServletAdvice.init());
+        this(new RequestServletMapping(), new ServletAdvice());
     }
 
     public HttpFrontServlet(final RequestServletMapping requestServletMapping, final ServletAdvice servletAdvice) {

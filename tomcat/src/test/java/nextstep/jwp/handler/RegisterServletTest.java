@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 class RegisterServletTest {
 
-    private final RegisterServlet registerServlet = new RegisterServlet();
+    private final UserServlet registerServlet = new UserServlet();
 
     private HttpRequest getHttpFormDataRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);

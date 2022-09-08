@@ -1,4 +1,4 @@
-package org.apache.coyote.constant;
+package org.apache.coyote.http11.constant;
 
 public enum MediaType {
 

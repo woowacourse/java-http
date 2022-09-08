@@ -1,30 +1,28 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.coyote.HttpHeaders.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HttpHeaders.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaders.SET_COOKIE;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import java.util.Objects;
-import org.apache.coyote.constant.HttpStatus;
-import org.apache.coyote.constant.MediaType;
+import org.apache.coyote.http11.constant.HttpStatus;
+import org.apache.coyote.http11.constant.MediaType;
 
 public class HttpResponse {
 
-    private static final String BLANK = " ";
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String LOCATION = "Location";
 
     private String body;
     private HttpStatus status;
     private final HttpHeaders headers;
 
     public HttpResponse() {
-        body = "";
+        this.body = "";
         this.status = HttpStatus.OK;
         this.headers = new HttpHeaders(new LinkedHashMap<>());
     }
@@ -37,11 +35,7 @@ public class HttpResponse {
         headers.addHeader(CONTENT_LENGTH, String.valueOf(responseBody.length));
     }
 
-    public void setBody(final URL resource) throws IOException {
-        Objects.requireNonNull(resource);
-
-        final File file = new File(resource.getFile());
-        final Path path = file.toPath();
+    public void setBody(final Path path) throws IOException {
         final byte[] responseBody = Files.readAllBytes(path);
 
         headers.addHeader(CONTENT_TYPE, Files.probeContentType(path) + CHARSET_UTF_8);
@@ -49,12 +43,20 @@ public class HttpResponse {
         this.body = new String(responseBody);
     }
 
-    public void setStatus(final HttpStatus status){
+    public void setStatus(final HttpStatus status) {
         this.status = status;
+    }
+
+    public void setLocation(final String location) {
+        headers.addHeader(LOCATION, location);
     }
 
     public void addHeader(final String key, final String value) {
         headers.addHeader(key, value);
+    }
+
+    public void addSetCookie(final String key, final String value) {
+        headers.addCookie(key, value);
     }
 
     public byte[] toBytes() {
@@ -65,7 +67,18 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        final String statusLine = HTTP_VERSION + status.getStatusCode() + BLANK + status.getStatusMessage();
+        if (headers.hasCookie()) {
+            addHeader(SET_COOKIE, headers.getAllCookie());
+        }
+
+        final int statusCode = status.getStatusCode();
+        final String statusMessage = status.getStatusMessage();
+
+        final String statusLine = String.join(" ",
+                HTTP_VERSION,
+                String.valueOf(statusCode),
+                statusMessage);
+
         return String.join("\r\n",
                 statusLine,
                 headers.toString(),

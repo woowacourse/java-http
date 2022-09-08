@@ -17,11 +17,7 @@ public abstract class AbstractController implements Controller {
         throw new MethodNotAllowedException();
     }
 
-    protected Http11Response doGet(final Http11Request request) {
-        throw new MethodNotAllowedException();
-    }
+    protected abstract Http11Response doGet(final Http11Request request);
 
-    protected Http11Response doPost(final Http11Request request) {
-        throw new MethodNotAllowedException();
-    }
+    protected abstract Http11Response doPost(final Http11Request request);
 }

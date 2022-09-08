@@ -6,15 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.LoginException;
-import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.handler.ExceptionHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Path;
-import org.apache.support.ResourceFindUtils;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,57 +35,31 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String line = bufferedReader.readLine();
-
-            final HttpRequest httpRequest = HttpRequest.from(line);
-
-            final String response = getResponse(httpRequest);
+            final String response = processRequest(bufferedReader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getResponse(HttpRequest httpRequest) {
-        Path path = httpRequest.getPath();
-        if (path.getResource().equals("/")) {
-            return generateResponseMessage(path.getContentType(), "Hello world!");
+    private String processRequest(BufferedReader bufferedReader) {
+        try {
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final HttpResponse httpResponse = generateHttpResponse(httpRequest);
+
+            return httpResponse.toResponseMessage();
+        } catch (Exception exception) {
+            final ExceptionHandler errorHandler = ErrorMapping.findErrorHandler(exception);
+            final HttpResponse httpResponse = errorHandler.handle();
+
+            return httpResponse.toResponseMessage();
         }
-        if (path.isIcoContentType()) {
-            return "";
-        }
-        return generateResponseMessage(path.getContentType(), generateResponseBody(path));
     }
 
-    private String generateResponseMessage(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String generateResponseBody(Path path) {
-        Map<String, String> params = path.getQueryParameter();
-        if (!params.isEmpty() && path.getResource().contains("login")) {
-            processLogin(params);
-        }
-        return ResourceFindUtils.getResourceFile(path.getResource() + path.getExtension());
-    }
-
-    private void processLogin(Map<String, String> params) {
-        final String username = params.get("account");
-        final String password = params.get("password");
-
-        User user = InMemoryUserRepository.findByAccount(username)
-                .orElseThrow(LoginException::new);
-
-        if (!user.checkPassword(password)) {
-            throw new LoginException();
-        }
-        log.info(user.toString());
+    private HttpResponse generateHttpResponse(HttpRequest httpRequest) {
+        final Controller controller = HandlerMapping.findController(httpRequest);
+        return controller.service(httpRequest);
     }
 }

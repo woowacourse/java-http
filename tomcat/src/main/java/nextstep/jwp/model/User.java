@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.LoginFailedException;
+
 public class User {
 
     private final Long id;
@@ -18,8 +20,10 @@ public class User {
         this(null, account, password, email);
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public void checkPassword(String password) {
+        if (!this.password.equals(password)) {
+            throw new LoginFailedException();
+        }
     }
 
     public String getAccount() {

@@ -1,22 +1,16 @@
-package org.apache.coyote.http11.request;
+package org.apache.support;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryParameter {
+public class ParameterBinder {
 
     private static final String QUERY_STRING_SEPARATOR = "&";
     private static final String PARAMETER_DELIMITER = "=";
 
-    private final Map<String, String> params;
-
-    private QueryParameter(Map<String, String> params) {
-        this.params = params;
-    }
-
-    public static QueryParameter from(String query) {
-        if (query == null) {
-            return new QueryParameter(new HashMap<>());
+    public static Map<String, String> bind(String query) {
+        if (query == null || query.isEmpty()) {
+            return new HashMap<>();
         }
 
         Map<String, String> params = new HashMap<>();
@@ -29,15 +23,6 @@ public class QueryParameter {
 
             params.put(key, value);
         }
-
-        return new QueryParameter(params);
-    }
-
-    public static QueryParameter empty() {
-        return new QueryParameter(new HashMap<>());
-    }
-
-    public Map<String, String> getParams() {
         return params;
     }
 }

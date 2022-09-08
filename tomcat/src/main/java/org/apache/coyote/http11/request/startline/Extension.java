@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.startline;
 
 import java.util.Arrays;
 
@@ -7,6 +7,8 @@ public enum Extension {
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
     ICO(".ico", "image/x-icon"),
+    SVG(".svg", "image/svg+xml"),
+    NONE("null", "text/html"),
     ;
 
     private final String extension;
@@ -21,7 +23,7 @@ public enum Extension {
         return Arrays.stream(values())
                 .filter(it -> extension.contains(it.extension))
                 .findAny()
-                .orElse(HTML);
+                .orElse(NONE);
     }
 
     public String getExtension() {

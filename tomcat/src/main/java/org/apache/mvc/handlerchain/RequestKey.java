@@ -1,4 +1,4 @@
-package org.apache.mvc;
+package org.apache.mvc.handlerchain;
 
 import java.util.Objects;
 import org.apache.coyote.http11.request.RequestMethod;

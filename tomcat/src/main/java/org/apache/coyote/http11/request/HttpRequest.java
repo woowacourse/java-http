@@ -1,48 +1,88 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.context.HttpCookie.SESSION_NAME;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import org.apache.coyote.http11.context.Context;
+import org.apache.coyote.http11.context.HttpCookie;
+import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.context.Session;
+import org.apache.coyote.http11.context.SessionManager;
 import org.apache.exception.TempException;
+import org.apache.util.NumberUtil;
 
 public class HttpRequest {
 
-    private static final int START_LINE_INDEX = 0;
-    private static final String EMPTY_LINE_SIGNATURE = "";
+    private static final SessionManager MANAGER = new SessionManager();
 
     private final RequestGeneral requestGeneral;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
+    private final Context context;
 
-    private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody) {
+    private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody,
+                       Context context) {
         this.requestGeneral = requestGeneral;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
+        this.context = context;
     }
 
     public static HttpRequest parse(InputStream inputStream) {
-        List<String> lines = readAllLines(inputStream);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        int emptyLineIndex = findEmptyLine(lines);
-        return new HttpRequest(
-                RequestGeneral.parse(lines.get(0)),
-                RequestHeaders.parse(lines.subList(START_LINE_INDEX + 1, emptyLineIndex)),
-                RequestBody.parse(lines.subList(Math.min(emptyLineIndex + 1, lines.size()), lines.size()))
-        );
+        RequestGeneral general = readGeneralLine(reader);
+        RequestHeaders headers = readHeaderLines(reader);
+        RequestBody body = readBodyLines(reader, headers);
+        Context context = parseOrCreateContext(headers);
+
+        return new HttpRequest(general, headers, body, context);
     }
 
-    private static List<String> readAllLines(InputStream inputStream) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> lines = new ArrayList<>();
+    private static RequestGeneral readGeneralLine(BufferedReader reader) {
+        return RequestGeneral.parse(readOneLine(reader));
+    }
 
+    private static RequestHeaders readHeaderLines(BufferedReader reader) {
+        List<String> lines = new ArrayList<>();
         String line;
-        while (!(line = readOneLine(reader)).equals("")) {
+        while (!"".equals(line = readOneLine(reader))) {
             lines.add(line);
         }
-        return lines;
+        return RequestHeaders.parse(lines);
+    }
+
+    private static RequestBody readBodyLines(BufferedReader reader, RequestHeaders headers) {
+        int length = findContentLength(headers);
+        if (length == 0) {
+            return RequestBody.empty();
+        }
+        return readActualBody(reader, length);
+    }
+
+    private static int findContentLength(RequestHeaders headers) {
+        try {
+            RequestHeader header = headers.findHeader("Content-Length");
+            return NumberUtil.parseIntSafe(header.getValue());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return 0;
+        }
+    }
+
+    private static RequestBody readActualBody(BufferedReader reader, int length) {
+        char[] buffer = new char[length];
+        try {
+            reader.read(buffer, 0, length);
+            return new RequestBody(new String(buffer));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String readOneLine(BufferedReader reader) {
@@ -53,28 +93,46 @@ public class HttpRequest {
         }
     }
 
-    private static int findEmptyLine(List<String> lines) {
-        int index = lines.indexOf(EMPTY_LINE_SIGNATURE);
-        if (index == -1) {
-            return lines.size();
+    private static Context parseOrCreateContext(RequestHeaders headers) {
+        RequestHeader cookieHeader = headers.findHeader("Cookie");
+        if (cookieHeader == null) {
+            return Context.createNew();
         }
-        return index;
+        HttpCookie cookie = HttpCookie.parse(cookieHeader.getValue());
+        return new Context(MANAGER.findSession(cookie.find(SESSION_NAME)), cookie);
+    }
+
+    public Session getSession(boolean isCreate) {
+        Session findSession = MANAGER.findSession(context.getSession().getId());
+        if (findSession != null) {
+            return findSession;
+        }
+        if (!isCreate) {
+            return null;
+        }
+        Session session = new Session(UUID.randomUUID().toString());
+        MANAGER.add(session);
+        return session;
     }
 
     public String getPath() {
         return requestGeneral.getPath().getPath();
     }
 
-    public HttpRequest redirectPath(String path) {
-        return new HttpRequest(requestGeneral.redirectPath(path), requestHeaders, requestBody);
-    }
-
-    public String getParameter(String field) {
-        return requestGeneral.getPath().getParameter(field);
-    }
-
     public RequestMethod getMethod() {
         return requestGeneral.getMethod();
+    }
+
+    public String getRequestBody() {
+        return requestBody.getBody();
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public HttpCookie getCookie() {
+        return context.getCookie();
     }
 
     @Override

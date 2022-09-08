@@ -1,11 +1,13 @@
-package org.apache.mvc;
+package org.apache.mvc.handlerchain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import org.apache.coyote.http11.ResponseEntity;
+import org.apache.coyote.exception.InvocationException;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.exception.TempException;
+import org.apache.mvc.Controller;
 
 public class RequestHandlerMethod {
 
@@ -50,7 +52,7 @@ public class RequestHandlerMethod {
             Object result = method.invoke(instance, httpRequest);
             return castToResponseEntity(result);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
+            throw new InvocationException(e, "Exception on method invocation");
         }
     }
 

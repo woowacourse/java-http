@@ -8,6 +8,10 @@ public class ResponseBody implements Response {
         this.body = body;
     }
 
+    public static ResponseBody empty() {
+        return new ResponseBody("");
+    }
+
     @Override
     public String getAsString() {
         return body;

@@ -1,14 +1,17 @@
 package nextstep.jwp.ui;
 
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ResponseEntity;
+import org.apache.coyote.http11.context.Session;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.mvc.Controller;
 import org.apache.mvc.annotation.RequestMapping;
+import org.apache.util.UrlUtil;
 
 public class DashboardController implements Controller {
 
@@ -24,19 +27,36 @@ public class DashboardController implements Controller {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ResponseEntity handleLogin(HttpRequest request) {
-        Optional<User> user = repository.findByAccount(request.getParameter("account"));
-        user.ifPresent(it -> printUser(request, it));
-        return new ResponseEntity(HttpStatus.OK, "redirect:/login.html");
-    }
-
-    private static void printUser(HttpRequest request, User user) {
-        if (user.checkPassword(request.getParameter("password"))) {
-            System.out.println(user.getAccount() + "의 패스워드가 일치합니다");
-            System.out.println(user);
-            return;
+    public ResponseEntity showLogin(HttpRequest request) {
+        Session session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            return new ResponseEntity(HttpStatus.FOUND, "/index.html");
         }
-        System.out.println(user.getAccount() + "의 패스워드가 일치하지 않습니다");
+        return new ResponseEntity(HttpStatus.FOUND, "/login.html");
     }
 
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ResponseEntity handleLogin(HttpRequest request) {
+        Map<String, String> userMap = UrlUtil.parseQueryString(request.getRequestBody());
+        Optional<User> optionalUser = repository.findByAccount(userMap.get("account"));
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(userMap.get("password"))) {
+            Session session = request.getSession(true);
+            session.setAttribute("user", optionalUser.get());
+            return new ResponseEntity(HttpStatus.FOUND, "/index.html");
+        }
+        return new ResponseEntity(HttpStatus.FOUND, "/401.html");
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.GET)
+    public ResponseEntity showRegister(HttpRequest request) {
+        return new ResponseEntity(HttpStatus.FOUND, "/register.html");
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ResponseEntity handleRegister(HttpRequest request) {
+        Map<String, String> userMap = UrlUtil.parseQueryString(request.getRequestBody());
+        User user = new User(userMap.get("account"), userMap.get("password"), userMap.get("email"));
+        repository.save(user);
+        return new ResponseEntity(HttpStatus.FOUND, "/index.html");
+    }
 }

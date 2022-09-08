@@ -13,7 +13,7 @@ class NotFoundHandlerChainTest {
         NotFoundHandlerChain chain = new NotFoundHandlerChain();
 
         // when
-        HttpResponse response = chain.handle(null);
+        HttpResponse response = chain.handle(null, HttpResponse.initial());
 
         // then
         assertThat(response.getAsString()).contains("HTTP/1.1 404 NOT_FOUND");

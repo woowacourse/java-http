@@ -25,7 +25,7 @@ class ControllerRequestHandlerChainTest {
         );
         // when
 
-        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(http.getBytes())));
+        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(http.getBytes())), HttpResponse.initial());
 
         // then
         List<String> expected = List.of("HTTP/1.1 200 OK",

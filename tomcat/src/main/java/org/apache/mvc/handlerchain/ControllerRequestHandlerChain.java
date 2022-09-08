@@ -2,18 +2,16 @@ package org.apache.mvc.handlerchain;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.headers.ContentType;
+import org.apache.coyote.http11.response.headers.Location;
 import org.apache.mvc.Controller;
 import org.apache.mvc.ControllerParser;
-import org.apache.mvc.RequestHandlerMethod;
-import org.apache.mvc.RequestKey;
 
 public class ControllerRequestHandlerChain implements RequestHandlerChain {
-
-    private static final String REDIRECT = "redirect:";
 
     private final RequestHandlerChain next;
     private final Map<RequestKey, RequestHandlerMethod> map;
@@ -24,16 +22,19 @@ public class ControllerRequestHandlerChain implements RequestHandlerChain {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request, HttpResponse response) {
         RequestHandlerMethod requestHandlerMethod = findMappedHandlerMethod(request);
         if (requestHandlerMethod == null) {
-            return next.handle(request);
+            return next.handle(request, response);
         }
+
         ResponseEntity entity = requestHandlerMethod.handle(request);
-        if (isRedirect(entity.getBody())) {
-            return next.handle(redirectPath(request, entity.getBody()));
+        response = response.update(entity.getStatus(), entity.getBody());
+        response = response.addHeader(ContentType.TEXT_HTML);
+        if (isRedirect(entity.getStatus())) {
+            return response.addHeader(new Location(entity.getBody()));
         }
-        return HttpResponse.from(entity.getStatus(), entity.getBody()).addHeader(ContentType.TEXT_HTML);
+        return response;
     }
 
     private RequestHandlerMethod findMappedHandlerMethod(HttpRequest httpRequest) {
@@ -41,11 +42,7 @@ public class ControllerRequestHandlerChain implements RequestHandlerChain {
         return map.get(requestKey);
     }
 
-    private boolean isRedirect(String entityBody) {
-        return entityBody.startsWith(REDIRECT);
-    }
-
-    private HttpRequest redirectPath(HttpRequest request, String body) {
-        return request.redirectPath(body.replace(REDIRECT, ""));
+    private boolean isRedirect(HttpStatus status) {
+        return status.isRedirection();
     }
 }

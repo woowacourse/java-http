@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.fixture;
 
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.mvc.Controller;
 import org.apache.mvc.annotation.RequestMapping;
 

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
-import org.apache.coyote.http11.message.HttpVersion;
+import org.apache.coyote.http11.header.HttpVersion;
 import org.apache.exception.TempException;
 import org.apache.util.StringUtil;
 

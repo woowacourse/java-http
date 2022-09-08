@@ -6,15 +6,17 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.request.headers.RequestHeaderMapper;
 
 
 public class RequestHeaders {
 
     private static final Pattern HEADER_PATTERN = Pattern.compile("(?<field>[a-zA-Z\\- ]+): ?(?<value>.+)");
 
-    private final Map<String, String> headers;
+    private final Map<String, RequestHeader> headers;
 
-    public RequestHeaders(Map<String, String> headers) {
+    private RequestHeaders(Map<String, RequestHeader> headers) {
         this.headers = headers;
     }
 
@@ -24,26 +26,22 @@ public class RequestHeaders {
                 .filter(Matcher::find)
                 .collect(Collectors.toMap(
                         matcher -> matcher.group("field"),
-                        matcher -> matcher.group("value")
+                        matcher -> RequestHeaderMapper.findAndApply(matcher.group("field"), matcher.group("value"))
                 )));
     }
 
-    public String getPairByKey(String key) {
-        return key + ": " + headers.get(key);
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
+    public RequestHeader findHeader(String field) {
+        return headers.get(field);
     }
 
     @Override
     public String toString() {
-        StringBuilder entryBuilder = new StringBuilder("\n");
-        for (Entry<String, String> entry : headers.entrySet()) {
-            entryBuilder.append(entry.getKey()).append("->").append(entry.getValue()).append("\n");
+        StringBuilder builder = new StringBuilder("\n");
+        for (Entry<String, RequestHeader> entry : headers.entrySet()) {
+            builder.append(entry.getKey()).append(" -> ").append(entry.getValue());
         }
         return "RequestHeaders{\n" +
-                "headers={" + entryBuilder +
+                "headers={" + builder +
                 "\n}\n}";
     }
 }

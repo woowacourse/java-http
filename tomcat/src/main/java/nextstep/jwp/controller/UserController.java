@@ -17,6 +17,7 @@ public class UserController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private static final String HTML_EXTENSION = ".html";
+    private static final String INDEX_PAGE = "/index.html";
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
@@ -24,7 +25,7 @@ public class UserController extends AbstractController {
         final Path path = PathUtils.load(url + HTML_EXTENSION);
         saveUser(request);
         final String responseBody = new String(Files.readAllBytes(path));
-        return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, "/index.html");
+        return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
     }
 
     private void saveUser(final HttpRequest request) {

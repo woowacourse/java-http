@@ -5,6 +5,11 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private static final int REQUEST_BODY_KEY_INDEX = 0;
+    private static final int REQUEST_BODY_VALUE_INDEX = 1;
+    private static final String REQUEST_BODY_DELIMITER = "&";
+    private static final String REQUEST_BODY_VALUE_DELEMITER = "=";
+
     private final Map<String, String> values;
 
     private RequestBody(final Map<String, String> values) {
@@ -20,10 +25,10 @@ public class RequestBody {
         if (requestBody.isEmpty()) {
             return values;
         }
-        final String[] splits = requestBody.split("&");
+        final String[] splits = requestBody.split(REQUEST_BODY_DELIMITER);
         for (String split : splits) {
-            final String[] value = split.split("=");
-            values.put(value[0], value[1]);
+            final String[] value = split.split(REQUEST_BODY_VALUE_DELEMITER);
+            values.put(value[REQUEST_BODY_KEY_INDEX], value[REQUEST_BODY_VALUE_INDEX]);
         }
         return values;
     }

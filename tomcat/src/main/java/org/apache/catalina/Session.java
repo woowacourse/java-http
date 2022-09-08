@@ -23,4 +23,8 @@ public class Session {
     public void setAttribute(String key, Object object) {
         values.put(key, object);
     }
+
+    public boolean isLoginedUserSession() {
+        return values.containsKey("user");
+    }
 }

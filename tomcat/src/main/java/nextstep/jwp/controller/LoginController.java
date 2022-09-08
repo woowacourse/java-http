@@ -48,7 +48,7 @@ public class LoginController implements Controller {
         final SessionManager sessionManager = new SessionManager();
         final Session session = sessionManager.findSession(request.getSessionId());
 
-        if (session != null) {
+        if (isLogined(session)) {
             return new HttpResponse.Builder()
                     .status(HttpStatus.FOUND)
                     .location(REDIRECT_PATH)
@@ -59,6 +59,10 @@ public class LoginController implements Controller {
                 .contentType(path.getContentType())
                 .responseBody(responseBody)
                 .build();
+    }
+
+    private boolean isLogined(Session session) {
+        return session != null && session.isLoginedUserSession();
     }
 
     private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {

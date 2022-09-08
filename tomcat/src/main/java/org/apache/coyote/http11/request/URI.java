@@ -24,10 +24,6 @@ public class URI {
         return path;
     }
 
-    public QueryParams getQueryParams() {
-        return queryParams;
-    }
-
     @Override
     public String toString() {
         return "URI{" +

@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class MainController implements Controller {
+public class MainController extends AbstractController {
 
     private static final String WELCOME_MESSAGE = "Hello world!";
 
@@ -23,14 +23,15 @@ public class MainController implements Controller {
         return doNotFoundRequest(request);
     }
 
-    protected HttpResponse doGet(final HttpRequest request) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
+        return null;
+    }
+
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
         return new HttpResponse().addProtocol(request.getRequestLine().getProtocol()).addStatus(HttpStatus.OK)
                 .addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8);
 
-    }
-
-    private HttpResponse doNotFoundRequest(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol()).addStatus(HttpStatus.NOT_FOUND)
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }

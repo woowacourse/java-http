@@ -78,16 +78,6 @@ public class Http11Processor implements Runnable, Processor {
         return getNotFoundResponse(request);
     }
 
-    private HttpResponse getNotFoundResponse(HttpRequest request) {
-        return getNotFoundResponse(new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
-                .addStatus(HttpStatus.NOT_FOUND)
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8));
-    }
-
-    private HttpResponse getNotFoundResponse(HttpResponse request) {
-        return request;
-    }
-
     private String getStaticResourceResponse(String resourcePath) {
         return FileReader.readStaticFile(resourcePath, this.getClass());
     }
@@ -96,5 +86,15 @@ public class Http11Processor implements Runnable, Processor {
         String path = request.getRequestLine().getUri().getPath();
         Controller controller = HandlerMapping.findController(path);
         return controller.service(request);
+    }
+
+    private HttpResponse getNotFoundResponse(HttpRequest request) {
+        return getNotFoundResponse(new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+                .addStatus(HttpStatus.NOT_FOUND)
+                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8));
+    }
+
+    private HttpResponse getNotFoundResponse(HttpResponse request) {
+        return request;
     }
 }

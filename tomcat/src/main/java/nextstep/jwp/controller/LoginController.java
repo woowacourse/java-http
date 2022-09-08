@@ -16,7 +16,7 @@ import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.util.FileReader;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse service(HttpRequest request) {
@@ -33,6 +33,7 @@ public class LoginController implements Controller {
         return doNotFoundRequest(request);
     }
 
+    @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
@@ -54,6 +55,7 @@ public class LoginController implements Controller {
                 .addLocation("/401.html");
     }
 
+    @Override
     protected HttpResponse doGet(HttpRequest request) {
         Optional<String> session = request.getSession();
         if (session.isPresent() && SessionManager.findSession(session.get()).isPresent()) {
@@ -66,12 +68,6 @@ public class LoginController implements Controller {
         return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
                 .addStatus(HttpStatus.OK)
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
-    }
-
-    private HttpResponse doNotFoundRequest(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
-                .addStatus(HttpStatus.NOT_FOUND)
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }
 

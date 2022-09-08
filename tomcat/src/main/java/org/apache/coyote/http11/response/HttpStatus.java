@@ -10,7 +10,7 @@ public enum HttpStatus {
     final private int code;
     final private String text;
 
-    HttpStatus(final int code, final String text) {
+    HttpStatus(int code, String text) {
         this.code = code;
         this.text = text;
     }

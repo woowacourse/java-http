@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.util.FileReader;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse service(HttpRequest request) {
@@ -27,6 +27,7 @@ public class RegisterController implements Controller {
         return doNotFoundRequest(request);
     }
 
+    @Override
     protected HttpResponse doGet(HttpRequest request) {
         String responseBody = FileReader.readStaticFile("/register.html", this.getClass());
         return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
@@ -34,6 +35,7 @@ public class RegisterController implements Controller {
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 
+    @Override
     protected HttpResponse doPost(HttpRequest request) {
         String account = request.getRequestBody().getValue("account");
         String password = request.getRequestBody().getValue("password");
@@ -43,11 +45,5 @@ public class RegisterController implements Controller {
         return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
                 .addStatus(HttpStatus.FOUND)
                 .addLocation("/index.html");
-    }
-
-    private HttpResponse doNotFoundRequest(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
-                .addStatus(HttpStatus.NOT_FOUND)
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }

@@ -27,10 +27,6 @@ public class RequestLine {
         return Optional.of(path.substring(index + 1));
     }
 
-    public boolean hasQueryParams() {
-        return !uri.getQueryParams().isEmpty();
-    }
-
     public Method getMethod() {
         return method;
     }

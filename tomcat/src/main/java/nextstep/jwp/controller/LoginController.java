@@ -10,7 +10,6 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.session.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -44,14 +43,12 @@ public class LoginController extends AbstractController {
                 session.setAttribute("user", user.get());
                 SessionManager.add(session);
 
-                return new HttpResponse().addProtocol(request.getProtocol())
-                        .addStatus(HttpStatus.FOUND)
+                return HttpResponse.redirect()
                         .addLocation("/index.html")
                         .addCookie(Cookies.ofJSessionId(session.getId()));
             }
         }
-        return new HttpResponse().addProtocol(request.getProtocol())
-                .addStatus(HttpStatus.FOUND)
+        return HttpResponse.redirect()
                 .addLocation("/401.html");
     }
 
@@ -59,8 +56,7 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) {
         Optional<String> session = request.getSession();
         if (session.isPresent() && SessionManager.findSession(session.get()).isPresent()) {
-            return new HttpResponse().addProtocol(request.getProtocol())
-                    .addStatus(HttpStatus.FOUND)
+            return HttpResponse.redirect()
                     .addLocation("/index.html");
         }
 

@@ -23,6 +23,10 @@ public class HttpResponse {
         return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.OK);
     }
 
+    public static HttpResponse redirect() {
+        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.FOUND);
+    }
+
     public HttpResponse addProtocol(String protocol) {
         this.protocol = protocol;
         return this;

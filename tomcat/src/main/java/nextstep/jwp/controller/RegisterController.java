@@ -7,7 +7,6 @@ import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.util.FileReader;
 
 public class RegisterController extends AbstractController {
@@ -41,8 +40,7 @@ public class RegisterController extends AbstractController {
         String email = request.getRequestBody().getValue("email");
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return new HttpResponse().addProtocol(request.getProtocol())
-                .addStatus(HttpStatus.FOUND)
+        return HttpResponse.redirect()
                 .addLocation("/index.html");
     }
 }

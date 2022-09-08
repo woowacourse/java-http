@@ -31,4 +31,4 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 ## 🖥 기능 목록
 
 - [x] Executors 로 Thread Pool 적용
-- [ ] 동시성 컬렉션 사용하기
+- [x] 동시성 컬렉션 사용하기

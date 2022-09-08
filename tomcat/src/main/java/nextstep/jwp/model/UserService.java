@@ -37,7 +37,6 @@ public class UserService {
 	}
 
 	public static User login(Map<String, String> params) {
-		System.out.println("로그인 2");
 		if (params.isEmpty()) {
 			return null;
 		}

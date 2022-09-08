@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.response.HttpResponseFactory.getFoundHttpResponse;
+import static org.apache.coyote.http11.response.HttpResponseFactory.getLoginHttpResponse;
 import static org.apache.coyote.http11.response.HttpResponseFactory.getOKHttpResponse;
 
 import java.io.IOException;
@@ -12,6 +12,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 import com.sun.jdi.InternalException;
 
+import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserService;
 import nextstep.jwp.util.Parser;
 
@@ -29,8 +30,8 @@ public class RegisterController implements Handler {
 			}
 
 			if (httpRequest.requestPOST()) {
-				UserService.register(httpRequest.getRequestBody());
-				getFoundHttpResponse(succeedRedirectUrl);
+				final User user = UserService.register(httpRequest.getRequestBody());
+				return getLoginHttpResponse(succeedRedirectUrl, user);
 			}
 
 			return getOKHttpResponse(fileName, ContentType.from(fileType).getValue());

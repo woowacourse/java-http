@@ -5,12 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import lombok.Getter;
 import lombok.ToString;
 
-@Getter
 @ToString
 public class HttpHeaders {
 
@@ -23,14 +20,14 @@ public class HttpHeaders {
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final Map<String, String> headers;
+    private final Map<String, String> values;
 
-    public HttpHeaders(final Map<String, String> headers) {
-        this.headers = new LinkedHashMap<>(headers);
+    public HttpHeaders(final Map<String, String> values) {
+        this.values = new LinkedHashMap<>(values);
     }
 
-    public HttpHeaders(final String headerText) {
-        String[] splitHeaders = headerText.split(NEW_LINE);
+    public static HttpHeaders parse(final String rawHeaders) {
+        String[] splitHeaders = rawHeaders.split(NEW_LINE);
         LinkedList<String> headerLines = new LinkedList<>(Arrays.asList(splitHeaders));
 
         HashMap<String, String> headers = new HashMap<>();
@@ -39,24 +36,24 @@ public class HttpHeaders {
             headers.put(splitHeader[HEADER_NAME_INDEX], splitHeader[HEADER_VALUE_INDEX]);
         }
 
-        this.headers = headers;
+        return new HttpHeaders(headers);
     }
 
     public Optional<String> getHeader(final String header) {
-        String value = headers.get(header);
-        if (Objects.isNull(value)) {
-            return Optional.empty();
-        }
+        String value = values.get(header);
+        return Optional.ofNullable(value);
+    }
 
-        return Optional.of(value);
+    public boolean hasHeader(final String header) {
+        return values.containsKey(header);
     }
 
     public String generateHeaderText() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (String headerKey : headers.keySet()) {
+        for (String headerKey : values.keySet()) {
             stringBuilder.append(headerKey)
                     .append(HEADER_DELIMITER)
-                    .append(headers.get(headerKey))
+                    .append(values.get(headerKey))
                     .append(WHITE_SPACE)
                     .append(NEW_LINE);
         }

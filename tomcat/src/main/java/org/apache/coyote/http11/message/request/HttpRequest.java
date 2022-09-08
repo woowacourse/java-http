@@ -3,6 +3,7 @@ package org.apache.coyote.http11.message.request;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.coyote.http11.message.common.HttpHeaders;
+import org.apache.coyote.http11.message.common.HttpMethod;
 
 @ToString
 @Getter
@@ -13,19 +14,18 @@ public class HttpRequest {
 
     private static final int MESSAGE_BEGIN_INDEX = 0;
 
-    private final RequestStartLine requestStartLine;
+    private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    private HttpRequest(final RequestStartLine requestStartLine, final HttpHeaders httpHeaders,
-                        final String requestBody) {
-        this.requestStartLine = requestStartLine;
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders, final String requestBody) {
+        this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
     }
 
     private HttpRequest(final String requestStartLine, final String header, final String body) {
-        this(new RequestStartLine(requestStartLine), new HttpHeaders(header), body);
+        this(RequestLine.parse(requestStartLine), HttpHeaders.parse(header), body);
     }
 
     public static HttpRequest parse(final String httpRequestMessage) {
@@ -52,7 +52,14 @@ public class HttpRequest {
         return message.substring(bodyStartIndex);
     }
 
+    public boolean matches(final HttpMethod method, final String uri) {
+        boolean methodMatches = requestLine.getMethod().equals(method);
+        boolean uriMatches = requestLine.getUri().matches(uri);
+
+        return methodMatches && uriMatches;
+    }
+
     public RequestUri getRequestUri() {
-        return requestStartLine.getRequestUri();
+        return requestLine.getUri();
     }
 }

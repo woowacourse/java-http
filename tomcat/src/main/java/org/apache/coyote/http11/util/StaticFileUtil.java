@@ -12,6 +12,9 @@ public class StaticFileUtil {
 
     private static final String STATIC_DIRECTORY = "static";
 
+    private StaticFileUtil() {
+    }
+
     public static String readFile(final String path) {
         ClassLoader classLoader = StaticFileUtil.class.getClassLoader();
         URL resource = classLoader.getResource(STATIC_DIRECTORY + path);

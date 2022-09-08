@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class RequestUriTest {
@@ -78,5 +79,19 @@ class RequestUriTest {
 
         // then
         assertThat(actual).isEqualTo("");
+    }
+
+    @DisplayName("URI의 쿼리 존재 유무를 반환한다.")
+    @CsvSource(value = {"/login?hello=world,true", "/login,false", "/login?,false"})
+    @ParameterizedTest
+    void hasQuery(final String uri, final boolean expected) {
+        // given
+        RequestUri requestUri = new RequestUri(uri);
+
+        // when
+        boolean actual = requestUri.hasQuery();
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }

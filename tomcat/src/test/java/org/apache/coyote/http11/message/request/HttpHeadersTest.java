@@ -21,7 +21,7 @@ class HttpHeadersTest {
                         + "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
 
         // when
-        HttpHeaders actual = new HttpHeaders(requestHeaders);
+        HttpHeaders actual = HttpHeaders.parse(requestHeaders);
 
         // then
         assertThat(actual).isNotNull();
@@ -39,7 +39,7 @@ class HttpHeadersTest {
                         + "Host: localhost:8080\r\n"
                         + "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
 
-        HttpHeaders httpHttpHeaders = new HttpHeaders(requestHeaders);
+        HttpHeaders httpHttpHeaders = HttpHeaders.parse(requestHeaders);
 
         // when
         String actual = httpHttpHeaders.getHeader("Host").get();

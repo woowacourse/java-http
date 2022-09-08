@@ -7,6 +7,9 @@ public enum HttpStatus {
     OK(200),
     CREATED(201),
     NO_CONTENT(204),
+    MOVED_PERMANENTLY(301),
+    FOUND(302),
+    NOT_MODIFIED(304),
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
     FORBIDDEN(403),
@@ -17,5 +20,9 @@ public enum HttpStatus {
 
     HttpStatus(final int code) {
         this.code = code;
+    }
+
+    public String getCodeAndPhrase() {
+        return code + " " + name();
     }
 }

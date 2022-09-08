@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RequestUri {
@@ -16,8 +17,8 @@ public class RequestUri {
 
     public Optional<String> getQuery(final String key) {
         String query = uri.getQuery();
-        QueryString queryString = new QueryString(query);
-        return queryString.getQuery(key);
+        QueryString queryString = QueryString.parse(query);
+        return queryString.getValues(key);
     }
 
     public String getPath() {
@@ -35,8 +36,9 @@ public class RequestUri {
         return path.substring(lastDotIndex + 1);
     }
 
-    public boolean hasExtension() {
-        return !getExtension().isBlank();
+    public boolean hasQuery() {
+        String query = uri.getQuery();
+        return !(Objects.isNull(query) || query.isBlank());
     }
 
     public boolean matches(final String uri) {

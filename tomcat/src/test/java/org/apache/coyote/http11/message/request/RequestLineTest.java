@@ -6,16 +6,16 @@ import org.apache.coyote.http11.message.common.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestStartLineTest {
+class RequestLineTest {
 
     @DisplayName("HTTP Request Line을 전달하여 생성한다.")
     @Test
-    void constructor() {
+    void parse() {
         // given
         String httpRequestLine = "GET /index.html HTTP/1.1";
 
         // when
-        RequestStartLine actual = new RequestStartLine(httpRequestLine);
+        RequestLine actual = RequestLine.parse(httpRequestLine);
 
         // then
         assertThat(actual).isNotNull();
@@ -25,10 +25,10 @@ class RequestStartLineTest {
     @Test
     void getMethod() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET /index.html HTTP/1.1");
+        RequestLine requestLine = RequestLine.parse("GET /index.html HTTP/1.1");
 
         // when
-        HttpMethod actual = requestStartLine.getMethod();
+        HttpMethod actual = requestLine.getMethod();
 
         // then
         assertThat(actual).isEqualTo(HttpMethod.GET);
@@ -38,10 +38,10 @@ class RequestStartLineTest {
     @Test
     void getUri() {
         // given
-        RequestStartLine requestStartLine = new RequestStartLine("GET /index.html HTTP/1.1");
+        RequestLine requestLine = RequestLine.parse("GET /index.html HTTP/1.1");
 
         // when
-        RequestUri actual = requestStartLine.getRequestUri();
+        RequestUri actual = requestLine.getUri();
 
         // then
         assertThat(actual.getPath()).isEqualTo("/index.html");

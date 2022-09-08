@@ -18,15 +18,19 @@ public class LoginInterceptor {
     }
 
     public boolean preHandle(final Request request, final OutputStream outputStream) {
-        if (!includeUris.contains(request.getUri())) {
-            return true;
-        }
-        final Session session = getSession(request.getHeaders());
-        if(session == null) {
+        if (isUriNotMatch(request) || isSessionAlreadyExist(request)) {
             return true;
         }
         makeRedirect(outputStream);
         return false;
+    }
+
+    private boolean isUriNotMatch(final Request request) {
+        return !includeUris.contains(request.getUri());
+    }
+
+    private boolean isSessionAlreadyExist(final Request request) {
+        return getSession(request.getHeaders()) == null;
     }
 
     private Session getSession(final Headers headers) {

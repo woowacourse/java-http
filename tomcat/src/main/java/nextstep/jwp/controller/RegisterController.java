@@ -20,7 +20,6 @@ public class RegisterController implements Controller {
         try {
             final User user = convert(request.getContent());
             InMemoryUserRepository.save(user);
-
         } catch (NotEnoughConditionException e) {
             return errorResponse();
         }

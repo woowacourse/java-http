@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = controllerMapping.getController(request.getRequestInfo());
             ResponseFlusher.flush(outputStream, controller.execute(request));
         } catch (UnauthorizedException e) {
-            ResponseFlusher.flush(outputStream, makeRedirectResponse(HttpStatus.FOUND, View.UNAUTHORIZED.getValue()));
+            ResponseFlusher.flush(outputStream, makeRedirectResponse(View.UNAUTHORIZED.getValue()));
         } catch (CustomNotFoundException e) {
             ResponseFlusher.flush(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, View.NOT_FOUND));
         } catch (Exception e) {
@@ -64,10 +64,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Response makeRedirectResponse(final HttpStatus httpStatus, final String redirectUri) {
+    private Response makeRedirectResponse(final String redirectUri) {
         final Headers headers = new Headers();
         headers.put(HttpHeader.LOCATION, redirectUri);
-        return new Response(headers).httpStatus(httpStatus);
+        return new Response(headers).httpStatus(HttpStatus.FOUND);
     }
 
     private Response makeErrorResponse(final HttpStatus httpStatus, final View errorView) {

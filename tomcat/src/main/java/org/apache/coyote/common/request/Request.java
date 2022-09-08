@@ -31,7 +31,9 @@ public class Request {
     private final Map<String, String> queryString;
     private final Map<String, String> headers;
     private final Map<String, String> body;
+
     private final Cookie cookie;
+
 
     public Request(final String rawRequest) {
         final String[] parsedRequest = rawRequest.split("\r\n");
@@ -55,7 +57,9 @@ public class Request {
         final int index = Arrays.asList(parsedRequest)
                 .indexOf(HEADER_BODY_DELIMITER);
         if (index == -1) {
+
             return parsedRequest.length;
+
         }
         return index;
     }

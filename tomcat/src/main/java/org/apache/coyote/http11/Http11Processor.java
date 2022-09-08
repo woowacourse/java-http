@@ -44,7 +44,6 @@ public class Http11Processor implements Runnable, Processor {
                     .build();
             final Controller controller = HandlerMapper.of(request);
             controller.service(request, response);
-
             bufferedReader.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -65,6 +64,25 @@ public class Http11Processor implements Runnable, Processor {
                     .append("\r\n");
         }
 //        System.out.println(actual);
+        actual.append("\r\n");
+        while (bufferedReader.ready()) {
+            char a = (char) bufferedReader.read();
+            actual.append(a);
+        }
+        return actual.toString();
+    }
+
+    private String getRequestMessage(final BufferedReader bufferedReader) throws IOException {
+        final StringBuilder actual = new StringBuilder();
+        String line;
+        while (true) {
+            line = bufferedReader.readLine();
+            if (line.equals("")) {
+                break;
+            }
+            actual.append(line)
+                    .append("\r\n");
+        }
         actual.append("\r\n");
         while (bufferedReader.ready()) {
             char a = (char) bufferedReader.read();

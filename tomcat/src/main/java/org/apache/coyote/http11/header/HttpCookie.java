@@ -1,20 +1,22 @@
 package org.apache.coyote.http11.header;
 
-import java.util.List;
+public class HttpCookie {
 
-public class HttpCookie extends HttpHeader {
+    private static final String DELIMITER = "=";
 
-    private static final String SET_COOKIE = "Set-Cookie";
+    private final String name;
+    private final String value;
 
-    private HttpCookie(final String httpHeaderType, final List<String> values) {
-        super(httpHeaderType, values);
+    public HttpCookie(final String name, final String value) {
+        this.name = name;
+        this.value = value;
     }
 
-    public static HttpCookie of(final HttpHeader httpHeader) {
-        return new HttpCookie(httpHeader.getHttpHeaderType(), httpHeader.getValues());
+    public String toHeaderValue() {
+        return name + DELIMITER + value;
     }
 
-    public static HttpHeader generateResponseHeader(final String value) {
-        return HttpHeader.of(SET_COOKIE, value);
+    public String getValue() {
+        return value;
     }
 }

@@ -1,6 +1,7 @@
-package org.apache.coyote.http11.handler.user;
+package org.apache.coyote.http11.handler.resource;
 
-import org.apache.coyote.http11.handler.ResourceHandler;
+import static org.apache.coyote.http11.handler.resource.ResourceUrls.REGISTER_HTML;
+
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
@@ -8,6 +9,6 @@ public class RegisterPageHandler extends ResourceHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        return generateResourceResponse("/register.html");
+        return generateResourceResponse(REGISTER_HTML);
     }
 }

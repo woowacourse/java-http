@@ -8,17 +8,17 @@ import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HomeHandler;
-import org.apache.coyote.http11.handler.IndexHandler;
-import org.apache.coyote.http11.handler.ResourceHandler;
-import org.apache.coyote.http11.handler.user.LoginHandler;
-import org.apache.coyote.http11.handler.user.LoginPageHandler;
-import org.apache.coyote.http11.handler.user.RegisterHandler;
-import org.apache.coyote.http11.handler.user.RegisterPageHandler;
+import org.apache.coyote.http11.handler.resource.IndexHandler;
+import org.apache.coyote.http11.handler.resource.ResourceHandler;
+import org.apache.coyote.http11.handler.auth.LoginHandler;
+import org.apache.coyote.http11.handler.resource.LoginPageHandler;
+import org.apache.coyote.http11.handler.resource.RegisterHandler;
+import org.apache.coyote.http11.handler.resource.RegisterPageHandler;
 import org.apache.coyote.http11.http.request.HttpMethod;
 
 public enum HandlerMapper {
     HOME(GET, Constants.HOME_URL_REGEX, new HomeHandler()),
-    INDEX(GET, Pattern.compile("^(/index\\.html)"), new IndexHandler()),
+    INDEX(GET, Constants.INDEX_PAGE_REGEX, new IndexHandler()),
     LOGIN_PAGE(GET, Constants.LOGIN_URL_REGEX, new LoginPageHandler()),
     LOGIN(POST, Constants.LOGIN_REGEX, new LoginHandler()),
     REGISTER_PAGE(GET, Constants.REGISTER_PAGE_REGEX, new RegisterPageHandler()),
@@ -50,6 +50,7 @@ public enum HandlerMapper {
         private static final Pattern LOGIN_REGEX = Pattern.compile("^(/login)(\\?([^#\\s]*))?");
         private static final Pattern REGISTER_PAGE_REGEX = Pattern.compile("^(/register)(\\?([^#\\s]*))?");
         private static final Pattern REGISTER_REGEX = Pattern.compile("^(/register)(\\?([^#\\s]*))?");
+        private static final Pattern INDEX_PAGE_REGEX = Pattern.compile("^(/index\\.html)");
     }
 
     private static boolean matchUrl(final String url, final HandlerMapper handlerMapper) {

@@ -8,6 +8,13 @@ import nextstep.jwp.model.User;
 
 public class UserService {
 
+    private UserService() {
+    }
+
+    public static UserService getInstance() {
+        return new UserService();
+    }
+
     public void save(final UserRegisterRequest userRegisterRequest) {
         validateExistUser(userRegisterRequest.getAccount());
         final User user = new User(userRegisterRequest.getAccount(), userRegisterRequest.getPassword(), userRegisterRequest.getEmail());

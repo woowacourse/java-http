@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.handler.user;
+package org.apache.coyote.http11.handler.resource;
 
+import static org.apache.coyote.http11.handler.resource.ResourceUrls.INDEX_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
@@ -8,14 +9,13 @@ import java.util.Map;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.dto.UserRegisterRequest;
 import org.apache.catalina.utils.Parser;
-import org.apache.coyote.http11.handler.ResourceHandler;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
 public class RegisterHandler extends ResourceHandler {
 
-    private final UserService userService = new UserService();
+    private final UserService userService = UserService.getInstance();
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
@@ -30,7 +30,7 @@ public class RegisterHandler extends ResourceHandler {
         final UserRegisterRequest userRegisterRequest = new UserRegisterRequest(account, password, email);
         userService.save(userRegisterRequest);
 
-        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), "/index.html");
+        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
         return HttpResponse.of(HTTP11, REDIRECT, location);
     }
 

@@ -58,7 +58,7 @@ public class HttpRequest {
     }
 
     public Session getSession(final boolean create) {
-        final SessionManager sessionManager = new SessionManager();
+        final SessionManager sessionManager = SessionManager.getInstance();
 
         if (create) {
             final Session session = new Session(String.valueOf(UUID.randomUUID()));

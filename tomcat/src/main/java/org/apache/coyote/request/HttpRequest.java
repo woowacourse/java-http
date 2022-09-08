@@ -54,7 +54,7 @@ public class HttpRequest {
         return httpHeaders.getValue();
     }
 
-    public Map<String, String> getRequestBody() {
-        return requestBody.getValue();
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

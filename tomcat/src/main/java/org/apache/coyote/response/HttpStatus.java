@@ -2,11 +2,12 @@ package org.apache.coyote.response;
 
 public enum HttpStatus {
     OK(200, "OK"),
-    REDIRECT(302, "Redirect"),
+    FOUND(302, "Found"),
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),
-    INTERNAL_SERVER_ERROR(500, "Interal Server Error"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     ;
 
     private final int code;
@@ -23,5 +24,9 @@ public enum HttpStatus {
 
     public String getMessage() {
         return message;
+    }
+
+    public String createStatusLine() {
+        return String.format("HTTP/1.1 %d %s ", code, message);
     }
 }

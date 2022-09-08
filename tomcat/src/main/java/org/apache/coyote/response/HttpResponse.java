@@ -1,26 +1,18 @@
 package org.apache.coyote.response;
 
-import java.util.Map;
-import org.apache.coyote.request.HttpRequest;
+import java.util.StringJoiner;
 
 public class HttpResponse {
 
-    public static final String ACCEPT = "Accept";
+    private static final String CRLF = "\r\n";
 
-    private final HttpStatus httpStatus;
-    private final String contentType;
+    private HttpStatus httpStatus = HttpStatus.OK;
+    private String contentType;
+    private String location;
+    private Cookie cookie;
     private String responseBody;
 
-    public HttpResponse(final HttpStatus httpStatus, final String contentType, final String responseBody) {
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
-    }
-
-    public static HttpResponse of(final HttpStatus httpStatus, final HttpRequest httpRequest,
-                                  final String responseBody) {
-        Map<String, String> headers = httpRequest.getHttpHeaders();
-        return new HttpResponse(httpStatus, headers.get(ACCEPT), responseBody);
+    public HttpResponse() {
     }
 
     public byte[] getResponse() {
@@ -28,11 +20,49 @@ public class HttpResponse {
     }
 
     private String createResponse() {
-        return String.join("\r\n",
-                String.format("HTTP/1.1 %d %s", httpStatus.getCode(), httpStatus.getMessage()) +
-                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        StringJoiner joiner = new StringJoiner(CRLF);
+        joiner.add(httpStatus.createStatusLine());
+        joiner.add(String.format("Content-Type: %s;charset=utf-8 ", contentType));
+
+        addHeaders(joiner);
+        joiner.add("");
+        if (responseBody != null) {
+            joiner.add(responseBody);
+        }
+        return joiner.toString();
+    }
+
+    private void addHeaders(final StringJoiner joiner) {
+        if (responseBody != null) {
+            joiner.add(String.format("Content-Length: " + responseBody.getBytes().length + " "));
+        }
+        if (location != null) {
+            joiner.add(String.format("Location: %s", location));
+        }
+    }
+
+    public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+        return this;
+    }
+
+    public HttpResponse setContentType(final String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public HttpResponse setLocation(final String location) {
+        this.location = location;
+        return this;
+    }
+
+    public HttpResponse setCookie(final Cookie cookie) {
+        this.cookie = cookie;
+        return this;
+    }
+
+    public HttpResponse setResponseBody(final String responseBody) {
+        this.responseBody = responseBody;
+        return this;
     }
 }

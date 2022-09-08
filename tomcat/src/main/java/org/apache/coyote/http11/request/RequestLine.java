@@ -36,16 +36,16 @@ public class RequestLine {
         }
     }
 
-    public boolean isPostMethod() {
+    public boolean isGet() {
+        return method.isGet();
+    }
+
+    public boolean isPost() {
         return method.isPost();
     }
 
     public String getPath() {
         return requestUri.getPath();
-    }
-
-    public HttpMethod getMethod() {
-        return method;
     }
 
     public RequestUri getRequestUri() {

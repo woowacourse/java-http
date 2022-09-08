@@ -8,15 +8,18 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public void add(final Session session) {
+    private SessionManager() {
+    }
+
+    public static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Optional<Session> findSession(final String id) {
+    public static Optional<Session> findSession(final String id) {
         return Optional.ofNullable(SESSIONS.get(id));
     }
 
-    public void remove(final String id) {
+    public static void remove(final String id) {
         SESSIONS.remove(id);
     }
 }

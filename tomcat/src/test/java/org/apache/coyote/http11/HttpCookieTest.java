@@ -42,7 +42,7 @@ class HttpCookieTest {
             // when & then
             assertThatThrownBy(() -> HttpCookie.from(cookies))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("올바른 application/x-www-form-urlencoded 형식이 아닙니다.");
+                    .hasMessage("올바른 Http Cookie 형식이 아닙니다.");
         }
     }
 }

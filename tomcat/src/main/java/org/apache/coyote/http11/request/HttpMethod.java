@@ -18,6 +18,10 @@ public enum HttpMethod {
                 .orElseThrow(() -> new IllegalArgumentException("올바른 HTTP 요청 메서드 타입이 아닙니다."));
     }
 
+    public boolean isGet() {
+        return this.equals(GET);
+    }
+
     public boolean isPost() {
         return this.equals(POST);
     }

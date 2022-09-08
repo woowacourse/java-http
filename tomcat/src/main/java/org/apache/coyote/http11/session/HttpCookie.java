@@ -32,7 +32,7 @@ public class HttpCookie {
 
         final String[] pair = cookie.split("=");
         if (pair.length != DEFAULT_COOKIE_PAIR_SIZE) {
-            throw new IllegalArgumentException("올바른 application/x-www-form-urlencoded 형식이 아닙니다.");
+            throw new IllegalArgumentException("올바른 Http Cookie 형식이 아닙니다.");
         }
         cookies.put(pair[0], pair[1].trim());
     }

@@ -40,16 +40,16 @@ public class HttpRequest {
         return headers.findCookie(name);
     }
 
-    public boolean isPostMethod() {
-        return requestLine.isPostMethod();
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
     }
 
     public String getUri() {
         return requestLine.getPath();
-    }
-
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
     }
 
     public String getProtocolVersion() {

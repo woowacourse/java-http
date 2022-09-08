@@ -24,5 +24,5 @@
 ### 3단계 - 리팩터링
 - [x] HTTP 요청을 처리하는 HTTP Request 클래스를 구현한다.
 - [x] HTTP 응답을 처리하는 HTTP Response 클래스를 구현한다.
-- [ ] Controller 인터페이스 추가한다.
+- [x] Controller 인터페이스 추가한다.
   - HTTP 요청, 응답을 Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거한다.

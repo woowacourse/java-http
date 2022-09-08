@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.http.request;
 
-import static org.apache.catalina.utils.IOUtils.readData;
+import static org.apache.catalina.webutils.IOUtils.readData;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
 
 import java.io.BufferedReader;

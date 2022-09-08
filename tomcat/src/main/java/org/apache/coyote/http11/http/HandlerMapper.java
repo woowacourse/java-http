@@ -6,14 +6,14 @@ import static org.apache.coyote.http11.http.request.HttpMethod.POST;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.HomeHandler;
-import org.apache.coyote.http11.handler.resource.IndexHandler;
-import org.apache.coyote.http11.handler.resource.ResourceHandler;
-import org.apache.coyote.http11.handler.auth.LoginHandler;
-import org.apache.coyote.http11.handler.resource.LoginPageHandler;
-import org.apache.coyote.http11.handler.resource.RegisterHandler;
-import org.apache.coyote.http11.handler.resource.RegisterPageHandler;
+import nextstep.jwp.controller.Handler;
+import nextstep.jwp.controller.HomeHandler;
+import nextstep.jwp.controller.resource.IndexHandler;
+import nextstep.jwp.controller.resource.ResourceHandler;
+import nextstep.jwp.controller.auth.LoginHandler;
+import nextstep.jwp.controller.resource.LoginPageHandler;
+import nextstep.jwp.controller.resource.RegisterHandler;
+import nextstep.jwp.controller.resource.RegisterPageHandler;
 import org.apache.coyote.http11.http.request.HttpMethod;
 
 public enum HandlerMapper {

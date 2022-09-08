@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.http;
 
-import static org.apache.catalina.utils.Parser.removeBlank;
+import static org.apache.catalina.webutils.Parser.removeBlank;
 
 import java.io.BufferedReader;
 import java.io.IOException;

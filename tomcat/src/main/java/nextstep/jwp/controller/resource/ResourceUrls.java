@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.resource;
+package nextstep.jwp.controller.resource;
 
 abstract public class ResourceUrls {
 

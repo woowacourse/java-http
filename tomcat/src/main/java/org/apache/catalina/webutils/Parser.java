@@ -1,4 +1,4 @@
-package org.apache.catalina.utils;
+package org.apache.catalina.webutils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +10,6 @@ public class Parser {
     private static final String EMPTY_LETTER = "";
     private static final String DOT_REGEX = "\\.";
     private static final String DOT_LETTER = ".";
-    private static final String QUESTION_MARK_LETTER = "?";
     private static final String AMPERSAND_LETTER = "&";
     private static final String EQUAL_LETTER = "=";
 

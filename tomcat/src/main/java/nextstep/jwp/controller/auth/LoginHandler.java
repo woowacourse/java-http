@@ -1,19 +1,18 @@
-package org.apache.coyote.http11.handler.auth;
+package nextstep.jwp.controller.auth;
 
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.INDEX_HTML;
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.UNAUTHORIZED_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
 import nextstep.jwp.application.UserService;
+import nextstep.jwp.controller.Handler;
+import nextstep.jwp.controller.resource.ResourceUrls;
 import nextstep.jwp.dto.UserLoginRequest;
-import org.apache.catalina.utils.Parser;
-import org.apache.coyote.http11.handler.Handler;
+import org.apache.catalina.webutils.Parser;
 import org.apache.coyote.http11.header.HttpCookie;
 import org.apache.coyote.http11.header.HttpHeader;
-import org.apache.coyote.http11.http.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
@@ -32,12 +31,12 @@ public class LoginHandler implements Handler {
         try {
             final UserLoginRequest userLoginRequest = getUserLoginRequest(queryParams);
             userService.login(userLoginRequest);
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), ResourceUrls.INDEX_HTML);
             final HttpCookie cookie = SessionManager.createCookie();
             final HttpHeader cookieHeader = HttpHeader.of("Set-Cookie", cookie.toHeaderValue());
             return HttpResponse.of(HTTP11, REDIRECT, location, cookieHeader);
         } catch (IllegalArgumentException exception) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), UNAUTHORIZED_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), ResourceUrls.UNAUTHORIZED_HTML);
             return HttpResponse.of(HTTP11, REDIRECT, location);
         }
     }

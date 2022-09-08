@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.resource;
+package nextstep.jwp.controller.resource;
 
 import static org.apache.coyote.http11.header.ContentType.UTF_8;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
@@ -8,10 +8,10 @@ import static org.apache.coyote.http11.http.response.HttpStatus.OK;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.apache.catalina.utils.IOUtils;
-import org.apache.catalina.utils.Parser;
-import org.apache.coyote.http11.exception.InternalException;
-import org.apache.coyote.http11.handler.Handler;
+import nextstep.jwp.controller.Handler;
+import nextstep.jwp.exception.InternalException;
+import org.apache.catalina.webutils.IOUtils;
+import org.apache.catalina.webutils.Parser;
 import org.apache.coyote.http11.header.ContentType;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;

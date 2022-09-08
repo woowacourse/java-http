@@ -1,9 +1,9 @@
-package org.apache.catalina.utils;
+package org.apache.catalina.webutils;
 
 public enum FileType {
     HTML("html");
 
-    private String value;
+    private final String value;
 
     FileType(final String value) {
         this.value = value;

@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.handler.resource;
+package nextstep.jwp.controller.resource;
 
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.INDEX_HTML;
+import static nextstep.jwp.controller.resource.ResourceUrls.INDEX_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
@@ -8,7 +8,7 @@ import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 import java.util.Map;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.dto.UserRegisterRequest;
-import org.apache.catalina.utils.Parser;
+import org.apache.catalina.webutils.Parser;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;

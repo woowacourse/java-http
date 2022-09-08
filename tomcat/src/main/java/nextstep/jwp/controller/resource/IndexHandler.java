@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.handler.resource;
+package nextstep.jwp.controller.resource;
 
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.INDEX_HTML;
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.LOGIN_HTML;
+import static nextstep.jwp.controller.resource.ResourceUrls.INDEX_HTML;
+import static nextstep.jwp.controller.resource.ResourceUrls.LOGIN_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;

@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.handler.resource;
+package nextstep.jwp.controller.resource;
 
-import static org.apache.coyote.http11.handler.resource.ResourceUrls.REGISTER_HTML;
+import static nextstep.jwp.controller.resource.ResourceUrls.REGISTER_HTML;
 
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;

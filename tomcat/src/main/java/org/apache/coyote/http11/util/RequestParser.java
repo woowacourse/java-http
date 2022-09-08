@@ -31,8 +31,7 @@ public class RequestParser {
         final HttpHeaders headers = HttpHeaders.from(rawHeaders);
         final HttpBody body = HttpBody.from(readBody(bufferedReader, headers));
 
-        LOG.info("============= HTTP REQUEST =============");
-        LOG.info("{}\n{}\n\n{}", rawStartLine, headers, body);
+        LOG.info("{}", rawStartLine);
 
         return new HttpRequest(startLine, headers, body);
     }

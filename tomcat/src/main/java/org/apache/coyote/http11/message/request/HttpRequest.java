@@ -17,16 +17,16 @@ import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
 public class HttpRequest {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
-
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody requestBody;
+    private final SessionManager sessionManager;
 
     private HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
+        this.sessionManager = SessionManager.getINSTANCE();
     }
 
     public static HttpRequest from(final BufferedReader requestReader) throws IOException {
@@ -79,7 +79,7 @@ public class HttpRequest {
 
     public Session createSession() {
         final Session session = new Session();
-        SESSION_MANAGER.add(session);
+        sessionManager.add(session);
         return session;
     }
 
@@ -97,7 +97,7 @@ public class HttpRequest {
         if (jSessionId.isEmpty()) {
             return null;
         }
-        return SESSION_MANAGER.findSession(jSessionId.get());
+        return sessionManager.findSession(jSessionId.get());
     }
 
     public QueryParams getQueryParams() {

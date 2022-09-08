@@ -43,4 +43,4 @@
 - [X] 소켓 연결 시 thread pool을 이용한다.
   - [X] `Executors`로 `ExecutorService`객체를 생성한다.
   - [X] thread 개수를 250, 대기 수를 100으로 제한한다.
-- [ ] `SessionManager`의 `SESSIONS`를 Concurrent Collection으로 만든다.
+- [X] `SessionManager`의 `SESSIONS`를 Concurrent Collection으로 만든다.

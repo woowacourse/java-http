@@ -36,13 +36,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        try {
-            final User user = userService.register(request);
-            setLoginSession(request, response, user);
-            redirectIndex(response);
-        } catch (final RuntimeException runtimeException) {
-            LOG.error(runtimeException.getMessage());
-        }
+        final User user = userService.register(request);
+        setLoginSession(request, response, user);
+        redirectIndex(response);
 
         response.setBody(StaticResource.ofRequest(request));
     }

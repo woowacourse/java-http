@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
-import org.apache.coyote.support.HttpResponse;
 
 public class IoUtils {
 

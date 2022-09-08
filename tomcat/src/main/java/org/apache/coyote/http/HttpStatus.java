@@ -1,4 +1,4 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
 
 public enum HttpStatus {
 

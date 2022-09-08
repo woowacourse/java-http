@@ -1,4 +1,4 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
 
 import static java.util.Arrays.stream;
 

@@ -1,10 +1,10 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
 
 import static java.lang.String.format;
 
-import jakarta.servlet.http.Cookie;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.status.HttpCookie;
 import support.StringUtils;
 
 public class HttpResponse {

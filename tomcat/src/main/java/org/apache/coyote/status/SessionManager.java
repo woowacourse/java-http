@@ -1,6 +1,5 @@
-package org.apache.coyote.support;
+package org.apache.coyote.status;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

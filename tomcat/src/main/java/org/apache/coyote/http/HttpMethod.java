@@ -1,4 +1,4 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
 
 public class HttpMethod {
     public static final String GET = "GET";

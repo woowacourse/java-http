@@ -1,10 +1,12 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.coyote.status.HttpCookie;
+import org.apache.coyote.status.Session;
 import support.IoUtils;
 import support.StringUtils;
 

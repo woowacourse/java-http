@@ -1,4 +1,4 @@
-package org.apache.coyote.support;
+package org.apache.coyote.handler;
 
 import static java.util.Arrays.stream;
 
@@ -6,6 +6,15 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.constant.MediaType;
+import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpParser;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.HttpStatus;
+import org.apache.coyote.status.HttpCookie;
+import org.apache.coyote.status.Session;
+import org.apache.coyote.status.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

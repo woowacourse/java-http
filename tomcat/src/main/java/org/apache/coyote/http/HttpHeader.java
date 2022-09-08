@@ -1,4 +1,7 @@
-package org.apache.coyote.support;
+package org.apache.coyote.http;
+
+import org.apache.coyote.status.HttpCookie;
+import org.apache.coyote.status.Session;
 
 public enum HttpHeader {
 

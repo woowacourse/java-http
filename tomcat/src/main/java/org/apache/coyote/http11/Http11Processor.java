@@ -12,10 +12,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.support.ApiHandlerMethod;
-import org.apache.coyote.support.HttpRequest;
-import org.apache.coyote.support.HttpResponse;
-import org.apache.coyote.support.StaticHandlerMethod;
+import org.apache.coyote.handler.ApiHandlerMethod;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.handler.StaticHandlerMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

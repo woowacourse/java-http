@@ -39,5 +39,12 @@ public class InMemoryUserRepository {
         throw new InvalidLoginException();
     }
 
+    public static boolean login(String account, String password) {
+        User user = findByAccount(account)
+                .orElseThrow(InvalidLoginException::new);
+
+        return user.checkPassword(password);
+    }
+
     private InMemoryUserRepository() {}
 }

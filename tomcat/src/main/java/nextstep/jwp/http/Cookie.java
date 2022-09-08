@@ -13,6 +13,7 @@ public class Cookie {
     private static final int COOKIE_DIVIDED_LIMIT = 2;
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
+
     private final Map<String, String> cookies;
 
     public Cookie(Map<String, String> cookies) {

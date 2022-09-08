@@ -33,8 +33,8 @@ public class LoginHandler implements Http11Handler {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             visitor.maintainLogin(loginService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
-            return HandlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
+            return HandlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);
         }
-        return HandlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.REDIRECT);
+        return HandlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.FOUND);
     }
 }

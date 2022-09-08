@@ -23,7 +23,7 @@ public class LoginPageHandler implements Http11Handler {
     @Override
     public Http11Response handle(Http11Request http11Request, Visitor visitor) {
         if (visitor.isLogin()) {
-            return HandlerSupporter.redirectResponseComponent(REDIRECT_URI_ALREADY_LOGIN, StatusCode.REDIRECT);
+            return HandlerSupporter.redirectResponseComponent(REDIRECT_URI_ALREADY_LOGIN, StatusCode.FOUND);
         }
         return HandlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }

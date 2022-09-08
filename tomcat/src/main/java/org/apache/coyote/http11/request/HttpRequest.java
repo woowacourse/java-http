@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.UUID;
+import org.apache.coyote.http11.Headers;
+import org.apache.catalina.Session;
 
 public class HttpRequest {
 

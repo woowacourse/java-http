@@ -11,6 +11,11 @@ import nextstep.jwp.controller.FileReader;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.RequestUri;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,13 +99,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         try {
-            httpResponse
-                    .httpStatus(HttpStatus.OK)
+            httpResponse.httpStatus(HttpStatus.OK)
                     .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
         } catch (Exception e) {
-            httpResponse
-                    .httpStatus(HttpStatus.FOUND)
-                    .redirect("/404.html");
+            httpResponse.redirect("/404.html");
         }
     }
 }

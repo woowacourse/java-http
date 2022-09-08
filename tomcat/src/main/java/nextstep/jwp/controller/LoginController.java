@@ -4,12 +4,12 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.RequestParameters;
-import org.apache.coyote.http11.RequestUri;
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.request.RequestParameters;
+import org.apache.coyote.http11.request.RequestUri;
+import org.apache.catalina.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +25,6 @@ public class LoginController extends AbstractController {
             return;
         }
         RequestUri requestUri = httpRequest.getRequestUri();
-        if (requestUri.hasRequestParameters()) {
-            login(httpRequest, httpResponse);
-            return;
-        }
         httpResponse.httpStatus(HttpStatus.OK)
                 .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
     }
@@ -45,14 +41,12 @@ public class LoginController extends AbstractController {
             validatePassword(requestParameters, user);
             Session session = httpRequest.getSession(true);
             session.addAttribute("user", user);
-            httpResponse.httpStatus(HttpStatus.FOUND)
-                    .redirect("/index.html")
+            httpResponse.redirect("/index.html")
                     .setCookie(HttpCookie.ofJSessionId(session.getId()));
             log.info("user : " + user);
         } catch (NoSuchUserException e) {
             log.info(e.getMessage());
-            httpResponse.httpStatus(HttpStatus.FOUND)
-                    .redirect("/401.html");
+            httpResponse.redirect("/401.html");
         }
     }
 

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.apache.catalina.Session;
 
 public class Headers {
 

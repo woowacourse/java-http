@@ -2,11 +2,11 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.RequestParameters;
-import org.apache.coyote.http11.RequestUri;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.request.RequestParameters;
+import org.apache.coyote.http11.request.RequestUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +35,10 @@ public class RegisterController extends AbstractController {
                     requestParameters.get("email")
             );
             InMemoryUserRepository.save(user);
-            httpResponse.httpStatus(HttpStatus.FOUND)
-                    .redirect("/index.html");
+            httpResponse.redirect("/index.html");
         } catch (Exception e) {
             log.info(e.getMessage());
-            httpResponse.httpStatus(HttpStatus.FOUND)
-                    .redirect("/401.html");
+            httpResponse.redirect("/401.html");
         }
     }
 }

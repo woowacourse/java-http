@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.Map.Entry;
+import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.MediaType;
 
 public class HttpResponse {
 
@@ -32,6 +35,7 @@ public class HttpResponse {
     }
 
     public HttpResponse redirect(final String location) {
+        httpStatus = HttpStatus.FOUND;
         headers.add("Location", location);
         return this;
     }

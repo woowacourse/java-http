@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.Session;
 
 public class HttpCookie {
 

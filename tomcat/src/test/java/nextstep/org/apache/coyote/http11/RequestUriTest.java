@@ -3,7 +3,7 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http11.MediaType;
-import org.apache.coyote.http11.RequestUri;
+import org.apache.coyote.http11.request.RequestUri;
 import org.junit.jupiter.api.Test;
 
 class RequestUriTest {

@@ -24,10 +24,10 @@ public class RequestMapping {
     public HttpResponse process(final HttpRequest request) {
         try {
             return handleRequest(request);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn(e.getMessage());
+            return HttpResponse.of(Status.INTERNAL_SERVER_ERROR);
         }
-        return HttpResponse.of(Status.INTERNAL_SERVER_ERROR);
     }
 
     private HttpResponse handleRequest(final HttpRequest request) throws IOException {

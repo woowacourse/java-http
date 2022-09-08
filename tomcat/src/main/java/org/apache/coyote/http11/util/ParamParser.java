@@ -16,7 +16,7 @@ public class ParamParser {
     }
 
     public static Map<String, String> parseOf(final String rawParams, final String delimiter) {
-        if (rawParams.isBlank()) {
+        if (rawParams == null || rawParams.isBlank()) {
             return new HashMap<>();
         }
 

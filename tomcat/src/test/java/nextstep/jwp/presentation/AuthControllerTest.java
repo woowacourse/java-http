@@ -51,6 +51,6 @@ class AuthControllerTest {
         final HttpResponse httpResponse = authController.service(new HttpRequest(httpHeader, httpBody),
                 new HttpResponse());
 
-//        assertThat(ht.getStatusCode()).isEqualTo(StatusCode.MOVED_TEMPORARILY);
+        assertThat(httpResponse.getResponse()).contains("302 Found");
     }
 }

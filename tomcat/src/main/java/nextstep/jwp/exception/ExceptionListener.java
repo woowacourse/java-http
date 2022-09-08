@@ -1,14 +1,12 @@
 package nextstep.jwp.exception;
 
 import java.util.Arrays;
-import org.apache.catalina.servlet.ExceptionHandler;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
-public class ExceptionListener extends ExceptionHandler {
+public class ExceptionListener {
 
-    @Override
     public void handle(HttpException exception, HttpResponse response) {
         final var status = exception.getStatus();
         final var path = ExceptionPage.toUri(status);
@@ -20,8 +18,7 @@ public class ExceptionListener extends ExceptionHandler {
         BAD_REQUEST(HttpStatus.BAD_REQUEST, "/400.html"),
         UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "/401.html"),
         NOT_FOUND(HttpStatus.NOT_FOUND, "/404.html"),
-        INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html")
-        ;
+        INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
 
         final HttpStatus status;
         final String uri;

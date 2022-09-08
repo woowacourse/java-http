@@ -5,10 +5,8 @@ import static org.apache.coyote.http11.HttpCookie.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -83,12 +81,8 @@ public class HttpRequest {
         return getPath().equals("/");
     }
 
-    public URL getUrl() {
-        try {
-            return addExtensionToPath(getUri());
-        } catch (URISyntaxException | MalformedURLException e) {
-            throw new IllegalArgumentException("Invalid URI requested");
-        }
+    public String getPath() {
+        return getUri().getPath();
     }
 
     private URI getUri() {
@@ -97,22 +91,6 @@ public class HttpRequest {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URI requested");
         }
-    }
-
-    public String getPath() {
-        return getUri().getPath();
-    }
-
-    private URL addExtensionToPath(URI requestUri) throws URISyntaxException, MalformedURLException {
-        if (!requestUri.getPath().contains(".")) {
-            requestUri = new URI(requestUri + ".html");
-        }
-
-        final URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
-        if (resource == null) {
-            return requestUri.toURL();
-        }
-        return resource;
     }
 
     public boolean containsHeader(final String headerName) {

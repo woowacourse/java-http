@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import org.apache.catalina.handler.AbstractController;
+import org.apache.catalina.handler.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -15,8 +16,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
-        return new HttpResponse.Builder(request).ok()
-            .messageBody(getStaticResource(request.getUrl())).build();
+        return ViewResolver.render(request);
     }
 
     @Override

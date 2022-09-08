@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.support.session;
 
 import org.apache.catalina.Manager;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static SessionManager instance;
 
     private SessionManager() {
@@ -33,6 +33,10 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public int size() {
+        return SESSIONS.size();
     }
 }
 

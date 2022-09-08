@@ -10,3 +10,6 @@
 - [x] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
 - [x] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
 - [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+
+## 4단계: 동시성 확장하기
+- [ ] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.

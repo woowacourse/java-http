@@ -1,8 +1,8 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import org.apache.Servlet;
 import org.apache.catalina.Container;
+import org.apache.catalina.servlet.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +10,8 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start(Servlet servlet) {
-        final var container = new Container(servlet);
+    public void start(RequestMapping requestMapping) {
+        final var container = new Container(requestMapping);
         container.start();
 
         try {

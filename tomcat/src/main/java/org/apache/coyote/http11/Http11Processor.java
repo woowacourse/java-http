@@ -7,13 +7,13 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.servlet.RequestMapping;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.Servlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestHeaders;
 import org.apache.coyote.request.StartLine;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +23,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Servlet servlet;
+    private final RequestMapping requestMapping;
     private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final Servlet servlet, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping,
+                           final SessionManager sessionManager) {
         this.connection = connection;
-        this.servlet = servlet;
+        this.requestMapping = requestMapping;
         this.sessionManager = sessionManager;
     }
 
@@ -46,8 +47,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = toRequest(reader);
             final var response = new HttpResponse();
+            final var controller = requestMapping.getController(request);
             sessionManager.updateSessionAndCookie(request, response);
-            servlet.service(request, response);
+            controller.service(request, response);
 
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();

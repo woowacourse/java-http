@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.coyote.http11.request.HttpRequest;
 
 enum ContentType {
+
     CSS("text/css"), HTML("text/html"), JSON("application/json");
 
     private static final String DEFAULT_CHARSET = "utf-8";

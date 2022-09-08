@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class RequestLine {
+class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
 
@@ -13,7 +13,7 @@ public class RequestLine {
     private final String requestUri;
     private final String version;
 
-    public RequestLine(final HttpMessage message) {
+    RequestLine(final HttpMessage message) {
         final List<String> values = parseRequestLine(message.getRequestLine());
         this.method = values.get(0);
         this.requestUri = values.get(1);
@@ -26,15 +26,15 @@ public class RequestLine {
             .collect(toList());
     }
 
-    public boolean isGet() {
+    boolean isGet() {
         return method.equals("GET");
     }
 
-    public String getVersion() {
+    String getVersion() {
         return version;
     }
 
-    public String getUri() {
+    String getUri() {
         return requestUri;
     }
 }

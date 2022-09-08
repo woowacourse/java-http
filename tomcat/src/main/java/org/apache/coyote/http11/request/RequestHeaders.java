@@ -7,14 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestHeaders {
+class RequestHeaders {
 
     private static final String LINE_BREAK = "\r\n";
     private static final String HEADER_DELIMITER = ":";
 
     private final Map<String, String> headers = new HashMap<>();
 
-    public RequestHeaders(final HttpMessage message) {
+    RequestHeaders(final HttpMessage message) {
         parseHeaders(message.getHeaders());
     }
 

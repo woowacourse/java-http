@@ -23,7 +23,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.handlerMapping = new HandlerMapping();
+        this.handlerMapping = HandlerMapping.getInstance();
     }
 
     @Override

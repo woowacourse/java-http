@@ -18,7 +18,7 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {

@@ -1,22 +1,21 @@
 package org.apache.coyote.http11;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.request.HttpMethod.GET;
+import static org.apache.coyote.request.HttpMethod.POST;
 import static org.apache.coyote.response.StatusCode.OK;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.request.HttpRequestHeader;
+import org.apache.coyote.handler.RegisterHandler;
+import org.apache.coyote.request.HttpMethod;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
@@ -48,15 +47,22 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(bufferedReader);
-            String requestUrl = httpRequestHeader.getRequestUrlWithoutQuery();
+            final HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            final HttpMethod requestMethod = httpRequest.getRequestMethod();
+            String requestUrl = httpRequest.getRequestUrlWithoutQuery();
+            HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), requestUrl);
 
-            handleLogin(httpRequestHeader, requestUrl);
+            if (requestUrl.contains("login") && requestMethod.equals(GET)) {
+                httpResponse = LoginHandler.loginWithGet(httpRequest);
+            }
+            if (requestUrl.contains("login") && requestMethod.equals(POST)) {
+                httpResponse = LoginHandler.login(httpRequest);
+            }
+            if (requestUrl.contains("register") && requestMethod.equals(POST)) {
+                httpResponse = RegisterHandler.register(httpRequest.getRequestBody());
+            }
 
-            String responseBody = makeResponseBody(requestUrl);
-            final HttpResponse httpResponse = new HttpResponse(OK, ContentType.from(requestUrl), responseBody);
             final String response = httpResponse.getResponse();
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -64,43 +70,40 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void handleLogin(final HttpRequestHeader httpRequestHeader, final String requestUrl) {
-        if (requestUrl.contains("login")) {
-            final String fullRequestUrl = httpRequestHeader.getRequestUrl();
-            LoginHandler.login(fullRequestUrl);
-        }
-    }
-
-    private String makeResponseBody(final String requestUrl) throws IOException {
-        return new String(readAllFile(requestUrl), UTF_8);
-    }
-
-    private static byte[] readAllFile(final String requestUrl) throws IOException {
-        final URL resourceUrl = ClassLoader.getSystemResource("static" + requestUrl);
-        final Path path = new File(resourceUrl.getPath()).toPath();
-        return Files.readAllBytes(path);
-    }
-
-    private HttpRequestHeader makeHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final String httpStartLine = bufferedReader.readLine();
-        final Map<String, String> httpHeaderLines = makeHttpHeaderLines(bufferedReader);
+        final Map<String, String> httpHeaderLines = readHttpHeaderLines(bufferedReader);
+        final String requestBody = readRequestBody(bufferedReader, httpHeaderLines);
 
-        return new HttpRequestHeader(httpStartLine, httpHeaderLines);
+        return HttpRequest.of(httpStartLine, httpHeaderLines, requestBody);
     }
 
-    private static Map<String, String> makeHttpHeaderLines(final BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> readHttpHeaderLines(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> httpHeaderLines = new HashMap<>();
-
         String line;
+
         while ((line = bufferedReader.readLine()) != null) {
             if (line.isBlank()) {
                 break;
             }
-
             final String[] header = line.split(HEADER_DELIMITER);
-            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX]);
+            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX].trim());
         }
 
         return httpHeaderLines;
+    }
+
+    private static String readRequestBody(BufferedReader bufferedReader, Map<String, String> httpHeaderLines)
+            throws IOException {
+        final String contentLengthHeader = httpHeaderLines.get("Content-Length");
+        if (contentLengthHeader == null) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(contentLengthHeader.trim());
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 }

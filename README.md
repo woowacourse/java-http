@@ -51,4 +51,99 @@ css 파일과 같은 것을 응답으로 반환해줄 때에는 'text/css' 와 �
 또한 클라이언트 입장에서는 HTTP 요청 헤더의 `Accept` 를 통해서 응답으로 받길 원하는 컨텐츠 형식을 지정해줄 수 있는데,
 이 때 우선순위에 따라서 여러개를 명시해줄 수 있게 된다.
 
-[RFC 문서 Accept](https://www.rfc-editor.org/rfc/rfc2616#page-100)
+참고 : [RFC 문서 Accept](https://www.rfc-editor.org/rfc/rfc2616#page-100)
+
+---
+
+## 레벨2 구현 내용 정리
+
+- [x] HTTP Status Code 302
+  - [x] `http://localhost:8080/login` 요청시 login.html 파일을 응답한다.
+  - [x] `http://locahost:8080/login` 페이지에서 입력한 아이디와 비밀번호는 query string으로 전달된다.
+  - [x] `http://localhost:8080/login` 페이지에서 로그인 버튼 클릭시 302 상태코드를 응답한다.
+  - [x] 로그인 성공시에는 index.html로 리다이렉트한다.
+  - [x] 로그인 실패시에는 401.html로 리다이렉트한다.
+  
+
+- [x] POST 방식으로 회원가입
+  - [x] 기존 로그인 POST 방식으로 변경
+    - [x] `login.html` form 태그 변경
+    - [x] 기존 로그인 방식을 `POST` 로 변경
+    - [x] `HttpResopnse` 에서 responseBody 생성하도록 변경
+    - [x] `StartLine` 및 `HttpMethod` 도출
+    - [x] 기존 쿼리파라미터를 받던 `LoginHandler` 에서 바디를 읽도록 수정
+    - [x] `ContentLength` 헤더를 이용해 POST 요청의 바디를 읽도록 구현
+  - [x] 회원가입 처리
+    - [x] `http://localhost:8080/register` GET 요청시 register.html 을 응답한다.
+    - [x] 회원가입 요청(POST) 받기
+      - [x] `http://localhost:8008/register` POST 요청시 회원가입 처리를 한다.
+    - [x] 회원가입 요청 처리
+      - [x] 회원가입 성공시 index.html 로 리다이렉트한다.
+      - [x] 회원가입 실패시 ExistUserException 예외를 던진다.
+
+
+- [x] Cookie에 JSESSIONID 값 저장하기
+  - [x] 로그인 성공시에 `JSESSIONID` 쿠키를 생성해서 응답(Set-Cookie)에 함께 보낸다.
+  - [x] 만약 HTTP 요청 헤더의 Cookie에 `JSESSIONID` 가 존재하면 Set-Cookie 응답을 보내지 않는다.
+
+
+- [x] Session 구현하기
+  - [x] 쿠키에서 전달 받은 JSESSIONID 의 값으로 로그인 여부를 체크할 수 있다.
+  - [x] Session을 통해 유저 정보를 저장한다.
+  - [x] 세션을 통해 로그인 여부를 판별하고 이미 로그인 된 사용자는 index.html 로 리다이렉트한다.
+ 
+## 새롭게 알게 된 내용 (레벨2)
+
+### Content-Length 헤더 필드
+
+큰 의미가 없다고 생각했던 `Content-Length` 헤더 필드에 대해서 직접 POST 요청의 바디 부분을 읽으면서 그 사용용도를 알게 되었다.
+`Content-Length` 는 수신자에게 보내지는 바이트 단위를 가지는 요청 바디(Request Body)의 크기를 나타낸다.
+수신자쪽에서는 해당 바이트의 크기만큼 읽어들여 처리할 수 있다.
+
+```java
+final int contentLength = Integer.parseInt(contentLengthHeader.trim());
+final char[] buffer = new char[contentLength];
+bufferedReader.read(buffer, 0, contentLength);
+
+return new String(buffer);
+```
+
+참고 : [Content-Length - HTTP](https://developer.mozilla.org/ko/docs/Web/HTTP/Headers/Content-Length)
+
+### InMemoryDB rollback
+
+회원가입을 구현하고, 이를 테스트하기 위해 단위 테스트(`RegisterHandlerTest`) 를 작성하다보니 각 단위테스트가 격리되지 못하는 문제가 발생하였다.
+앞선 단위 테스트에서 저장한 `User` 가 다른 단위테스트에도 영향을 끼치는 것이다.
+
+<img width="1622" alt="KakaoTalk_Photo_2022-09-06-06-51-11" src="https://user-images.githubusercontent.com/57028386/188536783-314637b5-2b9d-460f-9e71-7e45fafbf42a.png">
+
+따라서 이를 격리해줄 필요성이 있게 되었고, 다음과 같은 메소드를 `InMemoryUserRepositroy` 에 만들고,
+`BeforeEach` 를 통해서 각 단위 테스트 진행 전에 호출하도록 구현해주었다.
+하지만 아직 테스트를 위해서 Production 코드에 `rollback()` 과 같은 메소드를 만들어 두는 것이 최선인지에 대해서는 고민이든다.
+조금 더 나은 방법을 고민해보아야겠다.
+
+```java
+public static void rollback() {
+    database.clear();
+    final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+    database.put(user.getAccount(), user);
+}
+```
+
+```java
+class RegisterHandlerTest {
+
+  @BeforeEach
+  void setUp() {
+    InMemoryUserRepository.rollback();
+  }
+    
+    ...
+}
+```
+
+### 쿠키와 세션
+
+쿠키와 세션을 통한 인증&인가 과정을 이론으로만 알고 있다가 실제로 구현해보니 생각보니 어려웠다.
+머릿속에 있는 내용이 코드로 잘 안옮겨지는 느낌이었다.
+또한 세션 저장소를 통해서 별도로 세션에 대한 관리가 필요하다는 점이 실제로 구현을 진행해보니 JWT에 비해서 불편하다는 생각도 들었다.

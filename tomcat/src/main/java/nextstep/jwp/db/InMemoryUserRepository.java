@@ -24,4 +24,10 @@ public class InMemoryUserRepository {
     }
 
     private InMemoryUserRepository() {}
+
+    public static void rollback() {
+        database.clear();
+        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        database.put(user.getAccount(), user);
+    }
 }

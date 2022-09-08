@@ -5,8 +5,7 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("text/html"),
     CSS("text/css"),
-    JS("application/javascript"),
-    DEFAULT("text/html");
+    JS("application/javascript");
 
     private static final String EXTENSION_DELIMITER = "\\.";
     private static final int EXTENSION_INDEX = 1;
@@ -21,14 +20,14 @@ public enum ContentType {
     public static ContentType from(final String requestUrl) {
         String[] splitRequestUrl = requestUrl.split(EXTENSION_DELIMITER);
         if (splitRequestUrl.length == NO_EXTENSION_SIZE) {
-            return DEFAULT;
+            return HTML;
         }
 
         String extension = splitRequestUrl[EXTENSION_INDEX];
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> isSameExtension(contentType, extension))
                 .findAny()
-                .orElse(DEFAULT);
+                .orElse(HTML);
     }
 
     private static boolean isSameExtension(ContentType contentType, String extension) {

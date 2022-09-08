@@ -1,36 +1,79 @@
 package org.apache.coyote.handler;
 
+import static org.apache.coyote.response.ContentType.HTML;
+import static org.apache.coyote.response.StatusCode.FOUND;
+import static org.apache.coyote.response.StatusCode.OK;
+
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.QueryParams;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.Location;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginHandler {
-
-    private static final String QUERY_START_CHARACTER = "?";
-    private static final int INVALID_INDEX = -1;
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     private LoginHandler() {
     }
 
-    public static void login(final String requestUrl) {
-        final int index = requestUrl.indexOf(QUERY_START_CHARACTER);
-
-        if (index == INVALID_INDEX) {
-            return;
+    public static HttpResponse loginWithGet(HttpRequest httpRequest) {
+        final Optional<Cookie> optionalCookie = httpRequest.getJSessionCookie();
+        if (optionalCookie.isPresent()) {
+            final Cookie cookie = optionalCookie.get();
+            handleSession(cookie);
+            return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
         }
 
-        String queryString = requestUrl.substring(index + 1);
-        final QueryParams queryParams = QueryParams.from(queryString);
+        return HttpResponse.of(OK, HTML, "/login.html");
+    }
+
+    public static HttpResponse login(final HttpRequest request) {
+        final QueryParams queryParams = QueryParams.from(request.getRequestBody());
         final String account = queryParams.getValueFromKey("account");
+        final String password = queryParams.getValueFromKey("password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NoSuchUserException::new);
-        final String userInformation = user.toString();
-        log.info(userInformation);
+
+        if (user.checkPassword(password)) {
+            log.info("User : {}", user);
+            final Session session = saveUserInSession(user);
+            return makeLoginSuccessResponse(request, session);
+        }
+
+        return HttpResponse.of(FOUND, HTML, Location.from("/401.html"));
+    }
+
+    private static void handleSession(Cookie cookie) {
+        final Session session = SessionManager.findSession(cookie.getValue());
+        final User user = (User) session.getAttribute("user");
+        log.info("User : {}", user);
+    }
+
+    private static Session saveUserInSession(User user) {
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+
+        return session;
+    }
+
+    private static HttpResponse makeLoginSuccessResponse(HttpRequest request, Session session) {
+        final Optional<Cookie> cookie = request.getJSessionCookie();
+        if (cookie.isEmpty()) {
+            final Cookie jsessionid = Cookie.ofJSessionId(session.getId());
+            return HttpResponse.of(FOUND, HTML, Location.from("/index.html"), jsessionid);
+        }
+
+        return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
     }
 }

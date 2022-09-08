@@ -40,7 +40,8 @@ public class LoginHandler extends AbstractHandler {
     @Override
     protected String postMethodResponse() {
         if (!checkUser(httpRequest.getRequestBody())) {
-            throw new IllegalArgumentException("유저 정보가 올바르지 않습니다.");
+            return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
+                    .getResponse();
         }
         HttpResponse httpResponse = createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()));
         if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
@@ -50,12 +51,6 @@ public class LoginHandler extends AbstractHandler {
             httpResponse.addCookie(cookie);
         }
         return httpResponse.getResponse();
-    }
-
-    @Override
-    protected String otherMethodResponse() {
-        return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
-                .getResponse();
     }
 
     private boolean checkUser(final RequestBody params) {

@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.presenstation;
 
 import org.apache.coyote.http11.ResponseEntity;
-import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.http.HttpRequest;
 
 public interface RequestHandler {
 

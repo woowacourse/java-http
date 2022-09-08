@@ -2,9 +2,9 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.ResponseEntity;
-import org.apache.coyote.http11.message.HttpHeaders;
-import org.apache.coyote.http11.message.HttpRequest;
-import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.util.FileUtil;
 
 public class FileHandler {

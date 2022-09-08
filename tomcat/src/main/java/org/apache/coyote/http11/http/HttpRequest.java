@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.http;
 
 import java.io.IOException;
 import java.util.Arrays;

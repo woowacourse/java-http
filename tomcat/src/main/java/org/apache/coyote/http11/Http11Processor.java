@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.FrontRequestHandler;
-import org.apache.coyote.http11.message.HttpCookie;
-import org.apache.coyote.http11.message.HttpHeaders;
-import org.apache.coyote.http11.message.HttpRequest;
-import org.apache.coyote.http11.message.HttpResponse;
-import org.apache.coyote.http11.message.RequestBody;
+import org.apache.coyote.http11.http.HttpCookie;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

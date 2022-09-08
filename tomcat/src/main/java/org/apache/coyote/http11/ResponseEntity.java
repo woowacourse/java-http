@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.message.HttpHeaders;
-import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpStatus;
 
 public class ResponseEntity {
 

@@ -12,6 +12,6 @@ public class HttpCookie {
     }
 
     public String getCookie() {
-        return COOKIE_NAME + "=" + value.toString();
+        return COOKIE_NAME + "=" + value;
     }
 }

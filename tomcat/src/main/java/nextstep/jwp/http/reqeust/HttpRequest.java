@@ -25,12 +25,16 @@ public class HttpRequest {
         return ContentType.findContentType(url);
     }
 
-    public String getPath() {
-        return httpRequestLine.getPath();
+    public boolean hasPostMethod() {
+        return httpRequestLine.hasPostMethod();
     }
 
-    public String getMethod() {
-        return httpRequestLine.getMethod();
+    public boolean hasGetMethod() {
+        return httpRequestLine.hasGetMethod();
+    }
+
+    public String getPath() {
+        return httpRequestLine.getPath();
     }
 
     public Map<String, String> getRequestBodies() {

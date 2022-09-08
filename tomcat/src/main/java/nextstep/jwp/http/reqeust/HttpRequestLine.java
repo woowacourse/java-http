@@ -48,6 +48,14 @@ public class HttpRequestLine {
         }
     }
 
+    public boolean hasPostMethod() {
+        return method.equals("POST");
+    }
+
+    public boolean hasGetMethod() {
+        return method.equals("GET");
+    }
+
     public String getPath() {
         return path;
     }

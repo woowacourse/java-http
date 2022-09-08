@@ -16,11 +16,10 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
-        String method = request.getMethod();
-        if (method.equals("POST")) {
+        if (request.hasPostMethod()) {
             doPost(request, response);
         }
-        if (method.equals("GET")) {
+        if (request.hasGetMethod()) {
             doGet(request, response);
         }
     }

@@ -22,7 +22,6 @@ public enum ContentType {
 	}
 
 	public static ContentType from(String url) {
-		System.out.println(url);
 		return Arrays.stream(values())
 			.filter(it -> url.endsWith(it.type))
 			.findFirst()

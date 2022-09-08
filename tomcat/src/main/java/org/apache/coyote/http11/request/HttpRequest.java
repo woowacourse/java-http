@@ -52,7 +52,6 @@ public class HttpRequest {
 	public String getCookie() {
 		String cookie = requestHeaders.findCookie();
 		final int splitPoint = cookie.lastIndexOf("=");
-		System.out.println("쿠키 찍어보기 " + cookie.substring(splitPoint+1));
 		return cookie.substring(splitPoint+1);
 	}
 

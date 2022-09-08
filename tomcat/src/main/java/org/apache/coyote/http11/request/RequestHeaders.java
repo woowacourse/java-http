@@ -65,10 +65,6 @@ public class RequestHeaders {
 	}
 
 	public boolean hasCookie() {
-		for (Map.Entry<String, String> i : headers.entrySet()) {
-			System.out.println(i.getKey() + "  " + i.getValue());
-		}
-
 		return headers.containsKey(COOKIE.getValue());
 	}
 

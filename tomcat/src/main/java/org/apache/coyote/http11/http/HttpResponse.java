@@ -2,6 +2,9 @@ package org.apache.coyote.http11.http;
 
 public class HttpResponse {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private final String value;
 
     public HttpResponse(String value) {
@@ -22,7 +25,7 @@ public class HttpResponse {
         private String body;
 
         public Builder contentType(ContentType contentType) {
-            headers.addHeader("Content-Type", contentType.getMimeType() + ";charset=utf-8");
+            headers.addHeader(CONTENT_TYPE, contentType.getMimeType() + CHARSET_UTF_8);
             return this;
         }
 
@@ -36,7 +39,7 @@ public class HttpResponse {
                 return this;
             }
             this.body = body;
-            headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+            headers.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
             return this;
         }
 

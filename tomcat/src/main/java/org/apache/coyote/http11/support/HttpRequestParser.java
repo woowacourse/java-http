@@ -13,6 +13,13 @@ import org.apache.coyote.http11.http.RequestBody;
 
 public class HttpRequestParser {
 
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
+
+    private static final String HTTP_REQUEST_LINE_DELIMITER = ":";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_VALUE_DELIMITER = "=";
+
     private HttpRequestParser() {
     }
 
@@ -33,7 +40,7 @@ public class HttpRequestParser {
             if (line.isEmpty()) {
                 break;
             }
-            String[] split = line.split(":");
+            String[] split = line.split(HTTP_REQUEST_LINE_DELIMITER);
             headers.put(split[0], split[1].trim());
         }
         return new HttpHeaders(headers);
@@ -41,8 +48,8 @@ public class HttpRequestParser {
 
     private static RequestBody extractBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
         RequestBody requestBody = new RequestBody();
-        if (httpHeaders.containsKey("Content-Length")) {
-            requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get("Content-Length")), bufferedReader);
+        if (httpHeaders.containsKey(CONTENT_LENGTH)) {
+            requestBody = extractRequestBody(Integer.parseInt(httpHeaders.get(CONTENT_LENGTH)), bufferedReader);
         }
         return requestBody;
     }
@@ -56,12 +63,11 @@ public class HttpRequestParser {
 
     private static HttpCookie extractCookie(HttpHeaders httpHeaders) {
         HttpCookie httpCookie = new HttpCookie();
-        if (httpHeaders.containsKey("Cookie")) {
-            String cookieValue = httpHeaders.get("Cookie");
-            Map<String, String> cookieValueMap = Arrays.stream(cookieValue.split("; "))
-                    .map(it -> it.split("="))
+        if (httpHeaders.containsKey(COOKIE)) {
+            String cookieValue = httpHeaders.get(COOKIE);
+            Map<String, String> cookieValueMap = Arrays.stream(cookieValue.split(COOKIE_DELIMITER))
+                    .map(it -> it.split(COOKIE_VALUE_DELIMITER))
                     .collect(Collectors.toMap(it -> it[0], it -> it[1]));
-
             httpCookie.putAll(cookieValueMap);
         }
         return httpCookie;

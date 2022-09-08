@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 public class RequestBody {
 
+    private static final String FORM_TYPE_DELIMITER = "&";
+    private static final String FORM_VALUE_DELIMITER = "=";
+
     private final Map<String, String> values;
 
     public RequestBody() {
@@ -21,8 +24,8 @@ public class RequestBody {
         if (request.isEmpty()) {
             return new RequestBody(Map.of());
         }
-        Map<String, String> toMap = Arrays.stream(request.split("&"))
-                .map(it -> it.split("="))
+        Map<String, String> toMap = Arrays.stream(request.split(FORM_TYPE_DELIMITER))
+                .map(it -> it.split(FORM_VALUE_DELIMITER))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));
         return new RequestBody(toMap);
     }

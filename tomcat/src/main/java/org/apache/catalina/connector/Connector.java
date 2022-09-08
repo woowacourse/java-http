@@ -16,16 +16,18 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor executor;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
-        final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -68,7 +70,7 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executor.execute(processor);
     }
 
     public void stop() {

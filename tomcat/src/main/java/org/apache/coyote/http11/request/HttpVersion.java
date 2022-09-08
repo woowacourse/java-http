@@ -19,4 +19,8 @@ public enum HttpVersion {
                 .findFirst()
                 .orElseThrow(() -> new HttpVersionNotSupportException(value));
     }
+
+    public String getValue() {
+        return value;
+    }
 }

@@ -23,4 +23,16 @@ public class HttpRequestLine {
                 HttpPath.from(values[PATH_INDEX]),
                 HttpVersion.from(values[PROTOCOL_VERSION_INDEX]));
     }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public HttpPath getPath() {
+        return path;
+    }
+
+    public HttpVersion getVersion() {
+        return version;
+    }
 }

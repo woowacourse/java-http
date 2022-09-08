@@ -15,20 +15,19 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpPath;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int URL_INDEX = 1;
-    private static final String DEFAULT_URL = "/";
-    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-
     private static final String HEADER_DELIMITER = ":";
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -51,12 +50,12 @@ public class Http11Processor implements Runnable, Processor {
             final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
             final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
 
-            printLoginUser();
+            printLoginUser(httpRequest);
 
-            final String responseBody = getResponseBody(request.get("path"));
-            final String response = createResponse(request.get("contentType"), responseBody);
+            final String responseBody = getResponseBody(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.of(httpRequest, responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getResponseAsBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -75,35 +74,26 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private void printLoginUser(final String path, final String allOfQueryParam) {
-        if (path.contains("login")) {
-            final User user = InMemoryUserRepository.findByAccount(params.get("account"))
+    private void printLoginUser(final HttpRequest httpRequest) {
+        if (httpRequest.isLoginRequest()) {
+            final User user = InMemoryUserRepository.findByAccount(httpRequest.getParam("account"))
                     .orElseThrow(UserNotFoundException::new);
-            if (user.checkPassword(params.get("password"))) {
+            if (user.checkPassword(httpRequest.getParam("password"))) {
                 log.info(String.format("user : %s", user));
             }
         }
     }
 
-    private String getResponseBody(final String path) throws IOException {
-        if (path.equals(DEFAULT_URL)) {
+    private String getResponseBody(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isDefaultRequest()) {
             return DEFAULT_RESPONSE_BODY;
         }
-        return readFile(path);
+        return readFile(httpRequest.getHttpPath());
     }
 
-    private String readFile(final String path) throws IOException {
-        final String filePath = String.format("static%s", path);
+    private String readFile(final HttpPath httpPath) throws IOException {
+        final String filePath = String.format("static%s", httpPath.getPath());
         final URL resource = this.getClass().getClassLoader().getResource(filePath);
         return Files.readString(Path.of(Objects.requireNonNull(resource).getPath()));
-    }
-
-    private String createResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

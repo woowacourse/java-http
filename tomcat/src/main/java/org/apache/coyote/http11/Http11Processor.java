@@ -107,15 +107,14 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         String url = httpRequest.getUrl();
         if (url.equals(LANDING_PAGE_URL)) {
-            return toOkResponse(httpRequest, ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
+            return toOkResponse(httpRequest, DEFAULT_RESPONSE_BODY);
         }
-        ContentType contentType = HttpRequestParser.parseContentType(url);
         String resourceUrl = addExtension(url);
         if (resourceUrl.equals(LOGIN_PAGE_PATH) && isLoggedIn(httpRequest)) {
             return toFoundResponse(httpRequest, LOGIN_REDIRECT_PATH);
         }
         String responseBody = ResourcesUtil.readResource(STATIC_PATH + resourceUrl);
-        return toOkResponse(httpRequest, contentType, responseBody);
+        return toOkResponse(httpRequest, responseBody);
     }
 
     private String addExtension(String url) {
@@ -165,10 +164,10 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", loginUser);
     }
 
-    private HttpResponse toOkResponse(final HttpRequest httpRequest, final ContentType contentType,
-                                      final String responseBody) {
+    private HttpResponse toOkResponse(final HttpRequest httpRequest, final String responseBody) {
         Map<String, String> responseHeaders = new HashMap<>();
         handleSession(httpRequest, responseHeaders);
+        ContentType contentType = HttpRequestParser.parseContentType(httpRequest.getUrl());
         responseHeaders.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         if (!responseBody.isBlank()) {
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));

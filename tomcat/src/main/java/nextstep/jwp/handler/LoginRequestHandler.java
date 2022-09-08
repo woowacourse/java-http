@@ -10,15 +10,13 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.Session;
 import nextstep.jwp.http.session.SessionManager;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.ResourcesUtil;
 
 public final class LoginRequestHandler extends AbstractHttpRequestHandler {
 
-    private final HttpVersion httpVersion;
     private final LoginService loginService = new LoginService();
 
     public LoginRequestHandler(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        super(httpVersion);
     }
 
     @Override
@@ -26,9 +24,9 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
         if (!httpRequest.isEmptySessionId()) {
             return SessionManager.findSession(httpRequest.getJsessionId())
                     .map(session -> HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html")))
-                    .orElse(parseRequestFile(httpRequest));
+                    .orElse(handleStaticResourceRequest(httpRequest));
         }
-        return parseRequestFile(httpRequest);
+        return handleStaticResourceRequest(httpRequest);
     }
 
     @Override
@@ -42,11 +40,6 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
             return loginUserRedirect(user, httpCookie);
         }
         return HttpResponse.found(httpVersion, httpCookie, new Location("/401.html"));
-    }
-
-    private HttpResponse parseRequestFile(final HttpRequest httpRequest) {
-        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
     }
 
     private HttpResponse loginUserRedirect(final User user, final HttpCookie httpCookie) {

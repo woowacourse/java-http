@@ -9,20 +9,16 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestBody;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.ResourcesUtil;
 
 public final class RegisterRequestHandler extends AbstractHttpRequestHandler {
 
-    private final HttpVersion httpVersion;
-
     public RegisterRequestHandler(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        super(httpVersion);
     }
 
     @Override
     protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
-        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
+        return handleStaticResourceRequest(httpRequest);
     }
 
     @Override

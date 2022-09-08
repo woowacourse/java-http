@@ -7,10 +7,8 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public class RootRequestHandler extends AbstractHttpRequestHandler {
 
-    private final HttpVersion httpVersion;
-
     public RootRequestHandler(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
+        super(httpVersion);
     }
 
     @Override

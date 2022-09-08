@@ -17,10 +17,11 @@ public class CustomServlet implements Servlet {
     private final ExceptionHandler exceptionHandler;
 
     public CustomServlet() {
+        ExceptionListener exceptionHandler = new ExceptionListener();
         final var userService = new UserService(new InMemoryUserRepository());
-        this.requestMapping = RequestMapping.of(new HomeController(),
-                new LoginController(userService), new RegisterController(userService));
-        this.exceptionHandler = new ExceptionListener();
+        this.requestMapping = RequestMapping.of(new HomeController(exceptionHandler),
+                new LoginController(userService, exceptionHandler), new RegisterController(userService, exceptionHandler));
+        this.exceptionHandler = exceptionHandler;
     }
 
     public void service(HttpRequest request, HttpResponse response) {

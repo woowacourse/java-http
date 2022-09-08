@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.HeaderField.SET_COOKIE;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
-import nextstep.jwp.LoginFailureException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
 import org.apache.coyote.http11.HttpCookie;
@@ -37,18 +36,14 @@ public class LoginController extends AbstractController {
         final String account = request.getBodyValue("account");
         final String password = request.getBodyValue("password");
 
-        try {
-            final UUID uuid = UUID.randomUUID();
-            final User user = loginService.login(account, password);
-            addSession(uuid, user);
+        final UUID uuid = UUID.randomUUID();
+        final User user = loginService.login(account, password);
+        addSession(uuid, user);
 
-            final ResponseHeaders headers = ResponseHeaders.create()
-                    .addHeader(SET_COOKIE, "JSESSIONID=" + uuid);
-            return HttpResponseBuilder.found("/index", headers);
+        final ResponseHeaders headers = ResponseHeaders.create()
+                .addHeader(SET_COOKIE, "JSESSIONID=" + uuid);
+        return HttpResponseBuilder.found("/index", headers);
 
-        } catch (LoginFailureException exception) {
-            return ControllerAdvice.handleUnauthorized();
-        }
     }
 
     private void addSession(UUID uuid, User user) {

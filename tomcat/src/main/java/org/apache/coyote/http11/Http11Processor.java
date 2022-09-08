@@ -28,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void run() {
         try {
+            log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
             process(connection);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

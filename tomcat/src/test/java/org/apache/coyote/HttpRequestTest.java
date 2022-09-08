@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -31,7 +33,7 @@ class HttpRequestTest {
                 new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
 
         // when
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
         // then
         assertAll(
@@ -55,7 +57,7 @@ class HttpRequestTest {
                 "");
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
         // when
         ContentType contentType = httpRequest.getAcceptContentType();
@@ -74,12 +76,33 @@ class HttpRequestTest {
                 "");
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
         // when
         ContentType contentType = httpRequest.getAcceptContentType();
 
         // then
         assertThat(contentType).isEqualTo(ContentType.TEXT_CSS);
+    }
+
+    @Test
+    void 세션을_반환한다() throws IOException {
+        // given
+        String request = String.join("\r\n",
+                "GET /index.css HTTP/1.1 ",
+                "Cookie: JSESSIONID=sessionId ",
+                "");
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
+        HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
+        Session session = new Session("sessionId");
+        SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
+
+        // when
+        Session findSession = httpRequest.getSession();
+
+        // then
+        assertThat(findSession).isEqualTo(session);
     }
 }

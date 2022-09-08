@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.support.ResourcesUtil;
 
 public class HttpRequest {
+
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private final HttpMethod httpMethod;
     private final String url;
@@ -24,7 +28,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
         HttpRequestStartLine startLine = HttpRequestStartLine.parse(bufferedReader.readLine());
         URI uri = startLine.getUri();
         QueryParams queryParams = QueryParams.parse(uri.getQuery());
@@ -60,6 +64,16 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return HttpCookie.parseCookie(headers.getOrDefault("Cookie", ""));
+    }
+
+    public Session getSession() {
+        HttpCookie cookie = getCookie();
+        String sessionId = cookie.get(SESSION_COOKIE_NAME);
+        SessionManager sessionManager = new SessionManager();
+        if (sessionId == null) {
+            return null;
+        }
+        return sessionManager.findSession(sessionId);
     }
 
     public HttpMethod getHttpMethod() {

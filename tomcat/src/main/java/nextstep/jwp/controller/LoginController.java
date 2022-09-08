@@ -15,7 +15,7 @@ import nextstep.jwp.util.FileReader;
 
 public class LoginController implements Controller {
 
-    private static SessionManager sessionManager = new SessionManager();
+    private static SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
     public HttpResponse doGet(HttpRequest request) {

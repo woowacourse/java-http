@@ -4,34 +4,25 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.http11.Http11Processor;
-import org.apache.Servlet;
-import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Connector implements Runnable {
+public class Connector {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
-    private final Servlet servlet;
-    private final SessionManager sessionManager = new SessionManager();
     private final ServerSocket serverSocket;
-    private boolean stopped;
 
-    public Connector(Servlet servlet) {
-        this(servlet, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector() {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final Servlet servlet,
-                     final int port,
+    public Connector(final int port,
                      final int acceptCount) {
-        this.servlet = servlet;
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -44,39 +35,11 @@ public class Connector implements Runnable {
         }
     }
 
-    public void start() {
-        var thread = new Thread(this);
-        thread.setDaemon(true);
-        thread.start();
-        stopped = false;
-    }
-
-    @Override
-    public void run() {
-        while (!stopped) {
-            connect();
-        }
-    }
-
-    private void connect() {
-        try {
-            process(serverSocket.accept());
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void process(final Socket connection) {
-        if (connection == null) {
-            return;
-        }
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection, servlet, sessionManager);
-        new Thread(processor).start();
+    public Socket connect() throws IOException {
+        return serverSocket.accept();
     }
 
     public void stop() {
-        stopped = true;
         try {
             serverSocket.close();
         } catch (IOException e) {

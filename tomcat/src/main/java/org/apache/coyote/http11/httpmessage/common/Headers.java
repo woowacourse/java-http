@@ -44,7 +44,7 @@ public class Headers {
     }
 
     public boolean exist(final String headerName) {
-        return headers.containsKey("headerName");
+        return headers.containsKey(headerName);
     }
 
     public String getValue(final String headerName) {

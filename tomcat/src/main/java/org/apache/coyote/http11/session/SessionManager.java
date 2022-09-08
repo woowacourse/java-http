@@ -15,6 +15,10 @@ public class SessionManager {
     }
 
     public static boolean contains(String id) {
-        return SESSIONS.containsKey(id);
+        try {
+            return SESSIONS.containsKey(id);
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 }

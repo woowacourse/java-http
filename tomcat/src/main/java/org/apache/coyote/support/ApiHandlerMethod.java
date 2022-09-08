@@ -56,7 +56,7 @@ public enum ApiHandlerMethod {
             SessionManager.add(session);
 
             response.sendRedirect("/index.html")
-                    .addCooke(session);
+                    .addCooke(HttpCookie.ofJSessionId(session.getId()));
 
             log.info("Redirect: /index.html");
         }

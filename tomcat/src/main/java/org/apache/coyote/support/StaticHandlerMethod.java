@@ -34,16 +34,9 @@ public enum StaticHandlerMethod {
         final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
 
-        // TODO login 폼에서 로그인후 다시 login폼에 왔을시에 JS=JS={id} 현싱
         if (dto.fileName.contains("login") && isAlreadyLogin(request)) {
             alreadyLoginEvent(request, response);
         }
-
-//        final String response = HttpResponseBuilderOld.builder()
-//                .addStatus(HttpStatus.OK)
-//                .add(HttpHeader.CONTENT_TYPE, contentType)
-//                .body(responseBody)
-//                .build();
 
         response.addStatus(HttpStatus.OK)
                 .add(HttpHeader.CONTENT_TYPE, contentType)
@@ -51,13 +44,9 @@ public enum StaticHandlerMethod {
     }
 
     private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {
-//        final String response = HttpResponseBuilderOld.builder()
-//                .addStatus(HttpStatus.FOUND)
-//                .add(HttpHeader.LOCATION, "/index.html")
-//                .addCooke(request.getSession(false))
-//                .build();
+        final Session foundSession = request.getSession(false);
         response.sendRedirect("/index.html")
-                .addCooke(request.getSession(false));
+                .addCooke(HttpCookie.ofJSessionId(foundSession.getId()));
 
         log.info("Redirect: /index.html");
     }

@@ -25,9 +25,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private Socket connection;
 
-    public Http11Processor() {
-    }
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }

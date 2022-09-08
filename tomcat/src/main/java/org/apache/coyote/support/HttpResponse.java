@@ -2,6 +2,7 @@ package org.apache.coyote.support;
 
 import static java.lang.String.format;
 
+import jakarta.servlet.http.Cookie;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import support.StringUtils;
@@ -20,19 +21,11 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addCooke(final Session session) {
-        final String value = HttpHeader.SET_COOKIE.apply(session);
+    public HttpResponse addCooke(final HttpCookie cookie) {
+        final String value = HttpHeader.SET_COOKIE.apply(cookie);
         headers.put(HttpHeader.SET_COOKIE.type(), value);
         return this;
     }
-
-/*
-    public HttpResponse addCooke(final Cookie cookie) {
-        final String value = HttpHeaderNew.SET_COOKIE.apply(cookie);
-        headers.put(HttpHeaderNew.SET_COOKIE.type(), value);
-        return this;
-    }
-*/
 
     public HttpResponse add(HttpHeader header, Object value) {
         headers.put(header.type(), header.apply(value.toString()));

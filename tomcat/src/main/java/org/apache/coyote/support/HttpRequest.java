@@ -86,7 +86,7 @@ public class HttpRequest {
         if (session != null) {
             return session;
         }
-        return new Session(new HttpCookie().value());
+        return new Session(HttpCookie.ofRandomUuid().value());
     }
 
     private Session nullOrGetSession() {

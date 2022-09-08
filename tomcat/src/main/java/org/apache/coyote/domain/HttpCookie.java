@@ -47,6 +47,6 @@ public class HttpCookie implements Header {
 
     @Override
     public String getHeader() {
-        return "Set-Cookie: " + JSESSIONID + " " + this.getJSESSIONID();
+        return "Set-Cookie: " + JSESSIONID + "=" + this.getJSESSIONID() + "\r\n";
     }
 }

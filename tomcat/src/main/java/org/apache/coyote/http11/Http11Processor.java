@@ -53,4 +53,26 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private String getResponseBody(String requestUri) throws IOException {
+        if (requestUri.equals("/")) {
+            requestUri = "/index.html";
+        }
+        if (!requestUri.contains(".")) {
+            requestUri += ".html";
+        }
+        URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+        Path filePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
+        return new String(Files.readAllBytes(filePath));
+    }
+
+    private String getContentType(String requestUri) {
+        if (requestUri.endsWith("css")) {
+            return "text/css";
+        }
+        if (requestUri.endsWith("js")) {
+            return "text/javascript";
+        }
+        return "text/html";
+    }
 }

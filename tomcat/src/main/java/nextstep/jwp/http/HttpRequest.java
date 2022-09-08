@@ -86,6 +86,10 @@ public class HttpRequest {
             .isPresent();
     }
 
+    public String getUri() {
+        return uri;
+    }
+
     public String getPath() {
         return path;
     }

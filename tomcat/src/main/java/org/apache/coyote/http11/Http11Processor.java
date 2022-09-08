@@ -12,6 +12,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.ControllerContainer;
 import org.apache.coyote.handler.ApiHandlerMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
@@ -49,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+/*
     private void route(final HttpRequest request, final HttpResponse response,
                        final BufferedWriter bufferedWriter) {
         ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(request);
@@ -61,4 +64,18 @@ public class Http11Processor implements Runnable, Processor {
         }
         writeAndFlush(bufferedWriter, response.toStringData());
     }
+*/
+
+    private void route(final HttpRequest request, final HttpResponse response,
+                       final BufferedWriter bufferedWriter) {
+
+        final Controller controller = ControllerContainer.findFromUri(request.getUri(), request.getHttpMethod());
+        if (controller != null) {
+            controller.service(request, response);
+        } else {
+            StaticHandlerMethod.INSTANCE.handle(request, response);
+        }
+        writeAndFlush(bufferedWriter, response.toStringData());
+    }
+
 }

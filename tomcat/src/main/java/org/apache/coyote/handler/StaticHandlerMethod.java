@@ -43,6 +43,7 @@ public enum StaticHandlerMethod {
 
         if (dto.fileName.contains("login") && isAlreadyLogin(request)) {
             alreadyLoginEvent(request, response);
+            return;
         }
 
         response.addStatus(HttpStatus.OK)
@@ -51,10 +52,7 @@ public enum StaticHandlerMethod {
     }
 
     private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {
-        final Session foundSession = request.getSession(false);
-        response.sendRedirect("/index.html")
-                .addCooke(HttpCookie.ofJSessionId(foundSession.getId()));
-
+        response.sendRedirect("/index.html");
         log.info("Redirect: /index.html");
     }
 

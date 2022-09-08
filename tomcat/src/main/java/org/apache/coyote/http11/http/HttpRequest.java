@@ -17,6 +17,10 @@ public class HttpRequest {
     private final RequestBody requestBody;
     private final HttpCookie httpCookie;
 
+    public HttpRequest(HttpMethod httpMethod, String requestUri) {
+        this(httpMethod, requestUri, Map.of(), new HttpHeaders(), new RequestBody(), new HttpCookie());
+    }
+
     public HttpRequest(HttpMethod httpMethod, String requestUri, HttpHeaders headers, RequestBody requestBody,
                        HttpCookie httpCookie) {
         this(httpMethod, requestUri, Map.of(), headers, requestBody, httpCookie);

@@ -38,6 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 			 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
 			final HttpRequest request = HttpRequest.from(reader);
+			System.out.println(request.getRequestHeaders().toString());
 			final Handler controller = ControllerMapper.findController(request.getUrl());
 			final HttpResponse response = controller.handle(request);
 

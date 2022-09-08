@@ -8,6 +8,7 @@ public class Parser {
 
 	private static final String START_QUERY_STRING_DELIMITER = "?";
 	private static final String QUERY_CONNECT_DELIMITER = "&";
+	private static final String COOKIE_CONNECT_DELIMITER = "; ";
 	private static final String QUERY_VALUE_DELIMITER = "=";
 	private static final int NAME_INDEX = 0;
 	private static final int VALUE_INDEX = 1;
@@ -40,6 +41,16 @@ public class Parser {
 
 	public static Map<String, String> parseQueryString(String queryString) {
 		String[] values = queryString.split(QUERY_CONNECT_DELIMITER);
+		Map<String, String> params = new HashMap<>();
+		for (String param : values) {
+			final String[] data = param.split(QUERY_VALUE_DELIMITER);
+			params.put(data[NAME_INDEX], data[VALUE_INDEX]);
+		}
+		return params;
+	}
+
+	public static Map<String, String> parseCookieString(String queryString) {
+		String[] values = queryString.split(COOKIE_CONNECT_DELIMITER);
 		Map<String, String> params = new HashMap<>();
 		for (String param : values) {
 			final String[] data = param.split(QUERY_VALUE_DELIMITER);

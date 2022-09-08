@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import static org.apache.coyote.http11.response.HttpResponseFactory.getFoundHttpResponse;
+import static org.apache.coyote.http11.response.HttpResponseFactory.getLoginHttpResponse;
 import static org.apache.coyote.http11.response.HttpResponseFactory.getOKHttpResponse;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class LoginController implements Handler {
 			}
 			final boolean succeed = UserService.login(httpRequest.getParams());
 			if (succeed) {
-				return getFoundHttpResponse(succeedRedirectUrl);
+				return getLoginHttpResponse(succeedRedirectUrl);
 			}
 			return getFoundHttpResponse(failedRedirectUrl);
 		} catch (IOException | URISyntaxException e) {

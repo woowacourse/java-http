@@ -84,7 +84,9 @@ public class HttpResponse {
         if (this == o) return true;
         if (!(o instanceof HttpResponse)) return false;
         final HttpResponse that = (HttpResponse) o;
-        return httpStatus == that.httpStatus && Objects.equals(httpHeaders, that.httpHeaders) && Objects.equals(responseBody, that.responseBody);
+        return httpStatus == that.httpStatus &&
+                Objects.equals(httpHeaders, that.httpHeaders) &&
+                Objects.equals(responseBody, that.responseBody);
     }
 
     @Override

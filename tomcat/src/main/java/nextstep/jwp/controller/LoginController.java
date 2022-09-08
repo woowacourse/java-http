@@ -53,11 +53,6 @@ public class LoginController extends AbstractController {
         if (request.existSession()) {
             return redirectToIndex();
        }
-
         return success(HttpStatus.OK, Page.LOGIN);
-    }
-
-    private HttpResponse redirectToIndex() {
-        return redirect(HttpStatus.FOUND, "/");
     }
 }

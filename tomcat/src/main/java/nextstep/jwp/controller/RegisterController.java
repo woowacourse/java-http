@@ -22,7 +22,7 @@ public class RegisterController extends AbstractController {
             final String email = params.find("email");
 
             if (isUserPresent(account)) {
-                return redirect(HttpStatus.FOUND, "/404.html");
+                return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
             }
 
             final User user = new User(account, password, email);
@@ -30,7 +30,7 @@ public class RegisterController extends AbstractController {
             return redirectToIndex();
 
         } catch (final NoSuchElementException e) {
-            return redirect(HttpStatus.FOUND, "/404.html");
+            return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
         }
     }
 
@@ -43,9 +43,5 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) {
         return HttpResponse.ok()
                 .body(Page.REGISTER.getResource());
-    }
-
-    private HttpResponse redirectToIndex() {
-        return redirect(HttpStatus.FOUND, "/");
     }
 }

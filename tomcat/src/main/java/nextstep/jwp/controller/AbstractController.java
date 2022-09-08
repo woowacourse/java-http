@@ -42,6 +42,10 @@ public abstract class AbstractController implements Controller {
                 .location(uri);
     }
 
+    protected final HttpResponse redirectToIndex() {
+        return redirect(HttpStatus.FOUND, "/");
+    }
+
     protected final HttpResponse fail(final HttpStatus status, final Page page) {
         return HttpResponse.status(status)
                 .body(page.getResource());

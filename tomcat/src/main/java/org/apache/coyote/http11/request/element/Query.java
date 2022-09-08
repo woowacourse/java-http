@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request.element;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,11 @@ public class Query {
     }
 
     public String find(String param) {
-        return params.get(param);
+        String value = params.get(param);
+        if (value == null) {
+            throw new NoSuchElementException("해당 이름의 파라미터가 없습니다.");
+        }
+        return value;
     }
 
     @Override

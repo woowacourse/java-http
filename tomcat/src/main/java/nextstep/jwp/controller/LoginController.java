@@ -4,7 +4,7 @@ import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.OK;
-import static org.apache.coyote.http11.util.FileLoader.loadFile;
+import static util.FileLoader.loadFile;
 
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;

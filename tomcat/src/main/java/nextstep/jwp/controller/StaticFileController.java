@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpStatusCode.OK;
-import static org.apache.coyote.http11.util.FileLoader.loadFile;
+import static util.FileLoader.loadFile;
 
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;

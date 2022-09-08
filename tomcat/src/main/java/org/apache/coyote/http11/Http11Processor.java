@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.HttpStatusCode.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.HttpStatusCode.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.HttpStatusCode.NOT_FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.UNAUTHORIZED;
-import static org.apache.coyote.http11.util.FileLoader.loadFile;
+import static util.FileLoader.loadFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;

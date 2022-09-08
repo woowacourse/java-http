@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.request;
 
 import java.util.UUID;
-import org.apache.coyote.http11.Headers;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Headers;
 
 public class HttpRequest {
 
@@ -17,10 +18,13 @@ public class HttpRequest {
     }
 
     public Session getSession(final boolean create) {
-        if (create) {
-            return new Session(UUID.randomUUID().toString());
+        String jSessionId = headers.getJSessionId();
+        if (jSessionId != null && !create) {
+            return SessionManager.findSession(jSessionId);
         }
-        return headers.getSession();
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.add(session);
+        return session;
     }
 
     public RequestUri getRequestUri() {

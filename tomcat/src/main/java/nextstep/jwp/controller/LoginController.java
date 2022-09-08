@@ -3,13 +3,13 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.request.RequestUri;
-import org.apache.catalina.Session;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,9 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
-        if (httpRequest.getSession(false) != null) {
+        Session session = httpRequest.getSession(false);
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .redirect("/index.html");
             return;
@@ -31,33 +33,25 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        login(httpRequest, httpResponse);
+        RequestParameters requestParameters = httpRequest.getRequestParameters();
+        User user = InMemoryUserRepository.getUserByAccount(requestParameters.get("account"));
+        validatePassword(user, requestParameters.get("password"));
+        login(httpRequest, httpResponse, user);
     }
 
-    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        try {
-            RequestParameters requestParameters = httpRequest.getRequestParameters();
-            User user = getUserByAccount(requestParameters.get("account"));
-            validatePassword(requestParameters, user);
-            Session session = httpRequest.getSession(true);
-            session.addAttribute("user", user);
-            httpResponse.redirect("/index.html")
-                    .setCookie(HttpCookie.ofJSessionId(session.getId()));
-            log.info("user : " + user);
-        } catch (NoSuchUserException e) {
-            log.info(e.getMessage());
-            httpResponse.redirect("/401.html");
-        }
-    }
-
-    private static void validatePassword(final RequestParameters queryParameters, final User user) {
-        if (!user.checkPassword(queryParameters.get("password"))) {
+    private void validatePassword(final User user, final String password) {
+        if (!user.checkPassword(password)) {
             throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
         }
     }
 
-    private User getUserByAccount(final String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
+    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse, final User user) {
+        Session session = httpRequest.getSession(true);
+        session.addAttribute("user", user);
+
+        httpResponse.redirect("/index.html")
+                .setCookie(HttpCookie.ofJSessionId(session.getId()));
+
+        log.info("user : " + user);
     }
 }

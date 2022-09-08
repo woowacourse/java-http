@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import org.apache.catalina.Session;
 
 public class Headers {
 
@@ -41,10 +40,10 @@ public class Headers {
         return new LinkedHashMap<>(values);
     }
 
-    public Session getSession() {
+    public String getJSessionId() {
         if (values.containsKey("Cookie")) {
             HttpCookie cookie = HttpCookie.of(values.get("Cookie"));
-            return cookie.getSession();
+            return cookie.getJSessionId();
         }
         return null;
     }

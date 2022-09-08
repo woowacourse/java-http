@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.catalina.Session;
 
 public class HttpCookie {
 
@@ -33,11 +32,8 @@ public class HttpCookie {
         return this;
     }
 
-    public Session getSession() {
-        if (values.containsKey(JSESSIONID)) {
-            return new Session(values.get(JSESSIONID));
-        }
-        return null;
+    public String getJSessionId() {
+        return values.get(JSESSIONID);
     }
 
     public String joinToString() {

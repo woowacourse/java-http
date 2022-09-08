@@ -304,7 +304,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        var expected = "HTTP/1.1 302 Found \r\n" +
+        var expected = "HTTP/1.1 401 Unauthorized \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
                 "Location: /401.html \r\n" +
@@ -445,6 +445,67 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "Location: /index.html \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @DisplayName("존재하지 않는 자원으로 요청시 404.html을 반환한다.")
+    @Test
+    void notExistResource() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /notExistResource HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        var expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2426 \r\n" +
+                "Location: /404.html \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("사용자가 잘못된 값으로 요청을 하는 경우 400.html 페이지를 응답한다.")
+    @Test
+    void badRequest() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 47 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/400.html");
+        var expected = "HTTP/1.1 400 Bad Request \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2081 \r\n" +
+                "Location: /400.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

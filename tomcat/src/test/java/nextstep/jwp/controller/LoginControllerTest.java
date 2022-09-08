@@ -25,7 +25,7 @@ class LoginControllerTest {
 
     @DisplayName("존재하는 회원의 account 로 로그인시 로그인을 성공하여 로그를 남긴다.")
     @Test
-    void login() {
+    void login() throws Exception {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         final Logger logger = (Logger) LoggerFactory.getLogger(LoginController.class);
@@ -56,7 +56,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 성공 시에 Cookie에 JSESSIONID가 없으면 Cookie 를 담은 응답을 반환한다.")
     @Test
-    void setCookie() {
+    void setCookie() throws Exception {
         // given
         final String requestBody = "account=gugu&password=password";
 
@@ -72,7 +72,7 @@ class LoginControllerTest {
 
     @DisplayName("요청에 쿠키가 포함되어 있을 경우에는 Set-cookie 를 응답하지 않는다.")
     @Test
-    void noSetCookieWhenExist() {
+    void noSetCookieWhenExist() throws Exception {
         // given
         final String requestBody = "account=gugu&password=password";
 
@@ -89,7 +89,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 성공 시 세션 저장소(SessionManager)에 유저 정보를 저장한다.")
     @Test
-    void saveSession() {
+    void saveSession() throws Exception {
         // given
         final String account = "gugu";
         final String requestBody = "account=" + account + "&password=password";

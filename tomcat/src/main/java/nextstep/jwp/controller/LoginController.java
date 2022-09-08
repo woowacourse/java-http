@@ -31,15 +31,12 @@ public class LoginController extends AbstractController {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NoSuchUserException::new);
 
-        if (user.checkPassword(password)) {
-            log.info("User : {}", user);
-            final Session session = saveUserInSession(user);
-            loginWithSuccessResponse(request, response, session);
-            return;
+        if (!user.checkPassword(password)) {
+            throw new NoSuchUserException();
         }
-
-        response.setResponse(FOUND, HTML, Location.from("/401.html"));
-        response.print();
+        log.info("User : {}", user);
+        final Session session = saveUserInSession(user);
+        loginWithSuccessResponse(request, response, session);
     }
 
     @Override

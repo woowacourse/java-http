@@ -30,7 +30,7 @@ class RegisterControllerTest {
 
     @DisplayName("회원가입을 성공하면 로그를 남긴다.")
     @Test
-    void register() {
+    void register() throws Exception {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         final Logger logger = (Logger) LoggerFactory.getLogger(RegisterController.class);

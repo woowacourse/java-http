@@ -14,10 +14,6 @@ public class HttpRequestBody {
         return new HttpRequestBody(requestBody);
     }
 
-    public String getRequestBody() {
-        return requestBody;
-    }
-
     public QueryParams getBodyWithQueryParam() {
         return QueryParams.from(requestBody);
     }

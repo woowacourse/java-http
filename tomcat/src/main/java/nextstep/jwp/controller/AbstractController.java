@@ -9,7 +9,7 @@ import org.apache.coyote.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         final HttpMethod method = request.getRequestMethod();
 
         if (method.equals(POST)) {
@@ -20,10 +20,10 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse httpResponse) {
+    protected void doPost(HttpRequest request, HttpResponse httpResponse) throws Exception {
         throw new UnsupportedOperationException();
     }
-    protected void doGet(HttpRequest request, HttpResponse httpResponse) {
+    protected void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
         throw new UnsupportedOperationException();
     }
 }

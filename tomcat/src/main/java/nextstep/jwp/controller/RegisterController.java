@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final QueryParams queryParams = request.getQueryParams();
         final String account = queryParams.getValueFromKey("account");
         final String password = queryParams.getValueFromKey("password");
@@ -37,7 +37,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String requestPath = request.getRequestPath();
 
         response.setResponse(OK, ContentType.from(requestPath), requestPath);

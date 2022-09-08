@@ -1,8 +1,7 @@
-package org.apache.coyote.request;
+package org.apache.coyote.request.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.request.query.QueryParam;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

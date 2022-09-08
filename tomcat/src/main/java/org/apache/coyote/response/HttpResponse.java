@@ -58,6 +58,10 @@ public class HttpResponse {
         responsePrinter.flushBuffer(response);
     }
 
+    public Cookie getCookie() {
+        return cookie;
+    }
+
     private String makeResponse() {
         StringBuilder builder = new StringBuilder();
         builder.append("HTTP/1.1 ").append(statusCode).append(" \r\n");
@@ -71,10 +75,6 @@ public class HttpResponse {
         builder.append(responseBody);
 
         return builder.toString();
-    }
-
-    public Cookie getCookie() {
-        return cookie;
     }
 
     private void appendLocation(StringBuilder builder) {

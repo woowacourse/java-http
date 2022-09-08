@@ -7,8 +7,8 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.servlet.ChicChocServlet;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.util.HttpMessageSupporter;
-import org.apache.coyote.http11.util.StaticResourceExtensionSupporter;
+import org.apache.coyote.http11.exception.NotFoundResourceException;
+import org.apache.coyote.http11.util.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,33 +34,34 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
             final var http11request = Http11Request.from(bufferedReader);
             final var http11response = new Http11Response();
-//            final var requestLine = http11request.getRequestLine();
 
             // 정적 파일 요청일 경우
-            if (isStaticResourceRequest(http11request.getRequestLine().getRequestURI())) {
-                final var response = HttpMessageSupporter.getHttpMessageWithStaticResource(
-                        http11request.getRequestLine().getRequestURI());
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+            if (http11request.isStaticResource()) {
+                final RequestLine requestLine = http11request.getRequestLine();
+                final String requestURI = requestLine.getRequestURI().getRequestURI();
+                http11response.setResourceURI(requestURI);
+
+                try {
+                    http11response.getBytes();
+                    http11response.setStatusCode(HttpStatus.OK);
+                } catch (NotFoundResourceException e) {
+                    http11response.setStatusCode(HttpStatus.NOT_FOUND);
+                    http11response.setResourceURI("/404.html");
+                } finally {
+                    outputStream.write(http11response.getBytes());
+                    outputStream.flush();
+                }
                 return;
             }
 
             // servlet 요청 처리
             chicChocServlet.doService(http11request, http11response);
-
-            final var response = HttpMessageSupporter.getHttpMessage(http11response);
-            System.out.println(response);
-            outputStream.write(response.getBytes());
+            outputStream.write(http11response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private boolean isStaticResourceRequest(final String requestURI) {
-        return StaticResourceExtensionSupporter.isStaticResource(requestURI);
     }
 }

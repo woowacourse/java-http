@@ -11,6 +11,7 @@ import nextstep.jwp.presentation.controller.RegisterPageRequestHandler;
 import nextstep.jwp.presentation.controller.RegisterRequestHandler;
 import nextstep.jwp.presentation.controller.RequestHandler;
 import nextstep.jwp.presentation.filter.LoginFilter;
+import org.apache.catalina.SessionManager;
 import org.apache.catalina.servlet.exception.NotFoundHandlerException;
 import org.apache.coyote.http11.Http11Request;
 import org.apache.coyote.http11.Http11Response;
@@ -25,10 +26,12 @@ public class ChicChocServlet {
     private final ViewResolver viewResolver;
     private final LoginFilter loginFilter;
     private final List<RequestHandler> requestHandlers = new ArrayList<>();
+    private final SessionManager sessionManager;
 
     public ChicChocServlet() {
         this.loginFilter = new LoginFilter();
         this.viewResolver = new ViewResolver();
+        this.sessionManager = new SessionManager();
     }
 
     public void doService(final Http11Request request, final Http11Response response) {
@@ -43,13 +46,13 @@ public class ChicChocServlet {
             final var handler = getHandler(request);
             viewName = handler.handle(request, response);
         } catch (AuthenticationException e) {
-            response.setStatusCode(HttpStatus.FOUND.getValue());
+            response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(UNAUTHORIZED_PAGE);
         } catch (NotFoundHandlerException e) {
-            response.setStatusCode(HttpStatus.FOUND.getValue());
+            response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(NOT_FOUND_PAGE);
         } catch (DuplicateAccountException e) {
-            response.setStatusCode(HttpStatus.FOUND.getValue());
+            response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(INTERNAL_SERVER_ERROR_PAGE);
         }
         applyViewName(viewName, response);

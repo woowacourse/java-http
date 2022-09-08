@@ -8,6 +8,7 @@ import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.exception.NotFoundResourceException;
 
 public class HttpMessageSupporter {
+    private static final String SPACE = " ";
     private static final String ROOT = "/";
     private static final String BLANK = " ";
     private static final int REQUEST_RESOURCE_INDEX = 1;
@@ -36,31 +37,30 @@ public class HttpMessageSupporter {
                 responseBody);
     }
 
-    public static String getHttpMessage(final Http11Response response) throws IOException {
-        final String resourceURI = response.getResourceURI();
-        if (!Objects.isNull(resourceURI)) {
-            final var absolutePath = parsePath(resourceURI);
-            final var contentType = Files.probeContentType(absolutePath);
-            final var responseBody = readFile(absolutePath);
-
-            response.setContentType(contentType);
-            response.setResponseBody(responseBody);
-
-            return readResponse(response);
-        }
-        return readResponse(response);
-    }
+//    public static String getHttpMessage(final String resourceURI) throws IOException {
+//        if (Objects.isNull(resourceURI)) {
+//            return readResponse(resourceURI);
+//        }
+//        final var absolutePath = parsePath(resourceURI);
+//        final var contentType = Files.probeContentType(absolutePath);
+//        final var responseBody = readFile(absolutePath);
+//
+//        response.setContentType(contentType);
+//        response.setResponseBody(responseBody);
+//
+//        return readResponse(response);
+//    }
 
     private static String readResponse(final Http11Response response) {
         final String responseBody = response.getResponseBody();
         if (Objects.isNull(responseBody)) {
             return String.join("\r\n",
-                    "HTTP/1.1 " + response.getHttpStatusCode() + BLANK,
+                    "HTTP/1.1 " + response.getHttpStatus().getValue() + BLANK,
                     "Location: " + response.getLocation() + BLANK
             );
         }
         return String.join("\r\n",
-                "HTTP/1.1 " + response.getHttpStatusCode() + BLANK,
+                "HTTP/1.1 " + response.getHttpStatus().getValue() + BLANK,
                 "Content-Type: " + response.getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + BLANK,
                 "",
@@ -77,5 +77,12 @@ public class HttpMessageSupporter {
 
     private static String readFile(final Path filePath) throws IOException {
         return String.join("\n", Files.readAllLines(filePath)) + "\n";
+    }
+
+    public static String createMessage(final String httpStatusCode, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + httpStatusCode + SPACE,
+                "Location: " + location + SPACE
+        );
     }
 }

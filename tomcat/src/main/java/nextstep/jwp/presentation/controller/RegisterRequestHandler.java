@@ -20,7 +20,7 @@ public class RegisterRequestHandler implements RequestHandler {
     @Override
     public String handle(final Http11Request request, final Http11Response response) {
         memberService.register(RegisterRequest.from(FormDataResolver.resolve(request.getRequestBody())));
-        response.setStatusCode(HttpStatus.FOUND.getValue());
+        response.setStatusCode(HttpStatus.FOUND);
         response.setLocation("index");
         return null;
     }

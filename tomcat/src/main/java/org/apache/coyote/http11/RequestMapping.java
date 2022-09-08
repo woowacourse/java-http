@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
@@ -11,7 +11,7 @@ import org.apache.catalina.session.SessionManager;
 
 public class RequestMapping {
 
-    private static final Map<String, Controller> CONTROLLERS = new HashMap<>();
+    private static final Map<String, Controller> CONTROLLERS = new ConcurrentHashMap<>();
 
     public RequestMapping() {
     }

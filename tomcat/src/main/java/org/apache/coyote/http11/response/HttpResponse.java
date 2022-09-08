@@ -53,6 +53,12 @@ public class HttpResponse {
         return new HttpResponse(StatusCode.NOT_FOUND, header, FileReader.read("/404.html"));
     }
 
+    public static HttpResponse internalServerError() {
+        HashMap<String, String> header = new HashMap<>();
+        header.put("Content-Type", ContentType.HTML.getValue());
+        return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, header, FileReader.read("/500.html"));
+    }
+
     public void setCookie(String key, String value) {
         responseHeader.add("Set-Cookie", key + "=" + value);
         log.info("setting-cookie: {}", key + "=" + value);

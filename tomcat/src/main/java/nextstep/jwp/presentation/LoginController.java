@@ -1,7 +1,6 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -13,16 +12,24 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
-    public HttpResponse process(final HttpRequest httpRequest) {
-        if (httpRequest.isGet()) {
-            return checkSession(httpRequest);
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        if (httpRequest.containsSession()) {
+            final Session session = sessionManager.findSession(httpRequest.getSession());
+            final User user = (User) session.getAttribute("user");
+            log.info("session-user: {}", user.toString());
+            return HttpResponse.found("/index.html", FileReader.read("/index.html"));
         }
+        return HttpResponse.ok("/login.html", FileReader.read("/login.html"));
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         try {
             final String account = httpRequest.getHttpBody("account");
             final String password = httpRequest.getHttpBody("password");
@@ -32,35 +39,25 @@ public class LoginController implements Controller {
             httpResponse.setCookie("JSESSIONID", jSessionId);
             createAndSaveSession(user, jSessionId);
             return httpResponse;
-        } catch (UncheckedServletException e) {
+        } catch (RuntimeException e) {
             return HttpResponse.unauthorized("/401.html", FileReader.read("/401.html"));
         }
     }
 
-    private HttpResponse checkSession(final HttpRequest httpRequest) {
-        if (httpRequest.containsSession()) {
-            String session1 = httpRequest.getSession();
-            final Session session = sessionManager.findSession(session1);
-            final User user = (User) session.getAttribute("user");
-            log.info("session user: {}", user.toString());
-            return HttpResponse.found("/index.html", FileReader.read("/index.html"));
+    private User checkUser(final String account, final String password) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new RuntimeException("유저가 존재하지 않습니다."));
+
+        if (!user.checkPassword(password)) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
-        return HttpResponse.ok("/login.html", FileReader.read("/login.html"));
+        log.info(user.toString());
+        return user;
     }
 
     private void createAndSaveSession(final User user, final String jSessionId) {
         final Session session = new Session(jSessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);
-    }
-
-    private User checkUser(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new RuntimeException("유저가 존재하지 않습니다."));
-        if (!user.checkPassword(password)) {
-            throw new UncheckedServletException("비밀번호가 일치하지 않습니다.");
-        }
-        log.info(user.toString());
-        return user;
     }
 }

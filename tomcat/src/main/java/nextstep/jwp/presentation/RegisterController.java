@@ -9,15 +9,17 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
-    public HttpResponse process(HttpRequest httpRequest) {
-        if (httpRequest.isGet()) {
-            return HttpResponse.ok("/register.html", FileReader.read("/register.html"));
-        }
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        return HttpResponse.ok("/register.html", FileReader.read("/register.html"));
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         try {
             final String account = httpRequest.getHttpBody("account");
             final String email = httpRequest.getHttpBody("email");
@@ -25,7 +27,7 @@ public class RegisterController implements Controller {
             checkUser(account, email, password);
             return HttpResponse.found("/index.html", FileReader.read("/index.html"));
         } catch (RuntimeException e) {
-            return HttpResponse.unauthorized("/500.html", FileReader.read("/500.html"));
+            return HttpResponse.internalServerError();
         }
     }
 
@@ -33,7 +35,8 @@ public class RegisterController implements Controller {
         if (InMemoryUserRepository.existByAccount(account)) {
             throw new RuntimeException("이미 존재하는 유저입니다.");
         }
-        User user = new User(account, password, email);
+
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info(user.toString());
     }

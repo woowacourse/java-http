@@ -10,12 +10,12 @@ public class StartLine {
 
     private final String httpMethod;
     private final RequestURL requestURL;
-    private final String httpVersion;
+    private final String protocol;
 
-    private StartLine(final String httpMethod, final String requestURL, final String httpVersion) {
+    private StartLine(final String httpMethod, final String requestURL, final String protocol) {
         this.httpMethod = httpMethod;
         this.requestURL = RequestURL.from(requestURL);
-        this.httpVersion = httpVersion;
+        this.protocol = protocol;
     }
 
     public static StartLine from(final String line) {
@@ -35,7 +35,11 @@ public class StartLine {
     }
 
     public boolean isGet() {
-        return httpMethod.equals("GET");
+        return "GET".equals(httpMethod);
+    }
+
+    public boolean isPost() {
+        return "POST".equals(httpMethod);
     }
 
     public RequestURL getRequestURL() {

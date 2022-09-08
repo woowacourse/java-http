@@ -20,7 +20,7 @@ public class RequestHandler {
         );
     }
 
-    public static Controller from(String path) {
+    public static Controller from(final String path) {
         return controllers.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(path))
                 .map(Entry::getValue)

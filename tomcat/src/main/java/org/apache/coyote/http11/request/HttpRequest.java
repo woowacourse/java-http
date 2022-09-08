@@ -9,9 +9,10 @@ public class HttpRequest {
     private final HttpRequestHeader requestHeader;
     private final HttpRequestBody requestBody;
 
-    private HttpRequest(final StartLine startLine,
-                        final HttpRequestHeader requestHeader,
-                        final HttpRequestBody requestBody
+    private HttpRequest(
+            final StartLine startLine,
+            final HttpRequestHeader requestHeader,
+            final HttpRequestBody requestBody
     ) {
         this.startLine = startLine;
         this.requestHeader = requestHeader;
@@ -29,6 +30,10 @@ public class HttpRequest {
 
     public boolean isGet() {
         return startLine.isGet();
+    }
+
+    public boolean isPost() {
+        return startLine.isPost();
     }
 
     public boolean containsSession() {

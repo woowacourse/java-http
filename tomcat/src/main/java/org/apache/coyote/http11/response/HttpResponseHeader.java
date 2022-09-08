@@ -15,10 +15,6 @@ public class HttpResponseHeader {
         this.value.put(key, value);
     }
 
-    public String getContentType() {
-        return value.getOrDefault("Content-Type", ContentType.HTML.getValue());
-    }
-
     public String getAll() {
         return value.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")

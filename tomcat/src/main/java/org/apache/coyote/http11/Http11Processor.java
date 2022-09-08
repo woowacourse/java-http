@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller
     ) throws IOException {
         try {
-            return controller.process(httpRequest);
+            return controller.service(httpRequest);
         } catch (RuntimeException e) {
             return HttpResponse.notFound();
         }

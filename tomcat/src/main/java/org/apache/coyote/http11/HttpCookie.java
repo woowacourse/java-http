@@ -41,11 +41,11 @@ public class HttpCookie {
         return UUID.randomUUID().toString();
     }
 
-    public String getSession() {
-        return value.get("JSESSIONID");
-    }
-
     public boolean containsSession() {
         return value.containsKey("JSESSIONID");
+    }
+
+    public String getSession() {
+        return value.get("JSESSIONID");
     }
 }

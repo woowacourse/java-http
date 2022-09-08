@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
@@ -17,7 +16,7 @@ class RequestMappingTest {
 
     @DisplayName("로그인이 실패하면 401.html로 리다이렉트한다.")
     @Test
-    void createResponse_loginFail() throws IOException {
+    void createResponse_loginFail() throws Exception {
         //given
         final String string = String.join("\r\n",
                 "POST /login?account=gugu&passord=가짜 HTTP/1.1 ",
@@ -30,19 +29,19 @@ class RequestMappingTest {
 
         //when
         HttpResponse response = RequestMapping.createResponse(httpRequest);
-        ResponseHeaders responseHeader = response.getHeader();
+        ResponseHeaders responseHeader = response.getHeaders();
         ResponseBody responseBody = response.getBody();
 
         //then
         assertAll(
                 () -> response.getResponseLine().contains(HttpStatus.FOUND.code),
-                () -> responseHeader.getHeaders().contains("Location: 401.html")
+                () -> responseHeader.getStringHeaders().contains("Location: 401.html")
         );
     }
 
     @DisplayName("로그인이 성공하면 index.html로 리다이렉트한다.")
     @Test
-    void createResponse_loginSuccess() throws IOException {
+    void createResponse_loginSuccess() throws Exception {
         //given
         final String string = String.join("\r\n",
                 "POST /login?account=gugu&passord=password HTTP/1.1 ",
@@ -55,13 +54,13 @@ class RequestMappingTest {
 
         //when
         HttpResponse response = RequestMapping.createResponse(httpRequest);
-        ResponseHeaders responseHeader = response.getHeader();
+        ResponseHeaders responseHeader = response.getHeaders();
         ResponseBody responseBody = response.getBody();
 
         //then
         assertAll(
                 () -> response.getResponseLine().contains(HttpStatus.FOUND.code),
-                () -> responseHeader.getHeaders().contains("Location: index.html")
+                () -> responseHeader.getStringHeaders().contains("Location: index.html")
         );
     }
 }

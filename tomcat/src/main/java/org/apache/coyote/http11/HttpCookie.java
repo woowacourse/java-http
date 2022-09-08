@@ -9,6 +9,7 @@ public class HttpCookie {
     private static final String COOKIE_UNIT_DELIMITER = ";";
     private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
     private static final String KEY_JSESSIONID = "JSESSIONID";
+    private static final String EMPTY_VALUE = "";
 
     private final Map<String, String> cookies;
 
@@ -31,14 +32,10 @@ public class HttpCookie {
                 .collect(Collectors.toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
-    public boolean isExistJSESSIONID() {
-        return cookies.containsKey(KEY_JSESSIONID);
-    }
-
     public String getJSESSIONID() {
         if (cookies.containsKey(KEY_JSESSIONID)) {
             return cookies.get(KEY_JSESSIONID);
         }
-        return "";
+        return EMPTY_VALUE;
     }
 }

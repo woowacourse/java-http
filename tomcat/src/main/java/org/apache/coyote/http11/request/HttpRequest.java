@@ -40,7 +40,7 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String getRequestLine() {
+    public String getRequestUri() {
         return requestLine.getRequestUri();
     }
 

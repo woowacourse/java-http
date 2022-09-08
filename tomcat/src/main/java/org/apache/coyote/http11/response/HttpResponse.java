@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
 import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
@@ -11,35 +10,19 @@ public class HttpResponse {
     private final ResponseBody body;
     private final ResponseHeaders headers;
 
-    public HttpResponse(String responseLine, ResponseBody body, ResponseHeaders header) {
+    public HttpResponse(String responseLine, ResponseHeaders header, ResponseBody body) {
         this.responseLine = responseLine;
-        this.body = body;
         this.headers = header;
+        this.body = body;
     }
 
-    public static HttpResponse createWithBody(HttpStatus httpStatus, String url) throws IOException {
-        final String responseLine = HTTP_VERSION + httpStatus.code;
-        final ResponseBody body = ResponseBody.from(url);
-        final ResponseHeaders header = ResponseHeaders.create(url, body.getBody());
-        return new HttpResponse(responseLine, body, header);
-    }
-
-    public static HttpResponse createWithoutBody(HttpStatus httpStatus, String redirectUrl) {
-        final String responseLine = HTTP_VERSION + httpStatus.code;
-        final ResponseBody body = new ResponseBody();
-        final ResponseHeaders header = ResponseHeaders.createWithLocation(redirectUrl);
-        return new HttpResponse(responseLine, body, header);
-    }
-
-    public static HttpResponse createWithoutBodyForJSession(HttpStatus httpStatus, String redirectUrl, String uuid) {
-        final String responseLine = HTTP_VERSION + httpStatus.code;
-        final ResponseBody body = new ResponseBody();
-        final ResponseHeaders header = ResponseHeaders.createWithLocationAndJSessionId(redirectUrl, uuid);
-        return new HttpResponse(responseLine, body, header);
+    public static HttpResponse create(HttpStatus status, ResponseHeaders header, ResponseBody body) {
+        return new HttpResponse(HTTP_VERSION + status.code, header, body);
     }
 
     public byte[] getBytes() {
-        String response = String.join("\r\n", responseLine, headers.getHeadersToString(), body.getBody());
+        String response = String.join("\r\n", responseLine, headers.getStringHeaders(), body.getBody());
+        System.out.println("response = " + response);
         return response.getBytes();
     }
 
@@ -47,11 +30,11 @@ public class HttpResponse {
         return responseLine;
     }
 
-    public ResponseBody getBody() {
-        return body;
+    public ResponseHeaders getHeaders() {
+        return headers;
     }
 
-    public ResponseHeaders getHeader() {
-        return headers;
+    public ResponseBody getBody() {
+        return body;
     }
 }

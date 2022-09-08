@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.HeaderField.COOKIE;
+
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 
@@ -12,8 +14,8 @@ public class RequestHeaders {
     }
 
     public HttpCookie getCookie() {
-        if (requestHeaders.containsKey("Cookie")) {
-            String cookie = requestHeaders.get("Cookie");
+        if (requestHeaders.containsKey(COOKIE)) {
+            String cookie = requestHeaders.get(COOKIE);
             return HttpCookie.from(cookie);
         }
         return HttpCookie.getEmptyValue();

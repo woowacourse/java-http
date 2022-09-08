@@ -34,8 +34,8 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
-        RequestBody requestBody = httpRequest.getRequestBody();
+    protected HttpResponse doPost(HttpRequest request) {
+        RequestBody requestBody = request.getRequestBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
         if (user.isPresent()) {
             if (user.get().checkPassword(requestBody.getValue("password"))) {
@@ -44,13 +44,13 @@ public class LoginController extends AbstractController {
                 session.setAttribute("user", user.get());
                 SessionManager.add(session);
 
-                return new HttpResponse().addProtocol(httpRequest.getRequestLine().getProtocol())
+                return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
                         .addStatus(HttpStatus.FOUND)
                         .addLocation("/index.html")
                         .addCookie(Cookies.ofJSessionId(session.getId()));
             }
         }
-        return new HttpResponse().addProtocol(httpRequest.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
                 .addStatus(HttpStatus.FOUND)
                 .addLocation("/401.html");
     }

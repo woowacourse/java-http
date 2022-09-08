@@ -7,9 +7,9 @@ import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
-    protected abstract HttpResponse doPost(HttpRequest httpRequest);
+    protected abstract HttpResponse doPost(HttpRequest request);
 
-    protected abstract HttpResponse doGet(HttpRequest httpRequest);
+    protected abstract HttpResponse doGet(HttpRequest request);
 
     protected HttpResponse doNotFoundRequest(HttpRequest request) {
         return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())

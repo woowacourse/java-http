@@ -4,10 +4,10 @@ public class HttpRequest {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
-    private final StartLine startLine;
-    private final RequestHeaders requestHeaders;
-    private final RequestBody requestBody;
-    private final Session session;
+    private StartLine startLine;
+    private RequestHeaders requestHeaders;
+    private RequestBody requestBody;
+    private Session session;
 
     public HttpRequest(StartLine startLine, RequestHeaders requestHeaders,
                        RequestBody requestBody) {
@@ -15,6 +15,10 @@ public class HttpRequest {
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
         this.session = SESSION_MANAGER.findSession(requestHeaders.getJSessionId());
+    }
+
+    public HttpRequest() {
+
     }
 
     public HttpMethod getHttpMethod() {
@@ -43,5 +47,29 @@ public class HttpRequest {
 
     public Session getSession() {
         return session;
+    }
+
+    public boolean isGet() {
+        return startLine.getHttpMethod().isGetMethod();
+    }
+
+    public boolean isPost() {
+        return startLine.getHttpMethod().isPostMethod();
+    }
+
+    public void setStartLine(StartLine startLine) {
+        this.startLine = startLine;
+    }
+
+    public void setRequestHeaders(RequestHeaders requestHeaders) {
+        this.requestHeaders = requestHeaders;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    public void setRequestBody(RequestBody requestBody) {
+        this.requestBody = requestBody;
     }
 }

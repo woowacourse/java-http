@@ -6,7 +6,8 @@ import nextstep.jwp.exception.NotSupportedHttpMethodException;
 public enum HttpMethod {
 
     GET,
-    POST;
+    POST,
+    PUT;
 
     public static HttpMethod findHttpMethod(String inputHttpMethod) {
         return Arrays.stream(values())
@@ -17,5 +18,13 @@ public enum HttpMethod {
 
     private boolean isSameMethod(String inputHttpMethod) {
         return name().equals(inputHttpMethod);
+    }
+
+    public boolean isGetMethod() {
+        return this.equals(GET);
+    }
+
+    public boolean isPostMethod() {
+        return this.equals(POST);
     }
 }

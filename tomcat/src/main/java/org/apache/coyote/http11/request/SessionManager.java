@@ -21,6 +21,10 @@ public class SessionManager implements Manager {
         return SESSIONS.get(id);
     }
 
+    public static Session getSession(String id) {
+        return SESSIONS.get(id);
+    }
+
     @Override
     public void remove(Session session) {
 

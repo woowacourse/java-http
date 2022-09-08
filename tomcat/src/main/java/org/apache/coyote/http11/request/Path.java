@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Objects;
+
 public class Path {
 
     private static final int EXCLUDE_SLASH_INDEX = 1;
@@ -19,6 +21,10 @@ public class Path {
         return new Path(uri);
     }
 
+    public static Path fromPath(String path) {
+        return new Path(path);
+    }
+
     public boolean isFileRequest() {
         return value.contains(".");
     }
@@ -29,5 +35,24 @@ public class Path {
 
     public boolean checkRequest(String path) {
         return value.equals(path);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Path path = (Path) o;
+
+        return Objects.equals(value, path.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
     }
 }

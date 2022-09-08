@@ -13,6 +13,7 @@ public class HttpRequest {
     private static final String COOKIE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+
     private final RequestLine requestLine;
     private final HttpHeaders requestHeaders;
     private final RequestBody requestBody;
@@ -49,14 +50,6 @@ public class HttpRequest {
 
     public Map<String, String> getQueryParameters() {
         return requestLine.getQueryParameters();
-    }
-
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public HttpHeaders getRequestHeaders() {
-        return requestHeaders;
     }
 
     public RequestBody getRequestBody() {

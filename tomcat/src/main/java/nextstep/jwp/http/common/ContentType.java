@@ -1,9 +1,5 @@
 package nextstep.jwp.http.common;
 
-import java.util.Arrays;
-import java.util.Objects;
-import nextstep.jwp.exception.NotFoundContentTypeException;
-
 public enum ContentType {
 
     TEXT_HTML("html", "text/html"),
@@ -18,14 +14,6 @@ public enum ContentType {
     ContentType(final String extension, final String type) {
         this.extension = extension;
         this.type = type;
-    }
-
-    public static ContentType from(final String extension) {
-        Objects.requireNonNull(extension);
-        return Arrays.stream(values())
-            .filter(value -> value.extension.equals(extension))
-            .findAny()
-            .orElseThrow(NotFoundContentTypeException::new);
     }
 
     public String getType() {

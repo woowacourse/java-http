@@ -5,12 +5,12 @@ import java.net.URISyntaxException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.domain.FilePath;
-import org.apache.coyote.domain.request.requestline.HttpMethod;
 import org.apache.coyote.domain.request.HttpRequest;
-import org.apache.coyote.domain.response.HttpStatusCode;
-import org.apache.coyote.domain.response.HttpResponse;
-import org.apache.coyote.domain.response.RedirectUrl;
 import org.apache.coyote.domain.request.RequestBody;
+import org.apache.coyote.domain.request.requestline.HttpMethod;
+import org.apache.coyote.domain.response.HttpResponse;
+import org.apache.coyote.domain.response.HttpStatusCode;
+import org.apache.coyote.domain.response.RedirectUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +21,11 @@ public class RegisterHandler implements Handler {
     @Override
     public HttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
         final FilePath filePath = FilePath.from(httpRequest.getRequestLine().getPath().getPath());
-        if (httpRequest.getRequestLine().getHttpMethod().equals(HttpMethod.GET) && httpRequest.getRequestLine().getPath().getQueryParam().isEmpty()) {
-            return HttpResponse.from(filePath, HttpStatusCode.OK);
+        if (httpRequest.getRequestLine().getHttpMethod().equals(HttpMethod.GET) && httpRequest.getRequestLine()
+                .getPath().getQueryParam().isEmpty()) {
+            return HttpResponse.from(httpRequest.getRequestLine().getHttpVersion(), filePath, HttpStatusCode.OK);
         }
-        return HttpResponse.from(filePath, HttpStatusCode.FOUND)
+        return HttpResponse.from(httpRequest.getRequestLine().getHttpVersion(), filePath, HttpStatusCode.FOUND)
                 .addRedirectUrlHeader(RedirectUrl.from(register(httpRequest)));
     }
 

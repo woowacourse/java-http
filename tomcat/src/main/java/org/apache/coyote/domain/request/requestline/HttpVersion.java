@@ -19,6 +19,10 @@ public enum HttpVersion {
         return Arrays.stream(HttpVersion.values())
                 .filter(httpVersion -> message.equals(httpVersion.message))
                 .findFirst()
-                .orElseThrow(()->new IllegalArgumentException("올바르지 않는 HTTP Version입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("올바르지 않는 HTTP Version입니다."));
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

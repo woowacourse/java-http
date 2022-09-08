@@ -6,24 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.domain.FilePath;
 import org.apache.coyote.domain.HttpCookie;
+import org.apache.coyote.domain.request.requestline.HttpVersion;
 
 public class HttpResponse {
 
-    private final HttpStatusCode httpStatusCode;
+    private final ResponseLine responseLine;
     private final ContentType contentType;
     private final ResponseBody responseBody;
     private final List<String> responseHeader;
 
-    public HttpResponse(HttpStatusCode httpStatusCode, ContentType contentType, ResponseBody responseBody) {
-        this.httpStatusCode = httpStatusCode;
+    public HttpResponse(final ResponseLine responseLine,
+                        final ContentType contentType,
+                        final ResponseBody responseBody) {
+        this.responseLine = responseLine;
         this.contentType = contentType;
         this.responseBody = responseBody;
         this.responseHeader = new ArrayList<>();
     }
 
-    public static HttpResponse from(FilePath filePath, HttpStatusCode httpStatusCode)
-            throws URISyntaxException, IOException {
-        return new HttpResponse(httpStatusCode,
+    public static HttpResponse from(final HttpVersion httpVersion,
+                                    final FilePath filePath,
+                                    final HttpStatusCode httpStatusCode) throws URISyntaxException, IOException {
+        return new HttpResponse(ResponseLine.of(httpVersion, httpStatusCode),
                 ContentType.find(filePath.getValue()),
                 ResponseBody.from(filePath.getValue()));
     }
@@ -41,8 +45,8 @@ public class HttpResponse {
     public String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\r\n")
-                .append("HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.getStatusMessage() + " "
-                        + "\r\n")
+                .append(responseLine.generateResponseString())
+                .append("\r\n")
                 .append("Content-Type: " + this.contentType.getType() + ";charset=utf-8 " + "\r\n");
         for (String header : responseHeader) {
             stringBuilder.append(header).append("\r\n");

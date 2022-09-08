@@ -1,12 +1,15 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.LoginFailureException;
-import nextstep.jwp.LoginService;
+import nextstep.jwp.service.LoginService;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -45,7 +48,9 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isExistSession(HttpRequest httpRequest) {
-        final String jSessionId = httpRequest.getCookie().getJSESSIONID();
-        return SessionManager.findSession(jSessionId).isPresent();
+        final HttpCookie cookie = httpRequest.getCookie();
+        final String jSessionId = cookie.getJSESSIONID();
+        final Optional<Session> session = SessionManager.findSession(jSessionId);
+        return session.isPresent();
     }
 }

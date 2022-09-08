@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.service;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;

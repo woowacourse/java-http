@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.UserService;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

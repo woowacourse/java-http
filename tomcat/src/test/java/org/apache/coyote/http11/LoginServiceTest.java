@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.LoginFailureException;
-import nextstep.jwp.LoginService;
+import nextstep.jwp.service.LoginService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class LoginServiceTest {
         String password = "password";
         final LoginService loginService = new LoginService();
 
-        assertThatThrownBy(() -> loginService.validateAccount(account, password))
+        assertThatThrownBy(() -> loginService.login(account, password))
                 .isInstanceOf(LoginFailureException.class);
     }
 
@@ -28,7 +28,7 @@ class LoginServiceTest {
         String password = "가짜password";
         final LoginService loginService = new LoginService();
 
-        assertThatThrownBy(() -> loginService.validateAccount(account, password))
+        assertThatThrownBy(() -> loginService.login(account, password))
                 .isInstanceOf(LoginFailureException.class);
     }
 }

@@ -1,9 +1,8 @@
-package nextstep.jwp.controller;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.Session;
 
 public class SessionManager {
 

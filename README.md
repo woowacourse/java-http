@@ -26,9 +26,9 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 
 ## 🖊 체크리스트
 
-- [ ] Executors 로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
+- [x] Executors 로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
 
 ## 🖥 기능 목록
 
-- [ ] Executors 로 Thread Pool 적용
+- [x] Executors 로 Thread Pool 적용
 - [ ] 동시성 컬렉션 사용하기

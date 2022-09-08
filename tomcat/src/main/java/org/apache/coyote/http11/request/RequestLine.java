@@ -60,4 +60,13 @@ public class RequestLine {
 	public String getVersion() {
 		return version;
 	}
+
+	@Override
+	public String toString() {
+		return "RequestLine{" +
+			"method=" + method +
+			", url=" + url +
+			", version='" + version + '\'' +
+			'}';
+	}
 }

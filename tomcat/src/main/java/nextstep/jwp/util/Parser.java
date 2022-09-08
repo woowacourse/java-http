@@ -15,11 +15,16 @@ public class Parser {
 	private static final String EXTENSION = ".";
 	private static final String ROOT = "/";
 
-	public static String findUrl(String url) {
-		return url.split(GAP)[0];
+	public static String convertResourceFileName(String url) {
+		int startQueryIndex = findStartQueryString(url);
+		if (startQueryIndex > 0) {
+			return url.substring(0, startQueryIndex);
+		}
+		return url;
 	}
 
 	public static Map<String, String> findParam(String url) {
+		Objects.nonNull(url);
 		int startQueryIndex = findStartQueryString(url);
 		if (startQueryIndex < 0) {
 			return new HashMap<>();
@@ -46,17 +51,13 @@ public class Parser {
 		return params;
 	}
 
-	public static String convertResourceFileName(String path) {
-		Objects.nonNull(path);
-		final int index = path.indexOf(START_QUERY_STRING_DELIMITER);
-		if (index > 0) {
-			return path.split(START_QUERY_STRING_DELIMITER)[0];
-		}
-		return path;
-	}
-
 	public static String parseFileType(String fileName) {
 		Objects.nonNull(fileName);
-		return fileName.substring(fileName.indexOf(".")+1);
+		final String fileType = fileName.substring(fileName.indexOf(".") + 1);
+		int startQueryIndex = findStartQueryString(fileType);
+		if (startQueryIndex > 0) {
+			return fileType.substring(0, startQueryIndex);
+		}
+		return fileType;
 	}
 }

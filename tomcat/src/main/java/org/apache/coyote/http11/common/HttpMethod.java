@@ -19,4 +19,9 @@ public enum HttpMethod {
 			.findAny()
 			.orElseThrow(() -> new InvalidHttpMethodException(ExceptionType.INVALID_HTTP_METHOD_EXCEPTION));
 	}
+
+	@Override
+	public String toString() {
+		return "HttpMethod{}" +this.name();
+	}
 }

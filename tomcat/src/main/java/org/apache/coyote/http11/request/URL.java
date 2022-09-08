@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static nextstep.jwp.util.Parser.convertResourceFileName;
 import static nextstep.jwp.util.Parser.findParam;
-import static nextstep.jwp.util.Parser.findUrl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class URL {
 	}
 
 	public static URL from(String url) {
-		return new URL(findUrl(url), findParam(url));
+		return new URL(convertResourceFileName(url), findParam(url));
 	}
 
 	private void validate(String path) {
@@ -36,5 +36,13 @@ public class URL {
 
 	public Map<String, String> getParams() {
 		return params;
+	}
+
+	@Override
+	public String toString() {
+		return "URL{" +
+			"path='" + path + '\'' +
+			", params=" + params +
+			'}';
 	}
 }

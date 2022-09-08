@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 
-public class UserInfoLogger {
+public class UserService {
 
-	private static final Logger log = LoggerFactory.getLogger(UserInfoLogger.class);
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 	private static final String ID = "account";
 	private static final String PASSWORD = "password";
 
-	private UserInfoLogger() {
+	private UserService() {
 	}
 
 	public static void info(Map<String, String> params) {
@@ -26,6 +26,14 @@ public class UserInfoLogger {
 			User user = optionalUser.get();
 			loggingInfoUser(params, user);
 		}
+	}
+
+	public static boolean login(Map<String, String> params) {
+		if (params.isEmpty()) {
+			return false;
+		}
+		final Optional<User> user = InMemoryUserRepository.findByAccount(params.get(ID));
+		return user.isPresent() && user.get().checkPassword(params.get(PASSWORD));
 	}
 
 	private static void loggingInfoUser(Map<String, String> params, User user) {

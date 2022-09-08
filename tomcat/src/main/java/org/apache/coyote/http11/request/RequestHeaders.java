@@ -55,4 +55,11 @@ public class RequestHeaders {
 	public Map<String, String> getHeaders() {
 		return headers;
 	}
+
+	@Override
+	public String toString() {
+		return "RequestHeaders{" +
+			"headers=" + headers +
+			'}';
+	}
 }

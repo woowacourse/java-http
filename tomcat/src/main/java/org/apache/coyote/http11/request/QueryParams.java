@@ -52,10 +52,6 @@ class QueryParams {
         splitQueryParameters(query);
     }
 
-    boolean hasQuery() {
-        return !queryParams.isEmpty();
-    }
-
     String getQueryValue(final String queryKey) {
         return queryParams.get(queryKey);
     }

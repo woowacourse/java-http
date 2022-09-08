@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
@@ -38,22 +37,10 @@ public class HttpResponse {
     }
 
     private void addHeaders(final Builder builder) {
-        addContentType();
-        addContentLength();
+        addHeader("Content-Type", ContentType.from(request));
+        addHeader("Content-Length", String.valueOf(messageBody.getBytes().length));
         addHeader("Location", builder.location);
         addHeader("Set-Cookie", builder.cookie);
-    }
-
-    public void addContentType() {
-        if (request.containsHeader("Accept") && request.getHeaderValue("Accept").contains("text/css")) {
-            this.headers.put("Content-Type", "text/css;");
-            return;
-        }
-        this.headers.put("Content-Type", "text/html;charset=utf-8");
-    }
-
-    private void addContentLength() {
-        this.headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
     }
 
     private void addHeader(final String headerName, final String value) {

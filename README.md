@@ -31,4 +31,8 @@
     - version of the protocol
   - Request Header
 - [ ] HTTP Response 클래스 구현
+  - Response First Line
+    - version of the protocol
+    - Status Code
+    - Status Message
 - [ ] Controller Interface 추가

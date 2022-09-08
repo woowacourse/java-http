@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class Headers {
 
     private final static int HEADER_NAME = 0;
-    private final static int HEADER_VALUE = 0;
+    private final static int HEADER_VALUE = 1;
 
     private final static String HEADER_SPLITTER = ": ";
     private final static String BLANK = " ";

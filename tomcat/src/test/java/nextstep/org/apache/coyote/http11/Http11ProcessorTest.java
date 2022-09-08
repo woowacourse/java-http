@@ -106,6 +106,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+
     @DisplayName("회원가입을 완료하면 index.html 페이지로 리다이렉트한다.")
     @Test
     void userRegisterIsSuccess() throws IOException {
@@ -195,7 +196,7 @@ class Http11ProcessorTest {
         // then
         final String output = socket.output();
         final String cookie = output.split("\r\n")[1];
-        final String sessionId = cookie.split("JSESSIONID=")[1];
+        final String sessionId = cookie.split("JSESSIONID=")[1].trim();
 
         final Session session = SessionManager.findSession(sessionId);
         assertThat(session.hasAttribute("user")).isTrue();

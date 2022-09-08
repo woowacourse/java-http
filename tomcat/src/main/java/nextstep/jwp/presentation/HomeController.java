@@ -1,21 +1,34 @@
 package nextstep.jwp.presentation;
 
+import java.io.IOException;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.StatusCode;
 
 public class HomeController extends AbstractController {
 
     @Override
-    protected ResponseEntity doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, "/404.html");
+    protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
+
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
+                .contentType("/401.html")
+                .contentLength(httpBody.getBody().getBytes().length)
+                .location("/401.html");
+
+        return new HttpResponse(httpHeader, httpBody);
     }
 
     @Override
-    protected ResponseEntity doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        return new ResponseEntity(StatusCode.OK, httpRequest.getUrl()).body("Hello world!");
+    protected HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final HttpBody httpBody = new HttpBody("Hello world!");
+
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
+                .contentType(httpRequest.getUrl())
+                .contentLength(httpBody.getBody().getBytes().length);
+
+        return new HttpResponse(httpHeader, httpBody);
     }
 }

@@ -1,23 +1,34 @@
 package nextstep.jwp.presentation;
 
+import java.io.IOException;
+import org.apache.coyote.http11.HttpBody;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.StatusCode;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public ResponseEntity service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    public HttpResponse service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.getMethod().equals("POST")) {
             return doPost(httpRequest, httpResponse);
         }
         if (httpRequest.getMethod().equals("GET")) {
             return doGet(httpRequest, httpResponse);
         }
-        return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, "/404.html");
+        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
+
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
+                .contentType("/404.html")
+                .contentLength(httpBody.getBody().getBytes().length)
+                .location("/401.html");
+
+        return new HttpResponse(httpHeader, httpBody);
     }
 
-    protected abstract ResponseEntity doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
-    protected abstract ResponseEntity doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
+    protected abstract HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException;
+    protected abstract HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException;
 }

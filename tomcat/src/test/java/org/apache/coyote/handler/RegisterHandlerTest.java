@@ -8,9 +8,11 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.ExistUserException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +29,7 @@ class RegisterHandlerTest {
 
     @DisplayName("회원가입을 성공하면 로그를 남긴다.")
     @Test
-    void login() {
+    void register() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         final Logger logger = (Logger) LoggerFactory.getLogger(RegisterHandler.class);
@@ -38,9 +40,11 @@ class RegisterHandlerTest {
         final String password = "1234";
         final String email = "dwoo@email.com";
         final String requestBody = "account=" + account + "&password=" + password + "&email=" + email;
+        final HttpRequest httpRequest = HttpRequest.of("POST /register HTTP/1.1",
+                Map.of(), requestBody);
 
         // when
-        RegisterHandler.register(requestBody);
+        RegisterHandler.register(httpRequest);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -59,9 +63,11 @@ class RegisterHandlerTest {
     void failToLogin() {
         // given
         final String requestBody = "account=gugu&password=password&email=gugu@email.com";
+        final HttpRequest httpRequest = HttpRequest.of("POST /register HTTP/1.1",
+                Map.of(), requestBody);
 
         // when & then
-        Assertions.assertThatThrownBy(() -> RegisterHandler.register(requestBody))
+        Assertions.assertThatThrownBy(() -> RegisterHandler.register(httpRequest))
                 .isInstanceOf(ExistUserException.class);
     }
 
@@ -70,9 +76,11 @@ class RegisterHandlerTest {
     void returnLoginWhenWithoutQuery() {
         // given
         final String requestBody = "account=dwoo&password=1234&email=dwoo@email.com";
+        final HttpRequest httpRequest = HttpRequest.of("POST /register HTTP/1.1",
+                Map.of(), requestBody);
 
         // when
-        final HttpResponse httpResponse = RegisterHandler.register(requestBody);
+        final HttpResponse httpResponse = RegisterHandler.register(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("/index.html");

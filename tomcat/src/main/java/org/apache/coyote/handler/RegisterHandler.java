@@ -7,6 +7,7 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.ExistUserException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.query.QueryParams;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.Location;
@@ -20,8 +21,8 @@ public class RegisterHandler {
     private RegisterHandler() {
     }
 
-    public static HttpResponse register(final String requestBody) {
-        final QueryParams queryParams = QueryParams.from(requestBody);
+    public static HttpResponse register(final HttpRequest request) {
+        final QueryParams queryParams = request.getQueryParams();
 
         final String account = queryParams.getValueFromKey("account");
         final String password = queryParams.getValueFromKey("password");

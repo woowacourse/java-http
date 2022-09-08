@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse = LoginHandler.login(httpRequest);
             }
             if (requestUrl.contains("register") && requestMethod.equals(POST)) {
-                httpResponse = RegisterHandler.register(httpRequest.getRequestBody());
+                httpResponse = RegisterHandler.register(httpRequest);
             }
 
             final String response = httpResponse.getResponse();

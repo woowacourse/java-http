@@ -13,7 +13,15 @@ import org.apache.coyote.http11.message.response.header.StatusCode;
 public class ErrorHandler implements ExceptionHandler {
 
     @Override
-    public HttpResponse handle(final Exception e) throws IOException, URISyntaxException {
+    public HttpResponse handle(final Exception e) {
+        try {
+            return mapResponse(e);
+        } catch (IOException | URISyntaxException ex) {
+            return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, "페이지를 읽지 못했습니다.");
+        }
+    }
+
+    private static HttpResponse mapResponse(final Exception e) throws IOException, URISyntaxException {
         if (e instanceof NotFoundException) {
             return new HttpResponse(StatusCode.NOT_FOUND, View.NOT_FOUND.getResource());
         }

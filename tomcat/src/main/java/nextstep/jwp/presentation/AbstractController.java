@@ -17,12 +17,11 @@ public abstract class AbstractController implements Controller {
         if (httpRequest.getMethod().equals("GET")) {
             return doGet(httpRequest, httpResponse);
         }
-        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
-
+        final HttpBody httpBody = HttpBody.createByUrl("/404.html");
         final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
                 .contentType("/404.html")
                 .contentLength(httpBody.getBody().getBytes().length)
-                .location("/401.html");
+                .location("/404.html");
 
         return new HttpResponse(httpHeader, httpBody);
     }

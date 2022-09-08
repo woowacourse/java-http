@@ -6,9 +6,11 @@ import org.apache.coyote.http11.request.HttpCookie;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final ResponseHeaders headers;
-    private final String resource;
+    private StatusLine statusLine;
+    private ResponseHeaders headers;
+    private String resource;
+
+    public HttpResponse(){}
 
     public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String resource) {
         this.statusLine = statusLine;
@@ -16,12 +18,30 @@ public class HttpResponse {
         this.resource = resource;
     }
 
-    public HttpResponse addCookie(HttpCookie cookie) {
-        this.headers.put("Set-Cookie", cookie.getResponse());
+    public HttpResponse setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
         return this;
     }
 
-    public String toResponse() throws IOException {
+    public HttpResponse setHeaders(ResponseHeaders headers) {
+        this.headers = headers;
+        return this;
+    }
+    public HttpResponse setResource(String resource) {
+        this.resource = resource;
+        return this;
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        String values = this.headers.getCookieValue();
+        if (values == null) {
+            this.headers.put("Set-Cookie", cookie.getResponse());
+            return;
+        }
+        this.headers.put("Set-Cookie", values + " " + cookie.getResponse());
+    }
+
+    public String to() throws IOException {
 
         String statusLineResponse = statusLine.getResponse();
         String headersResponse = headers.getHeader().entrySet()
@@ -34,5 +54,14 @@ public class HttpResponse {
 
     public String getResource() {
         return resource;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "statusLine=" + statusLine +
+                ", headers=" + headers +
+                ", resource='" + resource + '\'' +
+                '}';
     }
 }

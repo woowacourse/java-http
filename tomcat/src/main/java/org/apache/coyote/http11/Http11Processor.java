@@ -3,8 +3,10 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpCookie;
@@ -12,13 +14,10 @@ import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.url.HandlerMapping;
-import org.apache.coyote.http11.url.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -44,15 +43,21 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie cookie = HttpCookie.extract(httpHeaders);
             String requestBody = extractRequestBody(bufferedReader, httpHeaders, requestLine.getHttpMethod());
 
-            Url url = HandlerMapping.from(new HttpRequest(requestLine, httpHeaders, cookie));
+            HttpRequest request = new HttpRequest(requestLine, httpHeaders, cookie, requestBody);
+            Controller controller = RequestMapping.getController(request);
 
-            HttpResponse resource = url.handle(httpHeaders, requestBody);
-            String response = resource.toResponse();
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            HttpResponse response = new HttpResponse();
+            controller.service(request, response);
+            submitResponse(outputStream, response);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void submitResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        String httpResponse = response.to();
+        outputStream.write(httpResponse.getBytes());
+        outputStream.flush();
     }
 
     private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, HttpMethod httpMethod)

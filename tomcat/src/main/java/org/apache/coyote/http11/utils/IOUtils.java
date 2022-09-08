@@ -21,11 +21,11 @@ public class IOUtils {
                     .getResource(STATIC_DIRECTORY + path);
             validatePath(resource);
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
-            throw new IllegalArgumentException("파일을 읽어오는데 실패했습니다 : " + url);
+            log.info(e.getMessage(), e);
         }
-
+        throw new IllegalArgumentException("파일 읽기를 실패했습니다.");
     }
 
     private static void validatePath(URL resource) {

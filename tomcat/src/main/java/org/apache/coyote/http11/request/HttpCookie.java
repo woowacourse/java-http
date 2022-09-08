@@ -68,9 +68,10 @@ public class HttpCookie {
         return values;
     }
 
-    public HttpCookie addCookie(HttpCookie cookie) {
-        Map<String, String> response = cookie.getValues();
-        this.values.putAll(response);
-        return this;
+    @Override
+    public String toString() {
+        return "HttpCookie{" +
+                "values=" + values +
+                '}';
     }
 }

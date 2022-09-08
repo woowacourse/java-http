@@ -7,19 +7,23 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final HttpCookie cookie;
+    private final String requestBody;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpCookie cookie) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpCookie cookie,
+                       String requestBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.cookie = cookie;
+        this.requestBody = requestBody;
     }
 
-    public HttpCookie addCookie(HttpCookie cookie) {
-        return cookie.addCookie(cookie);
-    }
     public HttpSession getSession() {
         SessionManager sessionManager = new SessionManager();
         return sessionManager.findSession(cookie.getSession());
+    }
+
+    public boolean hasCookie() {
+        return !cookie.isEmpty();
     }
 
     public HttpMethod getHttpMethod() {
@@ -36,5 +40,19 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return cookie;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "requestLine=" + requestLine +
+                ", httpHeaders=" + httpHeaders +
+                ", cookie=" + cookie +
+                ", requestBody='" + requestBody + '\'' +
+                '}';
     }
 }

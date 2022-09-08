@@ -23,7 +23,7 @@ public class UrlParser {
     }
 
     public static String convertEmptyToHtml(String url) {
-        log.info("url : {}", url);
+        log.info("url :{}", url);
         String resource = url;
         int index = url.indexOf(".");
         if (index == -1) {

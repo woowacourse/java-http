@@ -1,17 +1,13 @@
 package org.apache.coyote.http11.common;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.util.ParamParser;
 
 public class HttpCookie {
 
     private static final String COOKIE_DELIMITER = "=";
     private static final String COOKIES_DELIMITER = ";";
-    private static final String EMPTY_STRING = "";
-
-    private static final int KEY = 0;
-    private static final int VALUE = 1;
 
     private final Map<String, String> values;
 
@@ -20,18 +16,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String rawValue) {
-        final HashMap<String, String> values = new HashMap<>();
-        if (EMPTY_STRING.equals(rawValue)) {
-            return new HttpCookie(values);
-        }
-        final String[] cookies = rawValue.split(COOKIES_DELIMITER);
-
-        for (final String cookie : cookies) {
-            final String stripedCookie = cookie.strip();
-            final String[] cookieKeyValue = stripedCookie.split(COOKIE_DELIMITER);
-
-            values.put(cookieKeyValue[KEY], cookieKeyValue[VALUE]);
-        }
+        final Map<String, String> values = ParamParser.parseOf(rawValue, COOKIES_DELIMITER);
 
         return new HttpCookie(values);
     }

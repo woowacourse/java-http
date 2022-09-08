@@ -38,7 +38,7 @@
 - [x] loginController 악취 제거하기
   - [x] 컨트롤러 간 참조하는 구조 변경하기 ( LoginController, RegisterController,  -> StaticResourceController)
 - [x] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기
-- [ ] HttpBody 와 HttpPath의 param 생성 로직이 겹친다. 이를 어떻게 처리할까?
+- [x] HttpBody 와 HttpPath의 param 생성 로직이 겹친다. 이를 어떻게 처리할까?
 
 
 ### 예외 처리하기

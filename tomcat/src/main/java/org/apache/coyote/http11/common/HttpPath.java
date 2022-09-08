@@ -1,22 +1,13 @@
 package org.apache.coyote.http11.common;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.util.ParamParser;
 
 public class HttpPath {
 
-    private static final String REQUEST_PARAM_DELIMITER = "?";
     private static final String PARAMS_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
-
-    private static final int KEY = 0;
-    private static final int VALUE = 1;
-    private static final String EMPTY_VALUE = "";
-    private static final int EMPTY_VALUE_PARAM_LENGTH = 1;
-
-    private static final int START_INDEX = 0;
-    private static final int ONE_INDEX = 1;
-
 
     private final String value;
     private final Map<String, String> params;
@@ -26,41 +17,14 @@ public class HttpPath {
         this.params = new HashMap<>(params);
     }
 
-    public static HttpPath from(final String uri) {
-        final Map<String, String> params = new HashMap<>();
-        String path = uri;
+    public static HttpPath from(final String rawUri) {
+        final URI uri = URI.create(rawUri);
+        final String path = uri.getPath();
+        final String query = uri.getQuery();
 
-        if (uri.contains(REQUEST_PARAM_DELIMITER)) {
-            final int paramStartIndex = uri.indexOf(REQUEST_PARAM_DELIMITER);
-            path = uri.substring(START_INDEX, paramStartIndex);
-            final String queryString = uri.substring(paramStartIndex + ONE_INDEX);
-
-            parseQueryParams(params, queryString);
-        }
+        final Map<String, String> params = ParamParser.parseOf(query, PARAMS_DELIMITER);
 
         return new HttpPath(path, params);
-    }
-
-    private static void parseQueryParams(final Map<String, String> params, final String queryString) {
-        final String[] queryParams = queryString.split(PARAMS_DELIMITER);
-
-        for (final String queryParam : queryParams) {
-            parseQueryParam(params, queryParam);
-        }
-    }
-
-    private static void parseQueryParam(final Map<String, String> params, final String queryParam) {
-        final String[] queryParamKeyValue = queryParam.split(KEY_VALUE_DELIMITER);
-
-        if (haveEmptyValue(queryParamKeyValue)) {
-            params.put(queryParamKeyValue[KEY], EMPTY_VALUE);
-            return;
-        }
-        params.put(queryParamKeyValue[KEY], queryParamKeyValue[VALUE]);
-    }
-
-    private static boolean haveEmptyValue(final String[] queryParamKeyValue) {
-        return queryParamKeyValue.length == EMPTY_VALUE_PARAM_LENGTH;
     }
 
     public String getValue() {

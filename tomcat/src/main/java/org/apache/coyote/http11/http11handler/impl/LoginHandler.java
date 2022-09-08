@@ -7,7 +7,7 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.login.LoginService;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
-import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
+import org.apache.coyote.http11.http11handler.support.QueryStringUtil;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11response.Http11Response;
 
@@ -29,7 +29,7 @@ public class LoginHandler implements Http11Handler {
 
     @Override
     public Http11Response handle(Http11Request http11Request, Visitor visitor) {
-        Map<String, String> queryStringDatas = QueryStringProcessor.extractQueryStringDatas(http11Request.getBody());
+        Map<String, String> queryStringDatas = QueryStringUtil.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             visitor.maintainLogin(loginService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
             return HandlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);

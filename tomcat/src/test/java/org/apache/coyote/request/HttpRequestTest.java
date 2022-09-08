@@ -18,7 +18,7 @@ class HttpRequestTest {
         final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
 
         // when
-        final String url = sut.getRequestUrlWithoutQuery();
+        final String url = sut.getRequestPath();
 
         // then
         assertThat(url).isEqualTo("/login.html");

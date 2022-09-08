@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HeaderElement;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
-public class ResponseComponent {
+public class Http11Response {
 
     private static final String LINE = "\r\n";
     private static final String HEADER_NAME_VALUE_DELIMITER = ": ";
@@ -18,13 +18,13 @@ public class ResponseComponent {
     private Map<HeaderElement, String> headerElements;
     private String body;
 
-    public ResponseComponent(StatusCode statusCode, String body) {
+    public Http11Response(StatusCode statusCode, String body) {
         this.statusCode = statusCode;
         headerElements = new HashMap<>();
         this.body = body;
     }
 
-    public ResponseComponent(StatusCode statusCode) {
+    public Http11Response(StatusCode statusCode) {
         this(statusCode, null);
     }
 

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.visitor.NewVisitor;
 import nextstep.jwp.model.visitor.Visitor;
 import nextstep.jwp.model.visitor.VisitorManager;
 import org.apache.coyote.Processor;
@@ -13,7 +12,7 @@ import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.Http11HandlerSelector;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11request.Http11RequestHandler;
-import org.apache.coyote.http11.http11response.ResponseComponent;
+import org.apache.coyote.http11.http11response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +48,12 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info(http11Request.getUri());
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
-            ResponseComponent responseComponent = http11Handler.handle(http11Request, visitor);
+            Http11Response http11Response = http11Handler.handle(http11Request, visitor);
 
             if (visitor.isNewVisitor()) {
-                responseComponent.setSession(visitor.getSessionId());
+                http11Response.setSession(visitor.getSessionId());
             }
-            final var response = responseComponent.toString();
+            final var response = http11Response.toString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

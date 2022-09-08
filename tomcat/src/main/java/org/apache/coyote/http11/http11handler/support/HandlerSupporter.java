@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.util.Objects;
 import org.apache.coyote.http11.ExtensionContentType;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.http11response.ResponseComponent;
+import org.apache.coyote.http11.http11response.Http11Response;
 
 public class HandlerSupporter {
 
@@ -16,24 +16,24 @@ public class HandlerSupporter {
     private HandlerSupporter() {
     }
 
-    public static ResponseComponent redirectResponseComponent(String uri, StatusCode statusCode) {
-        ResponseComponent responseComponent = new ResponseComponent(statusCode);
-        responseComponent.setLocation(uri);
-        return responseComponent;
+    public static Http11Response redirectResponseComponent(String uri, StatusCode statusCode) {
+        Http11Response http11Response = new Http11Response(statusCode);
+        http11Response.setLocation(uri);
+        return http11Response;
     }
 
-    public static ResponseComponent resourceResponseComponent(String uri, StatusCode statusCode) {
-        ResponseComponent responseComponent = new ResponseComponent(statusCode, extractBody(uri));
-        responseComponent.setContentLength(getContentLength(uri));
-        responseComponent.setContentType(getContentType(uri));
-        return responseComponent;
+    public static Http11Response resourceResponseComponent(String uri, StatusCode statusCode) {
+        Http11Response http11Response = new Http11Response(statusCode, extractBody(uri));
+        http11Response.setContentLength(getContentLength(uri));
+        http11Response.setContentType(getContentType(uri));
+        return http11Response;
     }
 
-    public static ResponseComponent defaultResponseComponent(String message, StatusCode statusCode) {
-        ResponseComponent responseComponent = new ResponseComponent(statusCode, message);
-        responseComponent.setContentLength(Integer.toString(message.length()));
-        responseComponent.setContentType(ExtensionContentType.HTML.getContentType());
-        return responseComponent;
+    public static Http11Response defaultResponseComponent(String message, StatusCode statusCode) {
+        Http11Response http11Response = new Http11Response(statusCode, message);
+        http11Response.setContentLength(Integer.toString(message.length()));
+        http11Response.setContentType(ExtensionContentType.HTML.getContentType());
+        return http11Response;
     }
 
     public static String extractBody(String uri) {

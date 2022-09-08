@@ -9,7 +9,7 @@ import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
 import org.apache.coyote.http11.http11handler.user.UserService;
 import org.apache.coyote.http11.http11request.Http11Request;
-import org.apache.coyote.http11.http11response.ResponseComponent;
+import org.apache.coyote.http11.http11response.Http11Response;
 
 public class RegisterAccountHandler implements Http11Handler {
 
@@ -30,7 +30,7 @@ public class RegisterAccountHandler implements Http11Handler {
     }
 
     @Override
-    public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
+    public Http11Response handle(Http11Request http11Request, Visitor visitor) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (userService.addNewUser(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(EMAIL_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             return HandlerSupporter.redirectResponseComponent(REDIRECT_WHEN_REGISTER_SUCCESS, StatusCode.REDIRECT);

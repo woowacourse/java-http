@@ -27,6 +27,12 @@ public abstract class AbstractController implements Controller {
         return new HttpResponse(httpHeader, httpBody);
     }
 
+    protected HttpHeader defaultHeader(final StatusCode statusCode, final HttpBody httpBody,  final String url) {
+        return new HttpHeader().startLine(statusCode)
+                .contentType(url)
+                .contentLength(httpBody.getBody().getBytes().length);
+    }
+
     protected abstract HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse)
             throws IOException;
     protected abstract HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse)

@@ -12,11 +12,8 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final HttpBody httpBody = HttpBody.createByUrl("/401.html");
-
-        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                .contentType("/401.html")
-                .contentLength(httpBody.getBody().getBytes().length)
-                .location("/401.html");
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/401.html");
+        httpHeader.location("/401.html");
 
         return new HttpResponse(httpHeader, httpBody);
     }
@@ -24,10 +21,7 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
-
-        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
-                .contentType(httpRequest.getUrl())
-                .contentLength(httpBody.getBody().getBytes().length);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, httpRequest.getUrl());
 
         return new HttpResponse(httpHeader, httpBody);
     }

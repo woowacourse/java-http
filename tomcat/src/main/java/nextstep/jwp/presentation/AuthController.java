@@ -28,54 +28,43 @@ public class AuthController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.getUrl().startsWith("/login")) {
-            return login(httpRequest, httpResponse);
+            return postLogin(httpRequest, httpResponse);
         }
-        return register(httpRequest, httpResponse);
+        return postRegister(httpRequest, httpResponse);
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.getUrl().startsWith("/login")) {
-            return login(httpRequest, httpResponse);
+            return getLogin(httpRequest, httpResponse);
         }
-        return register(httpRequest, httpResponse);
+        return getRegister(httpRequest, httpResponse);
     }
 
-    private HttpResponse login(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    private HttpResponse postRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException {
+        final User user = new User(httpRequest.getBodyValue(ACCOUNT), httpRequest.getBodyValue(PASSWORD), httpRequest.getBodyValue("email"));
+        InMemoryUserRepository.save(user);
+
+        return redirect(httpRequest);
+    }
+
+    private HttpResponse redirect(final HttpRequest httpRequest) throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, httpRequest.getUrl());
+        httpHeader.location(REDIRECT_URL);
+        return new HttpResponse(httpHeader, httpBody);
+    }
+
+    private HttpResponse postLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
             final Session session = SessionManager.findSession(httpRequest.getJSESSIONID());
-            if (session == null && httpRequest.getMethod().equals("POST")) {
+            if (session == null) {
                 return requireAuthByRequestInfo(httpRequest, httpResponse);
             }
-            if (session == null && httpRequest.getMethod().equals("GET")) {
-                final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
-
-                final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
-                        .contentType(LOGIN_URL)
-                        .contentLength(httpBody.getBody().getBytes().length);
-
-                return new HttpResponse(httpHeader, httpBody);
-            }
             if (session.hasAttribute("user")) {
-                final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
-
-                final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                        .contentType(httpRequest.getUrl())
-                        .contentLength(httpBody.getBody().getBytes().length)
-                        .location(REDIRECT_URL);
-
-                return new HttpResponse(httpHeader, httpBody);
+                return redirect(httpRequest);
             }
-        }
-
-        if (httpRequest.getMethod().equals("GET")) {
-            final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
-
-            final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
-                    .contentType(LOGIN_URL)
-                    .contentLength(httpBody.getBody().getBytes().length);
-
-            return new HttpResponse(httpHeader, httpBody);
         }
         return requireAuthByRequestInfo(httpRequest, httpResponse);
     }
@@ -88,66 +77,58 @@ public class AuthController extends AbstractController {
                 return authentication(httpRequest, queryParam.getValue(ACCOUNT), queryParam.getValue(PASSWORD));
             }
         }
-
         final String account = httpRequest.getBodyValue(ACCOUNT);
         final String password = httpRequest.getBodyValue(PASSWORD);
         return authentication(httpRequest, account, password);
     }
 
-    private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)
+    private HttpResponse getRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
             throws IOException {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            LOGGER.info(user.get().toString());
-
-            final Session session = SessionManager.add(HttpCookie.makeJSESSIONID());
-            session.addAttribute("user", user.get());
-
-            final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
-
-            final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                    .cookie(session.getId())
-                    .contentType(httpRequest.getUrl())
-                    .contentLength(httpBody.getBody().getBytes().length)
-                    .location(REDIRECT_URL);
-
-            return new HttpResponse(httpHeader, httpBody);
-        }
-
-        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
-
-        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                .contentType("/401.html")
-                .contentLength(httpBody.getBody().getBytes().length)
-                .location("/401.html");
-
-        return new HttpResponse(httpHeader, httpBody);
-    }
-
-    private HttpResponse register(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (httpRequest.getUrl().startsWith("/register") && httpRequest.getMethod().equals("POST")) {
-            final String account = httpRequest.getBodyValue(ACCOUNT);
-            final String password = httpRequest.getBodyValue(PASSWORD);
-            final String email = httpRequest.getBodyValue("email");
-
-            final User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-
-            final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
-
-            final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                    .contentType(httpRequest.getUrl())
-                    .contentLength(httpBody.getBody().getBytes().length)
-                    .location(REDIRECT_URL);
-
-            return new HttpResponse(httpHeader, httpBody);
-        }
-
         final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
 
         final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
                 .contentType(httpRequest.getUrl())
                 .contentLength(httpBody.getBody().getBytes().length);
+
+        return new HttpResponse(httpHeader, httpBody);
+    }
+
+    private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        if (httpRequest.hasJSESSIONID()) {
+            final Session session = SessionManager.findSession(httpRequest.getJSESSIONID());
+            if (session.hasAttribute("user")) {
+                return redirect(httpRequest);
+            }
+        }
+        final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, LOGIN_URL);
+        return new HttpResponse(httpHeader, httpBody);
+    }
+
+    private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password) throws IOException {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            LOGGER.info(user.get().toString());
+            return assignCookie(httpRequest, user);
+        }
+
+        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/401.html");
+        httpHeader.location("/401.html");
+
+        return new HttpResponse(httpHeader, httpBody);
+    }
+
+    private HttpResponse assignCookie(final HttpRequest httpRequest, final Optional<User> user) throws IOException {
+        final Session session = SessionManager.add(HttpCookie.makeJSESSIONID());
+        session.addAttribute("user", user.get());
+
+        final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
+                .cookie(session.getId())
+                .contentType(httpRequest.getUrl())
+                .contentLength(httpBody.getBody().getBytes().length)
+                .location(REDIRECT_URL);
 
         return new HttpResponse(httpHeader, httpBody);
     }

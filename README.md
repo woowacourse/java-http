@@ -34,4 +34,4 @@
 ### 3단계 
 - [x] HttpRequest 클래스 생성
 - [x] HttpResponse 클래스 생성
-- [ ] Controller 인터페이스 생성
+- [x] Controller 인터페이스 생성

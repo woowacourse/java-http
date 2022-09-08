@@ -23,4 +23,8 @@ public abstract class Visitor {
     public abstract void maintainLogin(User user);
 
     public abstract boolean isLogin();
+
+    public boolean isNewVisitor() {
+        return this instanceof NewVisitor;
+    }
 }

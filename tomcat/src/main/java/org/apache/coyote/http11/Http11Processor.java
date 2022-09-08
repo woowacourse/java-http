@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
             ResponseComponent responseComponent = http11Handler.handle(http11Request, visitor);
 
-            if (visitor instanceof NewVisitor) {
+            if (visitor.isNewVisitor()) {
                 responseComponent.setSession(visitor.getSessionId());
             }
             final var response = responseComponent.toString();

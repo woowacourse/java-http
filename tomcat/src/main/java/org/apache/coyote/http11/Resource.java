@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 import org.apache.coyote.http11.request.HttpRequest;
@@ -30,11 +30,15 @@ public class Resource {
         final URL resource = Resource.class.getClassLoader().getResource(STATIC_PATH_PREFIX + path);
         try {
             return Files.readString(
-                new File(Objects.requireNonNull(resource)
-                    .getFile()).toPath());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Static File Not Found for this path: " + path);
+                getFilePathFrom(resource));
+        } catch (Exception e) {
+            return readFileAt("/404.html");
         }
+    }
+
+    private static Path getFilePathFrom(URL resource) throws NullPointerException {
+        return new File(Objects.requireNonNull(resource)
+            .getFile()).toPath();
     }
 
     public String getValue() {

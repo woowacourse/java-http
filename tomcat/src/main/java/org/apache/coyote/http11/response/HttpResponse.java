@@ -34,7 +34,12 @@ public class HttpResponse implements Response {
     public HttpResponse postProcess(HttpRequest request) {
         PostProcessMeta meta = new PostProcessMeta(request, this.body);
         MANAGER.add(request.getContext().getSession());
-        return new HttpResponse(general, this.headers.postProcess(meta), body, request.getContext().postProcess(meta));
+        return new HttpResponse(
+                general,
+                this.headers.postProcess(meta),
+                body,
+                request.getContext().postProcess(meta)
+        );
     }
 
     public HttpResponse update(HttpStatus status, String bodyString) {

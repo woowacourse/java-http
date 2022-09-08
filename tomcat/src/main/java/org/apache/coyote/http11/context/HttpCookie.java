@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    public static final String SESSION_NAME = "JSESSIONID";
     private static final String DELIMITER = "; ";
     private static final Pattern PATTERN = Pattern.compile("(?<key>.+)=(?<value>.+)");
-    public static final String SESSION_NAME = "JSESSIONID";
 
     private final Map<String, String> cookies;
 

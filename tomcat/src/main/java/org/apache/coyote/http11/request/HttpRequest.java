@@ -16,6 +16,7 @@ import org.apache.coyote.http11.context.Session;
 import org.apache.coyote.http11.context.SessionManager;
 import org.apache.exception.TempException;
 import org.apache.util.NumberUtil;
+import org.apache.util.StringUtil;
 
 public class HttpRequest {
 
@@ -46,13 +47,13 @@ public class HttpRequest {
     }
 
     private static RequestGeneral readGeneralLine(BufferedReader reader) {
-        return RequestGeneral.parse(readOneLine(reader));
+        return RequestGeneral.parse(StringUtil.readOneLine(reader));
     }
 
     private static RequestHeaders readHeaderLines(BufferedReader reader) {
         List<String> lines = new ArrayList<>();
         String line;
-        while (!"".equals(line = readOneLine(reader))) {
+        while (!"".equals(line = StringUtil.readOneLine(reader))) {
             lines.add(line);
         }
         return RequestHeaders.parse(lines);
@@ -85,34 +86,32 @@ public class HttpRequest {
         }
     }
 
-    private static String readOneLine(BufferedReader reader) {
-        try {
-            return reader.readLine();
-        } catch (IOException e) {
-            throw new TempException();
-        }
-    }
-
     private static Context parseOrCreateContext(RequestHeaders headers) {
         RequestHeader cookieHeader = headers.findHeader("Cookie");
         if (cookieHeader == null) {
             return Context.createNew();
         }
         HttpCookie cookie = HttpCookie.parse(cookieHeader.getValue());
-        return new Context(MANAGER.findSession(cookie.find(SESSION_NAME)), cookie);
+        Session session = findOrCreateSession(cookie.find(SESSION_NAME));
+
+        return new Context(session, cookie);
     }
 
-    public Session getSession(boolean isCreate) {
-        Session findSession = MANAGER.findSession(context.getSession().getId());
+    private static Session findOrCreateSession(String uuid) {
+        Session findSession = MANAGER.findSession(uuid);
         if (findSession != null) {
             return findSession;
         }
-        if (!isCreate) {
+        Session createSession = new Session(UUID.randomUUID().toString());
+        MANAGER.add(createSession);
+        return createSession;
+    }
+
+    public Session getSession(boolean isCreate) {
+        if (!isCreate && MANAGER.findSession(context.getSession().getId()) == null) {
             return null;
         }
-        Session session = new Session(UUID.randomUUID().toString());
-        MANAGER.add(session);
-        return session;
+        return findOrCreateSession(context.getSession().getId());
     }
 
     public String getPath() {

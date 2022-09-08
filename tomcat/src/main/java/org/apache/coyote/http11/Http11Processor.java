@@ -15,19 +15,20 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String URL_START_REGEX = " ";
     private static final int URL_INDEX = 1;
     private static final String DEFAULT_URL = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-    private static final String QUERY_PARAM_DELIMITER = "?";
-    private static final String QUERY_PARAM_AND_DELIMITER = "&";
-    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
+
+    private static final String HEADER_DELIMITER = ":";
 
     private final Socket connection;
 
@@ -44,11 +45,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final Map<String, String> request = parseUrl(bufferedReader.readLine());
+            final HttpRequestLine httpRequestLine = HttpRequestLine.from(reader.readLine());
+            final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
+            final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
 
-            printLoginUser(request.get("path"), request.get("params"));
+            printLoginUser();
 
             final String responseBody = getResponseBody(request.get("path"));
             final String response = createResponse(request.get("contentType"), responseBody);
@@ -60,36 +63,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> parseUrl(String url) throws IOException {
-        url = url.split(URL_START_REGEX)[URL_INDEX];
-        Map<String, String> request = new HashMap<>();
-        request.put("contentType", ContentType.from(url).getValue());
-        request.put("path", getPath(url));
-        request.put("params", getParams(url));
-        return request;
-    }
-
-    private String getPath(final String url) {
-        if (url.contains(QUERY_PARAM_DELIMITER)) {
-            return url.substring(0, url.indexOf(QUERY_PARAM_DELIMITER)) + ContentType.getDefaultExtension();
+    private Map<String, String> parseRequestHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String line;
+        while (!(line = reader.readLine()).isEmpty()) {
+            final String[] header = line.split(HEADER_DELIMITER);
+            final String name = header[0].trim();
+            final String value = header[1].trim();
+            headers.put(name, value);
         }
-        return url;
-    }
-
-    private String getParams(final String url) {
-        if (url.contains(QUERY_PARAM_DELIMITER)) {
-            return url.substring(url.indexOf(QUERY_PARAM_DELIMITER) + 1);
-        }
-        return "";
+        return headers;
     }
 
     private void printLoginUser(final String path, final String allOfQueryParam) {
         if (path.contains("login")) {
-            final Map<String, String> params = new HashMap<>();
-            for (String queryParameter : allOfQueryParam.split(QUERY_PARAM_AND_DELIMITER)) {
-                final String[] param = queryParameter.split(QUERY_PARAM_VALUE_DELIMITER);
-                params.put(param[0], param[1]);
-            }
             final User user = InMemoryUserRepository.findByAccount(params.get("account"))
                     .orElseThrow(UserNotFoundException::new);
             if (user.checkPassword(params.get("password"))) {

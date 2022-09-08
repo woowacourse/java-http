@@ -6,6 +6,8 @@ import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapping {
 
+    public static final String DEFAULT_URL = "/**";
+
     private final Map<String, Controller> mappings;
 
     public RequestMapping(Map<String, Controller> mappings) {
@@ -28,11 +30,9 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest request) {
         final var uri = request.getUri();
-        return mappings.get(uri);
-    }
-
-    public boolean hasMappedController(HttpRequest request) {
-        final var uri = request.getUri();
-        return mappings.containsKey(uri);
+        if (mappings.containsKey(uri)) {
+            return mappings.get(uri);
+        }
+        return mappings.get(DEFAULT_URL);
     }
 }

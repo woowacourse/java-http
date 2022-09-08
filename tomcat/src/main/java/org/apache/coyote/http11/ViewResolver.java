@@ -28,7 +28,6 @@ public class ViewResolver {
     private void doRedirect(final String path, final HttpResponse response) {
         int index = path.indexOf(DEFAULT_PATH);
         String requestUri = createUri(path.substring(index + 1));
-        System.out.println(requestUri);
         response.setHttpStatus(HttpStatus.FOUND)
                 .setContentType(getContentType(requestUri))
                 .setLocation(requestUri);
@@ -36,7 +35,6 @@ public class ViewResolver {
 
     private void doResolve(final String path, final HttpResponse response) {
         String uri = createUri(path);
-        System.out.println("uri :" + uri);
         response.setHttpStatus(HttpStatus.OK)
                 .setContentType(getContentType(uri))
                 .setResponseBody(getResource(uri));

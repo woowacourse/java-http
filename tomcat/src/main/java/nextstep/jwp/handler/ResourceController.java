@@ -13,9 +13,18 @@ import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-public class ResourceHandler extends AbstractController {
+public class ResourceController extends AbstractController {
 
     private static final String STATIC_RESOURCE_PATH = "static";
+
+    private static final ResourceController INSTANCE = new ResourceController();
+
+    public static ResourceController getInstance() {
+        return INSTANCE;
+    }
+
+    private ResourceController() {
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

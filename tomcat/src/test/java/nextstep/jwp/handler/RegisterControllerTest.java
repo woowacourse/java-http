@@ -17,19 +17,19 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     @DisplayName("GET /register 경로로 요청시 200 OK와 함께 Register 페이지를 반환한다.")
     @Test
     void performGetMethod() throws IOException {
-        RegisterHandler registerHandler = new RegisterHandler();
+        RegisterController registerController = RegisterController.getInstance();
         String request = "GET /register HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         HttpResponse httpResponse = new HttpResponse();
-        registerHandler.service(httpRequest, httpResponse);
+        registerController.service(httpRequest, httpResponse);
 
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -47,7 +47,7 @@ class RegisterHandlerTest {
     @DisplayName("Post /register 경로로 요청시 302 Found와 함께 index 페이지를 반환한다.")
     @Test
     void performPostMethod() throws IOException {
-        RegisterHandler registerHandler = new RegisterHandler();
+        RegisterController registerController = RegisterController.getInstance();
         String request = "POST /register HTTP/1.1\n"
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n"
@@ -59,7 +59,7 @@ class RegisterHandlerTest {
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         HttpResponse httpResponse = new HttpResponse();
-        registerHandler.service(httpRequest, httpResponse);
+        registerController.service(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),

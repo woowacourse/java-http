@@ -15,7 +15,7 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class IndexHandlerTest {
+class IndexControllerTest {
 
     @DisplayName("GET /login 경로로 요청시 200 OK와 함께 Hello world가 담긴 HttpResponse를 반환한다.")
     @Test

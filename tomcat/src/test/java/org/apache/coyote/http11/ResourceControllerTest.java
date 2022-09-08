@@ -15,17 +15,17 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.handler.ResourceHandler;
+import nextstep.jwp.handler.ResourceController;
 
-class ResourceHandlerTest {
+class ResourceControllerTest {
 
     @DisplayName("정적 파일을 읽어와 HttpResponse를 반환한다.")
     @Test
     void staticFileRequest() throws IOException {
-        ResourceHandler resourceHandler = new ResourceHandler();
+        ResourceController resourceController = ResourceController.getInstance();
         String fileName = "/js/scripts.js";
         HttpResponse httpResponse = new HttpResponse();
-        resourceHandler.returnResource(fileName, httpResponse);
+        resourceController.returnResource(fileName, httpResponse);
 
         URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -44,10 +44,10 @@ class ResourceHandlerTest {
     @DisplayName("존재하지 않는 정적 파일을 요청할 경우 Not Found 응답을 한다.")
     @Test
     void responseBadRequestWhenRequestInvalidStaticFile() {
-        ResourceHandler resourceHandler = new ResourceHandler();
+        ResourceController resourceController = ResourceController.getInstance();
         String fileName = "/rex/rex.js";
         HttpResponse httpResponse = new HttpResponse();
-        resourceHandler.returnResource(fileName, httpResponse);
+        resourceController.returnResource(fileName, httpResponse);
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND)

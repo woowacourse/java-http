@@ -8,19 +8,19 @@ import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-import nextstep.jwp.handler.AbstractController;
-import nextstep.jwp.handler.IndexHandler;
-import nextstep.jwp.handler.LoginHandler;
-import nextstep.jwp.handler.RegisterHandler;
-import nextstep.jwp.handler.ResourceHandler;
+import nextstep.jwp.handler.IndexController;
+import nextstep.jwp.handler.LoginController;
+import nextstep.jwp.handler.NotMappedErrorController;
+import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.handler.ResourceController;
 
 public enum HandlerMapping {
 
-    DEFAULT("/", (request, response) -> new IndexHandler().service(request, response)),
-    LOGIN("/login", (request, response) -> new LoginHandler().service(request, response)),
-    REGISTER("/register", (request, response) -> new RegisterHandler().service(request, response)),
-    STATIC_FILE(Constants.NULL, (request, response) -> new ResourceHandler().service(request, response)),
-    NOF_FOUND(Constants.NULL, (request, response) -> new NotMappedHandler().service(request, response));
+    DEFAULT("/", (request, response) -> IndexController.getInstance().service(request, response)),
+    LOGIN("/login", (request, response) -> LoginController.getInstance().service(request, response)),
+    REGISTER("/register", (request, response) -> RegisterController.getInstance().service(request, response)),
+    STATIC_FILE(Constants.NULL, (request, response) -> ResourceController.getInstance().service(request, response)),
+    NOF_FOUND(Constants.NULL, (request, response) -> NotMappedErrorController.getInstance().service(request, response));
 
     private static class Constants {
         private static final String NULL = "null";
@@ -48,8 +48,5 @@ public enum HandlerMapping {
 
     public void execute(HttpRequest request, HttpResponse response) {
         this.executor.accept(request, response);
-    }
-
-    static class NotMappedHandler extends AbstractController {
     }
 }

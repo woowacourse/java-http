@@ -11,7 +11,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.model.User;
 
-public class LoginHandler extends AbstractController {
+public class LoginController extends AbstractController {
 
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
@@ -20,7 +20,15 @@ public class LoginHandler extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String JSESSIONID = "JSESSIONID";
 
+    private static final LoginController INSTANCE = new LoginController();
     private static final SessionManager sessionManager = new SessionManager();
+
+    public static LoginController getInstance() {
+        return INSTANCE;
+    }
+
+    private LoginController() {
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
@@ -28,14 +36,13 @@ public class LoginHandler extends AbstractController {
             String sessionId = request.getCookieValue(JSESSIONID);
             Session session = sessionManager.findSession(sessionId);
             User user = (User) session.getAttribute("user");
-            System.out.println(user);
 
             HttpResponse.redirect(response, INDEX_PAGE);
             response.addCookie(session.getId());
             return;
         }
 
-        ResourceHandler.returnResource(LOGIN_PAGE, response);
+        ResourceController.returnResource(LOGIN_PAGE, response);
     }
 
     @Override

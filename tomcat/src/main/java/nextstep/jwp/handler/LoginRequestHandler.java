@@ -23,6 +23,7 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
     protected HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
         if (!httpRequest.isEmptySessionId()) {
             return SessionManager.findSession(httpRequest.getJsessionId())
+                    .filter(session -> loginService.existsUser((User) session.getAttribute("user")))
                     .map(session -> HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html")))
                     .orElse(handleStaticResourceRequest(httpRequest));
         }

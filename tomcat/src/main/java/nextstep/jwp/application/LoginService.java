@@ -10,4 +10,9 @@ public class LoginService {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
     }
+
+    public boolean existsUser(final User user) {
+        return InMemoryUserRepository.findByAccount(user.getAccount())
+                .isPresent();
+    }
 }

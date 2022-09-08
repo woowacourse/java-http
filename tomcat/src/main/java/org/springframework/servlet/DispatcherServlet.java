@@ -18,6 +18,9 @@ import org.apache.coyote.Servlet;
 import org.apache.http.BasicHttpResponse;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.info.ContentType;
+import org.apache.http.info.HttpVersion;
+import org.apache.http.info.StatusCode;
 import org.reflections.Reflections;
 import org.richard.utils.CustomReflectionUtils;
 import org.richard.utils.YamlUtils;
@@ -95,14 +98,20 @@ public class DispatcherServlet implements Servlet {
     }
 
     private Function<HttpRequest, HttpResponse> resourceHandler() {
-        return new Function<HttpRequest, HttpResponse>() {
-            @Override
-            public HttpResponse apply(final HttpRequest httpRequest) {
-                final var resourceResponse = getResponseBodyByURI(httpRequest);
-                final var contentType = httpRequest.getContentType();
-
-                return BasicHttpResponse.from(resourceResponse, contentType);
+        return httpRequest -> {
+            final var accept = httpRequest.getHeader("Accept");
+            var contentType = ContentType.TEXT_HTML.getName();
+            if (Objects.nonNull(accept)) {
+                contentType = accept.split(",")[0];
             }
+            final var resourceAsBody = getResponseBodyByURI(httpRequest);
+
+            return BasicHttpResponse.builder()
+                    .httpVersion(HttpVersion.HTTP_1_1)
+                    .statusCode(StatusCode.OK_200)
+                    .contentType(contentType)
+                    .body(resourceAsBody)
+                    .build();
         };
     }
 

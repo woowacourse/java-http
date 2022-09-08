@@ -4,18 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestBodyContent {
+
+    private static final int NAME_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
+    private static final String CONTENT_SPLITTER = "&";
+    private static final String NAME_AND_VALUE_SPLITTER = "=";
+
     private final Map<String, String> body;
 
-    public RequestBodyContent(Map<String, String> body) {
+    public RequestBodyContent(final Map<String, String> body) {
         this.body = body;
     }
 
     public static RequestBodyContent parse(final String requestBody) {
         final Map<String, String> bodyContents = new HashMap<>();
 
-        for (final String queryString : requestBody.split("&")) {
-            final String name = queryString.split("=")[0];
-            final String value = queryString.split("=")[1];
+        for (final String queryString : requestBody.split(CONTENT_SPLITTER)) {
+            final String name = queryString.split(NAME_AND_VALUE_SPLITTER)[NAME_INDEX];
+            final String value = queryString.split(NAME_AND_VALUE_SPLITTER)[VALUE_INDEX];
             bodyContents.put(name, value);
         }
         return new RequestBodyContent(new HashMap<>(bodyContents));

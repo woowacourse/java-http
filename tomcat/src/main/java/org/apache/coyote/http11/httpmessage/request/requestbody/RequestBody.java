@@ -20,11 +20,4 @@ public class RequestBody {
     public String getRequestBody() {
         return requestBody;
     }
-
-    @Override
-    public String toString() {
-        return "Body{" +
-                "responseBody='" + requestBody + '\'' +
-                '}';
-    }
 }

@@ -7,33 +7,33 @@ import java.util.List;
 import org.apache.coyote.domain.FilePath;
 import org.apache.coyote.domain.HttpCookie;
 
-public class MyHttpResponse {
+public class HttpResponse {
 
     private final HttpStatusCode httpStatusCode;
     private final ContentType contentType;
     private final ResponseBody responseBody;
     private final List<String> responseHeader;
 
-    public MyHttpResponse(HttpStatusCode httpStatusCode, ContentType contentType, ResponseBody responseBody) {
+    public HttpResponse(HttpStatusCode httpStatusCode, ContentType contentType, ResponseBody responseBody) {
         this.httpStatusCode = httpStatusCode;
         this.contentType = contentType;
         this.responseBody = responseBody;
         this.responseHeader = new ArrayList<>();
     }
 
-    public static MyHttpResponse from(FilePath filePath, HttpStatusCode httpStatusCode)
+    public static HttpResponse from(FilePath filePath, HttpStatusCode httpStatusCode)
             throws URISyntaxException, IOException {
-        return new MyHttpResponse(httpStatusCode,
+        return new HttpResponse(httpStatusCode,
                 ContentType.find(filePath.getValue()),
                 ResponseBody.from(filePath.getValue()));
     }
 
-    public MyHttpResponse addRedirectUrlHeader(RedirectUrl redirectUrl) {
+    public HttpResponse addRedirectUrlHeader(RedirectUrl redirectUrl) {
         responseHeader.add(redirectUrl.getHeader());
         return this;
     }
 
-    public MyHttpResponse addSetCookieHeader(HttpCookie httpCookie) {
+    public HttpResponse addSetCookieHeader(HttpCookie httpCookie) {
         responseHeader.add(httpCookie.getHeader());
         return this;
     }

@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.domain.request.HttpRequest;
-import org.apache.coyote.domain.response.MyHttpResponse;
+import org.apache.coyote.domain.response.HttpResponse;
 import org.apache.coyote.handler.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequest.from(inputBufferedReader);
 
-            final MyHttpResponse httpResponse = HandlerMapping.getHandler(httpRequest).run(httpRequest);
+            final HttpResponse httpResponse = HandlerMapping.getHandler(httpRequest).run(httpRequest);
 
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();

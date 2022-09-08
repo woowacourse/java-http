@@ -11,15 +11,15 @@ import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 
-    private static final String HEADER_DELIMITER = " ";
-
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
     private final HttpCookie httpCookie;
 
-    private HttpRequest(RequestLine requestLine, RequestHeader requestHeader,
-                        RequestBody requestBody, HttpCookie httpCookie) {
+    private HttpRequest(final RequestLine requestLine,
+                        final RequestHeader requestHeader,
+                        final RequestBody requestBody,
+                        final HttpCookie httpCookie) {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
@@ -29,10 +29,10 @@ public class HttpRequest {
     public static HttpRequest from(BufferedReader inputReader) {
         try {
             String startLine = inputReader.readLine();
-            RequestLine requestLine = RequestLine.from(startLine);
-            RequestHeader requestHeader = RequestHeader.from(inputReader);
-            HttpCookie httpCookie = HttpCookie.from(requestHeader.getCookies());
-            RequestBody requestBody = RequestBody.of(inputReader, requestHeader.getContentLength());
+            final RequestLine requestLine = RequestLine.from(startLine);
+            final RequestHeader requestHeader = RequestHeader.from(inputReader);
+            final HttpCookie httpCookie = HttpCookie.from(requestHeader.getCookies());
+            final RequestBody requestBody = RequestBody.of(inputReader, requestHeader.getContentLength());
             return new HttpRequest(requestLine, requestHeader, requestBody, httpCookie);
         } catch (IOException e) {
             throw new IllegalArgumentException("");

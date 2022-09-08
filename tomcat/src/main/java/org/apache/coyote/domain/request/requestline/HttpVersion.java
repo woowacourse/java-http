@@ -3,6 +3,7 @@ package org.apache.coyote.domain.request.requestline;
 import java.util.Arrays;
 
 public enum HttpVersion {
+
     HTTP_09("HTTP/0.9"),
     HTTP_10("HTTP/1.0"),
     HTTP_11("HTTP/1.1"),

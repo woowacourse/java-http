@@ -3,13 +3,14 @@ package org.apache.coyote.http11.cookie;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Cookie {
     private final Map<String, String> cookies;
 
     public Cookie() {
-        this.cookies = new HashMap<>();
+        this.cookies = new ConcurrentHashMap<>();
     }
 
     public boolean hasCookie(String cookieName) {

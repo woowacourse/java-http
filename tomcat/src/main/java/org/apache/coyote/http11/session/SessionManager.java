@@ -5,10 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, HttpSession> sessions = new HashMap<>();
+    private static final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void add(HttpSession session) {

@@ -29,3 +29,4 @@
 
 ### 4단계 - 동시성 확장하기
 - [x] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 한다.
+- [x] Session 컬렉션을 동시성 컬렉션 적용하여 관리한다.

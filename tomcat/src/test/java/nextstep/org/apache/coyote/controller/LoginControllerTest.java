@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import org.apache.coyote.Controller;
 import nextstep.jwp.controller.LoginController;
+import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -32,21 +31,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void isRunnable() throws IOException {
-        // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/login", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
-
-        // when
-        final boolean actual = loginController.isRunnable(request);
-
-        // then
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    void loginSuccess() throws IOException, URISyntaxException {
+    void loginSuccess() throws Exception {
         // given
         final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=password");
         stubSocket = new StubSocket(requestString);
@@ -54,7 +39,7 @@ class LoginControllerTest {
         final Response response = Response.of(stubSocket.getOutputStream());
 
         // when
-        loginController.run(request, response);
+        loginController.service(request, response);
 
         // then
         assertAll(
@@ -64,14 +49,14 @@ class LoginControllerTest {
     }
 
     @Test
-    void loginFailure() throws IOException, URISyntaxException {
+    void loginFailure() throws Exception {
         final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=wrongPassword");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
         final Response response = Response.of(stubSocket.getOutputStream());
 
         // when
-        loginController.run(request, response);
+        loginController.service(request, response);
 
         // then
         assertAll(

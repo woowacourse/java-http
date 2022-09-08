@@ -34,21 +34,7 @@ class RegisterControllerTest {
     }
 
     @Test
-    void isRunnable() throws IOException {
-        // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/register", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
-
-        // when
-        final boolean actual = registerController.isRunnable(request);
-
-        // then
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    void registerSuccess() throws IOException, URISyntaxException {
+    void registerSuccess() throws Exception {
         // given
         final String requestString = RequestFixture.create(HttpMethod.POST, "/register", "account=accountName&password=password&email=gugu@naver.com");
         stubSocket = new StubSocket(requestString);
@@ -56,7 +42,7 @@ class RegisterControllerTest {
         final Response response = Response.of(stubSocket.getOutputStream());
 
         // when
-        registerController.run(request, response);
+        registerController.service(request, response);
 
         // then
         assertAll(
@@ -73,7 +59,7 @@ class RegisterControllerTest {
         final Response response = Response.of(stubSocket.getOutputStream());
 
         // when
-        assertThatThrownBy(() ->         registerController.run(request, response))
+        assertThatThrownBy(() ->         registerController.service(request, response))
                 .isExactlyInstanceOf(DuplicateAccountRegisterException.class);
     }
 }

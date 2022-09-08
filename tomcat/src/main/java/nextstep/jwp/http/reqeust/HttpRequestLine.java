@@ -24,18 +24,18 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine from(final String requestLine) {
-        String[] line = requestLine.split(REQUEST_LINE_SEPARATOR);
-        validateRequestLineFormat(line);
+        String[] requestLines = requestLine.split(REQUEST_LINE_SEPARATOR);
+        validateRequestLineFormat(requestLines);
 
-        String method = line[METHOD_INDEX];
-        URI uri = requestUri(line[URI_INDEX]);
-        String version = line[VERSION_INDEX];
+        String method = requestLines[METHOD_INDEX];
+        URI uri = requestUri(requestLines[URI_INDEX]);
+        String version = requestLines[VERSION_INDEX];
 
         return new HttpRequestLine(method, uri, version);
     }
 
-    private static void validateRequestLineFormat(final String[] line) {
-        if (line.length != REQUEST_LINE_CONTENT_COUNT) {
+    private static void validateRequestLineFormat(final String[] requestLines) {
+        if (requestLines.length != REQUEST_LINE_CONTENT_COUNT) {
             throw new IllegalArgumentException();
         }
     }

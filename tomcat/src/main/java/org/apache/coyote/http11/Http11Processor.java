@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,9 +16,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
+import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -25,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String DEFAULT_PAGE = "/index.html";
 
     private final Logger log;
     private final Socket connection;
@@ -51,16 +55,17 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final String response = route(httpRequest);
+            final HttpResponse response = route(httpRequest);
+            final String responseAsString = response.toString();
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseAsString.getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String route(final HttpRequest httpRequest) {
+    private HttpResponse route(final HttpRequest httpRequest) {
         final String requestUri = httpRequest.getUri();
         log.info("request method: {}, uri: {}", httpRequest.getMethod(), requestUri);
 
@@ -71,24 +76,25 @@ public class Http11Processor implements Runnable, Processor {
             return createRegisterResponse(httpRequest);
         }
         if (!requestUri.equals("/")) {
-            return createResponse(StatusCode.OK, ContentType.findByUri(requestUri), createResponseBody(requestUri));
+            return createResponse(StatusCode.OK, ContentType.findByUri(requestUri), createResponseBody(requestUri),
+                    httpRequest);
         }
 
-        return createResponse(StatusCode.OK, ContentType.HTML, "Hello world!");
+        return createResponse(StatusCode.OK, ContentType.HTML, "Hello world!", httpRequest);
     }
 
-    private String createLoginResponse(final HttpRequest httpRequest) {
+    private HttpResponse createLoginResponse(final HttpRequest httpRequest) {
         final Optional<String> jSessionId = httpRequest.findCookie("JSESSIONID");
         if (jSessionId.isPresent() && sessionManager.findSession(jSessionId.get()).isPresent()) {
-            return createRedirectResponse(StatusCode.FOUND, "/index.html");
+            return createRedirectResponse(StatusCode.FOUND, DEFAULT_PAGE, httpRequest);
         }
         if (httpRequest.isPostMethod()) {
             return login(httpRequest);
         }
-        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/login.html"));
+        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/login.html"), httpRequest);
     }
 
-    private String login(final HttpRequest httpRequest) {
+    private HttpResponse login(final HttpRequest httpRequest) {
         final StatusCode statusCode = StatusCode.FOUND;
         try {
             final User user = userService.login(httpRequest);
@@ -97,19 +103,19 @@ public class Http11Processor implements Runnable, Processor {
             sessionManager.add(session);
             session.setAttribute("user", user);
 
-            return createLoginSuccessResponse(statusCode, sessionId);
+            return createLoginSuccessResponse(statusCode, sessionId, httpRequest);
         } catch (final IllegalArgumentException e) {
-            return createRedirectResponse(statusCode, "/401.html");
+            return createRedirectResponse(statusCode, "/401.html", httpRequest);
         }
     }
 
-    private String createRegisterResponse(final HttpRequest httpRequest) {
+    private HttpResponse createRegisterResponse(final HttpRequest httpRequest) {
         if (httpRequest.isPostMethod()) {
             userService.register(httpRequest);
-            return createRedirectResponse(StatusCode.FOUND, "/index.html");
+            return createRedirectResponse(StatusCode.FOUND, DEFAULT_PAGE, httpRequest);
         }
 
-        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/register.html"));
+        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/register.html"), httpRequest);
     }
 
     private String createResponseBody(final String pathUri) {
@@ -126,28 +132,29 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final StatusCode statusCode, final ContentType contentType,
-                                  final String responseBody) {
-        return String.join("\r\n",
-                HTTP_VERSION + statusCode + " ",
-                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private HttpResponse createResponse(final StatusCode statusCode, final ContentType contentType,
+                                        final String responseBody, final HttpRequest httpRequest) {
+        final StatusLine statusLine = StatusLine.from(httpRequest.getProtocolVersion(), statusCode);
+        final Headers headers = Headers.from(Map.entry("Content-Type", contentType.getValue() + ";charset=utf-8"),
+                Map.entry("Content-Length", String.valueOf(responseBody.getBytes().length)));
+
+        return HttpResponse.from(statusLine, headers, responseBody);
     }
 
-    private String createRedirectResponse(final StatusCode statusCode, final String location) {
-        return String.join("\r\n",
-                HTTP_VERSION + statusCode.toString() + " ",
-                "Location: " + location + " ",
-                "");
+    private HttpResponse createRedirectResponse(final StatusCode statusCode, final String location,
+                                                final HttpRequest httpRequest) {
+        final StatusLine statusLine = StatusLine.from(httpRequest.getProtocolVersion(), statusCode);
+        final Headers headers = Headers.from(Map.entry("Location", location));
+        return HttpResponse.from(statusLine, headers, "");
     }
 
-    private String createLoginSuccessResponse(final StatusCode statusCode, final String jSessionCookie) {
-        return String.join("\r\n",
-                HTTP_VERSION + statusCode.toString() + " ",
-                "Location: /index.html" + " ",
-                "Set-Cookie: JSESSIONID=" + jSessionCookie + " ",
-                "");
+    private HttpResponse createLoginSuccessResponse(final StatusCode statusCode, final String jSessionCookie,
+                                                    final HttpRequest httpRequest) {
+        final StatusLine statusLine = StatusLine.from(httpRequest.getProtocolVersion(), statusCode);
+        final Headers headers = Headers.from(Map.entry("Location", DEFAULT_PAGE),
+                Map.entry("Set-Cookie", "JSESSIONID=" + jSessionCookie));
+        return HttpResponse.from(statusLine, headers, "");
     }
+
+
 }

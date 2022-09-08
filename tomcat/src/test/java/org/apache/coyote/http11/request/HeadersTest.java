@@ -8,12 +8,13 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.common.Headers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("RequestHeaders 클래스의")
-class RequestHeadersTest {
+class HeadersTest {
 
     @Nested
     @DisplayName("생성자는")
@@ -32,10 +33,10 @@ class RequestHeadersTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             // when
-            final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
+            final Headers headers = Headers.from(bufferedReader);
 
             // then
-            assertThat(requestHeaders.getHeaders()).contains(
+            assertThat(headers.getValues()).contains(
                     entry("Host", "localhost:8080"),
                     entry("Connection", "keep-alive"),
                     entry("Accept", "*/*")
@@ -53,7 +54,7 @@ class RequestHeadersTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             // when & then
-            assertThatThrownBy(() -> RequestHeaders.from(bufferedReader))
+            assertThatThrownBy(() -> Headers.from(bufferedReader))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("올바른 Header Field 형식이 아닙니다.");
         }

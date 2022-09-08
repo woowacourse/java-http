@@ -36,7 +36,7 @@ class HttpRequestTest {
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getPath()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getParams()).isEmpty(),
                 () -> assertThat(httpRequest.getRequestLine().getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpRequest.getRequestHeaders().getHeaders()).contains(
+                () -> assertThat(httpRequest.getRequestHeaders().getValues()).contains(
                         entry("Host", "localhost:8080"),
                         entry("Connection", "keep-alive")
                 )

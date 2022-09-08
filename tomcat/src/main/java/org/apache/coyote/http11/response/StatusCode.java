@@ -14,6 +14,14 @@ public enum StatusCode {
         this.reasonPhrase = reasonPhrase;
     }
 
+    public int getValue() {
+        return value;
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    }
+
     @Override
     public String toString() {
         return value + " " + reasonPhrase;

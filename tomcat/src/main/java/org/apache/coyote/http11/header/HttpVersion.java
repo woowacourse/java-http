@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.header;
 
 import java.util.Arrays;
-import org.apache.exception.TempException;
 
 public enum HttpVersion {
     HTTP11("HTTP/1.1");
@@ -20,6 +19,6 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(value -> value.version.equalsIgnoreCase(version))
                 .findAny()
-                .orElseThrow(TempException::new);
+                .orElseThrow(() -> new IllegalArgumentException("HTTP version " + version + " not supported"));
     }
 }

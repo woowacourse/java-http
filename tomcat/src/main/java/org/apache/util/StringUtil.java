@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.exception.TempException;
 
 public class StringUtil {
 
@@ -19,7 +18,7 @@ public class StringUtil {
         try {
             return reader.readLine();
         } catch (IOException e) {
-            throw new TempException();
+            throw new IllegalStateException("Failed to read line from BufferedReader", e);
         }
     }
 

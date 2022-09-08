@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.exception.TempException;
 
 public class UrlUtil {
 
@@ -22,7 +21,7 @@ public class UrlUtil {
     public static String parsePath(String pathString) {
         Matcher matcher = PATH_PATTERN.matcher(pathString);
         if (!matcher.find()) {
-            throw new TempException();
+            throw new IllegalArgumentException("Failed to parse path : " + pathString);
         }
         return matcher.group("path");
     }

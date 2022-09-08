@@ -7,7 +7,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Resource;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -16,11 +15,11 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
+    protected final HttpResponse doPost(HttpRequest request) {
         final Params params = request.getParamsFromBody();
 
         if (request.existSession()) {
-            return redirect("/index.html");
+            return redirectToIndex();
         }
 
         try {
@@ -34,39 +33,31 @@ public class LoginController extends AbstractController {
                 final Session session = request.generateSession();
                 session.setAttribute("user", user);
 
-                return new HttpResponse()
-                        .status(HttpStatus.FOUND)
+                return HttpResponse.found()
                         .setCookie(session)
                         .location("/index.html");
             }
 
-            return redirect("/401.html");
+            return fail(HttpStatus.UNAUTHORIZED, Page.UNAUTHORIZED);
 
         } catch (final UserNotFoundException e) {
-            return redirect("/401.html");
+            return fail(HttpStatus.UNAUTHORIZED, Page.UNAUTHORIZED);
 
         } catch (final NoSuchElementException e) {
-            return redirect("/404.html");
+            return fail(HttpStatus.BAD_REQUEST, Page.BAD_REQUEST);
         }
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected final HttpResponse doGet(HttpRequest request) {
         if (request.existSession()) {
-            return redirect("/index.html");
-        }
-        return success("login.html");
+            return redirectToIndex();
+       }
+
+        return success(HttpStatus.OK, Page.LOGIN);
     }
 
-    private HttpResponse success(final String filePath) {
-        return new HttpResponse()
-                .status(HttpStatus.OK)
-                .body(new Resource(filePath));
-    }
-
-    private HttpResponse redirect(final String filePath) {
-        return new HttpResponse()
-                .status(HttpStatus.FOUND)
-                .location(filePath);
+    private HttpResponse redirectToIndex() {
+        return redirect(HttpStatus.FOUND, "/");
     }
 }

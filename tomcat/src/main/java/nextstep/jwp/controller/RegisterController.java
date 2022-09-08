@@ -6,7 +6,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Resource;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -23,15 +22,15 @@ public class RegisterController extends AbstractController {
             final String email = params.find("email");
 
             if (isUserPresent(account)) {
-                return redirect("/404.html");
+                return redirect(HttpStatus.FOUND, "/404.html");
             }
 
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            return redirect("/index.html");
+            return redirectToIndex();
 
         } catch (final NoSuchElementException e) {
-            return redirect("/404.html");
+            return redirect(HttpStatus.FOUND, "/404.html");
         }
     }
 
@@ -42,14 +41,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return new HttpResponse()
-                .status(HttpStatus.OK)
-                .body(new Resource("register.html"));
+        return HttpResponse.ok()
+                .body(Page.REGISTER.getResource());
     }
 
-    private HttpResponse redirect(final String filePath) {
-        return new HttpResponse()
-                .status(HttpStatus.FOUND)
-                .location(filePath);
+    private HttpResponse redirectToIndex() {
+        return redirect(HttpStatus.FOUND, "/");
     }
 }

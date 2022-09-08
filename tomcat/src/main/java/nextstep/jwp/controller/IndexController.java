@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 
 public class IndexController extends AbstractController {
 
@@ -17,8 +16,7 @@ public class IndexController extends AbstractController {
     }
 
     private HttpResponse doAction() {
-        return new HttpResponse()
-                .status(HttpStatus.OK)
+        return HttpResponse.ok()
                 .body("Hello world!");
     }
 }

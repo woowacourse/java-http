@@ -33,7 +33,6 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
-        System.out.println("SESSIONS = " + SESSIONS);
     }
 
     public int size() {

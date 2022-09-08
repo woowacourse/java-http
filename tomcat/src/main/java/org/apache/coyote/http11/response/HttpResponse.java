@@ -115,7 +115,7 @@ public class HttpResponse {
     }
 
     private void appendLineWithCRLF(final String line) {
-        String endOfLine = " ";
+        final String endOfLine = " ";
         headers.append(line);
         headers.append(endOfLine);
         headers.append(CRLF);

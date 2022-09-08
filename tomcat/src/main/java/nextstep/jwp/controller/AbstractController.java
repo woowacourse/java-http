@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public HttpResponse service(final HttpRequest request) {
         final RequestMethod method = request.getMethod();
 
         if (method.equals(RequestMethod.GET)) {
@@ -20,11 +20,11 @@ public abstract class AbstractController implements Controller {
         return methodNotAllowed();
     }
 
-    protected HttpResponse doPost(HttpRequest request) {
+    protected HttpResponse doPost(final HttpRequest request) {
         return methodNotAllowed();
     }
 
-    protected HttpResponse doGet(HttpRequest request) {
+    protected HttpResponse doGet(final HttpRequest request) {
         return methodNotAllowed();
     }
 

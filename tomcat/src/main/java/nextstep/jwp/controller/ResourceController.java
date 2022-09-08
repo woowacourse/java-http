@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.Resource;
 public class ResourceController extends AbstractController {
 
     @Override
-    protected final HttpResponse doGet(HttpRequest request) {
+    protected final HttpResponse doGet(final HttpRequest request) {
         return HttpResponse.ok()
                 .body(new Resource(request.getPath()));
     }

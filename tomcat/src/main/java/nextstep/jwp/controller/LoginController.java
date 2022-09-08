@@ -16,7 +16,7 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     @Override
-    protected final HttpResponse doPost(HttpRequest request) {
+    protected final HttpResponse doPost(final HttpRequest request) {
         final Params params = request.getParamsFromBody();
 
         if (request.existSession()) {
@@ -49,7 +49,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected final HttpResponse doGet(HttpRequest request) {
+    protected final HttpResponse doGet(final HttpRequest request) {
         if (request.existSession()) {
             return redirectToIndex();
        }

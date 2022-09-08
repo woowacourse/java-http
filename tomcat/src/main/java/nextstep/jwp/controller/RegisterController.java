@@ -13,7 +13,7 @@ import nextstep.jwp.model.User;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
+    protected HttpResponse doPost(final HttpRequest request) {
         final Params params = request.getParamsFromBody();
 
         try {
@@ -40,7 +40,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected HttpResponse doGet(final HttpRequest request) {
         return HttpResponse.ok()
                 .body(Page.REGISTER.getResource());
     }

@@ -18,11 +18,11 @@ public class SessionManager {
         return INSTANCE;
     }
 
-    public void add(Session session) {
+    public void add(final Session session) {
         sessions.put(session.getId(), session);
     }
 
-    public Session findSession(String id) {
+    public Session findSession(final String id) {
         if (!sessions.containsKey(id)) {
             throw new NoSuchElementException("id에 해당하는 세션을 찾지 못했습니다 : " + id);
         }

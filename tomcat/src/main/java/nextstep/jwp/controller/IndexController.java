@@ -6,12 +6,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class IndexController extends AbstractController {
 
     @Override
-    protected final HttpResponse doPost(HttpRequest request) {
+    protected final HttpResponse doPost(final HttpRequest request) {
         return doAction();
     }
 
     @Override
-    protected final HttpResponse doGet(HttpRequest request) {
+    protected final HttpResponse doGet(final HttpRequest request) {
         return doAction();
     }
 

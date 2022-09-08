@@ -20,13 +20,13 @@ public enum HandlerMapping {
         this.controller = controller;
     }
 
-    public static HandlerAdapter getMethodHandler(HttpRequest request) {
+    public static MethodMapping getMethodHandler(HttpRequest request) {
         String path = request.path();
         Controller controller = Arrays.stream(values())
                 .filter(requestMapping -> requestMapping.path.equals(path))
                 .findAny()
                 .orElse(STATIC)
                 .controller;
-        return HandlerAdapter.from(controller, request);
+        return MethodMapping.from(controller, request);
     }
 }

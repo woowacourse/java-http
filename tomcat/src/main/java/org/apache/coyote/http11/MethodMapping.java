@@ -6,19 +6,19 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class HandlerAdapter {
+public class MethodMapping {
 
     private final Controller controller;
     private final HttpRequest request;
 
-    private HandlerAdapter(Controller controller, HttpRequest request) {
+    private MethodMapping(Controller controller, HttpRequest request) {
         this.controller = controller;
         this.request = request;
     }
 
-    public static HandlerAdapter from(Controller controller,
-                                      HttpRequest request) {
-        return new HandlerAdapter(controller, request);
+    public static MethodMapping from(Controller controller,
+                                     HttpRequest request) {
+        return new MethodMapping(controller, request);
     }
 
     public HttpResponse service() throws Exception {

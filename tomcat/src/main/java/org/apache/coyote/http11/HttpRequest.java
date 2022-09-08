@@ -78,8 +78,16 @@ public class HttpRequest {
         return headers.get(headerName);
     }
 
-    private URI getUri() throws URISyntaxException {
-        return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
+    private URI getUri() {
+        try {
+            return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URI requested");
+        }
+    }
+
+    public String getPath() {
+        return getUri().getPath();
     }
 
     public URL getUrl() {
@@ -122,6 +130,10 @@ public class HttpRequest {
 
     public String getQueryValue(String queryKey) {
         return queryParams.getQueryValue(queryKey);
+    }
+
+    public String getHttpMethod() {
+        return getHeaderValue(HTTP_METHOD);
     }
 
     public String getHttpVersion() {

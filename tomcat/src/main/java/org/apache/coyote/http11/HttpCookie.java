@@ -21,14 +21,14 @@ public class HttpCookie {
 
     public HttpCookie() {
         this.cookies = new HashMap<>();
-        cookies.put(JSESSIONID, generateJSESSIONID());
+        cookies.put(JSESSIONID, generateJSessionId());
     }
 
-    public static HttpCookie fromJSESSIONID(String id) {
+    public static HttpCookie fromJSessionId(String id) {
         return new HttpCookie(JSESSIONID + "=" + id);
     }
 
-    private String generateJSESSIONID() {
+    private String generateJSessionId() {
         return UUID.randomUUID().toString();
     }
 
@@ -47,7 +47,7 @@ public class HttpCookie {
         return cookies.get(cookieName);
     }
 
-    public String getCookieHeader() {
+    public String getJSessionCookieHeader() {
         return JSESSIONID + "=" + cookies.get(JSESSIONID);
     }
 }

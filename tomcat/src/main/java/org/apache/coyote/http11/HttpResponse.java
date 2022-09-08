@@ -62,7 +62,7 @@ public class HttpResponse {
         final StringJoiner lineJoiner = new StringJoiner(LINE_BREAK);
         lineJoiner.add(message);
         for (String headerName : headers.keySet()) {
-            final StringJoiner joiner = new StringJoiner(HEADER_DELIMITER, EMPTY_LINE, HEADER_SUFFIX);
+            final StringJoiner joiner = new StringJoiner(HEADER_DELIMITER, "", HEADER_SUFFIX);
             final String headerLine = joiner.add(headerName).add(headers.get(headerName)).toString();
             lineJoiner.add(headerLine);
         }
@@ -115,7 +115,7 @@ public class HttpResponse {
         }
 
         public Builder cookie(HttpCookie cookie) {
-            this.cookie = cookie.getCookieHeader();
+            this.cookie = cookie.getJSessionCookieHeader();
             return this;
         }
 

@@ -13,24 +13,11 @@ public class RequestLine {
         this.protocolVersion = protocolVersion;
     }
 
-//    private String updateIfNoDot(String path) {
-//        int index = path.indexOf(".");
-//        if (existsNotExtension(index)) {
-//            return path + "." + TEXT_HTML.getExtension();
-//        }
-//        return path;
-//    }
-
-    private boolean existsNotExtension(int index) {
-        return index == -1;
-    }
-
     public static RequestLine extract(String request) {
         return new RequestLine(
                 UrlParser.extractMethod(request),
                 UrlParser.extractPath(request),
                 UrlParser.extractProtocolVersion(request));
-
     }
 
     public HttpMethod getHttpMethod() {

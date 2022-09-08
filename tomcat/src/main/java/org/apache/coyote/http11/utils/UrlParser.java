@@ -3,6 +3,7 @@ package org.apache.coyote.http11.utils;
 import static org.apache.coyote.http11.response.ContentType.TEXT_HTML;
 
 import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,5 +31,10 @@ public class UrlParser {
             resource = url + "." + TEXT_HTML.getExtension();
         }
         return resource;
+    }
+
+    public static String extractOnlyFile(HttpRequest request) {
+        String path = request.getPath();
+        return path.substring(1);
     }
 }

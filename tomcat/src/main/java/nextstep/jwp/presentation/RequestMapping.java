@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.utils.UrlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,19 +12,19 @@ public class RequestMapping {
 
     static {
         HANDLER_MAPPING = Map.of(
-                "/index", new HomeController(),
-                "/login", new LoginController(),
-                "/register", new RegisterController(),
-                "/", new RootController());
+                "login", new LoginController(),
+                "register", new RegisterController(),
+                "", new RootController());
     }
 
     public static Controller getController(HttpRequest request) {
         log.info("request : {}", request);
-        if(isHomeUrl(request.getPath())){
+        if (isHomeUrl(request.getPath())) {
             return new HomeController();
         }
+        String path = UrlParser.extractOnlyFile(request);
         return HANDLER_MAPPING.keySet().stream()
-                .filter(key -> request.getPath().startsWith(key))
+                .filter(path::equals)
                 .map(HANDLER_MAPPING::get)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("알맞은 컨트롤러가 없습니다."));

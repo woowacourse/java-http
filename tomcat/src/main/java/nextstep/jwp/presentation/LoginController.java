@@ -51,12 +51,14 @@ public class LoginController extends AbstractController {
         }
         if (user.checkPassword(data.get("password"))) {
             final var session = checkSession(request, user);
+            HttpCookie requestCookie = request.getCookie();
             HttpCookie cookie = HttpCookie.ofJSessionId(session.getId());
             String indexResource = IOUtils.readResourceFile("/index.html");
 
             response.setStatusLine(new StatusLine(HttpStatus.FOUND))
                     .setHeaders(ResponseHeaders.create(request, indexResource))
                     .setResource(indexResource)
+                    .addLocation("/index.html")
                     .addCookie(cookie);
             return;
         }

@@ -16,8 +16,7 @@ public class ResponseHeaders {
         mp.put("Content-Type", ContentType.from(request.getPath()));
         mp.put("Content-Length", String.valueOf(resource.getBytes().length));
         if (request.hasCookie()) {
-            System.out.println("쿠키추가 : " + request.getCookie().getResponse());
-            mp.put("Set-Cookie", request.getCookie().getResponse());
+            mp.putIfAbsent("Set-Cookie", request.getCookie().getResponse());
         }
         return new ResponseHeaders(mp);
     }

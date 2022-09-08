@@ -8,10 +8,10 @@ import java.net.Socket;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = new HttpRequest(requestLine, httpHeaders, cookie, requestBody);
             Controller controller = RequestMapping.getController(request);
-
+            log.info("controller : {}", controller);
             HttpResponse response = new HttpResponse();
             controller.service(request, response);
             submitResponse(outputStream, response);

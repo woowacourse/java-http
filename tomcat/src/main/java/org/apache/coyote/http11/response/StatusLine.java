@@ -27,7 +27,7 @@ public class StatusLine {
         return protocolVersion;
     }
 
-    public String getResponse(){
+    public String getResponse() {
         return String.format("%s %d %s\r\n", DEFAULT_PROTOCOL_VERSION, httpStatus.getCode(), httpStatus.getMessage());
     }
 

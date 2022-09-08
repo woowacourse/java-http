@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.request.HttpCookie;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -10,7 +11,8 @@ public class HttpResponse {
     private ResponseHeaders headers;
     private String resource;
 
-    public HttpResponse(){}
+    public HttpResponse() {
+    }
 
     public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String resource) {
         this.statusLine = statusLine;
@@ -27,6 +29,7 @@ public class HttpResponse {
         this.headers = headers;
         return this;
     }
+
     public HttpResponse setResource(String resource) {
         this.resource = resource;
         return this;
@@ -63,5 +66,10 @@ public class HttpResponse {
                 ", headers=" + headers +
                 ", resource='" + resource + '\'' +
                 '}';
+    }
+
+    public HttpResponse addLocation(String redirectUrl) {
+        headers.put("Location", redirectUrl);
+        return this;
     }
 }

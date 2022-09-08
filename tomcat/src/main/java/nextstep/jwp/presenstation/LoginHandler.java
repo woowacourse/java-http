@@ -1,12 +1,11 @@
 package nextstep.jwp.presenstation;
 
 import java.util.Map;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.application.LoginService;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.http.ContentType;
-import org.apache.coyote.http11.handler.ResponseEntity;
 import org.apache.coyote.http11.handler.AbstractRequestHandler;
+import org.apache.coyote.http11.handler.ResponseEntity;
+import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpStatus;
@@ -15,6 +14,8 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.util.FileUtil;
 
 public class LoginHandler extends AbstractRequestHandler {
+
+    private final LoginService loginService = new LoginService();
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {
@@ -37,22 +38,15 @@ public class LoginHandler extends AbstractRequestHandler {
     }
 
     private ResponseEntity doPost(HttpRequest httpRequest) {
-        RequestBody requestBody = httpRequest.getRequestBody();
+        final RequestBody requestBody = httpRequest.getRequestBody();
+        final User user = loginService.findUser(requestBody.get("account"));
 
-        if (!requestBody.containsKey("account") || !requestBody.containsKey("password")) {
-            return new ResponseEntity(HttpStatus.NOTFOUND, FileUtil.readAllBytes("/404.html"), ContentType.HTML);
-        }
-
-        Optional<User> foundUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
-        if (foundUser.isPresent()) {
-            User user = foundUser.get();
-            if (user.checkPassword(requestBody.get("password"))) {
-                final var session = httpRequest.getSession();
-                session.setAttribute("user", user);
-                Map<String, String> headers = Map.of("Location", "/index.html", "Set-Cookie",
-                        "JSESSIONID=" + session.getId());
-                return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(headers));
-            }
+        if (user.checkPassword(requestBody.get("password"))) {
+            final var session = httpRequest.getSession();
+            session.setAttribute("user", user);
+            Map<String, String> headers = Map.of("Location", "/index.html", "Set-Cookie",
+                    "JSESSIONID=" + session.getId());
+            return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(headers));
         }
         return new ResponseEntity(HttpStatus.UNAUTHORIZED, FileUtil.readAllBytes("/401.html"), ContentType.HTML);
     }

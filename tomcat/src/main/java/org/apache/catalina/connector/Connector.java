@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,19 +17,22 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 10;
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
+    private final ExecutorService threadPool;
     private boolean stopped;
 
     public Connector(final RequestMapping requestMapping) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestMapping, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, final RequestMapping requestMapping) {
+    public Connector(final int port, final int acceptCount, final RequestMapping requestMapping, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.requestMapping = requestMapping;
+        this.threadPool = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,13 +71,13 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         final var processor = new Http11Processor(connection, requestMapping);
-        new Thread(processor).start();
+        threadPool.submit(processor);
     }
 
     public void stop() {
         stopped = true;
+        threadPool.shutdown();
         try {
             serverSocket.close();
         } catch (final IOException e) {

@@ -16,7 +16,7 @@ public enum HttpMethod {
 
     public static HttpMethod from(final String value) {
         return Stream.of(values())
-                .filter(it -> it.value.equals(value))
+                .filter(it -> it.value.equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(() -> new HttpMethodNotSupportException(value));
     }

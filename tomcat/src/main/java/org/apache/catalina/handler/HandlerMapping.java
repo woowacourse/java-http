@@ -11,12 +11,17 @@ import nextstep.jwp.controller.RegisterController;
 
 public class HandlerMapping {
 
+    private static final HandlerMapping INSTANCE = new HandlerMapping();
     private static final Map<String, Controller> handlers = new HashMap<>();
 
     static {
         handlers.put("/login", new LoginController());
         handlers.put("/index", new DefaultController());
         handlers.put("/register", new RegisterController());
+    }
+
+    public static HandlerMapping getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -27,4 +32,6 @@ public class HandlerMapping {
     public Controller getController(final HttpRequest request) {
         return handlers.get(request.getPath());
     }
+
+    private HandlerMapping() {}
 }

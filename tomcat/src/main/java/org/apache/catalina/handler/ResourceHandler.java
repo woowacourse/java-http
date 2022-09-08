@@ -18,4 +18,6 @@ public class ResourceHandler {
         }
         return path + ".html";
     }
+
+    private ResourceHandler() {}
 }

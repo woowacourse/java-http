@@ -5,7 +5,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
+    private static final SessionManager INSTANCE = new SessionManager();
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public void add(final Session session) {
@@ -31,4 +36,6 @@ public class SessionManager implements Manager {
     public boolean hasSession(final String id) {
         return SESSIONS.containsKey(id);
     }
+
+    private SessionManager() {}
 }

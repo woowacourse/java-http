@@ -17,6 +17,11 @@ public class UserCreateController extends AbstractController {
     private final static Logger LOGGER = LoggerFactory.getLogger(UserCreateController.class);
 
     @Override
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.redirect(Url.createUrl("/register.html"));
+    }
+
+    @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         UserRegisterRequest request = UserRegisterRequest.from(httpRequest.getParameters());
 

@@ -10,6 +10,12 @@ import org.apache.coyote.http11.message.response.header.ContentType;
 
 public class ResourceController extends AbstractController {
 
+    private static final ResourceController INSTANCE = new ResourceController();
+
+    public static ResourceController getINSTANCE() {
+        return INSTANCE;
+    }
+
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws IOException, URISyntaxException {
         final String path = httpRequest.getPath();
@@ -24,5 +30,8 @@ public class ResourceController extends AbstractController {
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         return httpRequest.isForResource();
+    }
+
+    private ResourceController() {
     }
 }

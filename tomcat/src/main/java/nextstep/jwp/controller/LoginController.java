@@ -15,8 +15,15 @@ import org.apache.coyote.http11.message.response.header.StatusCode;
 
 public class LoginController extends AbstractController {
 
+    private static final LoginController INSTANCE = new LoginController();
     private static final String KEY_ACCOUNT = "account";
     private static final String KEY_PASSWORD = "password";
+
+    private final UserService userService;
+
+    public static LoginController getINSTANCE() {
+        return INSTANCE;
+    }
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws IOException, URISyntaxException {
@@ -31,7 +38,7 @@ public class LoginController extends AbstractController {
         final QueryParams requestParams = QueryParams.from(httpRequest.getBody());
         checkParams(requestParams);
 
-        final User user = UserService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));
+        final User user = userService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));
         final Session session = createSession(httpRequest, user);
 
         final HttpResponse httpResponse = HttpResponse.ofRedirection(StatusCode.FOUND, View.INDEX.getPath());
@@ -59,5 +66,9 @@ public class LoginController extends AbstractController {
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         return httpRequest.isPath("/login");
+    }
+
+    private LoginController() {
+        this.userService = UserService.getINSTANCE();
     }
 }

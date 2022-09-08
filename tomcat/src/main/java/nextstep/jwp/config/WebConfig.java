@@ -11,14 +11,14 @@ public class WebConfig extends Config {
 
     @Override
     protected void addControllers() {
-        addController(new HelloController());
-        addController(new LoginController());
-        addController(new ResourceController());
-        addController(new RegisterController());
+        addController(HelloController.getINSTANCE());
+        addController(LoginController.getINSTANCE());
+        addController(ResourceController.getINSTANCE());
+        addController(RegisterController.getINSTANCE());
     }
 
     @Override
     protected void setExceptionHandler() {
-        setExceptionHandler(new ErrorHandler());
+        setExceptionHandler(ErrorHandler.getINSTANCE());
     }
 }

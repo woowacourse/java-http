@@ -12,6 +12,12 @@ import org.apache.coyote.http11.message.response.header.StatusCode;
 
 public class ErrorHandler implements ExceptionHandler {
 
+    private static final ErrorHandler INSTANCE = new ErrorHandler();
+
+    public static ErrorHandler getINSTANCE() {
+        return INSTANCE;
+    }
+
     @Override
     public HttpResponse handle(final Exception e) {
         try {
@@ -39,5 +45,8 @@ public class ErrorHandler implements ExceptionHandler {
         }
 
         return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR.getResource());
+    }
+
+    private ErrorHandler() {
     }
 }

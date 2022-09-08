@@ -24,4 +24,7 @@ public abstract class AbstractController implements Controller {
     protected abstract HttpResponse doGet(final HttpRequest httpRequest) throws Exception;
 
     protected abstract HttpResponse doPost(final HttpRequest httpRequest) throws Exception;
+
+    protected AbstractController() {
+    }
 }

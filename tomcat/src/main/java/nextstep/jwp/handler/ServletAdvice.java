@@ -18,10 +18,11 @@ public class ServletAdvice {
     static {
         exceptionMapping.put(IllegalArgumentException.class, NOT_FOUND);
         exceptionMapping.put(UncheckedServletException.class, NOT_FOUND);
+        exceptionMapping.put(IllegalStateException.class, NOT_FOUND);
         exceptionMapping.put(UnauthorizedException.class, UNAUTHORIZED);
     }
 
-    public <T extends Exception> HttpStatus getExceptionStatusCode(final Class<T> exception) throws IOException {
+    public <T extends Exception> HttpStatus getExceptionStatusCode(final Class<T> exception) {
         if (isUnhandledError(exception)) {
             return SERVER_ERROR;
         }

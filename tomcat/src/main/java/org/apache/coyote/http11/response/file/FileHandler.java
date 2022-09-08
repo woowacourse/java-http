@@ -15,7 +15,7 @@ public class FileHandler {
 
     public static boolean isStaticFilePath(final String resource) {
         final URL url = FileHandler.class.getClassLoader().getResource("static" + resource);
-        return url != null;
+        return url != null && resource.contains(".");
     }
 
     public static ResponseEntity createFileResponse(final String resource) throws IOException {

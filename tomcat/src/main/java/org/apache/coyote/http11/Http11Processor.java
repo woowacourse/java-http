@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String ROOT_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -90,20 +89,12 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         final String path = httpRequest.getPath();
 
-        if (isRootPath(path)) {
-            return ResponseEntity.createTextHtmlResponse(ServletResponseEntity.createWithResource(ROOT_BODY));
-        }
-
         if (FileHandler.isStaticFilePath(path)) {
             return FileHandler.createFileResponse(path);
         }
 
         final HttpFrontServlet frontServlet = new HttpFrontServlet();
         return frontServlet.service(httpRequest);
-    }
-
-    private boolean isRootPath(final String path) {
-        return path.equals("/");
     }
 
     private void writeResponse(final OutputStream outputStream, final String response) throws IOException {

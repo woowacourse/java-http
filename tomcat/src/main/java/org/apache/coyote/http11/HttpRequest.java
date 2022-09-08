@@ -2,12 +2,10 @@ package org.apache.coyote.http11;
 
 public class HttpRequest {
 
-    private final String requestLine;
     private final HttpHeader httpHeader;
     private final HttpBody httpBody;
 
-    public HttpRequest(final String requestLine, final HttpHeader httpHeader, final HttpBody httpBody) {
-        this.requestLine = requestLine;
+    public HttpRequest(final HttpHeader httpHeader, final HttpBody httpBody) {
         this.httpHeader = httpHeader;
         this.httpBody = httpBody;
     }
@@ -24,15 +22,11 @@ public class HttpRequest {
         return httpBody.getValue(key);
     }
 
-    public String getRequestLine() {
-        return requestLine;
-    }
-
     public String getMethod() {
-        return requestLine.split(" ")[0];
+        return httpHeader.getMethod();
     }
 
     public String getUrl() {
-        return requestLine.split(" ")[1];
+        return httpHeader.getUrl();
     }
 }

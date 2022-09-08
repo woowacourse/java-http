@@ -26,7 +26,7 @@ class PairConverterTest {
                 + "Connection: keep-alive ";
 
         final Map<String, String> map = PairConverter.toMap(target, "\n", ": ");
-        assertThat(map.get("Accept")).isEqualTo("text/css,*/*;q=0.1 ");
-        assertThat(map.get("Connection")).isEqualTo("keep-alive ");
+        assertThat(map.get("Accept")).isEqualTo("text/css,*/*;q=0.1");
+        assertThat(map.get("Connection")).isEqualTo("keep-alive");
     }
 }

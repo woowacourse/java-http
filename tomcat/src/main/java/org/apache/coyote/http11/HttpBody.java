@@ -57,8 +57,4 @@ public class HttpBody {
         }
         return this.body;
     }
-
-    public String getBodyByFormat() {
-        return body;
-    }
 }

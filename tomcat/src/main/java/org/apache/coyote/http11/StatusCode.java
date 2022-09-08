@@ -14,15 +14,7 @@ public enum StatusCode {
         this.statusMessage = statusMessage;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
     public String getStatusMessage() {
         return statusMessage;
-    }
-
-    public boolean isEqual(final StatusCode statusCode) {
-        return this == statusCode;
     }
 }

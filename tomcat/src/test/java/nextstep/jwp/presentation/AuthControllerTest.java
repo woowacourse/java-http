@@ -26,7 +26,7 @@ class AuthControllerTest {
                         "Content-Length: keep-alive "));
         final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
 
-        authController.service(new HttpRequest(requestLine, httpHeader, httpBody), new HttpResponse());
+        authController.service(new HttpRequest(httpHeader, httpBody), new HttpResponse());
 
         final User user = InMemoryUserRepository.findByAccount("green").get();
 
@@ -48,7 +48,7 @@ class AuthControllerTest {
                         "Content-Length: keep-alive "));
         final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
 
-        final HttpResponse httpResponse = authController.service(new HttpRequest(requestLine, httpHeader, httpBody),
+        final HttpResponse httpResponse = authController.service(new HttpRequest(httpHeader, httpBody),
                 new HttpResponse());
 
 //        assertThat(ht.getStatusCode()).isEqualTo(StatusCode.MOVED_TEMPORARILY);

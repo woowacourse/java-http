@@ -25,6 +25,6 @@ public class HttpResponse {
 
     public String getResponse() {
         return String.join("\r\n", httpHeader.getHeaderByFormat(),
-                httpBody.getBodyByFormat());
+                httpBody.getBody());
     }
 }

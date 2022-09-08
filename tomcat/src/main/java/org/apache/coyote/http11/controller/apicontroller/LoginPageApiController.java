@@ -30,7 +30,7 @@ public class LoginPageApiController extends AbstractController {
     }
 
     private String getBody() throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
         File file = new File(resource.getFile());
         Path path = file.toPath();
         return new String(Files.readAllBytes(path));

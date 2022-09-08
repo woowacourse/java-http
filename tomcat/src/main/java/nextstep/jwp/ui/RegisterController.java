@@ -37,9 +37,9 @@ public final class RegisterController extends AbstractController {
 
     private void registerUser(final Http11QueryParams queryParams) {
         final String account = queryParams.getValueFrom("account");
-        final String email = queryParams.getValueFrom("email");
         final String password = queryParams.getValueFrom("password");
-        final User user = new User(account, email, password);
+        final String email = queryParams.getValueFrom("email");
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info(user.toString());
     }

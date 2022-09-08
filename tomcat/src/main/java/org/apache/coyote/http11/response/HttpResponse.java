@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.common.FileReader;
 import org.slf4j.Logger;

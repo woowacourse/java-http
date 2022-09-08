@@ -19,6 +19,6 @@ public class SessionManagerTest {
         sessionManager.add(session);
 
         final Session foundSession = sessionManager.findSession("1234");
-        assertThat((User)foundSession.getAttribute("user")).isEqualTo(user);
+        assertThat((User) foundSession.getAttribute("user")).isEqualTo(user);
     }
 }

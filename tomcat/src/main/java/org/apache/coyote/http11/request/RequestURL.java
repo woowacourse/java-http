@@ -41,4 +41,8 @@ public class RequestURL {
     public String getPath() {
         return path;
     }
+
+    public Map<String, String> getQueryParams() {
+        return Collections.unmodifiableMap(queryParams);
+    }
 }

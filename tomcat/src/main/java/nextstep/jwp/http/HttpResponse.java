@@ -31,7 +31,7 @@ public class HttpResponse {
         final String responseLine = String.format("HTTP/1.1 %s ", statusCode.writeStatus());
         if (cookie != null) {
             final String header = String.join("\r\n",
-                writeSetCookieOfHeader(),
+                writeSetCookieOfHeader() +
                 "Content-Type: " + contentType.writeMediaType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ");
             return write(responseLine, header);
@@ -43,7 +43,9 @@ public class HttpResponse {
     }
 
     private String writeSetCookieOfHeader() {
-        return SET_COOKIE_HEADER_WITH_JSESSIONID + cookie.getJSessionId().orElse("") + " ";
+        return cookie.getJSessionId()
+            .map(it -> SET_COOKIE_HEADER_WITH_JSESSIONID + it + " \r\n")
+            .orElse("");
     }
 
     private byte[] write(String responseLine, String header) {

@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.User;
 
 public class Session {
 
@@ -21,7 +20,7 @@ public class Session {
         return values.get(name);
     }
 
-    public void setAttribute(String key, User user) {
-        values.put(key, user);
+    public void setAttribute(String key, Object object) {
+        values.put(key, object);
     }
 }

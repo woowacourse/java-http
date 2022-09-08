@@ -23,4 +23,7 @@ public class StringUtil {
         }
     }
 
+    public static boolean isNullOrBlank(String string) {
+        return string == null || string.isBlank();
+    }
 }

@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.util.StringUtil;
+
 public class User {
 
     private final Long id;
@@ -8,6 +11,7 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validate(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
@@ -16,6 +20,14 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    private void validate(String account, String password, String email) {
+        if (StringUtil.isNullOrBlank(account) ||
+                StringUtil.isNullOrBlank(password) ||
+                StringUtil.isNullOrBlank(email)) {
+            throw new IllegalArgumentException("account, password or email is null or blank");
+        }
     }
 
     public boolean checkPassword(String password) {

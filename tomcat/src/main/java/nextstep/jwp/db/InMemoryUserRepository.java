@@ -20,6 +20,9 @@ public class InMemoryUserRepository {
         if (!user.hasId()) {
             user = user.setId(id.getAndIncrement());
         }
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalStateException("already joined user");
+        }
         database.put(user.getAccount(), user);
     }
 

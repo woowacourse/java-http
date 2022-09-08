@@ -9,7 +9,7 @@ public class HttpRequest {
     private static final String REQUEST_LINE_SEPARATOR = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
-    private static final String URI_PATH_SEPARATOR = "\\?";
+    private static final String QUERY_SEPARATOR = "\\?";
     private static final int PATH_INDEX = 0;
     private static final int QUERY_PARAM_INDEX = 1;
     private static final int ONLY_PATH_SIZE = 1;
@@ -37,8 +37,8 @@ public class HttpRequest {
         List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
         HttpMethod httpMethod = HttpMethod.from(request.get(HTTP_METHOD_INDEX));
         String uri = request.get(URI_INDEX);
-        List<String> separatedUri = List.of(uri.split(URI_PATH_SEPARATOR));
-        return handleHavingQueryParams(httpMethod, uri, separatedUri, httpHeaders, requestBody);
+        List<String> queryParams = List.of(uri.split(QUERY_SEPARATOR));
+        return handleHavingQueryParams(httpMethod, uri, queryParams, httpHeaders, requestBody);
     }
 
     private static HttpRequest handleHavingQueryParams(HttpMethod httpMethod, String uri,

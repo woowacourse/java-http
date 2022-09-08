@@ -117,10 +117,10 @@ public class Http11Processor implements Runnable, Processor {
         return toOkResponse(httpRequest, responseBody);
     }
 
-    private String addExtension(String url) {
+    private String addExtension(final String url) {
         String extension = HttpRequestParser.parseExtension(url);
         if (extension.isBlank()) {
-            url = url + DEFAULT_EXTENSION;
+            return url + DEFAULT_EXTENSION;
         }
         return url;
     }

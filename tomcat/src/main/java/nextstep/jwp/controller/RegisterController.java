@@ -20,7 +20,12 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected HttpResponse doPost(HttpRequest request) {
+        final String account = request.getBodyValue("account");
+        final String email = request.getBodyValue("email");
+        final String password = request.getBodyValue("password");
+        userService.register(account, email, password);
+
         return HttpResponseBuilder.found("/index");
     }
 }

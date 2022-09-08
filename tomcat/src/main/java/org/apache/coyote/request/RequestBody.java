@@ -27,4 +27,8 @@ public class RequestBody {
 
         return new RequestBody(values);
     }
+
+    public Map<String, String> getValues() {
+        return values;
+    }
 }

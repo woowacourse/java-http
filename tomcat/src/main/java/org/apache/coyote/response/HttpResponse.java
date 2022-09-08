@@ -14,7 +14,19 @@ public class HttpResponse {
     }
 
     public void ok(final String path) throws IOException {
-        this.statusLine = StatusLine.from(StatusCode.OK);
+        updateByStatusCodeAndPath(StatusCode.OK, path);
+    }
+
+    public void redirect(final String path) throws IOException {
+        updateByStatusCodeAndPath(StatusCode.FOUND, path);
+    }
+
+    public void unauthorized(final String path) throws IOException {
+        updateByStatusCodeAndPath(StatusCode.UNAUTHORIZED, path);
+    }
+
+    private void updateByStatusCodeAndPath(final StatusCode statusCode, final String path) throws IOException {
+        this.statusLine = StatusLine.from(statusCode);
         final String content = StaticFile.load(path);
         this.header = ResponseHeader.of(StaticFile.parseContentType(path), String.valueOf(content.getBytes().length));
         this.body = new ResponseBody(content);

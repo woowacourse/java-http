@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -32,18 +33,18 @@ public class HttpRequest {
     }
 
     private static String splitBody(final BufferedReader bufferedReader, final HttpHeader header) throws IOException {
-        final String contentType = header.get("Content-Type");
-        final int contentLength = calculateContentLength(contentType);
+        final int contentLength = calculateContentLength(header);
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    private static int calculateContentLength(final String contentType) {
-        if (contentType == null) {
+    private static int calculateContentLength(final HttpHeader header) {
+        final String contentLength = header.get("Content-Length");
+        if (contentLength == null) {
             return 0;
         }
-        return Integer.parseInt(contentType);
+        return Integer.parseInt(contentLength);
     }
 
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
@@ -56,5 +57,9 @@ public class HttpRequest {
 
     public String getHeader() {
         return header.toString();
+    }
+
+    public Map<String, String> getParams() {
+        return body.getValues();
     }
 }

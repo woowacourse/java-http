@@ -178,9 +178,9 @@ class RegisterHandlerTest {
 `HttpRequest` 와 `HttpResponse` 각각에 대해서 책임을 어떻게 하면 가장 적절하게 분배할 수 있을지를 고민하였다.
 (어떻게 객체들을 구성할지 고민하였다.)
 
-![](../../../Desktop/스크린샷 2022-09-08 14.47.42.png)
+<img width="755" alt="스크린샷 2022-09-08 14 47 42" src="https://user-images.githubusercontent.com/57028386/189070514-fde81560-8246-4a68-9a05-b53ee690291b.png">
 
-![](../../../Desktop/스크린샷 2022-09-08 14.47.45.png)
+<img width="796" alt="스크린샷 2022-09-08 14 47 45" src="https://user-images.githubusercontent.com/57028386/189070551-a8be09fc-b92a-450b-aef6-264148779f5c.png">
 
 위의 그림을 참고하여 클래스를 도출해내었다.
 

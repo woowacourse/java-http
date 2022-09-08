@@ -40,9 +40,9 @@ public class HttpRequest {
         if (contentLength.isPresent()) {
             final String rawContentLength = contentLength.get();
             final String body = readBody(requestReader, Integer.parseInt(rawContentLength.trim()));
-            return new HttpRequest(requestLine, headers, RequestBody.from(body));
+            return new HttpRequest(requestLine, headers, new RequestBody(body));
         }
-        return new HttpRequest(requestLine, headers, RequestBody.ofEmpty());
+        return new HttpRequest(requestLine, headers, RequestBody.ofNull());
     }
 
     private static List<String> readHeaders(final BufferedReader requestReader) throws IOException {
@@ -100,11 +100,11 @@ public class HttpRequest {
         return SESSION_MANAGER.findSession(jSessionId.get());
     }
 
-    public QueryParams getUriQueryParams() {
+    public QueryParams getQueryParams() {
         return requestLine.getQueryParams();
     }
 
-    public QueryParams getBodyQueryParams() {
-        return requestBody.getQueryParams();
+    public String getBody() {
+        return requestBody.getValue();
     }
 }

@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        final QueryParams requestParams = httpRequest.getBodyQueryParams();
+        final QueryParams requestParams = QueryParams.from(httpRequest.getBody());
         checkParams(requestParams);
         UserService.register(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD),
                 requestParams.get(KEY_EMAIL));

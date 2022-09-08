@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        final QueryParams requestParams = httpRequest.getBodyQueryParams();
+        final QueryParams requestParams = QueryParams.from(httpRequest.getBody());
         checkParams(requestParams);
 
         final User user = UserService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));

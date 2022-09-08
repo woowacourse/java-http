@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import org.apache.catalina.cookie.HttpCookie;
 import org.apache.catalina.cookie.HttpCookies;
+import org.apache.coyote.response.View;
 import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {
@@ -13,7 +14,7 @@ public class HttpResponse {
     private HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     private String location;
     private final HttpCookies cookies = new HttpCookies(new HashMap<>());
-    private String viewResource;
+    private final View view = new View();
     private String contentType;
     private String messageBody;
 
@@ -32,17 +33,15 @@ public class HttpResponse {
     }
 
     public HttpResponse setViewResource(String viewResource) {
-        this.viewResource = viewResource;
+        final var path = view.toResourcePath(viewResource);
+        setContentType(view.findContentType(path));
+        setMessageBody(view.findContent(path));
         return this;
     }
 
     public HttpResponse addSetCookieHeader(String name, HttpCookie value) {
         cookies.setCookie(name, value);
         return this;
-    }
-
-    public String getViewResource() {
-        return viewResource;
     }
 
     public HttpResponse setContentType(String contentType) {
@@ -53,10 +52,6 @@ public class HttpResponse {
     public HttpResponse setMessageBody(String messageBody) {
         this.messageBody = messageBody;
         return this;
-    }
-
-    public boolean hasViewResource() {
-        return viewResource != null;
     }
 
     public String toMessage() {

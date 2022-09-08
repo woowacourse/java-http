@@ -1,25 +1,14 @@
-package org.apache.catalina.view;
+package org.apache.coyote.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
-public class ViewResolver {
+public class View {
 
-    public void resolve(HttpResponse response) {
-        if (!response.hasViewResource()) {
-            return;
-        }
-        final var uri = response.getViewResource();
-        final var path = toResourcePath(uri);
-        response.setContentType(findContentType(path))
-                .setMessageBody(findContent(path));
-    }
-
-    private Path toResourcePath(String uri) {
+    public Path toResourcePath(String uri) {
         try {
             final var classLoader = getClass().getClassLoader();
             final var url = classLoader.getResource("static" + uri);
@@ -30,7 +19,7 @@ public class ViewResolver {
         }
     }
 
-    private String findContent(Path path) {
+    public String findContent(Path path) {
         try {
             return new String(Files.readAllBytes(path));
         } catch (IOException e) {
@@ -38,7 +27,7 @@ public class ViewResolver {
         }
     }
 
-    private String findContentType(Path path) {
+    public String findContentType(Path path) {
         try {
             return String.format("%s;charset=utf-8", Files.probeContentType(path));
         } catch (IOException e) {

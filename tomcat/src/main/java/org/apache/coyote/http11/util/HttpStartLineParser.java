@@ -8,12 +8,10 @@ public class HttpStartLineParser {
 
     private static final String START_LINE_DELIMITER = " ";
     private static final String QUERY_STRING_DELIMITER = "?";
-    private static final String QUERY_PARAM_DELIMITER = "&";
-    private static final String KEY_AND_VALUE_DELIMITER = "=";
 
     private final HttpMethod httpMethod;
     private final String httpUrl;
-    private final Map<String, String> queryParams = new HashMap<>();
+    private Map<String, String> queryParams = new HashMap<>();
 
     public HttpStartLineParser(String startLine) {
         String[] startLines = startLine.split(START_LINE_DELIMITER);
@@ -35,17 +33,7 @@ public class HttpStartLineParser {
 
     private void parseQueryParams(String url) {
         String queryString = url.split("\\?")[1];
-        String[] keyAndValues = queryString.split(QUERY_PARAM_DELIMITER);
-        parseKeyAndValues(keyAndValues);
-    }
-
-    private void parseKeyAndValues(String[] keyAndValues) {
-        for (String keyAndValue : keyAndValues) {
-            String[] keyValue = keyAndValue.split(KEY_AND_VALUE_DELIMITER);
-            String key = keyValue[0];
-            String value = keyValue[1];
-            queryParams.put(key, value);
-        }
+        queryParams = StringUtils.parseKeyAndValues(queryString);
     }
 
     private String rejectQueryStringFromUrl(String url) {

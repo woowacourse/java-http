@@ -10,10 +10,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Map;
+import nextstep.jwp.exception.LoginFailException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.LoginService;
+import nextstep.jwp.service.RegisterService;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.util.HttpStartLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +22,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String HTML_MIME_TYPE = "text/html";
     private static final String RESOURCES_PREFIX = "static";
-    private static final String LOGIN_SUCCESS_REDIRECT_PAGE = "/index.html";
-    private static final String LOGIN_FAIL_REDIRECT_PAGE = "/401.html";
+    private static final String INDEX_REDIRECT_PAGE = "/index.html";
+    private static final String ERROR_REDIRECT_PAGE = "/401.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -41,18 +42,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String startLine = bufferedReader.readLine();
-            HttpStartLineParser httpStartLineParser = new HttpStartLineParser(startLine);
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            String response = getResponse(httpRequest);
 
-            HttpMethod httpMethod = httpStartLineParser.getHttpMethod();
-            String httpUrl = httpStartLineParser.getHttpUrl();
-            Map<String, String> queryParams = httpStartLineParser.getQueryParams();
-
-            if (httpUrl.equals("/favicon.ico")) {
-                return;
-            }
-
-            String response = getResponse(httpMethod, httpUrl, queryParams);
             byte[] bytes = response.getBytes();
             outputStream.write(bytes);
             outputStream.flush();
@@ -61,18 +53,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpMethod httpMethod, String httpUrl, Map<String, String> queryParams)
-            throws URISyntaxException, IOException {
-        if (httpUrl.equals("/")) {
+    private String getResponse(HttpRequest httpRequest) throws URISyntaxException, IOException {
+        HttpMethod httpMethod = httpRequest.getHttpMethod();
+        String httpUrl = httpRequest.getHttpUrl();
+
+        if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/favicon.ico")) {
+            return "";
+        }
+
+        if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/")) {
             String responseBody = "Hello world!";
             return toResponse(responseBody, HTML_MIME_TYPE);
         }
 
-        if (HttpMethod.GET.equals(httpMethod) && httpUrl.startsWith("/login") && !queryParams.isEmpty()) {
+        if (HttpMethod.POST.equals(httpMethod) && httpUrl.startsWith("/login")) {
+            Map<String, String> requestBody = httpRequest.getRequestBody();
             LoginService loginService = new LoginService();
-            boolean loginResult = loginService.login(queryParams);
-            String page = getLoginRedirectPage(loginResult);
-            return toRedirectResponse(page);
+
+            try {
+                loginService.login(requestBody);
+                return toRedirectResponse(INDEX_REDIRECT_PAGE);
+            } catch (LoginFailException e) {
+                return toRedirectResponse(ERROR_REDIRECT_PAGE);
+            }
+        }
+
+        if (HttpMethod.POST.equals(httpMethod) && httpUrl.startsWith("/register")) {
+            Map<String, String> requestBody = httpRequest.getRequestBody();
+            RegisterService registerService = new RegisterService();
+
+            try {
+                registerService.register(requestBody);
+                return toRedirectResponse(INDEX_REDIRECT_PAGE);
+            } catch (LoginFailException e) {
+                return toRedirectResponse(ERROR_REDIRECT_PAGE);
+            }
         }
 
         String fileName = ViewResolver.convert(httpUrl);
@@ -80,13 +95,6 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = toResponseBody(file);
         FileType fileType = FileType.from(fileName);
         return toResponse(responseBody, fileType.getMimeType());
-    }
-
-    private String getLoginRedirectPage(boolean loginResult) {
-        if (loginResult) {
-            return LOGIN_SUCCESS_REDIRECT_PAGE;
-        }
-        return LOGIN_FAIL_REDIRECT_PAGE;
     }
 
     private File getFile(String fileName) throws URISyntaxException {

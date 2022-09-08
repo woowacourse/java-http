@@ -13,6 +13,8 @@ public class HttpRequestHeader {
     private static final String HTTP_HEADER_REGEX = ": ";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
+    private static final String COOKIE_HEADER_KEY = "Cookie";
+    private static final String CONTENT_LENGTH_HEADER_KEY = "Content-Length";
 
     private final Map<String, String> value;
     private final HttpCookie httpCookie;
@@ -23,8 +25,8 @@ public class HttpRequestHeader {
     }
 
     private HttpCookie getHttpCookie(final Map<String, String> value) {
-        if (value.containsKey("Cookie")) {
-            final String cookie = value.get("Cookie");
+        if (value.containsKey(COOKIE_HEADER_KEY)) {
+            final String cookie = value.get(COOKIE_HEADER_KEY);
             return HttpCookie.from(cookie);
         }
         return new HttpCookie();
@@ -52,7 +54,7 @@ public class HttpRequestHeader {
     }
 
     public String getContentLength() {
-        return value.getOrDefault("Content-Length", "0");
+        return value.getOrDefault(CONTENT_LENGTH_HEADER_KEY, "0");
     }
 
     public boolean containsSession() {

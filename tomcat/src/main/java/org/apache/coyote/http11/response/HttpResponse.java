@@ -16,51 +16,44 @@ public class HttpResponse {
     private final String body;
 
     public HttpResponse(final StatusCode statusCode,
-                        final Map<String, String> responseHeader,
+                        final HttpResponseHeader responseHeader,
                         final String body) {
         this.statusCode = statusCode;
-        this.responseHeader = new HttpResponseHeader(responseHeader);
+        this.responseHeader = responseHeader;
         this.body = body;
     }
 
     public static HttpResponse ok(String resource, String body) {
         StatusCode statusCode = StatusCode.OK;
         ContentType contentType = ContentType.from(resource);
-        HashMap<String, String> header = new HashMap<>();
-        header.put("Content-Type", contentType.getValue());
-        return new HttpResponse(statusCode, header, body);
+        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
+        return new HttpResponse(statusCode, responseHeader, body);
     }
 
     public static HttpResponse found(String resource, String body) {
         StatusCode statusCode = StatusCode.FOUND;
         ContentType contentType = ContentType.from(resource);
-        HashMap<String, String> header = new HashMap<>();
-        header.put("Content-Type", contentType.getValue());
-        return new HttpResponse(statusCode, header, body);
+        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
+        return new HttpResponse(statusCode, responseHeader, body);
     }
 
-    public static HttpResponse unauthorized(String resource, String body) {
-        StatusCode statusCode = StatusCode.UNAUTHORIZED;
-        ContentType contentType = ContentType.from(resource);
-        HashMap<String, String> header = new HashMap<>();
-        header.put("Content-Type", contentType.getValue());
-        return new HttpResponse(statusCode, header, body);
+    public static HttpResponse unauthorized() {
+        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        return new HttpResponse(StatusCode.UNAUTHORIZED, responseHeader, FileReader.read("/401.html"));
     }
 
     public static HttpResponse notFound() {
-        HashMap<String, String> header = new HashMap<>();
-        header.put("Content-Type", ContentType.HTML.getValue());
-        return new HttpResponse(StatusCode.NOT_FOUND, header, FileReader.read("/404.html"));
+        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        return new HttpResponse(StatusCode.NOT_FOUND, responseHeader, FileReader.read("/404.html"));
     }
 
     public static HttpResponse internalServerError() {
-        HashMap<String, String> header = new HashMap<>();
-        header.put("Content-Type", ContentType.HTML.getValue());
-        return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, header, FileReader.read("/500.html"));
+        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, responseHeader, FileReader.read("/500.html"));
     }
 
     public void setCookie(String key, String value) {
-        responseHeader.add("Set-Cookie", key + "=" + value);
+        responseHeader.setCookie(key + "=" + value);
         log.info("setting-cookie: {}", key + "=" + value);
     }
 

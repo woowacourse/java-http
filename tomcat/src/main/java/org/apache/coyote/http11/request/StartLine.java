@@ -7,6 +7,8 @@ public class StartLine {
     private static final int REQUEST_URL_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
     private static final int START_LINE_SIZE = 3;
+    private static final String HTTP_GET_METHOD = "GET";
+    private static final String HTTP_POST_METHOD = "POST";
 
     private final String httpMethod;
     private final RequestURL requestURL;
@@ -35,11 +37,11 @@ public class StartLine {
     }
 
     public boolean isGet() {
-        return "GET".equals(httpMethod);
+        return HTTP_GET_METHOD.equals(httpMethod);
     }
 
     public boolean isPost() {
-        return "POST".equals(httpMethod);
+        return HTTP_POST_METHOD.equals(httpMethod);
     }
 
     public RequestURL getRequestURL() {

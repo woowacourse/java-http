@@ -11,6 +11,7 @@ public class HttpCookie {
     private static final String KEY_AND_VALUE_REGEX = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String JSESSIONID_KEY = "JSESSIONID";
 
     private final Map<String, String> value;
 
@@ -42,10 +43,10 @@ public class HttpCookie {
     }
 
     public boolean containsSession() {
-        return value.containsKey("JSESSIONID");
+        return value.containsKey(JSESSIONID_KEY);
     }
 
     public String getSession() {
-        return value.get("JSESSIONID");
+        return value.get(JSESSIONID_KEY);
     }
 }

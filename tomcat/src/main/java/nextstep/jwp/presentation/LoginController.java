@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
             createAndSaveSession(user, jSessionId);
             return httpResponse;
         } catch (RuntimeException e) {
-            return HttpResponse.unauthorized("/401.html", FileReader.read("/401.html"));
+            return HttpResponse.unauthorized();
         }
     }
 

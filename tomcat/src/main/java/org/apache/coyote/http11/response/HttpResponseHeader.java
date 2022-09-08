@@ -1,9 +1,13 @@
 package org.apache.coyote.http11.response;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponseHeader {
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> value;
 
@@ -11,8 +15,14 @@ public class HttpResponseHeader {
         this.value = value;
     }
 
-    public void add(String key, String value) {
-        this.value.put(key, value);
+    public static HttpResponseHeader fromContentType(final ContentType contentType) {
+        final Map<String, String> value = new HashMap<>();
+        value.put(CONTENT_TYPE, contentType.getValue());
+        return new HttpResponseHeader(value);
+    }
+
+    public void setCookie(String value) {
+        this.value.put(SET_COOKIE, value);
     }
 
     public String getAll() {

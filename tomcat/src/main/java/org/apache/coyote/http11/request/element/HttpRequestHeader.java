@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request.element;
 
 import static org.apache.coyote.Constants.CRLF;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,14 @@ public class HttpRequestHeader {
 
         String[] split = request.split(CRLF);
         String[] firstLine = split[0].split(" ");
+        Map<String, String> headers = extractHeaders(split);
 
         HttpMethod method = HttpMethod.valueOf(firstLine[0]);
-        Path path = Path.of(firstLine[1]);
-        Query query = new Query(firstLine[1]);
+        URI uri = URI.create(firstLine[1]);
 
-        Map<String, String> headers = extractHeaders(split);
+        Path path = Path.of(uri.getPath());
+        Query query = Query.of(uri.getQuery());
+
         return new HttpRequestHeader(method, path, query, headers);
     }
 

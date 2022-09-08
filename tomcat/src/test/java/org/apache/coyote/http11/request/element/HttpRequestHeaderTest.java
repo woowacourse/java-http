@@ -4,6 +4,8 @@ import static org.apache.coyote.Constants.CRLF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.junit.jupiter.api.Test;
@@ -18,7 +20,7 @@ class HttpRequestHeaderTest {
         HttpRequestHeader header = HttpRequestHeader.of(request);
         assertThat(header.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(header.getPath()).isEqualTo(Path.of("/index.html"));
-        assertThat(header.getQuery()).isEqualTo(Query.ofUri("/index.html"));
+        assertThat(header.getQuery()).isEqualTo(new Query(new LinkedHashMap<>()));
 
         assertThat(header.find("Host")).isEqualTo("localhost:8080");
         assertThat(header.find("Connection")).isEqualTo("keep-alive");

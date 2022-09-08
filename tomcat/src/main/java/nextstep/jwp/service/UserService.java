@@ -21,7 +21,7 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     public ResponseEntity login(HttpRequest request) {
-        Query query = Query.ofQuery(request.getBody());
+        Query query = Query.of(request.getBody());
 
         User user = InMemoryUserRepository.findByAccount(query.find("account"))
                 .orElseThrow(NoUserException::new);
@@ -58,7 +58,7 @@ public class UserService {
     }
 
     public ResponseEntity register(HttpRequest request) {
-        Query query = Query.ofQuery(request.getBody());
+        Query query = Query.of(request.getBody());
 
         String account = query.find("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {

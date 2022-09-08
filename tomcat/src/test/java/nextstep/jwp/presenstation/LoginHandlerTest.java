@@ -1,72 +1,83 @@
 package nextstep.jwp.presenstation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import org.apache.coyote.http11.Http11Processor;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
+import org.apache.coyote.http11.handler.ResponseEntity;
+import org.apache.coyote.http11.http.HttpCookie;
+import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpStatus;
+import org.apache.coyote.http11.http.RequestBody;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import support.StubSocket;
 
 class LoginHandlerTest {
 
-    @Test
-    void login() throws IOException {
-        // given
-        String requestBody = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
+    private final LoginHandler loginHandler = new LoginHandler();
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+    @Nested
+    @DisplayName("GET /login을 요청하면")
+    class Get {
 
-        // when
-        processor.process(socket);
+        @Test
+        @DisplayName("로그인페이지를 보여준다")
+        void naive() {
+            ResponseEntity responseEntity = loginHandler.handle(new HttpRequest(HttpMethod.GET, "/login"));
+            assertThat(responseEntity.getStatus()).isEqualTo(HttpStatus.OK);
+        }
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Length: " + Files.readAllBytes(new File(resource.getFile()).toPath()).length + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        @Test
+        @DisplayName("Cookie의 JSESSIONID가 세션에 있는 경우, /index 페이지로 리다이렉팅시킨다.")
+        void withSession() {
+            String sessionId = "sample-code";
+            Session session = new Session(sessionId);
+            session.setAttribute("user", new User("user", "password", "email@email.com"));
+            SessionManager.add(session);
+            HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", sessionId));
 
-        assertThat(socket.output()).isEqualTo(expected);
+            ResponseEntity responseEntity = loginHandler.handle(
+                    new HttpRequest(HttpMethod.GET, "/login", new HttpHeaders(), new RequestBody(), cookie));
+            assertThat(responseEntity.getStatus()).isEqualTo(HttpStatus.FOUND);
+        }
     }
 
-    @Test
-    void login_fail() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "account=fake_gugu&password=wrong_password");
+    @Nested
+    @DisplayName("POST /login을 요청하면")
+    class Post {
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        @Test
+        @DisplayName("존재하는 회원일 경우 Cookie에 SessionId를 담고 리다이렉팅 시킨다.")
+        void success() {
+            User user = new User("user", "password", "email@email.com");
+            InMemoryUserRepository.save(user);
 
-        // when
-        processor.process(socket);
+            RequestBody requestBody = new RequestBody(Map.of("account", "user", "password", "password"));
+            ResponseEntity responseEntity = loginHandler.handle(
+                    new HttpRequest(HttpMethod.POST, "/login", new HttpHeaders(), requestBody, new HttpCookie())
+            );
+            assertAll(
+                    () -> assertThat(responseEntity.getStatus()).isEqualTo(HttpStatus.FOUND),
+                    () -> assertThat(responseEntity.getHeaders().get("Set-Cookie")).isNotNull()
+            );
+        }
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final var expected = "HTTP/1.1 404 Not found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + Files.readAllBytes(new File(resource.getFile()).toPath()).length + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        @Test
+        @DisplayName("존재하는 회원일 경우 Cookie에 SessionId를 담고 리다이렉팅 시킨다.")
+        void fail_noExistUser() {
+            RequestBody requestBody = new RequestBody(Map.of("account", "user", "password", "password"));
+            ResponseEntity responseEntity = loginHandler.handle(
+                    new HttpRequest(HttpMethod.POST, "/login", new HttpHeaders(), requestBody, new HttpCookie())
+            );
 
-        assertThat(socket.output()).isEqualTo(expected);
+            assertThat(responseEntity.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        }
     }
-
 }

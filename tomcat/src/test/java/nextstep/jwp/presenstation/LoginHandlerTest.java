@@ -25,6 +25,7 @@ class LoginHandlerTest {
 
     @Nested
     @DisplayName("GET /login을 요청하면")
+
     class Get {
 
         @Test
@@ -72,7 +73,7 @@ class LoginHandlerTest {
         @Test
         @DisplayName("존재하는 회원일 경우 Cookie에 SessionId를 담고 리다이렉팅 시킨다.")
         void fail_noExistUser() {
-            RequestBody requestBody = new RequestBody(Map.of("account", "user", "password", "password"));
+            RequestBody requestBody = new RequestBody(Map.of("account", "user2", "password", "password2"));
             ResponseEntity responseEntity = loginHandler.handle(
                     new HttpRequest(HttpMethod.POST, "/login", new HttpHeaders(), requestBody, new HttpCookie())
             );

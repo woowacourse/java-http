@@ -1,21 +1,33 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.request.HttpRequest;
+import java.util.stream.Stream;
 
-public class RequestMapping {
+public enum RequestMapping {
 
-    public Controller getController(HttpRequest request) {
-        final String path = request.getPath();
+    INDEX("/", new IndexController()),
+    LOGIN("/login", new LoginController()),
+    REGISTER("/register", new RegisterController()),
+    ;
 
-        if (path.equals("/")) {
-            return new IndexController();
-        }
-        if (path.equals("/login")) {
-            return new LoginController();
-        }
-        if (path.equals("/register")) {
-            return new RegisterController();
-        }
-        return new ResourceController();
+    private static final ResourceController DEFAULT_CONTROLLER = new ResourceController();
+
+    private final String path;
+    private final Controller controller;
+
+    RequestMapping(final String path, final Controller controller) {
+        this.path = path;
+        this.controller = controller;
+    }
+
+    public static Controller from(final String path) {
+        return Stream.of(values())
+                .filter(mapping -> mapping.equalsPath(path))
+                .findAny()
+                .map(mapping -> mapping.controller)
+                .orElse(DEFAULT_CONTROLLER);
+    }
+
+    private boolean equalsPath(final String other) {
+        return path.equals(other);
     }
 }

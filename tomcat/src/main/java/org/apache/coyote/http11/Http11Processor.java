@@ -24,7 +24,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
 
@@ -44,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = readHttpRequest(bufferedReader);
-            final Controller controller = REQUEST_MAPPING.getController(request);
+            final Controller controller = RequestMapping.from(request.getPath());
             final HttpResponse response = controller.service(request);
 
             outputStream.write(response.asFormat().getBytes());

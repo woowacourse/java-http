@@ -97,13 +97,7 @@ public class HttpRequest {
         if (hasSession()) {
             return session;
         }
-
-        if (hasExistentSessionIdInCookies()) {
-            session = SessionManager.getSession(cookies.getSessionId());
-            return session;
-        }
-
-        session = SessionManager.createSession();
+        session = SessionManager.getSession(this);
         return session;
     }
 
@@ -111,7 +105,7 @@ public class HttpRequest {
         return session != null;
     }
 
-    private boolean hasExistentSessionIdInCookies() {
-        return cookies.hasSessionId() && SessionManager.hasSession(cookies.getSessionId());
+    public Cookies getCookies() {
+        return cookies;
     }
 }

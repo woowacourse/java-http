@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.exception.FileIOException;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class ResourceFindUtils {
             return responseBody;
         } catch (IOException exception) {
             log.error(exception.getMessage());
-            throw new ResourceNotFoundException();
+            throw new FileIOException();
         }
     }
 

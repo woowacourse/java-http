@@ -8,6 +8,7 @@ import nextstep.jwp.exception.handler.LoginFailedHandler;
 import nextstep.jwp.exception.handler.MethodNotAllowedHandler;
 import nextstep.jwp.exception.handler.NotFoundHandler;
 import nextstep.jwp.exception.handler.RuntimeExceptionHandler;
+import org.apache.coyote.http11.exception.FileIOException;
 import org.apache.coyote.http11.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 
@@ -17,6 +18,7 @@ public enum ErrorMapping {
     LOGIN_FAILED(new LoginFailedException(), new LoginFailedHandler()),
     METHOD_NOT_ALLOWED(new MethodNotAllowedException(), new MethodNotAllowedHandler()),
     UNCHECKED_SERVLET(new UncheckedServletException(), new RuntimeExceptionHandler()),
+    FILE_IO(new FileIOException(), new RuntimeExceptionHandler()),
     RUNTIME_EXCEPTION(new RuntimeException(), new RuntimeExceptionHandler()),
     ;
 

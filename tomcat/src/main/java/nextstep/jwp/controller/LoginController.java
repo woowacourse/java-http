@@ -1,8 +1,5 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.HeaderField.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HeaderField.CONTENT_TYPE;
-import static org.apache.coyote.http11.HeaderField.LOCATION;
 import static org.apache.coyote.http11.HeaderField.SET_COOKIE;
 
 import java.io.IOException;
@@ -12,13 +9,11 @@ import nextstep.jwp.LoginFailureException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBody;
+import org.apache.coyote.http11.response.HttpResponseBuilder;
 import org.apache.coyote.http11.response.ResponseHeaders;
 
 public class LoginController extends AbstractController {
@@ -32,19 +27,9 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
         if (isExistSession(request)) {
-
-            ResponseBody body = new ResponseBody();
-            final ResponseHeaders headers = ResponseHeaders.create()
-                    .addHeader(LOCATION, "/index");
-            return HttpResponse.create(HttpStatus.FOUND, headers, body);
+            return HttpResponseBuilder.found("/index");
         }
-
-        String requestUri = request.getRequestUri();
-        ResponseBody body = ResponseBody.from(requestUri);
-        final ResponseHeaders headers = ResponseHeaders.create()
-                .addHeader(CONTENT_TYPE, ContentType.find(requestUri) + ";charset=utf-8 ")
-                .addHeader(CONTENT_LENGTH, body.getBytesLength());
-        return HttpResponse.create(HttpStatus.OK, headers, body);
+        return HttpResponseBuilder.ok(request);
     }
 
     @Override
@@ -53,21 +38,23 @@ public class LoginController extends AbstractController {
         final String password = request.getBodyValue("password");
 
         try {
-            final User user = loginService.login(account, password);
             final UUID uuid = UUID.randomUUID();
-            final Session session = new Session(uuid.toString());
-            session.setAttribute("user", user);
-            SessionManager.add(session);
+            final User user = loginService.login(account, password);
+            addSession(uuid, user);
 
-            ResponseBody body = new ResponseBody();
             final ResponseHeaders headers = ResponseHeaders.create()
-                    .addHeader(LOCATION, "/index")
                     .addHeader(SET_COOKIE, "JSESSIONID=" + uuid);
-            return HttpResponse.create(HttpStatus.FOUND, headers, body);
+            return HttpResponseBuilder.found("/index", headers);
 
         } catch (LoginFailureException exception) {
             return ControllerAdvice.handleUnauthorized();
         }
+    }
+
+    private void addSession(UUID uuid, User user) {
+        final Session session = new Session(uuid.toString());
+        session.setAttribute("user", user);
+        SessionManager.add(session);
     }
 
     private boolean isExistSession(HttpRequest request) {

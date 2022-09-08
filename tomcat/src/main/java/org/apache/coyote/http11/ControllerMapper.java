@@ -1,8 +1,12 @@
-package nextstep.jwp.controller;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.controller.HomePageController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 
 public enum ControllerMapper {
     LOGIN(url -> url.contains("/login"), controller -> new LoginController()),

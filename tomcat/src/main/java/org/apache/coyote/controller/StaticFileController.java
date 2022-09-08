@@ -5,12 +5,13 @@ import org.apache.coyote.domain.response.ContentType;
 import org.apache.coyote.domain.response.HttpResponse;
 import org.apache.coyote.domain.response.HttpStatusCode;
 import org.apache.coyote.domain.response.ResponseBody;
+import org.apache.coyote.handler.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StaticFileController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
+    private static final Logger log = LoggerFactory.getLogger(StaticFileController.class);
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {

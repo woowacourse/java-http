@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.domain.FilePath;
 import org.apache.coyote.domain.HttpCookie;
 import org.apache.coyote.domain.request.requestline.HttpVersion;
 

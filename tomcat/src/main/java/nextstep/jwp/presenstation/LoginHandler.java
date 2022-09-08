@@ -1,6 +1,7 @@
 package nextstep.jwp.presenstation;
 
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.application.LoginService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.AbstractRequestHandler;
@@ -39,15 +40,17 @@ public class LoginHandler extends AbstractRequestHandler {
 
     private ResponseEntity doPost(HttpRequest httpRequest) {
         final RequestBody requestBody = httpRequest.getRequestBody();
-        final User user = loginService.findUser(requestBody.get("account"));
+        Optional<User> foundUser = loginService.findUser(requestBody.get("account"));
 
-        if (user.checkPassword(requestBody.get("password"))) {
+        if (foundUser.isPresent() && foundUser.get().checkPassword(requestBody.get("password"))) {
+            User user = foundUser.get();
             final var session = httpRequest.getSession();
             session.setAttribute("user", user);
             Map<String, String> headers = Map.of("Location", "/index.html", "Set-Cookie",
                     "JSESSIONID=" + session.getId());
             return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML, new HttpHeaders(headers));
         }
+
         return new ResponseEntity(HttpStatus.UNAUTHORIZED, FileUtil.readAllBytes("/401.html"), ContentType.HTML);
     }
 }

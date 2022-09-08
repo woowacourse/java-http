@@ -1,6 +1,9 @@
 package org.apache.catalina.connector;
 
+import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +19,16 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private final RequestMapping requestMapping;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final List<Controller> controllers) {
+        this(new RequestMapping(controllers), DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final RequestMapping requestMapping, final int port, final int acceptCount) {
+        this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -65,7 +70,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
     }
 

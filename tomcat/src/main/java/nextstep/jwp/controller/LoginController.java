@@ -1,24 +1,33 @@
 package nextstep.jwp.controller;
 
+import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.request.RequestUri;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.utils.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final List<String> PATHS = List.of("/login");
 
     @Override
-    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
+    public boolean containsPath(final String path) {
+        return PATHS.contains(path);
+    }
+
+    @Override
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         Session session = httpRequest.getSession(false);
         User user = (User) session.getAttribute("user");
         if (user != null) {

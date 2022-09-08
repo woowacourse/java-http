@@ -7,28 +7,27 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.controller.FileReader;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.exception.NoSuchUserException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.request.RequestUri;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_REQUEST_BODY = "Hello world!";
     private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -43,9 +42,17 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = makeHttpRequest(bufferedReader);
-
             HttpResponse httpResponse = new HttpResponse();
-            doService(httpRequest, httpResponse);
+
+            Controller controller = requestMapping.findController(httpRequest);
+
+            try {
+                controller.service(httpRequest, httpResponse);
+            } catch (NoSuchUserException e) {
+                httpResponse.redirect("/401.html");
+            } catch (Exception e) {
+                httpResponse.redirect("/404.html");
+            }
 
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
@@ -79,30 +86,5 @@ public class Http11Processor implements Runnable, Processor {
             return new String(buffer);
         }
         return "";
-    }
-
-    private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
-        RequestUri requestUri = httpRequest.getRequestUri();
-        String resourcePath = requestUri.getResourcePath();
-        if (resourcePath.equals("/")) {
-            httpResponse
-                    .httpStatus(HttpStatus.OK)
-                    .body(DEFAULT_REQUEST_BODY, MediaType.HTML);
-            return;
-        }
-        if (resourcePath.startsWith("/login")) {
-            new LoginController().service(httpRequest, httpResponse);
-            return;
-        }
-        if (resourcePath.startsWith("/register")) {
-            new RegisterController().service(httpRequest, httpResponse);
-            return;
-        }
-        try {
-            httpResponse.httpStatus(HttpStatus.OK)
-                    .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
-        } catch (Exception e) {
-            httpResponse.redirect("/404.html");
-        }
     }
 }

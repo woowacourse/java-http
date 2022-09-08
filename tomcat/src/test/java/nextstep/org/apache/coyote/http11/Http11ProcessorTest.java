@@ -2,15 +2,17 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import nextstep.jwp.RequestMapping;
+import nextstep.jwp.ui.HomeController;
+import nextstep.jwp.ui.LoginController;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -22,6 +24,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
+        RequestMapping.registerController(Map.of("/", new HomeController()));
 
         // when
         processor.process(socket);
@@ -105,7 +108,7 @@ class Http11ProcessorTest {
                 "Cookie: JSESSIONID=eden ",
                 "",
                 "");
-
+        RequestMapping.registerController(Map.of("/login", new LoginController()));
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 

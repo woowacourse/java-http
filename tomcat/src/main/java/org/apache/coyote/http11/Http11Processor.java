@@ -6,12 +6,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import nextstep.jwp.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.ui.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestParser;
-import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.http11.response.ResponseProcessor;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestHeaders;
+import org.apache.coyote.http11.request.SessionManager;
+import org.apache.coyote.http11.request.StartLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +43,60 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedWriter bufferedWriter = new BufferedWriter(
                      new OutputStreamWriter(connection.getOutputStream()))) {
 
-            final HttpRequest httpRequest = RequestParser.createRequest(bufferedReader);
-            final ResponseEntity responseEntity = Controller.processRequest(httpRequest);
-            final ResponseProcessor responseProcessor = ResponseProcessor.of(httpRequest, responseEntity);
-            final String response = responseProcessor.getResponse();
+            HttpRequest httpRequest = new HttpRequest();
+            HttpResponse httpResponse = new HttpResponse();
 
-            bufferedWriter.write(response);
+            setRequest(bufferedReader, httpRequest, httpResponse);
+            Controller controller = RequestMapping.getController(httpRequest.getPath());
+            controller.service(httpRequest, httpResponse);
+
+            bufferedWriter.write(httpResponse.asString());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void setRequest(BufferedReader bufferedReader, HttpRequest httpRequest, HttpResponse httpResponse)
+            throws IOException {
+        setStartLine(httpRequest, bufferedReader);
+        setRequestHeaders(httpRequest, httpResponse, bufferedReader);
+        setResponseBody(httpRequest, bufferedReader);
+    }
+
+    private void setStartLine(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
+        final StartLine startLine = new StartLine(bufferedReader.readLine());
+        httpRequest.setStartLine(startLine);
+    }
+
+    private void setRequestHeaders(HttpRequest httpRequest, HttpResponse httpResponse, BufferedReader bufferedReader)
+            throws IOException {
+        RequestHeaders requestHeaders = RequestHeaders.of(readRequestHeaders(bufferedReader));
+        httpRequest.setRequestHeaders(requestHeaders);
+        httpRequest.setSession(SessionManager.getSession(requestHeaders.getJSessionId()));
+        if (requestHeaders.doesNeedToSetJSessionIdCookie()) {
+            httpResponse.setJSessionCookie(requestHeaders.getJSessionId());
+        }
+    }
+
+
+    private static List<String> readRequestHeaders(BufferedReader bufferedReader) throws IOException {
+        String line;
+        List<String> requestHeaders = new ArrayList<>();
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            requestHeaders.add(line);
+        }
+        return requestHeaders;
+    }
+
+    private void setResponseBody(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
+        httpRequest.setRequestBody(RequestBody.of(readRequestBody(httpRequest.getRequestHeaders(), bufferedReader)));
+    }
+
+    private String readRequestBody(RequestHeaders requestHeaders, BufferedReader bufferedReader)
+            throws IOException {
+        int contentLength = requestHeaders.getContentLength();
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

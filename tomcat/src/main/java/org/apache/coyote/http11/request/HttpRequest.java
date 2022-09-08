@@ -36,7 +36,7 @@ public class HttpRequest {
     }
 
     public String getUri() {
-        return startLine.getUri();
+        return startLine.getPath();
     }
 
     public boolean containsSession() {

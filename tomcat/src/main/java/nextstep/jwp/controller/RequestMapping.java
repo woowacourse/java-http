@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public enum ControllerMapper {
+public enum RequestMapping {
 
     MAIN(MainController.getInstance(), (uri) -> uri.equals("/")),
     LOGIN(LoginController.getInstance(), (uri) -> uri.startsWith("/login")),
@@ -14,13 +14,13 @@ public enum ControllerMapper {
     private final Controller controller;
     private final Predicate<String> canHandle;
 
-    ControllerMapper(Controller controller, Predicate<String> canHandel) {
+    RequestMapping(Controller controller, Predicate<String> canHandel) {
         this.controller = controller;
         this.canHandle = canHandel;
     }
 
-    public static Optional<Controller> findController(String uri) {
-        Optional<ControllerMapper> result = Arrays.stream(ControllerMapper.values())
+    public static Optional<Controller> getController(String uri) {
+        Optional<RequestMapping> result = Arrays.stream(RequestMapping.values())
             .filter(c -> c.canHandle.test(uri))
             .findFirst();
 

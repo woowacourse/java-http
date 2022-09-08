@@ -27,6 +27,10 @@ public class HttpResponse {
         return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.FOUND);
     }
 
+    public static HttpResponse notFound() {
+        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.NOT_FOUND);
+    }
+
     public HttpResponse addProtocol(String protocol) {
         this.protocol = protocol;
         return this;

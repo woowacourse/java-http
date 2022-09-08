@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
             return doGet(request);
         }
 
-        return doNotFoundRequest(request);
+        return doNotFoundRequest();
     }
 
     @Override

@@ -19,7 +19,7 @@ public class MainController extends AbstractController {
             return doGet(request);
         }
 
-        return doNotFoundRequest(request);
+        return doNotFoundRequest();
     }
 
     @Override

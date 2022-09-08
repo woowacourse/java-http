@@ -17,7 +17,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
-        try (InputStream inputStream = connection.getInputStream();
-             OutputStream outputStream = connection.getOutputStream();
+        try (InputStream inputStream = connection.getInputStream(); OutputStream outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
 
@@ -62,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             return getDynamicResourceResponse(request);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return getNotFoundResponse(request);
+            return getNotFoundResponse();
         }
     }
 
@@ -74,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                     .addResponseBody(getStaticResourceResponse(request.getRequestLine().getUri().getPath()),
                             contentType);
         }
-        return getNotFoundResponse(request);
+        return getNotFoundResponse();
     }
 
     private String getStaticResourceResponse(String resourcePath) {
@@ -87,13 +85,8 @@ public class Http11Processor implements Runnable, Processor {
         return controller.service(request);
     }
 
-    private HttpResponse getNotFoundResponse(HttpRequest request) {
-        return getNotFoundResponse(new HttpResponse().addProtocol(request.getProtocol())
-                .addStatus(HttpStatus.NOT_FOUND)
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8));
-    }
-
-    private HttpResponse getNotFoundResponse(HttpResponse request) {
-        return request;
+    private HttpResponse getNotFoundResponse() {
+        return HttpResponse.notFound()
+                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }

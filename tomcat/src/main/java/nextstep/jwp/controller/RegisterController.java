@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
             return doGet(request);
         }
 
-        return doNotFoundRequest(request);
+        return doNotFoundRequest();
     }
 
     @Override

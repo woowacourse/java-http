@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
-            setCookieAndSession(httpRequest, httpResponse);
+            setSession(httpRequest, httpResponse);
 
             FrontController frontController = new FrontController();
             frontController.doDispatch(httpRequest, httpResponse);
@@ -49,13 +49,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void setCookieAndSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void setSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String cookieValue = httpRequest.getCookieValue();
         Cookie cookie = Cookie.of(cookieValue);
         Manager sessionManager = new SessionManager();
 
         if (!cookie.hasJSessionId()) {
-            UUID uuid = UUID.randomUUID();
+             UUID uuid = UUID.randomUUID();
             httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
             Session session = new Session(uuid.toString());
             sessionManager.add(session);

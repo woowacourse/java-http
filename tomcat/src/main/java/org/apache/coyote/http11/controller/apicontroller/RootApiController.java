@@ -8,7 +8,7 @@ import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 
-public class RootApiHandler extends AbstractController {
+public class RootApiController extends AbstractController {
 
     private static final Pattern ROOT_URI_PATTERN = Pattern.compile("/");
 

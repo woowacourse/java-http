@@ -2,6 +2,7 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,14 +24,19 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        String expectedRequestLine = "HTTP/1.1 200 OK ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+        assertAll(
+                () -> assertThat(actual).startsWith(expectedRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -51,13 +57,20 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectRequestLine = "HTTP/1.1 200 OK";
+        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expectedHeaderAndBody = String.join("\r\n",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + expectedBody.getBytes().length + " ",
+                "",
+                expectedBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -80,14 +93,19 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        String expectRequestLine = "HTTP/1.1 200 OK ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Content-Type: text/css;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -110,14 +128,19 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        String expectRequestLine = "HTTP/1.1 200 OK ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Content-Type: text/javascript;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -157,15 +180,21 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+        String expectRequestLine = "HTTP/1.1 302 Found ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Location: /404.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -188,15 +217,21 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+        String expectRequestLine = "HTTP/1.1 302 Found ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -220,15 +255,21 @@ class Http11ProcessorTest {
 
         // then
 
-        var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+        String expectRequestLine = "HTTP/1.1 302 Found ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -251,15 +292,21 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+        String expectRequestLine = "HTTP/1.1 302 Found ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -303,15 +350,22 @@ class Http11ProcessorTest {
         processor.run();
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+        String expectRequestLine = "HTTP/1.1 302 Found ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Location: /401.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 
     @Test
@@ -334,13 +388,19 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        String expectRequestLine = "HTTP/1.1 200 OK ";
+        var expectedHeaderAndBody = String.join("\r\n",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String actual = socket.output();
+
+        assertAll(
+                () -> assertThat(actual).startsWith(expectRequestLine),
+                () -> assertThat(actual).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(actual).contains(expectedHeaderAndBody)
+        );
     }
 }

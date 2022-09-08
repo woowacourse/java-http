@@ -52,10 +52,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public boolean isGetMethod() {
-        return requestLine.matchHttpMethod(HttpMethod.GET);
-    }
-
     public boolean matchRequestLine(HttpMethod httpMethod, Pattern uriPattern) {
         return requestLine.matchHttpMethod(httpMethod) && requestLine.matchUri(uriPattern);
     }

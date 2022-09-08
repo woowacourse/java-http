@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.httpmessage.ContentType;
@@ -24,7 +28,7 @@ class FrontControllerTest {
     @Test
     void file_요청의_httpRequest를_받으면_httpResponse_내부의_값을_세팅한다() throws IOException {
         // given
-        String requestMessage = 요청_메시지("GET / HTTP/1.1 ", "");
+        String requestMessage = 요청_메시지("GET /index.html HTTP/1.1 ", "");
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse(outputStream);
@@ -35,21 +39,20 @@ class FrontControllerTest {
          frontController.doDispatch(httpRequest, httpResponse);
 
         // then
-        String expectedBody = "Hello world!";
+        String expectedBody = getBody("/index.html");
 
-        assertThat(httpResponse).extracting("statusLine", "headers", "responseBody")
-                .containsExactly(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.OK)
-                        , getDefaultHeaders(expectedBody)
-                        , expectedBody
-                );
+        assertThat(httpResponse).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(outputStream).ok(expectedBody)
+                        .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 "));
+
         outputStream.close();
     }
 
     @Test
     void api_요청의_httpRequest를_받으면_httpResponse_내부의_값을_세팅한다() throws IOException {
         // given
-        String body = "account=gugu&password=password&email=hkkang@woowahan.com";
-        String requestMessage = 요청_메시지("POST /register HTTP/1.1 ", body);
+        String body = "";
+        String requestMessage = 요청_메시지("GET / HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpResponse httpResponse = new HttpResponse(outputStream);
@@ -60,16 +63,11 @@ class FrontControllerTest {
         frontController.doDispatch(httpRequest, httpResponse);
 
         // then
-        Headers expectedHeaders = new Headers(new LinkedHashMap<>());
-        expectedHeaders.putAll(Map.of("Location", "/index.html "));
-        expectedHeaders.putAll(getDefaultHeaders("").getHeaders());
-
         assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(outputStream)
-                        .setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.FOUND))
-                        .setHeaders(expectedHeaders)
-                        .setResponseBody("")
+                .isEqualTo(new HttpResponse(outputStream).ok("Hello world!")
+                                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
                 );
+
         outputStream.close();
     }
 
@@ -93,10 +91,11 @@ class FrontControllerTest {
         return httpRequest;
     }
 
-    private static Headers getDefaultHeaders(String expectedBody) {
-        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
-        headers.putAll(Map.of("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ",
-                "Content-Length", expectedBody.getBytes().length + " "));
-        return new Headers(headers);
+    private String getBody(String uri) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + uri);
+        File file = new File(resource.getFile());
+        Path path = file.toPath();
+        return new String(Files.readAllBytes(path));
     }
+
 }

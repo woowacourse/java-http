@@ -13,7 +13,7 @@ import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 
-public class LoginPageHandler extends AbstractController {
+public class LoginPageController extends AbstractController {
     private static final String USER = "user";
 
     private static final Pattern LOGIN_PAGE_URI_PATTERN = Pattern.compile("/login.html");

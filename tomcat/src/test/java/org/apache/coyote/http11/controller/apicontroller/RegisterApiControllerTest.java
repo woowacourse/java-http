@@ -4,13 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
-import org.apache.coyote.http11.httpmessage.response.HttpStatus;
+import org.apache.coyote.http11.httpmessage.response.HttpResponse;
+import org.apache.coyote.http11.session.Cookie;
+import org.apache.coyote.http11.session.Session;
 import org.junit.jupiter.api.Test;
 
 class RegisterApiControllerTest {
@@ -61,38 +64,52 @@ class RegisterApiControllerTest {
     }
 
     @Test
-    void registerApiHandler는_회원가입을_진행할_수_있다() throws IOException {
+    void registerApiHandler는_회원가입에_실패하면_INTERNAL_SERVER_ERROR를_반환한다() throws IOException {
         // given
-        String body = "account=gugu&password=password&email=hkkang@woowahan.com";
+        String body = "account=gugu&password=&email=hkkang@woowahan.com";
         String requestMessage = 회원가입_요청_메시지("POST /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse httpResponse = new HttpResponse(outputStream);
+
+
 
         RegisterApiController registerApiController = new RegisterApiController();
 
         // when
-        ApiHandlerResponse response = (ApiHandlerResponse) registerApiController.service(httpRequest);
+        registerApiController.service(httpRequest, httpResponse);
+        outputStream.close();
 
         // then
-        assertThat(response).usingRecursiveComparison()
-                .isEqualTo(ApiHandlerResponse.of(HttpStatus.FOUND, Map.of("Location", "/index.html "), "",
-                        ContentType.HTML));
+        assertThat(httpResponse).usingRecursiveComparison()
+                .isEqualTo(httpResponse.sendError());
     }
 
     @Test
-    void registerApiHandler는_회원가입에_실패하면_INTERNAL_SERVER_ERROR를_반환한다() throws IOException {
+    void registerApiHandler는_회원가입을_진행할_수_있다() throws IOException {
         // given
-        String body = "account=gugu&password=password&email=";
+        String body = "account=gugo&password=password&email=hkkang@woowahan.com";
         String requestMessage = 회원가입_요청_메시지("POST /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
+        Session session = new Session("sessionId");
+        httpRequest.setSession(session);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse httpResponse = new HttpResponse(outputStream);
+
+
 
         RegisterApiController registerApiController = new RegisterApiController();
 
         // when
-        ApiHandlerResponse response = (ApiHandlerResponse) registerApiController.service(httpRequest);
+        registerApiController.service(httpRequest, httpResponse);
 
         // then
-        assertThat(response).usingRecursiveComparison()
-                .isEqualTo(ApiHandlerResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, Map.of(), "", ContentType.HTML));
+        assertThat(httpResponse).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(outputStream).found("/index.html ")
+                        .addHeader("Set-Cookie", new Cookie(Map.of("JSESSIONID", session.getId())))
+                        .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
+                        .addHeader("Content-Length", "0 "));
+        outputStream.close();
     }
 
     private static String 회원가입_요청_메시지(String requestLine, String body) {

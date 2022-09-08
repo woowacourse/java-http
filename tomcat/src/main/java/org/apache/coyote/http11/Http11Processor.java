@@ -79,11 +79,8 @@ public class Http11Processor implements Runnable, Processor {
     private RequestBody readBody(final BufferedReader reader) throws IOException {
         final StringBuilder builder = new StringBuilder();
         while (reader.ready()) {
-            final char[] buffer = new char[128];
-            final int size = reader.read(buffer);
-            builder.append(buffer, 0, size);
+            builder.append((char) reader.read());
         }
-
         final String body = builder.toString();
         return RequestBody.parse(body);
     }

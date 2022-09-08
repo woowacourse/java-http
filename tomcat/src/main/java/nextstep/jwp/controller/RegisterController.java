@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.controller.dto.DtoAssembler;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
 
 public class RegisterController extends AbstractController {

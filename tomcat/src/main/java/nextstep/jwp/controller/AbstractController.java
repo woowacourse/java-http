@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.List;
 import org.apache.catalina.servlet.Controller;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;

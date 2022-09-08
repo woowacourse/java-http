@@ -8,7 +8,7 @@ import nextstep.jwp.exception.ExceptionListener;
 import nextstep.jwp.service.UserService;
 import org.apache.Servlet;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
 public class CustomServlet implements Servlet {

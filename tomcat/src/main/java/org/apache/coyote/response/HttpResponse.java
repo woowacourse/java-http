@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.response;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import org.apache.catalina.cookie.HttpCookie;
 import org.apache.catalina.cookie.HttpCookies;
-import org.apache.coyote.response.View;
 import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {
@@ -35,8 +34,7 @@ public class HttpResponse {
     public HttpResponse setViewResource(String viewResource) {
         final var path = view.toResourcePath(viewResource);
         setContentType(view.findContentType(path));
-        setMessageBody(view.findContent(path));
-        return this;
+        return setMessageBody(view.findContent(path));
     }
 
     public HttpResponse addSetCookieHeader(String name, HttpCookie value) {

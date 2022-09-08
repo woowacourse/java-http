@@ -12,7 +12,7 @@ import org.apache.Servlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestHeaders;
 import org.apache.coyote.request.StartLine;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;

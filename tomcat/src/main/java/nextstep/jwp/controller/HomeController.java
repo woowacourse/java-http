@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.util.List;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
 
 public class HomeController extends AbstractController {

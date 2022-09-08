@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.cookie.HttpCookie;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.response.HttpResponse;
 
 public class SessionManager {
 

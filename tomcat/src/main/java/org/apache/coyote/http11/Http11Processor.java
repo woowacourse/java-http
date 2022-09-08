@@ -38,19 +38,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = makeRequest(bufferedReader);
             final HttpResponse response = Registry.handle(httpRequest);
 
-            outputStream.write(makeHttpMessage(response).getBytes());
+            outputStream.write(response.makeResultMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             throw new IllegalArgumentException("요청을 정상적으로 처리하지 못했습니다.");
         }
-    }
-
-    private String makeHttpMessage(HttpResponse response) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + response.getHttpStatus() + " ",
-                "Content-Type: " + response.getHeader().getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + response.getBody().getBytes().length + " ",
-                "",
-                response.getBody());
     }
 }

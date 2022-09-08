@@ -12,21 +12,17 @@ import nextstep.jwp.exception.UncheckedServletException;
 
 public class HttpResponseBuilder {
 
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_DELIMITER = "=";
     private HttpStatus httpStatus;
     private Map<String, String> header;
     private String body;
+    private HttpCookie cookie;
 
     public HttpResponseBuilder(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
         this.header = new HashMap<>();
         this.body = "";
-    }
-
-    public HttpResponseBuilder header(final Header inputHeader) {
-        for (Entry<String, String> value : inputHeader.getHeaderMap().entrySet()) {
-            header.put(value.getKey(), value.getValue());
-        }
-        return this;
     }
 
     public HttpResponseBuilder header(final String key, final String value) {
@@ -36,7 +32,7 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder body(final Path path) {
         try {
-            header.put("Content-Type", Files.probeContentType(path));
+            header.put("Content-Type", Files.probeContentType(path) + ";charset=utf-8");
         } catch (IOException e) {
             throw new IllegalArgumentException("지원하지 않는 파일 형식입니다.");
         }
@@ -56,6 +52,14 @@ public class HttpResponseBuilder {
         return this;
     }
 
+    public HttpResponseBuilder addCookie(HttpCookie cookie, Session session) {
+        if(!cookie.checkJSessionIdInCookie()){
+            final Map<String, String> setCookie = cookie.ofJSessionId(session.getId());
+            header.put("Set-Cookie", JSESSIONID + COOKIE_DELIMITER + setCookie.get(JSESSIONID));
+        }
+        return this;
+    }
+
     public HttpResponse build() {
         if (httpStatus == HttpStatus.NOT_FOUND) {
             body(Paths.get(Objects.requireNonNull(
@@ -64,7 +68,7 @@ public class HttpResponseBuilder {
                     .getResource("static/404.html"))
                     .getPath()));
         }
-        return new HttpResponse(httpStatus, header, body);
+        return new HttpResponse(httpStatus, header, body, cookie);
     }
 
     private String readFile(final Path filePath) {
@@ -74,5 +78,4 @@ public class HttpResponseBuilder {
             throw new UncheckedServletException(e);
         }
     }
-
 }

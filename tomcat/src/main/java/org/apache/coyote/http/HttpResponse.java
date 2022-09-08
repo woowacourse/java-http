@@ -1,23 +1,25 @@
 package org.apache.coyote.http;
 
 
-import static org.apache.coyote.page.PageMapper.getFilePath;
 import static org.apache.coyote.page.PageMapper.getPath;
 
 import java.util.Map;
-import java.util.Objects;
-import nextstep.jwp.model.User;
 
 public class HttpResponse {
 
     private HttpStatus httpStatus;
     private Header header;
     private String body;
+    private HttpCookie cookie;
 
-    public HttpResponse(final HttpStatus httpStatus, final Map<String, String> header, final String body) {
+    public HttpResponse(final HttpStatus httpStatus,
+                        final Map<String, String> header,
+                        final String body,
+                        final HttpCookie cookie) {
         this.httpStatus = httpStatus;
         this.header = new Header(header);
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static HttpResponseBuilder ok() {
@@ -50,5 +52,13 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public String makeResultMessage() {
+        return String.join("\r\n",
+                "HTTP/1.1 " + this.getHttpStatus() + " ",
+                this.getHeader().getHeaderMapForMessage(),
+                "",
+                this.getBody());
     }
 }

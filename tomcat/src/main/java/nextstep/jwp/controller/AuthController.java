@@ -7,10 +7,12 @@ import nextstep.jwp.controller.dto.UserResponseDto;
 import nextstep.jwp.exception.UnauthorizedUserException;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.annotation.RequestMapping;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.annotation.Controller;
+import org.apache.coyote.http.SessionManager;
 
 @Controller
 public class AuthController {
@@ -29,9 +31,13 @@ public class AuthController {
         try{
             authService.login(httpRequest);
         } catch (UnauthorizedUserException | NoSuchElementException e){
-            return HttpResponse.redirect("/401.html").build();
+            return HttpResponse.redirect("/401.html")
+                    .build();
         }
-        return HttpResponse.redirect("/index.html").build();
+        return HttpResponse.redirect("/index.html")
+                .addCookie(httpRequest.getCookie(), httpRequest.getSession())
+                .build();
+
     }
 
     @RequestMapping(value = "/register", httpMethod = HttpMethod.GET)

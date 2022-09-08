@@ -1,9 +1,11 @@
 package org.apache.coyote.http;
 
+import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -16,6 +18,7 @@ public class HttpRequest {
     private final String uri;
     private final Header header;
     private final String body;
+    private final Session session;
 
 
     public HttpRequest(final String requestLine, Header header, String body) {
@@ -24,6 +27,7 @@ public class HttpRequest {
         this.uri = parseRequest[1];
         this.header = header;
         this.body = body;
+        this.session = SessionManager.add();
     }
 
     public Optional<String> findQueryByKey(String queryKey){
@@ -39,7 +43,7 @@ public class HttpRequest {
     }
 
     private boolean isFormUrlEncoded() {
-        final String contentType = header.getContentType();
+        final String contentType = header.getHeaderMap().get("Content-Type");
         return contentType!= null && contentType.equals("application/x-www-form-urlencoded");
     }
 
@@ -76,7 +80,19 @@ public class HttpRequest {
         return uri;
     }
 
+    public Header getHeader() {
+        return header;
+    }
+
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public HttpCookie getCookie(){
+        return header.getCookie();
     }
 }

@@ -1,23 +1,26 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticResourceController;
 
-public class RequestMapping {
+class RequestMapping {
 
-    Controller findController(final HttpRequest request) {
-        if (request.getUriPath().equals("/")) {
-            return new HomeController();
-        }
+    private static final Map<String, Controller> CONTROLLERS = Map.of(
+            "/", new HomeController(),
+            "/login", new LoginController(),
+            "/register", new RegisterController()
+    );
 
-        if (request.getUriPath().equals("/login")) {
-            return new LoginController();
-        }
+    private RequestMapping() {
+        throw new UnsupportedOperationException("RequestMapping 객체를 생성할 수 없습니다.");
+    }
 
-        if (request.getUriPath().equals("/register")) {
-            return new RegisterController();
+    static Controller getController(final HttpRequest request) {
+        if (CONTROLLERS.containsKey(request.getUriPath())) {
+            return CONTROLLERS.get(request.getUriPath());
         }
 
         return new StaticResourceController();

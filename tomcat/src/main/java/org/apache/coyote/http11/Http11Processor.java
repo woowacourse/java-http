@@ -12,8 +12,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpRequestConvertor httpRequestConvertor = new HttpRequestConvertor();
-    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -29,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = httpRequestConvertor.convert(inputStream);
+            final HttpRequest request = HttpRequestConvertor.convert(inputStream);
             final HttpResponse response = createResponse(request);
             outputStream.write(response.writeValueAsBytes());
             outputStream.flush();
@@ -39,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest request) {
-        final Controller controller = requestMapping.findController(request);
+        final Controller controller = RequestMapping.getController(request);
         final HttpResponse response = controller.doService(request);
 
         addContentTypeToResponse(request, response);

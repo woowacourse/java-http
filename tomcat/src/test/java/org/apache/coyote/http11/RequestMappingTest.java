@@ -13,7 +13,7 @@ import org.apache.coyote.http11.response.ResponseHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpMapperTest {
+class RequestMappingTest {
 
     @DisplayName("로그인이 실패하면 401.html로 리다이렉트한다.")
     @Test
@@ -29,7 +29,7 @@ class HttpMapperTest {
         HttpRequest httpRequest = HttpRequestFactory.parse(inputStream);
 
         //when
-        HttpResponse response = HttpMapper.createResponse(httpRequest);
+        HttpResponse response = RequestMapping.createResponse(httpRequest);
         ResponseHeaders responseHeader = response.getHeader();
         ResponseBody responseBody = response.getBody();
 
@@ -54,7 +54,7 @@ class HttpMapperTest {
         HttpRequest httpRequest = HttpRequestFactory.parse(inputStream);
 
         //when
-        HttpResponse response = HttpMapper.createResponse(httpRequest);
+        HttpResponse response = RequestMapping.createResponse(httpRequest);
         ResponseHeaders responseHeader = response.getHeader();
         ResponseBody responseBody = response.getBody();
 

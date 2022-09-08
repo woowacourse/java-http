@@ -6,7 +6,7 @@ import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class HttpMapper {
+public class RequestMapping {
 
     public static HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
         final String requestUri = httpRequest.getRequestLine();

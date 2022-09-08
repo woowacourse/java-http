@@ -27,14 +27,14 @@ public class HttpResponse implements Response {
                 new ResponseGeneral(HttpVersion.HTTP11, HttpStatus.OK),
                 ResponseHeaders.empty(),
                 ResponseBody.empty(),
-                null
+                Context.empty()
         );
     }
 
     public HttpResponse postProcess(HttpRequest request) {
         PostProcessMeta meta = new PostProcessMeta(request, this.body);
         MANAGER.add(request.getContext().getSession());
-        return new HttpResponse(general, this.headers.postProcess(meta), body, Context.asResponse(request.getContext()));
+        return new HttpResponse(general, this.headers.postProcess(meta), body, request.getContext().postProcess(meta));
     }
 
     public HttpResponse update(HttpStatus status, String bodyString) {
@@ -52,7 +52,11 @@ public class HttpResponse implements Response {
 
     @Override
     public String getAsString() {
+        String headerWithCookie = headers.getAsString();
+        if (!"".equals(context.getAsString())) {
+            headerWithCookie = headerWithCookie + "\n" + context.getAsString();
+        }
         return String.join("\n",
-                general.getAsString(), headers.getAsString(), context.getAsString(), "", body.getAsString());
+                general.getAsString(), headerWithCookie, "", body.getAsString());
     }
 }

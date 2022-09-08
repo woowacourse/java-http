@@ -54,7 +54,6 @@ public class HttpCookie {
 
     public String getAsString() {
         String setCookie = cookies.get(SESSION_NAME);
-        System.out.println("setCookie = " + setCookie);
         if (setCookie == null) {
             return "";
         }

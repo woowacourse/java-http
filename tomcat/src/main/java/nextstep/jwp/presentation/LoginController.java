@@ -1,6 +1,7 @@
 package nextstep.jwp.presentation;
 
 import static org.apache.catalina.Session.JSESSIONID;
+import static org.apache.coyote.http11.util.StaticResource.INDEX_PATH;
 
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -70,6 +71,6 @@ public class LoginController extends AbstractController {
 
     private void redirectIndex(final HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation("/index");
+        response.setLocation(INDEX_PATH);
     }
 }

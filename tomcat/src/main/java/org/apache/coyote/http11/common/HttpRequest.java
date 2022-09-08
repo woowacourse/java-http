@@ -41,10 +41,6 @@ public class HttpRequest {
         return startLine.getMethod();
     }
 
-    public boolean isResource() {
-        return startLine.isResource();
-    }
-
     public String getParam(final String param) {
         return startLine.getParam(param);
     }
@@ -61,6 +57,7 @@ public class HttpRequest {
         final SessionManager sessionManager = SessionManager.getInstance();
 
         if (create) {
+
             final Session session = new Session(String.valueOf(UUID.randomUUID()));
             sessionManager.add(session);
             return session;

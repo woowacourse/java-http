@@ -10,38 +10,31 @@ public class StaticResource {
 
     private static final String STATIC_PREFIX = "static";
     private static final String HTML_EXTENSION = ".html";
+    private static final String EXTENSION_DOT = ".";
 
-    public static final String UNAUTHORIZED_PAGE = "static/401.html";
-    public static final String NOT_FOUND_PAGE = "static/404.html";
-    public static final String INTERNAL_SERVER_ERROR_PAGE = "static/500.html";
+    public static final String INDEX_PATH = "/index";
+    public static final String UNAUTHORIZED_PATH = "/401";
+    public static final String NOT_FOUND_PATH = "/404";
+    public static final String INTERNAL_SERVER_ERROR_PATH = "/500";
 
     private StaticResource() {
     }
 
     public static Path ofRequest(final HttpRequest request) {
-        final String resourceName = readResourceName(request);
-        return findPath(resourceName);
-    }
-
-    private static String readResourceName(final HttpRequest request) {
-        String resourceName = request.getPath();
-        if (!request.isResource()) {
-            resourceName += HTML_EXTENSION;
-        }
-
-        return STATIC_PREFIX + resourceName;
+        final String resourceName = request.getPath();
+        return findPath(toResourceName(resourceName));
     }
 
     public static Path notFound() {
-        return findPath(NOT_FOUND_PAGE);
+        return findPath(toResourceName(NOT_FOUND_PATH));
     }
 
     public static Path internalServerError() {
-        return findPath(INTERNAL_SERVER_ERROR_PAGE);
+        return findPath(toResourceName(INTERNAL_SERVER_ERROR_PATH));
     }
 
     public static Path unauthorized() {
-        return findPath(UNAUTHORIZED_PAGE);
+        return findPath(toResourceName(UNAUTHORIZED_PATH));
     }
 
     private static Path findPath(final String resourceName) {
@@ -61,5 +54,13 @@ public class StaticResource {
         return StaticResource.class
                 .getClassLoader()
                 .getResource(resourceName);
+    }
+
+    private static String toResourceName(final String rawResourceName) {
+        if (!rawResourceName.contains(EXTENSION_DOT)) {
+            return String.join("", STATIC_PREFIX, rawResourceName, HTML_EXTENSION);
+        }
+
+        return String.join("", STATIC_PREFIX, rawResourceName);
     }
 }

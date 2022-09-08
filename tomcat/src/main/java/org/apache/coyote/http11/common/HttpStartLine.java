@@ -34,10 +34,6 @@ public class HttpStartLine {
         return path.getValue();
     }
 
-    public boolean isResource() {
-        return path.isResource();
-    }
-
     public String getParam(final String param) {
         return path.getParam(param);
     }

@@ -9,24 +9,28 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.StatusCode;
 import nextstep.jwp.utils.FileUtils;
 
-public abstract class AbstractController implements Controller{
+public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request) throws Exception {
+    public HttpResponse service(HttpRequest request) {
         if (request.matches(HttpMethod.GET)) {
-            handleGet(request);
+            return handleGet(request);
         }
         if (request.matches(HttpMethod.POST)) {
             handlePost(request);
         }
+        return notfound();
     }
 
-    protected HttpResponse handleGet(HttpRequest request) throws Exception {
+    protected HttpResponse handleGet(HttpRequest request) {
         return notfound();
     }
-    protected HttpResponse handlePost(HttpRequest request) throws Exception {
+
+    protected HttpResponse handlePost(HttpRequest request) {
         return notfound();
-    };
+    }
+
+    ;
 
     protected HttpResponse notfound() {
         return HttpResponse.of(StatusCode.NOT_FOUND, ContentType.TEXT_HTML,

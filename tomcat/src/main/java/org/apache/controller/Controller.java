@@ -5,5 +5,5 @@ import nextstep.jwp.http.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request) throws Exception;
+    HttpResponse service(HttpRequest request);
 }

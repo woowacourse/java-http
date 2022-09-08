@@ -11,6 +11,9 @@ public class RequestMapping {
 
     private static final Map<String, Controller> controllers = new HashMap<>();
 
+    private RequestMapping() {
+    }
+
     static {
         controllers.put("/", new HelloWorldController());
         controllers.put("/register", new RegisterController());

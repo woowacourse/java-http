@@ -1,16 +1,15 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.ControllerMapper;
+import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.controller.ControllerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RequestMapping {
 
-    public static HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
+    public static HttpResponse createResponse(HttpRequest httpRequest) throws Exception {
         final String requestUri = httpRequest.getRequestLine();
-        final Controller controller = ControllerMapper.findController(requestUri);
+        final AbstractController controller = ControllerMapper.findController(requestUri);
         return controller.getResponse(httpRequest);
     }
 }

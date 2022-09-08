@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.catalina.session.Session;
@@ -34,6 +35,12 @@ public class HttpRequest {
     public Session generateSession() {
         final Session session = Session.generate();
         SESSION_MANAGER.add(session);
+        return session;
+    }
+
+    public Session generateSession(final Map<String, Object> attributes) {
+        final Session session = generateSession();
+        session.setAttributes(attributes);
         return session;
     }
 

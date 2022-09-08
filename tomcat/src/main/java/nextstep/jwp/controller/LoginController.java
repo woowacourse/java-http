@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.catalina.session.Session;
@@ -30,8 +31,7 @@ public class LoginController extends AbstractController {
                     .orElseThrow(UserNotFoundException::new);
 
             if (user.checkPassword(password)) {
-                final Session session = request.generateSession();
-                session.setAttribute("user", user);
+                final Session session = request.generateSession(Map.of("user", user));
 
                 return HttpResponse.found()
                         .setCookie(session)

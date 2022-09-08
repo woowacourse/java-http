@@ -27,8 +27,8 @@ public class Session {
         return JSESSIONID + "=" + id;
     }
 
-    public void setAttribute(final String key, final Object value) {
-        attributes.put(key, value);
+    public void setAttributes(final Map<String, Object> attributes) {
+        this.attributes.putAll(attributes);
     }
 
     public String getId() {

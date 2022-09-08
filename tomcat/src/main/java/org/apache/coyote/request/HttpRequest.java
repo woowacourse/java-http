@@ -22,10 +22,6 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
-    public HttpMethod getMethod() {
-        return startLine.getMethod();
-    }
-
     public boolean isMethodOf(HttpMethod method) {
         return startLine.getMethod().equals(method);
     }

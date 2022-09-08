@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.support.HttpHeader;
 
 public class HttpCookies {
 
     private static final String COOKIE_DELIMITER = "; ";
-    private static final String SET_COOKIE_HEADER_FORMAT = "Set-Cookie: %s ";
 
     private final Map<String, HttpCookie> values;
 
@@ -39,7 +39,7 @@ public class HttpCookies {
         return values.values()
                 .stream()
                 .map(HttpCookie::toHeaderFormat)
-                .map(it -> String.format(SET_COOKIE_HEADER_FORMAT, it))
+                .map(HttpHeader.SET_COOKIE::toLineFormat)
                 .collect(Collectors.toList());
     }
 }

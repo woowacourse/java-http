@@ -30,9 +30,7 @@ public class Http11Response {
     }
 
     public static Http11Response of(final StatusCode statusCode, final String resourcePath) {
-        final URL resource = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource("static" + resourcePath);
+        final URL resource = getResource(resourcePath);
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
@@ -40,9 +38,7 @@ public class Http11Response {
     }
 
     public static Http11Response withLocation(final StatusCode statusCode, final String resourcePath, String location) {
-        final URL resource = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource("static" + resourcePath);
+        final URL resource = getResource(resourcePath);
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
@@ -54,14 +50,18 @@ public class Http11Response {
                                                           final String location,
                                                           final HttpCookie cookie,
                                                           final String cookieName) {
-        final URL resource = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource("static" + resourcePath);
+        final URL resource = getResource(resourcePath);
         validateResourcePath(resource);
 
         final String responseBody = getResponseBody(resource);
         return new Http11Response(statusCode,
                 ResponseHeaders.withLocationAndSetCookie(resourcePath, location, cookie, cookieName), responseBody);
+    }
+
+    private static URL getResource(String resourcePath) {
+        return Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("static" + resourcePath);
     }
 
     private static void validateResourcePath(final URL resource) {

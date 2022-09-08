@@ -24,7 +24,7 @@
 - [x] Session 구현 
 
 ### 3단계 - 리팩터링
-- [ ] HTTP Request 클래스 구현
+- [x] HTTP Request 클래스 구현
   - Request Line 
     - Method
     - Path

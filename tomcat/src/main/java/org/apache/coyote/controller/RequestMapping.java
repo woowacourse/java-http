@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class RequestMapping {
 
     private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
-    private static final List<Controller> controllers = List.of(new LoginController());
+    private static final List<Controller> controllers = List.of(new LoginController(), new RegisterController());
 
     public Controller getController(HttpRequest httpRequest) {
         return controllers.stream()

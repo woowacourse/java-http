@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestMapping.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final String URL = "/login";
 

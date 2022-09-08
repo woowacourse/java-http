@@ -9,17 +9,17 @@ import org.junit.jupiter.api.Test;
 class InMemoryUserRepositoryTest {
 
     @Test
-    void save() {
+    void saveIncrease() {
         User huni = new User("huni", "1234", "huni@huni.com");
         User jaehun = new User("jaehun", "1234", "jeahun@jaehun.com");
 
         InMemoryUserRepository.save(huni);
         InMemoryUserRepository.save(jaehun);
 
+        User savedHuni = InMemoryUserRepository.findByAccount("huni").get();
+        User savedJaehun = InMemoryUserRepository.findByAccount("jaehun").get();
         assertAll(
-                () -> assertThat(InMemoryUserRepository.findByAccount("huni").get().getId()).isEqualTo(2L),
-                () -> assertThat(InMemoryUserRepository.findByAccount("jaehun").get().getId()).isEqualTo(3L)
+                () -> assertThat(savedJaehun.getId() - savedHuni.getId()).isEqualTo(1L)
         );
     }
-
 }

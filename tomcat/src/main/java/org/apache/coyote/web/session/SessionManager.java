@@ -4,8 +4,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SessionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
     public static final String JSESSIONID = "JSESSIONID";
 
@@ -19,7 +23,7 @@ public class SessionManager {
 
     public static void addSession(final String id, final Session session) {
         store.put(id, session);
-        System.out.println(store);
+        LOGGER.info("All in Session Store = {} ", store);
     }
 
     public static Optional<Session> findSession(final String id) {

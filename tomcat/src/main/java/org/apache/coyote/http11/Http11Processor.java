@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.FrontRequestHandler;
+import org.apache.coyote.http11.handler.ResponseEntity;
 import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpRequest;

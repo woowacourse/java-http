@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpStatus;
 

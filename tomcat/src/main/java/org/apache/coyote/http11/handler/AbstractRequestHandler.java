@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import nextstep.jwp.presenstation.RequestHandler;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.ResponseEntity;
+import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.util.FileUtil;

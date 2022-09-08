@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.http;
 
-import org.apache.coyote.http11.ContentType;
-
 public class HttpResponse {
 
     private final String value;

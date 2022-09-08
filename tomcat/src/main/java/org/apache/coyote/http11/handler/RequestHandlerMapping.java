@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.presenstation.LoginHandler;
 import nextstep.jwp.presenstation.RegisterHandler;
-import nextstep.jwp.presenstation.RequestHandler;
 
 public class RequestHandlerMapping {
 

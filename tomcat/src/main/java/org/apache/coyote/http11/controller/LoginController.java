@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
                 .orElseThrow(NoSuchElementException::new);
 
         if (!user.checkPassword(parameters.get("password"))) {
-            response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+            response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
             response.addBodyFromFile("/401.html");
             return;
         }

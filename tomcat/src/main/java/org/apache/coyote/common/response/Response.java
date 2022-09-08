@@ -1,5 +1,7 @@
 package org.apache.coyote.common.response;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,29 +10,36 @@ import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.header.Cookie;
 import org.apache.coyote.common.header.Header;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Response {
+
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String RESPONSE_MESSAGE_DELIMITER = "\r\n";
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final String HEADER_BODY_DELIMITER = "";
     private static final String HEADER_VALUE_DELIMITER = ";";
 
+    private final OutputStream outputStream;
     private final HttpVersion httpVersion;
     private Status status;
     private final Map<String, String> headers;
     private String body;
 
-    public static ResponseBuilder builder(final HttpVersion httpVersion) {
-        return new ResponseBuilder(httpVersion);
+    public static ResponseBuilder builder(final HttpVersion httpVersion, final OutputStream outputStream) {
+        return new ResponseBuilder(httpVersion, outputStream);
     }
 
     private Response(final HttpVersion httpVersion, final Status status, final Map<String, String> headers,
-                     final String body) {
+                     final String body, final OutputStream outputStream) {
         this.httpVersion = httpVersion;
         this.status = status;
         this.headers = headers;
         this.body = body;
+        this.outputStream = outputStream;
     }
 
     public String getResponse() {
@@ -90,15 +99,26 @@ public class Response {
         return this;
     }
 
+    public void build() {
+        try {
+            outputStream.write(getResponse().getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.info(e.getMessage(), e);
+        }
+    }
+
     public static class ResponseBuilder {
 
+        private final OutputStream outputStream;
         private final HttpVersion httpVersion;
         private final Status status;
         private final Map<String, String> headers;
         private String body;
 
-        ResponseBuilder(final HttpVersion httpVersion) {
+        ResponseBuilder(final HttpVersion httpVersion, final OutputStream outputStream) {
             this.httpVersion = httpVersion;
+            this.outputStream = outputStream;
             this.status = Status.OK;
             this.headers = new HashMap<>();
             headers.put(Header.CONTENT_TYPE.getValue(), MediaType.TEXT_HTML.getValue());
@@ -106,15 +126,11 @@ public class Response {
         }
 
         public Response build() {
-            return new Response(httpVersion, status, this.headers, this.body);
+            return new Response(httpVersion, status, this.headers, this.body, this.outputStream);
         }
 
         public ResponseBuilder setJSessionIdCookie(final Cookie cookie) {
             if (cookie.getValue(Cookie.SESSION_ID_COOKIE_KEY).isEmpty()) {
-//                final String cookieValue = Cookie.setCookieBuilder(Cookie.SESSION_ID_COOKIE_KEY,
-//                                UUID.randomUUID().toString())
-//                                .asString();
-//                System.out.println(cookieValue);
                 headers.put(Header.SET_COOKIE.getValue(), cookie.generateSessionIdCookie());
             }
             return this;

@@ -1,28 +1,27 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import java.util.function.BiFunction;
-import nextstep.jwp.view.LoginHandler;
-import nextstep.jwp.view.LoginPageHandler;
-import nextstep.jwp.view.RegisterHandler;
+import nextstep.jwp.view.LoginController;
+import nextstep.jwp.view.RegisterController;
+import org.apache.coyote.common.controller.Controller;
 import org.apache.coyote.common.request.Request;
-import org.apache.coyote.common.response.Response;
 
 public class HandlerMapper {
 
-    private static final Map<String, BiFunction<Request, Response, Response>> cache;
-    private static final StaticResourceHandler staticResourceHandler;
+    private static final Map<String, Controller> cache;
+    private static final Controller staticResourceController;
 
     static {
         cache = Map.ofEntries(
-                Map.entry("GET /login", new LoginPageHandler()),
-                Map.entry("POST /login", new LoginHandler()),
-                Map.entry("POST /register", new RegisterHandler())
+                Map.entry("GET /login", new LoginController()),
+                Map.entry("POST /login", new LoginController()),
+                Map.entry("POST /register", new RegisterController()),
+                Map.entry("GET /register", new RegisterController())
         );
-        staticResourceHandler = new StaticResourceHandler();
+        staticResourceController = new StaticResourceController();
     }
 
-    public static BiFunction<Request, Response, Response> of(final Request request) {
-        return cache.getOrDefault(request.getRequestIdentifier(), staticResourceHandler);
+    public static Controller of(final Request request) {
+        return cache.getOrDefault(request.getRequestIdentifier(), staticResourceController);
     }
 }

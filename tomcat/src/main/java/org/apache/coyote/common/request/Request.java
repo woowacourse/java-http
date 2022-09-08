@@ -85,6 +85,10 @@ public class Request {
                 .apply(rawBody);
     }
 
+    public boolean isGetRequest() {
+        return this.method.equals(RequestMethod.GET);
+    }
+
     public String getPath() {
         return path;
     }

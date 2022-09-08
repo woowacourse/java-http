@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.function.BiFunction;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpVersion;
+import org.apache.coyote.common.controller.Controller;
 import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
 import org.slf4j.Logger;
@@ -38,18 +38,18 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestMessage = getRequestMessage(bufferedReader);
             final Request request = new Request(requestMessage);
-            final Response response = Response.builder(HttpVersion.HTTP11)
+
+            final Response response = Response.builder(HttpVersion.HTTP11, outputStream)
                     .setJSessionIdCookie(request.getCookie())
                     .build();
-            final BiFunction<Request, Response, Response> handler = HandlerMapper.of(request);
-            final String rawResponse = handler.apply(request, response)
-                    .getResponse();
+            final Controller controller = HandlerMapper.of(request);
+            controller.service(request, response);
 
-            outputStream.write(rawResponse.getBytes());
-            outputStream.flush();
             bufferedReader.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -59,8 +59,6 @@ public class Http11Processor implements Runnable, Processor {
         while (true) {
             line = bufferedReader.readLine();
             if (line.equals("")) {
-//                actual.append("")
-//                        .append("\r\n");
                 break;
             }
             actual.append(line)

@@ -14,7 +14,7 @@ class ResponseTest {
     @DisplayName("원하는 응답값을 생성한다.")
     @Test
     void createResponse() {
-        final Response response = Response.builder(HttpVersion.HTTP11)
+        final Response response = Response.builder(HttpVersion.HTTP11, null)
                 .build();
 
         final String actual = response.setContentType(MediaType.TEXT_CSS)

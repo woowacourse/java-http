@@ -1,18 +1,22 @@
 package nextstep.jwp.view;
 
-import java.util.function.BiFunction;
+import java.nio.charset.StandardCharsets;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.common.MediaType;
+import org.apache.coyote.common.controller.AbstractController;
 import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
+import org.apache.coyote.common.response.Status;
+import org.utils.ResourceGenerator;
 
-public class RegisterHandler implements BiFunction<Request, Response, Response> {
+public class RegisterController extends AbstractController {
 
     private static final String BODY_DOES_NOT_EXIST = "존재하지 않는 바디 데이터입니다.";
 
     @Override
-    public Response apply(final Request request, final Response response) {
+    protected void doPost(final Request request, final Response response) throws Exception {
+
         final String account = request.getBodyValue("account")
                 .orElseThrow(() -> new IllegalArgumentException(BODY_DOES_NOT_EXIST));
         final String email = request.getBodyValue("email")
@@ -21,7 +25,17 @@ public class RegisterHandler implements BiFunction<Request, Response, Response> 
                 .orElseThrow(() -> new IllegalArgumentException(BODY_DOES_NOT_EXIST));
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return response.setLocation("/")
-                .setContentType(MediaType.TEXT_HTML);
+        response.setStatus(Status.FOUND)
+                .setLocation("/")
+                .setContentType(MediaType.TEXT_HTML)
+                .build();
+    }
+
+    @Override
+    protected void doGet(final Request request, final Response response) throws Exception {
+        final String responseBody = ResourceGenerator.getStaticResource("/register");
+        response.setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                .setBody(responseBody)
+                .build();
     }
 }

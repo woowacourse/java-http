@@ -1,10 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.catalina.handler.AbstractController;
@@ -27,7 +22,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
         if (isLogin(request)) {
-            return getRedirectResponse(request, "/index.html");
+            return getRedirectResponse(request, "/index");
         }
 
         return new HttpResponse.Builder(request).ok()
@@ -37,7 +32,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
         if (isLogin(request)) {
-            return getRedirectResponse(request, "/index.html");
+            return getRedirectResponse(request, "/index");
         }
 
         final Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
@@ -56,19 +51,9 @@ public class LoginController extends AbstractController {
         log.info("로그인 성공! 아이디: {}", user.getAccount());
 
         return new HttpResponse.Builder(request)
-            .redirect().location("/index.html")
+            .redirect().location("/index")
             .cookie(HttpCookie.fromJSessionId(session.getId()))
             .build();
-    }
-
-    private String getStaticResource(final URL url) {
-        try {
-            return Files.readString(new File(Objects.requireNonNull(url)
-                .getFile())
-                .toPath());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("No such resource");
-        }
     }
 
     private HttpResponse getRedirectResponse(final HttpRequest request, final String location) {

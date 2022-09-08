@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.coyote.http11.request.HttpRequest;
 
+import nextstep.jwp.controller.DefaultController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 

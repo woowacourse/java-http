@@ -1,11 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
-
 import org.apache.catalina.handler.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -37,17 +31,7 @@ public class RegisterController extends AbstractController {
 
         return new HttpResponse.Builder(request)
             .redirect()
-            .location("index.html")
+            .location("index")
             .build();
-    }
-
-    private String getStaticResource(final URL url) {
-        try {
-            return Files.readString(new File(Objects.requireNonNull(url)
-                .getFile())
-                .toPath());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("No such resource");
-        }
     }
 }

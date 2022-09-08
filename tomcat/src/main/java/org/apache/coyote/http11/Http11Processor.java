@@ -67,9 +67,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getStaticResource(final HttpRequest request) throws IOException {
         final URL requestUrl = request.getUrl();
-        if (requestUrl.getPath().equals("/")) {
+        if (isRootPath(requestUrl)) {
             return "Hello world!";
         }
         return Files.readString(new File(Objects.requireNonNull(requestUrl).getFile()).toPath());
+    }
+
+    private boolean isRootPath(URL requestUrl) {
+        return requestUrl.getPath().equals("/");
     }
 }

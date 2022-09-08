@@ -16,7 +16,7 @@ class JwpTest {
     @DisplayName("경로가 '/'일 시, hello.txt 반환")
     @Test
     void hello() {
-        final var requestHandler = new RequestHandler();
+        final var requestHandler = new RequestMapping();
         final var request = HttpRequest.from(
                 "GET / HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -35,7 +35,7 @@ class JwpTest {
     @DisplayName("올바른 로그인 요청 시 Status Found 및 Location 반환")
     @Test
     void loginSuccess() {
-        final var requestHandler = new RequestHandler();
+        final var requestHandler = new RequestMapping();
         final var request = HttpRequest.from(
                 "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -54,7 +54,7 @@ class JwpTest {
     @DisplayName("존재하지 않는 유저 로그인 시 Status 401 반환")
     @Test
     void loginFail_idDoesNotExist_statusUnauthorized() {
-        final var requestHandler = new RequestHandler();
+        final var requestHandler = new RequestMapping();
         final var invalidRequest = HttpRequest.from(
                 "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -70,7 +70,7 @@ class JwpTest {
     @DisplayName("틀린 비밀번호로 로그인 시 Status 401 반환")
     @Test
     void loginFail_passwordNotMatch_statusUnauthorized() {
-        final var requestHandler = new RequestHandler();
+        final var requestHandler = new RequestMapping();
         final var invalidRequest = HttpRequest.from(
                 "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -86,7 +86,7 @@ class JwpTest {
     @DisplayName("로그인 시 쿠키에 세션 id가 없다면, 응답 헤더에 Set-Cookie 설정")
     @Test
     void login_noSessionIdInRequestCookie_setHeaderCookie() {
-        final var requestHandler = new RequestHandler();
+        final var requestHandler = new RequestMapping();
         final var request = HttpRequest.from(
                 "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",

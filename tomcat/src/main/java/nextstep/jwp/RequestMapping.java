@@ -14,7 +14,7 @@ import org.apache.coyote.http11.model.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestHandler {
+public class RequestMapping {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final List<Controller> controllers = List.of(
@@ -23,14 +23,14 @@ public class RequestHandler {
 
     public HttpResponse process(final HttpRequest request) {
         try {
-            return match(request);
+            return handleRequest(request);
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
         return HttpResponse.of(Status.INTERNAL_SERVER_ERROR);
     }
 
-    private HttpResponse match(final HttpRequest request) throws IOException {
+    private HttpResponse handleRequest(final HttpRequest request) throws IOException {
         Controller controller = getController(request.getUrl());
         if (request.getMethod() == Method.POST) {
             return controller.doPost(request);

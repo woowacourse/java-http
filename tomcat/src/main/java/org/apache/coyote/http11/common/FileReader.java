@@ -20,6 +20,8 @@ public class FileReader {
             return new String(Files.readAllBytes(path));
         } catch (IOException e) {
             return "";
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("존재하지 않는 파일입니다.");
         }
     }
 }

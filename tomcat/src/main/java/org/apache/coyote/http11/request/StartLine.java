@@ -32,7 +32,7 @@ public class StartLine {
 
     private static void validateStartLine(final String[] values) {
         if (values.length < START_LINE_SIZE) {
-            throw new IllegalArgumentException("비어있는 값이 있습니다.");
+            throw new IllegalArgumentException("요청 첫 줄에 비어있는 값이 있습니다.");
         }
     }
 

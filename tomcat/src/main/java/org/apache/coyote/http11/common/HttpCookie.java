@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class HttpCookie {
 
-    private static final String LINE_REGEX = ";";
+    private static final String LINE_REGEX = "; ";
     private static final String KEY_AND_VALUE_REGEX = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;

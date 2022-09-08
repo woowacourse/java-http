@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.StatusCode;
 import nextstep.jwp.io.ClassPathResource;
 
 public abstract class AbstractController implements Controller {
@@ -28,6 +29,7 @@ public abstract class AbstractController implements Controller {
         String path = resourcePath(request.getPath());
         String responseBody = new ClassPathResource().getStaticContent(path);
 
+        response.setStatusCode(StatusCode.OK);
         response.setContentLength(responseBody.getBytes().length);
         response.setResponseBody(responseBody);
     }
@@ -36,6 +38,7 @@ public abstract class AbstractController implements Controller {
         String path = resourcePath(request.getPath());
         String responseBody = new ClassPathResource().getStaticContent(path);
 
+        response.setStatusCode(StatusCode.OK);
         response.setContentLength(responseBody.getBytes().length);
         response.setResponseBody(responseBody);
         response.sendRedirect(INDEX_PAGE_URL);

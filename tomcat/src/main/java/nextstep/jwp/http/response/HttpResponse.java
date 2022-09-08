@@ -20,8 +20,7 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(final StatusCode statusCode, final String contentType) {
-        this.statusCode = statusCode;
+    public HttpResponse(final String contentType) {
         this.httpHeaders.addValue(CONTENT_TYPE, contentType);
     }
 
@@ -40,6 +39,10 @@ public class HttpResponse {
 
     public void setCookie(final HttpCookie cookie) {
         this.httpHeaders.addValue(SET_COOKIE, cookie.getCookie());
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String getResponseTemplate() {

@@ -9,8 +9,6 @@ import java.util.Objects;
 
 public class HttpRequest {
 
-    public static final String J_SESSION = "JSESSIONID";
-
     private final HttpStartLine httpStartLine;
     private final HttpHeaders httpHeaders;
     private final String requestBody;

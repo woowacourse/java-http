@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.support;
 
-import static org.apache.coyote.http11.web.request.HttpRequest.J_SESSION;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +8,7 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String J_SESSION = "JSESSIONID";
     private static final String COOKIE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;

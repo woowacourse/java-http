@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import java.util.Optional;
 
 import org.apache.catalina.handler.AbstractController;
-import org.apache.catalina.handler.ViewResolver;
+import org.apache.catalina.handler.ResourceHandler;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
             return getRedirectResponse(request, "/index");
         }
 
-        return ViewResolver.render(request);
+        return ResourceHandler.render(request);
     }
 
     @Override

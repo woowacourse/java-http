@@ -1,12 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
 
 import org.apache.catalina.handler.Controller;
 import org.apache.catalina.handler.HandlerMapping;
@@ -21,7 +17,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_PATH_PREFIX = "static";
 
     private final Socket connection;
     private final HandlerMapping handlerMapping;
@@ -66,14 +61,11 @@ public class Http11Processor implements Runnable, Processor {
         return controller != null;
     }
 
-    private String getStaticResource(final HttpRequest request) throws IOException {
+    private Resource getStaticResource(final HttpRequest request) {
         if (request.isRootPath()) {
-            return "Hello world!";
+            return new Resource("Hello world!");
         }
 
-        final URL resource = getClass().getClassLoader().getResource(STATIC_PATH_PREFIX + request.getPath());
-        return Files.readString(
-            new File(Objects.requireNonNull(resource)
-                .getFile()).toPath());
+        return Resource.from(request);
     }
 }

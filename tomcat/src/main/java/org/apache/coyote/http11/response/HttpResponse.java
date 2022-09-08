@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.Resource;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
@@ -95,8 +96,8 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder messageBody(final String messageBody) {
-            this.messageBody = messageBody;
+        public Builder messageBody(final Resource resource) {
+            this.messageBody = resource.getValue();
             return this;
         }
 

@@ -8,7 +8,7 @@ import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
-    private AtomicLong id = new AtomicLong(1L);
+    private final AtomicLong id = new AtomicLong(1L);
     private final Map<String, User> database = new ConcurrentHashMap<>();
 
     public InMemoryUserRepository() {

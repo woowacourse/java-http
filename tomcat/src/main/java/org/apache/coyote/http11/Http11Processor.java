@@ -38,7 +38,8 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpResponse httpResponse = getHttpResponse(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final HttpResponse httpResponse = generateHttpResponse(httpRequest);
 
             final String response = httpResponse.toResponseMessage();
 
@@ -49,8 +50,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getHttpResponse(BufferedReader bufferedReader) {
-        final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+    private HttpResponse generateHttpResponse(HttpRequest httpRequest) {
         try {
             final Controller controller = HandlerMapping.findController(httpRequest);
             final HttpResponse httpResponse = controller.service(httpRequest);

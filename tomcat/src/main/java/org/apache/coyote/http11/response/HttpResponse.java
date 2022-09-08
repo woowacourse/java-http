@@ -1,8 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -17,7 +21,7 @@ public class HttpResponse {
     private final String messageBody;
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public HttpResponse(Builder builder) {
+    public HttpResponse(final Builder builder) {
         this.request = builder.request;
         this.statusCode = builder.statusCode;
         this.messageBody = builder.messageBody;
@@ -33,7 +37,7 @@ public class HttpResponse {
             messageBody);
     }
 
-    private void addHeaders(Builder builder) {
+    private void addHeaders(final Builder builder) {
         addContentType();
         addContentLength();
         addHeader("Location", builder.location);
@@ -52,13 +56,13 @@ public class HttpResponse {
         this.headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
     }
 
-    private void addHeader(String headerName, String value) {
+    private void addHeader(final String headerName, final String value) {
         if (!value.isEmpty()) {
             headers.put(headerName, value);
         }
     }
 
-    private String addHeaders(String message) {
+    private String addHeaders(final String message) {
         final StringJoiner lineJoiner = new StringJoiner(LINE_BREAK);
         lineJoiner.add(message);
         for (String headerName : headers.keySet()) {
@@ -90,7 +94,7 @@ public class HttpResponse {
         private String location = NO_VALUE;
         private String cookie = NO_VALUE;
 
-        public Builder(HttpRequest request) {
+        public Builder(final HttpRequest request) {
             this.request = request;
         }
 
@@ -104,17 +108,17 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder messageBody(String messageBody) {
+        public Builder messageBody(final String messageBody) {
             this.messageBody = messageBody;
             return this;
         }
 
-        public Builder location(String location) {
+        public Builder location(final String location) {
             this.location = location;
             return this;
         }
 
-        public Builder cookie(HttpCookie cookie) {
+        public Builder cookie(final HttpCookie cookie) {
             this.cookie = cookie.getJSessionCookieHeader();
             return this;
         }

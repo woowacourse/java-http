@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ class HttpReader {
 
     private final BufferedReader reader;
 
-    HttpReader(InputStream inputStream) {
+    HttpReader(final InputStream inputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         this.reader = new BufferedReader(inputStreamReader);
     }
@@ -43,7 +43,7 @@ class HttpReader {
         }
     }
 
-    private String readByLength(int length) {
+    private String readByLength(final int length) {
         final char[] buffer = new char[length];
         try {
             reader.read(buffer, 0, length);

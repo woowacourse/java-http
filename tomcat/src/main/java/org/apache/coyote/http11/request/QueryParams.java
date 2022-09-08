@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static java.util.stream.Collectors.*;
 
@@ -15,12 +15,12 @@ class QueryParams {
 
     private final Map<String, String> queryParams = new HashMap<>();
 
-    QueryParams(URI requestUri, String messageBody) {
+    QueryParams(final URI requestUri, final String messageBody) {
         parseQueryParams(requestUri);
         addQuery(messageBody);
     }
 
-    private void parseQueryParams(URI requestUri) {
+    private void parseQueryParams(final URI requestUri) {
         if (Objects.isNull(requestUri)) {
             return;
         }
@@ -33,7 +33,7 @@ class QueryParams {
         splitQueryParameters(query);
     }
 
-    private void splitQueryParameters(String query) {
+    private void splitQueryParameters(final String query) {
         final String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
 
         final List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
@@ -44,7 +44,7 @@ class QueryParams {
         }
     }
 
-    void addQuery(String query) {
+    void addQuery(final String query) {
         if (query.isEmpty()) {
             return;
         }
@@ -56,7 +56,7 @@ class QueryParams {
         return !queryParams.isEmpty();
     }
 
-    String getQueryValue(String queryKey) {
+    String getQueryValue(final String queryKey) {
         return queryParams.get(queryKey);
     }
 }

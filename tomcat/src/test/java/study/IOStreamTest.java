@@ -1,16 +1,25 @@
 package study;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 /**
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
@@ -98,7 +107,8 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            try(outputStream) {}
+            try (outputStream) {
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -149,7 +159,8 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            try(inputStream) {}
+            try (inputStream) {
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -197,10 +208,10 @@ class IOStreamTest {
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
-                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
-                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
-                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
-                    "");
+                "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
+                "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 

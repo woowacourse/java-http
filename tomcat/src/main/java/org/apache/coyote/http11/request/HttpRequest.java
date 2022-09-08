@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static java.util.stream.Collectors.*;
 import static org.apache.coyote.http11.HttpCookie.*;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
@@ -30,25 +31,25 @@ public class HttpRequest {
     private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
-    public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
+    public HttpRequest(final InputStream inputStream) throws IOException, URISyntaxException {
         final String message = readMessage(inputStream);
         parseHeaders(message);
         this.queryParams = new QueryParams(getUri(), parseMessageBody(message));
     }
 
-    private String readMessage(InputStream inputStream) {
+    private String readMessage(final InputStream inputStream) {
         final HttpReader reader = new HttpReader(inputStream);
         return reader.readHttpRequest();
     }
 
-    private void parseHeaders(String message) {
+    private void parseHeaders(final String message) {
         final String headers = message.split(MESSAGE_DIVIDER)[0];
         for (String header : headers.split(LINE_BREAK)) {
             putHeader(header);
         }
     }
 
-    private void putHeader(String requestLine) {
+    private void putHeader(final String requestLine) {
         if (!headers.isEmpty()) {
             final List<String> headerAndValue = parseRequestLine(requestLine, HEADER_DELIMITER);
             headers.put(headerAndValue.get(0), headerAndValue.get(1));
@@ -60,13 +61,13 @@ public class HttpRequest {
         headers.put(HTTP_VERSION, startLine.get(2));
     }
 
-    private List<String> parseRequestLine(String requestLine, String delimiter) {
+    private List<String> parseRequestLine(final String requestLine, final String delimiter) {
         return Arrays.stream(requestLine.split(delimiter))
             .map(String::trim)
             .collect(toList());
     }
 
-    private String parseMessageBody(String message) {
+    private String parseMessageBody(final String message) {
         final String[] split = message.split(MESSAGE_DIVIDER);
         if (split.length < 2) {
             return EMPTY_MESSAGE_BODY;
@@ -74,8 +75,12 @@ public class HttpRequest {
         return split[1];
     }
 
-    public String getHeaderValue(String headerName) {
+    public String getHeaderValue(final String headerName) {
         return headers.get(headerName);
+    }
+
+    public boolean isGetRequest() {
+        return getHttpMethod().equals("GET");
     }
 
     private URI getUri() {
@@ -124,11 +129,11 @@ public class HttpRequest {
         return queryParams.hasQuery();
     }
 
-    public boolean containsHeader(String headerName) {
+    public boolean containsHeader(final String headerName) {
         return headers.containsKey(headerName);
     }
 
-    public String getQueryValue(String queryKey) {
+    public String getQueryValue(final String queryKey) {
         return queryParams.getQueryValue(queryKey);
     }
 

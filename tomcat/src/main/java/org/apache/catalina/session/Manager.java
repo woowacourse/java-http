@@ -27,7 +27,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(Session session);
+    void add(final Session session);
 
     /**
      * Return the active Session, associated with this Manager, with the
@@ -43,12 +43,12 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    Session findSession(String id) throws IOException;
+    Session findSession(final String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    void remove(Session session);
+    void remove(final Session session);
 }

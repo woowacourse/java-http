@@ -11,8 +11,8 @@ import org.apache.catalina.handler.AbstractController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected HttpResponse doGet(final HttpRequest request) {
         if (isLogin(request)) {
             return getRedirectResponse(request, "/index.html");
         }
@@ -35,22 +35,22 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
+    protected HttpResponse doPost(final HttpRequest request) {
         if (isLogin(request)) {
             return getRedirectResponse(request, "/index.html");
         }
 
-        Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
+        final Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
 
         final String account = request.getQueryValue("account");
         final String password = request.getQueryValue("password");
 
-        Optional<User> foundUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
+        final Optional<User> foundUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
         if (foundUser.isEmpty()) {
             return getRedirectResponse(request, "/401.html");
         }
 
-        User user = foundUser.get();
+        final User user = foundUser.get();
         session.setAttribute("user", user);
         sessionManager.add(session);
         log.info("로그인 성공! 아이디: {}", user.getAccount());
@@ -61,7 +61,7 @@ public class LoginController extends AbstractController {
             .build();
     }
 
-    private String getStaticResource(URL url) {
+    private String getStaticResource(final URL url) {
         try {
             return Files.readString(new File(Objects.requireNonNull(url)
                 .getFile())
@@ -71,29 +71,29 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private HttpResponse getRedirectResponse(HttpRequest request, String location) {
+    private HttpResponse getRedirectResponse(final HttpRequest request, final String location) {
         return new HttpResponse.Builder(request)
             .redirect()
             .location(location)
             .build();
     }
 
-    private boolean isLogin(HttpRequest request) {
+    private boolean isLogin(final HttpRequest request) {
         if (!request.hasSession()) {
             return false;
         }
 
-        Session session = request.getSession();
+        final Session session = request.getSession();
         if (!sessionManager.hasSession(session.getId())) {
             return false;
         }
 
-        User user = getUser(sessionManager.findSession(session.getId()));
+        final User user = getUser(sessionManager.findSession(session.getId()));
         return InMemoryUserRepository.findByAccount(user.getAccount())
             .isPresent();
     }
 
-    private User getUser(Session session) {
+    private User getUser(final Session session) {
         return (User)session.getAttribute("user");
     }
 }

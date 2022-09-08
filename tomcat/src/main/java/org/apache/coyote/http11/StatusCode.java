@@ -5,7 +5,7 @@ public enum StatusCode {
 
     private final int code;
 
-    StatusCode(int code) {
+    StatusCode(final int code) {
         this.code = code;
     }
 

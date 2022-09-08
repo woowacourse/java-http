@@ -9,13 +9,14 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-    static final String COOKIE = "Cookie";
-    static final String JSESSIONID = "JSESSIONID";
+    public static final String COOKIE = "Cookie";
+    public static final String JSESSIONID = "JSESSIONID";
+
     private static final String COOKIE_TYPE_DELIMITER = ";";
 
     private final Map<String, String> cookies;
 
-    public HttpCookie(String cookieHeader) {
+    public HttpCookie(final String cookieHeader) {
         this.cookies = parseCookie(cookieHeader);
     }
 
@@ -24,7 +25,7 @@ public class HttpCookie {
         cookies.put(JSESSIONID, generateJSessionId());
     }
 
-    public static HttpCookie fromJSessionId(String id) {
+    public static HttpCookie fromJSessionId(final String id) {
         return new HttpCookie(JSESSIONID + "=" + id);
     }
 
@@ -32,7 +33,7 @@ public class HttpCookie {
         return UUID.randomUUID().toString();
     }
 
-    private Map<String, String> parseCookie(String cookieHeader) {
+    private Map<String, String> parseCookie(final String cookieHeader) {
 
         final List<String[]> result = Arrays.stream(cookieHeader.split(COOKIE_TYPE_DELIMITER))
             .map(it -> it.trim().split("="))
@@ -43,7 +44,7 @@ public class HttpCookie {
                 .toMap(cookie -> cookie[0], cookie -> cookie[1], (a, b) -> b));
     }
 
-    public String getCookieValue(String cookieName) {
+    public String getCookieValue(final String cookieName) {
         return cookies.get(cookieName);
     }
 

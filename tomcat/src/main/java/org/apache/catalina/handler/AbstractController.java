@@ -1,23 +1,23 @@
 package org.apache.catalina.handler;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public HttpResponse service(final HttpRequest request) {
         if (isGetRequest(request)) {
             return doGet(request);
         }
         return doPost(request);
     }
 
-    protected boolean isGetRequest(HttpRequest request) {
-        return request.getHttpMethod().equals("GET");
+    protected boolean isGetRequest(final HttpRequest request) {
+        return request.isGetRequest();
     }
 
-    protected abstract HttpResponse doGet(HttpRequest request);
+    protected abstract HttpResponse doGet(final HttpRequest request);
 
-    protected abstract HttpResponse doPost(HttpRequest request);
+    protected abstract HttpResponse doPost(final HttpRequest request);
 }

@@ -26,3 +26,7 @@
 - [x] HttpRequest 구현하기
 - [x] HttpResponse 구현하기
 - [x] Controller 인터페이스 추가하기
+
+### 4단계
+
+- [x] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 한다.

@@ -8,9 +8,10 @@ public class HttpSession {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public HttpSession(){
+    public HttpSession() {
         id = UUID.randomUUID().toString();
     }
+
     public HttpSession(final String id) {
         this.id = id;
     }

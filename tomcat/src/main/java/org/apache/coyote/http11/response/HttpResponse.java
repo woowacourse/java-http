@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.request.HttpCookie;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 

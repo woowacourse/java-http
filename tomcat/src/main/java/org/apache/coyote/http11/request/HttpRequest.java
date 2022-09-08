@@ -19,7 +19,11 @@ public class HttpRequest {
 
     public HttpSession getSession() {
         SessionManager sessionManager = new SessionManager();
-        return sessionManager.findSession(cookie.getSession());
+        String session = cookie.getSession();
+        if (session == null) {
+            return new HttpSession();
+        }
+        return sessionManager.findSession(session);
     }
 
     public boolean hasCookie() {

@@ -5,14 +5,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.catalina.cookie.HttpCookies;
 import org.apache.coyote.support.HttpException;
+import org.apache.coyote.support.HttpHeader;
 
 public class RequestHeaders {
 
-    private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_LINE_ELEMENT_COUNT = 2;
-    private static final String COOKIE_REQUEST_HEADER = "Cookie";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_TYPE_URL_ENCODED = "application/x-www-form-urlencoded";
 
     private final Map<String, String> headers;
@@ -30,7 +27,7 @@ public class RequestHeaders {
     }
 
     private static void addValidHeader(Map<String, String> headers, String line) {
-        final var elements = line.split(HEADER_DELIMITER);
+        final var elements = line.split(HttpHeader.DELIMITER);
         if (elements.length != HEADER_LINE_ELEMENT_COUNT) {
             throw HttpException.ofBadRequest();
         }
@@ -40,21 +37,23 @@ public class RequestHeaders {
     }
 
     public int getContentLength() {
-        if (!headers.containsKey(CONTENT_LENGTH)) {
+        String contentLengthHeader = HttpHeader.CONTENT_LENGTH.getValue();
+        if (!headers.containsKey(contentLengthHeader)) {
             return 0;
         }
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+        return Integer.parseInt(headers.get(contentLengthHeader));
     }
 
     public boolean hasParametersAsBody() {
-        return CONTENT_TYPE_URL_ENCODED.equals(headers.get(CONTENT_TYPE));
+        return CONTENT_TYPE_URL_ENCODED.equals(headers.get(HttpHeader.CONTENT_TYPE.getValue()));
     }
 
     public HttpCookies getCookies() {
-        if (!headers.containsKey(COOKIE_REQUEST_HEADER)) {
+        String cookieHeader = HttpHeader.COOKIE.getValue();
+        if (!headers.containsKey(cookieHeader)) {
             return new HttpCookies(new HashMap<>());
         }
-        String cookies = headers.get(COOKIE_REQUEST_HEADER);
+        String cookies = headers.get(cookieHeader);
         return HttpCookies.ofRequestHeader(cookies);
     }
 }

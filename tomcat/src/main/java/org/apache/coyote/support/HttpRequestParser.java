@@ -1,4 +1,4 @@
-package org.apache.coyote.web.request;
+package org.apache.coyote.support;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +11,8 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpMethod;
+import org.apache.coyote.web.request.HttpRequest;
+import org.apache.coyote.web.request.HttpRequestLine;
 
 public class HttpRequestParser {
 

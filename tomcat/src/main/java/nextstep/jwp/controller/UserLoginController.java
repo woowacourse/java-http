@@ -20,6 +20,11 @@ public class UserLoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.redirect(Url.createUrl("/login.html"));
+    }
+
+    @Override
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         UserLoginRequest request = UserLoginRequest.from(httpRequest.getParameters());
         try {
             User user = InMemoryUserRepository.findByAccount(request.getAccount())

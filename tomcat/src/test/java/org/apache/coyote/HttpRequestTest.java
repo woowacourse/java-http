@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.web.request.HttpRequest;
-import org.apache.coyote.web.request.HttpRequestParser;
+import org.apache.coyote.support.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

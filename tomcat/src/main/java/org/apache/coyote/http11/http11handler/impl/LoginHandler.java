@@ -20,7 +20,6 @@ public class LoginHandler implements Http11Handler {
     private static final String REDIRECT_WHEN_LOGIN_SUCCESS = "/index.html";
     private static final String REDIRECT_WHEN_LOGIN_FAIL = "/401.html";
 
-    private final QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private final LoginService loginService = new LoginService();
 
     @Override
@@ -30,7 +29,7 @@ public class LoginHandler implements Http11Handler {
 
     @Override
     public Http11Response handle(Http11Request http11Request, Visitor visitor) {
-        Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
+        Map<String, String> queryStringDatas = QueryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             visitor.maintainLogin(loginService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
             return HandlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);

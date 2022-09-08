@@ -22,7 +22,6 @@ public class RegisterAccountHandler implements Http11Handler {
     private static final String REDIRECT_WHEN_REGISTER_FAIL = "/500.html";
 
     private final UserService userService = new UserService();
-    private final QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
 
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
@@ -31,7 +30,7 @@ public class RegisterAccountHandler implements Http11Handler {
 
     @Override
     public Http11Response handle(Http11Request http11Request, Visitor visitor) {
-        Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
+        Map<String, String> queryStringDatas = QueryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (userService.addNewUser(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(EMAIL_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             return HandlerSupporter.redirectResponseComponent(REDIRECT_WHEN_REGISTER_SUCCESS, StatusCode.FOUND);
         }

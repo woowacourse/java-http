@@ -13,11 +13,9 @@ public class IndexPageHandler implements Http11Handler {
     private static final String URI = "/index";
     private static final String URI_WITH_EXTENSION = "/index.html";
 
-    private QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
-        String uri = queryStringProcessor.removeQueryString(http11Request.getUri());
+        String uri = QueryStringProcessor.removeQueryString(http11Request.getUri());
         return uri.equals(URI) || uri.equals(URI_WITH_EXTENSION);
     }
 

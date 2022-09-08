@@ -11,11 +11,13 @@ public class QueryStringProcessor {
     private static final String QUERY_STRING_ELEMENT_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
-    public String removeQueryString(String uri) {
+    private QueryStringProcessor() {}
+
+    public static String removeQueryString(String uri) {
         return uri.split(QUERY_STRING_IDENTIFIER_FOR_SPLIT)[RESOURCE_INDEX];
     }
 
-    public Map<String, String> extractQueryStringDatas(String queryString) {
+    public static Map<String, String> extractQueryStringDatas(String queryString) {
         List<String> queryStringElements = List.of(queryString.split(QUERY_STRING_ELEMENT_DELIMITER));
         return queryStringElements.stream()
                 .map(it -> it.split(KEY_VALUE_DELIMITER))

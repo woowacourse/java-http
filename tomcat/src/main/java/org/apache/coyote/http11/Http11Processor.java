@@ -3,19 +3,22 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.Application;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.ControllerContainer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.ExceptionHandler;
+import org.apache.coyote.exception.InternalServerException;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LOGIN_RESOURCE = "/login.html";
-    private static final String PASSWORD = "password";
-    private static final String ACCOUNT = "account";
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Socket connection;
 
@@ -32,37 +35,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final Http11URL urlPath = Http11URL.of(inputStream);
-            final Http11StaticFile staticFile = Http11StaticFile.of(urlPath);
-            final Http11Response http11Response = new Http11Response(outputStream);
-            logLogin(urlPath);
-            http11Response.write(staticFile);
-        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
+            final Request request = Request.of(inputStream);
+            final Response response = Response.of(outputStream);
+            execute(request, response);
+        } catch (IOException | UncheckedServletException | IllegalArgumentException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void logLogin(final Http11URL urlPath) {
-        if (urlPath.hasPath(LOGIN_RESOURCE) && loginSuccess(urlPath)) {
-            final User loggedInUser = findUser(urlPath);
-            log.info(loggedInUser.toString());
+    private void execute(final Request request, final Response response) throws IOException, URISyntaxException {
+        try {
+            final Controller controller = ControllerContainer.findController(request);
+            controller.run(request, response);
+        } catch (InternalServerException | NotFoundException e) {
+            ExceptionHandler.handle(e, response);
         }
-    }
-
-    private boolean loginSuccess(final Http11URL urlPath) {
-        if (!urlPath.hasParams()) {
-            return false;
-        }
-        final User foundUser = findUser(urlPath);
-        final String password = urlPath.findParamByKey(PASSWORD);
-        return foundUser.checkPassword(password);
-
-    }
-
-    private User findUser(final Http11URL urlPath) {
-        String account = urlPath.findParamByKey(ACCOUNT);
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
     }
 }

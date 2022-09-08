@@ -10,8 +10,6 @@ import nextstep.jwp.ui.IndexController;
 import nextstep.jwp.ui.LoginController;
 import nextstep.jwp.ui.RegisterController;
 import nextstep.jwp.ui.ResourceController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public enum ControllerMapper {
 
@@ -20,8 +18,6 @@ public enum ControllerMapper {
     LOGIN("/login"::equals, new LoginController()),
     REGISTER("/register"::equals, new RegisterController()),
     RESOURCE(ControllerMapper::isStaticResource, new ResourceController());
-
-    private static final Logger log = LoggerFactory.getLogger(ControllerMapper.class);
 
     private final Predicate<String> condition;
     private final Controller controller;

@@ -2,9 +2,12 @@ package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.exception.UserNotFoundException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
+import org.apache.coyote.response.Cookie;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected String doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        Session session = httpRequest.getSession();
+        if (SessionManager.isValidateSession(session)) {
+            return "redirect:/index";
+        }
         return "login";
     }
 
@@ -27,9 +34,17 @@ public class LoginController extends AbstractController {
                 .orElseThrow(UserNotFoundException::new);
         if (user.checkPassword(password)) {
             log.info("user : {}", user);
+            issueSession(httpRequest, httpResponse, user);
         }
 
         return "redirect:/index";
+    }
+
+    private void issueSession(final HttpRequest httpRequest, final HttpResponse httpResponse, final User user) {
+        Session session = httpRequest.getSession();
+        session.setAttribute("user", user);
+        httpResponse.setCookie(Cookie.ofJsession(session.getId()));
+        SessionManager.add(session);
     }
 
     @Override

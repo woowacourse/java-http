@@ -9,7 +9,7 @@ public class HttpResponse {
     private HttpStatus httpStatus = HttpStatus.OK;
     private String contentType;
     private String location;
-    private Cookie cookie;
+    private Cookies cookies = Cookies.init();
     private String responseBody;
 
     public HttpResponse() {
@@ -39,6 +39,9 @@ public class HttpResponse {
         if (location != null) {
             joiner.add(String.format("Location: %s", location));
         }
+        if (!cookies.isEmpty()) {
+            joiner.add(String.format("Set-Cookie: %s", cookies.toHeaders()));
+        }
     }
 
     public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
@@ -57,7 +60,7 @@ public class HttpResponse {
     }
 
     public HttpResponse setCookie(final Cookie cookie) {
-        this.cookie = cookie;
+        cookies.add(cookie);
         return this;
     }
 

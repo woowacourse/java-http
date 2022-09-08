@@ -2,15 +2,21 @@ package org.apache.coyote.request;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.exception.InvalidRequestException;
+import org.apache.coyote.response.Cookie;
+import org.apache.coyote.response.Cookies;
 
 public class HttpRequest {
 
     private static final int REQUEST_LINE_INDEX = 0;
+    private static final String SESSION = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final RequestBody requestBody;
+    private Session session;
 
     public HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders, final RequestBody requestBody) {
         this.requestLine = requestLine;
@@ -56,5 +62,14 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        Cookies cookies = httpHeaders.getCookies();
+        Cookie sessionCookie = cookies.find(SESSION);
+        if (sessionCookie == null) {
+            return Session.init();
+        }
+        return SessionManager.findSession(sessionCookie.getValue());
     }
 }

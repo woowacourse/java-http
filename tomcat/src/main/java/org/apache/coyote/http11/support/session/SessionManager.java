@@ -15,7 +15,7 @@ public class SessionManager implements Manager {
 
     public static SessionManager getInstance() {
         if (Objects.isNull(instance)) {
-            return new SessionManager();
+            instance = new SessionManager();
         }
         return instance;
     }

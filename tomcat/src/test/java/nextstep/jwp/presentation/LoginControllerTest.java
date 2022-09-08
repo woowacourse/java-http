@@ -17,11 +17,13 @@ class LoginControllerTest {
     void login_returnsResponseWithCookie() {
         // given
         final HttpStartLine httpStartLine =
-                HttpStartLine.from(new String[]{"GET", "/login?account=gugu&password=password", "HTTP/1.1"});
-        final HttpRequest httpRequest = new HttpRequest(httpStartLine, new HttpHeaders(Collections.emptyMap()), "");
+                HttpStartLine.from(new String[]{"POST", "/login", "HTTP/1.1"});
+        final HttpRequest httpRequest = new HttpRequest(httpStartLine,
+                new HttpHeaders(Collections.emptyMap()),
+                "account=gugu&password=password");
 
         // when
-        final HttpResponse httpResponse = new LoginController().doGet(httpRequest);
+        final HttpResponse httpResponse = new LoginController().doPost(httpRequest);
         final String actual = httpResponse.format();
 
         // then

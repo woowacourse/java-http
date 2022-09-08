@@ -15,18 +15,19 @@ import java.util.List;
 
 class RequestHandlerTest {
 
-    @DisplayName("로그인을 Query String과 함께 GET으로 요청하면 로그인 성공 응답을 반환한다.")
+    @DisplayName("로그인을 RequestBody과 함께 POST로 요청하면 로그인 성공 응답을 반환한다.")
     @Test
     void handle_returnsRedirectResponse_whenGetAndLoginUriWithQueryString() throws IOException {
         // given
         final HttpStartLine httpStartLine = HttpStartLine.from(
-                new String[]{"GET", "/login?account=gugu&password=password", "HTTP/1.1"}
+                new String[]{"POST", "/login", "HTTP/1.1"}
         );
         final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
         httpHeaders.put(HttpHeader.HOST, "localhost:8080");
         httpHeaders.put(HttpHeader.CONNECTION, "keep-alive");
         httpHeaders.put(HttpHeader.ACCEPT, "text/html");
-        final HttpRequest httpRequest = new HttpRequest(httpStartLine, httpHeaders, "");
+        final HttpRequest httpRequest =
+                new HttpRequest(httpStartLine, httpHeaders, "account=gugu&password=password");
 
         // when
         final HttpResponse httpResponse = new RequestHandler().handle(httpRequest);

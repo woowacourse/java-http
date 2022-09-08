@@ -97,14 +97,15 @@ class Http11ProcessorTest {
     void login() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
                 "Accept: text/html,application/xhtml+xml,application/xml;q=0.9," +
                         "image/avif,image/webp,image/apng,*/*;q=0.8," +
                         "application/signed-exchange;v=b3;q=0.9 ",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

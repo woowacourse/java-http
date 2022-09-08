@@ -48,7 +48,7 @@ public class HttpRequestParser {
                 .filter(it -> HttpHeader.contains(it[HTTP_HEADER_INDEX]))
                 .collect(Collectors.toMap(
                         it -> HttpHeader.from(it[HTTP_HEADER_INDEX]),
-                        it -> it[HTTP_HEADER_VALUE_INDEX],
+                        it -> it[HTTP_HEADER_VALUE_INDEX].strip(),
                         (x, y) -> y, LinkedHashMap::new));
 
         return new HttpHeaders(httpHeaders);

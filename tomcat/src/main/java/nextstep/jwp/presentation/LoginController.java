@@ -3,6 +3,7 @@ package nextstep.jwp.presentation;
 import static org.apache.catalina.Session.JSESSIONID;
 
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.Session;
@@ -46,7 +47,7 @@ public class LoginController extends AbstractController {
             final User user = userService.login(request);
             setLoginSession(request, response, user);
             redirectIndex(response);
-        } catch (final RuntimeException exception) {
+        } catch (final NullPointerException | UserNotFoundException exception) {
             LOG.error(exception.getMessage(), exception);
             throw new UnauthorizedException();
         }

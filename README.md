@@ -277,3 +277,36 @@ Response는 OutputStream을 받아 생성되고, `service()` 메소드가 종료
 또한 내가 지금 버그를 만들지 않으면서 구조를 개선하고 있는지 확인받기 위한 test 코드도 프로덕션 코드와 함께 깨져 피드백도 제대로 받지 못하는 상태에서 리팩터링을 진행하였다.
 이러한 과정에서 느낀점은 최대한 구현을 하면서 최소한의 리팩터링을 함께 진행하자는 점과 이렇게 구조 자체를 변경해야하는 큰 단위의 리팩터링의 경우,
 기존 코드는 살려두고 새로운 .java 파일을 생성해서 기존의 테스트나 프로덕션 코드는 제대로 돌아가게 두고 하나씩 교체하는 방향으로 리팩터링 하는 것도 하나의 방법이 될 수 있겠다 이다. 
+
+---
+
+## 4단계 구현 내용 정리
+
+- [x] Executors로 Thread Pool 적용
+  - [x] `newFixedThreadPool` 을 사용하여 고정된 개수(250)의 쓰레드를 재사용하며 초과되는 요청은 대기 상태(큐)
+
+## 새롭게 알게 된 내용 (4단계)
+
+### newCachedThreadPool vs newFixThreadPool
+
+`newFixedThreadPool`은 공유 언바운드 큐에서 작동하는 고정된 수의 쓰레드를 재사용하는 쓰레드풀을 생성한다.
+만약 동시에 실행되는 태스크의 수가 최대 쓰레드의 수를 초과한다면 작업 중 일부를 큐에 넣어 순서를 기다리게 된다.
+반면 `newCachedThreadPool` 은 사용가능한 쓰레드가 없다면 새롭게 쓰레드를 생성한다.
+
+### submit() vs execute()
+
+두 메소드 모두 쓰레드풀에게 작업 처리를 요청하는 메소드이다.
+`execute()` 로 실행했을 때는 작업 처리 도중 예외가 발생하면 해당 쓰레드는 제거되고 새 쓰레드가 계속해서 생겨난다.
+반면 `submit()` 의 경우에는 예외가 발생하더라도 쓰레드가 종료되지 않고 계속해서 재사용되어 다른 작업을 처리할 수 있다.
+따라서 쓰레드 생성의 오베헤드를 줄일 수 있다.
+또한 `submit()` 은 작업 처리 결과를 받을 수 있도록 Future를 리턴하는데, Future는 작업 실행 결과나 작업 상태(실행중)를 확인하기 위한 객체이다.
+
+### ExecutorService의 shutdown()
+
+`ExecutorService`의 `shutdown()` 메서드는 실행자 서비스를 즉시 종료시키지 않는다.
+작업큐에 남아있는 작업까지 모두 마무리한 후 종료한다.
+이와 다르게 `shutdownNow()` 메소드는 작업큐의 작업 잔량과 관계없이 강제 종료시킨다.
+(The shutdown() method doesn't cause immediate destruction of the ExecutorService.
+It will make the ExecutorService stop accepting new tasks and shut down after all running threads finish their current work)
+
+

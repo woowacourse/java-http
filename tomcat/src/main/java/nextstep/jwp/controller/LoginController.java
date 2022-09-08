@@ -2,18 +2,17 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.controller.dto.DtoAssembler;
 import nextstep.jwp.service.UserService;
-import org.apache.catalina.servlet.Controller;
-import org.apache.catalina.servlet.RequestMapping;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
 
-@RequestMapping(path = "/login")
-public class LoginController extends Controller {
+public class LoginController extends AbstractController {
 
     private final UserService userService;
 
     public LoginController(UserService userService) {
+        super("/login");
         this.userService = userService;
     }
 

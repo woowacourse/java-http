@@ -1,24 +1,12 @@
 package org.apache.catalina.servlet;
 
-import org.apache.coyote.request.HttpRequest;
+import java.util.List;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.support.HttpMethod;
+import org.apache.coyote.request.HttpRequest;
 
-public abstract class Controller {
+public interface Controller {
 
-    public void service(HttpRequest request, HttpResponse response) {
-        if (request.isMethodOf(HttpMethod.GET)) {
-            doGet(request, response);
-            return;
-        }
-        if (request.isMethodOf(HttpMethod.POST)) {
-            doPost(request, response);
-            return;
-        }
-        throw new UnsupportedOperationException("API not implemented");
-    }
+    void service(HttpRequest request, HttpResponse response);
 
-    protected abstract void doGet(HttpRequest request, HttpResponse response);
-
-    protected abstract void doPost(HttpRequest request, HttpResponse response);
+    List<String> getMappedPaths();
 }

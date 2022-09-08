@@ -1,12 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.catalina.servlet.Controller;
-import org.apache.catalina.servlet.RequestMapping;
-import org.apache.coyote.request.HttpRequest;
+import java.util.List;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
 
-@RequestMapping(path = {"/", "/index"})
-public class HomeController extends Controller {
+public class HomeController extends AbstractController {
+
+    public HomeController() {
+        super(List.of("/", "/index"));
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

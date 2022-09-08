@@ -21,9 +21,7 @@ public class HandlerMapping {
     }
 
     private static void mapPathToController(Map<String, Controller> mappings, Controller controller) {
-        Class<?> clazz = controller.getClass();
-        RequestMapping declaredAnnotation = clazz.getDeclaredAnnotation(RequestMapping.class);
-        for (final var path : declaredAnnotation.path()) {
+        for (final var path : controller.getMappedPaths()) {
             mappings.put(path, controller);
         }
     }

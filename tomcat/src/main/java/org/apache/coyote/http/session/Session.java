@@ -3,6 +3,7 @@ package org.apache.coyote.http.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,7 @@ public class Session {
     private static final Logger log = LoggerFactory.getLogger(Session.class);
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     public Session() {
         this.id = UUID.randomUUID().toString();

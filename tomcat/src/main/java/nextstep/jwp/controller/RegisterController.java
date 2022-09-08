@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import org.apache.catalina.handler.AbstractController;
 import org.apache.catalina.handler.ResourceHandler;
+import org.apache.coyote.http11.Resource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -26,7 +27,15 @@ public class RegisterController extends AbstractController {
         final String email = request.getQueryValue("email");
 
         final User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
+
+        try {
+            InMemoryUserRepository.save(user);
+        } catch (IllegalArgumentException e) {
+            return new HttpResponse.Builder(request)
+                .messageBody(new Resource(e.getMessage()))
+                .build();
+        }
+
         log.info("회원가입 성공! 아이디: {}", user.getAccount());
 
         return new HttpResponse.Builder(request)

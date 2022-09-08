@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.catalina.session.Session;
+
 public class HttpCookie {
 
     public static final String COOKIE = "Cookie";
@@ -25,8 +27,8 @@ public class HttpCookie {
         cookies.put(JSESSIONID, generateJSessionId());
     }
 
-    public static HttpCookie fromJSessionId(final String id) {
-        return new HttpCookie(JSESSIONID + "=" + id);
+    public static HttpCookie fromJSession(final Session session) {
+        return new HttpCookie(JSESSIONID + "=" + session.getId());
     }
 
     private String generateJSessionId() {

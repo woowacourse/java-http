@@ -16,7 +16,14 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        validateUserRegistered(user);
         database.put(user.getAccount(), user);
+    }
+
+    private static void validateUserRegistered(User user) {
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalArgumentException("User account has already registered");
+        }
     }
 
     public static Optional<User> findByAccount(String account) {

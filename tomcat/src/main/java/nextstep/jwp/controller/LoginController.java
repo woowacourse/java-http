@@ -35,8 +35,6 @@ public class LoginController extends AbstractController {
             return getRedirectResponse(request, "/index");
         }
 
-        final Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
-
         final String account = request.getQueryValue("account");
         final String password = request.getQueryValue("password");
 
@@ -46,20 +44,12 @@ public class LoginController extends AbstractController {
         }
 
         final User user = foundUser.get();
-        session.setAttribute("user", user);
-        sessionManager.add(session);
+        final Session session = addSession(user);
         log.info("로그인 성공! 아이디: {}", user.getAccount());
 
         return new HttpResponse.Builder(request)
             .redirect().location("/index")
-            .cookie(HttpCookie.fromJSessionId(session.getId()))
-            .build();
-    }
-
-    private HttpResponse getRedirectResponse(final HttpRequest request, final String location) {
-        return new HttpResponse.Builder(request)
-            .redirect()
-            .location(location)
+            .cookie(HttpCookie.fromJSession(session))
             .build();
     }
 
@@ -73,6 +63,10 @@ public class LoginController extends AbstractController {
             return false;
         }
 
+        return isSessionUserFound(session);
+    }
+
+    private boolean isSessionUserFound(Session session) {
         final User user = getUser(sessionManager.findSession(session.getId()));
         return InMemoryUserRepository.findByAccount(user.getAccount())
             .isPresent();
@@ -80,5 +74,19 @@ public class LoginController extends AbstractController {
 
     private User getUser(final Session session) {
         return (User)session.getAttribute("user");
+    }
+
+    private HttpResponse getRedirectResponse(final HttpRequest request, final String location) {
+        return new HttpResponse.Builder(request)
+            .redirect()
+            .location(location)
+            .build();
+    }
+
+    private Session addSession(User user) {
+        final Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return session;
     }
 }

@@ -1,126 +1,58 @@
 package nextstep.org.apache.coyote.http11;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import org.junit.jupiter.api.DisplayName;
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import org.apache.catalina.servlets.Controller;
+import org.apache.catalina.servlets.RequestMappings;
+import org.apache.coyote.WebConfig;
+import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.spec.HttpStatus;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
     @Test
-    void process() throws IOException {
+    @DisplayName("HTTP 요청 메시지를 읽는다.")
+    void readHttpRequest() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/hello.html");
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("html 파일을 요청할 경우 text/html 응답을 반환한다")
-    void requestHtml() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1",
+        StubSocket stubSocket = new StubSocket();
+        String body = "body message";
+        stubSocket.setRequest(String.join("\r\n",
+                "GET / HTTP/1.1",
                 "Host: localhost:8080",
-                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body));
+        WebConfig webConfig = new WebConfig(null, new RequestMappings(List.of(new Controller() {
+            @Override
+            public boolean isProcessable(HttpRequest request) {
+                return true;
+            }
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+            @Override
+            public void service(HttpRequest request, HttpResponse response) {
+                response.setStatus(HttpStatus.OK);
+                response.addHeader("Content-Type", "text/html");
+                response.setBody(request.getBody());
+            }
+        })));
+        Http11Processor processor = new Http11Processor(stubSocket, webConfig);
 
         // when
-        processor.process(socket);
+        processor.process(stubSocket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("css 파일을 요청할 경우 text/cs 응답을 반환한다")
-    void requestCss() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html",
                 "",
-                "");
+                body);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/css;charset=utf-8\r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("js 파일을 요청할 경우 text/js 응답을 반환한다")
-    void requestJs() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/css;charset=utf-8\r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(stubSocket.output()).isEqualTo(expected);
     }
 }

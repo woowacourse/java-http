@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request.spec;
 
 import java.util.List;
-import java.util.Map;
 
 public class StartLine {
 
@@ -14,7 +13,7 @@ public class StartLine {
     private final RequestUrl requestUrl;
     private final Protocol protocol;
 
-    public StartLine(HttpMethod method, RequestUrl requestUrl, Protocol protocol) {
+    private StartLine(HttpMethod method, RequestUrl requestUrl, Protocol protocol) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.protocol = protocol;
@@ -27,10 +26,6 @@ public class StartLine {
                 HttpMethod.from(components[METHOD_INDEX]),
                 RequestUrl.from(components[URL_INDEX]),
                 new Protocol(components[PROTOCOL_INDEX]));
-    }
-
-    public boolean hasQueryParams() {
-        return requestUrl.hasQueryParams();
     }
 
     private static void validateComponentsCount(String[] components) {
@@ -51,11 +46,11 @@ public class StartLine {
         return protocol;
     }
 
-    public Map<String, String> getParams() {
-        return requestUrl.getParams();
+    public boolean isPathEqualTo(String path) {
+        return requestUrl.isPathEqualTo(path);
     }
 
-    public void setPath(String pathName) {
-        requestUrl.setPath(pathName);
+    public boolean isStaticResourcePath() {
+        return requestUrl.isStaticResourcePath();
     }
 }

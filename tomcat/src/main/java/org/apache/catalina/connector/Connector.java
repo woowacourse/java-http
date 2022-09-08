@@ -1,13 +1,20 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootController;
+import nextstep.jwp.controller.StaticResourceController;
+import org.apache.catalina.servlets.RequestMappings;
+import org.apache.coyote.WebConfig;
+import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.ResourceLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -65,7 +72,12 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection);
+        ResourceLocator resourceLocator = new ResourceLocator("/static");
+        RequestMappings requestMappings = new RequestMappings(
+                List.of(new LoginController(resourceLocator), new RootController(resourceLocator),
+                        new StaticResourceController(resourceLocator), new RegisterController(resourceLocator)));
+        WebConfig webConfig = new WebConfig(resourceLocator, requestMappings);
+        var processor = new Http11Processor(connection, webConfig);
         new Thread(processor).start();
     }
 

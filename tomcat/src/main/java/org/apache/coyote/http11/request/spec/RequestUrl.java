@@ -11,7 +11,7 @@ public class RequestUrl {
     private String path;
     private final QueryParams queryParams;
 
-    public RequestUrl(String path, QueryParams queryParams) {
+    private RequestUrl(String path, QueryParams queryParams) {
         this.path = path;
         this.queryParams = queryParams;
     }
@@ -42,5 +42,13 @@ public class RequestUrl {
 
     public void setPath(String pathName) {
         this.path = pathName;
+    }
+
+    public boolean isPathEqualTo(String path) {
+        return this.path.equals(path);
+    }
+
+    public boolean isStaticResourcePath() {
+        return this.path.contains(".");
     }
 }

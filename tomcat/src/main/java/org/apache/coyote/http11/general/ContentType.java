@@ -1,18 +1,17 @@
-package org.apache.coyote.http11.response.spec;
+package org.apache.coyote.http11.general;
 
 import java.util.Arrays;
 
-public enum MimeType {
+public enum ContentType {
 
     HTML("text/html"),
     CSS("text/css"),
     JS("text/javascript"),
-    SVG("image/svg+xml")
-    ;
+    SVG("image/svg+xml");
 
     private final String value;
 
-    MimeType(String value) {
+    ContentType(String value) {
         this.value = value;
     }
 
@@ -20,9 +19,9 @@ public enum MimeType {
         return value;
     }
 
-    public static MimeType of(String type) {
+    public static ContentType of(String type) {
         return Arrays.stream(values())
-                .filter(mimeType -> mimeType.name().equalsIgnoreCase(type))
+                .filter(contentType -> contentType.name().equalsIgnoreCase(type))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 mime type = " + type));
     }

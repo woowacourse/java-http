@@ -22,7 +22,6 @@ public class HttpHeader {
 	public String generateHeaderResponse() {
 		StringBuilder sb = new StringBuilder();
 
-		int count = 1;
 		for (Map.Entry<HttpHeaderType, List<String>> header : header.entrySet()) {
 			final String value = joinValues(header.getValue());
 			sb.append(String.join(": ", header.getKey().getValue(), value)).append(CRLF);

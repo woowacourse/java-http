@@ -11,9 +11,6 @@ public class Parser {
 	private static final String QUERY_VALUE_DELIMITER = "=";
 	private static final int NAME_INDEX = 0;
 	private static final int VALUE_INDEX = 1;
-	private static final String GAP = " ";
-	private static final String EXTENSION = ".";
-	private static final String ROOT = "/";
 
 	public static String convertResourceFileName(String url) {
 		int startQueryIndex = findStartQueryString(url);
@@ -41,7 +38,7 @@ public class Parser {
 		return url.substring(startQueryIndex + VALUE_INDEX);
 	}
 
-	private static Map<String, String> parseQueryString(String queryString) {
+	public static Map<String, String> parseQueryString(String queryString) {
 		String[] values = queryString.split(QUERY_CONNECT_DELIMITER);
 		Map<String, String> params = new HashMap<>();
 		for (String param : values) {

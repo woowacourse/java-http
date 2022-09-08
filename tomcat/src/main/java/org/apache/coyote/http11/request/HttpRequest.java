@@ -2,7 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.coyote.http11.common.HttpMethod;
 
 import nextstep.jwp.exception.ExceptionType;
 import nextstep.jwp.exception.InvalidHttpRequestException;
@@ -23,18 +26,23 @@ public class HttpRequest {
 		try {
 			final RequestLine requestLine = RequestLine.from(reader.readLine());
 			final RequestHeaders requestHeaders = RequestHeaders.from(reader);
-			return new HttpRequest(requestLine, requestHeaders, new RequestBody());
+			final int contentLength = requestHeaders.getContentLength();
+
+			if (contentLength > 0) {
+				return new HttpRequest(requestLine, requestHeaders, RequestBody.of(reader, contentLength));
+			}
+			return new HttpRequest(requestLine, requestHeaders, RequestBody.from(new HashMap<>()));
 		} catch (IOException e) {
 			throw new InvalidHttpRequestException(ExceptionType.INVALID_REQUEST_LINE_EXCEPTION);
 		}
 	}
 
-	public boolean isMatching(String url) {
-		return requestLine.hasUrl(url);
-	}
-
 	public String getUrl() {
 		return requestLine.getUrl();
+	}
+
+	public boolean requestPOST() {
+		return requestLine.getMethod().isMatch(HttpMethod.POST);
 	}
 
 	public Map<String, String> getParams() {
@@ -49,7 +57,7 @@ public class HttpRequest {
 		return requestHeaders;
 	}
 
-	public RequestBody getRequestBody() {
-		return requestBody;
+	public Map<String, String> getRequestBody() {
+		return requestBody.getRequestBody();
 	}
 }

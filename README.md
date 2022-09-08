@@ -47,7 +47,7 @@ Jun-15-2022 11-45-55.gif
   로그인 여부에 따라 다른 페이지로 이동시켜보자. /login 페이지에서 아이디는 gugu, 비밀번호는 password를 입력하자. 로그인에 성공하면 응답 헤더에 http status code를 302로 반환하고
   /index.html로 리다이렉트 한다. 로그인에 실패하면 401.html로 리다이렉트한다.
 
-- [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [x] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
   http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다. 회원가입 페이지를 보여줄 때는 GET을 사용한다. 회원가입을 버튼을 누르면 HTTP
   method를 GET이 아닌 POST를 사용한다. 회원가입을 완료하면 index.html로 리다이렉트한다. 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
 

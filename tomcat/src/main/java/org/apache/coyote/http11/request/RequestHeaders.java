@@ -11,6 +11,7 @@ import java.util.Objects;
 public class RequestHeaders {
 
 	private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
+	private static final String CONTENT_LENGTH = "Content-Length";
 
 	private final Map<String, String> headers;
 
@@ -50,6 +51,12 @@ public class RequestHeaders {
 		if (field.length != DEFAULT_HEADER_FIELD_LENGTH) {
 			throw new IllegalArgumentException(INVALID_REQUEST_LINE_EXCEPTION.getMessage());
 		}
+	}
+
+	public int getContentLength() {
+		if (headers.containsKey(CONTENT_LENGTH))
+			return Integer.parseInt(headers.get(CONTENT_LENGTH));
+		return 0;
 	}
 
 	public Map<String, String> getHeaders() {

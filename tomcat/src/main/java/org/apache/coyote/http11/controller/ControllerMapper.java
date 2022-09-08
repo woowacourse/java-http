@@ -8,6 +8,7 @@ public enum ControllerMapper {
 
 	ROOT_CONTROLLER((path) -> path.equals("/"), new RootController()),
 	LOGIN_CONTROLLER((path) -> path.startsWith("/login"), new LoginController()),
+	RESISTER((path) -> path.startsWith("/register"), new RegisterController()),
 	RESOURCE_CONTROLLER((path) -> path.contains("."), new ResourceController());
 
 	private final Predicate<String> regex;

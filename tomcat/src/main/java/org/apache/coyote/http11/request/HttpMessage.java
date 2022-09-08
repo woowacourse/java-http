@@ -22,7 +22,7 @@ class HttpMessage {
         readHttpRequest();
     }
 
-    void readHttpRequest() {
+    private void readHttpRequest() {
         this.requestLine = readLine();
 
         final String contentLength = readHeaders();

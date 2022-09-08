@@ -32,11 +32,12 @@ class ResponseTest {
         // given
         String body = "index.html";
         ResponseEntity responseEntity = ResponseEntity.body(body);
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
+        httpResponse.initResponseValues(responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "html" + ";charset=utf-8 ";
@@ -49,11 +50,12 @@ class ResponseTest {
         // given
         String body = "/css/styles.css";
         ResponseEntity responseEntity = ResponseEntity.body(body);
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
+        httpResponse.initResponseValues(responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "css" + ";charset=utf-8 ";
@@ -65,11 +67,12 @@ class ResponseTest {
         // given
         String body = "/js/scripts.js";
         ResponseEntity responseEntity = ResponseEntity.body(body);
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
+        httpResponse.initResponseValues(responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "javascript" + ";charset=utf-8 ";
@@ -81,14 +84,14 @@ class ResponseTest {
         // given
         String body = "eden king";
         ResponseEntity responseEntity = ResponseEntity.body(body);
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
+        httpResponse.initResponseValues(responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 200 + " " + "OK" + " ";
-        String expectedCookieHeader = "Set-Cookie: JSESSIONID=";
-        assertThat(httpResponse.asString()).contains(expectedStartLine, expectedCookieHeader, body);
+        assertThat(httpResponse.asString()).contains(expectedStartLine, body);
     }
 
     @Test
@@ -96,15 +99,10 @@ class ResponseTest {
         // given
         String body = "redirect:index.html";
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
+        HttpResponse httpResponse = new HttpResponse();
 
         // when
-        HttpResponse httpResponse = HttpResponse.of(httpRequest, responseEntity);
-        String expected = String.join("\r\n",
-                "HTTP/1.1 " + 302 + " " + "FOUND" + " ",
-                "Location: index.html ",
-                "",
-                ""
-        );
+        httpResponse.initResponseValues(responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 302 + " " + "FOUND" + " ";

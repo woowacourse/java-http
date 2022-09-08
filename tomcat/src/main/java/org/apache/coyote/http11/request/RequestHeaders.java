@@ -6,6 +6,10 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String JSESSIONID_NAME = "JSESSIONID";
+
     private final Map<String, String> headers;
     private final HttpCookie cookie;
 
@@ -23,14 +27,14 @@ public class RequestHeaders {
     }
 
     private static HttpCookie createCookie(Map<String, String> headers) {
-        if (headers.containsKey("Cookie")) {
-            return HttpCookie.of(headers.get("Cookie"));
+        if (headers.containsKey(COOKIE_HEADER)) {
+            return HttpCookie.of(headers.get(COOKIE_HEADER));
         }
         return HttpCookie.emptyCookie();
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.getOrDefault("Content-Length", String.valueOf(0)));
+        return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH_HEADER, String.valueOf(0)));
     }
 
     public String getHeader(String headerName) {
@@ -38,7 +42,7 @@ public class RequestHeaders {
     }
 
     public String getJSessionId() {
-        return this.cookie.get("JSESSIONID");
+        return this.cookie.get(JSESSIONID_NAME);
     }
 
     public boolean doesNeedToSetJSessionIdCookie() {

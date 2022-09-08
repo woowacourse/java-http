@@ -1,23 +1,30 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.HttpRequest;
-
 public class HttpResponse {
 
-    private final General general;
-    private final ResponseHeaders headers;
-    private final ResponseBody responseBody;
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String SET_COOKIE_HEADER = "Set-Cookie";
 
-    public HttpResponse(General general, ResponseHeaders headers, ResponseBody responseBody) {
-        this.general = general;
-        this.headers = headers;
-        this.responseBody = responseBody;
+    private General general;
+    private final ResponseHeaders headers = new ResponseHeaders();
+    private ResponseBody responseBody;
+
+    public void initResponseValues(ResponseEntity responseEntity) {
+        this.general = new General(responseEntity.getHttpStatus());
+        this.responseBody = ResponseBody.of(responseEntity);
+        this.headers.setHeaders(responseEntity);
+        setContentLength(headers, responseBody.getContentLength());
     }
 
-    public static HttpResponse of(HttpRequest httpRequest, ResponseEntity responseEntity) {
-        ResponseHeaders responseHeaders = ResponseHeaders.of(httpRequest.getRequestHeaders(), responseEntity);
-        ResponseBody responseBody = ResponseBody.of(responseEntity, responseHeaders);
-        return new HttpResponse(new General(responseEntity.getHttpStatus()), responseHeaders, responseBody);
+    private void setContentLength(ResponseHeaders headers, int contentLength) {
+        if (contentLength == 0) {
+            return;
+        }
+        headers.add(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
+    }
+
+    public void setJSessionCookie(String jSessionId) {
+        headers.add(SET_COOKIE_HEADER, "JSESSIONID=" + jSessionId);
     }
 
     public String asString() {

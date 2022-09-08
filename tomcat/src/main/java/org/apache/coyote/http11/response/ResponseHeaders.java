@@ -3,43 +3,32 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.request.HttpCookie;
-import org.apache.coyote.http11.request.RequestHeaders;
 
 public class ResponseHeaders {
 
-    private final Map<String, String> values;
+    private static final String LOCATION_HEADER = "Location";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String HOST = "http://localhost:8080/";
 
-    public ResponseHeaders(Map<String, String> values) {
-        this.values = values;
-    }
+    private final Map<String, String> values = new LinkedHashMap<>();
 
-    public static ResponseHeaders of(RequestHeaders requestHeaders, ResponseEntity responseEntity) {
-        Map<String, String> responseHeaders = new LinkedHashMap<>();
-        checkJSessionId(requestHeaders, responseHeaders);
+    public void setHeaders(ResponseEntity responseEntity) {
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
-            responseHeaders.put("Location", "http://localhost:8080/" + responseBody.split(":")[1]);
-            return new ResponseHeaders(responseHeaders);
+            values.put(LOCATION_HEADER, HOST + responseBody.split(":")[1]);
+            return;
         }
         ContentType contentType = ContentType.findContentType(responseEntity.getResponseBody());
-        responseHeaders.put("Content-Type", "text/" + contentType.name().toLowerCase() + ";charset=utf-8");
-        return new ResponseHeaders(responseHeaders);
+        values.put(CONTENT_TYPE_HEADER, "text/" + contentType.name().toLowerCase() + ";charset=utf-8");
     }
 
-    private static void checkJSessionId(RequestHeaders requestHeaders, Map<String, String> responseHeaders) {
-        if (requestHeaders.doesNeedToSetJSessionIdCookie()) {
-            responseHeaders.put("Set-Cookie", "JSESSIONID=".concat(requestHeaders.getJSessionId()));
-        }
+    public void add(String key, String value) {
+        values.put(key, value);
     }
 
     public String asString() {
         return this.values.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));
-    }
-
-    public void setContentLength(int length) {
-        values.put("Content-Length", String.valueOf(length));
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.coyote.http11.constant.HttpHeader;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -31,7 +32,6 @@ public class LoginController extends AbstractController {
 
         Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
-        Cookie cookie = request.getCookies();
 
         if (userByAccount.isPresent()) {
             log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
@@ -49,7 +49,7 @@ public class LoginController extends AbstractController {
         String jSessionId = session.getId();
         response.addCookie(SESSION_COOKIE_NAME, jSessionId);
         response.statusCode(HttpStatus.REDIRECT);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(HttpHeader.LOCATION.value(), "/index.html");
         sessionManager.add(session);
     }
 
@@ -74,6 +74,6 @@ public class LoginController extends AbstractController {
         User user = (User) session.get("user");
         log.info("로그인 성공!" + " 아이디: " + user.getAccount());
         response.statusCode(HttpStatus.REDIRECT);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(HttpHeader.LOCATION.value(), "/index.html");
     }
 }

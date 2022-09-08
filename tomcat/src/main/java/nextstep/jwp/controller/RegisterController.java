@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.coyote.http11.constant.HttpHeader;
 import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,7 +24,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.addHeader("Location", "/index.html");
+        response.addHeader(HttpHeader.LOCATION.value(), "/index.html");
         response.statusCode(HttpStatus.REDIRECT);
     }
 

@@ -54,16 +54,16 @@ public class HttpResponse {
         long fileSize = targetFile.length();
 
         statusCode(HttpStatus.OK);
-        addHeader(HttpHeader.CONTENT_TYPE.getHeaderName(), HttpContent.extensionToContentType(extension));
-        addHeader(HttpHeader.CONTENT_LENGTH.getHeaderName(), Long.toString(fileSize));
+        addHeader(HttpHeader.CONTENT_TYPE.value(), HttpContent.extensionToContentType(extension));
+        addHeader(HttpHeader.CONTENT_LENGTH.value(), Long.toString(fileSize));
         body(new String(Files.readAllBytes(targetFile.toPath())));
     }
 
     public void loadRawString(String responseData) throws IOException {
 
         statusCode(HttpStatus.OK);
-        addHeader(HttpHeader.CONTENT_TYPE.getHeaderName(), HttpContent.HTML.getContentType());
-        addHeader(HttpHeader.CONTENT_LENGTH.getHeaderName(), String.valueOf(responseData.getBytes().length));
+        addHeader(HttpHeader.CONTENT_TYPE.value(), HttpContent.HTML.getContentType());
+        addHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(responseData.getBytes().length));
         body(responseData);
     }
 

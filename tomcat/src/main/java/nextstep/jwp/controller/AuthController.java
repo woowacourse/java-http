@@ -45,7 +45,7 @@ public class AuthController extends AbstractController {
         final String password = request.getParameter("password");
 
         if (account.isEmpty() || password.isEmpty() || !isSuccessLogin(account, password)) {
-            return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
+            return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, LOGIN_PAGE);
         }
         final User user = new User(account, password);
         return successLoginResponse(user, responseBody);

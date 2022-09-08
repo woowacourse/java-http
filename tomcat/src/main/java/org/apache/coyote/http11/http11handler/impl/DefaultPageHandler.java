@@ -12,8 +12,6 @@ public class DefaultPageHandler implements Http11Handler {
     private static final String TARGET_URI = "/";
     private static final String DEFAULT_MESSAGE = "Hello world!";
 
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
         return http11Request.getUri().equals(TARGET_URI);
@@ -21,7 +19,7 @@ public class DefaultPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
-        return handlerSupporter.defaultResponseComponent(DEFAULT_MESSAGE, StatusCode.OK);
+        return HandlerSupporter.defaultResponseComponent(DEFAULT_MESSAGE, StatusCode.OK);
     }
 }
 

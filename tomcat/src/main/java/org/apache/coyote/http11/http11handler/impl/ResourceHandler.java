@@ -13,16 +13,14 @@ public class ResourceHandler implements Http11Handler {
 
     private static final List<String> SUPPORT_EXTENSION = List.of("css", "js");
 
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
-        String extension = handlerSupporter.extractExtension(http11Request.getUri()).toLowerCase(Locale.ROOT);
+        String extension = HandlerSupporter.extractExtension(http11Request.getUri()).toLowerCase(Locale.ROOT);
         return SUPPORT_EXTENSION.contains(extension);
     }
 
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
-        return handlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
+        return HandlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
     }
 }

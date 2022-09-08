@@ -15,8 +15,6 @@ public class LoginPageHandler implements Http11Handler {
     private static final String REDIRECT_URI_ALREADY_LOGIN = "/index.html";
     private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
 
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
         return URI.equals(http11Request.getUri()) && http11Request.getHttpMethod().equals(HTTP_METHOD);
@@ -25,9 +23,9 @@ public class LoginPageHandler implements Http11Handler {
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
         if (visitor.isLogin()) {
-            return handlerSupporter.redirectResponseComponent(REDIRECT_URI_ALREADY_LOGIN, StatusCode.REDIRECT);
+            return HandlerSupporter.redirectResponseComponent(REDIRECT_URI_ALREADY_LOGIN, StatusCode.REDIRECT);
         }
-        return handlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
+        return HandlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }
 
 }

@@ -14,7 +14,6 @@ public class IndexPageHandler implements Http11Handler {
     private static final String URI_WITH_EXTENSION = "/index.html";
 
     private QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
 
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
@@ -24,6 +23,6 @@ public class IndexPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
-        return handlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
+        return HandlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }
 }

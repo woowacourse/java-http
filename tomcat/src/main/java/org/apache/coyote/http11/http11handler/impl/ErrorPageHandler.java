@@ -12,8 +12,6 @@ public class ErrorPageHandler implements Http11Handler {
 
     private static final List<String> SUPPORT_URI = List.of("/401.html", "/404.html", "/500.html");
 
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
         return SUPPORT_URI.contains(http11Request.getUri());
@@ -21,6 +19,6 @@ public class ErrorPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
-        return handlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
+        return HandlerSupporter.resourceResponseComponent(http11Request.getUri(), StatusCode.OK);
     }
 }

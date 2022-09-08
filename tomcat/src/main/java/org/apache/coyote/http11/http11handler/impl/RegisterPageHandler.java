@@ -14,8 +14,6 @@ public class RegisterPageHandler implements Http11Handler {
     private static final String URI_WITH_EXTENSION = "/register.html";
     private static final HttpMethod ALLOWED_HTTP_METHOD = HttpMethod.GET;
 
-    private HandlerSupporter handlerSupporter = new HandlerSupporter();
-
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
         return http11Request.getUri().equals(URI) && http11Request.getHttpMethod().equals(ALLOWED_HTTP_METHOD);
@@ -23,6 +21,6 @@ public class RegisterPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request, Visitor visitor) {
-        return handlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
+        return HandlerSupporter.resourceResponseComponent(URI_WITH_EXTENSION, StatusCode.OK);
     }
 }

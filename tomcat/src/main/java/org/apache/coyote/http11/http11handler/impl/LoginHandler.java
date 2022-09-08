@@ -20,7 +20,6 @@ public class LoginHandler implements Http11Handler {
     private static final String REDIRECT_WHEN_LOGIN_SUCCESS = "/index.html";
     private static final String REDIRECT_WHEN_LOGIN_FAIL = "/401.html";
 
-    private final HandlerSupporter handlerSupporter = new HandlerSupporter();
     private final QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private final LoginService loginService = new LoginService();
 
@@ -34,8 +33,8 @@ public class LoginHandler implements Http11Handler {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
             visitor.maintainLogin(loginService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
-            return handlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
+            return HandlerSupporter.resourceResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
         }
-        return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.REDIRECT);
+        return HandlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.REDIRECT);
     }
 }

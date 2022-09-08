@@ -14,15 +14,14 @@ import org.apache.coyote.support.HttpException;
 
 public class CustomServlet implements Servlet {
 
-    private final HandlerMapping handlerMapping;
+    private final RequestMapping requestMapping;
     private final ViewResolver viewResolver;
     private final ExceptionHandler exceptionHandler;
 
     public CustomServlet() {
         final var userService = new UserService(new InMemoryUserRepository());
-        final var handlerMapping = HandlerMapping.of(new HomeController(),
+        this.requestMapping = RequestMapping.of(new HomeController(),
                 new LoginController(userService), new RegisterController(userService));
-        this.handlerMapping = handlerMapping;
         this.viewResolver = new ViewResolver();
         this.exceptionHandler = new ExceptionListener();
     }
@@ -38,11 +37,11 @@ public class CustomServlet implements Servlet {
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {
-        if (!handlerMapping.hasMappedHandler(request)) {
+        if (!requestMapping.hasMappedController(request)) {
             response.ok().setViewResource(request.getUri());
             return;
         }
-        final var handler = handlerMapping.getMappedHandler(request);
-        handler.service(request, response);
+        final var controller = requestMapping.getController(request);
+        controller.service(request, response);
     }
 }

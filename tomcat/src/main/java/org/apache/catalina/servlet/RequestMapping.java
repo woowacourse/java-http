@@ -4,20 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 
-public class HandlerMapping {
+public class RequestMapping {
 
     private final Map<String, Controller> mappings;
 
-    public HandlerMapping(Map<String, Controller> mappings) {
+    public RequestMapping(Map<String, Controller> mappings) {
         this.mappings = mappings;
     }
 
-    public static HandlerMapping of(Controller... controllers) {
+    public static RequestMapping of(Controller... controllers) {
         Map<String, Controller> mappings = new HashMap<>();
         for (final var controller : controllers) {
             mapPathToController(mappings, controller);
         }
-        return new HandlerMapping(mappings);
+        return new RequestMapping(mappings);
     }
 
     private static void mapPathToController(Map<String, Controller> mappings, Controller controller) {
@@ -26,12 +26,12 @@ public class HandlerMapping {
         }
     }
 
-    public Controller getMappedHandler(HttpRequest request) {
+    public Controller getController(HttpRequest request) {
         final var uri = request.getUri();
         return mappings.get(uri);
     }
 
-    public boolean hasMappedHandler(HttpRequest request) {
+    public boolean hasMappedController(HttpRequest request) {
         final var uri = request.getUri();
         return mappings.containsKey(uri);
     }

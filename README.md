@@ -1,4 +1,4 @@
-# 🐱 톰캣 구현하기 3단계 - 리팩터링
+# 🐱 톰캣 구현하기 4단계 - 동시성 확장하기
 
 ## 🚀 미션 설명
 
@@ -8,49 +8,27 @@ HTTP 서버를 구현한 코드의 복잡도가 높아졌다.
 
 ## ⚙️ 기능 요구 사항
 
-### 1. HttpRequest 클래스 구현하기
+### 1. Executors 로 Thread Pool 적용
 
-HTTP 요청을 처리하는 클래스를 추가한다.
+Connector 클래스의 void process(final Socket connection) 메서드에서 요청마다 스레드를 새로 생성하고 있다.
 
-HTTP 요청은 어떤 형태로 구성되어 있는가?
+Connector 클래스에서 Executors 클래스를 사용해서 ExecutorService 객체를 만들어보자.
 
-클래스로 HTTP 요청을 어떻게 구성하면 좋을까?
+스레드 갯수는 maxThreads 라는 변수로 지정한다.
 
-HTTP 요청 이미지를 참고해서 구현해보자
+### 2. 동시성 컬렉션 사용하기
 
-### 2. HttpResponse 클래스 구현하기
+SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시에 접근할 수 있다.
 
-HTTP 응답을 처리하는 클래스를 추가한다.
+그러다보니 Session 컬렉션에 여러 스레드가 동시에 접근하여 읽고 쓰다보면 스레드 안정성을 보장하기 어렵다.
 
-HTTP 응답은 어떤 형태로 구성되어 있는가?
-
-클라이언트에게 어떤 형태로 HTTP를 응답하면 좋을까?
-
-### 3. Controller 인터페이스 추가하기
-
-HTTP 요청, 응답을 다른 객체에게 역할을 맡기고 나니까 uri 경로에 따른 if절 분기 처리가 남는다.
-if절 분기는 어떻게 리팩터링하는게 좋을까?
-컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들어보자.
+동시성 컬렉션(Concurrent Collections)을 적용해서 스레드 안정성과 원자성을 보장해보자.
 
 ## 🖊 체크리스트
 
-- [x] HTTP Request, HTTP Response 클래스로 나눠서 구현했다.
-- [ ] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
+- [ ] Executors 로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
 
 ## 🖥 기능 목록
 
-- [x] HttpRequest 클래스 구현하기
-- [x] HttpResponse 클래스 구현하기
-- [x] Controller 인터페이스 추가하기
-
-## 🔥 리팩토링 목록
-
-### ⚽️ ResponseEntity 실제 구조처럼 만들기
-
-- [x] builder 패턴 사용해 status Code 별 분리하기
-- [x] 각 상태코드 별 필요 헤더 추가할 수 있게 세팅하기
-- [x] 302 location 헤더 추가할 수 있도록 변경!!!
-
-### 📝 피드백
-
-#### 1차 피드백
+- [ ] Executors 로 Thread Pool 적용
+- [ ] 동시성 컬렉션 사용하기

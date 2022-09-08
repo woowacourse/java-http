@@ -7,11 +7,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.controller.FileHandler.FileController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-class FileHandlerTest {
+class FileControllerTest {
 
     @Test
     void FileHandler는_file요청을_처리할_수_있다() throws IOException {
@@ -20,10 +21,10 @@ class FileHandlerTest {
         String requestMessage = 파일_요청_메시지("GET /index.html HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        FileHandler fileHandler = new FileHandler();
+        FileController fileController = new FileController();
 
         // when
-        boolean result = fileHandler.canHandle(httpRequest);
+        boolean result = fileController.canHandle(httpRequest);
 
         // then
         assertThat(result).isTrue();
@@ -36,10 +37,10 @@ class FileHandlerTest {
         String requestMessage = 파일_요청_메시지("GET /index HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        FileHandler fileHandler = new FileHandler();
+        FileController fileController = new FileController();
 
         // when
-        boolean result = fileHandler.canHandle(httpRequest);
+        boolean result = fileController.canHandle(httpRequest);
 
         // then
         assertThat(result).isFalse();
@@ -52,10 +53,10 @@ class FileHandlerTest {
         String requestMessage = 파일_요청_메시지("GET /index.html HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        FileHandler fileHandler = new FileHandler();
+        FileController fileController = new FileController();
 
         // when
-        FileHandlerResponse response = fileHandler.handle(httpRequest);
+        FileHandlerResponse response = fileController.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

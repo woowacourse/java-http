@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
+import org.apache.coyote.http11.controller.ApiHandler.RootApiHandler;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
@@ -73,7 +74,7 @@ class RootApiHandlerTest {
         RootApiHandler rootApiHandler = new RootApiHandler();
 
         // when
-        ApiHandlerResponse response = rootApiHandler.handle(httpRequest);
+        ApiHandlerResponse response = rootApiHandler.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

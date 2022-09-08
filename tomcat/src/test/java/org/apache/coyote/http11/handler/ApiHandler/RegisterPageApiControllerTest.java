@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
+import org.apache.coyote.http11.controller.ApiHandler.RegisterPageApiController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-class RegisterPageApiHandlerTest {
+class RegisterPageApiControllerTest {
 
     @Test
     void RegisterPageApiHandler는_register요청을_처리할_수_있다() throws IOException {
@@ -22,10 +23,10 @@ class RegisterPageApiHandlerTest {
         String requestMessage = 회원가입_페이지_요청("GET /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
+        RegisterPageApiController registerPageApiController = new RegisterPageApiController();
 
         // when
-        boolean result = registerPageApiHandler.canHandle(httpRequest);
+        boolean result = registerPageApiController.canHandle(httpRequest);
 
         // then
         assertThat(result).isTrue();
@@ -38,10 +39,10 @@ class RegisterPageApiHandlerTest {
         String requestMessage = 회원가입_페이지_요청("GET /regist HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
+        RegisterPageApiController registerPageApiController = new RegisterPageApiController();
 
         // when
-        boolean result = registerPageApiHandler.canHandle(httpRequest);
+        boolean result = registerPageApiController.canHandle(httpRequest);
 
         // then
         assertThat(result).isFalse();
@@ -54,10 +55,10 @@ class RegisterPageApiHandlerTest {
         String requestMessage = 회원가입_페이지_요청("POST /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
+        RegisterPageApiController registerPageApiController = new RegisterPageApiController();
 
         // when
-        boolean result = registerPageApiHandler.canHandle(httpRequest);
+        boolean result = registerPageApiController.canHandle(httpRequest);
 
         // then
         assertThat(result).isFalse();
@@ -70,10 +71,10 @@ class RegisterPageApiHandlerTest {
         String requestMessage = 회원가입_페이지_요청("GET /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        RegisterPageApiHandler registerPageApiHandler = new RegisterPageApiHandler();
+        RegisterPageApiController registerPageApiController = new RegisterPageApiController();
 
         // when
-        ApiHandlerResponse response = registerPageApiHandler.handle(httpRequest);
+        ApiHandlerResponse response = registerPageApiController.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

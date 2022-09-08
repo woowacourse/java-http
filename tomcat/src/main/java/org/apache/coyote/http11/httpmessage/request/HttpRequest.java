@@ -52,6 +52,10 @@ public class HttpRequest {
         return new String(buffer);
     }
 
+    public boolean isGetMethod() {
+        return requestLine.matchHttpMethod(HttpMethod.GET);
+    }
+
     public boolean matchRequestLine(HttpMethod httpMethod, Pattern uriPattern) {
         return requestLine.matchHttpMethod(httpMethod) && requestLine.matchUri(uriPattern);
     }
@@ -68,11 +72,11 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
     public Session getSession() {
         return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

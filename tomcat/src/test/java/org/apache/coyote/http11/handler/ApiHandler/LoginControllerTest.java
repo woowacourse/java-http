@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
+import org.apache.coyote.http11.controller.ApiHandler.LoginController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-class LoginApiHandlerTest {
+class LoginControllerTest {
 
     @Test
     void loginApiHandler는_로그인_요청을_처리할_수_있다() throws IOException {
@@ -22,10 +23,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        final boolean result = loginApiHandler.canHandle(httpRequest);
+        final boolean result = loginController.canHandle(httpRequest);
 
         // then
         assertThat(result).isTrue();
@@ -38,10 +39,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("POST /signin HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        boolean result = loginApiHandler.canHandle(httpRequest);
+        boolean result = loginController.canHandle(httpRequest);
 
         // then
         assertThat(result).isFalse();
@@ -54,10 +55,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("GET /signin HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        boolean result = loginApiHandler.canHandle(httpRequest);
+        boolean result = loginController.canHandle(httpRequest);
 
         // then
         assertThat(result).isFalse();
@@ -70,10 +71,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
+        ApiHandlerResponse response = loginController.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()
@@ -91,10 +92,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
+        ApiHandlerResponse response = loginController.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()
@@ -112,10 +113,10 @@ class LoginApiHandlerTest {
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
 
-        final LoginApiHandler loginApiHandler = new LoginApiHandler();
+        final LoginController loginController = new LoginController();
 
         // when
-        ApiHandlerResponse response = loginApiHandler.handle(httpRequest);
+        ApiHandlerResponse response = loginController.service(httpRequest);
 
         // then
         assertThat(response).usingRecursiveComparison()

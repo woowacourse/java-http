@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         httpRequest.setSession(session);
     }
 
-    private static Session getSession(Cookie cookie, Manager sessionManager) throws IOException {
+    private Session getSession(Cookie cookie, Manager sessionManager) throws IOException {
         Session session = sessionManager.findSession(cookie.getSessionKey());
 
         if (session == null) {

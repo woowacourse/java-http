@@ -1,27 +1,25 @@
-package org.apache.coyote.http11.handler.ApiHandler;
+package org.apache.coyote.http11.controller.ApiHandler;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
-import org.apache.coyote.http11.httpmessage.request.RequestBody;
-import org.apache.coyote.http11.httpmessage.response.HttpStatus;
+import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginApiHandler implements Handler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginApiHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final Pattern LOGIN_URI_PATTERN = Pattern.compile("/login");
 
     @Override
@@ -30,45 +28,32 @@ public class LoginApiHandler implements Handler {
     }
 
     @Override
-    public ApiHandlerResponse handle(HttpRequest httpRequest) {
-        Map<String, Object> parameters = getParameters(httpRequest.getRequestBody());
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        Map<String, Object> parameters = httpRequest.getRequestBody().getParameters();
         final String account = (String) parameters.get("account");
         final String password = (String) parameters.get("password");
 
-        Map<String, Object> headers = new LinkedHashMap<>();
         Optional<User> user = findUser(account);
 
         if (user.isEmpty()) {
-            return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "", ContentType.HTML);
+            httpResponse.unAuthorized();
+            return;
         }
 
         User existedUser = user.orElseThrow();
 
         if (!existedUser.checkPassword(password)) {
-            return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "", ContentType.HTML);
+            httpResponse.unAuthorized();
+            return;
         }
 
         log.info("로그인 성공! 아이디: " + existedUser.getAccount());
         setSession(httpRequest, existedUser);
 
-        headers.put("Location", "/index.html ");
-        headers.put("Set-Cookie", new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())));
-        return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
-    }
-
-    private Map<String, Object> getParameters(RequestBody requestBody) {
-        String body = requestBody.getBody();
-        String[] params = body.split("&");
-
-        HashMap<String, Object> parameters = new HashMap<>();
-        for (String param : params) {
-            int index = param.indexOf("=");
-            String key = param.substring(0, index);
-            String value = param.substring(index + 1);
-
-            parameters.put(key, value);
-        }
-        return parameters;
+        httpResponse.found("/index.html ")
+                .addHeader("Set-Cookie", new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())))
+                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
+                .addHeader("Content-Length", "0 ");
     }
 
     private Optional<User> findUser(String account) {
@@ -80,6 +65,16 @@ public class LoginApiHandler implements Handler {
         Session session = httpRequest.getSession();
         session.setAttribute("user", user);
         sessionManager.add(session);
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+
     }
 }
 

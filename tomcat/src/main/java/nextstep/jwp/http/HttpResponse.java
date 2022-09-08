@@ -2,7 +2,7 @@ package nextstep.jwp.http;
 
 public class HttpResponse {
 
-    private static final String SET_COOKIE_HEADER = "Set-Cookie: JSESSIONID=";
+    private static final String SET_COOKIE_HEADER_WITH_JSESSIONID = "Set-Cookie: JSESSIONID=";
 
     private final StatusCode statusCode;
     private final ContentType contentType;
@@ -43,7 +43,7 @@ public class HttpResponse {
     }
 
     private String writeSetCookieOfHeader() {
-        return SET_COOKIE_HEADER + cookie.getJSessionId().orElse("") + " ";
+        return SET_COOKIE_HEADER_WITH_JSESSIONID + cookie.getJSessionId().orElse("") + " ";
     }
 
     private byte[] write(String responseLine, String header) {

@@ -52,7 +52,7 @@ public class HttpBody {
     }
 
     public String getBody() {
-        if (body == null)  {
+        if (body == null) {
             return "";
         }
         return this.body;

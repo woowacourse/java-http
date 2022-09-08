@@ -43,7 +43,8 @@ public class AuthController extends AbstractController {
 
     private HttpResponse postRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
             throws IOException {
-        final User user = new User(httpRequest.getBodyValue(ACCOUNT), httpRequest.getBodyValue(PASSWORD), httpRequest.getBodyValue("email"));
+        final User user = new User(httpRequest.getBodyValue(ACCOUNT), httpRequest.getBodyValue(PASSWORD),
+                httpRequest.getBodyValue("email"));
         InMemoryUserRepository.save(user);
 
         return redirect(httpRequest);
@@ -105,7 +106,8 @@ public class AuthController extends AbstractController {
         return new HttpResponse(httpHeader, httpBody);
     }
 
-    private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password) throws IOException {
+    private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)
+            throws IOException {
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             LOGGER.info(user.get().toString());

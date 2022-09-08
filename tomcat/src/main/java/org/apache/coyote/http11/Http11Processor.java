@@ -10,7 +10,7 @@ import java.util.List;
 import nextstep.jwp.exception.NoSuchUserException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.controller.ControllerContainer;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,11 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
+    private final ControllerContainer controllerContainer;
 
-    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
+    public Http11Processor(final Socket connection, final ControllerContainer controllerContainer) {
         this.connection = connection;
-        this.requestMapping = requestMapping;
+        this.controllerContainer = controllerContainer;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = makeHttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            Controller controller = requestMapping.findController(httpRequest);
+            Controller controller = controllerContainer.find(httpRequest);
 
             try {
                 controller.service(httpRequest, httpResponse);

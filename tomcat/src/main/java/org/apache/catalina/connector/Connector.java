@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.controller.ControllerContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,17 +21,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREADS = 100;
 
-    private final RequestMapping requestMapping;
+    private final ControllerContainer controllerContainer;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(final List<Controller> controllers) {
-        this(new RequestMapping(controllers), DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS);
+        this(new ControllerContainer(controllers), DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS);
     }
 
-    public Connector(final RequestMapping requestMapping, final int port, final int acceptCount, final int maxThreads) {
-        this.requestMapping = requestMapping;
+    public Connector(final ControllerContainer controllerContainer, final int port, final int acceptCount, final int maxThreads) {
+        this.controllerContainer = controllerContainer;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
@@ -74,7 +74,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection, requestMapping);
+        var processor = new Http11Processor(connection, controllerContainer);
         executorService.execute(processor);
     }
 

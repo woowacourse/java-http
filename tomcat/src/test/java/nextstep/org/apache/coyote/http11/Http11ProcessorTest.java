@@ -11,20 +11,20 @@ import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.controller.ControllerContainer;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private static final RequestMapping REQUEST_MAPPING
-            = new RequestMapping(List.of(new HomeController(), new LoginController(), new RegisterController()));
+    private static final ControllerContainer CONTROLLER_CONTAINER
+            = new ControllerContainer(List.of(new HomeController(), new LoginController(), new RegisterController()));
 
     @Test
     void processor에서_적절한_응답을_만들어_반환한다() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, REQUEST_MAPPING);
+        final var processor = new Http11Processor(socket, CONTROLLER_CONTAINER);
 
         // when
         processor.process(socket);
@@ -51,7 +51,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_MAPPING);
+        final Http11Processor processor = new Http11Processor(socket, CONTROLLER_CONTAINER);
 
         // when
         processor.process(socket);
@@ -80,7 +80,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_MAPPING);
+        final Http11Processor processor = new Http11Processor(socket, CONTROLLER_CONTAINER);
 
         // when
         processor.process(socket);
@@ -106,7 +106,7 @@ class Http11ProcessorTest {
                 "account=wrong&password=wrong");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_MAPPING);
+        final Http11Processor processor = new Http11Processor(socket, CONTROLLER_CONTAINER);
 
         // when
         processor.process(socket);

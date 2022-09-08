@@ -47,9 +47,8 @@ public class HttpResponse {
 
     public HttpResponse body(final String body, final MediaType mediaType) {
         this.body = body;
-        addHeader("Content-Type", mediaType.getValue());
-        addHeader("Content-Length", Integer.toString(this.body.getBytes().length));
-        return this;
+        return this.addHeader("Content-Type", mediaType.getValue())
+                .addHeader("Content-Length", Integer.toString(this.body.getBytes().length));
     }
 
     public String getValue() {

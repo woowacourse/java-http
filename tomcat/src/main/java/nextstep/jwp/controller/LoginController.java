@@ -28,9 +28,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Session session = httpRequest.getSession(false);
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
+        if (isLogin(httpRequest)) {
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .redirect("/index.html");
             return;
@@ -38,6 +36,15 @@ public class LoginController extends AbstractController {
         RequestUri requestUri = httpRequest.getRequestUri();
         httpResponse.httpStatus(HttpStatus.OK)
                 .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
+    }
+
+    private boolean isLogin(HttpRequest httpRequest) {
+        Session session = httpRequest.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        User user = (User) session.getAttribute("user");
+        return user != null;
     }
 
     @Override

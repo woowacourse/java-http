@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_REGEX = "; ";
+    private static final String ITEM_REGEX = "=";
 
     private final LinkedHashMap<String, String> values;
 
@@ -20,8 +22,8 @@ public class HttpCookie {
 
     public static HttpCookie of(final String input) {
         LinkedHashMap<String, String> cookies = new LinkedHashMap<>();
-        for (String cookie : input.split("; ")) {
-            String[] splitCookie = cookie.split("=", 2);
+        for (String cookie : input.split(COOKIE_REGEX)) {
+            String[] splitCookie = cookie.split(ITEM_REGEX, 2);
             cookies.put(splitCookie[0], splitCookie[1]);
         }
         return new HttpCookie(cookies);
@@ -38,7 +40,7 @@ public class HttpCookie {
 
     public String joinToString() {
         return values.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
+                .map(entry -> entry.getKey() + ITEM_REGEX + entry.getValue())
+                .collect(Collectors.joining(COOKIE_REGEX));
     }
 }

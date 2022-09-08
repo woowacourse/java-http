@@ -28,7 +28,7 @@ public class Headers {
         this.values.put(key, value);
     }
 
-    public String get(final String key) {
+    public String find(final String key) {
         return values.get(key);
     }
 

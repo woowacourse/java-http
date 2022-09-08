@@ -79,12 +79,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestBody(final BufferedReader bufferedReader, final Headers requestHeaders)
             throws IOException {
-        if (requestHeaders.contains(CONTENT_LENGTH)) {
-            int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            return new String(buffer);
+        if (!requestHeaders.contains(CONTENT_LENGTH)) {
+            return "";
         }
-        return "";
+        int contentLength = Integer.parseInt(requestHeaders.find(CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

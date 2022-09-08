@@ -11,10 +11,9 @@ import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
-import org.apache.coyote.http11.utils.UrlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Url url = HandlerMapping.from(new HttpRequest(requestLine, httpHeaders, cookie));
 
-            Http11Response resource = url.handle(httpHeaders, requestBody);
+            HttpResponse resource = url.handle(httpHeaders, requestBody);
             String response = resource.toResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -14,6 +14,9 @@ public class HttpRequest {
         this.cookie = cookie;
     }
 
+    public HttpCookie addCookie(HttpCookie cookie) {
+        return cookie.addCookie(cookie);
+    }
     public HttpSession getSession() {
         SessionManager sessionManager = new SessionManager();
         return sessionManager.findSession(cookie.getSession());

@@ -5,13 +5,15 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.HttpSession;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpDataRequest;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseHeaders;
+import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,41 +27,53 @@ public class Login extends Url {
     }
 
     @Override
-    public Http11Response handle(HttpHeaders httpHeaders, String requestBody) {
+    public HttpResponse handle(HttpHeaders httpHeaders, String requestBody) {
         if (HttpMethod.GET.equals(request.getHttpMethod())) {
             try {
                 HttpSession session = request.getSession();
                 User user = (User) session.getAttribute(SESSION_KEY);
                 if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
-                    return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"));
+                    String resource = IOUtils.readResourceFile("/index.html");
+                    return new HttpResponse(new StatusLine(HttpStatus.FOUND),
+                            ResponseHeaders.create(getPath(), resource), resource);
                 }
             } catch (NullPointerException e) {
                 log.info(e.getMessage(), e);
-                return new Http11Response(getPath(), HttpStatus.OK, IOUtils.readResourceFile(getPath()));
+                String resource = IOUtils.readResourceFile(getPath());
+                return new HttpResponse(new StatusLine(HttpStatus.OK), ResponseHeaders.create(getPath(), resource),
+                        resource);
             }
         }
 
         if (HttpMethod.POST.equals(request.getHttpMethod())) {
-            HttpDataRequest data = HttpDataRequest.extractRequest(requestBody);
-            User user = InMemoryUserRepository.findByAccount(data.get("account"))
+            var data = HttpDataRequest.extractRequest(requestBody);
+            var user = InMemoryUserRepository.findByAccount(data.get("account"))
                     .orElse(null);
+            String resource = IOUtils.readResourceFile("/401.html");
             if (Objects.isNull(user)) {
-                return new Http11Response(getPath(), HttpStatus.UNAUTHORIZED, IOUtils.readResourceFile("/401.html"));
+                return new HttpResponse(new StatusLine(HttpStatus.UNAUTHORIZED),
+                        ResponseHeaders.create(getPath(), resource), resource);
             }
             if (user.checkPassword(data.get("password"))) {
-                SessionManager sessionManager = new SessionManager();
-                final var session = request.getSession();
-                session.setAttribute("user", user);
-                sessionManager.add(session);
-                log.info("sessionManager에 저장 : {}", session);
-                HttpCookie requestCookie = request.getCookie();
-                HttpCookie responseCookie = requestCookie.addCookie(HttpCookie.ofJSessionId(session.getId()));
-                return new Http11Response(getPath(), HttpStatus.FOUND, IOUtils.readResourceFile("/index.html"),
-                        responseCookie);
+                final var session = validateSession(user);
+                var requestCookie = request.addCookie(HttpCookie.ofJSessionId(session.getId()));
+                String indexResource = IOUtils.readResourceFile("/index.html");
+                return new HttpResponse(new StatusLine(HttpStatus.FOUND), ResponseHeaders.create(getPath(), indexResource),
+                        indexResource).addCookie(requestCookie);
             }
             log.info("user : {}", user);
-            return new Http11Response(getPath(), HttpStatus.UNAUTHORIZED, IOUtils.readResourceFile("/401.html"));
+
+            return new HttpResponse(new StatusLine(HttpStatus.UNAUTHORIZED), ResponseHeaders.create(getPath(), resource), resource);
         }
         throw new IllegalArgumentException("Login에 해당하는 HTTP Method가 아닙니다. : " + request.getHttpMethod());
+    }
+
+    private HttpSession validateSession(User user) {
+        SessionManager sessionManager = new SessionManager();
+        final var session = request.getSession();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        log.info("sessionManager에 저장 : {}", session);
+        return session;
     }
 }

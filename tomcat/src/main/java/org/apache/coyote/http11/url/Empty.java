@@ -3,8 +3,10 @@ package org.apache.coyote.http11.url;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseHeaders;
+import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +18,11 @@ public class Empty extends Url {
     }
 
     @Override
-    public Http11Response handle(HttpHeaders httpHeaders, String requestBody) {
+    public HttpResponse handle(HttpHeaders httpHeaders, String requestBody) {
         if (HttpMethod.GET.equals(request.getHttpMethod())) {
             log.info("path : {} ", getPath());
-            return new Http11Response(getPath(), HttpStatus.OK, "Hello world!");
+            return new HttpResponse(new StatusLine(HttpStatus.OK), ResponseHeaders.create(getPath(), "Hello world!"),
+                    "Hello world!");
         }
         if (HttpMethod.POST.equals(request.getHttpMethod())) {
             throw new IllegalArgumentException("EMPTY url은 POST로 요청이 들어올수 없습니다.");

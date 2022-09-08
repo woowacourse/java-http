@@ -4,9 +4,9 @@ import java.util.Arrays;
 import org.apache.coyote.http11.utils.UrlParser;
 
 public enum ContentType {
-    TEXT_HTML("text/html", "html"),
-    TEXT_CSS("text/css", "css"),
-    TEXT_JS("text/js", "js"),
+    TEXT_HTML("text/html;charset=utf-8", "html"),
+    TEXT_CSS("text/css;charset=utf-8", "css"),
+    TEXT_JS("text/js;charset=utf-8", "js"),
     IMAGE_CSV("image/svg+xml", "svg"),
     IMAGE_ICO("image/x-icon", "ico"),
     ;

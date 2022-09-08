@@ -7,18 +7,18 @@ public enum HttpStatus {
     ;
 
     private final int code;
-    private final String name;
+    private final String message;
 
-    HttpStatus(int code, String name) {
+    HttpStatus(int code, String message) {
         this.code = code;
-        this.name = name;
+        this.message = message;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getName() {
-        return name;
+    public String getMessage() {
+        return message;
     }
 }

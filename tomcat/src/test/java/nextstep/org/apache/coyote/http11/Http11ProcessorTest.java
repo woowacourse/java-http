@@ -16,7 +16,7 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private static final String START_LINE_FOUND = "HTTP/1.1 302 Found \r\n";
+    private static final String START_LINE_FOUND = "HTTP/1.1 302 Found";
 
     @DisplayName("요청이 들어오면 Hello world를 body로 응답한다.")
     @Test
@@ -30,9 +30,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -58,9 +58,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5670\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -112,13 +112,13 @@ class Http11ProcessorTest {
 
     @DisplayName("login이 성공하면 302 Found를 헤더를 반환하고 index.html을 보여준다.")
     @Test
-    void redirect() throws IOException {
+    void redirect() {
         // given
         final String content = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "Content-Length: " + content.getBytes().length,
                 "",
                 content);
@@ -129,17 +129,11 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
+        System.out.println(socket.output());
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertAll(
                 () -> assertThat(socket.output().contains(START_LINE_FOUND)).isTrue(),
-                () -> assertThat(socket.output().contains("Content-Length: 5670 \r\n")).isTrue()
+                () -> assertThat(socket.output().contains("Content-Length: 5670")).isTrue()
         );
 
     }
@@ -165,9 +159,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        var expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2478 \r\n" +
+        var expected = "HTTP/1.1 401 Unauthorized\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 2478\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -193,9 +187,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 4391 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 4391\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -224,9 +218,9 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
+        var expected = "HTTP/1.1 302 Found\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5670\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         User user = InMemoryUserRepository.findByAccount("giron").get();

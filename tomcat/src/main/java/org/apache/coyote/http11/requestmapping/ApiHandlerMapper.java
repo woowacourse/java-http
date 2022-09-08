@@ -1,14 +1,14 @@
-package org.apache.coyote.http11.handlermapper;
+package org.apache.coyote.http11.requestmapping;
 
 import java.util.List;
-import org.apache.coyote.http11.controller.ApiHandler.LoginController;
-import org.apache.coyote.http11.controller.ApiHandler.RegisterApiController;
-import org.apache.coyote.http11.controller.ApiHandler.RegisterPageApiController;
-import org.apache.coyote.http11.controller.ApiHandler.RootApiHandler;
+import org.apache.coyote.http11.controller.apicontroller.LoginController;
+import org.apache.coyote.http11.controller.apicontroller.RegisterApiController;
+import org.apache.coyote.http11.controller.apicontroller.RegisterPageApiController;
+import org.apache.coyote.http11.controller.apicontroller.RootApiHandler;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
-public class ApiHandlerMapper implements HandlerMapper {
+public class ApiHandlerMapper implements RequestMapper {
 
     private static final List<Controller> API_HANDLERS = List.of(
             new RootApiHandler(), new LoginController(),

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller.FileHandler;
+package org.apache.coyote.http11.controller.filecontroller;
 
 import java.io.File;
 import java.io.IOException;

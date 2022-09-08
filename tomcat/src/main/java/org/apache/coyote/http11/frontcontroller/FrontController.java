@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
-import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
-import org.apache.coyote.http11.handlermapper.HandlerMapper;
+import org.apache.coyote.http11.requestmapping.ApiHandlerMapper;
+import org.apache.coyote.http11.requestmapping.FileHandlerMapper;
+import org.apache.coyote.http11.requestmapping.RequestMapper;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 
 public class FrontController {
 
-    private static final List<HandlerMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
+    private static final List<RequestMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
 
     public void doDispatch(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 

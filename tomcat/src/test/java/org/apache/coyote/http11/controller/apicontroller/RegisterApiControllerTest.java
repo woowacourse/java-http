@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.ApiHandler;
+package org.apache.coyote.http11.controller.apicontroller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
-import org.apache.coyote.http11.controller.ApiHandler.RegisterApiController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;

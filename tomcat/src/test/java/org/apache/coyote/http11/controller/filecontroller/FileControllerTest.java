@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.FileHandler;
+package org.apache.coyote.http11.controller.filecontroller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import org.apache.coyote.http11.controller.FileHandler.FileController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.junit.jupiter.api.Test;

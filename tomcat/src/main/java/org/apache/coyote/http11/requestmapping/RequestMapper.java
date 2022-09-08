@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.handlermapper;
+package org.apache.coyote.http11.requestmapping;
 
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
-public interface HandlerMapper {
+public interface RequestMapper {
 
     Controller mapHandler(HttpRequest httpRequest);
 }

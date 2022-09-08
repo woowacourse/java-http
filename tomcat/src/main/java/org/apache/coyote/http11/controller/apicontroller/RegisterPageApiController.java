@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller.FileHandler;
+package org.apache.coyote.http11.controller.apicontroller;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,31 +12,28 @@ import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 
-public class FileController extends AbstractController {
+public class RegisterPageApiController extends AbstractController {
 
-    private static final Pattern FILE_URI_PATTERN = Pattern.compile("/.+\\.(html|css|js|ico)");
+    private static final Pattern REGISTER_URI_PATTERN = Pattern.compile("/register");
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.matchRequestLine(HttpMethod.GET, FILE_URI_PATTERN);
+        return httpRequest.matchRequestLine(HttpMethod.GET, REGISTER_URI_PATTERN);
     }
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
-
-        if (resource == null) {
-            httpResponse.notFound();
-            return;
-        }
-
-        File file = new File(resource.getFile());
-        Path path = file.toPath();
-        String responseBody = new String(Files.readAllBytes(path));
-        ContentType contentType = ContentType.of(Files.probeContentType(path));
+        String responseBody = getBody();
 
         httpResponse.ok(responseBody)
-                .addHeader("Content-Type", contentType.getValue() + ";charset=utf-8 ");
+                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ");
+    }
+
+    private String getBody() throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        File file = new File(resource.getFile());
+        Path path = file.toPath();
+        return new String(Files.readAllBytes(path));
     }
 
     @Override

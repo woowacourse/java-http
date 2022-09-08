@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.http.info.ContentType;
 import org.apache.http.info.HttpHeaderName;
 import org.apache.http.info.HttpVersion;
 import org.apache.http.info.StatusCode;
+import org.richard.utils.StringUtils;
 import org.springframework.http.Cookie;
 
 public class BasicHttpResponse implements HttpResponse {
@@ -34,6 +34,22 @@ public class BasicHttpResponse implements HttpResponse {
 
     @Override
     public String getResponseHttpMessage() {
+        if (StringUtils.isNullOrBlank(this.body)) {
+            return createResponseWithoutBody();
+        }
+
+        return createResponseWithBody();
+    }
+
+    private String createResponseWithoutBody() {
+        return String.join(
+                CRLF,
+                createStartLine(),
+                createHeaders(),
+                "");
+    }
+
+    private String createResponseWithBody() {
         return String.join(
                 CRLF,
                 createStartLine(),
@@ -55,6 +71,10 @@ public class BasicHttpResponse implements HttpResponse {
     }
 
     private String createContentLength() {
+        if (StringUtils.isNullOrBlank(this.body)) {
+            return "0";
+        }
+
         return String.format("%s: %s ", HttpHeaderName.CONTENT_LENGTH.getName(), this.body.getBytes().length);
     }
 
@@ -86,10 +106,6 @@ public class BasicHttpResponse implements HttpResponse {
 
             if (Objects.isNull(this.statusCode)) {
                 this.statusCode = StatusCode.OK_200;
-            }
-
-            if (!headers.containsKey(HttpHeaderName.CONTENT_TYPE.getName())) {
-                headers.put(HttpHeaderName.CONTENT_LENGTH.getName(), ContentType.TEXT_HTML.getName());
             }
         }
 
@@ -125,6 +141,11 @@ public class BasicHttpResponse implements HttpResponse {
 
         public BasicHttpResponseBuilder body(final String body) {
             this.body = body;
+            return this;
+        }
+
+        public BasicHttpResponseBuilder redirect(final String location) {
+            headers.put("Location", location);
             return this;
         }
     }

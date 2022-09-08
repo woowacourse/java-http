@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HandlerMapping {
+public class ControllerMapping {
 
     private final static Map<String, Controller> controllers = new HashMap<>();
 

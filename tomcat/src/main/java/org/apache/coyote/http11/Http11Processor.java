@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.HandlerMapping;
+import nextstep.jwp.controller.ControllerMapping;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getDynamicResourceResponse(HttpRequest request) throws Exception {
         String path = request.getRequestLine().getUri().getPath();
-        Controller controller = HandlerMapping.findController(path);
+        Controller controller = ControllerMapping.findController(path);
         return controller.service(request);
     }
 

@@ -1,0 +1,35 @@
+package org.apache.catalina.support;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+import org.apache.catalina.exception.ResourceNotFoundException;
+
+public class ResourcesUtil {
+
+    private static final String EXTENSION_DELIMITER = ".";
+
+    private ResourcesUtil() {
+    }
+
+    public static String parseExtension(final String url) {
+        if (url.contains(EXTENSION_DELIMITER)) {
+            return url.substring(url.lastIndexOf(EXTENSION_DELIMITER) + 1);
+        }
+        return "";
+    }
+
+    public static String readResource(final String resourcePath) throws IOException {
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
+        try {
+            Objects.requireNonNull(resource);
+        } catch (NullPointerException e) {
+            throw new ResourceNotFoundException(resourcePath);
+        }
+        Path path = new File(resource.getPath()).toPath();
+        return new String(Files.readAllBytes(path));
+    }
+}

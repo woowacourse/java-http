@@ -3,14 +3,14 @@ package nextstep.jwp.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import http.HttpRequest;
+import http.HttpResponse;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {

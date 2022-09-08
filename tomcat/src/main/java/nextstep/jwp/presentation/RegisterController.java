@@ -1,10 +1,10 @@
 package nextstep.jwp.presentation;
 
+import http.HttpHeaders;
+import http.HttpRequest;
+import http.HttpResponse;
+import http.HttpStatus;
 import nextstep.jwp.application.AuthService;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 
 public class RegisterController extends AbstractController {
 

@@ -1,9 +1,9 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import http.HttpHeaders;
+import http.HttpRequest;
+import http.HttpResponse;
+import http.HttpStatus;
 
 public class RootController extends AbstractController {
 

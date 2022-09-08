@@ -1,15 +1,15 @@
 package nextstep.jwp.presentation;
 
+import http.ContentType;
+import http.HttpHeaders;
+import http.HttpMethod;
+import http.HttpRequest;
+import http.HttpResponse;
+import http.HttpStatus;
 import java.io.IOException;
 import nextstep.jwp.exception.MethodNotAllowedException;
-import org.apache.catalina.RequestHandler;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.support.ResourcesUtil;
+import org.apache.catalina.handler.RequestHandler;
+import org.apache.catalina.support.ResourcesUtil;
 
 abstract class AbstractController implements RequestHandler {
 

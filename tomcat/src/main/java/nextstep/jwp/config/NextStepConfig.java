@@ -5,9 +5,9 @@ import nextstep.jwp.presentation.GlobalExceptionHandler;
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.RegisterController;
 import nextstep.jwp.presentation.RootController;
-import org.apache.catalina.Configuration;
-import org.apache.catalina.ExceptionHandler;
-import org.apache.catalina.RequestMapper;
+import org.apache.catalina.config.Configuration;
+import org.apache.catalina.handler.ExceptionHandler;
+import org.apache.catalina.handler.RequestMapper;
 
 public class NextStepConfig implements Configuration {
 

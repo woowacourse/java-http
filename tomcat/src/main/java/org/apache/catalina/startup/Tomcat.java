@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import org.apache.catalina.Configuration;
+import org.apache.catalina.config.Configuration;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,15 +1,17 @@
 package org.apache.coyote.http11;
 
+import http.HttpRequest;
+import http.HttpResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.Configuration;
-import org.apache.catalina.ExceptionHandler;
-import org.apache.catalina.RequestHandler;
-import org.apache.catalina.RequestMapper;
+import org.apache.catalina.config.Configuration;
+import org.apache.catalina.handler.ExceptionHandler;
+import org.apache.catalina.handler.RequestHandler;
+import org.apache.catalina.handler.RequestMapper;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

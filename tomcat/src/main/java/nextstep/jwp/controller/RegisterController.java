@@ -30,8 +30,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         String responseBody = FileReader.readStaticFile("/register.html", this.getClass());
-        return new HttpResponse().addProtocol(request.getProtocol())
-                .addStatus(HttpStatus.OK)
+        return HttpResponse.ok()
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 

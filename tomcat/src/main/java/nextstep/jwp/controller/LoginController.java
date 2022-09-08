@@ -65,8 +65,7 @@ public class LoginController extends AbstractController {
         }
 
         String responseBody = FileReader.readStaticFile("/login.html", this.getClass());
-        return new HttpResponse().addProtocol(request.getProtocol())
-                .addStatus(HttpStatus.OK)
+        return HttpResponse.ok()
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }

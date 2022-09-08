@@ -70,8 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> extension = request.getExtension();
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
-            return new HttpResponse().addProtocol(request.getProtocol())
-                    .addStatus(HttpStatus.OK)
+            return HttpResponse.ok()
                     .addResponseBody(getStaticResourceResponse(request.getRequestLine().getUri().getPath()),
                             contentType);
         }

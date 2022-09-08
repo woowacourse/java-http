@@ -5,7 +5,6 @@ import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 
 public class MainController extends AbstractController {
 
@@ -30,8 +29,7 @@ public class MainController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getProtocol()).addStatus(HttpStatus.OK)
-                .addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8);
+        return HttpResponse.ok().addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8);
 
     }
 }

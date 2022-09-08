@@ -10,10 +10,6 @@ public class RequestBody {
         this.bodies = bodies;
     }
 
-    public boolean isEmpty() {
-        return bodies.isEmpty();
-    }
-
     public String getValue(String field) {
         return bodies.get(field);
     }

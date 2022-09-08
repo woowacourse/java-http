@@ -2,6 +2,8 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
+    private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
+
     private String protocol = null;
     private HttpStatus status = null;
     private String location = null;
@@ -10,6 +12,15 @@ public class HttpResponse {
     private String responseBody = null;
 
     public HttpResponse() {
+    }
+
+    public HttpResponse(String protocol, HttpStatus status) {
+        this.protocol = protocol;
+        this.status = status;
+    }
+
+    public static HttpResponse ok() {
+        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.OK);
     }
 
     public HttpResponse addProtocol(String protocol) {

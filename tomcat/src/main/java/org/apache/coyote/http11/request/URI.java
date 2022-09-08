@@ -8,11 +8,11 @@ public class URI {
     private final QueryParams queryParams;
 
     public URI(String uri) {
-        this.path = getPath(uri);
+        this.path = parseToPath(uri);
         this.queryParams = new QueryParams(uri);
     }
 
-    private String getPath(String uri) {
+    private String parseToPath(String uri) {
         if (uri.contains(PATH_SPLITTER)) {
             int index = uri.indexOf(PATH_SPLITTER);
             return uri.substring(0, index);

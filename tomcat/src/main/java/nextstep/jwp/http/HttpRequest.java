@@ -56,6 +56,10 @@ public class HttpRequest {
         return separatedUri.size() != ONLY_PATH_SIZE;
     }
 
+    public boolean matches(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
     public boolean matches(String path, HttpMethod httpMethod) {
         return this.path.equals(path) && this.httpMethod.equals(httpMethod);
     }

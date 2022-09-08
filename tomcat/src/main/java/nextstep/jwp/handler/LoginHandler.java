@@ -33,7 +33,7 @@ public class LoginHandler {
 
     private static boolean isCorrectPassword(User user, String password) {
         if (user.checkPassword(password)) {
-            log.info(user.toString());
+            log.info("{}", user);
             return true;
         }
         return false;

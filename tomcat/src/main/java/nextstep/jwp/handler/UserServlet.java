@@ -8,7 +8,7 @@ import org.apache.coyote.http11.handler.RequestServlet;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class RegisterServlet implements RequestServlet {
+public class UserServlet implements RequestServlet {
 
     private static final String PASSWORD_KEY = "password";
     private static final String ACCOUNT_KEY = "account";

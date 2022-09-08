@@ -9,11 +9,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long userId = 1L;
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(userId, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
+
+    private InMemoryUserRepository() {}
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
@@ -23,5 +26,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static Long getNextUserId() {
+        return ++userId;
+    }
 }

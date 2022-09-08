@@ -2,25 +2,19 @@ package org.apache.coyote.http11.support;
 
 public enum HttpStatus {
 
-    OK(200, "OK"),
-    FOUND(302, "Found"),
-    UNAUTHORIZED(401, "Unauthorized"),
-    NOT_FOUND(404, "Not Found"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
+    OK(200),
+    FOUND(302),
+    UNAUTHORIZED(401),
+    NOT_FOUND(404),
+    INTERNAL_SERVER_ERROR(500);
 
     private final int statusCode;
-    private final String statusMessage;
 
-    HttpStatus(final int statusCode, final String statusMessage) {
+    HttpStatus(final int statusCode) {
         this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
     }
 
     public String getStatusCode() {
         return String.valueOf(statusCode);
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
     }
 }

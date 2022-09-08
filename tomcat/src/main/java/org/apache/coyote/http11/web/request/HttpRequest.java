@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.web.request;
 
-import org.apache.coyote.http11.file.ResourceExtension;
 import org.apache.coyote.http11.support.HttpCookie;
 import org.apache.coyote.http11.support.HttpHeaders;
 import org.apache.coyote.http11.support.HttpMethod;
@@ -22,17 +21,8 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public boolean isStaticResource() {
-        final String uri = httpStartLine.getUri();
-        return ResourceExtension.contains(uri);
-    }
-
     public boolean isMethod(final HttpMethod httpMethod) {
         return httpStartLine.getHttpMethod() == httpMethod;
-    }
-
-    public boolean isUri(final String uri) {
-        return httpStartLine.getUri().equals(uri);
     }
 
     public boolean hasCookie() {

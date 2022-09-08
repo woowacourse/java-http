@@ -12,19 +12,19 @@ import nextstep.jwp.utils.FileUtils;
 public abstract class AbstractController implements Controller{
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request) throws Exception {
         if (request.matches(HttpMethod.GET)) {
-            handleGet(request, response);
+            handleGet(request);
         }
         if (request.matches(HttpMethod.POST)) {
-            handlePost(request, response);
+            handlePost(request);
         }
     }
 
-    protected HttpResponse handleGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected HttpResponse handleGet(HttpRequest request) throws Exception {
         return notfound();
     }
-    protected HttpResponse handlePost(HttpRequest request, HttpResponse response) throws Exception {
+    protected HttpResponse handlePost(HttpRequest request) throws Exception {
         return notfound();
     };
 

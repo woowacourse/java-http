@@ -14,7 +14,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
-        return HttpResponse.ofResource("/register.html");
+        return HttpResponse.ofOk(View.REGISTER.getResource());
     }
 
     @Override
@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
         checkParams(requestParams);
         UserService.register(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD),
                 requestParams.get(KEY_EMAIL));
-        return HttpResponse.ofRedirection(StatusCode.SEE_OTHER, "/index.html");
+        return HttpResponse.ofRedirection(StatusCode.SEE_OTHER, View.INDEX.getPath());
     }
 
     private void checkParams(final QueryParams queryParams) {

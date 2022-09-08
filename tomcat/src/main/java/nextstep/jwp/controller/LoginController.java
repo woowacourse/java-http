@@ -16,14 +16,13 @@ public class LoginController extends AbstractController {
 
     private static final String KEY_ACCOUNT = "account";
     private static final String KEY_PASSWORD = "password";
-    private static final String PATH_REDIRECT = "/index.html";
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws IOException, URISyntaxException {
         if (hasLoggedIn(httpRequest)) {
-            return HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
+            return HttpResponse.ofRedirection(StatusCode.FOUND, View.INDEX.getPath());
         }
-        return HttpResponse.ofResource("/login.html");
+        return HttpResponse.ofOk(View.LOGIN.getResource());
     }
 
     @Override
@@ -34,7 +33,7 @@ public class LoginController extends AbstractController {
         final User user = UserService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));
         final Session session = createSession(httpRequest, user);
 
-        final HttpResponse httpResponse = HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
+        final HttpResponse httpResponse = HttpResponse.ofRedirection(StatusCode.FOUND, View.INDEX.getPath());
         httpResponse.setCookie(Cookie.fromJSessionId(session.getId()));
         return httpResponse;
     }

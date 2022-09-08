@@ -1,5 +1,6 @@
 package nextstep.jwp.db;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
 
-    private Long id = 1L;
+    private final AtomicInteger id = new AtomicInteger(1);
     private final Map<String, User> database = new ConcurrentHashMap<>();
 
     public InMemoryUserRepository() {
@@ -17,8 +18,9 @@ public class InMemoryUserRepository {
     }
 
     public User save(User user) {
-        final var newUser = new User(++id, user.getAccount(), user.getPassword(), user.getEmail());
-        database.put(user.getAccount(), user);
+        final var id = (long) this.id.incrementAndGet();
+        final var newUser = new User(id, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(newUser.getAccount(), newUser);
         return newUser;
     }
 

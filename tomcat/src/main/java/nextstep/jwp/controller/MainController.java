@@ -30,7 +30,7 @@ public class MainController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol()).addStatus(HttpStatus.OK)
+        return new HttpResponse().addProtocol(request.getProtocol()).addStatus(HttpStatus.OK)
                 .addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8);
 
     }

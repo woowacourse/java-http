@@ -12,7 +12,7 @@ public abstract class AbstractController implements Controller {
     protected abstract HttpResponse doGet(HttpRequest request);
 
     protected HttpResponse doNotFoundRequest(HttpRequest request) {
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.NOT_FOUND)
                 .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
     }

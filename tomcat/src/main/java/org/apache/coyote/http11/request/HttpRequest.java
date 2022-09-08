@@ -32,10 +32,6 @@ public class HttpRequest {
         return requestLine.getExtension();
     }
 
-    public boolean hasRequestBody() {
-        return !requestBody.isEmpty();
-    }
-
     public Optional<String> getSession() {
         Optional<String> cookieValue = requestHeaders.getHeaderValue(COOKIE_HEADER_KEY);
         if (cookieValue.isEmpty()) {
@@ -52,6 +48,10 @@ public class HttpRequest {
             return Optional.of(cookies.get(Cookies.JSESSIONID));
         }
         return Optional.empty();
+    }
+
+    public String getProtocol() {
+        return requestLine.getProtocol();
     }
 
     public RequestLine getRequestLine() {

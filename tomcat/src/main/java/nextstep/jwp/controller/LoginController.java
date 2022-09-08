@@ -44,13 +44,13 @@ public class LoginController extends AbstractController {
                 session.setAttribute("user", user.get());
                 SessionManager.add(session);
 
-                return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+                return new HttpResponse().addProtocol(request.getProtocol())
                         .addStatus(HttpStatus.FOUND)
                         .addLocation("/index.html")
                         .addCookie(Cookies.ofJSessionId(session.getId()));
             }
         }
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.FOUND)
                 .addLocation("/401.html");
     }
@@ -59,13 +59,13 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) {
         Optional<String> session = request.getSession();
         if (session.isPresent() && SessionManager.findSession(session.get()).isPresent()) {
-            return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+            return new HttpResponse().addProtocol(request.getProtocol())
                     .addStatus(HttpStatus.FOUND)
                     .addLocation("/index.html");
         }
 
         String responseBody = FileReader.readStaticFile("/login.html", this.getClass());
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.OK)
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
     }

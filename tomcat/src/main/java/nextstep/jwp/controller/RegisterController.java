@@ -30,7 +30,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         String responseBody = FileReader.readStaticFile("/register.html", this.getClass());
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.OK)
                 .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
@@ -42,7 +42,7 @@ public class RegisterController extends AbstractController {
         String email = request.getRequestBody().getValue("email");
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.FOUND)
                 .addLocation("/index.html");
     }

@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> extension = request.getExtension();
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
-            return new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+            return new HttpResponse().addProtocol(request.getProtocol())
                     .addStatus(HttpStatus.OK)
                     .addResponseBody(getStaticResourceResponse(request.getRequestLine().getUri().getPath()),
                             contentType);
@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getNotFoundResponse(HttpRequest request) {
-        return getNotFoundResponse(new HttpResponse().addProtocol(request.getRequestLine().getProtocol())
+        return getNotFoundResponse(new HttpResponse().addProtocol(request.getProtocol())
                 .addStatus(HttpStatus.NOT_FOUND)
                 .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8));
     }

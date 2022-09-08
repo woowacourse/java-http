@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.Constants.CRLF;
 
+import java.util.Map;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class HttpResponse {
@@ -21,6 +22,11 @@ public class HttpResponse {
         return new HttpResponse(header, responseBody);
     }
 
+    public static HttpResponse found() {
+        HttpResponseHeader header = new HttpResponseHeader(HttpStatus.FOUND);
+        return new HttpResponse(header, HttpResponseBody.empty());
+    }
+
     public HttpResponseBody getBody() {
         return body;
     }
@@ -30,5 +36,10 @@ public class HttpResponse {
                 header.getHeaders(),
                 "",
                 body.getBodyContext());
+    }
+
+    public HttpResponse addHeaders(Map<String, String> headers) {
+        headers.entrySet().forEach(header::addHeader);
+        return this;
     }
 }

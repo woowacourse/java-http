@@ -4,6 +4,7 @@ import static org.apache.coyote.Constants.CRLF;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class HttpResponseHeader {
@@ -26,5 +27,14 @@ public class HttpResponseHeader {
     public HttpResponseHeader addContentLength(int contentLength) {
         headers.add("Content-Length: " + contentLength + " ");
         return this;
+    }
+
+    public HttpResponseHeader addLocation(String uri) {
+        headers.add("Location: " + uri + " ");
+        return this;
+    }
+
+    public void addHeader(Entry<String, String> entry) {
+        headers.add(entry.getKey() + ": " + entry.getValue() + " ");
     }
 }

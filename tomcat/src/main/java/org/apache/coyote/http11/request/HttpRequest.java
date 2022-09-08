@@ -1,38 +1,54 @@
 package org.apache.coyote.http11.request;
 
 
-import static org.apache.coyote.Constants.CRLF;
-
-import java.util.NoSuchElementException;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.request.element.HttpRequestBody;
+import org.apache.coyote.http11.request.element.HttpRequestHeader;
+import org.apache.coyote.http11.request.element.Path;
+import org.apache.coyote.http11.request.element.Query;
 import org.apache.coyote.http11.response.element.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String EMPTY_REQUEST = "요청이 비어있습니다.";
+    private final HttpRequestHeader header;
+    private final HttpRequestBody body;
 
-    private final HttpMethod method;
-    private final String path;
-
-    public HttpRequest(HttpMethod method, String path) {
-        this.method = method;
-        this.path = path;
-    }
-
-    public static HttpRequest of(String request) {
-        if (request == null || request.isEmpty()) {
-            throw new NoSuchElementException(EMPTY_REQUEST);
-        }
-        String[] firstLineElements = request
-                .split(CRLF)[0]
-                .split(" ");
-        return new HttpRequest(HttpMethod.valueOf(firstLineElements[0]), firstLineElements[1]);
+    public HttpRequest(HttpRequestHeader header, HttpRequestBody body) {
+        this.header = header;
+        this.body = body;
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return header.getMethod();
     }
 
-    public String getPath() {
-        return path;
+    public Path getPath() {
+        return header.getPath();
+    }
+
+    public Query getQuery() {
+        return header.getQuery();
+    }
+
+    public String getBody() {
+        return body.getBodyContext();
+    }
+
+    public String findHeader(String header) {
+        return this.header.find(header);
+    }
+
+    public Session getSession() {
+        return new Session(String.valueOf(UUID.randomUUID()));
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "header=" + header +
+                ", body=" + body +
+                '}';
     }
 }

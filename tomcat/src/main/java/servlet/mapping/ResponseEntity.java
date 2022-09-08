@@ -1,22 +1,48 @@
 package servlet.mapping;
 
-import org.apache.coyote.http11.response.element.HttpMethod;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import nextstep.jwp.db.HttpCookie;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class ResponseEntity {
 
-    private final HttpMethod method;
-    private final String uri;
-    private final HttpStatus status;
+    private String uri;
+    private HttpStatus status;
+    private Map<String, String> headers;
 
-    public ResponseEntity(HttpMethod method, String uri, HttpStatus status) {
-        this.method = method;
-        this.uri = uri;
-        this.status = status;
+    public ResponseEntity() {
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public ResponseEntity(String uri, HttpStatus status) {
+        this.uri = uri;
+        this.status = status;
+        this.headers = new LinkedHashMap<>();
+    }
+
+    public ResponseEntity(String uri, HttpStatus status, Map<String, String> headers) {
+        this.uri = uri;
+        this.status = status;
+        this.headers = headers;
+    }
+
+    public static ResponseEntity ok(String uri) {
+        return new ResponseEntity(uri, HttpStatus.OK);
+    }
+
+    public static ResponseEntity found() {
+        return new ResponseEntity(null, HttpStatus.FOUND);
+    }
+
+    public ResponseEntity addCookie(HttpCookie cookie) {
+        this.headers.put("Set-Cookie", cookie.getResponse());
+        return this;
+    }
+
+    public ResponseEntity addLocation(String location) {
+        this.headers.put("Location", location);
+        return this;
     }
 
     public String getUri() {
@@ -25,5 +51,15 @@ public class ResponseEntity {
 
     public HttpStatus getStatus() {
         return status;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void clone(ResponseEntity entity) {
+        this.uri = entity.getUri();
+        this.status = entity.getStatus();
+        this.headers = entity.getHeaders();
     }
 }

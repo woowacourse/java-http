@@ -10,7 +10,7 @@ class SessionManagerTest {
     @Test
     void 세션을_저장한다() {
         // given
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.instance();
         Session session = new Session("id");
 
         // when
@@ -23,7 +23,7 @@ class SessionManagerTest {
     @Test
     void 세션을_제거한다() {
         // given
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.instance();
         Session session = new Session("id");
         sessionManager.add(session);
 

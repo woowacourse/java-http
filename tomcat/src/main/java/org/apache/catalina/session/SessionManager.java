@@ -8,6 +8,13 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
+    private SessionManager() {
+    }
+
+    public static SessionManager instance() {
+        return SessionManagerHolder.instance;
+    }
+
     @Override
     public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
@@ -21,5 +28,10 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    private static class SessionManagerHolder {
+
+        private static final SessionManager instance = new SessionManager();
     }
 }

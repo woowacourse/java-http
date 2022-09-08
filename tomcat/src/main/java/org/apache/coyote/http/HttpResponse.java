@@ -17,28 +17,28 @@ public class HttpResponse {
     }
 
     public HttpResponse addStatus(HttpStatus status) {
-        responseFirstLine = HttpHeader.HTTP_1_1_STATUS.apply(status);
+        responseFirstLine = HttpMessage.HTTP_1_1_STATUS.apply(status);
         return this;
     }
 
     public HttpResponse addCooke(final HttpCookie cookie) {
-        final String value = HttpHeader.SET_COOKIE.apply(cookie);
-        headers.put(HttpHeader.SET_COOKIE.type(), "JSESSIONID="+value);
+        final String value = HttpMessage.SET_COOKIE.apply(cookie);
+        headers.put(HttpMessage.SET_COOKIE.type(), "JSESSIONID="+value);
         return this;
     }
 
-    public HttpResponse add(HttpHeader header, Object value) {
+    public HttpResponse add(HttpMessage header, Object value) {
         headers.put(header.type(), header.apply(value.toString()));
         return this;
     }
 
-    public HttpResponse add(HttpHeader header, String value) {
+    public HttpResponse add(HttpMessage header, String value) {
         headers.put(header.type(), header.apply(value));
         return this;
     }
 
     public HttpResponse body(String body) {
-        add(HttpHeader.CONTENT_LENGTH, body.getBytes().length);
+        add(HttpMessage.CONTENT_LENGTH, body.getBytes().length);
         this.body = body;
         return this;
     }
@@ -46,7 +46,7 @@ public class HttpResponse {
     // "/index.html"
     public HttpResponse sendRedirect(String uri) {
         addStatus(HttpStatus.FOUND);
-        headers.put(HttpHeader.LOCATION.type(), uri);
+        headers.put(HttpMessage.LOCATION.type(), uri);
         return this;
     }
 

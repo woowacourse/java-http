@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import org.apache.constant.MediaType;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpMessage;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatus;
@@ -31,7 +31,7 @@ public class HomeController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String welcomeMessage = "Hello world!";
         response.addStatus(HttpStatus.OK)
-                .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN.value())
+                .add(HttpMessage.CONTENT_TYPE, MediaType.PLAIN.value())
                 .body(welcomeMessage);
     }
 }

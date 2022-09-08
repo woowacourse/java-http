@@ -1,11 +1,10 @@
 package org.apache.coyote.handler;
 
 import org.apache.constant.MediaType;
-import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpMessage;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpStatus;
-import org.apache.coyote.status.HttpCookie;
 import org.apache.coyote.status.Session;
 import org.apache.coyote.status.SessionManager;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public enum StaticHandlerMethod {
         }
 
         response.addStatus(HttpStatus.OK)
-                .add(HttpHeader.CONTENT_TYPE, contentType)
+                .add(HttpMessage.CONTENT_TYPE, contentType)
                 .body(responseBody);
     }
 

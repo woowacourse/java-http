@@ -14,10 +14,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.ControllerContainer;
-import org.apache.coyote.handler.ApiHandlerMethod;
+import org.apache.coyote.handler.StaticHandlerMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.handler.StaticHandlerMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,39 +42,28 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
              final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));) {
 
-            final HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            final HttpResponse httpResponse = new HttpResponse();
-            route(httpRequest, httpResponse, bufferedWriter);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            final HttpRequest request = new HttpRequest(bufferedReader);
+            final HttpResponse response = new HttpResponse();
+
+            route(request, response);
+            writeAndFlush(bufferedWriter, response.toStringData());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-/*
-    private void route(final HttpRequest request, final HttpResponse response,
-                       final BufferedWriter bufferedWriter) {
-        ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(request);
-        if (apiHandlerMethod != null) {
-            log.info("API Request = {}", request);
-            apiHandlerMethod.handle(request, response);
-        } else {
-            log.info("View Request = {}", request);
-            StaticHandlerMethod.INSTANCE.handle(request, response);
-        }
-        writeAndFlush(bufferedWriter, response.toStringData());
-    }
-*/
-
-    private void route(final HttpRequest request, final HttpResponse response,
-                       final BufferedWriter bufferedWriter) {
-
+    private void route(final HttpRequest request, final HttpResponse response) {
         final Controller controller = ControllerContainer.findFromUri(request.getUri(), request.getHttpMethod());
         if (controller != null) {
             controller.service(request, response);
-        } else {
-            StaticHandlerMethod.INSTANCE.handle(request, response);
         }
-        writeAndFlush(bufferedWriter, response.toStringData());
+        StaticHandlerMethod.INSTANCE.handle(request, response);
     }
 
 }

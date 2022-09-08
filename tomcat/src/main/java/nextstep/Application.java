@@ -12,7 +12,6 @@ public class Application {
 
     public static void main(String[] args) {
         ControllerContainer.scanPackage("nextstep.jwp.controller");
-
         log.info("web server start.");
         final var tomcat = new Tomcat();
         tomcat.start();

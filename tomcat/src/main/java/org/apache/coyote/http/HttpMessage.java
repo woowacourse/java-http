@@ -3,7 +3,7 @@ package org.apache.coyote.http;
 import org.apache.coyote.status.HttpCookie;
 import org.apache.coyote.status.Session;
 
-public enum HttpHeader {
+public enum HttpMessage {
 
     HTTP_1_1_STATUS("HTTP/1.1", "%s %s "),
     LOCATION("Location", "%s "),
@@ -14,7 +14,7 @@ public enum HttpHeader {
     private final String type;
     private final String format;
 
-    HttpHeader(final String type, final String format) {
+    HttpMessage(final String type, final String format) {
         this.type = type;
         this.format = format;
     }

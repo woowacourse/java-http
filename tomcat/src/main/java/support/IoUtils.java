@@ -97,18 +97,6 @@ public class IoUtils {
         }
     }
 
-    // TODO HttpResponse 기반으로 구현해야 함 !
-/*
-    public static void writeAndFlush(final BufferedWriter bufferedWriter, final HttpResponse response) {
-        try {
-            bufferedWriter.write();
-            bufferedWriter.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-*/
-
     private static Path getPath(final String fileName) {
         return Paths
                 .get("tomcat", "src", "main", "resources", "static", fileName)

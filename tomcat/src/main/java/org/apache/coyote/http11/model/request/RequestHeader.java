@@ -32,10 +32,6 @@ public class RequestHeader {
         return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH, "0"));
     }
 
-    public String getCookieKey() {
-        return headers.get(COOKIE);
-    }
-
     public Optional<String> getJSessionToString() {
         if (!headers.containsKey(COOKIE)) {
             return Optional.empty();

@@ -11,7 +11,7 @@ public class RequestCookie {
     public static final int VALUE_INDEX = 1;
     private final Map<String, String> cookies;
 
-    public RequestCookie(final Map<String, String> cookies) {
+    private RequestCookie(final Map<String, String> cookies) {
         this.cookies = cookies;
     }
 

@@ -284,6 +284,8 @@ Response는 OutputStream을 받아 생성되고, `service()` 메소드가 종료
 
 - [x] Executors로 Thread Pool 적용
   - [x] `newFixedThreadPool` 을 사용하여 고정된 개수(250)의 쓰레드를 재사용하며 초과되는 요청은 대기 상태(큐)
+- [x] 동시성 컬렉션 사용하기
+  - [x] `Sessionmanager`에 `ConcurrentHashMap` 을 사용하여 Session 컬렉션에 대해 쓰레드 안정성을 보장
 
 ## 새롭게 알게 된 내용 (4단계)
 
@@ -309,4 +311,7 @@ Response는 OutputStream을 받아 생성되고, `service()` 메소드가 종료
 (The shutdown() method doesn't cause immediate destruction of the ExecutorService.
 It will make the ExecutorService stop accepting new tasks and shut down after all running threads finish their current work)
 
+### ConCurrentHashMap
 
+`ConcurrentHashMap` 은 `put()` 메소드에 대해서 `synchronized` 를 붙여,
+읽기에 대해서는 여러 쓰레드에서 동시에 읽을 수 있도록 하지만, 쓰기에 있어서는 동시에 하나의 쓰레드만 접근이 가능하도록 한다.

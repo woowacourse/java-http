@@ -43,7 +43,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected final HttpResponse redirectToIndex() {
-        return redirect(HttpStatus.FOUND, "/");
+        return redirect(HttpStatus.FOUND, Page.INDEX.getPath());
     }
 
     protected final HttpResponse fail(final HttpStatus status, final Page page) {

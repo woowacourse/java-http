@@ -20,10 +20,10 @@ public class LoginController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) {
         final var session = request.getSession();
         if (session.hasAttribute(Session.USER_ATTRIBUTE)) {
-            response.redirect("/index.html");
+            response.redirect(Page.INDEX.getUri());
             return;
         }
-        response.ok().setViewResource("/login.html");
+        response.ok().setViewResource(Page.LOGIN.getUri());
     }
 
     @Override
@@ -31,6 +31,6 @@ public class LoginController extends AbstractController {
         final var user = userService.login(DtoAssembler.ofLoginDto(request));
         final var session = request.getSession();
         session.setAttribute(Session.USER_ATTRIBUTE, user);
-        response.redirect("/index.html");
+        response.redirect(Page.INDEX.getUri());
     }
 }

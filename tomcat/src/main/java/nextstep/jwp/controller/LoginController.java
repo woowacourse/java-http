@@ -1,8 +1,7 @@
 package nextstep.jwp.controller;
 
-import java.util.List;
 import nextstep.jwp.controller.dto.DtoAssembler;
-import nextstep.jwp.exception.ExceptionListener;
+import nextstep.jwp.exception.ExceptionHandler;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.response.HttpResponse;
@@ -12,8 +11,8 @@ public class LoginController extends AbstractController {
 
     private final UserService userService;
 
-    public LoginController(UserService userService, ExceptionListener exceptionListener) {
-        super("/login", exceptionListener);
+    public LoginController(UserService userService, ExceptionHandler exceptionHandler) {
+        super("/login", exceptionHandler);
         this.userService = userService;
     }
 

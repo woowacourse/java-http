@@ -1,14 +1,14 @@
 package nextstep.jwp.controller;
 
 import java.util.List;
-import nextstep.jwp.exception.ExceptionListener;
+import nextstep.jwp.exception.ExceptionHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
 public class HomeController extends AbstractController {
 
-    public HomeController(ExceptionListener exceptionListener) {
-        super(List.of("/", "/index"), exceptionListener);
+    public HomeController(ExceptionHandler exceptionHandler) {
+        super(List.of("/", "/index"), exceptionHandler);
     }
 
     @Override

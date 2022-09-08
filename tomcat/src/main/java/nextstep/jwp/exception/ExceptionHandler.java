@@ -5,7 +5,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
-public class ExceptionListener {
+public class ExceptionHandler {
 
     public void handle(HttpException exception, HttpResponse response) {
         final var status = exception.getStatus();

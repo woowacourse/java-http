@@ -1,6 +1,7 @@
 package org.apache.catalina.servlet;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 
@@ -14,7 +15,7 @@ public class RequestMapping {
         this.mappings = mappings;
     }
 
-    public static RequestMapping of(Controller... controllers) {
+    public static RequestMapping of(List<Controller> controllers) {
         Map<String, Controller> mappings = new HashMap<>();
         for (final var controller : controllers) {
             mapPathToController(mappings, controller);

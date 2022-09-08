@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.util.List;
-import nextstep.jwp.exception.ExceptionListener;
+import nextstep.jwp.exception.ExceptionHandler;
 import org.apache.catalina.servlet.Controller;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
@@ -12,15 +12,15 @@ import org.apache.coyote.support.HttpStatus;
 public abstract class AbstractController implements Controller {
 
     private final List<String> paths;
-    private final ExceptionListener exceptionListener;
+    private final ExceptionHandler exceptionHandler;
 
-    protected AbstractController(List<String> paths, ExceptionListener exceptionListener) {
+    protected AbstractController(List<String> paths, ExceptionHandler exceptionHandler) {
         this.paths = paths;
-        this.exceptionListener = exceptionListener;
+        this.exceptionHandler = exceptionHandler;
     }
 
-    protected AbstractController(String path,ExceptionListener exceptionListener) {
-        this(List.of(path), exceptionListener);
+    protected AbstractController(String path, ExceptionHandler exceptionHandler) {
+        this(List.of(path), exceptionHandler);
     }
 
     @Override
@@ -53,7 +53,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private void handleException(HttpException exception, HttpResponse response) {
-        exceptionListener.handle(exception, response);
+        exceptionHandler.handle(exception, response);
     }
 
     @Override

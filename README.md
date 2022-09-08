@@ -39,7 +39,7 @@
 
 ### 4단계 - 동시성 확장하기
 
-- [ ] Executors로 Thread Pool 적용
+- [x] Executors로 Thread Pool 적용
     - Connector 클래스에서 Executors 클래스 사용
-- [ ] 동시성 컬렉션 사용하기
+- [x] 동시성 컬렉션 사용하기
     - Session Concurrent Collections 적용

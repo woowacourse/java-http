@@ -14,8 +14,11 @@ public class HttpRequest {
         this.requestParameters = RequestParameters.of(requestBody);
     }
 
-    public Session getSession() {
-        return new Session(UUID.randomUUID().toString());
+    public Session getSession(final boolean create) {
+        if (create) {
+            return new Session(UUID.randomUUID().toString());
+        }
+        return headers.getSession();
     }
 
     public RequestUri getRequestUri() {

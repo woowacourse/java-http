@@ -39,4 +39,12 @@ public class Headers {
     public LinkedHashMap<String, String> getValues() {
         return new LinkedHashMap<>(values);
     }
+
+    public Session getSession() {
+        if (values.containsKey("Cookie")) {
+            HttpCookie cookie = HttpCookie.of(values.get("Cookie"));
+            return cookie.getSession();
+        }
+        return null;
+    }
 }

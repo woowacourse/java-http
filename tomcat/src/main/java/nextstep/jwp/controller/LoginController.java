@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
@@ -20,6 +19,11 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
+        if (httpRequest.getSession(false) != null) {
+            httpResponse.httpStatus(HttpStatus.FOUND)
+                    .redirect("/index.html");
+            return;
+        }
         RequestUri requestUri = httpRequest.getRequestUri();
         if (requestUri.hasRequestParameters()) {
             login(httpRequest, httpResponse);
@@ -39,7 +43,7 @@ public class LoginController extends AbstractController {
             RequestParameters requestParameters = httpRequest.getRequestParameters();
             User user = getUserByAccount(requestParameters.get("account"));
             validatePassword(requestParameters, user);
-            Session session = httpRequest.getSession();
+            Session session = httpRequest.getSession(true);
             session.addAttribute("user", user);
             httpResponse.httpStatus(HttpStatus.FOUND)
                     .redirect("/index.html")

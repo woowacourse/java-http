@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final LinkedHashMap<String, String> values;
 
     private HttpCookie(final LinkedHashMap<String, String> values) {
@@ -13,7 +15,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie ofJSessionId(final String id) {
-        return new HttpCookie(new LinkedHashMap<>(Map.of("JSESSIONID", id)));
+        return new HttpCookie(new LinkedHashMap<>(Map.of(JSESSIONID, id)));
     }
 
     public static HttpCookie of(final String input) {
@@ -28,6 +30,13 @@ public class HttpCookie {
     public HttpCookie add(final String key, final String value) {
         values.put(key, value);
         return this;
+    }
+
+    public Session getSession() {
+        if (values.containsKey(JSESSIONID)) {
+            return new Session(values.get(JSESSIONID));
+        }
+        return null;
     }
 
     public String joinToString() {

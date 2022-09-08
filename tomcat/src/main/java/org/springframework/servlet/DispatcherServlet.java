@@ -5,8 +5,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +21,7 @@ import org.apache.http.info.HttpVersion;
 import org.apache.http.info.StatusCode;
 import org.reflections.Reflections;
 import org.richard.utils.CustomReflectionUtils;
+import org.richard.utils.ResourceUtils;
 import org.richard.utils.YamlUtils;
 import org.springframework.annotation.Controller;
 import org.springframework.annotation.RequestMapping;
@@ -104,7 +103,8 @@ public class DispatcherServlet implements Servlet {
             if (Objects.nonNull(accept)) {
                 contentType = accept.split(",")[0];
             }
-            final var resourceAsBody = getResponseBodyByURI(httpRequest);
+            final var resourceAsBody = ResourceUtils.createResourceAsString(
+                    String.format("static/%s", httpRequest.getRequestURIWithoutQueryParams()));
 
             return BasicHttpResponse.builder()
                     .httpVersion(HttpVersion.HTTP_1_1)
@@ -113,28 +113,5 @@ public class DispatcherServlet implements Servlet {
                     .body(resourceAsBody)
                     .build();
         };
-    }
-
-    private String getResponseBodyByURI(final HttpRequest httpRequest) {
-        final var requestURI = httpRequest.getRequestURI();
-        final var resource = findResource(requestURI);
-        final var path = new File(resource.getFile()).toPath();
-
-        try {
-            return new String(Files.readAllBytes(path));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private URL findResource(final String requestURI) {
-        final var classLoader = getClass().getClassLoader();
-        final var resource = classLoader.getResource(String.format("static%s", requestURI));
-
-        if (Objects.nonNull(resource)) {
-            return resource;
-        }
-
-        return classLoader.getResource(NOT_FOUND_PAGE);
     }
 }

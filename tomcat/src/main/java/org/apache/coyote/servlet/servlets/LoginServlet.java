@@ -3,7 +3,7 @@ package org.apache.coyote.servlet.servlets;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.coyote.http11.SessionFactory;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.header.Method;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -17,8 +17,8 @@ public class LoginServlet extends AbstractServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
-    public LoginServlet(final SessionFactory sessionFactory) {
-        super(sessionFactory);
+    public LoginServlet(final SessionManager sessionManager) {
+        super(sessionManager);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class LoginServlet extends AbstractServlet {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        if (sessionFactory.isLoginAccount(httpRequest)) {
+        if (sessionManager.isLoginAccount(httpRequest)) {
             return HttpResponse.of(httpRequest, "/index.html", "302");
         }
         return HttpResponse.of(httpRequest, "/login.html", "200");
@@ -52,7 +52,7 @@ public class LoginServlet extends AbstractServlet {
             log.info("login success to ID : {}", user.get().getAccount());
             final HttpResponse httpResponse = HttpResponse.cookie(httpRequest, "/index.html", "302");
 
-            sessionFactory.add(user.get(), httpResponse);
+            sessionManager.add(user.get(), httpResponse);
 
             return httpResponse;
         }

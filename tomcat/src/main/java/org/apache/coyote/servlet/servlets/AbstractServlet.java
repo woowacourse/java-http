@@ -1,15 +1,15 @@
 package org.apache.coyote.servlet.servlets;
 
-import org.apache.coyote.http11.SessionFactory;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractServlet implements Servlet {
 
-    protected final SessionFactory sessionFactory;
+    protected final SessionManager sessionManager;
 
-    protected AbstractServlet(final SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    protected AbstractServlet(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @Override

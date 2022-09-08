@@ -3,7 +3,7 @@ package org.apache.coyote.servlet;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.coyote.http11.SessionFactory;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.ResourceSearcher;
@@ -19,20 +19,20 @@ public class ServletContainer {
 
     private static final Set<Mapping> MAPPINGS = new HashSet<>();
 
-    private final SessionFactory sessionFactory;
+    private final SessionManager sessionManager;
     private final ResourceServlet resourceServlet;
 
     private ServletContainer() {
-        sessionFactory = SessionFactory.init();
-        resourceServlet = new ResourceServlet(sessionFactory);
+        sessionManager = SessionManager.init();
+        resourceServlet = new ResourceServlet(sessionManager);
     }
 
     public static ServletContainer init() {
         final ServletContainer servletContainer = SERVLET_CONTAINER;
 
-        mapUrlToServlet(new HelloWorldServlet(servletContainer.sessionFactory), "/");
-        mapUrlToServlet(new LoginServlet(servletContainer.sessionFactory), "/login");
-        mapUrlToServlet(new RegisterServlet(servletContainer.sessionFactory), "/register");
+        mapUrlToServlet(new HelloWorldServlet(servletContainer.sessionManager), "/");
+        mapUrlToServlet(new LoginServlet(servletContainer.sessionManager), "/login");
+        mapUrlToServlet(new RegisterServlet(servletContainer.sessionManager), "/register");
 
         return servletContainer;
     }

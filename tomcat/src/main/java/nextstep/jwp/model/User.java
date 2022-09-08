@@ -6,7 +6,6 @@ public class User {
 
     private static final int NEXT_ID = 1;
 
-
     private final Long id;
     private final String account;
     private final String password;

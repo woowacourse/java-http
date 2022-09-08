@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginRequest;
 import nextstep.jwp.service.UserService;
@@ -10,7 +9,7 @@ import nextstep.jwp.util.MessageConverter;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.Session;
-import org.apache.coyote.http11.model.Sessions;
+import org.apache.coyote.http11.model.SessionManager;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Status;
@@ -30,12 +29,9 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse doGet(final HttpRequest request) throws IOException {
         if (loginAlready(request)) {
-            String sessionId = request.getCookie().getValue(SESSION_ID);
-            if (Sessions.find(sessionId).isPresent()) {
-                HttpResponse response = HttpResponse.of(Status.FOUND);
-                response.addHeader(Header.LOCATION, "/index.html");
-                return response;
-            }
+            HttpResponse response = HttpResponse.of(Status.FOUND);
+            response.addHeader(Header.LOCATION, "/index.html");
+            return response;
         }
         HttpResponse response = HttpResponse.of(Status.OK);
         response.addResource(ResourceLoader.load("/login.html"));
@@ -54,9 +50,11 @@ public class LoginController implements Controller {
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
 
-            UUID uuid = UUID.randomUUID();
-            response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + uuid);
-            Sessions.addNew(uuid.toString(), new Session("user", user));
+            SessionManager sessionManager = new SessionManager();
+            Session session = Session.create();
+            session.setAttribute("user", user);
+            response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + session.getId());
+            sessionManager.add(session);
 
             return response;
         } catch (IllegalArgumentException | NoSuchElementException e) {

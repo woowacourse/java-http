@@ -16,6 +16,7 @@ public class StatusLine {
         return String.join(" ",
                 httpVersion,
                 String.valueOf(statusCode),
-                reasonPhrase);
+                reasonPhrase,
+                "");
     }
 }

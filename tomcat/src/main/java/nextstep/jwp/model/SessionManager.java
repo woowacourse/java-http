@@ -1,6 +1,5 @@
 package nextstep.jwp.model;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
@@ -15,7 +14,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) throws IOException {
+    public Session findSession(final String id) {
         return SESSIONS.get(id);
     }
 

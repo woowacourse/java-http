@@ -26,6 +26,11 @@ public class RequestLine {
         return uri;
     }
 
+    public String getPath() {
+        return Path.fromUri(uri)
+                .get();
+    }
+
     public String getVersion() {
         return version;
     }

@@ -41,6 +41,19 @@ public class HttpResponse {
         }
     }
 
+    public byte[] getBytes() {
+        return makeResponse().getBytes();
+    }
+
+    private String makeResponse() {
+        final String messageHead = makeMessageHead(statusLine);
+
+        return String.join(LINE_BREAK,
+            messageHead,
+            EMPTY_LINE,
+            messageBody);
+    }
+
     private String makeMessageHead(final StatusLine statusLine) {
         final StringJoiner lineJoiner = new StringJoiner(LINE_BREAK);
         lineJoiner.add(statusLine.generate());
@@ -50,19 +63,6 @@ public class HttpResponse {
             lineJoiner.add(headerLine);
         }
         return lineJoiner.toString();
-    }
-
-    public byte[] getBytes() {
-        return makeResponse().getBytes();
-    }
-
-    private String makeResponse() {
-        String messageHead = makeMessageHead(statusLine);
-
-        return String.join(LINE_BREAK,
-            messageHead,
-            EMPTY_LINE,
-            messageBody);
     }
 
     public static class Builder {

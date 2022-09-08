@@ -17,20 +17,18 @@ import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
-    static final String HTTP_METHOD = "HTTP METHOD";
-    private static final String REQUEST_URI = "REQUEST URI";
-    private static final String HTTP_VERSION = "HTTP VERSION";
     private static final String HEADER_DELIMITER = ":";
-    private static final String REQUEST_LINE_DELIMITER = " ";
     private static final String MESSAGE_DIVIDER = "\r\n\r\n";
     private static final String LINE_BREAK = "\r\n";
     private static final String EMPTY_MESSAGE_BODY = "";
 
     private final Map<String, String> headers = new HashMap<>();
+    private final RequestLine requestLine;
     private final QueryParams queryParams;
 
     public HttpRequest(final InputStream inputStream) throws IOException, URISyntaxException {
         final String message = readMessage(inputStream);
+        this.requestLine = new RequestLine(message);
         parseHeaders(message);
         this.queryParams = new QueryParams(getUri(), parseMessageBody(message));
     }
@@ -41,26 +39,22 @@ public class HttpRequest {
     }
 
     private void parseHeaders(final String message) {
-        final String headers = message.split(MESSAGE_DIVIDER)[0];
+        int index = message.indexOf(LINE_BREAK);
+        final String messageRemovedRequestLine = message.substring(index + 1);
+        final String headers = messageRemovedRequestLine.split(MESSAGE_DIVIDER)[0];
+
         for (String header : headers.split(LINE_BREAK)) {
             putHeader(header);
         }
     }
 
-    private void putHeader(final String requestLine) {
-        if (!headers.isEmpty()) {
-            final List<String> headerAndValue = parseRequestLine(requestLine, HEADER_DELIMITER);
-            headers.put(headerAndValue.get(0), headerAndValue.get(1));
-            return;
-        }
-        final List<String> startLine = parseRequestLine(requestLine, REQUEST_LINE_DELIMITER);
-        headers.put(HTTP_METHOD, startLine.get(0));
-        headers.put(REQUEST_URI, startLine.get(1));
-        headers.put(HTTP_VERSION, startLine.get(2));
+    private void putHeader(final String headerLine) {
+        final List<String> headerAndValue = parseHeaderLine(headerLine);
+        headers.put(headerAndValue.get(0), headerAndValue.get(1));
     }
 
-    private List<String> parseRequestLine(final String requestLine, final String delimiter) {
-        return Arrays.stream(requestLine.split(delimiter))
+    private List<String> parseHeaderLine(final String headerLine) {
+        return Arrays.stream(headerLine.split(HEADER_DELIMITER))
             .map(String::trim)
             .collect(toList());
     }
@@ -74,7 +68,7 @@ public class HttpRequest {
     }
 
     public boolean isGetRequest() {
-        return getHttpMethod().equals("GET");
+        return requestLine.isGet();
     }
 
     public boolean isRootPath() {
@@ -87,7 +81,7 @@ public class HttpRequest {
 
     private URI getUri() {
         try {
-            return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
+            return new URI("http://" + getHeaderValue("Host") + requestLine.getUri());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URI requested");
         }
@@ -122,11 +116,7 @@ public class HttpRequest {
         return queryParams.getQueryValue(queryKey);
     }
 
-    public String getHttpMethod() {
-        return getHeaderValue(HTTP_METHOD);
-    }
-
     public String getHttpVersion() {
-        return getHeaderValue(HTTP_VERSION);
+        return requestLine.getVersion();
     }
 }

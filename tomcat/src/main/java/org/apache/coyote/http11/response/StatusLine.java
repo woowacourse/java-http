@@ -12,17 +12,17 @@ class StatusLine {
     private final String httpVersion;
     private final StatusCode statusCode;
 
-    StatusLine(HttpRequest request, StatusCode statusCode) {
+    StatusLine(final HttpRequest request, final StatusCode statusCode) {
         this.httpVersion = request.getHttpVersion();
         this.statusCode = statusCode;
     }
 
-    static StatusLine of(HttpRequest request, StatusCode statusCode) {
+    static StatusLine of(final HttpRequest request, final StatusCode statusCode) {
         return new StatusLine(request, statusCode);
     }
 
     String generate() {
-        StringJoiner joiner = new StringJoiner(STATUS_LINE_DELIMITER, "", STATUS_LINE_SUFFIX);
+        final StringJoiner joiner = new StringJoiner(STATUS_LINE_DELIMITER, "", STATUS_LINE_SUFFIX);
         return joiner.add(httpVersion)
             .add(String.valueOf(statusCode.getCode()))
             .add(statusCode.name())

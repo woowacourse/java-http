@@ -17,7 +17,7 @@ public class Tomcat {
     }
 
     public void start() {
-        var connector = new Connector(configuration);
+        Connector connector = new Connector(configuration);
         connector.start();
 
         try {

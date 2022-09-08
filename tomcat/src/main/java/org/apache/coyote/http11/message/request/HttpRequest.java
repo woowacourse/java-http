@@ -23,7 +23,7 @@ public class HttpRequest {
     private final Headers headers;
     private final RequestBody requestBody;
 
-    public HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
+    private HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;

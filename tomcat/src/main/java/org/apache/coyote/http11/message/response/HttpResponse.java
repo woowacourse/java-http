@@ -19,7 +19,7 @@ public class HttpResponse {
     private final Headers headers;
     private final String body;
 
-    public HttpResponse(final ContentType contentType, final StatusCode statusCode, final Map<Header, String> headers,
+    private HttpResponse(final ContentType contentType, final StatusCode statusCode, final Map<Header, String> headers,
                         final String body) {
         this.statusCode = statusCode;
         this.headers = Headers.of(contentType, body);

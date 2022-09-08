@@ -14,7 +14,7 @@ public class Cookie {
 
     private final Map<String, String> values;
 
-    public Cookie(final Map<String, String> values) {
+    private Cookie(final Map<String, String> values) {
         this.values = values;
     }
 

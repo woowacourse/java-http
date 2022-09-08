@@ -13,10 +13,10 @@ public class FileReader {
 
     public static String read(final String filePath) {
         final URL url = FileReader.class.getClassLoader().getResource(STATIC_FILE_PATH + filePath);
-        final Path path = new File(url.getFile()).toPath();
         try {
+            final Path path = new File(url.getFile()).toPath();
             return Files.readString(path);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             throw new NoSuchFileException(e.getMessage());
         }
     }

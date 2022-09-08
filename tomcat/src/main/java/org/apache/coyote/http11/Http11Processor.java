@@ -7,10 +7,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.exception.NoSuchUserException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.ControllerContainer;
+import org.apache.coyote.http11.exception.NoSuchFileException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -48,10 +48,12 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 controller.service(httpRequest, httpResponse);
-            } catch (NoSuchUserException e) {
-                httpResponse.redirect("/401.html");
-            } catch (Exception e) {
+            } catch (NoSuchFileException e) {
+                log.error(e.getMessage(), e);
                 httpResponse.redirect("/404.html");
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                httpResponse.redirect("/500.html");
             }
 
             outputStream.write(httpResponse.getValue().getBytes());

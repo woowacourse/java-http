@@ -50,8 +50,16 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         RequestParameters requestParameters = httpRequest.getRequestParameters();
-        User user = InMemoryUserRepository.getUserByAccount(requestParameters.get("account"));
-        validatePassword(user, requestParameters.get("password"));
+        User user;
+
+        try {
+            user = InMemoryUserRepository.getUserByAccount(requestParameters.get("account"));
+            validatePassword(user, requestParameters.get("password"));
+        } catch (NoSuchUserException e) {
+            httpResponse.redirect("/401.html");
+            return;
+        }
+
         login(httpRequest, httpResponse, user);
     }
 

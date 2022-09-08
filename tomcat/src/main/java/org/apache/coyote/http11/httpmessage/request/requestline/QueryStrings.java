@@ -17,8 +17,4 @@ public class QueryStrings {
             queryStrings.put(name, value);
         }
     }
-
-    public String getValue(final String name) {
-        return queryStrings.get(name);
-    }
 }

@@ -36,8 +36,4 @@ public class RequestLine {
     public RequestUri getRequestUri() {
         return requestUri;
     }
-
-    public boolean isMatchUri(final String requestUri) {
-        return this.requestUri.isMatchUri(requestUri);
-    }
 }

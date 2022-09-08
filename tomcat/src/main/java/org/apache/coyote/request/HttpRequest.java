@@ -9,8 +9,7 @@ import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
-
-    private static final int REQUEST_LINE_INDEX = 0;
+    
     private static final String SESSION = "JSESSIONID";
 
     private final RequestLine requestLine;
@@ -24,14 +23,14 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final List<String> requests, final String requestBody) {
-        validateRequest(requests);
-        return new HttpRequest(RequestLine.from(requests.get(REQUEST_LINE_INDEX)), HttpHeaders.from(requests),
+    public static HttpRequest of(final String requestLine, final List<String> requests, final String requestBody) {
+        validateRequest(requestLine);
+        return new HttpRequest(RequestLine.from(requestLine), HttpHeaders.from(requests),
                 RequestBody.from(requestBody));
     }
 
-    private static void validateRequest(final List<String> requests) {
-        if (requests.isEmpty() || requests == null) {
+    private static void validateRequest(final String requestLine) {
+        if (requestLine == null) {
             throw new InvalidRequestException();
         }
     }

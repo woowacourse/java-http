@@ -50,12 +50,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        List<String> requests = parseHeader(bufferedReader);
+        String requestLine = bufferedReader.readLine();
+        List<String> headers = parseHeaders(bufferedReader);
         StringBuilder requestBody = parseBody(bufferedReader);
-        return HttpRequest.from(requests, requestBody.toString());
+        return HttpRequest.of(requestLine, headers, requestBody.toString());
     }
 
-    private List<String> parseHeader(final BufferedReader bufferedReader) throws IOException {
+    private List<String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
         List<String> requests = new ArrayList<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();

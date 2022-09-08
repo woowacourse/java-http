@@ -18,7 +18,7 @@ public class HttpHeaders {
 
     public static HttpHeaders from(final List<String> requests) {
         Map<String, String> headers = new HashMap<>();
-        for (int i = 1; i < requests.size(); i++) {
+        for (int i = 0; i < requests.size(); i++) {
             String target = requests.get(i).strip();
             int index = target.indexOf(KEY_VALUE_SEPARATOR);
             headers.put(target.substring(0, index), target.substring(index + 1).strip());

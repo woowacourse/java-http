@@ -11,9 +11,9 @@ public class HomeController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
-        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/401.html");
-        httpHeader.location("/401.html");
+        final HttpBody httpBody = HttpBody.createByUrl("/404.html");
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/404.html");
+        httpHeader.location("/404.html");
 
         return new HttpResponse(httpHeader, httpBody);
     }

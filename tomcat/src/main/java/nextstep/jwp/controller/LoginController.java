@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.db.SessionStorage;
 import nextstep.jwp.model.User;
@@ -31,10 +32,9 @@ public class LoginController implements Controller {
     private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         Map<String, String> requestBody = httpRequest.getBody();
 
-        User user = InMemoryUserRepository.findByAccount(requestBody.get("account"))
-                .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저입니다."));
-        if (user.checkPassword(requestBody.get("password"))) {
-            return login(user);
+        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+        if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
+            return login(user.get());
         }
 
         return HttpResponse.unAuthorized();

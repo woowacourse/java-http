@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet;
+package org.apache.catalina.servlet;
 
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
@@ -6,9 +6,7 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.ExceptionListener;
 import nextstep.jwp.service.UserService;
-import nextstep.jwp.servlet.handler.ExceptionHandler;
-import nextstep.jwp.servlet.handler.HandlerMapping;
-import nextstep.jwp.servlet.view.ViewResolver;
+import org.apache.catalina.view.ViewResolver;
 import org.apache.Servlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.HttpResponse;

@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.servlet.CustomServlet;
+import org.apache.catalina.servlet.CustomServlet;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;

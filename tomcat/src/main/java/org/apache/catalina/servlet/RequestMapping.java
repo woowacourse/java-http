@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet.handler;
+package org.apache.catalina.servlet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

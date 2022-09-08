@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet.view;
+package org.apache.catalina.view;
 
 import java.io.File;
 import java.io.IOException;

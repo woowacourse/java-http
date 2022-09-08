@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet.handler;
+package org.apache.catalina.servlet;
 
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.HttpResponse;

@@ -1,6 +1,6 @@
 package nextstep;
 
-import nextstep.jwp.servlet.CustomServlet;
+import org.apache.catalina.servlet.CustomServlet;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

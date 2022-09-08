@@ -17,11 +17,11 @@ public class Http11Request {
         this.requestBody = requestBody;
     }
 
-    public static Http11Request of(final InputStream inputStream) throws IOException {
+    public static Http11Request from(final InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         RequestStartLine startLine = RequestStartLine.from(getStartLine(bufferedReader));
-        RequestHeaders requestHeaders = RequestHeaders.of(bufferedReader);
+        RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
         String requestBody = getRequestBody(bufferedReader, requestHeaders.getContentLength());
         return new Http11Request(startLine, requestHeaders, requestBody);
     }

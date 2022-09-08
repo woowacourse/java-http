@@ -16,7 +16,7 @@ class Http11RequestTest {
         final String httpRequest = getHttp11RequestContent("ABC", "/index.html");
         final StubSocket socket = new StubSocket(httpRequest);
 
-        assertThatThrownBy(() -> Http11Request.of(socket.getInputStream()))
+        assertThatThrownBy(() -> Http11Request.from(socket.getInputStream()))
                 .isInstanceOf(MethodNotAllowedException.class);
     }
 

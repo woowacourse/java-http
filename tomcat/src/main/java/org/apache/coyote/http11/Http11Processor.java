@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Http11Request request = Http11Request.of(inputStream);
+            final Http11Request request = Http11Request.from(inputStream);
             final Controller controller = ControllerMapper.getControllerFrom(request.getRequestUrl());
             final Http11Response response = controller.service(request);
             response.write(outputStream);

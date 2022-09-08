@@ -20,7 +20,7 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders of(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {

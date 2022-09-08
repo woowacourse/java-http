@@ -8,6 +8,9 @@ import org.apache.coyote.support.HttpException;
 
 public class View {
 
+    private static final String TEXT_TYPE_PREFIX = "text/";
+    private static final String UTF_8_CHARSET_OPTION_FORMAT = "%s;charset=utf-8";
+
     public Path toResourcePath(String uri) {
         try {
             final var classLoader = getClass().getClassLoader();
@@ -29,9 +32,17 @@ public class View {
 
     public String findContentType(Path path) {
         try {
-            return String.format("%s;charset=utf-8", Files.probeContentType(path));
+            String contentType = Files.probeContentType(path);
+            return specifyCharacterSetForText(contentType);
         } catch (IOException e) {
             throw HttpException.ofInternalServerError(e);
         }
+    }
+
+    private String specifyCharacterSetForText(String contentType) {
+        if (contentType.startsWith(TEXT_TYPE_PREFIX)) {
+            return String.format(UTF_8_CHARSET_OPTION_FORMAT, contentType);
+        }
+        return contentType;
     }
 }

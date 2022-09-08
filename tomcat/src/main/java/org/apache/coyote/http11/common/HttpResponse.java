@@ -13,9 +13,9 @@ import org.apache.coyote.http11.constant.MediaType;
 
 public class HttpResponse {
 
-    private static final String BLANK = " ";
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String LOCATION = "Location";
 
     private String body;
     private HttpStatus status;
@@ -48,7 +48,7 @@ public class HttpResponse {
     }
 
     public void setLocation(final String location) {
-        headers.addHeader("Location", location);
+        headers.addHeader(LOCATION, location);
     }
 
     public void addHeader(final String key, final String value) {
@@ -71,7 +71,14 @@ public class HttpResponse {
             addHeader(SET_COOKIE, headers.getAllCookie());
         }
 
-        final String statusLine = HTTP_VERSION + status.getStatusCode() + BLANK + status.getStatusMessage();
+        final int statusCode = status.getStatusCode();
+        final String statusMessage = status.getStatusMessage();
+
+        final String statusLine = String.join(" ",
+                HTTP_VERSION,
+                String.valueOf(statusCode),
+                statusMessage);
+
         return String.join("\r\n",
                 statusLine,
                 headers.toString(),

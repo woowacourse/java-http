@@ -18,6 +18,7 @@ import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.JSessionId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,19 +45,17 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final var httpRequest = HttpRequest.from(bufferedReader);
+            final HttpResponse httpResponse = new HttpResponse();
 
             if (httpRequest == null) {
                 return;
             }
 
-            final var response = getResponse(httpRequest);
+            final var response = getResponse(httpRequest, httpResponse);
 
             if (!httpRequest.getHttpCookie().isJSessionId()) {
-                // 쿠키 생성
-                log.info("============쿠키 만들자!!!!!!!!!!!!!============");
-                response.setCookie();
+                response.addCookie(JSessionId.create());
             }
-            log.info("만든겨???????????????????????????????????/");
 
             outputStream.write(response.toBytes());
             outputStream.flush();
@@ -65,45 +64,44 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getResponse(final HttpRequest httpRequest) throws IOException {
-        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams(), httpRequest.getRequestBody());
-    }
-
-    private HttpResponse getResponse(final String url, final Map<String, String> requestParam, final String requestBody)
+    private HttpResponse getResponse(final HttpRequest httpRequest, final HttpResponse httpResponse)
             throws IOException {
+        final String url = httpRequest.getRequestUrl();
+        final Map<String, String> requestParam = httpRequest.getRequestParams();
+        final String requestBody = httpRequest.getRequestBody();
         final Map<String, String> headers = new HashMap<>();
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
             headers.put(CONTENT_TYPE, "text/html");
 
-            return HttpResponse.create200Response(headers, responseBody);
+            return httpResponse.create200Response(headers, responseBody);
         }
 
         if ("/login".equals(url) && requestBody.isEmpty()) {
-            return createStaticFileResponse(url + ".html", headers);
+            return createStaticFileResponse(httpResponse, url + ".html", headers);
         }
 
         if ("/login".equals(url)) {
-            if (LoginHandler.handle(parse(requestBody))) {
-                return createUserSuccessResponse(headers);
+            if (LoginHandler.handle(httpRequest, httpResponse)) {
+                return createUserSuccessResponse(httpResponse, headers);
             }
 
-            return create401Response();
+            return httpResponse.create401Response();
         }
 
         if ("/register".equals(url) && requestBody.isEmpty()) {
-            return createStaticFileResponse(url + ".html", headers);
+            return createStaticFileResponse(httpResponse, url + ".html", headers);
         }
 
         if ("/register".equals(url)) {
             if (RegisterHandler.handle(parse(requestBody))) {
-                return createUserSuccessResponse(headers);
+                return createUserSuccessResponse(httpResponse, headers);
             }
-            return create401Response();
+            return httpResponse.create401Response();
         }
 
         if (url.contains(".")) {
-            return createStaticFileResponse(url, headers);
+            return createStaticFileResponse(httpResponse, url, headers);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
@@ -115,30 +113,24 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(data -> data[0], data -> data[1]));
     }
 
-    private HttpResponse createStaticFileResponse(final String url, final Map<String, String> headers)
+    private HttpResponse createStaticFileResponse(final HttpResponse httpResponse, final String url,
+                                                  final Map<String, String> headers)
             throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + url);
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));
         headers.put(CONTENT_TYPE, Files.probeContentType(path));
 
-        return HttpResponse.create200Response(headers, responseBody);
+        return httpResponse.create200Response(headers, responseBody);
     }
 
-    private HttpResponse createUserSuccessResponse(final Map<String, String> headers) throws IOException {
+    private HttpResponse createUserSuccessResponse(final HttpResponse httpResponse, final Map<String, String> headers)
+            throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final Path path = new File(resource.getFile()).toPath();
         final String responseBody = new String(Files.readAllBytes(path));
         headers.put(CONTENT_TYPE, Files.probeContentType(path));
 
-        return HttpResponse.create302Response(headers, responseBody);
-    }
-
-    private HttpResponse create401Response() throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final Path path = new File(resource.getFile()).toPath();
-        final String responseBody = new String(Files.readAllBytes(path));
-
-        return HttpResponse.create200Response(Map.of(CONTENT_TYPE, Files.probeContentType(path)), responseBody);
+        return httpResponse.create302Response(headers, responseBody);
     }
 }

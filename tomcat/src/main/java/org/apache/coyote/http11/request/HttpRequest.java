@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +21,13 @@ public class HttpRequest {
     private final Map<String, String> requestParams;
     private final String protocolVersion;
     private final Map<String, String> headers;
-
     private final HttpCookie httpCookie;
     private final String requestBody;
+    private final Session session;
 
     private HttpRequest(final String method, final String requestUrl, final Map<String, String> requestParams,
                         final String protocolVersion, final Map<String, String> headers, final HttpCookie httpCookie,
-                        final String requestBody) {
+                        final String requestBody, final Session session) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.requestParams = requestParams;
@@ -34,6 +35,7 @@ public class HttpRequest {
         this.headers = headers;
         this.httpCookie = httpCookie;
         this.requestBody = requestBody;
+        this.session = session;
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
@@ -66,7 +68,7 @@ public class HttpRequest {
         }
 
         return new HttpRequest(parseMethod(startLine), parseUrl(startLine), parseRequestParams(startLine),
-                parseProtocolVersion(startLine), headers, httpCookies, requestBody);
+                parseProtocolVersion(startLine), headers, httpCookies, requestBody, new Session());
     }
 
     private static Map<String, String> readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -112,6 +114,12 @@ public class HttpRequest {
         return startLine.split(" ")[2];
     }
 
+    public Map<String, String> getParseRequestBody() {
+        return Arrays.stream(requestBody.split("&"))
+                .map(data -> data.split("="))
+                .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+    }
+
     public String getMethod() {
         return method;
     }
@@ -138,5 +146,9 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

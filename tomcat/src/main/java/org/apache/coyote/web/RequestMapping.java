@@ -1,8 +1,8 @@
 package org.apache.coyote.web;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.DefaultController;
 import nextstep.jwp.controller.UserCreateController;
@@ -13,7 +13,7 @@ import org.apache.coyote.web.response.HttpResponse;
 
 public class RequestMapping {
 
-    private static Map<String, Controller> handlers = new HashMap<>();
+    private static Map<String, Controller> handlers = new ConcurrentHashMap<>();
 
     static {
         handlers.put("/", new DefaultController());

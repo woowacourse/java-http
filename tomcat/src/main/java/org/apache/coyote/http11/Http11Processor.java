@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.handler.ExceptionHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -36,25 +35,31 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final HttpResponse httpResponse = generateHttpResponse(httpRequest);
-
-            final String response = httpResponse.toResponseMessage();
+            final String response = processRequest(bufferedReader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse generateHttpResponse(HttpRequest httpRequest) {
+    private String processRequest(BufferedReader bufferedReader) {
         try {
-            final Controller controller = HandlerMapping.findController(httpRequest);
-            return controller.service(httpRequest);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final HttpResponse httpResponse = generateHttpResponse(httpRequest);
+
+            return httpResponse.toResponseMessage();
         } catch (Exception exception) {
             final ExceptionHandler errorHandler = ErrorMapping.findErrorHandler(exception);
-            return errorHandler.handle();
+            final HttpResponse httpResponse = errorHandler.handle();
+
+            return httpResponse.toResponseMessage();
         }
+    }
+
+    private HttpResponse generateHttpResponse(HttpRequest httpRequest) {
+        final Controller controller = HandlerMapping.findController(httpRequest);
+        return controller.service(httpRequest);
     }
 }

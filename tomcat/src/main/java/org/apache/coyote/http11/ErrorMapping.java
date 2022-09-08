@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.stream.Stream;
 import nextstep.jwp.exception.LoginFailedException;
+import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.handler.ExceptionHandler;
 import nextstep.jwp.exception.handler.LoginFailedHandler;
 import nextstep.jwp.exception.handler.MethodNotAllowedHandler;
@@ -15,6 +16,7 @@ public enum ErrorMapping {
     NOT_FOUND(new ResourceNotFoundException(), new NotFoundHandler()),
     LOGIN_FAILED(new LoginFailedException(), new LoginFailedHandler()),
     METHOD_NOT_ALLOWED(new MethodNotAllowedException(), new MethodNotAllowedHandler()),
+    UNCHECKED_SERVLET(new UncheckedServletException(), new RuntimeExceptionHandler()),
     RUNTIME_EXCEPTION(new RuntimeException(), new RuntimeExceptionHandler()),
     ;
 

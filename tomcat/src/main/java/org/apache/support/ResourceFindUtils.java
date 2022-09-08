@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class ResourceFindUtils {
             return responseBody;
         } catch (IOException exception) {
             log.error(exception.getMessage());
-            throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
+            throw new ResourceNotFoundException();
         }
     }
 

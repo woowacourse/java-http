@@ -30,7 +30,7 @@ public class HttpRequest {
             final RequestBody requestBody = extractRequestBody(bufferedReader, httpHeaders);
             return new HttpRequest(startLine, httpHeaders, requestBody);
         } catch (IOException exception) {
-            throw new UncheckedServletException("유효하지 않은 요청입니다.");
+            throw new UncheckedServletException();
         }
     }
 

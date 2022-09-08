@@ -5,7 +5,6 @@ import java.util.Map;
 public class Path {
 
     private static final String PATH_DELIMITER = "?";
-    private static final String EXTENSION_DELIMITER = ".";
 
     private final String resource;
     private final Extension extension;
@@ -29,13 +28,6 @@ public class Path {
         return new Path(resource, Extension.from(resource), QueryParameter.from(queryParameter));
     }
 
-    private static String removeExtension(String uri) {
-        if (uri.contains(EXTENSION_DELIMITER)) {
-            return uri.split("\\" + EXTENSION_DELIMITER)[0];
-        }
-        return uri;
-    }
-
     public String getResource() {
         return resource;
     }
@@ -46,10 +38,6 @@ public class Path {
 
     public Map<String, String> getQueryParameter() {
         return queryParameter.getParams();
-    }
-
-    public String getExtension() {
-        return extension.getExtension();
     }
 
     public boolean isIcoContentType() {

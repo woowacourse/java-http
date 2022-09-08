@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request.startline;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.exception.MethodNotAllowedException;
 
 public enum HttpMethod {
     GET,
@@ -14,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(method -> method.name().equals(request))
                 .findAny()
-                .orElseThrow(() -> new UncheckedServletException("올바른 Http Method가 아닙니다."));
+                .orElseThrow(MethodNotAllowedException::new);
     }
 }

@@ -3,13 +3,13 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginFailedException;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionFactory;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.request.startline.Extension;
+import org.apache.coyote.http11.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.startline.Extension;
 import org.apache.coyote.http11.request.startline.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -29,7 +29,7 @@ public class LoginController implements Controller {
             return doPost(request);
         }
 
-        throw new UncheckedServletException("지원하지 않는 메서드입니다.");
+        throw new MethodNotAllowedException();
     }
 
     private HttpResponse doGet(HttpRequest request) {

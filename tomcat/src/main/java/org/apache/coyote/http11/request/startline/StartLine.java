@@ -16,7 +16,7 @@ public class StartLine {
 
     public static StartLine from(String requestLine){
         if (requestLine == null || requestLine.isEmpty()) {
-            throw new UncheckedServletException("유효하지 않은 요청입니다.");
+            throw new UncheckedServletException();
         }
         final String[] split = requestLine.split(" ");
         return new StartLine(HttpMethod.from(split[0]), Path.from(split[1]), split[2]);

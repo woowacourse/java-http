@@ -32,10 +32,6 @@ public class HttpResponse {
 
     public void forward(final Url url) {
         try {
-            if (url.isDefaultPath()) {
-                forwardDefault();
-                return;
-            }
             ContentType contentType = ContentType.from(url.extractFileExtension());
             String responseBody = url.extractFileLines();
             httpHeaders.setContentType(contentType);
@@ -46,11 +42,15 @@ public class HttpResponse {
         }
     }
 
-    public void forwardDefault() throws IOException {
-        String responseBody = "Hello world!";
-        httpHeaders.setContentType(ContentType.STRINGS);
-        httpHeaders.setContentLength(responseBody.length());
-        httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
+    public void forwardDefault() {
+        try {
+            String responseBody = "Hello world!";
+            httpHeaders.setContentType(ContentType.STRINGS);
+            httpHeaders.setContentLength(responseBody.length());
+            httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
+        } catch (IOException e) {
+            sendError(HttpStatus.NOT_FOUND, Url.createUrl("/404.html"));
+        }
     }
 
     public void redirect(final Url url) {

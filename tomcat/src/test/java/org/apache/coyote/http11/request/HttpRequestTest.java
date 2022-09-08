@@ -48,11 +48,21 @@ class HttpRequestTest {
     }
 
     @Test
-    void ss() {
+    void createRequestWithContent() {
         // given
-
+        String body = "request body";
+        String message = String.join("\n",
+                List.of(
+                        "GET /hello?a=1&b=2 HTTP/1.1",
+                        "Content-Length: " + body.length(),
+                        "",
+                        body
+                )
+        );
+        InputStream inputStream = new ByteArrayInputStream(message.getBytes());
         // when
-
+        HttpRequest request = HttpRequest.parse(inputStream);
         // then
+        assertThat(request).isNotNull();
     }
 }

@@ -38,8 +38,4 @@ public class Context implements ResponseHeader {
     public Session getSession() {
         return session;
     }
-
-    public HttpCookie getCookie() {
-        return cookie;
-    }
 }

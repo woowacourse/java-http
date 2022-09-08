@@ -37,20 +37,12 @@ public class RequestGeneral {
         }
     }
 
-    public RequestGeneral redirectPath(String path) {
-        return new RequestGeneral(method, new RequestPath(path, null), httpVersion);
-    }
-
     public RequestMethod getMethod() {
         return method;
     }
 
     public RequestPath getPath() {
         return path;
-    }
-
-    public String getParameter(String field) {
-        return path.getParameter(field);
     }
 
     public HttpVersion getHttpVersion() {

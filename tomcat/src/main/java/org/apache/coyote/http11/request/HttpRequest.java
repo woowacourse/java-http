@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.coyote.http11.context.Context;
 import org.apache.coyote.http11.context.HttpCookie;
-import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.context.Session;
 import org.apache.coyote.http11.context.SessionManager;
-import org.apache.exception.TempException;
+import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.util.NumberUtil;
 import org.apache.util.StringUtil;
 
@@ -28,7 +27,7 @@ public class HttpRequest {
     private final Context context;
 
     private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody,
-                       Context context) {
+                        Context context) {
         this.requestGeneral = requestGeneral;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
@@ -128,10 +127,6 @@ public class HttpRequest {
 
     public Context getContext() {
         return context;
-    }
-
-    public HttpCookie getCookie() {
-        return context.getCookie();
     }
 
     @Override

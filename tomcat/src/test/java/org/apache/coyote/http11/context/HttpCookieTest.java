@@ -10,7 +10,7 @@ class HttpCookieTest {
     @Test
     void createCookie() {
         // given
-        String cookieString = "hello=world; name=kth";
+        String cookieString = "hello=world; name=akth";
         // when
         HttpCookie cookie = HttpCookie.parse(cookieString);
         // then

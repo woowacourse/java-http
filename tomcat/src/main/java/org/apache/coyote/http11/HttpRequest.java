@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.*;
+import static org.apache.coyote.http11.HttpCookie.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,8 +78,16 @@ public class HttpRequest {
         return headers.get(headerName);
     }
 
-    private URI getUri() throws URISyntaxException {
-        return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
+    private URI getUri() {
+        try {
+            return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URI requested");
+        }
+    }
+
+    public String getPath() {
+        return getUri().getPath();
     }
 
     public URL getUrl() {
@@ -123,14 +132,18 @@ public class HttpRequest {
         return queryParams.getQueryValue(queryKey);
     }
 
+    public String getHttpMethod() {
+        return getHeaderValue(HTTP_METHOD);
+    }
+
     public String getHttpVersion() {
         return getHeaderValue(HTTP_VERSION);
     }
 
     public Session getSession() {
         validateJSESSIONIDExist();
-        final HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
-        return new Session(cookie.getCookieValue("JSESSIONID"));
+        final HttpCookie cookie = new HttpCookie(getHeaderValue(COOKIE));
+        return new Session(cookie.getCookieValue(JSESSIONID));
     }
 
     private void validateJSESSIONIDExist() {
@@ -140,6 +153,7 @@ public class HttpRequest {
     }
 
     public boolean hasSession() {
-        return containsHeader("Cookie") && getHeaderValue("Cookie").contains("JSESSIONID");
+        return containsHeader(COOKIE) &&
+            getHeaderValue(COOKIE).contains(JSESSIONID);
     }
 }

@@ -30,9 +30,4 @@ public class Session {
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
-
-    public void removeAttribute(String name) {
-        validateContainsAttribute(name);
-        values.remove(name);
-    }
 }

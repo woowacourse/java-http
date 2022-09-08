@@ -12,4 +12,4 @@
 - [x] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
 
 ## 4단계: 동시성 확장하기
-- [ ] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.
+- [x] Executors로 만든 ExecutorService 객체를 활용하여 스레드 처리를 하고 있다.

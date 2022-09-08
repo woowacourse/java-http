@@ -2,7 +2,7 @@ package org.apache.coyote.core;
 
 import nextstep.jwp.http.reqeust.HttpRequest;
 import org.apache.coyote.core.controller.Controller;
-import org.apache.coyote.core.controller.CssController;
+import org.apache.coyote.core.controller.ResourceController;
 import org.apache.coyote.core.controller.ExceptionController;
 import org.apache.coyote.core.controller.IndexController;
 import org.apache.coyote.core.controller.LoginController;
@@ -28,6 +28,6 @@ public class RequestMapping {
         if (path.contains("/register")) {
             return new RegisterController();
         }
-        return new CssController();
+        return new ResourceController();
     }
 }

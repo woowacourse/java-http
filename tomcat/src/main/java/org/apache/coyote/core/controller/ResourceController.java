@@ -5,7 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 
-public class CssController extends AbstractController {
+public class ResourceController extends AbstractController {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response)

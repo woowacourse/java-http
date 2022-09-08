@@ -1,7 +1,8 @@
-package org.apache.coyote.handler;
+package nextstep.jwp.controller;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -20,14 +21,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
     @DisplayName("존재하는 회원의 account 로 로그인시 로그인을 성공하여 로그를 남긴다.")
     @Test
     void login() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        final Logger logger = (Logger) LoggerFactory.getLogger(LoginHandler.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(LoginController.class);
         logger.addAppender(appender);
         appender.start();
 
@@ -37,7 +38,8 @@ class LoginHandlerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        loginController.service(httpRequest);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -59,7 +61,8 @@ class LoginHandlerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse httpResponse = loginController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("/401.html");
@@ -73,7 +76,8 @@ class LoginHandlerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse httpResponse = loginController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("/index.html");
@@ -87,7 +91,8 @@ class LoginHandlerTest {
 
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse httpResponse = loginController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("Set-Cookie: JSESSIONID");
@@ -102,7 +107,8 @@ class LoginHandlerTest {
         // when
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of("Cookie", "JSESSIONID=randomid"),
                 requestBody);
-        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse httpResponse = loginController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).doesNotContain("Set-Cookie: JSESSIONID");
@@ -117,7 +123,8 @@ class LoginHandlerTest {
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
 
         // when
-        final HttpResponse response = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse response = loginController.service(httpRequest);
 
         // then
         final Cookie cookie = response.getCookie();
@@ -142,7 +149,8 @@ class LoginHandlerTest {
                 Map.of("Cookie", "JSESSIONID=" + sessionId), "");
 
         // when
-        final HttpResponse httpResponse = LoginHandler.loginWithGet(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse httpResponse = loginController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("/index.html");

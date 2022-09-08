@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package nextstep.jwp.controller;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     @BeforeEach
     void setUp() {
@@ -32,7 +32,7 @@ class RegisterHandlerTest {
     void register() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        final Logger logger = (Logger) LoggerFactory.getLogger(RegisterHandler.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(RegisterController.class);
         logger.addAppender(appender);
         appender.start();
 
@@ -44,7 +44,8 @@ class RegisterHandlerTest {
                 Map.of(), requestBody);
 
         // when
-        RegisterHandler.register(httpRequest);
+        final RegisterController registerController = new RegisterController();
+        registerController.service(httpRequest);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -67,7 +68,8 @@ class RegisterHandlerTest {
                 Map.of(), requestBody);
 
         // when & then
-        Assertions.assertThatThrownBy(() -> RegisterHandler.register(httpRequest))
+        final RegisterController registerController = new RegisterController();
+        Assertions.assertThatThrownBy(() -> registerController.service(httpRequest))
                 .isInstanceOf(ExistUserException.class);
     }
 
@@ -80,7 +82,8 @@ class RegisterHandlerTest {
                 Map.of(), requestBody);
 
         // when
-        final HttpResponse httpResponse = RegisterHandler.register(httpRequest);
+        final RegisterController registerController = new RegisterController();
+        final HttpResponse httpResponse = registerController.service(httpRequest);
 
         // then
         assertThat(httpResponse.getResponse()).contains("/index.html");

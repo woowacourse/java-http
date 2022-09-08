@@ -1,20 +1,16 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.request.startline.HttpMethod.GET;
-import static org.apache.coyote.request.startline.HttpMethod.POST;
-import static org.apache.coyote.response.StatusCode.OK;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Optional;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RequestMapping;
+import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.RegisterHandler;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.startline.HttpMethod;
-import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,19 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = HttpRequest.readRequest(bufferedReader);
-            final HttpMethod requestMethod = httpRequest.getRequestMethod();
-            String requestUrl = httpRequest.getRequestPath();
-            HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), requestUrl);
-
-            if (requestUrl.contains("login") && requestMethod.equals(GET)) {
-                httpResponse = LoginHandler.loginWithGet(httpRequest);
-            }
-            if (requestUrl.contains("login") && requestMethod.equals(POST)) {
-                httpResponse = LoginHandler.login(httpRequest);
-            }
-            if (requestUrl.contains("register") && requestMethod.equals(POST)) {
-                httpResponse = RegisterHandler.register(httpRequest);
-            }
+            final HttpResponse httpResponse = handleRequest(httpRequest);
 
             final String response = httpResponse.getResponse();
             outputStream.write(response.getBytes());
@@ -62,5 +46,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static HttpResponse handleRequest(final HttpRequest httpRequest) {
+        final Optional<Controller> controller = RequestMapping.getController(httpRequest);
+        if (controller.isEmpty()) {
+            return new ResourceController().service(httpRequest);
+        }
+        return controller.get().service(httpRequest);
     }
 }

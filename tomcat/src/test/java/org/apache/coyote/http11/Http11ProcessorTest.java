@@ -13,11 +13,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.cookie.Cookie;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.RegisterHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.session.Session;
@@ -228,7 +228,7 @@ class Http11ProcessorTest {
     void loginWithLog() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        final Logger logger = (Logger) LoggerFactory.getLogger(LoginHandler.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(LoginController.class);
         logger.addAppender(appender);
         appender.start();
 
@@ -351,7 +351,7 @@ class Http11ProcessorTest {
     void registerWithNewUser() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        final Logger logger = (Logger) LoggerFactory.getLogger(RegisterHandler.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(RegisterController.class);
         logger.addAppender(appender);
         appender.start();
 
@@ -424,7 +424,8 @@ class Http11ProcessorTest {
         final String account = "gugu";
         final String requestBody = "account=" + account + "&password=password";
         final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
-        final HttpResponse response = LoginHandler.login(httpRequest);
+        final LoginController loginController = new LoginController();
+        final HttpResponse response = loginController.service(httpRequest);
 
         final Cookie cookie = response.getCookie();
         final Session session = SessionManager.findSession(cookie.getValue());

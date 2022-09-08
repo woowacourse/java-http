@@ -1,6 +1,7 @@
 package org.apache.coyote.response;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.response.StatusCode.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +63,10 @@ public class HttpResponse {
                                   final Cookie cookie) {
         final String responseBody = new String(Objects.requireNonNull(readAllFile(location.toString())), UTF_8);
         return new HttpResponse(statusCode, contentType, responseBody, location, cookie);
+    }
+
+    public static HttpResponse badRequest() {
+        return new HttpResponse(NOT_FOUND, ContentType.HTML, "static/404.html");
     }
 
     public String getResponse() {

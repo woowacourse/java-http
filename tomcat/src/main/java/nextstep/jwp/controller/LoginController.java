@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package nextstep.jwp.controller;
 
 import static org.apache.coyote.response.ContentType.HTML;
 import static org.apache.coyote.response.StatusCode.FOUND;
@@ -18,25 +18,12 @@ import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private LoginHandler() {
-    }
-
-    public static HttpResponse loginWithGet(HttpRequest httpRequest) {
-        final Optional<Cookie> optionalCookie = httpRequest.getJSessionCookie();
-        if (optionalCookie.isPresent()) {
-            final Cookie cookie = optionalCookie.get();
-            handleSession(cookie);
-            return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
-        }
-
-        return HttpResponse.of(OK, HTML, "/login.html");
-    }
-
-    public static HttpResponse login(final HttpRequest request) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest request) {
         final QueryParams queryParams = request.getQueryParams();
         final String account = queryParams.getValueFromKey("account");
         final String password = queryParams.getValueFromKey("password");
@@ -53,10 +40,16 @@ public class LoginHandler {
         return HttpResponse.of(FOUND, HTML, Location.from("/401.html"));
     }
 
-    private static void handleSession(Cookie cookie) {
-        final Session session = SessionManager.findSession(cookie.getValue());
-        final User user = (User) session.getAttribute("user");
-        log.info("User : {}", user);
+    @Override
+    protected HttpResponse doGet(final HttpRequest request) {
+        final Optional<Cookie> optionalCookie = request.getJSessionCookie();
+        if (optionalCookie.isPresent()) {
+            final Cookie cookie = optionalCookie.get();
+            handleSession(cookie);
+            return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
+        }
+
+        return HttpResponse.of(OK, HTML, "/login.html");
     }
 
     private static Session saveUserInSession(User user) {
@@ -75,5 +68,11 @@ public class LoginHandler {
         }
 
         return HttpResponse.of(FOUND, HTML, Location.from("/index.html"));
+    }
+
+    private static void handleSession(Cookie cookie) {
+        final Session session = SessionManager.findSession(cookie.getValue());
+        final User user = (User) session.getAttribute("user");
+        log.info("User : {}", user);
     }
 }

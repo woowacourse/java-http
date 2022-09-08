@@ -18,6 +18,6 @@
   - 로그인 페이지로 접속할 때 JsessionId가 일치하면 index.html을 반환한다.
 
 ## 3단계 요구사항
-- [ ] HttpRequest 클래스 구현하기
-- [ ] HttpResponse 클래스 구현하기
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
 - [ ] Controller 인터페이스 추가하기

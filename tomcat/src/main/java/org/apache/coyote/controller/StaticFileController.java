@@ -1,11 +1,10 @@
 package org.apache.coyote.controller;
 
 import org.apache.coyote.domain.request.HttpRequest;
-import org.apache.coyote.domain.response.ContentType;
+import org.apache.coyote.domain.response.statusline.ContentType;
 import org.apache.coyote.domain.response.HttpResponse;
-import org.apache.coyote.domain.response.HttpStatusCode;
+import org.apache.coyote.domain.response.statusline.HttpStatusCode;
 import org.apache.coyote.domain.response.ResponseBody;
-import org.apache.coyote.handler.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

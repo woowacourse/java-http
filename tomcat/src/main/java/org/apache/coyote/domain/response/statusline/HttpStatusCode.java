@@ -1,4 +1,4 @@
-package org.apache.coyote.domain.response;
+package org.apache.coyote.domain.response.statusline;
 
 public enum HttpStatusCode {
     OK(200, "OK"),

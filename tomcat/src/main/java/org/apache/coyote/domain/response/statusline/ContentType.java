@@ -1,6 +1,7 @@
-package org.apache.coyote.domain.response;
+package org.apache.coyote.domain.response.statusline;
 
 import java.util.Arrays;
+import org.apache.coyote.domain.response.Header;
 
 public enum ContentType implements Header {
     HTML(".html", "text/html"),

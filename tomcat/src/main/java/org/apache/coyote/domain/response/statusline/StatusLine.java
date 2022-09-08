@@ -1,24 +1,25 @@
-package org.apache.coyote.domain.response;
+package org.apache.coyote.domain.response.statusline;
 
 import org.apache.coyote.domain.request.requestline.HttpVersion;
 
-public class ResponseLine {
+public class StatusLine {
+
     private final HttpVersion httpVersion;
     private final HttpStatusCode httpStatusCode;
 
-    private ResponseLine(HttpVersion httpVersion, HttpStatusCode httpStatusCode) {
+    private StatusLine(HttpVersion httpVersion, HttpStatusCode httpStatusCode) {
         this.httpVersion = httpVersion;
         this.httpStatusCode = httpStatusCode;
     }
 
-    public static ResponseLine of(final HttpVersion httpVersion, final HttpStatusCode httpStatusCode) {
-        return new ResponseLine(httpVersion, httpStatusCode);
+    public static StatusLine of(final HttpVersion httpVersion, final HttpStatusCode httpStatusCode) {
+        return new StatusLine(httpVersion, httpStatusCode);
     }
 
     public String generateResponseString() {
-        return httpVersion.getMessage() + " "
+        return "\r\n" + httpVersion.getMessage() + " "
                 + httpStatusCode.getStatusCode() + " "
-                + httpStatusCode.getStatusMessage();
+                + httpStatusCode.getStatusMessage() + "\r\n";
     }
 
     public HttpVersion getHttpVersion() {

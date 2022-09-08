@@ -14,7 +14,7 @@ import nextstep.jwp.util.FileReader;
 
 class ResourceControllerTest {
 
-    private final ResourceController controller = new ResourceController();
+    private final Controller controller = ResourceController.getInstance();
 
     @Test
     @DisplayName("get 요청시 해당 리소스를 반환한다.")

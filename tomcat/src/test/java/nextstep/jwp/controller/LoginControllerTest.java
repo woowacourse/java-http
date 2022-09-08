@@ -15,7 +15,7 @@ import nextstep.jwp.util.FileReader;
 
 class LoginControllerTest {
 
-    private final LoginController controller = new LoginController();
+    private final Controller controller = LoginController.getInstance();
 
     @Nested
     @DisplayName("get 요청시")

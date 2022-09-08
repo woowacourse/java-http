@@ -6,10 +6,10 @@ import java.util.function.Predicate;
 
 public enum ControllerMapper {
 
-    MAIN(new MainController(), (uri) -> uri.equals("/")),
-    LOGIN(new LoginController(), (uri) -> uri.startsWith("/login")),
-    RESOURCE(new ResourceController(), (uri) -> uri.contains(".")),
-    REGISTER(new RegisterController(), (uri) -> uri.startsWith("/register"));
+    MAIN(MainController.getInstance(), (uri) -> uri.equals("/")),
+    LOGIN(LoginController.getInstance(), (uri) -> uri.startsWith("/login")),
+    RESOURCE(ResourceController.getInstance(), (uri) -> uri.contains(".")),
+    REGISTER(RegisterController.getInstance(), (uri) -> uri.startsWith("/register"));
 
     private final Controller controller;
     private final Predicate<String> canHandle;

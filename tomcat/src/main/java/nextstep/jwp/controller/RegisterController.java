@@ -11,6 +11,15 @@ import nextstep.jwp.util.FileReader;
 
 public class RegisterController implements Controller {
 
+    private static final Controller instance = new RegisterController();
+
+    private RegisterController() {
+    }
+
+    public static Controller getInstance() {
+        return instance;
+    }
+
     @Override
     public HttpResponse doGet(HttpRequest request) {
         return HttpResponse.ok("/register.html", FileReader.read("/register.html"));

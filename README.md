@@ -19,5 +19,8 @@
 
 ## 3단계 요구사항
 - [x] HttpRequest 클래스 구현하기
+  - 2단계에서 구현
 - [x] HttpResponse 클래스 구현하기
-- [ ] Controller 인터페이스 추가하기
+  - 2단계에서 구현
+- [x] Controller 인터페이스 추가하기
+  - HelloWorld, Login, Register, 정적 파일 컨트롤러 구현

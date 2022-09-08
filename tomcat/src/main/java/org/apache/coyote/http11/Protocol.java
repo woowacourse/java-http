@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import org.apache.coyote.exception.VersionNotFoundException;
+import org.apache.catalina.exception.VersionNotFoundException;
 
 public enum Protocol {
     HTTP1("HTTP/1.0"),
@@ -19,5 +19,9 @@ public enum Protocol {
                 .filter(version -> version.value.equals(versionString))
                 .findFirst()
                 .orElseThrow(VersionNotFoundException::new);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

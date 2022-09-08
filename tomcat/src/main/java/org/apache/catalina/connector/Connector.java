@@ -1,5 +1,10 @@
 package org.apache.catalina.connector;
 
+import java.util.List;
+import org.apache.catalina.ControllerContainer;
+import org.apache.catalina.ControllerFactory;
+import org.apache.coyote.Controller;
+import org.apache.coyote.ExceptionController;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +70,9 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection);
+        final List<Controller> controllers = ControllerFactory.createControllers();
+        final List<ExceptionController> exceptionControllers = ControllerFactory.createExceptionControllers();
+        var processor = new Http11Processor(connection, new ControllerContainer(controllers, exceptionControllers));
         new Thread(processor).start();
     }
 

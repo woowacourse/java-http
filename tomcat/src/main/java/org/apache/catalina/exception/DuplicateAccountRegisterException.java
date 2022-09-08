@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package org.apache.catalina.exception;
 
 public class DuplicateAccountRegisterException extends InternalServerException {
 

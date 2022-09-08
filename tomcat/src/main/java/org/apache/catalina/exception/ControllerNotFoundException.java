@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package org.apache.catalina.exception;
 
 import nextstep.jwp.exception.NotFoundException;
 

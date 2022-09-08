@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.RegisterController;
-import org.apache.coyote.exception.DuplicateAccountRegisterException;
+import org.apache.coyote.Controller;
+import nextstep.jwp.controller.RegisterController;
+import org.apache.catalina.exception.DuplicateAccountRegisterException;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;

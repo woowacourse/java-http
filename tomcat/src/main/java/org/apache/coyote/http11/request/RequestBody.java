@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import org.apache.coyote.KeyValueTupleParser;
-import org.apache.coyote.exception.RequestBodyValueNotExists;
+import org.apache.catalina.exception.RequestBodyValueNotExists;
 
 public class RequestBody {
     private final Map<String, String> content;

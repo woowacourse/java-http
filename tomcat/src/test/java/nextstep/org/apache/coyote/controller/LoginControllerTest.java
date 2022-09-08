@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.LoginController;
+import org.apache.coyote.Controller;
+import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;

@@ -6,11 +6,9 @@ import java.net.URISyntaxException;
 import nextstep.Application;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.ControllerContainer;
+import org.apache.coyote.ControllerFinder;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.ExceptionHandler;
-import org.apache.coyote.exception.InternalServerException;
+import org.apache.catalina.exception.InternalServerException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -21,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Socket connection;
+    private final ControllerFinder controllerFinder;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final ControllerFinder controllerFinder) {
         this.connection = connection;
+        this.controllerFinder = controllerFinder;
     }
 
     @Override
@@ -45,10 +45,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private void execute(final Request request, final Response response) throws IOException, URISyntaxException {
         try {
-            final Controller controller = ControllerContainer.findController(request);
-            controller.run(request, response);
+            controllerFinder.findController(request)
+                    .run(request, response);
         } catch (InternalServerException | NotFoundException e) {
-            ExceptionHandler.handle(e, response);
+            controllerFinder.findExceptionHandler(e)
+                    .handle(e, response);
         }
     }
 }

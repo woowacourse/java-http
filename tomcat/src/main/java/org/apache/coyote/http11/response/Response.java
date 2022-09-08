@@ -45,7 +45,7 @@ public class Response {
         this.headers.add("Content-Type", url.getMIMEType() + ";charset=utf-8");
         this.headers.add("Content-Length", String.valueOf(content.getBytes().length));
         final String body = String.join("\r\n",
-                Protocol.HTTP1_1 + SPACE_DELIMITER + status.getStatusNumber()
+                Protocol.HTTP1_1.getValue() + SPACE_DELIMITER + status.getStatusNumber()
                         + SPACE_DELIMITER + status.getStatusName() + SPACE_DELIMITER,
                 headerToString(),
                 EMPTY_STRING,

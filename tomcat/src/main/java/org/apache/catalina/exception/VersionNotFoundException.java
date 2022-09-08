@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package org.apache.catalina.exception;
 
 public class VersionNotFoundException extends InternalServerException {
 

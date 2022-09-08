@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.coyote;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

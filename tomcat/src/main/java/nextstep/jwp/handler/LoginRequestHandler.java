@@ -1,7 +1,6 @@
 package nextstep.jwp.handler;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.NotFoundUserException;
+import nextstep.jwp.application.LoginService;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.Location;
@@ -16,6 +15,7 @@ import nextstep.jwp.util.ResourcesUtil;
 public final class LoginRequestHandler extends AbstractHttpRequestHandler {
 
     private final HttpVersion httpVersion;
+    private final LoginService loginService = new LoginService();
 
     public LoginRequestHandler(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
@@ -36,7 +36,7 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
         HttpCookie httpCookie = HttpCookie.empty();
         HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
 
-        User user = findUser(httpRequestBody);
+        User user = loginService.findUser(httpRequestBody.getValue("account"));
 
         if (user.checkPassword(httpRequestBody.getValue("password"))) {
             return loginUserRedirect(user, httpCookie);
@@ -47,12 +47,6 @@ public final class LoginRequestHandler extends AbstractHttpRequestHandler {
     private HttpResponse parseRequestFile(final HttpRequest httpRequest) {
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
         return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
-    }
-
-    private User findUser(final HttpRequestBody httpRequestBody) {
-        String account = httpRequestBody.getValue("account");
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(NotFoundUserException::new);
     }
 
     private HttpResponse loginUserRedirect(final User user, final HttpCookie httpCookie) {

@@ -53,7 +53,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) throws Exception {
-        final Path path = PathFinder.findByFileName("login.html");
+        final Path path = PathFinder.findByFileName("/login.html");
         final String responseBody = new String(Files.readAllBytes(path));
 
         response.ok(responseBody)

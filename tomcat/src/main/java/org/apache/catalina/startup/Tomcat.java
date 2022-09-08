@@ -1,10 +1,10 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
+
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
@@ -20,7 +20,7 @@ public class Tomcat {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
-                 log.info("web server stop.");
+            log.info("web server stop.");
             connector.stop();
         }
     }

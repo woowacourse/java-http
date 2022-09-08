@@ -69,8 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
             return HttpResponse.ok()
-                    .addResponseBody(getStaticResourceResponse(request.getRequestLine().getUri().getPath()),
-                            contentType);
+                    .addResponseBody(getStaticResourceResponse(request.getPath()), contentType);
         }
         return getNotFoundResponse();
     }
@@ -80,8 +79,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getDynamicResourceResponse(HttpRequest request) throws Exception {
-        String path = request.getRequestLine().getUri().getPath();
-        Controller controller = ControllerMapping.findController(path);
+        Controller controller = ControllerMapping.findController(request.getPath());
         return controller.service(request);
     }
 

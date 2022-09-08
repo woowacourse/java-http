@@ -50,16 +50,13 @@ public class HttpRequest {
         return Optional.empty();
     }
 
-    public String getProtocol() {
-        return requestLine.getProtocol();
+    public String getPath() {
+        URI uri = requestLine.getUri();
+        return uri.getPath();
     }
 
     public RequestLine getRequestLine() {
         return requestLine;
-    }
-
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
     }
 
     public RequestBody getRequestBody() {

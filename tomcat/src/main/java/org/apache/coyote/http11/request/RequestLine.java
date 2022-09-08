@@ -31,10 +31,6 @@ public class RequestLine {
         return method;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
     public URI getUri() {
         return uri;
     }

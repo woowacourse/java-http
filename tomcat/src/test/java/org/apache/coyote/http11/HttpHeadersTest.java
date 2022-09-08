@@ -19,4 +19,16 @@ class HttpHeadersTest {
         assertThat(httpHeaders.getAll()).hasSize(1)
                 .containsOnly(HttpHeader.parse("Name: value"));
     }
+
+    @Test
+    void 헤더_추가_테스트() {
+        // given
+        HttpHeaders httpHeaders = HttpHeaders.createEmpty();
+
+        // when
+        httpHeaders.add("Name", "value");
+
+        // then
+        assertThat(httpHeaders.get("Name")).isEqualTo("value");
+    }
 }

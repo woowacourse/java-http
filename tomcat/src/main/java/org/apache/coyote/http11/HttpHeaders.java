@@ -15,6 +15,10 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
+    public static HttpHeaders createEmpty() {
+        return new HttpHeaders(new HashMap<>());
+    }
+
     public static HttpHeaders parse(final List<String> headerLines) {
         Map<String, HttpHeader> headers = new HashMap<>();
         int headerEndIndex = findHeaderEnd(headerLines);
@@ -31,6 +35,10 @@ public class HttpHeaders {
             return headerLines.size();
         }
         return index;
+    }
+
+    public void add(final String name, final String value) {
+        headers.put(name, HttpHeader.of(name, value));
     }
 
     public String get(final String name) {

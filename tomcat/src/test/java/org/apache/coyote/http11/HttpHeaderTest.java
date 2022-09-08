@@ -33,4 +33,16 @@ class HttpHeaderTest {
         assertThatThrownBy(() -> HttpHeader.parse(headerString))
                 .isExactlyInstanceOf(InvalidHttpRequestFormatException.class);
     }
+
+    @Test
+    void HTTP_응답_형식으로_변환한다() {
+        // given
+        HttpHeader httpHeader = HttpHeader.of("Name", "value");
+
+        // when
+        String responseFormat = httpHeader.toResponseFormat();
+
+        // then
+        assertThat(responseFormat).isEqualTo("Name: value");
+    }
 }

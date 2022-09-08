@@ -18,6 +18,10 @@ public class HttpHeader {
         this.value = value;
     }
 
+    public static HttpHeader of(final String name, final String value) {
+        return new HttpHeader(name, value);
+    }
+
     public static HttpHeader parse(final String headerString) {
         String[] splitHeaderLine = headerString.split(HEADER_DELIMITER);
         validateHeaderFormat(splitHeaderLine);
@@ -36,6 +40,10 @@ public class HttpHeader {
 
     public String getValue() {
         return value;
+    }
+
+    public String toResponseFormat() {
+        return name + HEADER_DELIMITER + value;
     }
 
     @Override

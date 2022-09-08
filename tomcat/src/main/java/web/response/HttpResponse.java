@@ -1,12 +1,12 @@
-package org.apache.response;
+package web.response;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.request.RequestUri;
-import org.apache.util.StaticResourceFinder;
+import web.request.RequestUri;
+import web.util.StaticResourceFinder;
 
 public class HttpResponse {
 
@@ -16,28 +16,12 @@ public class HttpResponse {
     public static final String HEADER_ELEMENT_DELIMITER = ": ";
 
     private StatusLine statusLine;
-    private Map<String, String> header;
+    private final Map<String, String> header;
     private String body;
-
-    public HttpResponse(final StatusLine statusLine, final Map<String, String> header, final String body) {
-        this.statusLine = statusLine;
-        this.header = header;
-        this.body = body;
-    }
-
-    public HttpResponse(String httpVersion,
-                        String statusCode,
-                        String reasonPhrase,
-                        Map<String, String> header,
-                        String body) {
-        this.statusLine = new StatusLine(httpVersion, statusCode, reasonPhrase);
-        this.header = header;
-        this.body = body;
-    }
 
     public HttpResponse() {
         this.statusLine = new StatusLine(EMPTY_VALUE, EMPTY_VALUE, EMPTY_VALUE);
-        this.header = new HashMap<>();
+        this.header = new LinkedHashMap<>();
         this.body = EMPTY_VALUE;
     }
 
@@ -87,10 +71,6 @@ public class HttpResponse {
 
     public void setStatusLine(final StatusLine statusLine) {
         this.statusLine = statusLine;
-    }
-
-    public void setHeader(final Map<String, String> header) {
-        this.header.putAll(header);
     }
 
     public void setBody(final String body) {

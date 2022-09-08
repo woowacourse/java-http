@@ -1,22 +1,22 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.controller.path.HelloController;
-import org.apache.controller.path.LoginController;
-import org.apache.controller.path.PathController;
-import org.apache.controller.path.RegisterController;
-import org.apache.request.HttpRequest;
-import org.apache.request.RequestLine;
-import org.apache.request.RequestUri;
-import org.apache.response.HttpResponse;
-import org.apache.util.StaticResourceFinder;
+import nextstep.jwp.controller.path.HelloController;
+import nextstep.jwp.controller.path.LoginController;
+import nextstep.jwp.controller.path.PathController;
+import nextstep.jwp.controller.path.RegisterController;
+import web.request.HttpRequest;
+import web.request.RequestLine;
+import web.request.RequestUri;
+import web.response.HttpResponse;
+import web.util.StaticResourceFinder;
 
 public class FrontController implements Controller {
 
-    private static FrontController instance = new FrontController();
+    private static final FrontController instance = new FrontController();
 
-    private Map<String, PathController> pathControllers;
+    private final Map<String, PathController> pathControllers;
 
     private FrontController() {
         this.pathControllers = new HashMap<>();

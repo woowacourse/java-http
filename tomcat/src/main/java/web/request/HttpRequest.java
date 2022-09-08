@@ -1,9 +1,9 @@
-package org.apache.request;
+package web.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,23 +14,9 @@ public class HttpRequest {
     public static final String HEADER_KEY_VALUE_DELIMITER = ":";
     public static final String EMPTY_BODY = "";
 
-    private RequestLine requestLine;
-    private Map<String, String> header;
-    private String body;
-
-    public HttpRequest(final RequestLine requestLine, final Map<String, String> header, final String body) {
-        this.requestLine = requestLine;
-        this.header = header;
-        this.body = body;
-    }
-
-    public HttpRequest(final String method, final String path, final String httpVersion,
-                       final Map<String, String> header,
-                       final String body) {
-        this.requestLine = new RequestLine(method, path, httpVersion);
-        this.header = header;
-        this.body = body;
-    }
+    private final RequestLine requestLine;
+    private final Map<String, String> header;
+    private final String body;
 
     public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         this.requestLine = parseRequestLine(bufferedReader.readLine());
@@ -50,9 +36,9 @@ public class HttpRequest {
             headerLines.add(line);
             line = bufferedReader.readLine();
         }
-        Map<String, String> header = new HashMap<>();
-        for (int i = 0; i < headerLines.size(); i++) {
-            String[] headerLine = headerLines.get(i).split(HEADER_KEY_VALUE_DELIMITER);
+        Map<String, String> header = new LinkedHashMap<>();
+        for (String s : headerLines) {
+            String[] headerLine = s.split(HEADER_KEY_VALUE_DELIMITER);
             header.put(headerLine[0].trim(), headerLine[1].trim());
         }
         return header;

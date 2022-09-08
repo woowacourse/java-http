@@ -1,15 +1,13 @@
-package org.apache.controller.path;
+package nextstep.jwp.controller.path;
 
-import org.apache.request.HttpRequest;
-import org.apache.request.RequestLine;
-import org.apache.response.HttpResponse;
-import org.apache.response.StatusLine;
+import web.request.HttpRequest;
+import web.request.RequestLine;
+import web.response.HttpResponse;
+import web.response.StatusLine;
 
 public class HelloController implements PathController {
 
-    private static HelloController helloController = new HelloController();
-
-    private final String path = "/";
+    private static final HelloController helloController = new HelloController();
 
     public static HelloController getInstance() {
         return helloController;
@@ -31,6 +29,6 @@ public class HelloController implements PathController {
 
     @Override
     public String getPath() {
-        return path;
+        return "/";
     }
 }

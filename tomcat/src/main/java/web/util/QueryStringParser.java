@@ -1,4 +1,4 @@
-package org.apache.util;
+package web.util;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 public class QueryStringParser {
 
-    private static final String QUERY_STRING_DELIMITER = "?";
     private static final String QUERY_STRING_ELEMENT_DELIMITER = "&";
     private static final String QUERY_STRING_KEY_VALUE_DELIMITER = "=";
 

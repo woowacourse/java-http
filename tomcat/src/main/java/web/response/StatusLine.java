@@ -1,4 +1,4 @@
-package org.apache.response;
+package web.response;
 
 public class StatusLine {
 

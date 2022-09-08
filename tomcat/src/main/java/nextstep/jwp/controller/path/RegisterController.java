@@ -1,19 +1,17 @@
-package org.apache.controller.path;
+package nextstep.jwp.controller.path;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.request.HttpRequest;
-import org.apache.request.RequestLine;
-import org.apache.request.RequestUri;
-import org.apache.response.HttpResponse;
-import org.apache.util.QueryStringParser;
+import web.request.HttpRequest;
+import web.request.RequestLine;
+import web.request.RequestUri;
+import web.response.HttpResponse;
+import web.util.QueryStringParser;
 
-public class RegisterController implements PathController{
+public class RegisterController implements PathController {
 
-    private static RegisterController registerController = new RegisterController();
-
-    private String path = "/register";
+    private static final RegisterController registerController = new RegisterController();
 
     public static RegisterController getInstance() {
         return registerController;
@@ -39,6 +37,6 @@ public class RegisterController implements PathController{
 
     @Override
     public String getPath() {
-        return path;
+        return "/register";
     }
 }

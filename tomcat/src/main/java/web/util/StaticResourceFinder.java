@@ -1,4 +1,4 @@
-package org.apache.util;
+package web.util;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import org.apache.request.RequestUri;
+import web.request.RequestUri;
 
 public class StaticResourceFinder {
 

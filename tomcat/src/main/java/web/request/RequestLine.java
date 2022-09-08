@@ -1,4 +1,4 @@
-package org.apache.request;
+package web.request;
 
 public class RequestLine {
 

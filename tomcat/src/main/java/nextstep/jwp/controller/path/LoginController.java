@@ -1,24 +1,22 @@
-package org.apache.controller.path;
+package nextstep.jwp.controller.path;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.request.HttpRequest;
-import org.apache.request.RequestLine;
-import org.apache.request.RequestUri;
-import org.apache.response.HttpResponse;
-import org.apache.util.CookieParser;
-import org.apache.util.QueryStringParser;
+import session.CookieParser;
 import session.Session;
 import session.SessionManager;
+import web.request.HttpRequest;
+import web.request.RequestLine;
+import web.request.RequestUri;
+import web.response.HttpResponse;
+import web.util.QueryStringParser;
 
 public class LoginController implements PathController {
 
-    private static LoginController loginController = new LoginController();
-
-    private final String path = "/login";
+    private static final LoginController loginController = new LoginController();
 
     public static LoginController getInstance() {
         return loginController;
@@ -44,7 +42,7 @@ public class LoginController implements PathController {
     }
 
     private boolean isAlreadyLogin(final Optional<String> value) {
-        return value.isPresent() && CookieParser.checkJSessionIdIsExist(value.get());
+        return value.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(value.get());
     }
 
     private void login(final HttpResponse httpResponse, final String body) {
@@ -73,6 +71,6 @@ public class LoginController implements PathController {
 
     @Override
     public String getPath() {
-        return path;
+        return "/login";
     }
 }

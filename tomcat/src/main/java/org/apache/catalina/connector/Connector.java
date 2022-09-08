@@ -16,20 +16,24 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_MAX_THREAD_COUNT = 250;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
-    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
+    private final ExecutorService threadPool;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(int port, int acceptCount, int maxThreadCount) {
-        this.executorService = Executors.newFixedThreadPool(maxThreadCount);
+    public Connector(final int port, final int acceptCount) {
+        this(port, acceptCount, DEFAULT_MAX_THREADS);
+    }
+
+    public Connector(int port, int acceptCount, int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.threadPool = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(int port, int acceptCount) {
@@ -70,15 +74,13 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
-        executorService.submit(processor);
+        threadPool.submit(() -> processor.process(connection));
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
-            executorService.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

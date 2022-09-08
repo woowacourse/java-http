@@ -3,6 +3,8 @@ package org.apache.coyote.http11.model.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.controller.support.FileReader;
+import org.apache.coyote.http11.model.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -33,6 +35,11 @@ public class HttpResponse {
                                   final ContentType contentType) {
         Map<String, String> headers = initHeaders(contentType, "");
         return new HttpResponse(ResponseLine.of(statusCode, version), headers, "");
+    }
+
+    public static HttpResponse createNotFoundResponse(final HttpRequest httpRequest, final Class<?> classes) {
+        String body = FileReader.getFile("/404.html", classes);
+        return HttpResponse.of(ResponseStatusCode.NOT_FOUND, httpRequest.getVersion(), ContentType.HTML, body);
     }
 
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {

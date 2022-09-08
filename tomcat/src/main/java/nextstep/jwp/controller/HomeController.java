@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.support.ErrorResponse;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.ContentType;
@@ -22,7 +21,7 @@ public class HomeController extends AbstractController {
         if (httpRequest.matchRequestMethod(Method.GET)) {
             return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, RESPONSE_BODY);
         }
-        return ErrorResponse.getNotFound(getClass(), httpRequest);
+        return HttpResponse.createNotFoundResponse(httpRequest, getClass());
     }
 
     @Override

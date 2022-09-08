@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.support.ErrorResponse;
 import nextstep.jwp.controller.support.FileReader;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
@@ -21,7 +20,7 @@ public class ResourceController extends AbstractController {
         if (httpRequest.matchRequestMethod(Method.GET)) {
             return doGet(httpRequest);
         }
-        return ErrorResponse.getNotFound(getClass(), httpRequest);
+        return HttpResponse.createNotFoundResponse(httpRequest, getClass());
     }
 
     @Override

@@ -7,6 +7,7 @@ public enum HttpHeaderType {
 
 	CONTENT_TYPE("Content-Type"),
 	CONTENT_LENGTH("Content-Length"),
+	LOCATION("Location"),
 	HOST("Host");
 
 	private final String value;

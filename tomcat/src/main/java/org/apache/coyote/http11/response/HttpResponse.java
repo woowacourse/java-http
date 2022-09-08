@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-	private static final String CRLF = " \r\n";
+	private static final String CRLF = "\r\n";
 
 	private final HttpStatusLine httpStatusLine;
 	private final HttpHeaders headers;

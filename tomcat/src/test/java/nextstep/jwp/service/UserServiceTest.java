@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.WrongInputException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ class UserServiceTest {
     @DisplayName("중복된 아이디로 회원가입하면 예외가 발생한다.")
     @Test
     void register_ifAccountNotUnique() {
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(WrongInputException.class)
                 .isThrownBy(() -> userService.register("gugu", "password", "email@foo.com"))
                 .withMessage("이미 존재하는 아이디입니다.");
     }
@@ -51,7 +52,7 @@ class UserServiceTest {
     @DisplayName("잘못된 형식의 이메일로 회원가입하면 예외가 발생한다.")
     @Test
     void register_ifIllegalEmail() {
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(WrongInputException.class)
                 .isThrownBy(() -> userService.register("ggyu", "password", "email.foo.com"))
                 .withMessage("이메일 형식이 올바르지 않습니다.");
     }

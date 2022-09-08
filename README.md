@@ -30,9 +30,16 @@
     - Path
     - version of the protocol
   - Request Header
-- [ ] HTTP Response 클래스 구현
+- [x] HTTP Response 클래스 구현
   - Response First Line
     - version of the protocol
     - Status Code
     - Status Message
 - [x] Controller Interface 추가
+
+### 4단계 - 동시성 확장하기
+
+- [ ] Executors로 Thread Pool 적용
+    - Connector 클래스에서 Executors 클래스 사용
+- [ ] 동시성 컬렉션 사용하기
+    - Session Concurrent Collections 적용

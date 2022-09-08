@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import nextstep.jwp.view.IndexController;
 import nextstep.jwp.view.LoginController;
 import nextstep.jwp.view.RegisterController;
 import org.apache.coyote.common.controller.Controller;
@@ -13,6 +14,7 @@ public class HandlerMapper {
 
     static {
         cache = Map.ofEntries(
+                Map.entry("GET /", new IndexController()),
                 Map.entry("GET /login", new LoginController()),
                 Map.entry("POST /login", new LoginController()),
                 Map.entry("POST /register", new RegisterController()),

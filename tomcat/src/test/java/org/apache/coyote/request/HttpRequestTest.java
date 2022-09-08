@@ -24,7 +24,7 @@ class HttpRequestTest {
         assertThat(url).isEqualTo("/login.html");
     }
 
-    @DisplayName("확장자를 추가하고, 쿼리스트링을 포함한 URI 를 가져올 수 있다.")
+    @DisplayName("확장자를 추가하고, 쿼리스트링을 제외한 URI 를 가져올 수 있다.")
     @Test
     void getRequestUrl() {
         // given
@@ -32,10 +32,10 @@ class HttpRequestTest {
         final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
 
         // when
-        final String url = sut.getRequestUrl();
+        final String requestPath = sut.getRequestPath();
 
         // then
-        assertThat(url).isEqualTo("/login.html?account=dwoo&password=123");
+        assertThat(requestPath).isEqualTo("/login.html");
     }
 
     @DisplayName("헤더에서 쿠키 정보를 조회할 수 있다.")

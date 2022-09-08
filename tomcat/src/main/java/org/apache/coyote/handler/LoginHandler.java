@@ -10,7 +10,7 @@ import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.query.QueryParams;
+import org.apache.coyote.request.query.QueryParams;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.Location;
 import org.apache.coyote.session.Session;
@@ -37,7 +37,7 @@ public class LoginHandler {
     }
 
     public static HttpResponse login(final HttpRequest request) {
-        final QueryParams queryParams = QueryParams.from(request.getRequestBody());
+        final QueryParams queryParams = request.getQueryParams();
         final String account = queryParams.getValueFromKey("account");
         final String password = queryParams.getValueFromKey("password");
 

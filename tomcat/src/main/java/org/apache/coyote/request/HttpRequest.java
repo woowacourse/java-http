@@ -1,9 +1,12 @@
 package org.apache.coyote.request;
 
+import static org.apache.coyote.request.startline.HttpMethod.*;
+
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.cookie.Cookies;
+import org.apache.coyote.request.query.QueryParams;
 import org.apache.coyote.request.startline.HttpMethod;
 import org.apache.coyote.request.startline.StartLine;
 
@@ -35,7 +38,7 @@ public class HttpRequest {
     }
 
     public String getRequestUrlWithoutQuery() {
-        final String requestUrl = getRequestUrl();
+        final String requestUrl = getRequestPath();
         if (requestUrl.contains(QUERY_START_CHARACTER)) {
             final int index = requestUrl.indexOf(QUERY_START_CHARACTER);
             return requestUrl.substring(0, index);
@@ -43,7 +46,7 @@ public class HttpRequest {
         return requestUrl;
     }
 
-    public String getRequestUrl() {
+    public String getRequestPath() {
         String requestUrl = startLine.getRequestPath();
         requestUrl = makeDefaultRequestUrl(requestUrl);
 
@@ -84,5 +87,12 @@ public class HttpRequest {
 
     public Optional<Cookie> getJSessionCookie() {
         return cookies.getJSessionCookie();
+    }
+
+    public QueryParams getQueryParams() {
+        if (startLine.getMethod().equals(GET)) {
+            return startLine.getQueryParams();
+        }
+        return QueryParams.from(requestBody);
     }
 }

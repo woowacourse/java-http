@@ -1,10 +1,9 @@
 package org.apache.coyote.controller;
 
-import java.io.File;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.controller.utils.PathFinder;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.response.Response;
@@ -20,11 +19,10 @@ public class ResourceFileController extends AbstractController {
     @Override
     protected void doGet(Request request, Response response) throws Exception {
         final String fileName = request.getUri().getResourcePath();
-        final String fileExtension = fileName.split("\\.")[1];
+        final Path path = PathFinder.findByFileName(fileName);
 
+        final String fileExtension = fileName.split("\\.")[1];
         final ContentType contentType = ContentType.from(fileExtension);
-        final URL resource = getClass().getClassLoader().getResource("static" + fileName);
-        final Path path = new File(resource.getPath()).toPath();
 
         final String responseBody = new String(Files.readAllBytes(path));
 

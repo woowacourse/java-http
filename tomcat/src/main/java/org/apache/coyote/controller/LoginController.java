@@ -1,13 +1,12 @@
 package org.apache.coyote.controller;
 
-import java.io.File;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
+import org.apache.coyote.controller.utils.PathFinder;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBodyContent;
@@ -54,9 +53,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) throws Exception {
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final Path path = new File(resource.getPath()).toPath();
-
+        final Path path = PathFinder.findByFileName("login.html");
         final String responseBody = new String(Files.readAllBytes(path));
 
         response.ok(responseBody)

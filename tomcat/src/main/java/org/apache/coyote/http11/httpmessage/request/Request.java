@@ -50,18 +50,6 @@ public class Request {
         return requestLine.getRequestUri();
     }
 
-    public boolean isMatchUri(String requestUri) {
-        return requestLine.isMatchUri(requestUri);
-    }
-
-    public boolean isFileRequest() {
-        return requestLine.getRequestUri().isFileRequest();
-    }
-
-    public boolean hasQueryString() {
-        return requestLine.getRequestUri().hasQueryStrings();
-    }
-
     public String getBody() {
         return requestBody.getRequestBody();
     }

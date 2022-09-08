@@ -1,19 +1,48 @@
 package org.apache.coyote.http11;
 
-import java.util.Objects;
+import static org.apache.coyote.http11.HttpHeader.LOCATION;
 
 public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1";
 
-    private final HttpStatusCode statusCode;
+    private HttpStatusCode statusCode;
     private final HttpHeaders httpHeaders;
-    private final String body;
+    private String body;
 
-    public HttpResponse(final HttpStatusCode statusCode, final HttpHeaders httpHeaders, final String body) {
+    public HttpResponse() {
+        this.httpHeaders = new HttpHeaders();
+        this.body = "";
+    }
+
+    public HttpResponse statusCode(final HttpStatusCode statusCode) {
         this.statusCode = statusCode;
-        this.httpHeaders = httpHeaders;
-        this.body = body;
+        return this;
+    }
+
+    public HttpResponse addHeader(final HttpHeader header, final String value) {
+        httpHeaders.addHeader(header, value);
+        return this;
+    }
+
+    public HttpResponse addHeader(final HttpHeader header, final int value) {
+        httpHeaders.addHeader(header, String.valueOf(value));
+        return this;
+    }
+
+    public HttpResponse addCookie(final HttpCookie httpCookie) {
+        httpHeaders.addCookie(httpCookie);
+        return this;
+    }
+
+    public HttpResponse responseBody(final String responseBody) {
+        this.body = responseBody;
+        return this;
+    }
+
+    public HttpResponse redirect(final String url) {
+        httpHeaders.addHeader(LOCATION, url);
+        return this;
     }
 
     public byte[] getBytes() {
@@ -21,7 +50,7 @@ public class HttpResponse {
     }
 
     private String encodingResponse() {
-        if (Objects.isNull(body)) {
+        if (body.isBlank()) {
             return String.join("\r\n",
                     PROTOCOL + " " + statusCode.toHttpString() + " ",
                     httpHeaders.encodingToString(),
@@ -32,34 +61,5 @@ public class HttpResponse {
                 httpHeaders.encodingToString(),
                 "",
                 body);
-    }
-
-    public static class Builder {
-
-        private HttpStatusCode statusCode;
-        private HttpHeaders httpHeaders;
-        private String body;
-
-        public Builder() {
-        }
-
-        public Builder statusCode(final HttpStatusCode statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder headers(final HttpHeaders httpHeaders) {
-            this.httpHeaders = httpHeaders;
-            return this;
-        }
-
-        public Builder body(final String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(statusCode, httpHeaders, body);
-        }
     }
 }

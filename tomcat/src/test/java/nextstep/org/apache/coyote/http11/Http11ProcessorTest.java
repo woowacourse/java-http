@@ -45,7 +45,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /index.hmtl 요청: index.html을 출력한다.")
+    @DisplayName("GET /index.html 요청: index.html을 출력한다.")
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -73,7 +73,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /index.hmtl에 쿠키와 함께 요청: index.html을 출력한다.")
+    @DisplayName("GET /index.html에 쿠키와 함께 요청: index.html을 출력한다.")
     void indexWithCookie() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

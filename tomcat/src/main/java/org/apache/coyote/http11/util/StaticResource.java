@@ -37,6 +37,10 @@ public class StaticResource {
         return findPath(NOT_FOUND_PAGE);
     }
 
+    public static Path internalServerError() throws URISyntaxException {
+        return findPath(INTERNAL_SERVER_ERROR_PAGE);
+    }
+
     private static Path findPath(final String resourceName) throws URISyntaxException {
         final URL resource = findResource(resourceName);
         if (resource == null) {

@@ -23,6 +23,9 @@ public abstract class AbstractController implements Controller {
         } catch (final ResourceNotFoundException notFoundException) {
             response.setBody(StaticResource.notFound());
             response.setStatus(HttpStatus.NOT_FOUND);
+        } catch (final Exception exception) {
+            response.setBody(StaticResource.internalServerError());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

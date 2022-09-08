@@ -49,6 +49,17 @@ public class HttpRequest {
 		return requestLine.getParams();
 	}
 
+	public String getCookie() {
+		String cookie = requestHeaders.findCookie();
+		final int splitPoint = cookie.lastIndexOf("=");
+		System.out.println("쿠키 찍어보기 " + cookie.substring(splitPoint+1));
+		return cookie.substring(splitPoint+1);
+	}
+
+	public boolean hasCookie() {
+		return requestHeaders.hasCookie();
+	}
+
 	public RequestLine getRequestLine() {
 		return requestLine;
 	}
@@ -59,5 +70,14 @@ public class HttpRequest {
 
 	public Map<String, String> getRequestBody() {
 		return requestBody.getRequestBody();
+	}
+
+	@Override
+	public String toString() {
+		return "HttpRequest{" +
+			"requestLine=" + requestLine.toString() +
+			", requestHeaders=" + requestHeaders.toString() +
+			", requestBody=" + requestBody.toString() +
+			'}';
 	}
 }

@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
+import org.apache.coyote.http11.common.Session;
+
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
  * particular Container.  Different Manager implementations may support
@@ -31,7 +33,9 @@ public interface Manager {
      */
     void add(HttpSession session);
 
-    /**
+	void add(Session session);
+
+	/**
      * Return the active Session, associated with this Manager, with the
      * specified session id (if any); otherwise return <code>null</code>.
      *

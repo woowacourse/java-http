@@ -5,6 +5,8 @@ import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_REGISTER_EXCEPTI
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,22 +24,42 @@ public class UserService {
 	private UserService() {
 	}
 
-	public static boolean login(Map<String, String> params) {
-		final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get(ID));
-		if (params.isEmpty() && optionalUser.isEmpty()) {
-			return false;
+	public static boolean login(HttpRequest request) {
+		if (request.hasCookie() && SessionManager.hasSession(request.getCookie())) {
+			return findUserBySession(request);
 		}
-		User user = optionalUser.get();
-		loggingInfoUser(params, user);
-		return true;
+
+		return false;
 	}
 
-	public static void register(Map<String, String> params) {
+	public static boolean findUserBySession(HttpRequest request) {
+		return SessionManager.hasSession(request.getCookie());
+	}
+
+	public static User login(Map<String, String> params) {
+		System.out.println("로그인 2");
+		if (params.isEmpty()) {
+			return null;
+		}
+		final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get(ID));
+		if (optionalUser.isPresent()) {
+			User user = optionalUser.get();
+			if (user.checkPassword(params.get(PASSWORD))) {
+				loggingInfoUser(params, user);
+				return user;
+			}
+		}
+
+		return null;
+	}
+
+	public static User register(Map<String, String> params) {
 		if (params.isEmpty() || params.size() < 3) {
 			throw new InvalidHttpRequestException(INVALID_HTTP_REGISTER_EXCEPTION);
 		}
 		User user = getUser(params);
 		InMemoryUserRepository.save(user);
+		return user;
 	}
 
 	private static User getUser(Map<String, String> params) {

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static nextstep.jwp.exception.ExceptionType.INVALID_REQUEST_LINE_EXCEPTION;
+import static org.apache.coyote.http11.common.HttpHeaderType.COOKIE;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,6 +62,18 @@ public class RequestHeaders {
 
 	public Map<String, String> getHeaders() {
 		return headers;
+	}
+
+	public boolean hasCookie() {
+		for (Map.Entry<String, String> i : headers.entrySet()) {
+			System.out.println(i.getKey() + "  " + i.getValue());
+		}
+
+		return headers.containsKey(COOKIE.getValue());
+	}
+
+	public String findCookie() {
+		return headers.get(COOKIE.getValue());
 	}
 
 	@Override

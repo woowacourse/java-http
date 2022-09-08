@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Map;
-import java.util.UUID;
 
 import nextstep.jwp.util.Parser;
 
@@ -21,8 +20,8 @@ public class HttpCookie {
 
 	}
 
-	public static String generateCookieValue() {
-		return String.join(DELIMITER, JSESSIONID, UUID.randomUUID().toString());
+	public static String generateCookieValue(String uuid) {
+		return String.join(DELIMITER, JSESSIONID, uuid);
 	}
 
 }

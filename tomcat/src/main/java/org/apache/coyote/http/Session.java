@@ -21,7 +21,8 @@ public class Session {
         attributes.put(key, value);
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
+    public boolean isLoggedInUser(){
+        return SessionManager.findSession(id).isPresent() && attributes.get("user") != null;
     }
+
 }

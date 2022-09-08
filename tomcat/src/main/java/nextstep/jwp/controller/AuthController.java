@@ -21,6 +21,11 @@ public class AuthController {
 
     @RequestMapping(value = "/login", httpMethod = HttpMethod.GET)
     public HttpResponse loginPage(final HttpRequest httpRequest){
+        if(!httpRequest.getSession().isLoggedInUser()){
+            return HttpResponse.redirect("/index.html")
+                    .addCookie(httpRequest.getCookie(), httpRequest.getSession())
+                    .build();
+        }
         return HttpResponse.ok()
                 .body(getFilePath(httpRequest.getUri()))
                 .build();
@@ -29,7 +34,7 @@ public class AuthController {
     @RequestMapping(value = "/login", httpMethod = HttpMethod.POST)
     public HttpResponse login(final HttpRequest httpRequest){
         try{
-            authService.login(httpRequest);
+                authService.login(httpRequest);
         } catch (UnauthorizedUserException | NoSuchElementException e){
             return HttpResponse.redirect("/401.html")
                     .build();

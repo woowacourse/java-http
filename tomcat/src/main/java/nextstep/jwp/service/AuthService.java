@@ -6,6 +6,7 @@ import nextstep.jwp.infra.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserRepository;
 import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.Session;
 import org.apache.coyote.http.SessionManager;
 
 public class AuthService {
@@ -22,7 +23,9 @@ public class AuthService {
                 .orElseThrow(() -> new NoSuchElementException("회원가입이 되어있지 않은 유저입니다."));
 
         user.checkPassword(password);
-        SessionManager.findSession(httpRequest.getSession().getId());
+        final Session session = SessionManager.findSession(httpRequest.getSession().getId())
+                .orElseThrow(() -> new NoSuchElementException("세션이 존재하지 않습니다."));
+        session.setAttribute("user", user.getId());
     }
 
     public UserResponseDto register(HttpRequest httpRequest) {

@@ -27,7 +27,8 @@ public class HttpRequest {
         this.uri = parseRequest[1];
         this.header = header;
         this.body = body;
-        this.session = SessionManager.add();
+        this.session = SessionManager.add()
+                .orElseThrow(() -> new NoSuchElementException("세션이 정상적으로 저장되지 않았습니다."));
     }
 
     public Optional<String> findQueryByKey(String queryKey){

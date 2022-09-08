@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.context.Context;
 import org.apache.coyote.http11.context.HttpCookie;
@@ -106,11 +107,11 @@ public class HttpRequest {
         return createSession;
     }
 
-    public Session getSession(boolean isCreate) {
+    public Optional<Session> getSession(boolean isCreate) {
         if (!isCreate && MANAGER.findSession(context.getSession().getId()) == null) {
-            return null;
+            return Optional.empty();
         }
-        return findOrCreateSession(context.getSession().getId());
+        return Optional.of(findOrCreateSession(context.getSession().getId()));
     }
 
     public String getPath() {

@@ -1,10 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.handler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.util.ResourceUtil;

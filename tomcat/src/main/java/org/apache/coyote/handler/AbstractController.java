@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.coyote.handler;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.request.HttpRequest;

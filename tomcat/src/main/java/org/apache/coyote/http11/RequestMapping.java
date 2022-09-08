@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.HomeController;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
+import org.apache.coyote.handler.Controller;
+import org.apache.coyote.handler.ResourceHandler;
 
 public class RequestMapping {
 

@@ -1,67 +1,36 @@
 package nextstep.jwp.handler;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.request.HttpRequest;
 
 public class RequestMapping {
 
-    private static final String ROOT_PATH = "/";
-    private static final String INDEX_PATH = "/index.html";
-    private static final String LOGIN_PATH = "/login";
-    private static final String REGISTER_PATH = "/register";
-    private static final List<String> STATIC_PATHS = List.of(".css", ".js");
+    private static final Pattern ROOT_PATH = Pattern.compile("/");
+    private static final Pattern LOGIN_PATH = Pattern.compile("/login");
+    private static final Pattern REGISTER_PATH = Pattern.compile("/register");
+    private static final Pattern STATIC_PATH = Pattern.compile("^\\S+.(?i)(html|css|js)$");
 
-    private final HttpRequestHandler rootRequestHandler;
-    private final HttpRequestHandler staticRequestHandler;
-    private final HttpRequestHandler loginRequestHandler;
-    private final HttpRequestHandler registerRequestHandler;
+    private final Map<Pattern, HttpRequestHandler> handlers;
 
     public RequestMapping(final HttpVersion httpVersion) {
-        this.rootRequestHandler = new RootRequestHandler(httpVersion);
-        this.staticRequestHandler = new StaticRequestHandler(httpVersion);
-        this.loginRequestHandler = new LoginRequestHandler(httpVersion);
-        this.registerRequestHandler = new RegisterRequestHandler(httpVersion);
+        this.handlers = new ConcurrentHashMap<>();
+        handlers.put(ROOT_PATH, new RootRequestHandler(httpVersion));
+        handlers.put(LOGIN_PATH, new LoginRequestHandler(httpVersion));
+        handlers.put(REGISTER_PATH, new RegisterRequestHandler(httpVersion));
+        handlers.put(STATIC_PATH, new StaticRequestHandler(httpVersion));
     }
 
     public HttpRequestHandler getHandler(final HttpRequest httpRequest) {
-        if (isLoginRequest(httpRequest.getPath())) {
-            return loginRequestHandler;
-        }
-        if (isRegisterRequest(httpRequest.getPath())) {
-            return registerRequestHandler;
-        }
-        if (isIndexRequest(httpRequest.getPath())) {
-            return staticRequestHandler;
-        }
-        if (isRootRequest(httpRequest.getPath())) {
-            return rootRequestHandler;
-        }
-        if (isStaticRequest(httpRequest.getPath())) {
-            return staticRequestHandler;
-        }
-        throw new UncheckedServletException("지원하지 않는 path입니다." + httpRequest.getPath());
-    }
-
-    private boolean isLoginRequest(final String path) {
-        return path.equals(LOGIN_PATH);
-    }
-
-    private boolean isRegisterRequest(final String path) {
-        return path.equals(REGISTER_PATH);
-    }
-
-    private boolean isIndexRequest(final String path) {
-        return path.equals(INDEX_PATH);
-    }
-
-    private boolean isRootRequest(final String path) {
-        return path.equals(ROOT_PATH);
-    }
-
-    private boolean isStaticRequest(final String path) {
-        return STATIC_PATHS.stream()
-                .anyMatch(path::endsWith);
+        return handlers.entrySet()
+                .stream()
+                .filter(handler -> handler.getKey().matcher(httpRequest.getPath()).matches())
+                .findFirst()
+                .map(Entry::getValue)
+                .orElseThrow(() -> new UncheckedServletException("지원하지 않는 path입니다." + httpRequest.getPath()));
     }
 }

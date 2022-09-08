@@ -13,15 +13,14 @@ public class RequestLine {
     private final String requestUri;
     private final String version;
 
-    public RequestLine(String message) {
-        List<String> values = parseRequestLine(message);
+    public RequestLine(final HttpMessage message) {
+        final List<String> values = parseRequestLine(message.getRequestLine());
         this.method = values.get(0);
         this.requestUri = values.get(1);
         this.version = values.get(2);
     }
 
-    private List<String> parseRequestLine(final String message) {
-        final String requestLine = message.split("\r\n")[0];
+    private List<String> parseRequestLine(final String requestLine) {
         return Arrays.stream(requestLine.split(REQUEST_LINE_DELIMITER))
             .map(String::trim)
             .collect(toList());

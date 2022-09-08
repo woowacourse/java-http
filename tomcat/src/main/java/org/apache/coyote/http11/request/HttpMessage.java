@@ -6,33 +6,44 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringJoiner;
 
-class HttpReader {
+class HttpMessage {
+
+    private static final String EMPTY_VALUE = "";
 
     private final BufferedReader reader;
 
-    HttpReader(final InputStream inputStream) {
+    private String requestLine = EMPTY_VALUE;
+    private String headers = EMPTY_VALUE;
+    private String messageBody = EMPTY_VALUE;
+
+    HttpMessage(final InputStream inputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         this.reader = new BufferedReader(inputStreamReader);
+        readHttpRequest();
     }
 
-    String readHttpRequest() {
-        String line;
-        String contentLength = "";
+    void readHttpRequest() {
+        this.requestLine = readLine();
+
+        final String contentLength = readHeaders();
+
+        if (!contentLength.isEmpty()) {
+            this.messageBody = readByLength(Integer.parseInt(contentLength));
+        }
+    }
+
+    private String readHeaders() {
+        String contentLength = EMPTY_VALUE;
         final StringJoiner joiner = new StringJoiner("\r\n");
+        String line;
         while (!(line = readLine()).isEmpty()) {
             if (line.startsWith("Content-Length")) {
                 contentLength = line.split(":")[1].trim();
             }
             joiner.add(line);
         }
-
-        if (contentLength.isEmpty()) {
-            return joiner.toString();
-        }
-
-        final String messageBody = readByLength(Integer.parseInt(contentLength));
-        joiner.add("").add(messageBody);
-        return joiner.toString();
+        this.headers = joiner.toString();
+        return contentLength;
     }
 
     private String readLine() {
@@ -51,5 +62,17 @@ class HttpReader {
         } catch (IOException e) {
             throw new IllegalArgumentException("Invalid byte read");
         }
+    }
+
+    public String getRequestLine() {
+        return requestLine;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public String getMessageBody() {
+        return messageBody;
     }
 }

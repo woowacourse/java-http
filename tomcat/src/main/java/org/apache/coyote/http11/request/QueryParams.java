@@ -15,9 +15,9 @@ class QueryParams {
 
     private final Map<String, String> queryParams = new HashMap<>();
 
-    QueryParams(final URI requestUri, final String messageBody) {
+    QueryParams(final URI requestUri, final HttpMessage message) {
         parseQueryParams(requestUri);
-        addQuery(messageBody);
+        addQuery(message.getMessageBody());
     }
 
     private void parseQueryParams(final URI requestUri) {

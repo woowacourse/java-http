@@ -14,7 +14,7 @@ public abstract class AbstractController implements Controller {
             new NotFoundException("지원되지 않는 method 입니다");
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) throws NotFoundException, IOException {
+    public final HttpResponse service(final HttpRequest httpRequest) throws NotFoundException, IOException {
         if (httpRequest.isMethod(GET)) {
             return doGet(httpRequest);
         }

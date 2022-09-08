@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.cookie;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class Cookies {
     public Cookie find(final String key) {
         return cookies.get(key);
     }
-    
+
     public boolean isEmpty() {
         return cookies.isEmpty();
     }

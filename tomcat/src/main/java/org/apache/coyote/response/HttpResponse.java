@@ -1,6 +1,8 @@
 package org.apache.coyote.response;
 
 import java.util.StringJoiner;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.cookie.Cookies;
 
 public class HttpResponse {
 

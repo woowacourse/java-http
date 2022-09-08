@@ -3,7 +3,7 @@ package org.apache.coyote.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.response.Cookies;
+import org.apache.coyote.cookie.Cookies;
 
 public class HttpHeaders {
 

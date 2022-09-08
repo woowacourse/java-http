@@ -31,4 +31,11 @@ public class RequestBodyContent {
     public String get(final String key) {
         return body.get(key);
     }
+
+    public String getValue(final String key) {
+        if (body.containsKey(key)) {
+            return body.get(key);
+        }
+        throw new IllegalArgumentException("존재하지 않는 body내용 입니다.");
+    }
 }

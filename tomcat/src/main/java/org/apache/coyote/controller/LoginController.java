@@ -2,7 +2,6 @@ package org.apache.coyote.controller;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
@@ -28,9 +27,11 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(Request request, Response response) throws Exception {
         final RequestBodyContent userInput = RequestBodyContent.parse(request.getBody());
-        final Optional<User> user = InMemoryUserRepository.findByAccount(userInput.get("account"));
+        final String account = userInput.getValue("account");
+        final String password = userInput.getValue("password");
 
-        if (user.isPresent() && user.get().checkPassword(userInput.get("password"))) {
+        if (InMemoryUserRepository.exist(account, password)) {
+            final User user = InMemoryUserRepository.findByAccount(account).get();
             log.info("존재하는 유저입니다. ::: " + user);
 
             if (request.hasHeader("Cookie")) {
@@ -46,7 +47,7 @@ public class LoginController extends AbstractController {
                     .addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             return;
         }
-        log.info("존재하지 않는 유저입니다. ::: " + userInput.get("account"));
+        log.info("존재하지 않는 유저입니다. ::: " + userInput.getValue("account"));
         response.redirect("/401.html")
                 .addHeader("Content-Type", ContentType.HTML.getContentType() + ";charset=utf-8");
     }

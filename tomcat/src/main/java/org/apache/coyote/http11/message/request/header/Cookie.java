@@ -18,7 +18,7 @@ public class Cookie {
         this.values = values;
     }
 
-    public static Cookie from(String rawCookies) {
+    public static Cookie from(final String rawCookies) {
         final Map<String, String> values = Arrays.stream(rawCookies.split(Regex.COOKIE_VALUE.getValue()))
                 .map(rawCookie -> rawCookie.split(Regex.KEY_VALUE.getValue()))
                 .collect(Collectors.toMap(
@@ -28,7 +28,7 @@ public class Cookie {
         return new Cookie(values);
     }
 
-    public static Cookie fromJSessionId(String sessionId) {
+    public static Cookie fromJSessionId(final String sessionId) {
         return new Cookie(Map.of(KEY_JSESSIONID, sessionId));
     }
 
@@ -40,7 +40,7 @@ public class Cookie {
         return get(KEY_JSESSIONID);
     }
 
-    public Optional<String> get(String key) {
+    public Optional<String> get(final String key) {
         if (values.containsKey(key)) {
             return Optional.of(values.get(key));
         }

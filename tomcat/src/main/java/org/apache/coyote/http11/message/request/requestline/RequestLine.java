@@ -13,14 +13,14 @@ public class RequestLine {
         this.uri = uri;
     }
 
-    public static RequestLine from(String requestLine) {
+    public static RequestLine from(final String requestLine) {
         final String[] splitLine = requestLine.split(Regex.BLANK.getValue());
         final Method method = Method.valueOf(splitLine[0]);
         final String uri = splitLine[1];
         return new RequestLine(method, RequestUri.from(uri));
     }
 
-    public boolean isPath(String path) {
+    public boolean isPath(final String path) {
         return uri.isPath(path);
     }
 

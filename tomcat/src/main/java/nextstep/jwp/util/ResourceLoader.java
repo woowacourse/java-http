@@ -11,7 +11,7 @@ public class ResourceLoader {
 
     private static final String STATIC_PATH = "static";
 
-    public static String getStaticResource(String path) throws IOException, URISyntaxException {
+    public static String getStaticResource(final String path) throws IOException, URISyntaxException {
         try {
             final URI resource = Thread.currentThread()
                     .getContextClassLoader()

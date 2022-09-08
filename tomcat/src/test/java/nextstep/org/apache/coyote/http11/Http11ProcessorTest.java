@@ -126,7 +126,6 @@ class Http11ProcessorTest {
                 "HTTP/1.1 302 ",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ");
-        System.out.println(socket.output());
 
         assertThat(socket.output()).contains(expected);
     }

@@ -79,10 +79,10 @@ public class HttpRequest {
         return QueryParams.empty();
     }
 
-    public boolean isLoggedInUser(SessionManager sessionManager) {
+    public boolean isLoggedInUser() {
         return httpHeaders.getCookie()
             .getJSessionId()
-            .filter(sessionManager::contains)
+            .filter(SessionManager::contains)
             .isPresent();
     }
 

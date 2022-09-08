@@ -4,8 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.common.Charset;
-import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.controller.AbstractController;
 import org.apache.coyote.common.header.Cookie;
 import org.apache.coyote.common.request.Request;
@@ -23,13 +21,15 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         final Optional<User> user = findUser(request);
 
-        String locationUrl = "/index";
-        String responseBody = "";
-        Status statusCode = Status.FOUND;
+        String responseBody = ResourceGenerator.getStaticResource("/");
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            locationUrl = "/401";
             responseBody = ResourceGenerator.getStaticResource("/401");
-            statusCode = Status.UNAUTHORIZED;
+            response.setStatus(Status.UNAUTHORIZED)
+                    .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                    .setLocation("/401")
+                    .setBody(responseBody)
+                    .build();
+            return;
         }
 
         final String sessionId = request.getCookie(Cookie.SESSION_ID_COOKIE_KEY)
@@ -38,10 +38,9 @@ public class LoginController extends AbstractController {
         session.setAttribute("userId", user.get().getId());
         new SessionManager().add("userId", session);
 
-        response.setContentType(MediaType.TEXT_HTML, Charset.UTF8)
-                .setStatus(statusCode)
+        response.setStatus(Status.FOUND)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .setLocation(locationUrl)
+                .setLocation("/")
                 .setBody(responseBody)
                 .build();
     }

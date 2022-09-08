@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.Test;
@@ -41,5 +42,44 @@ class HttpRequestTest {
                 () -> assertThat(httpRequest.getBody()).isEqualTo(
                         "requestBody1\r\nrequestBody2")
         );
+    }
+
+    @Test
+    void Accpet_헤더가_있으면_body의_Content_Type으로_반환한다() throws IOException {
+        // given
+        String request = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css",
+                "Connection: keep-alive ",
+                "");
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
+        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+
+        // when
+        ContentType contentType = httpRequest.getAcceptContentType();
+
+        // then
+        assertThat(contentType).isEqualTo(ContentType.TEXT_CSS);
+    }
+
+    @Test
+    void Accept_헤더가_없으면_확장자를_통해_body의_Content_Type을_반환한다() throws IOException {
+        // given
+        String request = String.join("\r\n",
+                "GET /index.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "");
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(request.getBytes())));
+        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+
+        // when
+        ContentType contentType = httpRequest.getAcceptContentType();
+
+        // then
+        assertThat(contentType).isEqualTo(ContentType.TEXT_CSS);
     }
 }

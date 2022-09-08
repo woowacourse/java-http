@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.support.ResourcesUtil;
 
 public class HttpRequest {
 
@@ -47,6 +48,14 @@ public class HttpRequest {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
+    }
+
+    public ContentType getAcceptContentType() {
+        String acceptValue = headers.get("Accept");
+        if (acceptValue != null) {
+            return ContentType.fromValue(acceptValue);
+        }
+        return ContentType.fromExtension(ResourcesUtil.parseExtension(url));
     }
 
     public HttpCookie getCookie() {

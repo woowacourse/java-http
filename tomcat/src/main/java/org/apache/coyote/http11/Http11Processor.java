@@ -23,7 +23,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 import org.apache.coyote.exception.QueryStringFormatException;
 import org.apache.coyote.exception.ResourceNotFoundException;
-import org.apache.coyote.support.HttpRequestParser;
 import org.apache.coyote.support.ResourcesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String addExtension(final String url) {
-        String extension = HttpRequestParser.parseExtension(url);
+        String extension = ResourcesUtil.parseExtension(url);
         if (extension.isBlank()) {
             return url + DEFAULT_EXTENSION;
         }
@@ -167,7 +166,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse toOkResponse(final HttpRequest httpRequest, final String responseBody) {
         Map<String, String> responseHeaders = new HashMap<>();
         handleSession(httpRequest, responseHeaders);
-        ContentType contentType = HttpRequestParser.parseContentType(httpRequest.getUrl());
+        ContentType contentType = httpRequest.getAcceptContentType();
         responseHeaders.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         if (!responseBody.isBlank()) {
             responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));

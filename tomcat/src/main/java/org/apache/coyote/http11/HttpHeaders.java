@@ -33,6 +33,14 @@ public class HttpHeaders {
         return index;
     }
 
+    public String get(final String name) {
+        HttpHeader header = headers.get(name);
+        if (header == null) {
+            return null;
+        }
+        return header.getValue();
+    }
+
     public String getOrDefault(final String name, final String defaultValue) {
         HttpHeader header = headers.get(name);
         if (header == null) {

@@ -15,6 +15,13 @@ public enum ContentType {
         this.extension = extension;
     }
 
+    public static ContentType fromValue(final String value) {
+        return Arrays.stream(values())
+                .filter(contentType -> contentType.value.equals(value))
+                .findAny()
+                .orElse(TEXT_HTML);
+    }
+
     public static ContentType fromExtension(final String extension) {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.extension.equals(extension))

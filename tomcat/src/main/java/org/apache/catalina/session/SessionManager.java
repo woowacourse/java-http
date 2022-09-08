@@ -7,7 +7,7 @@ public class SessionManager implements Manager {
 
     private static final SessionManager instance = new SessionManager();
 
-    private final Map<String, Session> Sessions = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -18,16 +18,16 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(Session session) {
-        Sessions.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(String id) {
-        return Sessions.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(Session session) {
-        Sessions.remove(session.getId());
+        sessions.remove(session.getId());
     }
 }

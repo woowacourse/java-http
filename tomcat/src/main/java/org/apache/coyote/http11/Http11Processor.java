@@ -21,6 +21,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_PATH_PREFIX = "static";
 
     private final Socket connection;
     private final HandlerMapping handlerMapping;
@@ -66,14 +67,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getStaticResource(final HttpRequest request) throws IOException {
-        final URL requestUrl = request.getUrl();
-        if (isRootPath(requestUrl)) {
+        if (request.isRootPath()) {
             return "Hello world!";
         }
-        return Files.readString(new File(Objects.requireNonNull(requestUrl).getFile()).toPath());
-    }
 
-    private boolean isRootPath(URL requestUrl) {
-        return requestUrl.getPath().equals("/");
+        final URL resource = getClass().getClassLoader().getResource(STATIC_PATH_PREFIX + request.getPath());
+        return Files.readString(
+            new File(Objects.requireNonNull(resource)
+                .getFile()).toPath());
     }
 }

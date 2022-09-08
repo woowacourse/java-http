@@ -75,12 +75,20 @@ public class HttpRequest {
         return split[1];
     }
 
-    public String getHeaderValue(final String headerName) {
-        return headers.get(headerName);
-    }
-
     public boolean isGetRequest() {
         return getHttpMethod().equals("GET");
+    }
+
+    public boolean isRootPath() {
+        return getPath().equals("/");
+    }
+
+    public URL getUrl() {
+        try {
+            return addExtensionToPath(getUri());
+        } catch (URISyntaxException | MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid URI requested");
+        }
     }
 
     private URI getUri() {
@@ -95,25 +103,7 @@ public class HttpRequest {
         return getUri().getPath();
     }
 
-    public URL getUrl() {
-        try {
-            final URI requestUri = getUri();
-
-            if (requestUri.getPath().equals("/")) {
-                return requestUri.toURL();
-            }
-
-            if (hasQuery()) {
-                return addExtensionToPath(new URI(requestUri.getPath()));
-            }
-
-            return addExtensionToPath(requestUri);
-        } catch (MalformedURLException | URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid Uri");
-        }
-    }
-
-    private URL addExtensionToPath(URI requestUri) throws MalformedURLException, URISyntaxException {
+    private URL addExtensionToPath(URI requestUri) throws URISyntaxException, MalformedURLException {
         if (!requestUri.getPath().contains(".")) {
             requestUri = new URI(requestUri + ".html");
         }
@@ -125,24 +115,13 @@ public class HttpRequest {
         return resource;
     }
 
-    public boolean hasQuery() {
-        return queryParams.hasQuery();
-    }
-
     public boolean containsHeader(final String headerName) {
         return headers.containsKey(headerName);
     }
 
-    public String getQueryValue(final String queryKey) {
-        return queryParams.getQueryValue(queryKey);
-    }
-
-    public String getHttpMethod() {
-        return getHeaderValue(HTTP_METHOD);
-    }
-
-    public String getHttpVersion() {
-        return getHeaderValue(HTTP_VERSION);
+    public boolean hasSession() {
+        return containsHeader(COOKIE) &&
+            getHeaderValue(COOKIE).contains(JSESSIONID);
     }
 
     public Session getSession() {
@@ -157,8 +136,19 @@ public class HttpRequest {
         }
     }
 
-    public boolean hasSession() {
-        return containsHeader(COOKIE) &&
-            getHeaderValue(COOKIE).contains(JSESSIONID);
+    public String getHeaderValue(final String headerName) {
+        return headers.get(headerName);
+    }
+
+    public String getQueryValue(final String queryKey) {
+        return queryParams.getQueryValue(queryKey);
+    }
+
+    public String getHttpMethod() {
+        return getHeaderValue(HTTP_METHOD);
+    }
+
+    public String getHttpVersion() {
+        return getHeaderValue(HTTP_VERSION);
     }
 }

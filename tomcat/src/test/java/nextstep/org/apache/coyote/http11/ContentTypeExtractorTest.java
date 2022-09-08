@@ -3,9 +3,9 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.ContentTypeExtractor;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.processor.ContentTypeExtractor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

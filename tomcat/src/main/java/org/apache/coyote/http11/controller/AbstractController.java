@@ -1,7 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
-public abstract class Controller {
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
+public abstract class AbstractController implements Controller {
+
+    @Override
     public final HttpResponse doService(HttpRequest request) {
         if (request.getHttpMethod() == HttpMethod.GET) {
             return doGet(request);

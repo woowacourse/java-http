@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.processor;
 
 import java.util.Optional;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class ContentTypeExtractor {
 

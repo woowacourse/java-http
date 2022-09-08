@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 

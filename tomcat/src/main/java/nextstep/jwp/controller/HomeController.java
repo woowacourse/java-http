@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.Controller;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public class HomeController extends Controller {
+public class HomeController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {

@@ -1,7 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.session;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionManager {
 

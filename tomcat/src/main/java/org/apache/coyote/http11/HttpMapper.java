@@ -9,14 +9,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class HttpMapper {
 
     public static HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
-        boolean isAuthorized = true;
-        if (httpRequest.containsUri("/login")) {
-            isAuthorized = new LoginInterceptor().handle(httpRequest);
-        }
-        if (!isAuthorized) {
-            return ControllerAdvice.handleUnauthorized();
-        }
-
         final String requestUri = httpRequest.getRequestLine();
         final Controller controller = ControllerMapper.findController(requestUri);
         return controller.getResponse(httpRequest);

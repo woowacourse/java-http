@@ -33,4 +33,11 @@ public class HttpCookie {
     public boolean isExistJSESSIONID() {
         return cookies.containsKey("JSESSIONID");
     }
+
+    public String getJSESSIONID() {
+        if (cookies.containsKey("JSESSIONID")) {
+            return cookies.get("JSESSIONID");
+        }
+        return "";
+    }
 }

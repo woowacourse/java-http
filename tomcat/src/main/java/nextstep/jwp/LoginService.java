@@ -10,17 +10,13 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public void validateAccount(String account, String password) {
-        User existedUser = findUser(account, password);
-        log.info(existedUser.toString());
-    }
-
-    private User findUser(String account, String password) {
+    public User login(String account, String password) {
         User existedUser = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(LoginFailureException::new);
         if (!existedUser.checkPassword(password)) {
             throw new LoginFailureException();
         }
+        log.info("로그인 성공! 아이디: " + account);
         return existedUser;
     }
 }

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.controller;
 
 import java.io.IOException;
-import org.apache.coyote.http11.ControllerAdvice;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.UserService;

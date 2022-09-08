@@ -29,10 +29,6 @@ public class HttpHeaders {
         return header.get(key);
     }
 
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
     @Override
     public String toString() {
         return "HttpHeaders{" +

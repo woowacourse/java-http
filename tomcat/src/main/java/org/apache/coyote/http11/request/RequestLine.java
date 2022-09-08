@@ -28,10 +28,6 @@ public class RequestLine {
         return path;
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
     @Override
     public String toString() {
         return "RequestLine{" +

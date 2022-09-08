@@ -23,8 +23,10 @@ public class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.info("RootController -> request : {}, response : {} ", request, response);
+        log.info("GET ###### request : {}, response : {} ######", request, response);
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        log.info("POST ##### request : {}, response : {} ######", request, response);
+    }
 }

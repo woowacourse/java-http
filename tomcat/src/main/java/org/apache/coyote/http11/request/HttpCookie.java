@@ -50,7 +50,6 @@ public class HttpCookie {
         for (var entry : values.entrySet()) {
             sb.append(entry.getKey()).append("=").append(entry.getValue());
         }
-        log.info("getResponse : {}", sb);
         return sb.toString();
     }
 
@@ -61,11 +60,6 @@ public class HttpCookie {
 
     public boolean isEmpty() {
         return values.isEmpty();
-    }
-
-    public Map<String, String> getValues() {
-        log.info("GET VALUES : {}", values);
-        return values;
     }
 
     @Override

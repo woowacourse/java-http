@@ -15,20 +15,8 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public int getHttpCode() {
-        return httpStatus.getCode();
-    }
-
-    public String getHttpMessage() {
-        return httpStatus.getMessage();
-    }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
     public String getResponse() {
-        return String.format("%s %d %s\r\n", DEFAULT_PROTOCOL_VERSION, httpStatus.getCode(), httpStatus.getMessage());
+        return String.format("%s %d %s\r\n", protocolVersion, httpStatus.getCode(), httpStatus.getMessage());
     }
 
 }

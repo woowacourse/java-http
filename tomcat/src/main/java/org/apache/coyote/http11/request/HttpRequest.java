@@ -26,24 +26,12 @@ public class HttpRequest {
         return sessionManager.findSession(session);
     }
 
-    public boolean hasCookie() {
-        return !cookie.isEmpty();
-    }
-
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
-    }
-
-    public HttpCookie getCookie() {
-        return cookie;
     }
 
     public String getRequestBody() {

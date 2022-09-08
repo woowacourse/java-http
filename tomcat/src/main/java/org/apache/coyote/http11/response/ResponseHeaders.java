@@ -15,9 +15,6 @@ public class ResponseHeaders {
         Map<String, String> mp = new LinkedHashMap<>();
         mp.put("Content-Type", ContentType.from(request.getPath()));
         mp.put("Content-Length", String.valueOf(resource.getBytes().length));
-        if (request.hasCookie()) {
-            mp.putIfAbsent("Set-Cookie", request.getCookie().getResponse());
-        }
         return new ResponseHeaders(mp);
     }
 

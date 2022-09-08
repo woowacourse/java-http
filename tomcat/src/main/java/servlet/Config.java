@@ -7,6 +7,7 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.controller.WelcomeController;
 import nextstep.jwp.controller.exception.ExceptionHandler;
+import nextstep.jwp.controller.exception.MethodNotAllowedHandler;
 import nextstep.jwp.controller.exception.NotFoundHandler;
 import nextstep.jwp.controller.exception.UnauthorizedHandler;
 import nextstep.jwp.service.UserService;
@@ -19,11 +20,12 @@ public class Config {
 
     private final List<Controller> controllers =
             List.of(new ResourceController(), new WelcomeController(),
-            new LoginController(userService), new RegisterController(userService));
+                    new LoginController(userService), new RegisterController(userService));
     private final List<ExceptionHandler> exceptionHandlers =
-            List.of(new NotFoundHandler(), new UnauthorizedHandler());
+            List.of(new NotFoundHandler(), new UnauthorizedHandler(), new MethodNotAllowedHandler());
 
-    private Config() {}
+    private Config() {
+    }
 
     public static Config get() {
         return CONFIG;

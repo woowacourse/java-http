@@ -12,3 +12,7 @@
   - `http://localhost:8080/register` 으로 접속하면 회원가입 페이지(`register.html`)를 보여준다.
 - 로그인에 성공하면 HTTP Reponse의 헤더에 `Set-Cookie`가 존재한다.
 - 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 `JSESSIONID` 값이 저장된다.
+
+## 스레드 구현 요구사항
+- Executors로 Thread Pool 적용
+- 동시성 컬렉션 사용하기

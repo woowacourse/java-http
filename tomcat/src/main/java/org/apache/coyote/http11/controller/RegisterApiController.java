@@ -12,11 +12,11 @@ import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
-import org.apache.coyote.http11.session.Cookie;
-import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
 public class RegisterApiController extends AbstractController {
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
@@ -35,28 +35,22 @@ public class RegisterApiController extends AbstractController {
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestBody requestBody = httpRequest.getRequestBody();
-
         try {
             Map<String, Object> parameters = requestBody.getParameters();
             String account = (String) parameters.get("account");
             String password = (String) parameters.get("password");
             String email = (String) parameters.get("email");
+
             User user = new User(account, password, email);
+
             InMemoryUserRepository.save(user);
-            setSession(httpRequest, user);
+            SESSION_MANAGER.setUserSession(httpResponse, user);
         } catch (Exception e) {
+            // TODO: 2022/09/10 controllerAdvice에서 잡도록 변경
             httpResponse.sendError();
             return;
         }
 
-        httpResponse.found("/index.html")
-                .setCookie(new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())));
-    }
-
-    private void setSession(HttpRequest httpRequest, User user) {
-        SessionManager sessionManager = new SessionManager();
-        Session session = httpRequest.getSession();
-        session.setAttribute("user", user);
-        sessionManager.add(session);
+        httpResponse.found("/index.html");
     }
 }

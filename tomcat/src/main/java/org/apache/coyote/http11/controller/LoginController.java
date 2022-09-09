@@ -12,7 +12,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
-import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String USER = "user";
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -44,27 +43,19 @@ public class LoginController extends AbstractController {
         }
 
         log.info("로그인 성공! 아이디: " + existedUser.getAccount());
-        setSession(httpRequest, existedUser);
+        SESSION_MANAGER.setUserSession(httpResponse, existedUser);
 
-        httpResponse.found("/index.html")
-                .setCookie(new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())));
+        httpResponse.found("/index.html");
     }
 
     private Optional<User> findUser(String account) {
         return InMemoryUserRepository.findByAccount(account);
     }
 
-    private void setSession(HttpRequest httpRequest, User user) {
-        SessionManager sessionManager = new SessionManager();
-        Session session = httpRequest.getSession();
-        session.setAttribute(USER, user);
-        sessionManager.add(session);
-    }
-
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        Session session = httpRequest.getSession();
-        if (session.getAttribute(USER) != null) {
+        Session session = SESSION_MANAGER.getSession(httpRequest);
+        if (session != null && session.getUserAttribute() != null) {
             httpResponse.found("/index.html");
             return;
         }

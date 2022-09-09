@@ -2,13 +2,11 @@ package org.apache.coyote.http11.session;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Cookie {
 
     private static final String JSESSIONID = "JSESSIONID";
-
     private final Map<String, Object> cookies;
 
     public Cookie(Map<String, Object> cookies) {
@@ -34,16 +32,12 @@ public class Cookie {
         }
     }
 
-    public static Cookie fromJSessionId(UUID uuid) {
-        return new Cookie(Map.of(JSESSIONID, uuid));
+    public static Cookie fromJSessionId(String jSessionId) {
+        return new Cookie(Map.of(JSESSIONID, jSessionId));
     }
 
-    public boolean hasJSessionId() {
-        return cookies.containsKey(JSESSIONID);
-    }
-
-    public String getSessionKey() {
-        return (String) cookies.get(JSESSIONID);
+    public Object getJSessionId() {
+        return cookies.get(JSESSIONID);
     }
 
     @Override

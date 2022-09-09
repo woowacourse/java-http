@@ -43,6 +43,10 @@ public class Headers {
         headers.put("Set-Cookie", cookie);
     }
 
+    public String getCookie() {
+        return (String) headers.get("Cookie");
+    }
+
     public Optional<Object> getHeader(String key) {
         return Optional.ofNullable(headers.get(key));
     }

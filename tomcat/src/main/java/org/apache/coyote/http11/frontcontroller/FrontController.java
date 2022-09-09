@@ -14,7 +14,7 @@ public class FrontController {
 
     private static final List<RequestMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
 
-    public void doDispatch(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public void doService(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
             Controller controller = getController(httpRequest);
             controller.service(httpRequest, httpResponse);
@@ -31,4 +31,31 @@ public class FrontController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 요청이 아닙니다."));
     }
+
+//    private void setSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+//        String cookieValue = httpRequest.getCookieValue();
+//        Cookie cookie = Cookie.of(cookieValue);
+//        Manager sessionManager = new SessionManager();
+//
+//        if (!cookie.hasJSessionId()) {
+//            UUID uuid = UUID.randomUUID();
+//            httpResponse.setCookie(Cookie.fromJSessionId(uuid));
+//            Session session = new Session(uuid.toString());
+//            sessionManager.add(session);
+//            httpRequest.setSession(session);
+//            return;
+//        }
+//        Session session = getSession(cookie, sessionManager);
+//        httpRequest.setSession(session);
+//    }
+//
+//    private Session getSession(Cookie cookie, Manager sessionManager) throws IOException {
+//        Session session = sessionManager.findSession(cookie.getSessionKey());
+//
+//        if (session == null) {
+//            session = new Session(cookie.getSessionKey());
+//            sessionManager.add(session);
+//        }
+//        return session;
+//    }
 }

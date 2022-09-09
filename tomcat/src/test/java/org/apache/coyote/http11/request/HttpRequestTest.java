@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -32,7 +33,7 @@ class HttpRequestTest {
 
         // then
         assertAll(
-                () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertTrue(httpRequest.getRequestLine().isGet()),
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getPath()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getParams()).isEmpty(),
                 () -> assertThat(httpRequest.getRequestLine().getProtocolVersion()).isEqualTo("HTTP/1.1"),

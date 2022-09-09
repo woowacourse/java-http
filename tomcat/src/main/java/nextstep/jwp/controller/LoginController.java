@@ -3,7 +3,10 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.dto.LoginRequest;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.QueryStringConverter;
+import nextstep.jwp.http.Request;
+import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
 import nextstep.jwp.support.View;
 import org.apache.catalina.Session;
@@ -28,7 +31,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Response execute(final Request request) {
+    public void service(final Request request, final Response response) {
         final LoginRequest loginRequest = convert(request.getContent());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
         if (wrappedUser.isPresent()) {
@@ -36,11 +39,19 @@ public class LoginController implements Controller {
             if (user.isSamePassword(loginRequest.getPassword())) {
                 log.debug(user.toString());
                 final Session session = makeSession(user);
-                final Headers headers = makeHeaders(session);
-                return makeResponse(headers);
+                final HttpCookie responseCookie = makeCookie(session);
+                response.header(HttpHeader.SET_COOKIE, responseCookie.parse())
+                        .header(HttpHeader.LOCATION, View.INDEX.getValue())
+                        .httpStatus(HttpStatus.FOUND);
+                return;
             }
         }
         throw new UnauthorizedException();
+    }
+
+    private LoginRequest convert(final String queryString) {
+        final Map<String, String> paramMapping = QueryStringConverter.convert(queryString);
+        return LoginRequest.of(paramMapping);
     }
 
     private Session makeSession(final User user) {
@@ -51,21 +62,9 @@ public class LoginController implements Controller {
         return session;
     }
 
-    private Headers makeHeaders(final Session session) {
-        final Headers headers = new Headers();
+    private HttpCookie makeCookie(final Session session) {
         final HttpCookie responseCookie = HttpCookie.create();
         responseCookie.put(COOKIE_SESSION_KEY, session.getId());
-        headers.put(HttpHeader.SET_COOKIE, responseCookie.parse());
-        return headers;
-    }
-
-    private Response makeResponse(final Headers headers) {
-        headers.put(HttpHeader.LOCATION, View.INDEX.getValue());
-        return new Response(headers).httpStatus(HttpStatus.FOUND);
-    }
-
-    private LoginRequest convert(final String queryString) {
-        final Map<String, String> paramMapping = QueryStringConverter.convert(queryString);
-        return LoginRequest.of(paramMapping);
+        return responseCookie;
     }
 }

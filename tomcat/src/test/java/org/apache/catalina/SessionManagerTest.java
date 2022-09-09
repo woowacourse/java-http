@@ -1,10 +1,10 @@
 package org.apache.catalina;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -12,12 +12,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SessionManagerTest {
 
+    final SessionManager sessionManager = SessionManager.get();
+    String sessionId = null;
+
+    @AfterEach
+    void setup() {
+        if(sessionId != null) {
+            final Session session = sessionManager.findSession(sessionId);
+            sessionManager.remove(session);
+        }
+    }
+
     @Test
     void 세션을_추가할_수_있다() {
         // given
-        final String sessionId = "sessionId";
+        sessionId = "sessionId";
         final Session session = new Session(sessionId);
-        final SessionManager sessionManager = SessionManager.get();
 
         // when
         sessionManager.add(session);
@@ -29,9 +39,8 @@ class SessionManagerTest {
     @Test
     void 세션을_삭제할_수_있다() {
         // given
-        final String sessionId = "sessionId";
+        sessionId = "sessionId";
         final Session session = new Session(sessionId);
-        final SessionManager sessionManager = SessionManager.get();
         sessionManager.add(session);
 
         // when
@@ -57,7 +66,7 @@ class SessionManagerTest {
         assertThat(sessionManager.size()).isEqualTo(expected);
     }
 
-    private Future<?> executeThreads(final SessionManager sessionManager, final ExecutorService executorService, final int count) {
-        return executorService.submit(() -> sessionManager.add(new Session("key" + count)));
+    private void executeThreads(final SessionManager sessionManager, final ExecutorService executorService, final int count) {
+        executorService.submit(() -> sessionManager.add(new Session("key" + count)));
     }
 }

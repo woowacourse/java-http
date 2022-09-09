@@ -24,16 +24,16 @@ class RegisterControllerTest {
                 "email=yoo77hyeon@gmail.com",
                 "password=password");
         final Request request = new Request(requestInfo, new Headers(), body);
+        final Response response = new Response();
 
-        final Headers headers = new Headers();
-        headers.put(LOCATION, "/index.html");
-        final Response expected = new Response(headers).httpStatus(FOUND);
+        final Response expected = new Response().header(LOCATION, "/index.html")
+                .httpStatus(FOUND);
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
+        assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
@@ -46,16 +46,16 @@ class RegisterControllerTest {
                 "email=yoo77hyeon@gmail.com",
                 "password=1234");
         final Request request = new Request(requestInfo, new Headers(), body);
+        final Response response = new Response();
 
-        final Headers headers = new Headers();
-        headers.put(LOCATION, "/register");
-        final Response expected = new Response(headers).httpStatus(FOUND);
+        final Response expected = new Response().header(LOCATION, "/register")
+                .httpStatus(FOUND);
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
+        assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 }

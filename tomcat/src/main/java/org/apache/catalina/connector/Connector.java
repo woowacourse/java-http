@@ -27,12 +27,6 @@ public class Connector implements Runnable {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int acceptCount, final ExecutorService executorService) {
-        this.serverSocket = createServerSocket(DEFAULT_PORT, acceptCount);
-        this.executorService = executorService;
-        this.stopped = false;
-    }
-
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = Executors.newFixedThreadPool(checkMaxThreads(maxThreads));
@@ -75,9 +69,11 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        final Thread thread = Thread.currentThread();
+        final ThreadGroup threadGroup = thread.getThreadGroup();
+        log.info("connect host: {}, port: {}, ThreadCount: {}, ThreadName: {}", connection.getInetAddress(), connection.getPort(), threadGroup.activeCount(), thread.getName());
         var processor = new Http11Processor(connection, new ControllerMapping());
-        executorService.execute(processor);
+        executorService.submit(processor);
     }
 
     public void stop() {

@@ -99,6 +99,7 @@ class Http11ProcessorTest {
 
     private String readContent(final String path) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(path);
+        assert resource != null;
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

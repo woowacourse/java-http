@@ -22,7 +22,7 @@ class LoginInterceptorTest {
         final Request request = GET_요청(new Headers(), "/index");
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, new MockOutputStream());
+        final boolean actual = loginInterceptor.preHandle(request, new Response(), new MockOutputStream());
 
         // then
         assertThat(actual).isTrue();
@@ -34,7 +34,7 @@ class LoginInterceptorTest {
         final Request request = GET_요청(new Headers(), "/login");
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, new MockOutputStream());
+        final boolean actual = loginInterceptor.preHandle(request, new Response(), new MockOutputStream());
 
         // then
         assertThat(actual).isTrue();
@@ -50,7 +50,7 @@ class LoginInterceptorTest {
         final OutputStream outputStream = new MockOutputStream();
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, outputStream);
+        final boolean actual = loginInterceptor.preHandle(request, new Response(), outputStream);
         // then
         assertAll(
                 () -> assertThat(actual).isFalse(),

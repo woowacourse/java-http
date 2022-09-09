@@ -5,15 +5,15 @@ import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.http.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.http.HttpMethod.GET;
 import static org.apache.http.HttpMethod.POST;
 
 public class ControllerMapping {
 
-    private final Map<RequestInfo, Controller> mapping = new HashMap<>();
+    private final Map<RequestInfo, Controller> mapping = new ConcurrentHashMap<>();
 
     public ControllerMapping() {
         mapping.put(new RequestInfo(GET, "/"), new GreetingController());

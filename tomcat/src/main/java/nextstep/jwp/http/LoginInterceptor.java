@@ -17,11 +17,11 @@ public class LoginInterceptor {
         this.includeUris = includeUris;
     }
 
-    public boolean preHandle(final Request request, final OutputStream outputStream) {
+    public boolean preHandle(final Request request, final Response response, final OutputStream outputStream) {
         if (isUriNotMatch(request) || isSessionAlreadyExist(request)) {
             return true;
         }
-        makeRedirect(outputStream);
+        makeRedirect(response, outputStream);
         return false;
     }
 
@@ -41,10 +41,9 @@ public class LoginInterceptor {
         return sessionManager.findSession(jsessionid);
     }
 
-    private void makeRedirect(final OutputStream outputStream) {
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.LOCATION, View.INDEX.getValue());
-        final Response response = new Response(headers).httpStatus(HttpStatus.FOUND);
+    private void makeRedirect(final Response response, final OutputStream outputStream) {
+        response.header(HttpHeader.LOCATION, View.INDEX.getValue())
+                .httpStatus(HttpStatus.FOUND);
         ResponseFlusher.flush(outputStream, response);
     }
 }

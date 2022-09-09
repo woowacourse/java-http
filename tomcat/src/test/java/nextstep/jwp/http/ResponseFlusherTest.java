@@ -13,9 +13,8 @@ class ResponseFlusherTest {
     @Test
     void Response에_해당하는_내용이_OutputStream에_write된다() {
         // given
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.LOCATION, "/index.html");
-        final Response response = new Response(headers).httpStatus(HttpStatus.FOUND);
+        final Response response = new Response().header(HttpHeader.LOCATION, "/index.html")
+                .httpStatus(HttpStatus.FOUND);
 
         final OutputStream outputStream = new MockOutputStream();
 
@@ -25,6 +24,6 @@ class ResponseFlusherTest {
         ResponseFlusher.flush(outputStream, response);
 
         // then
-        assertThat(outputStream.toString()).isEqualTo(expected);
+        assertThat(outputStream).hasToString(expected);
     }
 }

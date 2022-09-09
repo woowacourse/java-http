@@ -12,12 +12,8 @@ public class Response {
 
     private HttpVersion httpVersion = DEFAULT_HTTP_VERSION;
     private HttpStatus httpStatus = DEFAULT_HTTP_STATUS;
-    private final Headers headers;
+    private final Headers headers = new Headers();
     private String content = DEFAULT_CONTENT;
-
-    public Response(final Headers headers) {
-        this.headers = headers;
-    }
 
     public Response httpVersion(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
@@ -29,10 +25,19 @@ public class Response {
         return this;
     }
 
+    public Response header(final HttpHeader key, final String value) {
+        headers.put(key, value);
+        return this;
+    }
+
     public Response content(final String content) {
         this.content = content;
         this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
         return this;
+    }
+
+    public Headers getHeaders() {
+        return headers;
     }
 
     public String parse() {

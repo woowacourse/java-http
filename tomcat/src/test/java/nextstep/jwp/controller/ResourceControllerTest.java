@@ -22,17 +22,17 @@ class ResourceControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/index.html");
         final Request request = new Request(requestInfo, new Headers(), null);
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue());
-        headers.put(HttpHeader.CONTENT_LENGTH, "5564");
-        final Response expected = new Response(headers);
+        final Response response = new Response();
+
+        final Response expected = new Response().header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue())
+                .header(HttpHeader.CONTENT_LENGTH, "5564");
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
         assertAll(
-                () -> assertThat(actual).usingRecursiveComparison()
+                () -> assertThat(response).usingRecursiveComparison()
                         .ignoringFields("content")
                         .isEqualTo(expected)
         );
@@ -45,7 +45,7 @@ class ResourceControllerTest {
         final Request request = new Request(requestInfo, new Headers(), null);
 
         // when, then
-        assertThatThrownBy(() -> controller.execute(request))
+        assertThatThrownBy(() -> controller.service(request, new Response()))
                 .isInstanceOf(CustomNotFoundException.class);
     }
 }

@@ -20,16 +20,16 @@ class GreetingControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/");
         final Request request = new Request(requestInfo, new Headers(), null);
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.CONTENT_LENGTH, "12");
-        headers.put(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue());
-        final Response expected = new Response(headers);
+        final Response response = new Response();
+
+        final Response expected = new Response().header(HttpHeader.CONTENT_LENGTH, "12")
+                .header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue());
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
+        assertThat(response).usingRecursiveComparison()
                 .ignoringFields("content")
                 .isEqualTo(expected);
     }

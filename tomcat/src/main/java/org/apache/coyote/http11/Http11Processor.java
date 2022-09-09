@@ -33,6 +33,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
+        final Thread thread = Thread.currentThread();
+        log.info("ThreadName: {}", thread.getName());
         process(connection);
     }
 
@@ -43,38 +45,39 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final Request request = RequestParser.parse(bufferedReader);
-            if (loginInterceptor.preHandle(request, outputStream)) {
-                process(request, outputStream);
+            final Response response = new Response();
+
+            if (loginInterceptor.preHandle(request, response, outputStream)) {
+                process(request, response, outputStream);
             }
         } catch (Exception e) {
             log.info(e.getMessage());
         }
     }
 
-    private void process(final Request request, final OutputStream outputStream) {
+    private void process(final Request request, final Response response, final OutputStream outputStream) {
         try {
             final Controller controller = controllerMapping.getController(request.getRequestInfo());
-            ResponseFlusher.flush(outputStream, controller.execute(request));
+            controller.service(request, response);
         } catch (UnauthorizedException e) {
-            ResponseFlusher.flush(outputStream, makeRedirectResponse(View.UNAUTHORIZED.getValue()));
+            makeRedirectResponse(View.UNAUTHORIZED.getValue(), response);
         } catch (CustomNotFoundException e) {
-            ResponseFlusher.flush(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, View.NOT_FOUND));
+            makeErrorResponse(HttpStatus.BAD_REQUEST, View.NOT_FOUND, response);
         } catch (Exception e) {
-            ResponseFlusher.flush(outputStream, makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR));
+            makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR, response);
         }
+        ResponseFlusher.flush(outputStream, response);
     }
 
-    private Response makeRedirectResponse(final String redirectUri) {
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.LOCATION, redirectUri);
-        return new Response(headers).httpStatus(HttpStatus.FOUND);
+    private void makeRedirectResponse(final String redirectUri, final Response response) {
+        response.header(HttpHeader.LOCATION, redirectUri)
+                .httpStatus(HttpStatus.FOUND);
     }
 
-    private Response makeErrorResponse(final HttpStatus httpStatus, final View errorView) {
+    private void makeErrorResponse(final HttpStatus httpStatus, final View errorView, final Response response) {
         final Resource resource = new Resource(errorView.getValue());
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue());
-        return new Response(headers).httpStatus(httpStatus)
+        response.header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
+                .httpStatus(httpStatus)
                 .content(resource.read());
     }
 }

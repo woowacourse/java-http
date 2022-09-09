@@ -22,16 +22,17 @@ class LoginControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/login", null);
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.LOCATION, "/index.html");
-        headers.put(HttpHeader.SET_COOKIE, "JSESSIONID=1");
-        final Response expected = new Response(headers).httpStatus(HttpStatus.FOUND);
+        final Response response = new Response();
+
+        final Response expected = new Response().header(HttpHeader.LOCATION, "/index.html")
+                .header(HttpHeader.SET_COOKIE, "JSESSIONID=1")
+                .httpStatus(HttpStatus.FOUND);
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
+        assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
@@ -42,7 +43,7 @@ class LoginControllerTest {
         final Request request = new Request(requestInfo, new Headers(), "account=gonggong&password=password");
 
         // when, then
-        assertThatThrownBy(() -> controller.execute(request))
+        assertThatThrownBy(() -> controller.service(request, new Response()))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -53,7 +54,7 @@ class LoginControllerTest {
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password1");
 
         // when, then
-        assertThatThrownBy(() -> controller.execute(request))
+        assertThatThrownBy(() -> controller.service(request, new Response()))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -62,17 +63,17 @@ class LoginControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/login", null);
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
+        final Response response = new Response();
 
-        final Headers headers = new Headers();
-        headers.put(HttpHeader.LOCATION, "/index.html");
-        headers.put(HttpHeader.SET_COOKIE, "JSESSIONID=1");
-        final Response expected = new Response(headers).httpStatus(HttpStatus.FOUND);
+        final Response expected = new Response().header(HttpHeader.LOCATION, "/index.html")
+                .header(HttpHeader.SET_COOKIE, "JSESSIONID=1")
+                .httpStatus(HttpStatus.FOUND);
 
         // when
-        final Response actual = controller.execute(request);
+        controller.service(request, response);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
+        assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 }

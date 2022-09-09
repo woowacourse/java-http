@@ -30,7 +30,9 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        if (session != null) {
+            SESSIONS.remove(session.getId());
+        }
     }
 
     public int size() {

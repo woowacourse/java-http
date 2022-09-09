@@ -5,5 +5,5 @@ import nextstep.jwp.http.Response;
 
 public interface Controller {
 
-    Response execute(Request request);
+    void service(Request request, Response response);
 }

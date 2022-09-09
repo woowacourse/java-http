@@ -34,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));) {
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             final var httpRequest = HttpRequest.read(bufferedReader);
             final var httpResponse = getHttpResponse(httpRequest);
@@ -56,6 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.notFound();
         }
 
-        return requestMapping.get().getController().process(httpRequest);
+        RequestMapping controller = requestMapping.get();
+        return controller.process(httpRequest);
     }
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public enum RequestMapping {
 
@@ -26,7 +27,7 @@ public enum RequestMapping {
                 .findFirst();
     }
 
-    public Controller getController() {
-        return controller;
+    public HttpResponse process(HttpRequest httpRequest) throws Exception {
+        return controller.process(httpRequest);
     }
 }

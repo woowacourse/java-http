@@ -27,7 +27,7 @@ public class HttpCookie {
         final HashMap<String, String> values = new HashMap<>();
         for (final String param : params) {
             final String[] splitParam = param.split(COOKIE_DELIMITER);
-            final String paramInfo = splitParam[PARAM_INFO_INDEX];
+            final String paramInfo = splitParam[PARAM_INFO_INDEX].trim();
             final String paramValue = splitParam[PARAM_VALUE_INDEX];
             values.put(paramInfo, paramValue);
         }

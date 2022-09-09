@@ -17,6 +17,10 @@ import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
+    private static final String USER_KEY = "user";
+
     @Override
     public HttpResponse service(HttpRequest request) {
         RequestLine requestLine = request.getRequestLine();
@@ -35,8 +39,8 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doPost(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
-        String account = requestBody.getValue("account");
-        String password = requestBody.getValue("password");
+        String account = requestBody.getValue(ACCOUNT_KEY);
+        String password = requestBody.getValue(PASSWORD_KEY);
 
         return InMemoryUserRepository.findByAccount(account)
                 .map(user -> getLoginResponse(user, password))
@@ -47,7 +51,7 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             UUID uuid = UUID.randomUUID();
             Session session = new Session(uuid.toString());
-            session.setAttribute("user", user);
+            session.setAttribute(USER_KEY, user);
             SessionManager.add(session);
 
             return HttpResponse.redirect()

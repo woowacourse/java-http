@@ -18,6 +18,11 @@ public class HttpRequestFactory {
     private static final String REQUEST_HEADER_DELIMITER = ": ";
     private static final int REQUEST_HEADER_FIELD_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
+    private static final String CONTENT_LENGTH_KEY = "Content-Length";
+    private static final String REQUEST_BODY_DELIMITER = "&";
+    private static final String REQUEST_BODY_PARAMETER_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     public static HttpRequest create(BufferedReader reader) {
         try {
@@ -53,7 +58,7 @@ public class HttpRequestFactory {
 
     private static RequestBody parseToRequestBody(BufferedReader reader, RequestHeaders requestHeaders)
             throws IOException {
-        Optional<String> contentLengthValue = requestHeaders.getHeaderValue("Content-Length");
+        Optional<String> contentLengthValue = requestHeaders.getHeaderValue(CONTENT_LENGTH_KEY);
         if (contentLengthValue.isEmpty()) {
             return new RequestBody(Map.of());
         }
@@ -70,7 +75,8 @@ public class HttpRequestFactory {
     }
 
     private static Map<String, String> parseToMap(String requestBodyValue) {
-        return Arrays.stream(requestBodyValue.split("&"))
-                .collect(Collectors.toMap(value -> value.split("=")[0], value -> value.split("=")[1]));
+        return Arrays.stream(requestBodyValue.split(REQUEST_BODY_DELIMITER))
+                .collect(Collectors.toMap(value -> value.split(REQUEST_BODY_PARAMETER_DELIMITER)[KEY_INDEX],
+                        value -> value.split(REQUEST_BODY_PARAMETER_DELIMITER)[VALUE_INDEX]));
     }
 }

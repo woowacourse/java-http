@@ -10,7 +10,11 @@ public abstract class AbstractController implements Controller {
         // http method 분기문
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */
+        return null;
+    }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected HttpResponse doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */
+        return null;
+    }
 }

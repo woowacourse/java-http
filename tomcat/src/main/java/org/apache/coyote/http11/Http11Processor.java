@@ -9,6 +9,7 @@ import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.ResourceURI;
 import org.apache.coyote.http11.util.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final ResourceURI NOT_FOUND_PAGE = ResourceURI.from("/404.html");
 
     private final Socket connection;
     private final RequestMapping requestMapping;

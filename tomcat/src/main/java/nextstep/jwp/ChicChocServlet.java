@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.DuplicateAccountException;
+import nextstep.jwp.exception.InvalidSessionException;
 import nextstep.jwp.exception.NotFoundHandlerException;
 import nextstep.jwp.exception.NotFoundResourceException;
 import nextstep.jwp.presentation.controller.LoginPageRequestHandler;
@@ -17,13 +18,15 @@ import nextstep.jwp.presentation.filter.LoginFilter;
 import org.apache.catalina.servlet.AbstractServlet;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.Location;
 import org.apache.coyote.http11.util.HttpStatus;
 
 public class ChicChocServlet extends AbstractServlet {
 
-    private static final String UNAUTHORIZED_PAGE = "401";
-    private static final String NOT_FOUND_PAGE = "404";
-    private static final String INTERNAL_SERVER_ERROR_PAGE = "500";
+    private static final Location UNAUTHORIZED_PAGE = Location.from("/401.html");
+    private static final Location NOT_FOUND_PAGE = Location.from("/404.html");
+    private static final Location INTERNAL_SERVER_ERROR_PAGE = Location.from("/500.html");
+    private static final Location BAD_REQUEST_PAGE = Location.from("/400.html");
 
     private final ViewResolver viewResolver;
     private final LoginFilter loginFilter;
@@ -67,6 +70,9 @@ public class ChicChocServlet extends AbstractServlet {
             response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(NOT_FOUND_PAGE);
         } catch (DuplicateAccountException e) {
+            response.setStatusCode(HttpStatus.FOUND);
+            response.setLocation(BAD_REQUEST_PAGE);
+        } catch (InvalidSessionException e) {
             response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(INTERNAL_SERVER_ERROR_PAGE);
         }

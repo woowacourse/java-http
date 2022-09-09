@@ -1,7 +1,7 @@
 package nextstep.jwp.presentation.controller;
 
 import java.util.Optional;
-import org.apache.coyote.http11.http.SessionManager;
+import nextstep.jwp.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.RequestLine;

@@ -1,9 +1,11 @@
-package org.apache.coyote.http11.http;
+package nextstep.jwp;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.exception.InvalidSessionException;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.http.Session;
 
 public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
@@ -22,7 +24,7 @@ public class SessionManager implements Manager {
                 .filter(it -> it.getKey().equalsIgnoreCase(id))
                 .map(Entry::getValue)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("유효하지 않은 Session 아이디입니다."));
+                .orElseThrow(InvalidSessionException::new);
     }
 
     @Override

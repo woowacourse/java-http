@@ -2,6 +2,7 @@ package nextstep.jwp.presentation.controller;
 
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.util.HttpStatus;
 import org.apache.coyote.http11.util.PathParser;
 
 public class ResourceRequestHandler implements RequestHandler {
@@ -10,6 +11,7 @@ public class ResourceRequestHandler implements RequestHandler {
         final var requestURI = request.getRequestURI();
         final var rowRequestURI = requestURI.getRequestURI();
         PathParser.checkPath(rowRequestURI);
+        response.setStatusCode(HttpStatus.OK);
         return rowRequestURI;
     }
 

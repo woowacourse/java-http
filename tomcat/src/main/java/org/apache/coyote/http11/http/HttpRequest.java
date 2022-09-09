@@ -79,10 +79,6 @@ public class HttpRequest {
         return jSessionId.map(Session::new).orElseGet(null);
     }
 
-    public boolean hasCookieByJSessionId() {
-        return cookies.hasCookieByJSessionId();
-    }
-
     public Optional<String> getJSessionId() {
         return cookies.getJSessionId();
     }
@@ -93,5 +89,9 @@ public class HttpRequest {
 
     public RequestURI getRequestURI() {
         return requestLine.getRequestURI();
+    }
+
+    public boolean hasCookieByJSessionId() {
+        return cookies.hasCookieByJSessionId();
     }
 }

@@ -31,14 +31,6 @@ public class Cookies {
         return new Cookies(cookies);
     }
 
-    public String parseToHttpMessage() {
-        return "Set-Cookie: " + ID + "=" + cookies.entrySet().stream()
-                .filter(it -> it.getKey().equalsIgnoreCase(ID))
-                .map(Entry::getValue)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("JSessionID가 존재하지 않습니다."));
-    }
-
     public boolean hasCookieByJSessionId() {
         return cookies.entrySet().stream()
                 .anyMatch(it -> it.getKey().equalsIgnoreCase(ID));
@@ -49,5 +41,14 @@ public class Cookies {
                 .filter(it -> it.getKey().equalsIgnoreCase(ID))
                 .map(Entry::getValue)
                 .findFirst();
+    }
+
+    public String getCookieLine() {
+        return "Set-Cookie: " + ID + "=" + cookies.entrySet()
+                .stream()
+                .filter(it -> it.getKey().equalsIgnoreCase(ID))
+                .map(Entry::getValue)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("JSESSIONID 에 해당하는 쿠키가 존재하지 않습니다."));
     }
 }

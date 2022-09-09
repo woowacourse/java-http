@@ -13,16 +13,8 @@ public class Session {
         values = new HashMap<>();
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
-
     public void setAttribute(final String id, final Object value) {
         values.put(id, value);
-    }
-
-    public void removeAttribute(final String id) {
-        values.remove(id);
     }
 
     public String getId() {

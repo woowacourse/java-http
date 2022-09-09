@@ -6,6 +6,7 @@ import nextstep.jwp.http.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ControllerMapping {
@@ -14,7 +15,7 @@ public class ControllerMapping {
 
     public ControllerMapping() {
         mapping.put("/", new GreetingController());
-        mapping.put("/login", new LoginController(new SessionIdGenerator()));
+        mapping.put("/login", new LoginController(() -> UUID.randomUUID().toString()));
         mapping.put("/register", new RegisterController());
     }
 

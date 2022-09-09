@@ -41,7 +41,7 @@ public class RegisterHandler extends AbstractHandler {
 
     @Override
     protected String otherMethodResponse(final HttpRequest httpRequest) {
-        return createResponse(StatusCode.UNAUTHORIZED, HttpResponse.getResponseBody(CLIENT_ERROR_404, getClass()))
+        return createResponse(StatusCode.NOT_FOUND, HttpResponse.getResponseBody(CLIENT_ERROR_404, getClass()))
                 .getResponse();
     }
 

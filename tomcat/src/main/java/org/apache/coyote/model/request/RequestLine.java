@@ -37,7 +37,7 @@ public class RequestLine {
 
     public static RequestLine of(final String readLine) {
         final List<String> requests = Arrays.asList(Objects.requireNonNull(readLine).split(" "));
-        final var method = Method.of(requests.get(METHOD_INDEX));
+        final var method = Method.valueOf(requests.get(METHOD_INDEX));
         final var httpParams = getParam(requests.get(PARAM_INDEX));
         final var path = calculatePath(requests.get(PARAM_INDEX));
         final var contentType = ContentType.getType(getExtension(path));

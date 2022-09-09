@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.view.View;
@@ -38,8 +39,14 @@ public class RegisterController extends AbstractController {
         String password = request.getRequestBody().getValue("password");
         String email = request.getRequestBody().getValue("email");
 
-        InMemoryUserRepository.save(new User(account, password, email));
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            InMemoryUserRepository.save(new User(account, password, email));
+            return HttpResponse.redirect()
+                    .addLocation(View.INDEX.getViewFileName());
+        }
+
         return HttpResponse.redirect()
-                .addLocation(View.INDEX.getViewFileName());
+                .addLocation(View.UNAUTHORIZED.getViewFileName());
     }
 }

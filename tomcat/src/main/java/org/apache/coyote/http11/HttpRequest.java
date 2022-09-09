@@ -6,11 +6,8 @@ import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
-    private static final String COOKIE = "Cookie";
-
     private RequestLine requestLine;
     private Headers headers;
-    private HttpCookie httpCookie;
     private String body;
     private RequestParameters requestParameters;
 
@@ -18,7 +15,6 @@ public class HttpRequest {
         String[] splitStartLine = startLine.split(" ");
         this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
         this.headers = new Headers();
-        this.httpCookie = new HttpCookie();
         this.body = "";
         this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
@@ -33,10 +29,6 @@ public class HttpRequest {
     }
 
     public void addHeader(final String key, final String value) {
-        if (COOKIE.equals(key)) {
-            httpCookie.addCookie(value.trim());
-        }
-
         headers.addHeader(key, value.trim());
     }
 
@@ -67,8 +59,8 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        if (httpCookie.hasJSessionId()) {
-            String jSessionId = httpCookie.getJSessionId();
+        if (headers.hasJSessionId()) {
+            String jSessionId = headers.getJSessionId();
             return SessionManager.findSession(jSessionId);
         }
 

@@ -26,6 +26,6 @@ public enum HandlerMapper {
                 .filter(value -> path.equals(value.path))
                 .findAny()
                 .map(value -> value.handler)
-                .orElseGet(() -> DefaultHandler.getINSTANCE());
+                .orElseGet(DefaultHandler::getINSTANCE);
     }
 }

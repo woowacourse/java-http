@@ -1,5 +1,6 @@
-package org.apache.http;
+package org.apache.coyote;
 
+import org.apache.coyote.HttpMethod;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

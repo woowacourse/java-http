@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.http.Servlet;
+import org.apache.catalina.core.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

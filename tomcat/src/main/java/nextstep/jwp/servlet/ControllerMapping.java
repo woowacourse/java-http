@@ -2,7 +2,7 @@ package nextstep.jwp.servlet;
 
 import nextstep.jwp.controller.*;
 import nextstep.jwp.exception.CustomNotFoundException;
-import org.apache.http.RequestInfo;
+import org.apache.coyote.support.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.Map;

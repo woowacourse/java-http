@@ -2,7 +2,7 @@ package nextstep.jwp.support;
 
 import nextstep.jwp.exception.FileAccessException;
 import nextstep.jwp.exception.CustomNotFoundException;
-import org.apache.http.HttpMime;
+import org.apache.coyote.HttpMime;
 
 import java.io.File;
 import java.io.IOException;

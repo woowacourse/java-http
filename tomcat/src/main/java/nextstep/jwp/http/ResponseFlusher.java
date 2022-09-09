@@ -1,6 +1,6 @@
 package nextstep.jwp.http;
 
-import org.apache.http.Response;
+import org.apache.coyote.support.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

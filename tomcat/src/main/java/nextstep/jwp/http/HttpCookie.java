@@ -11,6 +11,8 @@ public class HttpCookie {
 
     private static final String VALUE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private static final int KEY_VALUE_SIZE = 2;
 
     private final Map<String, String> value;
@@ -33,14 +35,14 @@ public class HttpCookie {
 
     private static void putKeyValue(final String raw, final Map<String, String> value) {
         for (String keyValue : raw.split(VALUE_DELIMITER)) {
-            final String[] split = keyValue.split(KEY_VALUE_DELIMITER);
-            validateKeyValueSize(split);
-            value.put(split[0], split[1]);
+            final String[] seperatedKeyValue = keyValue.split(KEY_VALUE_DELIMITER);
+            validateKeyValueSize(seperatedKeyValue);
+            value.put(seperatedKeyValue[KEY_INDEX], seperatedKeyValue[VALUE_INDEX]);
         }
     }
 
-    private static void validateKeyValueSize(final String[] split) {
-        if (split.length != KEY_VALUE_SIZE) {
+    private static void validateKeyValueSize(final String[] seperatedKeyValue) {
+        if (seperatedKeyValue.length != KEY_VALUE_SIZE) {
             throw new InvalidCookieException();
         }
     }

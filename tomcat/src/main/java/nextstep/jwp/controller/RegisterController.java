@@ -3,13 +3,13 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotEnoughConditionException;
 import nextstep.jwp.http.QueryStringConverter;
-import org.apache.http.Request;
-import org.apache.http.Response;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
 import nextstep.jwp.model.User;
 import nextstep.jwp.support.Resource;
 import nextstep.jwp.support.View;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpStatus;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
 
 import java.util.Map;
 

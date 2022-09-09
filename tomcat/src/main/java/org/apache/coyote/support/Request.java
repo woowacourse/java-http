@@ -1,4 +1,6 @@
-package org.apache.http;
+package org.apache.coyote.support;
+
+import org.apache.coyote.Headers;
 
 public class Request {
 

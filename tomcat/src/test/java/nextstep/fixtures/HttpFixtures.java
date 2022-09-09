@@ -1,8 +1,8 @@
 package nextstep.fixtures;
 
-import org.apache.http.HttpMethod;
-import org.apache.http.HttpMime;
-import org.apache.http.HttpStatus;
+import org.apache.coyote.HttpMethod;
+import org.apache.coyote.HttpMime;
+import org.apache.coyote.HttpStatus;
 
 public class HttpFixtures {
 

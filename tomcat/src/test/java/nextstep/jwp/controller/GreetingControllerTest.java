@@ -1,11 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMime;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestInfo;
+import org.apache.coyote.Headers;
 import nextstep.jwp.http.MockOutputStream;
-import org.apache.http.*;
+import org.apache.coyote.support.Response;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.http.HttpMethod.GET;
+import static org.apache.coyote.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GreetingControllerTest {

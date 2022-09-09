@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.coyote;
 
 public enum HttpVersion {
 

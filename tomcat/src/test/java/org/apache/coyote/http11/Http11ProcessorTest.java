@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.servlet.DispatcherServlet;
-import org.apache.http.HttpStatus;
+import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -12,8 +12,8 @@ import java.nio.file.Files;
 
 import static nextstep.fixtures.HttpFixtures.요청을_생성한다;
 import static nextstep.fixtures.HttpFixtures.응답을_생성한다;
-import static org.apache.http.HttpMethod.GET;
-import static org.apache.http.HttpMime.*;
+import static org.apache.coyote.HttpMethod.GET;
+import static org.apache.coyote.HttpMime.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {

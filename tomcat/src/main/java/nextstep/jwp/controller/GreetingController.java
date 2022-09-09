@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.Request;
-import org.apache.http.Response;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpMime;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMime;
 
 public class GreetingController extends AbstractController {
 

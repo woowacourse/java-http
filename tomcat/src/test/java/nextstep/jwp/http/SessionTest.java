@@ -1,7 +1,5 @@
-package org.apache.http;
+package nextstep.jwp.http;
 
-import nextstep.jwp.http.Session;
-import nextstep.jwp.http.SessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

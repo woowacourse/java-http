@@ -1,4 +1,9 @@
-package org.apache.http;
+package org.apache.coyote.support;
+
+import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpVersion;
+import org.apache.coyote.HttpStatus;
 
 import java.io.OutputStream;
 

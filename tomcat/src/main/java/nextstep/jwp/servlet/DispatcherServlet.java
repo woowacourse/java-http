@@ -4,12 +4,16 @@ package nextstep.jwp.servlet;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.ResponseFlusher;
 import nextstep.jwp.interceptor.Interceptor;
 import nextstep.jwp.interceptor.LoginInterceptor;
-import nextstep.jwp.http.ResponseFlusher;
 import nextstep.jwp.support.Resource;
 import nextstep.jwp.support.View;
-import org.apache.http.*;
+import org.apache.catalina.core.Servlet;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
 
 import java.util.ArrayList;
 import java.util.List;

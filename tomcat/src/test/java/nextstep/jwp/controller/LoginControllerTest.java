@@ -3,17 +3,17 @@ package nextstep.jwp.controller;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.Session;
 import nextstep.jwp.http.SessionManager;
-import org.apache.http.Headers;
+import org.apache.coyote.Headers;
 import nextstep.jwp.http.MockOutputStream;
-import org.apache.http.Request;
-import org.apache.http.RequestInfo;
-import org.apache.http.Response;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpStatus;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestInfo;
+import org.apache.coyote.support.Response;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.http.HttpMethod.POST;
+import static org.apache.coyote.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

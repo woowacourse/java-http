@@ -1,7 +1,12 @@
 package nextstep.jwp.http;
 
 import nextstep.jwp.interceptor.LoginInterceptor;
-import org.apache.http.*;
+import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMethod;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestInfo;
+import org.apache.coyote.support.Response;
 import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;

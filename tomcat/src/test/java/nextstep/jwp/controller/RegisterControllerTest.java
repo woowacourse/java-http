@@ -1,15 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.Headers;
+import org.apache.coyote.Headers;
 import nextstep.jwp.http.MockOutputStream;
-import org.apache.http.Request;
-import org.apache.http.RequestInfo;
-import org.apache.http.Response;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestInfo;
+import org.apache.coyote.support.Response;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.http.HttpHeader.LOCATION;
-import static org.apache.http.HttpMethod.POST;
-import static org.apache.http.HttpStatus.FOUND;
+import static org.apache.coyote.HttpHeader.LOCATION;
+import static org.apache.coyote.HttpMethod.POST;
+import static org.apache.coyote.HttpStatus.FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RegisterControllerTest {

@@ -5,7 +5,11 @@ import nextstep.jwp.http.ResponseFlusher;
 import nextstep.jwp.http.Session;
 import nextstep.jwp.http.SessionManager;
 import nextstep.jwp.support.View;
-import org.apache.http.*;
+import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
 
 import java.util.List;
 

@@ -1,6 +1,9 @@
-package org.apache.http;
+package org.apache.coyote;
 
 import nextstep.jwp.support.View;
+import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMime;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

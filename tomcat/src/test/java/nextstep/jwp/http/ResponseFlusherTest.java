@@ -1,8 +1,8 @@
 package nextstep.jwp.http;
 
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpStatus;
-import org.apache.http.Response;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
+import org.apache.coyote.support.Response;
 import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;

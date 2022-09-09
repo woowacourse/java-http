@@ -1,6 +1,11 @@
 package nextstep.jwp.http;
 
-import org.apache.http.*;
+import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMime;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestInfo;
+import org.apache.coyote.support.RequestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -8,7 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 
 import static nextstep.fixtures.HttpFixtures.요청을_생성한다;
-import static org.apache.http.HttpMethod.GET;
+import static org.apache.coyote.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestParserTest {

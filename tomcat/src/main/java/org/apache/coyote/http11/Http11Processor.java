@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import org.apache.http.RequestParser;
+import org.apache.coyote.support.RequestParser;
 import org.apache.coyote.Processor;
-import org.apache.http.Request;
-import org.apache.http.Response;
-import org.apache.http.Servlet;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
+import org.apache.catalina.core.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

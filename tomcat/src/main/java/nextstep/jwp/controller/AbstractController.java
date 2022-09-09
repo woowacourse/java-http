@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.view.ExceptionPage.NOT_FOUND;
+
 import java.util.List;
 import nextstep.jwp.view.ExceptionPage;
 import org.apache.catalina.servlet.Controller;
@@ -47,7 +49,7 @@ public abstract class AbstractController implements Controller {
     protected abstract void doPost(HttpRequest request, HttpResponse response);
 
     protected void methodNotFound(HttpResponse response) {
-        response.status(HttpStatus.NOT_FOUND).setViewResource("/404.html");
+        response.status(HttpStatus.NOT_FOUND).setViewResource(NOT_FOUND.getUri());
     }
 
     private void handleException(HttpException exception, HttpResponse response) {

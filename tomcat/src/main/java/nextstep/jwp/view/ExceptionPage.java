@@ -25,4 +25,8 @@ public enum ExceptionPage {
                 .findAny()
                 .orElse(INTERNAL_SERVER_ERROR.uri);
     }
+
+    public String getUri() {
+        return uri;
+    }
 }

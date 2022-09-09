@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -35,19 +34,29 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doPost(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
-        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
-        if (user.isPresent()) {
-            if (user.get().checkPassword(requestBody.getValue("password"))) {
-                UUID uuid = UUID.randomUUID();
-                Session session = new Session(uuid.toString());
-                session.setAttribute("user", user.get());
-                SessionManager.add(session);
+        String account = requestBody.getValue("account");
+        String password = requestBody.getValue("password");
 
-                return HttpResponse.redirect()
-                        .addLocation(View.INDEX.getViewFileName())
-                        .addCookie(Cookies.ofJSessionId(session.getId()));
-            }
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> getLoginResponse(user, password))
+                .orElse(getUnauthorizedResponse());
+    }
+
+    private HttpResponse getLoginResponse(User user, String password) {
+        if (user.checkPassword(password)) {
+            UUID uuid = UUID.randomUUID();
+            Session session = new Session(uuid.toString());
+            session.setAttribute("user", user);
+            SessionManager.add(session);
+
+            return HttpResponse.redirect()
+                    .addLocation(View.INDEX.getViewFileName())
+                    .addCookie(Cookies.ofJSessionId(session.getId()));
         }
+        return getUnauthorizedResponse();
+    }
+
+    private HttpResponse getUnauthorizedResponse() {
         return HttpResponse.redirect()
                 .addLocation(View.UNAUTHORIZED.getViewFileName());
     }

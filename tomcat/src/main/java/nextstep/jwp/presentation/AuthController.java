@@ -59,11 +59,11 @@ public class AuthController extends AbstractController {
 
     private HttpResponse postLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
-            final Session session = SessionManager.findSession(httpRequest.getJSESSIONID());
-            if (session == null) {
+            final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
+            if (session.isEmpty()) {
                 return requireAuthByRequestInfo(httpRequest, httpResponse);
             }
-            if (session.hasAttribute("user")) {
+            if (session.get().hasAttribute("user")) {
                 return redirect(httpRequest);
             }
         }
@@ -96,8 +96,8 @@ public class AuthController extends AbstractController {
 
     private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
-            final Session session = SessionManager.findSession(httpRequest.getJSESSIONID());
-            if (session.hasAttribute("user")) {
+            final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
+            if (session.isPresent() && session.get().hasAttribute("user")) {
                 return redirect(httpRequest);
             }
         }

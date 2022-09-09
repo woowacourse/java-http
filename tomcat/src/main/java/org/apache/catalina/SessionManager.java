@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SessionManager {
 
@@ -16,7 +17,7 @@ public class SessionManager {
         return session;
     }
 
-    public static Session findSession(final String jsessionid) {
-        return SESSIONS.get(jsessionid);
+    public static Optional<Session> findSession(final String jsessionid) {
+        return Optional.ofNullable(SESSIONS.get(jsessionid));
     }
 }

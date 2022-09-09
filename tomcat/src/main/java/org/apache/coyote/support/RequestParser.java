@@ -1,8 +1,8 @@
 package org.apache.coyote.support;
 
 import nextstep.jwp.exception.FileAccessException;
-import org.apache.coyote.HttpHeader;
 import org.apache.coyote.Headers;
+import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpMethod;
 
 import java.io.BufferedReader;
@@ -10,6 +10,15 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class RequestParser {
+
+    private static final String BLANK_DELIMITER = " ";
+    private static final String KEY_VALUE_DELIMITER = ": ";
+    private static final String URI_DELIMITER = "\\?";
+    private static final int URL_INDEX = 1;
+    private static final int URI_INDEX = 0;
+    private static final int QUERY_PARAMETER_INDEX = 1;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private RequestParser() {
     }
@@ -25,34 +34,32 @@ public class RequestParser {
         final String line = readLine(bufferedReader);
         final Optional<HttpMethod> httpMethod = HttpMethod.find(line);
         if (httpMethod.isPresent()) {
-            final String uri = getUri(line);
-            final String queryString = getQueryString(line);
-            return new RequestInfo(httpMethod.get(), uri, queryString);
+            return new RequestInfo(httpMethod.get(), getUri(line), getQueryString(line));
         }
         throw new RuntimeException("요청 정보를 찾을 수 없음");
     }
 
     private static String getUri(final String line) {
-        final String url = line.split(" ")[1];
-        return url.split("\\?")[0];
+        final String url = line.split(BLANK_DELIMITER)[URL_INDEX];
+        return url.split(URI_DELIMITER)[URI_INDEX];
     }
 
     private static String getQueryString(final String line) {
-        final String url = line.split(" ")[1];
-        final String[] split = url.split("\\?");
+        final String url = line.split(BLANK_DELIMITER)[URL_INDEX];
+        final String[] split = url.split(URI_DELIMITER);
         if (split.length <= 1) {
-            return null;
+            return "";
         }
-        return split[1];
+        return split[QUERY_PARAMETER_INDEX];
     }
 
     private static Headers extractHeaders(final BufferedReader bufferedReader) {
         final Headers headers = new Headers();
         String line;
         while (isNotEnd(line = readLine(bufferedReader))) {
-            final String[] headerKeyValue = line.split(": ");
-            final Optional<HttpHeader> httpHeader = HttpHeader.find(headerKeyValue[0]);
-            httpHeader.ifPresent(header -> headers.put(header, headerKeyValue[1].trim()));
+            final String[] headerKeyValue = line.split(KEY_VALUE_DELIMITER);
+            final Optional<HttpHeader> httpHeader = HttpHeader.find(headerKeyValue[KEY_INDEX]);
+            httpHeader.ifPresent(header -> headers.put(header, headerKeyValue[VALUE_INDEX].trim()));
         }
         return headers;
     }

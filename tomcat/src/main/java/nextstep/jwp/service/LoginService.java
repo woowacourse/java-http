@@ -27,10 +27,10 @@ public class LoginService {
     }
 
     private static void validRequestBody(Map<String, String> requestBody) {
-        if (requestBody.containsKey("account") || requestBody.get("account").isBlank()) {
+        if (!requestBody.containsKey("account") || requestBody.get("account").isBlank()) {
             throw new NoSuchElementException("account를 입력해주세요");
         }
-        if (requestBody.containsKey("password") || requestBody.get("password").isBlank()) {
+        if (!requestBody.containsKey("password") || requestBody.get("password").isBlank()) {
             throw new NoSuchElementException("password를 입력해주세요");
         }
     }

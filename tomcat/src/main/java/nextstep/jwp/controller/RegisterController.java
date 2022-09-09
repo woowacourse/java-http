@@ -1,9 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.RegisterService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -21,14 +19,7 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
-        Map<String, String> requestBody = httpRequest.getBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        String email = requestBody.get("email");
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-
+        RegisterService.register(httpRequest.getBody());
         return HttpResponse.ok("/index.html");
     }
 }

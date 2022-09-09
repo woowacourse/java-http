@@ -12,7 +12,11 @@ public class Headers {
     }
 
     public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+        headers.put("Content-Type", contentType + ";charset=utf-8");
+    }
+
+    public void setContentLength(int contentLength) {
+        headers.put("Content-Length", String.valueOf(contentLength));
     }
 
     public void setCookie(String cookie) {
@@ -21,7 +25,7 @@ public class Headers {
 
     public String toMessage() {
         return headers.entrySet().stream()
-                .map(entry -> String.join(entry.getKey() + ": " + entry.getValue() + " "))
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));
     }
 

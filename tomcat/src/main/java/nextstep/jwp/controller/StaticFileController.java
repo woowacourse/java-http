@@ -17,20 +17,19 @@ public class StaticFileController extends AbstractController {
         if (hasMatchedStaticFile(request.getRequestUrl())) {
             final URL resource = getClass().getClassLoader().getResource("static" + request.getRequestUrl());
             final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
+            final String body = new String(Files.readAllBytes(path));
 
             Headers headers = new Headers();
             headers.setContentType(Files.probeContentType(path));
+            headers.setContentLength(body.getBytes().length);
 
-            return new ResponseBuilder()
-                    .status(Status.OK)
+            return new ResponseBuilder().status(Status.OK)
                     .headers(headers)
-                    .body(responseBody)
+                    .body(body)
                     .build();
         }
 
-        return new ResponseBuilder()
-                .status(Status.OK)
+        return new ResponseBuilder().status(Status.NOT_FOUND)
                 .build();
     }
 

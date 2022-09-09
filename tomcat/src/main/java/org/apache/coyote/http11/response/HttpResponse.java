@@ -71,10 +71,22 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     public static class ResponseBuilder {
         private Status status;
-        private Headers headers;
-        private String body;
+        private Headers headers = new Headers();
+        private String body = "";
 
         public ResponseBuilder status(final Status status) {
             this.status = status;

@@ -1,0 +1,37 @@
+package nextstep.jwp.controller;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.Status;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class StaticFileControllerTest {
+
+    @DisplayName("index.html 파일 로딩 확인")
+    @Test
+    void getIndex() throws Exception {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Host", "localhost:8080");
+        requestHeaders.put("Connection", "keep-alive");
+        HttpRequest httpRequest = new HttpRequest("GET",
+                "/index.html",
+                Map.of(),
+                "HTTP/1.1",
+                requestHeaders,
+                null,
+                "",
+                null
+        );
+
+        StaticFileController staticFileController = new StaticFileController();
+
+        HttpResponse httpResponse = staticFileController.doGet(httpRequest, new HttpResponse());
+
+        assertThat(httpResponse.getStatus()).isEqualTo(Status.OK);
+    }
+}

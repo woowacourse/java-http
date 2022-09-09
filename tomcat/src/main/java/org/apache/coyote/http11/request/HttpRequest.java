@@ -25,9 +25,9 @@ public class HttpRequest {
     private final String requestBody;
     private final Session session;
 
-    private HttpRequest(final String method, final String requestUrl, final Map<String, String> requestParams,
-                        final String protocolVersion, final Map<String, String> headers, final HttpCookie httpCookie,
-                        final String requestBody, final Session session) {
+    public HttpRequest(final String method, final String requestUrl, final Map<String, String> requestParams,
+                       final String protocolVersion, final Map<String, String> headers, final HttpCookie httpCookie,
+                       final String requestBody, final Session session) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.requestParams = requestParams;

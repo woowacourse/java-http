@@ -1,13 +1,10 @@
-package http;
+package http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import http.exception.InvalidHttpRequestFormatException;
-import http.request.HttpMethod;
-import http.request.HttpRequestStartLine;
-import java.net.URI;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestStartLineTest {
@@ -23,7 +20,8 @@ class HttpRequestStartLineTest {
         // then
         assertAll(
                 () -> assertThat(httpRequestStartLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(httpRequestStartLine.getUri()).isEqualTo(URI.create("/index.html")),
+                () -> assertThat(httpRequestStartLine.getUrl()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequestStartLine.getQueryParams()).isEqualTo(QueryParams.parse("")),
                 () -> assertThat(httpRequestStartLine.getProtocol()).isEqualTo("HTTP/1.1")
         );
     }

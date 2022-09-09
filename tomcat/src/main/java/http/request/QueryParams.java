@@ -3,6 +3,7 @@ package http.request;
 import http.exception.QueryStringFormatException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class QueryParams {
 
@@ -43,5 +44,22 @@ public class QueryParams {
 
     public boolean exists() {
         return params.size() > 0;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final QueryParams that = (QueryParams) o;
+        return Objects.equals(params, that.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(params);
     }
 }

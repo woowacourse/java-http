@@ -8,7 +8,6 @@ import http.session.SessionManager;
 import http.support.ResourcesUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,30 +15,23 @@ public class HttpRequest {
 
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
-    private final HttpMethod httpMethod;
-    private final String url;
-    private final QueryParams queryParams;
+    private final HttpRequestStartLine httpRequestStartLine;
     private final HttpHeaders headers;
     private final String body;
 
-    private HttpRequest(final HttpMethod httpMethod, final String url, final QueryParams queryParams,
-                        final HttpHeaders headers, final String body) {
-        this.httpMethod = httpMethod;
-        this.url = url;
-        this.queryParams = queryParams;
+    private HttpRequest(final HttpRequestStartLine httpRequestStartLine, final HttpHeaders headers, final String body) {
+        this.httpRequestStartLine = httpRequestStartLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
         HttpRequestStartLine startLine = HttpRequestStartLine.parse(bufferedReader.readLine());
-        URI uri = startLine.getUri();
-        QueryParams queryParams = QueryParams.parse(uri.getQuery());
         HttpHeaders httpHeaders = HttpHeaders.parse(readHeaders(bufferedReader));
         int contentLength = Integer.parseInt(httpHeaders.getOrDefault("Content-Length", "0"));
         String body = readBody(bufferedReader, contentLength);
 
-        return new HttpRequest(startLine.getHttpMethod(), uri.getPath(), queryParams, httpHeaders, body);
+        return new HttpRequest(startLine, httpHeaders, body);
     }
 
     private static List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -58,7 +50,7 @@ public class HttpRequest {
     }
 
     public ContentType getAcceptContentType() {
-        return ContentType.fromExtension(ResourcesUtil.parseExtension(url));
+        return ContentType.fromExtension(ResourcesUtil.parseExtension(httpRequestStartLine.getUrl()));
     }
 
     public HttpCookie getCookie() {
@@ -76,15 +68,15 @@ public class HttpRequest {
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return httpRequestStartLine.getHttpMethod();
     }
 
     public String getUrl() {
-        return url;
+        return httpRequestStartLine.getUrl();
     }
 
     public QueryParams getQueryParams() {
-        return queryParams;
+        return httpRequestStartLine.getQueryParams();
     }
 
     public HttpHeaders getHeaders() {

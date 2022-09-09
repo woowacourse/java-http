@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import http.session.Session;
+import http.session.SessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -11,8 +13,6 @@ import java.util.UUID;
 import nextstep.jwp.config.NextStepConfig;
 import nextstep.jwp.model.User;
 import org.apache.catalina.config.Configuration;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

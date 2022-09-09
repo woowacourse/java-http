@@ -6,10 +6,10 @@ import http.HttpMethod;
 import http.HttpRequest;
 import http.HttpResponse;
 import http.HttpStatus;
+import http.support.ResourcesUtil;
 import java.io.IOException;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import org.apache.catalina.handler.RequestHandler;
-import org.apache.catalina.support.ResourcesUtil;
 
 abstract class AbstractController implements RequestHandler {
 

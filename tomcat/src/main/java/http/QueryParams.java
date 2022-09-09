@@ -1,8 +1,8 @@
 package http;
 
+import http.exception.QueryStringFormatException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.exception.QueryStringFormatException;
 
 public class QueryParams {
 

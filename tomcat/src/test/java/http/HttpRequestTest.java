@@ -3,12 +3,12 @@ package http;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import http.session.Session;
+import http.session.SessionManager;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

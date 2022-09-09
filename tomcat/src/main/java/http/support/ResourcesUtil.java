@@ -1,12 +1,12 @@
-package org.apache.catalina.support;
+package http.support;
 
+import http.exception.ResourceNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.catalina.exception.ResourceNotFoundException;
 
 public class ResourcesUtil {
 

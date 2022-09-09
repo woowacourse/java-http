@@ -1,8 +1,8 @@
 package http;
 
+import http.exception.InvalidHttpRequestFormatException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.exception.InvalidHttpRequestFormatException;
 
 public class HttpCookie {
 

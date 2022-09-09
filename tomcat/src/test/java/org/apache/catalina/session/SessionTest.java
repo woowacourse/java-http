@@ -2,6 +2,7 @@ package org.apache.catalina.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import http.session.Session;
 import org.junit.jupiter.api.Test;
 
 class SessionTest {

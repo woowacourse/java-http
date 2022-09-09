@@ -1,4 +1,4 @@
-package org.apache.catalina.exception;
+package http.exception;
 
 public class InvalidHttpMethodException extends RuntimeException {
 

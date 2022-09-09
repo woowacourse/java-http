@@ -1,4 +1,4 @@
-package org.apache.catalina.session;
+package http.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

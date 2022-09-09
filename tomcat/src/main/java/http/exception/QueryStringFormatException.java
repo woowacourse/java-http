@@ -1,4 +1,4 @@
-package org.apache.catalina.exception;
+package http.exception;
 
 public class QueryStringFormatException extends RuntimeException {
 

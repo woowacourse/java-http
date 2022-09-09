@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import http.HttpRequest;
 import http.HttpResponse;
+import http.session.Session;
+import http.session.SessionManager;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -12,8 +14,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.UUID;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {

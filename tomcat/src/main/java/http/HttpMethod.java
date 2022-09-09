@@ -1,7 +1,7 @@
 package http;
 
+import http.exception.InvalidHttpMethodException;
 import java.util.Arrays;
-import org.apache.catalina.exception.InvalidHttpMethodException;
 
 public enum HttpMethod {
 

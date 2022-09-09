@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.catalina.exception.InvalidHttpRequestFormatException;
+import http.exception.InvalidHttpRequestFormatException;
 import org.junit.jupiter.api.Test;
 
 class HttpHeaderTest {

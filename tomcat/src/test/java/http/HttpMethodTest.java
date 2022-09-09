@@ -2,7 +2,7 @@ package http;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.catalina.exception.InvalidHttpMethodException;
+import http.exception.InvalidHttpMethodException;
 import org.junit.jupiter.api.Test;
 
 class HttpMethodTest {

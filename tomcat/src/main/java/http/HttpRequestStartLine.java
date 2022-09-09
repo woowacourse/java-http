@@ -1,7 +1,7 @@
 package http;
 
+import http.exception.InvalidHttpRequestFormatException;
 import java.net.URI;
-import org.apache.catalina.exception.InvalidHttpRequestFormatException;
 
 public class HttpRequestStartLine {
 

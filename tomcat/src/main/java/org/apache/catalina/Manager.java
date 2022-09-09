@@ -1,7 +1,7 @@
 package org.apache.catalina;
 
+import http.session.Session;
 import java.io.IOException;
-import org.apache.catalina.session.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager
@@ -29,7 +29,8 @@ public interface Manager {
     void add(Session session);
 
     /**
-     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise return
+     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise
+     * return
      * <code>null</code>.
      *
      * @param id The session id for the session to be returned

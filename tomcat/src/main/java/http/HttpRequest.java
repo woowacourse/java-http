@@ -1,13 +1,13 @@
 package http;
 
+import http.session.Session;
+import http.session.SessionManager;
+import http.support.ResourcesUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.apache.catalina.support.ResourcesUtil;
 
 public class HttpRequest {
 

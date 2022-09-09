@@ -4,11 +4,11 @@ import http.HttpHeaders;
 import http.HttpRequest;
 import http.HttpResponse;
 import http.HttpStatus;
+import http.session.Session;
+import http.session.SessionManager;
 import java.util.UUID;
 import nextstep.jwp.application.AuthService;
 import nextstep.jwp.model.User;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 
 public class LoginController extends AbstractController {
 

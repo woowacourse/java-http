@@ -23,7 +23,7 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.value.equals(method))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Á¸ÀçÇÏÁö ¾Ê´Â http methodÀÔ´Ï´Ù."));
+                .orElseThrow(() -> new IllegalArgumentException("ì¡´ìž¬í•˜ì§€ ì•ŠëŠ” http methodìž…ë‹ˆë‹¤."));
     }
 
     public String getValue() {

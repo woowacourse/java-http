@@ -42,7 +42,7 @@ public class LoginController implements Controller {
 
     private HttpResponse login(User user) throws IOException {
         HttpResponse response = HttpResponse.found("/index.html");
-        response.addCookie(SessionStorage.getSession(user.getId()));
+        response.addCookie(SessionStorage.getSession(user.getAccount()));
         return response;
     }
 }

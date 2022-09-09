@@ -26,7 +26,7 @@ public class RegisterController implements Controller {
         String password = requestBody.get("password");
         String email = requestBody.get("email");
 
-        User user = new User(InMemoryUserRepository.getDatabaseSize(), account, password, email);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         return HttpResponse.ok("/index.html");

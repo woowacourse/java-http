@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionStorage {
-
     private static final Map<String, String> sessions = new ConcurrentHashMap<>();
 
     private static String save(String account) {

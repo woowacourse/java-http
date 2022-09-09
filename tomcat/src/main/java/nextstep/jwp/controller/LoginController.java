@@ -1,11 +1,10 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.NoSuchElementException;
 import nextstep.jwp.db.SessionStorage;
 import nextstep.jwp.model.User;
+import nextstep.jwp.service.LoginService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -30,17 +29,12 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
-        Map<String, String> requestBody = httpRequest.getBody();
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
-        if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
-            return login(user.get());
+        User user;
+        try {
+            user = LoginService.login(httpRequest.getBody());
+        } catch (NoSuchElementException | IllegalArgumentException e) {
+            return HttpResponse.unAuthorized();
         }
-
-        return HttpResponse.unAuthorized();
-    }
-
-    private HttpResponse login(User user) throws IOException {
         HttpResponse response = HttpResponse.found("/index.html");
         response.addCookie(SessionStorage.getSession(user.getAccount()));
         return response;

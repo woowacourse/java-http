@@ -44,12 +44,11 @@ class HttpRequestTest {
     }
 
     @Test
-    void Accpet_헤더가_있으면_body의_Content_Type으로_반환한다() throws IOException {
+    void 파일_확장자로_Content_Type을_반환한다() throws IOException {
         // given
         String request = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /index.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Accept: text/css",
                 "Connection: keep-alive ",
                 "");
         BufferedReader bufferedReader = new BufferedReader(

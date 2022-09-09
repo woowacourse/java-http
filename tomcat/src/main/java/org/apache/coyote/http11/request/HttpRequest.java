@@ -151,4 +151,12 @@ public class HttpRequest {
     public Session getSession() {
         return session;
     }
+
+    public boolean isGet() {
+        return method.equals("GET");
+    }
+
+    public boolean isPost() {
+        return method.equals("POST");
+    }
 }

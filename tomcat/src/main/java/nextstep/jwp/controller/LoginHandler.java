@@ -30,12 +30,20 @@ public class LoginHandler extends AbstractHandler {
 
     @Override
     protected String getMethodResponse(final HttpRequest httpRequest) {
-        if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
+        if (hasCookie(httpRequest) && checkCookie(httpRequest)) {
             return createResponse(StatusCode.OK, getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
         }
         return createResponse(StatusCode.OK, getResponseBody(LOGIN_HTML, getClass()))
                 .getResponse();
+    }
+
+    private boolean hasCookie(HttpRequest httpRequest) {
+        return httpRequest.getCookieKey() != null;
+    }
+
+    private boolean checkCookie(HttpRequest httpRequest) {
+        return SessionManager.findSession(httpRequest.getCookieKey()).isPresent();
     }
 
     @Override

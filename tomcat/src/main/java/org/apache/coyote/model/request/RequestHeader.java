@@ -40,6 +40,6 @@ public class RequestHeader {
     }
 
     public String getCookieKey() {
-        return requestHeader.get(COOKIE);
+        return requestHeader.getOrDefault(COOKIE, null);
     }
 }

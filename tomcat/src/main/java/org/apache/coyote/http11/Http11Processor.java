@@ -15,15 +15,17 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.RegisterService;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.http11.util.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String HTML_MIME_TYPE = "text/html";
     private static final String RESOURCES_PREFIX = "static";
     private static final String INDEX_REDIRECT_PAGE = "/index.html";
     private static final String ERROR_REDIRECT_PAGE = "/401.html";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -56,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(HttpRequest httpRequest) throws URISyntaxException, IOException {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
         String httpUrl = httpRequest.getHttpUrl();
+        HttpCookie httpCookie = new HttpCookie();
 
         if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/favicon.ico")) {
             return "";
@@ -63,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/")) {
             String responseBody = "Hello world!";
-            return toResponse(responseBody, HTML_MIME_TYPE);
+            return toResponse(HttpStatus.OK, httpCookie, FileType.HTML, responseBody);
         }
 
         if (HttpMethod.POST.equals(httpMethod) && httpUrl.startsWith("/login")) {
@@ -72,9 +75,11 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 loginService.login(requestBody);
-                return toRedirectResponse(INDEX_REDIRECT_PAGE);
+                String identifier = UUIDGenerator.generate();
+                httpCookie.addCookie(JSESSIONID, identifier);
+                return toRedirectResponse(httpCookie, INDEX_REDIRECT_PAGE);
             } catch (LoginFailException e) {
-                return toRedirectResponse(ERROR_REDIRECT_PAGE);
+                return toRedirectResponse(httpCookie, ERROR_REDIRECT_PAGE);
             }
         }
 
@@ -84,9 +89,9 @@ public class Http11Processor implements Runnable, Processor {
 
             try {
                 registerService.register(requestBody);
-                return toRedirectResponse(INDEX_REDIRECT_PAGE);
+                return toRedirectResponse(httpCookie, INDEX_REDIRECT_PAGE);
             } catch (LoginFailException e) {
-                return toRedirectResponse(ERROR_REDIRECT_PAGE);
+                return toRedirectResponse(httpCookie, ERROR_REDIRECT_PAGE);
             }
         }
 
@@ -94,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
         File file = getFile(fileName);
         String responseBody = toResponseBody(file);
         FileType fileType = FileType.from(fileName);
-        return toResponse(responseBody, fileType.getMimeType());
+        return toResponse(HttpStatus.OK, httpCookie, fileType, responseBody);
     }
 
     private File getFile(String fileName) throws URISyntaxException {
@@ -117,18 +122,20 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private String toResponse(String responseBody, String mimeType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private String toResponse(HttpStatus status, HttpCookie cookie, FileType fileType, String responseBody) {
+        return new HttpResponseBuilder()
+                .status(status)
+                .cookie(cookie)
+                .mimeType(fileType.getMimeType())
+                .responseBody(responseBody)
+                .toResponse();
     }
 
-    private String toRedirectResponse(String redirectUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + redirectUrl);
+    private String toRedirectResponse(HttpCookie cookie, String redirectUrl) {
+        return new HttpResponseBuilder()
+                .status(HttpStatus.FOUND)
+                .cookie(cookie)
+                .location(redirectUrl)
+                .toRedirectResponse();
     }
 }

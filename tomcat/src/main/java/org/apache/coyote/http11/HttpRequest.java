@@ -10,12 +10,11 @@ import org.apache.coyote.http11.util.StringUtils;
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String EMPTY = "EMPTY";
 
     private HttpMethod httpMethod;
     private String httpUrl;
     private Map<String, String> queryParams;
-    private Map<String, String> headers = new HashMap<>();
+    private HttpHeaders headers = new HttpHeaders();
     private Map<String, String> requestBody = new HashMap<>();
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
@@ -35,7 +34,9 @@ public class HttpRequest {
         String line = bufferedReader.readLine();
         while (line != null && !line.isBlank()) {
             String[] header = line.split(HEADER_DELIMITER);
-            headers.put(header[0], header[1]);
+            String key = header[0];
+            String value = header[1].trim();
+            headers.add(key, value);
             line = bufferedReader.readLine();
         }
     }
@@ -56,7 +57,7 @@ public class HttpRequest {
         return httpUrl;
     }
 
-    public Map<String, String> getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 

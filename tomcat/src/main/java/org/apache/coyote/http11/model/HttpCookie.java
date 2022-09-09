@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 public class HttpCookie {
     private final Map<String, String> cookies;
 
-    public HttpCookie() {
+    private HttpCookie() {
         this.cookies = new HashMap<>();
     }
 
-    public static HttpCookie of(Map<String, String> cookies) {
+    public static HttpCookie from(Map<String, String> cookies) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.putAll(cookies);
         return httpCookie;
@@ -21,12 +21,12 @@ public class HttpCookie {
         this.cookies.putAll(cookies);
     }
 
-    public String getAttribute(String name) {
-        return cookies.get(name);
-    }
-
     public boolean containsAttribute(String name) {
         return cookies.containsKey(name);
+    }
+
+    public String getAttributeOrDefault(String name, String defaultValue) {
+        return cookies.getOrDefault(name, defaultValue);
     }
 
     public String toMessage() {
@@ -35,4 +35,3 @@ public class HttpCookie {
             .collect(Collectors.joining(";"));
     }
 }
-

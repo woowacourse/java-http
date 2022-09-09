@@ -12,17 +12,17 @@ public class HttpRequestParser {
 
     private final HttpMethod httpMethod;
     private final HttpRequestURI requestURI;
-    private final HttpHeaders httpRequestHeaders;
+    private final HttpHeader httpRequestHeader;
     private final HttpRequestBody requestBody;
     private final HttpCookie httpCookie;
 
-    private HttpRequestParser(HttpMethod httpMethod, String uri, Map<String, String> httpRequestHeaders,
-        Map<String, String> cookies, Map<String, String> bodyParams) {
+    private HttpRequestParser(HttpMethod httpMethod, HttpRequestURI requestURI, HttpHeader httpRequestHeader,
+        HttpCookie cookie, HttpRequestBody requestBody) {
         this.httpMethod = httpMethod;
-        this.requestURI = HttpRequestURI.from(uri);
-        this.httpRequestHeaders = new HttpHeaders(httpRequestHeaders);
-        this.httpCookie = HttpCookie.of(cookies);
-        this.requestBody = new HttpRequestBody(bodyParams);
+        this.requestURI = requestURI;
+        this.httpRequestHeader = httpRequestHeader;
+        this.httpCookie = cookie;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequestParser from(InputStream inputStream) throws IOException {
@@ -31,19 +31,30 @@ public class HttpRequestParser {
         String requestLine = bufferedReader.readLine();
         StringTokenizer requestTokenizer = new StringTokenizer(requestLine);
         HttpMethod httpMethod = HttpMethod.of(requestTokenizer.nextToken());
-        String uri = requestTokenizer.nextToken();
+        HttpRequestURI requestURI = HttpRequestURI.from(requestTokenizer.nextToken());
 
-        Map<String, String> httpRequestHeaders = new HashMap<>();
+        HttpHeader httpRequestHeaders = createRequestHeaders(bufferedReader);
+        HttpCookie httpCookie = createCookie(httpRequestHeaders);
+        HttpRequestBody httpRequestBody = createRequestBody(bufferedReader, httpRequestHeaders);
+
+        return new HttpRequestParser(httpMethod, requestURI, httpRequestHeaders, httpCookie, httpRequestBody);
+    }
+
+    private static HttpHeader createRequestHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> httpRequestHeader = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             StringTokenizer headerTokenizer =
                 new StringTokenizer(line.replaceAll(" ", ""), ":");
-            httpRequestHeaders.put(headerTokenizer.nextToken(), headerTokenizer.nextToken());
+            httpRequestHeader.put(headerTokenizer.nextToken(), headerTokenizer.nextToken());
             line = bufferedReader.readLine();
         }
+        return HttpHeader.from(httpRequestHeader);
+    }
 
+    private static HttpCookie createCookie(HttpHeader httpRequestHeader) {
         Map<String, String> cookies = new HashMap<>();
-        String cookie = httpRequestHeaders.getOrDefault("Cookie", "")
+        String cookie = httpRequestHeader.getAttributeOrDefault("Cookie", "")
             .replaceAll(" ", "");
         StringTokenizer cookieTokenizer = new StringTokenizer(cookie, ";");
         while (cookieTokenizer.hasMoreTokens()) {
@@ -51,9 +62,13 @@ public class HttpRequestParser {
             StringTokenizer attributeTokenizer = new StringTokenizer(attribute, "=");
             cookies.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
+        return HttpCookie.from(cookies);
+    }
 
+    private static HttpRequestBody createRequestBody(BufferedReader bufferedReader, HttpHeader httpRequestHeader) throws
+        IOException {
         Map<String, String> bodyParams = new HashMap<>();
-        int contentLength = Integer.parseInt(httpRequestHeaders.getOrDefault("Content-Length", "0"));
+        int contentLength = Integer.parseInt(httpRequestHeader.getAttributeOrDefault("Content-Length", "0"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         StringTokenizer bodyTokenizer = new StringTokenizer(new String(buffer).replaceAll("&", " "));
@@ -62,11 +77,10 @@ public class HttpRequestParser {
             StringTokenizer attributeTokenizer = new StringTokenizer(attribute, "=");
             bodyParams.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
-
-        return new HttpRequestParser(httpMethod, uri, httpRequestHeaders, cookies, bodyParams);
+        return HttpRequestBody.from(bodyParams);
     }
 
     public HttpRequest toHttpRequest() {
-        return new HttpRequest(httpMethod, requestURI, httpRequestHeaders, requestBody, httpCookie);
+        return new HttpRequest(httpMethod, requestURI, httpRequestHeader, requestBody, httpCookie);
     }
 }

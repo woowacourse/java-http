@@ -2,6 +2,7 @@ package nextstep.jwp.ui;
 
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpRequestURI;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.HttpStatusCode;
 
@@ -29,6 +30,6 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(new User(request.getBodyParam("account"),
             request.getBodyParam("password"), request.getBodyParam("email")));
 
-        return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND);
+        return redirectTo(HttpRequestURI.from("/index"), HttpStatusCode.HTTP_STATUS_FOUND);
     }
 }

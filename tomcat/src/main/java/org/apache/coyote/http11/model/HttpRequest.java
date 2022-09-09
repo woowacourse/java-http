@@ -9,23 +9,17 @@ public class HttpRequest {
 
     private final HttpMethod method;
     private final HttpRequestURI requestURI;
-    private final HttpHeaders requestHeaders;
+    private final HttpHeader requestHeaders;
     private final HttpRequestBody requestBody;
     private final HttpCookie cookie;
 
     public HttpRequest(HttpMethod httpMethod, HttpRequestURI requestURI,
-        HttpHeaders httpRequestHeaders, HttpRequestBody requestBody, HttpCookie cookie) {
+        HttpHeader httpRequestHeaders, HttpRequestBody requestBody, HttpCookie cookie) {
         this.method = httpMethod;
         this.requestURI = requestURI;
         this.requestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;
         this.cookie = cookie;
-    }
-
-    public boolean isLoginRequestWithAuthorization() {
-        return isGetRequest()
-            && requestURI.pathStartsWith("/login")
-            && cookie.containsAttribute("JSESSIONID");
     }
 
     public boolean isGetRequest() {
@@ -47,16 +41,21 @@ public class HttpRequest {
     public String getContentType() {
         String extension = requestURI.getExtension();
 
-        return ContentType.getContentType(extension).getType();
+        return ContentType.ofExtension(extension)
+            .getType();
     }
 
     public Session getSession() {
         return SessionManager.getSessionManager()
-            .findSession(cookie.getAttribute("JSESSIONID"))
+            .findSession(cookie.getAttributeOrDefault("JSESSIONID", ""))
             .orElse(new Session(String.valueOf(UUID.randomUUID())));
     }
 
-    public String getPath() {
-        return requestURI.getPath();
+    public HttpRequestURI getRequestURI() {
+        return requestURI;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

@@ -17,7 +17,7 @@ public enum ContentType {
         this.type = type;
     }
 
-    public static ContentType getContentType(String extension) {
+    public static ContentType ofExtension(String extension) {
         return Arrays.stream(values())
             .filter(contentType -> extension.equals(contentType.extension))
             .findFirst()

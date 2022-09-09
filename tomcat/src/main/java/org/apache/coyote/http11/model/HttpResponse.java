@@ -5,13 +5,13 @@ import java.util.Map;
 public class HttpResponse {
 
     private final HttpStatusCode httpStatusCode;
-    private final HttpHeaders responseHeaders;
+    private final HttpHeader responseHeaders;
     private final String responseBody;
 
     private HttpResponse(HttpStatusCode httpStatusCode, String responseBody) {
         this.httpStatusCode = httpStatusCode;
         this.responseBody = responseBody;
-        this.responseHeaders = new HttpHeaders(
+        this.responseHeaders = HttpHeader.from(
             Map.of("Content-Length", String.valueOf(responseBody.getBytes().length)));
     }
 

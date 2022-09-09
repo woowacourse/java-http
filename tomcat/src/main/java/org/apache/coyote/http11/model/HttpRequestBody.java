@@ -6,8 +6,12 @@ public class HttpRequestBody {
 
     private final Map<String, String> params;
 
-    public HttpRequestBody(Map<String, String> bodyParams) {
+    private HttpRequestBody(Map<String, String> bodyParams) {
         this.params = bodyParams;
+    }
+
+    public static HttpRequestBody from(Map<String, String> bodyParams) {
+        return new HttpRequestBody(bodyParams);
     }
 
     public String getParam(String name) {

@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.model.HttpCookie;
 import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpRequestURI;
 import org.apache.coyote.http11.model.HttpResponse;
 import org.apache.coyote.http11.model.HttpStatusCode;
 
@@ -18,8 +19,10 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     private static final LoginController controller = new LoginController();
+    private final SessionManager sessionManager;
 
     private LoginController() {
+        this.sessionManager = SessionManager.getSessionManager();
     }
 
     public static LoginController getController() {
@@ -28,20 +31,26 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
-        if (request.isLoginRequestWithAuthorization()) {
+        if (isLoginRequestWithAuthorization(request)) {
             return loginWithAuthorization(request);
         }
         return createGetResponseFrom(request);
     }
 
+    private boolean isLoginRequestWithAuthorization(HttpRequest request) {
+        HttpCookie cookie = request.getCookie();
+        return request.isGetRequest()
+            && cookie.containsAttribute("JSESSIONID");
+    }
+
     private HttpResponse loginWithAuthorization(HttpRequest request) throws IOException {
         Session session = request.getSession();
 
-        if (SessionManager.getSessionManager().containsSession(session)) {
+        if (sessionManager.containsSession(session)) {
             Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
-            HttpCookie httpCookie = HttpCookie.of(cookies);
+            HttpCookie httpCookie = HttpCookie.from(cookies);
 
-            return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
+            return redirectTo(HttpRequestURI.from("/index"), HttpStatusCode.HTTP_STATUS_FOUND)
                 .setCookie(httpCookie.toMessage());
         }
         return createGetResponseFrom(request);
@@ -52,22 +61,22 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(request.getBodyParam("account"));
 
         if (user.isEmpty()) {
-            return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
+            return redirectTo(HttpRequestURI.from("/401"), HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
         }
 
         User existingUser = user.get();
-        if (existingUser.checkPassword(request.getBodyParam("password"))) {
-            return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
+        if (!existingUser.checkPassword(request.getBodyParam("password"))) {
+            return redirectTo(HttpRequestURI.from("/401"), HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
         }
 
         Session session = request.getSession();
         session.setAttribute("user", existingUser);
-        SessionManager.getSessionManager().add(session);
+        sessionManager.add(session);
 
         Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
-        HttpCookie httpCookie = HttpCookie.of(cookies);
+        HttpCookie httpCookie = HttpCookie.from(cookies);
 
-        return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
+        return redirectTo(HttpRequestURI.from("/index"), HttpStatusCode.HTTP_STATUS_FOUND)
             .setCookie(httpCookie.toMessage());
     }
 }

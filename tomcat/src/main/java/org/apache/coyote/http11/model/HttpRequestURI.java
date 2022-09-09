@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 public class HttpRequestURI {
 
     private static final String DEFAULT_PATH = "/hello";
+    private static final String QUERY_PARAM_DELIMITER = "?";
+    private static final String EXTENSION_DELIMITER = ".";
 
     private final String path;
     private final Map<String, String> queryParams;
@@ -21,8 +23,8 @@ public class HttpRequestURI {
         String path = uri;
         Map<String, String> queryParams = new HashMap<>();
 
-        if (uri.contains("?")) {
-            int index = uri.indexOf("?");
+        if (uri.contains(QUERY_PARAM_DELIMITER)) {
+            int index = uri.indexOf(QUERY_PARAM_DELIMITER);
             path = uri.substring(0, index);
 
             String queryString = uri.substring(index + 1);
@@ -37,15 +39,11 @@ public class HttpRequestURI {
             path = DEFAULT_PATH;
         }
 
-        if (!path.contains(".")) {
+        if (!path.contains(EXTENSION_DELIMITER)) {
             path = path + ".html";
         }
 
         return new HttpRequestURI(path, queryParams);
-    }
-
-    public boolean pathStartsWith(String text) {
-        return path.startsWith(text);
     }
 
     public String getPath() {
@@ -53,6 +51,6 @@ public class HttpRequestURI {
     }
 
     public String getExtension() {
-        return StringUtils.substringAfterLast(path, ".");
+        return StringUtils.substringAfterLast(path, EXTENSION_DELIMITER);
     }
 }

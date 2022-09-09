@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
@@ -33,15 +32,13 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = HttpRequestParser.from(inputStream)
                 .toHttpRequest();
 
-            Controller controller = RequestMapping.getController(request.getPath());
+            Controller controller = RequestMapping.getController(request.getRequestURI());
             HttpResponse httpResponse = controller.service(request);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 }

@@ -13,6 +13,8 @@ import java.nio.file.Files;
 
 public class Resource {
 
+    private static final String BASE_PATH = "static";
+
     private final String target;
 
     public Resource(final String target) {
@@ -20,7 +22,7 @@ public class Resource {
     }
 
     public String read() {
-        final URL resource = getClass().getClassLoader().getResource("static" + target);
+        final URL resource = getClass().getClassLoader().getResource(BASE_PATH + target);
         validateExist(resource);
         return read(new File(getUri(resource)));
     }
@@ -41,7 +43,7 @@ public class Resource {
     }
 
     public HttpMime getContentType() {
-        final URL resource = getClass().getClassLoader().getResource("static" + target);
+        final URL resource = getClass().getClassLoader().getResource(BASE_PATH + target);
         validateExist(resource);
         final File file = new File(getUri(resource));
         return HttpMime.find(findOutContentType(file));

@@ -15,29 +15,29 @@ public class HttpCookie {
     private static final int VALUE_INDEX = 1;
     private static final int KEY_VALUE_SIZE = 2;
 
-    private final Map<String, String> value;
+    private final Map<String, String> values;
 
-    private HttpCookie(final Map<String, String> value) {
-        this.value = value;
+    private HttpCookie(final Map<String, String> values) {
+        this.values = values;
     }
 
     public static HttpCookie create() {
         return new HttpCookie(new LinkedHashMap<>());
     }
 
-    public static HttpCookie create(final String raw) {
+    public static HttpCookie create(final String rawCookie) {
         Map<String, String> value = new LinkedHashMap<>();
-        if (raw != null) {
-            putKeyValue(raw, value);
+        if (rawCookie != null) {
+            putKeyValue(rawCookie, value);
         }
         return new HttpCookie(value);
     }
 
-    private static void putKeyValue(final String raw, final Map<String, String> value) {
-        for (String keyValue : raw.split(VALUE_DELIMITER)) {
+    private static void putKeyValue(final String rawCookie, final Map<String, String> values) {
+        for (String keyValue : rawCookie.split(VALUE_DELIMITER)) {
             final String[] seperatedKeyValue = keyValue.split(KEY_VALUE_DELIMITER);
             validateKeyValueSize(seperatedKeyValue);
-            value.put(seperatedKeyValue[KEY_INDEX], seperatedKeyValue[VALUE_INDEX]);
+            values.put(seperatedKeyValue[KEY_INDEX], seperatedKeyValue[VALUE_INDEX]);
         }
     }
 
@@ -48,15 +48,15 @@ public class HttpCookie {
     }
 
     public void put(final String key, final String value) {
-        this.value.put(key, value);
+        this.values.put(key, value);
     }
 
     public String findByKey(final String key) {
-        return value.get(key);
+        return values.get(key);
     }
 
     public String parse() {
-        final List<String> collect = value.entrySet()
+        final List<String> collect = values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
                 .collect(Collectors.toList());

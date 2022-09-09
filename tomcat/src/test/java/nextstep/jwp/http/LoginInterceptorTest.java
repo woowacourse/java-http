@@ -1,9 +1,7 @@
 package nextstep.jwp.http;
 
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpMethod;
+import nextstep.jwp.interceptor.LoginInterceptor;
+import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;
@@ -22,7 +20,7 @@ class LoginInterceptorTest {
         final Request request = GET_요청(new Headers(), "/index");
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, new Response(), new MockOutputStream());
+        final boolean actual = loginInterceptor.preHandle(request, new Response(new MockOutputStream()));
 
         // then
         assertThat(actual).isTrue();
@@ -34,7 +32,7 @@ class LoginInterceptorTest {
         final Request request = GET_요청(new Headers(), "/login");
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, new Response(), new MockOutputStream());
+        final boolean actual = loginInterceptor.preHandle(request, new Response(new MockOutputStream()));
 
         // then
         assertThat(actual).isTrue();
@@ -50,7 +48,7 @@ class LoginInterceptorTest {
         final OutputStream outputStream = new MockOutputStream();
 
         // when
-        final boolean actual = loginInterceptor.preHandle(request, new Response(), outputStream);
+        final boolean actual = loginInterceptor.preHandle(request, new Response(outputStream));
         // then
         assertAll(
                 () -> assertThat(actual).isFalse(),

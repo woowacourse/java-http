@@ -1,9 +1,10 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.RequestInfo;
-import nextstep.jwp.http.Response;
+import org.apache.http.Headers;
+import nextstep.jwp.http.MockOutputStream;
+import org.apache.http.Request;
+import org.apache.http.RequestInfo;
+import org.apache.http.Response;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.http.HttpHeader.LOCATION;
@@ -24,9 +25,9 @@ class RegisterControllerTest {
                 "email=yoo77hyeon@gmail.com",
                 "password=password");
         final Request request = new Request(requestInfo, new Headers(), body);
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(LOCATION, "/index.html")
+        final Response expected = new Response(new MockOutputStream()).header(LOCATION, "/index.html")
                 .httpStatus(FOUND);
 
         // when
@@ -46,9 +47,9 @@ class RegisterControllerTest {
                 "email=yoo77hyeon@gmail.com",
                 "password=1234");
         final Request request = new Request(requestInfo, new Headers(), body);
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(LOCATION, "/register")
+        final Response expected = new Response(new MockOutputStream()).header(LOCATION, "/register")
                 .httpStatus(FOUND);
 
         // when

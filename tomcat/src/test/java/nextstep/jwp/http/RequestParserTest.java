@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpMime;
+import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;

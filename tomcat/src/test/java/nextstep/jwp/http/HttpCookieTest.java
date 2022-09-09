@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.InvalidCookieException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

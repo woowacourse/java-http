@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.servlet;
 
 import nextstep.jwp.controller.*;
 import nextstep.jwp.exception.CustomNotFoundException;
-import nextstep.jwp.http.RequestInfo;
+import org.apache.http.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.Map;

@@ -1,8 +1,6 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
+import java.io.OutputStream;
 
 public class Response {
 
@@ -10,10 +8,16 @@ public class Response {
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.OK;
     private static final String DEFAULT_CONTENT = "";
 
+    private final OutputStream outputStream;
+
     private HttpVersion httpVersion = DEFAULT_HTTP_VERSION;
     private HttpStatus httpStatus = DEFAULT_HTTP_STATUS;
     private final Headers headers = new Headers();
     private String content = DEFAULT_CONTENT;
+
+    public Response(final OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
 
     public Response httpVersion(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
@@ -34,6 +38,10 @@ public class Response {
         this.content = content;
         this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
         return this;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
     }
 
     public Headers getHeaders() {

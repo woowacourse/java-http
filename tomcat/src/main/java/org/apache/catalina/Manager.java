@@ -1,5 +1,7 @@
 package org.apache.catalina;
 
+import nextstep.jwp.http.Session;
+
 import java.io.IOException;
 
 /**

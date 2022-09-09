@@ -1,6 +1,4 @@
-package nextstep.jwp.http;
-
-import org.apache.http.HttpMethod;
+package org.apache.http;
 
 import java.util.Objects;
 
@@ -32,6 +30,10 @@ public class RequestInfo {
         return queryString;
     }
 
+    public boolean sameHttpMethod(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -43,9 +45,5 @@ public class RequestInfo {
     @Override
     public int hashCode() {
         return Objects.hash(httpMethod, uri);
-    }
-
-    public boolean sameHttpMethod(final HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
     }
 }

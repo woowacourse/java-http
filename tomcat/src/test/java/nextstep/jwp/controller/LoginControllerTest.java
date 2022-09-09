@@ -1,12 +1,16 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.RequestInfo;
-import nextstep.jwp.http.Response;
+import nextstep.jwp.http.Session;
+import nextstep.jwp.http.SessionManager;
+import org.apache.http.Headers;
+import nextstep.jwp.http.MockOutputStream;
+import org.apache.http.Request;
+import org.apache.http.RequestInfo;
+import org.apache.http.Response;
 import org.apache.http.HttpHeader;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.http.HttpMethod.POST;
@@ -17,14 +21,21 @@ class LoginControllerTest {
 
     private final Controller controller = new LoginController(() -> "1");
 
+    @AfterEach
+    void setDown() {
+        final SessionManager sessionManager = SessionManager.get();
+        final Session session = sessionManager.findSession("1");
+        sessionManager.remove(session);
+    }
+
     @Test
     void account값과_password값이_일치하면_index로_리다이렉트한다() {
         // given
         final RequestInfo requestInfo = new RequestInfo(POST, "/login", null);
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(HttpHeader.LOCATION, "/index.html")
+        final Response expected = new Response(new MockOutputStream()).header(HttpHeader.LOCATION, "/index.html")
                 .header(HttpHeader.SET_COOKIE, "JSESSIONID=1")
                 .httpStatus(HttpStatus.FOUND);
 
@@ -43,7 +54,7 @@ class LoginControllerTest {
         final Request request = new Request(requestInfo, new Headers(), "account=gonggong&password=password");
 
         // when, then
-        assertThatThrownBy(() -> controller.service(request, new Response()))
+        assertThatThrownBy(() -> controller.service(request, new Response(new MockOutputStream())))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -54,7 +65,7 @@ class LoginControllerTest {
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password1");
 
         // when, then
-        assertThatThrownBy(() -> controller.service(request, new Response()))
+        assertThatThrownBy(() -> controller.service(request, new Response(new MockOutputStream())))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -63,9 +74,9 @@ class LoginControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(POST, "/login", null);
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(HttpHeader.LOCATION, "/index.html")
+        final Response expected = new Response(new MockOutputStream()).header(HttpHeader.LOCATION, "/index.html")
                 .header(HttpHeader.SET_COOKIE, "JSESSIONID=1")
                 .httpStatus(HttpStatus.FOUND);
 

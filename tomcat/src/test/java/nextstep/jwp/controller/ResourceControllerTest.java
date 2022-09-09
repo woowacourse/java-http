@@ -1,10 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.CustomNotFoundException;
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.RequestInfo;
-import nextstep.jwp.http.Response;
+import org.apache.http.Headers;
+import nextstep.jwp.http.MockOutputStream;
 import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 
@@ -22,9 +20,9 @@ class ResourceControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/index.html");
         final Request request = new Request(requestInfo, new Headers(), null);
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue())
+        final Response expected = new Response(new MockOutputStream()).header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue())
                 .header(HttpHeader.CONTENT_LENGTH, "5564");
 
         // when
@@ -45,7 +43,7 @@ class ResourceControllerTest {
         final Request request = new Request(requestInfo, new Headers(), null);
 
         // when, then
-        assertThatThrownBy(() -> controller.service(request, new Response()))
+        assertThatThrownBy(() -> controller.service(request, new Response(new MockOutputStream())))
                 .isInstanceOf(CustomNotFoundException.class);
     }
 }

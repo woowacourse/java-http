@@ -1,15 +1,15 @@
-package nextstep.jwp.http;
+package nextstep.jwp.interceptor;
 
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.ResponseFlusher;
+import nextstep.jwp.http.Session;
+import nextstep.jwp.http.SessionManager;
 import nextstep.jwp.support.View;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 
-import java.io.OutputStream;
 import java.util.List;
 
-public class LoginInterceptor {
+public class LoginInterceptor implements Interceptor {
 
     private final List<String> includeUris;
 
@@ -17,11 +17,11 @@ public class LoginInterceptor {
         this.includeUris = includeUris;
     }
 
-    public boolean preHandle(final Request request, final Response response, final OutputStream outputStream) {
+    public boolean preHandle(final Request request, final Response response) {
         if (isUriNotMatch(request) || isSessionAlreadyExist(request)) {
             return true;
         }
-        makeRedirect(response, outputStream);
+        makeRedirect(response);
         return false;
     }
 
@@ -41,9 +41,9 @@ public class LoginInterceptor {
         return sessionManager.findSession(jsessionid);
     }
 
-    private void makeRedirect(final Response response, final OutputStream outputStream) {
+    private void makeRedirect(final Response response) {
         response.header(HttpHeader.LOCATION, View.INDEX.getValue())
                 .httpStatus(HttpStatus.FOUND);
-        ResponseFlusher.flush(outputStream, response);
+        ResponseFlusher.flush(response);
     }
 }

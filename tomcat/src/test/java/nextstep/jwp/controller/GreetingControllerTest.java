@@ -1,11 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.RequestInfo;
-import nextstep.jwp.http.Response;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpMime;
+import org.apache.http.Headers;
+import nextstep.jwp.http.MockOutputStream;
+import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.http.HttpMethod.GET;
@@ -20,9 +17,9 @@ class GreetingControllerTest {
         // given
         final RequestInfo requestInfo = new RequestInfo(GET, "/");
         final Request request = new Request(requestInfo, new Headers(), null);
-        final Response response = new Response();
+        final Response response = new Response(new MockOutputStream());
 
-        final Response expected = new Response().header(HttpHeader.CONTENT_LENGTH, "12")
+        final Response expected = new Response(new MockOutputStream()).header(HttpHeader.CONTENT_LENGTH, "12")
                 .header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue());
 
         // when

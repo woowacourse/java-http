@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import org.apache.http.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,8 @@ public class ResponseFlusher {
     private ResponseFlusher() {
     }
 
-    public static void flush(final OutputStream outputStream, final Response response) {
+    public static void flush(final Response response) {
+        final OutputStream outputStream = response.getOutputStream();
         if (outputStream == null) {
             return;
         }

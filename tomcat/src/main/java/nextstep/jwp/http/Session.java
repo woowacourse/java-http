@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;

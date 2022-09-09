@@ -1,4 +1,6 @@
-package org.apache.catalina;
+package nextstep.jwp.http;
+
+import org.apache.catalina.Manager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

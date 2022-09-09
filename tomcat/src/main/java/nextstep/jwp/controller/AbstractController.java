@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.RequestInfo;
-import nextstep.jwp.http.Response;
+import org.apache.http.Request;
+import org.apache.http.RequestInfo;
+import org.apache.http.Response;
 import org.apache.http.HttpMethod;
 
 public abstract class AbstractController implements Controller {

@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.exception;
 
 public class InvalidCookieException extends RuntimeException {
 

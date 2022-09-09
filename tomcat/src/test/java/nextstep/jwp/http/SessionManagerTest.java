@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package nextstep.jwp.http;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

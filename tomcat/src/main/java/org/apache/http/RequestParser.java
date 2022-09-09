@@ -1,9 +1,6 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
-import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.exception.FileAccessException;
-import org.apache.http.HttpHeader;
-import org.apache.http.HttpMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +26,7 @@ public class RequestParser {
             final String queryString = getQueryString(line);
             return new RequestInfo(httpMethod.get(), uri, queryString);
         }
-        throw new CustomNotFoundException("요청 정보를 찾을 수 없음");
+        throw new RuntimeException("요청 정보를 찾을 수 없음");
     }
 
     private static String getUri(final String line) {

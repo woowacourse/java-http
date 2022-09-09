@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.InvalidCookieException;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

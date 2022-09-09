@@ -5,7 +5,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.Headers;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
+import org.apache.coyote.http11.response.Status;
 
 public class StaticFileController extends AbstractController {
 
@@ -15,10 +18,20 @@ public class StaticFileController extends AbstractController {
             final URL resource = getClass().getClassLoader().getResource("static" + request.getRequestUrl());
             final Path path = new File(resource.getFile()).toPath();
             final String responseBody = new String(Files.readAllBytes(path));
-            headers.put(CONTENT_TYPE, Files.probeContentType(path));
 
-            return httpResponse.create200Response(headers, responseBody)
+            Headers headers = new Headers();
+            headers.setContentType(Files.probeContentType(path));
+
+            return new ResponseBuilder()
+                    .status(Status.OK)
+                    .headers(headers)
+                    .body(responseBody)
+                    .build();
         }
+
+        return new ResponseBuilder()
+                .status(Status.OK)
+                .build();
     }
 
 

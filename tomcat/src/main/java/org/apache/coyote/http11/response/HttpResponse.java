@@ -5,31 +5,26 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
     private final String protocolVersion = "HTTP/1.1";
-    private String statusCode;
-    private String statusMessage;
-    private Map<String, String> headers;
+
+    private Status status;
+    private Headers headers;
     private String body;
 
     public HttpResponse() {
-        this.headers = new HashMap<>();
+        this.headers = new Headers();
     }
 
-    private HttpResponse(final String statusCode, final String statusMessage,
-                         final Map<String, String> headers, final String body) {
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+    private HttpResponse(final Status status, final Headers headers, final String body) {
+        this.status = status;
         this.headers = headers;
         this.body = body;
     }
 
     public HttpResponse create200Response(final Map<String, String> headers, final String body) {
-        this.setStatusCode("200");
-        this.setStatusMessage("OK");
         this.setHeaders(headers);
         this.setBody(body);
 
@@ -37,8 +32,6 @@ public class HttpResponse {
     }
 
     public HttpResponse create302Response(final Map<String, String> headers, final String body) {
-        this.setStatusCode("302");
-        this.setStatusMessage("Found");
         this.setHeaders(headers);
         this.setBody(body);
 
@@ -53,47 +46,54 @@ public class HttpResponse {
         return this.create200Response(Map.of("Content-Type", Files.probeContentType(path)), responseBody);
     }
 
-    public byte[] toBytes() {
-        return createResponse().getBytes();
+    public String toMessage() {
+        return String.join("\r\n",
+                protocolVersion + " " + status.getCode() + " " + status.getMessage() + " ",
+                headers.toMessage(),
+                "",
+                body
+        );
     }
 
-    private String createResponse() {
-        if (headers.containsKey("Set-Cookie")) {
-            return String.join("\r\n",
-                    "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-                    "Content-Type: " + headers.get("contentType") + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "Set-Cookie: JSESSIONID=" + headers.get("Set-Cookie") + " ",
-                    "",
-                    body);
-        }
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-                "Content-Type: " + headers.get("contentType") + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+    public byte[] toBytes() {
+        return toMessage().getBytes();
     }
 
     public void addCookie(String cookie) {
-        headers.put("Set-Cookie", cookie);
-    }
-
-    public void setStatusCode(final String statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public void setStatusMessage(final String statusMessage) {
-        this.statusMessage = statusMessage;
+        headers.setCookie(cookie);
     }
 
     public void setHeaders(final Map<String, String> headers) {
-        this.headers = headers;
+        this.headers = new Headers();
     }
 
     public void setBody(final String body) {
         this.body = body;
+    }
+
+    public static class ResponseBuilder {
+        private Status status;
+        private Headers headers;
+        private String body;
+
+        public ResponseBuilder status(final Status status) {
+            this.status = status;
+            return this;
+        }
+
+        public ResponseBuilder headers(final Headers headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public ResponseBuilder body(final String body) {
+            this.body = body;
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(status, headers, body);
+        }
     }
 }
 

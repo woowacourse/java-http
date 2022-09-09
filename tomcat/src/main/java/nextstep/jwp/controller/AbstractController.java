@@ -14,8 +14,6 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request, HttpResponse response) throws Exception {
-        RequestMapping requestMapping = new RequestMapping();
-
         if (request.isGet()) {
             return doGet(request, response);
         }
@@ -25,11 +23,11 @@ public abstract class AbstractController implements Controller {
         throw new HttpMethodNotAllowedException("유효하지 않은 HTTP method 입니다.");
     }
 
-    protected HttpResponse doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */
+    protected HttpResponse doGet(HttpRequest request, HttpResponse response) throws Exception {
         return null;
     }
 
-    protected HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */
+    protected HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception {
         return null;
     }
 

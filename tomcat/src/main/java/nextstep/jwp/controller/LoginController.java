@@ -1,6 +1,10 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.handler.LoginHandler;
+import java.util.Optional;
+import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
@@ -8,6 +12,9 @@ import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 
 public class LoginController extends AbstractController {
+
+    private final UserService userService = new UserService();
+    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -23,11 +30,20 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Optional<User> user = userService.login(request.getBody());
 
-        if (LoginHandler.handle(request, response)) {
-            return response.redirect("/index.html");
+        if (user.isEmpty()) {
+            return response.redirect("/401.html");
         }
 
-        return response.redirect("/401.html");
+        Session session = request.getSession();
+
+        if (session == null) {
+            session = new Session();
+            sessionManager.add(session);
+            response.addCookie(session.getId());
+            session.setAttribute("user", user.get());
+        }
+        return response.redirect("/index.html");
     }
 }

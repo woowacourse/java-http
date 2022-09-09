@@ -2,19 +2,16 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.ParseUtils;
 
 public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final RequestLine startLine;
     private final RequestHeaders headers;
@@ -27,11 +24,11 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
-        final var line = readStartLine(reader);
+        final var startLine = readStartLine(reader);
         final var headers = readHeaders(reader);
         final var body = readBody(reader, headers.getContentLength());
 
-        return new HttpRequest(line, headers, body);
+        return new HttpRequest(startLine, headers, body);
     }
 
     private static RequestLine readStartLine(final BufferedReader reader) throws IOException {
@@ -59,14 +56,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public Map<String, String> getParsedRequestBody() {
-        return ParseUtils.parse(body, "&", "=");
-    }
-
-    public String getPath() {
-        return startLine.getPath();
-    }
-
     public HttpCookie getCookie() {
         HttpCookie httpCookies = HttpCookie.empty();
 
@@ -76,7 +65,6 @@ public class HttpRequest {
         return httpCookies;
     }
 
-
     public Session getSession() throws IOException {
         HttpCookie cookie = getCookie();
         String sessionId = cookie.getJSessionId();
@@ -85,6 +73,10 @@ public class HttpRequest {
             return null;
         }
         return sessionManager.findSession(sessionId);
+    }
+
+    public String getPath() {
+        return startLine.getPath();
     }
 
     public String getBody() {

@@ -18,15 +18,8 @@ class StaticFileControllerTest {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Host", "localhost:8080");
         requestHeaders.put("Connection", "keep-alive");
-        HttpRequest httpRequest = new HttpRequest("GET",
-                "/index.html",
-                Map.of(),
-                "HTTP/1.1",
-                requestHeaders,
-                null,
-                "",
-                null
-        );
+        // 테스트 추가하기
+        HttpRequest httpRequest = new HttpRequest(null, null, null);
 
         StaticFileController staticFileController = new StaticFileController();
 

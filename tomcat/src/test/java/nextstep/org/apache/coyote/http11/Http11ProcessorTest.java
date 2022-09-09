@@ -1,29 +1,34 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mockStatic;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
-//    private static MockedStatic<UUID> uuid;
-//
-//    @BeforeEach
-//    void setUp() {
-//        uuid = mockStatic(UUID.class);
-//    }
-//
-//    @AfterEach
-//    void close() {
-//        uuid.close();
-//    }
+    private static MockedStatic<UUID> uuid;
+
+    @BeforeEach
+    void setUp() {
+        uuid = mockStatic(UUID.class);
+    }
+
+    @AfterEach
+    void close() {
+        uuid.close();
+    }
 
     @Test
     void process() {

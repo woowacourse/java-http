@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,22 +11,22 @@ public class HttpCookie {
         this.cookies = new HashMap<>();
     }
 
-    public static HttpCookie of(Map<String, String> cookies){
+    public static HttpCookie from(Map<String, String> cookies) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.putAll(cookies);
         return httpCookie;
     }
 
-    public String getAttribute(String name){
-        return cookies.get(name);
+    public void putAll(Map<String, String> cookies) {
+        this.cookies.putAll(cookies);
     }
 
-    public boolean containsAttribute(String name){
+    public boolean containsAttribute(String name) {
         return cookies.containsKey(name);
     }
 
-    private void putAll(Map<String, String> cookies) {
-        this.cookies.putAll(cookies);
+    public String getAttributeOrDefault(String name, String defaultValue) {
+        return cookies.getOrDefault(name, defaultValue);
     }
 
     public String toMessage() {
@@ -35,4 +35,3 @@ public class HttpCookie {
             .collect(Collectors.joining(";"));
     }
 }
-

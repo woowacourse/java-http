@@ -1,6 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
-import java.util.Map;
 import java.util.UUID;
 
 import nextstep.jwp.model.Session;
@@ -10,12 +9,12 @@ public class HttpRequest {
 
     private final HttpMethod method;
     private final HttpRequestURI requestURI;
-    private final HttpHeaders requestHeaders;
+    private final HttpHeader requestHeaders;
     private final HttpRequestBody requestBody;
     private final HttpCookie cookie;
 
     public HttpRequest(HttpMethod httpMethod, HttpRequestURI requestURI,
-        HttpHeaders httpRequestHeaders, HttpRequestBody requestBody, HttpCookie cookie) {
+        HttpHeader httpRequestHeaders, HttpRequestBody requestBody, HttpCookie cookie) {
         this.method = httpMethod;
         this.requestURI = requestURI;
         this.requestHeaders = httpRequestHeaders;
@@ -23,25 +22,11 @@ public class HttpRequest {
         this.cookie = cookie;
     }
 
-    public boolean isValidLoginRequest() {
-        return isPostRequest() && requestURI.startsWith("/login");
-    }
-
-    public boolean isValidRegisterRequest() {
-        return isPostRequest() && requestURI.startsWith("/register");
-    }
-
-    public boolean isLoginRequestWithAuthorization() {
-        return isGetRequest()
-            && requestURI.startsWith("/login")
-            && cookie.containsAttribute("JSESSIONID");
-    }
-
-    private boolean isGetRequest() {
+    public boolean isGetRequest() {
         return method.equals(HttpMethod.GET);
     }
 
-    private boolean isPostRequest() {
+    public boolean isPostRequest() {
         return method.equals(HttpMethod.POST);
     }
 
@@ -50,21 +35,27 @@ public class HttpRequest {
     }
 
     public String getResourcePath() {
-        return requestURI.getStaticPath();
+        return "static" + requestURI.getPath();
     }
 
     public String getContentType() {
         String extension = requestURI.getExtension();
-        return ContentType.getContentType(extension).getType();
+
+        return ContentType.ofExtension(extension)
+            .getType();
     }
 
     public Session getSession() {
         return SessionManager.getSessionManager()
-            .findSession(cookie.getAttribute("JSESSIONID"))
+            .findSession(cookie.getAttributeOrDefault("JSESSIONID", ""))
             .orElse(new Session(String.valueOf(UUID.randomUUID())));
     }
 
-    public String getPath() {
-        return requestURI.getPath();
+    public HttpRequestURI getRequestURI() {
+        return requestURI;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

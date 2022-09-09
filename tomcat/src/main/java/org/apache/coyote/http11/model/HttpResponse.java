@@ -1,17 +1,18 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.util.Map;
 
 public class HttpResponse {
 
     private final HttpStatusCode httpStatusCode;
-    private final HttpHeaders responseHeaders;
+    private final HttpHeader responseHeaders;
     private final String responseBody;
 
     private HttpResponse(HttpStatusCode httpStatusCode, String responseBody) {
         this.httpStatusCode = httpStatusCode;
         this.responseBody = responseBody;
-        this.responseHeaders = new HttpHeaders(Map.of("Content-Length", String.valueOf(responseBody.getBytes().length)));
+        this.responseHeaders = HttpHeader.from(
+            Map.of("Content-Length", String.valueOf(responseBody.getBytes().length)));
     }
 
     public static HttpResponse of(HttpStatusCode httpStatusCode, String responseBody) {
@@ -28,14 +29,15 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setLocation(String location){
+    public HttpResponse setLocation(String location) {
         responseHeaders.addAttribute("Location", location);
         return this;
     }
 
     public byte[] getBytes() {
-        return String.join(" \r\n",
-            "HTTP/1.1 " + httpStatusCode.toMessage(),
+
+        return String.join("\r\n",
+            "HTTP/1.1 " + httpStatusCode.toString(),
             responseHeaders.toMessage(),
             "",
             responseBody).getBytes();

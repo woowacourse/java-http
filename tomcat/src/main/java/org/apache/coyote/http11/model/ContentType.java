@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.util.Arrays;
 
@@ -17,14 +17,14 @@ public enum ContentType {
         this.type = type;
     }
 
-    public static ContentType getContentType(String extension) {
+    public static ContentType ofExtension(String extension) {
         return Arrays.stream(values())
-            .filter(contentType -> extension.equals(contentType.getType()))
+            .filter(contentType -> extension.equals(contentType.extension))
             .findFirst()
             .orElse(ContentType.DEFAULT);
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 }

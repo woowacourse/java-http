@@ -1,18 +1,26 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpHeaders {
+public class HttpHeader {
     private final Map<String, String> headers;
 
-    public HttpHeaders(Map<String, String> httpRequestHeaders) {
+    private HttpHeader(Map<String, String> httpRequestHeaders) {
         headers = new HashMap<>(httpRequestHeaders);
+    }
+
+    public static HttpHeader from(Map<String, String> httpRequestHeaders) {
+        return new HttpHeader(httpRequestHeaders);
     }
 
     public void addAttribute(String key, String value) {
         headers.put(key, value);
+    }
+
+    public String getAttributeOrDefault(String key, String defaultValue) {
+        return headers.getOrDefault(key, defaultValue);
     }
 
     public String toMessage() {

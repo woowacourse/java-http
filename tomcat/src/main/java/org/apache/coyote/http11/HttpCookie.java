@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final int COOKIE_KEY_INDEX = 0;
+    private static final int COOKIE_VALUE_INDEX = 1;
 
     private final Map<String, String> values;
 
@@ -19,7 +21,7 @@ public class HttpCookie {
     public void addCookie(final String cookieValue) {
         Map<String, String> cookies = Arrays.stream(cookieValue.split("; "))
                 .map(cookie -> cookie.split("="))
-                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
+                .collect(Collectors.toMap(cookie -> cookie[COOKIE_KEY_INDEX], cookie -> cookie[COOKIE_VALUE_INDEX]));
 
         values.putAll(cookies);
     }

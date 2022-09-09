@@ -1,9 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.Location;
-import org.apache.coyote.http11.request.HttpVersion;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.HttpVersion;
 
 public class HttpResponse {
 

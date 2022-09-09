@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.HttpHeaders;
+import org.apache.coyote.http11.header.HttpVersion;
 
 public class HttpRequest {
 

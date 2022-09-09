@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.header.HttpVersion;
+
 public class HttpRequestLine {
 
     private static final String DELIMITER = " ";

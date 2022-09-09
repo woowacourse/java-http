@@ -15,12 +15,14 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.header.HttpHeaders;
+import org.apache.coyote.http11.header.HttpVersion;
 import org.apache.coyote.http11.request.HttpPath;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
-import org.apache.coyote.http11.request.HttpVersion;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

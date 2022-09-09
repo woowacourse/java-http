@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.header;
 
 import java.util.stream.Stream;
 import org.apache.coyote.http11.exception.HttpVersionNotSupportException;

@@ -3,81 +3,99 @@ package org.apache.coyote.http11.httpmessage.response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import org.apache.coyote.http11.httpmessage.ContentType;
-import org.apache.coyote.http11.httpmessage.request.Headers;
-import org.apache.coyote.http11.httpmessage.request.Http11Version;
+import org.apache.coyote.http11.httpmessage.Headers;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.HttpVersion;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpResponse {
 
     private final OutputStream outputStream;
+    private final StatusLine statusLine;
     private final Headers headers;
-    private StatusLine statusLine;
-    private String responseBody;
+    private final ResponseBody responseBody;
 
-    public HttpResponse(OutputStream outputStream) {
+    private HttpResponse(OutputStream outputStream, StatusLine statusLine, Headers headers, ResponseBody responseBody) {
         this.outputStream = outputStream;
-        this.headers = new Headers(new LinkedHashMap<>());
-    }
-
-    public HttpResponse setStatusLine(StatusLine statusLine) {
         this.statusLine = statusLine;
-        return this;
-    }
-
-    public HttpResponse addHeader(String key, Object value) {
-        Map<String, Object> header = Map.of(key, value);
-        headers.putAll(header);
-        return this;
-    }
-
-    public HttpResponse setHeaders(Headers headers) {
-        this.headers.putAll(headers.getHeaders());
-        return this;
-    }
-
-    public HttpResponse setResponseBody(String responseBody) {
+        this.headers = headers;
         this.responseBody = responseBody;
-        return this;
     }
 
-    public HttpResponse ok(String body) throws IOException {
-        this.setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.OK))
-                .addHeader("Content-Type", "")
-                .addHeader("Content-Length", body.getBytes().length + " ")
-                .setResponseBody(body);
+    // TODO: 2022/09/09 session까지 확인해주기
+    public static HttpResponse of(OutputStream outputStream, HttpRequest httpRequest) {
+        HttpVersion httpVersion = httpRequest.getHttpVersion();
+        StatusLine statusLine = StatusLine.from(httpVersion);
+        Headers headers = new Headers(new LinkedHashMap<>());
+        ResponseBody responseBody = new ResponseBody("");
 
-        return this;
+        return new HttpResponse(outputStream, statusLine, headers, responseBody);
+    }
+
+    public HttpResponse ok(ContentType contentType, String body) throws IOException {
+        return this.httpStatus(HttpStatus.OK)
+                .content(contentType, body.getBytes().length)
+                .responseBody(body);
     }
 
     public HttpResponse found(String path) {
-        this.setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.FOUND))
-                .addHeader("Location", path);
-        return this;
+        return this.httpStatus(HttpStatus.FOUND)
+                .location(path)
+                .content(ContentType.HTML, 0);
     }
 
     public HttpResponse unAuthorized() {
-        this.setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.FOUND))
-                .addHeader("Location", "/401.html ")
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                .addHeader("Content-Length", "0 ")
-                .setResponseBody("");
-        return this;
+        return this.httpStatus(HttpStatus.FOUND)
+                .location("/401.html")
+                .content(ContentType.HTML, 0)
+                .responseBody("");
     }
 
     public void notFound() {
-        this.setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.FOUND))
-                .addHeader("Location", "/404.html ")
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                .addHeader("Content-Length", "0 ");
+        this.httpStatus(HttpStatus.FOUND)
+                .location("/404.html")
+                .content(ContentType.HTML, 0);
     }
 
     public HttpResponse sendError() {
-        this.setStatusLine(new StatusLine(Http11Version.HTTP_11_VERSION, HttpStatus.FOUND))
-                .addHeader("Location", "/500.html ")
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                .addHeader("Content-Length", "0 ");
+        return this.httpStatus(HttpStatus.FOUND)
+                .location("/500.html")
+                .content(ContentType.HTML, 0);
+    }
 
+    public HttpResponse httpStatus(HttpStatus httpStatus) {
+        statusLine.addHttpStatus(httpStatus);
+        return this;
+    }
+
+    private HttpResponse location(String path) {
+        headers.addLocation(path);
+        return this;
+    }
+
+    private HttpResponse content(ContentType contentType, int length) {
+        return this.contentType(contentType)
+                .contentLength(length);
+    }
+
+    private HttpResponse contentType(ContentType contentType) {
+        headers.addContentType(contentType);
+        return this;
+    }
+
+    private HttpResponse contentLength(int length) {
+        headers.addContentLength(length);
+        return this;
+    }
+
+    public HttpResponse setCookie(Cookie cookie) {
+        headers.addSetCookie(cookie);
+        return this;
+    }
+
+    public HttpResponse responseBody(String body) {
+        responseBody.addBody(body);
         return this;
     }
 
@@ -94,7 +112,7 @@ public class HttpResponse {
                 statusLine.toString(),
                 headers.toString(),
                 "",
-                responseBody
+                responseBody.toString()
         );
     }
 }

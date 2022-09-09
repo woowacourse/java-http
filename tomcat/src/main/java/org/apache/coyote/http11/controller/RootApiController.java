@@ -9,9 +9,7 @@ public class RootApiController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        httpResponse.ok("Hello world!")
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ");
-
+        httpResponse.ok(ContentType.HTML, "Hello world!");
     }
 
     @Override

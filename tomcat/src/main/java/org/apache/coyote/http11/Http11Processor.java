@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            HttpResponse httpResponse = new HttpResponse(outputStream);
+            HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
             setSession(httpRequest, httpResponse);
 
             FrontController frontController = new FrontController();
@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (!cookie.hasJSessionId()) {
             UUID uuid = UUID.randomUUID();
-            httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+            httpResponse.setCookie(Cookie.fromJSessionId(uuid));
             Session session = new Session(uuid.toString());
             sessionManager.add(session);
             httpRequest.setSession(session);

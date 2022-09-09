@@ -32,10 +32,6 @@ public class RequestBody {
         }
     }
 
-    public String getBody() {
-        return body;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

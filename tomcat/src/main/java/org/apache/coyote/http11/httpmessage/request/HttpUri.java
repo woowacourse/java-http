@@ -3,8 +3,6 @@ package org.apache.coyote.http11.httpmessage.request;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class HttpUri {
 
@@ -52,11 +50,6 @@ public class HttpUri {
         }
 
         return parameters;
-    }
-
-    public boolean match(Pattern uriPattern) {
-        Matcher matcher = uriPattern.matcher(path);
-        return matcher.matches();
     }
 
     public String getPath() {

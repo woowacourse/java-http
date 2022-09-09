@@ -30,7 +30,7 @@ public abstract class AbstractController implements Controller {
 
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
 
     }
 }

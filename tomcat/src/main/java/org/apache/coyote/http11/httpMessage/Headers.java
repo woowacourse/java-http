@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage.request;
+package org.apache.coyote.http11.httpmessage;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.session.Cookie;
 
 public class Headers {
 
@@ -26,16 +27,24 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public void addContentType(ContentType contentType) {
+        headers.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+    }
+
+    public void addContentLength(int length) {
+        headers.put("Content-Length", length);
+    }
+
+    public void addLocation(String path) {
+        headers.put("Location", path);
+    }
+
+    public void addSetCookie(Cookie cookie) {
+        headers.put("Set-Cookie", cookie);
+    }
+
     public Optional<Object> getHeader(String key) {
         return Optional.ofNullable(headers.get(key));
-    }
-
-    public void putAll(Map<String, Object> other) {
-        headers.putAll(other);
-    }
-
-    public Map<String, Object> getHeaders() {
-        return headers;
     }
 
     @Override
@@ -58,7 +67,7 @@ public class Headers {
     @Override
     public String toString() {
         return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue().toString())
+                .map(entry -> entry.getKey() + ": " + entry.getValue().toString() + " ")
                 .collect(Collectors.joining("\r\n"));
     }
 }

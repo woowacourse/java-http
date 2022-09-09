@@ -1,22 +1,30 @@
 package org.apache.coyote.http11.httpmessage.response;
 
 import java.util.Objects;
-import org.apache.coyote.http11.httpmessage.request.Http11Version;
+import org.apache.coyote.http11.httpmessage.request.HttpVersion;
 
 public class StatusLine {
 
-    private final Http11Version http11Version;
-    private final HttpStatus httpStatus;
+    private final HttpVersion httpVersion;
+    private HttpStatus httpStatus;
 
-    public StatusLine(Http11Version http11Version, HttpStatus httpStatus) {
-        this.http11Version = http11Version;
+    private StatusLine(HttpVersion httpVersion, HttpStatus httpStatus) {
+        this.httpVersion = httpVersion;
+        this.httpStatus = httpStatus;
+    }
+
+    public static StatusLine from(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, null);
+    }
+
+    public void addHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 
     @Override
     public String toString() {
         return String.join(" ",
-                http11Version.getVersion(),
+                httpVersion.getVersion(),
                 Integer.toString(httpStatus.getValue()),
                 httpStatus.getMessage(),
                 ""
@@ -32,11 +40,11 @@ public class StatusLine {
             return false;
         }
         StatusLine that = (StatusLine) o;
-        return http11Version == that.http11Version && httpStatus == that.httpStatus;
+        return httpVersion == that.httpVersion && httpStatus == that.httpStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(http11Version, httpStatus);
+        return Objects.hash(httpVersion, httpStatus);
     }
 }

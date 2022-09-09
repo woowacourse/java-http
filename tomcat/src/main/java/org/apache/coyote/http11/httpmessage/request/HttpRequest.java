@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
+import org.apache.coyote.http11.httpmessage.Headers;
 import org.apache.coyote.http11.session.Session;
 
 public class HttpRequest {
@@ -52,12 +52,16 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public boolean matchRequestLine(HttpMethod httpMethod, Pattern uriPattern) {
-        return requestLine.matchHttpMethod(httpMethod) && requestLine.matchUri(uriPattern);
-    }
-
     public String getCookieValue() {
         return (String) headers.getHeader("Cookie").orElse("");
+    }
+
+    public HttpVersion getHttpVersion() {
+        return requestLine.getHttpVersion();
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getPath() {
@@ -74,9 +78,5 @@ public class HttpRequest {
 
     public void setSession(Session session) {
         this.session = session;
-    }
-
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
     }
 }

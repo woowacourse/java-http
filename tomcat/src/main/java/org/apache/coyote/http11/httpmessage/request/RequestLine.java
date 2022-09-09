@@ -1,15 +1,14 @@
 package org.apache.coyote.http11.httpmessage.request;
 
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class RequestLine {
 
+    private final HttpVersion httpVersion;
     private final HttpMethod method;
     private final HttpUri uri;
-    private final Http11Version httpVersion;
 
-    private RequestLine(HttpMethod method, HttpUri uri, Http11Version httpVersion) {
+    private RequestLine(HttpMethod method, HttpUri uri, HttpVersion httpVersion) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -25,7 +24,7 @@ public class RequestLine {
         return new RequestLine(
                 HttpMethod.of(method),
                 HttpUri.of(uri),
-                Http11Version.of(version)
+                HttpVersion.of(version)
         );
     }
 
@@ -33,8 +32,8 @@ public class RequestLine {
         return method == httpMethod;
     }
 
-    public boolean matchUri(Pattern uriPattern) {
-        return uri.match(uriPattern);
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 
     public String getPath() {

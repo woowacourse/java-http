@@ -46,10 +46,8 @@ public class LoginController extends AbstractController {
         log.info("로그인 성공! 아이디: " + existedUser.getAccount());
         setSession(httpRequest, existedUser);
 
-        httpResponse.found("/index.html ")
-                .addHeader("Set-Cookie", new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())))
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                .addHeader("Content-Length", "0 ");
+        httpResponse.found("/index.html")
+                .setCookie(new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())));
     }
 
     private Optional<User> findUser(String account) {
@@ -67,15 +65,12 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Session session = httpRequest.getSession();
         if (session.getAttribute(USER) != null) {
-            httpResponse.found("/index.html ")
-                    .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                    .addHeader("Content-Length", "0 ");
+            httpResponse.found("/index.html");
             return;
         }
-        String responseBody = getBody();
 
-        httpResponse.ok(responseBody)
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ");
+        String responseBody = getBody();
+        httpResponse.ok(ContentType.HTML, responseBody);
     }
 
     private String getBody() throws IOException {
@@ -84,7 +79,6 @@ public class LoginController extends AbstractController {
         Path path = file.toPath();
         return new String(Files.readAllBytes(path));
     }
-
 }
 
 

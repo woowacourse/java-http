@@ -19,6 +19,20 @@ import org.apache.coyote.http11.session.SessionManager;
 public class RegisterApiController extends AbstractController {
 
     @Override
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        String responseBody = getBody();
+
+        httpResponse.ok(ContentType.HTML, responseBody);
+    }
+
+    private String getBody() throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        File file = new File(resource.getFile());
+        Path path = file.toPath();
+        return new String(Files.readAllBytes(path));
+    }
+
+    @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestBody requestBody = httpRequest.getRequestBody();
 
@@ -35,10 +49,8 @@ public class RegisterApiController extends AbstractController {
             return;
         }
 
-        httpResponse.found("/index.html ")
-                .addHeader("Set-Cookie", new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())))
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
-                .addHeader("Content-Length", "0 ");
+        httpResponse.found("/index.html")
+                .setCookie(new Cookie(Map.of("JSESSIONID", httpRequest.getSession().getId())));
     }
 
     private void setSession(HttpRequest httpRequest, User user) {
@@ -46,20 +58,5 @@ public class RegisterApiController extends AbstractController {
         Session session = httpRequest.getSession();
         session.setAttribute("user", user);
         sessionManager.add(session);
-    }
-
-    @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        String responseBody = getBody();
-
-        httpResponse.ok(responseBody)
-                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ");
-    }
-
-    private String getBody() throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static/register.html");
-        File file = new File(resource.getFile());
-        Path path = file.toPath();
-        return new String(Files.readAllBytes(path));
     }
 }

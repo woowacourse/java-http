@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.httpmessage.request;
 
-public enum Http11Version {
+public enum HttpVersion {
 
     HTTP_11_VERSION("HTTP/1.1");
     private final String version;
 
-    Http11Version(String version) {
+    HttpVersion(String version) {
         this.version = version;
     }
 
-    public static Http11Version of(String version) {
+    public static HttpVersion of(String version) {
         validate(version);
         return HTTP_11_VERSION;
     }

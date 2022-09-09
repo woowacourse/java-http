@@ -29,7 +29,6 @@ public class FileController extends AbstractController {
         String responseBody = new String(Files.readAllBytes(path));
         ContentType contentType = ContentType.of(Files.probeContentType(path));
 
-        httpResponse.ok(responseBody)
-                .addHeader("Content-Type", contentType.getValue() + ";charset=utf-8 ");
+        httpResponse.ok(contentType, responseBody);
     }
 }

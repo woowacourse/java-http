@@ -24,6 +24,10 @@ public class HttpRequest {
         return httpPath.isDefaultRequest();
     }
 
+    public boolean hasQueryParams() {
+        return httpPath.hasQueryParams();
+    }
+
     public String getParam(final String name) {
         return httpPath.getParam(name);
     }
@@ -34,9 +38,5 @@ public class HttpRequest {
 
     public HttpPath getHttpPath() {
         return httpPath;
-    }
-
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
     }
 }

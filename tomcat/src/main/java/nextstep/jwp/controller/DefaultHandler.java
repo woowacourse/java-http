@@ -11,12 +11,17 @@ import static org.apache.coyote.utils.Util.getExtension;
 
 public class DefaultHandler extends AbstractHandler {
 
-    public DefaultHandler(HttpRequest httpRequest) {
-        super(httpRequest);
+    private static final DefaultHandler INSTANCE = new DefaultHandler();
+
+    private DefaultHandler() {
+    }
+
+    public static DefaultHandler getINSTANCE() {
+        return INSTANCE;
     }
 
     @Override
-    public String getResponse() {
+    public String getResponse(final HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
         final String extension = ContentType.getType(getExtension(path));
         final String body = Util.getResponseBody(path, this.getClass());

@@ -19,16 +19,17 @@ import static org.apache.coyote.utils.Util.createResponse;
 
 public class LoginHandler extends AbstractHandler {
 
+    private static final LoginHandler INSTANCE = new LoginHandler();
     private static final String LOGIN_HTML = "/login.html";
     private static final String INDEX_HTML = "/index.html";
     private static final String CLIENT_ERROR_401 = "/401.html";
 
-    public LoginHandler(HttpRequest httpRequest) {
-        super(httpRequest);
+    public static LoginHandler getINSTANCE() {
+        return INSTANCE;
     }
 
     @Override
-    protected String getMethodResponse() {
+    protected String getMethodResponse(final HttpRequest httpRequest) {
         if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
             return createResponse(StatusCode.OK, Util.getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
@@ -38,7 +39,7 @@ public class LoginHandler extends AbstractHandler {
     }
 
     @Override
-    protected String postMethodResponse() {
+    protected String postMethodResponse(final HttpRequest httpRequest) {
         if (!checkUser(httpRequest.getRequestBody())) {
             return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
                     .getResponse();

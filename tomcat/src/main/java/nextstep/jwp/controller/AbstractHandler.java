@@ -5,32 +5,29 @@ import org.apache.coyote.model.request.HttpRequest;
 
 public abstract class AbstractHandler implements Handler {
 
-    protected final HttpRequest httpRequest;
-
-    public AbstractHandler(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    public AbstractHandler() {
     }
 
     @Override
-    public String getResponse() {
+    public String getResponse(final HttpRequest httpRequest) {
         if (httpRequest.checkGetMethod()) {
-            return getMethodResponse();
+            return getMethodResponse(httpRequest);
         }
         if (httpRequest.checkPostMethod()) {
-            return postMethodResponse();
+            return postMethodResponse(httpRequest);
         }
-        return otherMethodResponse();
+        return otherMethodResponse(httpRequest);
     }
 
-    protected String getMethodResponse() {
+    protected String getMethodResponse(final HttpRequest httpRequest) {
         throw new UncheckedServletException("지원하지 않습니다.");
     }
 
-    protected String postMethodResponse() {
+    protected String postMethodResponse(final HttpRequest httpRequest) {
         throw new UncheckedServletException("지원하지 않습니다.");
     }
 
-    protected String otherMethodResponse() {
+    protected String otherMethodResponse(final HttpRequest httpRequest) {
         throw new UncheckedServletException("지원하지 않습니다.");
     }
 }

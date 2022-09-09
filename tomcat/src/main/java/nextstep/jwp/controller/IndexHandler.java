@@ -10,12 +10,17 @@ import static org.apache.coyote.model.request.ContentType.HTML;
 
 public class IndexHandler extends AbstractHandler {
 
-    public IndexHandler(HttpRequest httpRequest) {
-        super(httpRequest);
+    private static final IndexHandler INSTANCE = new IndexHandler();
+
+    private IndexHandler() {
+    }
+
+    public static IndexHandler getINSTANCE() {
+        return INSTANCE;
     }
 
     @Override
-    public String getResponse() {
+    public String getResponse(final HttpRequest httpRequest) {
         String responseBody = Util.getResponseBody(httpRequest.getPath(), getClass());
         ResponseLine responseLine = ResponseLine.of(StatusCode.OK);
         HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, responseLine);

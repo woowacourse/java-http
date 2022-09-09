@@ -3,20 +3,19 @@ package nextstep.jwp.controller;
 import org.apache.coyote.model.request.HttpRequest;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 public enum HandlerMapper {
 
-    DEFAULT("/", HomeHandler::new),
-    LOGIN("/login.html", LoginHandler::new),
-    INDEX("/index.html", IndexHandler::new),
-    REGISTER("/register.html", RegisterHandler::new),
+    DEFAULT("/", HomeHandler.getINSTANCE()),
+    LOGIN("/login.html", LoginHandler.getINSTANCE()),
+    INDEX("/index.html", IndexHandler.getINSTANCE()),
+    REGISTER("/register.html", RegisterHandler.getINSTANCE()),
     ;
 
     private final String path;
-    private final Function<HttpRequest, Handler> handler;
+    private final Handler handler;
 
-    HandlerMapper(final String path, final Function<HttpRequest, Handler> handler) {
+    HandlerMapper(final String path, final Handler handler) {
         this.path = path;
         this.handler = handler;
     }
@@ -26,7 +25,7 @@ public enum HandlerMapper {
         return Arrays.stream(values())
                 .filter(value -> path.equals(value.path))
                 .findAny()
-                .map(value -> value.handler.apply(httpRequest))
-                .orElseGet(() -> new DefaultHandler(httpRequest));
+                .map(value -> value.handler)
+                .orElseGet(() -> DefaultHandler.getINSTANCE());
     }
 }

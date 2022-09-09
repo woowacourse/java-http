@@ -16,32 +16,33 @@ public class RegisterHandler extends AbstractHandler {
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
+    private static final RegisterHandler INSTANCE = new RegisterHandler();
     private static final String CLIENT_ERROR_404 = "/404.html";
 
-    public RegisterHandler(HttpRequest httpRequest) {
-        super(httpRequest);
+    public static RegisterHandler getINSTANCE() {
+        return INSTANCE;
     }
 
     @Override
-    protected String getMethodResponse() {
+    protected String getMethodResponse(final HttpRequest httpRequest) {
         return createResponse(StatusCode.OK, Util.getResponseBody(REGISTER_HTML, getClass()))
                 .getResponse();
     }
 
     @Override
-    protected String postMethodResponse() {
-        saveUser();
+    protected String postMethodResponse(final HttpRequest httpRequest) {
+        saveUser(httpRequest);
         return createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()))
                 .getResponse();
     }
 
     @Override
-    protected String otherMethodResponse() {
+    protected String otherMethodResponse(final HttpRequest httpRequest) {
         return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_404, getClass()))
                 .getResponse();
     }
 
-    private void saveUser() {
+    private void saveUser(final HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
         String account = requestBody.getByKey(ACCOUNT);
         String password = requestBody.getByKey(PASSWORD);

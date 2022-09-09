@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import nextstep.jwp.controller.RootApiController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;

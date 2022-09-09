@@ -33,6 +33,10 @@ public class HttpResponse {
         return new HttpResponse(outputStream, statusLine, headers, responseBody);
     }
 
+    public HttpResponse ok(String body) throws IOException {
+        return ok(ContentType.HTML, body);
+    }
+
     public HttpResponse ok(ContentType contentType, String body) throws IOException {
         return this.httpStatus(HttpStatus.OK)
                 .content(contentType, body.getBytes().length)

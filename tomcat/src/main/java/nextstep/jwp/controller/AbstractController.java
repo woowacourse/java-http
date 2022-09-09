@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

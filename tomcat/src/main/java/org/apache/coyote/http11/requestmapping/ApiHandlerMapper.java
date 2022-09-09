@@ -2,10 +2,10 @@ package org.apache.coyote.http11.requestmapping;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.RootApiController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootApiController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class ApiHandlerMapper implements RequestMapper {

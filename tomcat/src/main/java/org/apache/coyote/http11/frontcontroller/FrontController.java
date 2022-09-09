@@ -3,7 +3,7 @@ package org.apache.coyote.http11.frontcontroller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import org.apache.coyote.http11.controller.Controller;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.requestmapping.ApiHandlerMapper;

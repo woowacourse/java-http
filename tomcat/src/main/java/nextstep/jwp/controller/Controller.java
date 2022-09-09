@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;

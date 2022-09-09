@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.FileController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.FileController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class FileHandlerMapper implements RequestMapper {

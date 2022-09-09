@@ -18,11 +18,23 @@ public class UserService {
         if (user.isEmpty()) {
             return user;
         }
-        
+
         if (!user.get().checkPassword(parsedBody.get(PASSWORD))) {
             return Optional.empty();
         }
 
         return user;
+    }
+
+    public boolean register(final String body) {
+        Map<String, String> parsedBody = ParseUtils.parse(body, "&", "=");
+        String account = parsedBody.get("account");
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return false;
+        }
+        User user = new User(account, parsedBody.get("password"), parsedBody.get("email"));
+        InMemoryUserRepository.save(user);
+
+        return true;
     }
 }

@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LINE_SEPARATOR = "\r\n";
+    private static final int MIN_OFF = 0;
 
     private final RequestLine startLine;
     private final RequestHeaders headers;
@@ -42,7 +44,7 @@ public class HttpRequest {
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
             headers.append(line)
-                    .append("\r\n");
+                    .append(LINE_SEPARATOR);
         }
 
         return RequestHeaders.from(headers.toString());
@@ -51,7 +53,7 @@ public class HttpRequest {
     private static String readBody(final BufferedReader reader, final String contentLength) throws IOException {
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
-        reader.read(buffer, 0, length);
+        reader.read(buffer, MIN_OFF, length);
 
         return new String(buffer);
     }

@@ -9,6 +9,8 @@ import org.apache.coyote.http11.response.Status;
 
 public class RegisterController extends AbstractController {
 
+    private static final String PAGE_INDEX = "/index.html";
+    private static final String PAGE_401 = "/401.html";
     private final UserService userService = new UserService();
 
     @Override
@@ -26,8 +28,8 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         if (userService.register(request.getBody())) {
-            return response.redirect("/index.html");
+            return response.redirect(PAGE_INDEX);
         }
-        return response.redirect("/401.html");
+        return response.redirect(PAGE_401);
     }
 }

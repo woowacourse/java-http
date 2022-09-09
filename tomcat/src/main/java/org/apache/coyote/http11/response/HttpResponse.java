@@ -5,6 +5,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private Status status;
     private ResponseHeaders responseHeaders;
@@ -29,8 +30,8 @@ public class HttpResponse {
         return toMessage().getBytes();
     }
 
-    public void addCookie(String cookie) {
-        responseHeaders.setCookie("JSESSIONID=" + cookie);
+    public void addSessionCookie(String cookie) {
+        responseHeaders.setCookie(JSESSIONID + "=" + cookie);
     }
 
     public void setHeaders(final Map<String, String> headers) {

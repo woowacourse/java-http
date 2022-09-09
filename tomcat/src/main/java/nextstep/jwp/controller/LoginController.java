@@ -13,6 +13,8 @@ import org.apache.coyote.http11.response.Status;
 
 public class LoginController extends AbstractController {
 
+    private static final String PAGE_401 = "/401.html";
+    private static final String PAGE_INDEX = "/index.html";
     private final UserService userService = new UserService();
     private final SessionManager sessionManager = new SessionManager();
 
@@ -33,7 +35,7 @@ public class LoginController extends AbstractController {
         final Optional<User> user = userService.login(request.getBody());
 
         if (user.isEmpty()) {
-            return response.redirect("/401.html");
+            return response.redirect(PAGE_401);
         }
 
         Session session = request.getSession();
@@ -41,9 +43,9 @@ public class LoginController extends AbstractController {
         if (session == null) {
             session = new Session();
             sessionManager.add(session);
-            response.addCookie(session.getId());
+            response.addSessionCookie(session.getId());
             session.setAttribute("user", user.get());
         }
-        return response.redirect("/index.html");
+        return response.redirect(PAGE_INDEX);
     }
 }

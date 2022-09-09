@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
+import utils.ParseUtils;
 
 public class HttpRequestParams {
+    private static final String REGEX_1 = "&";
+    private static final String REGEX_2 = "=";
+    private static final String PARAMS = "?";
     private final Map<String, String> params;
 
     private HttpRequestParams(Map<String, String> params) {
@@ -12,14 +14,12 @@ public class HttpRequestParams {
     }
 
     public static HttpRequestParams from(final String url) {
-        if (!url.contains("?")) {
+        if (!url.contains(PARAMS)) {
             return new HttpRequestParams(Map.of());
         }
 
         String params = url.split("\\?")[1];
 
-        return new HttpRequestParams(Arrays.stream(params.split("&"))
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1])));
+        return new HttpRequestParams(ParseUtils.parse(params, REGEX_1, REGEX_2));
     }
 }

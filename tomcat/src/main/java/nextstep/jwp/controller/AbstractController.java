@@ -12,6 +12,8 @@ import org.apache.coyote.http11.response.ResponseHeaders;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String STATIC = "static";
+
     @Override
     public HttpResponse service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isGet()) {
@@ -32,13 +34,13 @@ public abstract class AbstractController implements Controller {
     }
 
     protected String readResourceBody(String url) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + url);
+        final URL resource = getClass().getClassLoader().getResource(STATIC + url);
         final Path path = new File(resource.getFile()).toPath();
         return new String(Files.readAllBytes(path));
     }
 
     protected ResponseHeaders readResourceHeader(final String url, final String body) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + url);
+        final URL resource = getClass().getClassLoader().getResource(STATIC + url);
         final Path path = new File(resource.getFile()).toPath();
 
         ResponseHeaders responseHeaders = new ResponseHeaders();

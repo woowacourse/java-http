@@ -19,6 +19,7 @@ import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpPath;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.request.HttpVersion;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
             final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
 
-            printLoginUser(httpRequest);
-
-            final String responseBody = getResponseBody(httpRequest);
-            final HttpResponse httpResponse = HttpResponse.of(httpRequest, responseBody);
+            final HttpResponse httpResponse = createHttpResponse(httpRequest);
 
             outputStream.write(httpResponse.getResponseAsBytes());
             outputStream.flush();
@@ -74,21 +72,24 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private void printLoginUser(final HttpRequest httpRequest) {
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isDefaultRequest()) {
+            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),
+                    DEFAULT_RESPONSE_BODY);
+        }
         if (httpRequest.isLoginRequest()) {
-            final User user = InMemoryUserRepository.findByAccount(httpRequest.getParam("account"))
-                    .orElseThrow(UserNotFoundException::new);
-            if (user.checkPassword(httpRequest.getParam("password"))) {
-                log.info(String.format("user : %s", user));
+            if (httpRequest.hasQueryParams()) {
+                final User user = InMemoryUserRepository.findByAccount(httpRequest.getParam("account"))
+                        .orElseThrow(UserNotFoundException::new);
+                if (user.checkPassword(httpRequest.getParam("password"))) {
+                    log.info(String.format("user : %s", user));
+                    return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/index.html"),
+                            httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));
+                }
             }
         }
-    }
-
-    private String getResponseBody(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isDefaultRequest()) {
-            return DEFAULT_RESPONSE_BODY;
-        }
-        return readFile(httpRequest.getHttpPath());
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),
+                readFile(httpRequest.getHttpPath()));
     }
 
     private String readFile(final HttpPath httpPath) throws IOException {

@@ -75,6 +75,10 @@ public class HttpPath {
         return path.equals(DEFAULT_URL);
     }
 
+    public boolean hasQueryParams() {
+        return params.size() > 0;
+    }
+
     public String getPath() {
         return path;
     }

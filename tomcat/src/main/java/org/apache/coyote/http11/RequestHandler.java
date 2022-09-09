@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.ExceptionHandler;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -19,7 +17,7 @@ public class RequestHandler {
         exceptionHandler = handler;
     }
 
-    public static HttpResponse handle(final HttpRequest httpRequest) throws IOException, URISyntaxException {
+    public static HttpResponse handle(final HttpRequest httpRequest) {
         final Controller controller = RequestMapping.getController(httpRequest);
         try {
             return controller.service(httpRequest);
@@ -29,7 +27,7 @@ public class RequestHandler {
         }
     }
 
-    private static HttpResponse handleException(final Exception e) throws IOException, URISyntaxException {
+    private static HttpResponse handleException(final Exception e) {
         if (exceptionHandler != null) {
             return exceptionHandler.handle(e);
         }

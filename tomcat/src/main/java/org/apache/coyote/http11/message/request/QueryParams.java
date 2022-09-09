@@ -34,11 +34,11 @@ public class QueryParams {
         return new QueryParams(Map.of());
     }
 
-    public String get(String key) {
+    public String get(final String key) {
         return values.get(key);
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return values.containsKey(key);
     }
 }

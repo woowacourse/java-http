@@ -38,3 +38,9 @@
 - [X] `HttpRequest` 클래스 구현
 - [X] `HttpResponse` 클래스 구현
 - [X] `Controller`, `AbstractController`, `RequestMapping` 클래스 구현을 통한 요청 분기 처리
+
+### [🚀 4단계 - 동시성 확장하기](https://techcourse.woowahan.com/s/cCM7rQR9/ls/DE6nAoHG)
+- [X] 소켓 연결 시 thread pool을 이용한다.
+  - [X] `Executors`로 `ExecutorService`객체를 생성한다.
+  - [X] thread 개수를 250, 대기 수를 100으로 제한한다.
+- [X] `SessionManager`의 `SESSIONS`를 Concurrent Collection으로 만든다.

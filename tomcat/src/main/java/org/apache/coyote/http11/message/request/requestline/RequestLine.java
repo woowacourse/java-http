@@ -5,6 +5,9 @@ import org.apache.coyote.http11.message.request.QueryParams;
 
 public class RequestLine {
 
+    private static final int INDEX_METHOD = 0;
+    private static final int INDEX_URI = 1;
+
     private final Method method;
     private final RequestUri uri;
 
@@ -13,14 +16,14 @@ public class RequestLine {
         this.uri = uri;
     }
 
-    public static RequestLine from(String requestLine) {
+    public static RequestLine from(final String requestLine) {
         final String[] splitLine = requestLine.split(Regex.BLANK.getValue());
-        final Method method = Method.valueOf(splitLine[0]);
-        final String uri = splitLine[1];
+        final Method method = Method.valueOf(splitLine[INDEX_METHOD]);
+        final String uri = splitLine[INDEX_URI];
         return new RequestLine(method, RequestUri.from(uri));
     }
 
-    public boolean isPath(String path) {
+    public boolean isPath(final String path) {
         return uri.isPath(path);
     }
 

@@ -1,24 +1,18 @@
 package org.apache.coyote.http11.message.request.body;
 
-import org.apache.coyote.http11.message.request.QueryParams;
-
 public class RequestBody {
 
-    private final QueryParams queryParams;
+    private final String value;
 
-    private RequestBody(final QueryParams queryParams) {
-        this.queryParams = queryParams;
+    public RequestBody(final String value) {
+        this.value = value;
     }
 
-    public static RequestBody from(String body) {
-        return new RequestBody(QueryParams.from(body));
+    public static RequestBody ofNull() {
+        return new RequestBody(null);
     }
 
-    public static RequestBody ofEmpty() {
-        return new RequestBody(QueryParams.ofEmpty());
-    }
-
-    public QueryParams getQueryParams() {
-        return queryParams;
+    public String getValue() {
+        return value;
     }
 }

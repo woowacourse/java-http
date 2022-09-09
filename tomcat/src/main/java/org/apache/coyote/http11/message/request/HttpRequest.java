@@ -17,16 +17,16 @@ import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
 public class HttpRequest {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
-
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody requestBody;
+    private final SessionManager sessionManager;
 
-    public HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
+    private HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
+        this.sessionManager = SessionManager.getINSTANCE();
     }
 
     public static HttpRequest from(final BufferedReader requestReader) throws IOException {
@@ -40,9 +40,9 @@ public class HttpRequest {
         if (contentLength.isPresent()) {
             final String rawContentLength = contentLength.get();
             final String body = readBody(requestReader, Integer.parseInt(rawContentLength.trim()));
-            return new HttpRequest(requestLine, headers, RequestBody.from(body));
+            return new HttpRequest(requestLine, headers, new RequestBody(body));
         }
-        return new HttpRequest(requestLine, headers, RequestBody.ofEmpty());
+        return new HttpRequest(requestLine, headers, RequestBody.ofNull());
     }
 
     private static List<String> readHeaders(final BufferedReader requestReader) throws IOException {
@@ -79,7 +79,7 @@ public class HttpRequest {
 
     public Session createSession() {
         final Session session = new Session();
-        SESSION_MANAGER.add(session);
+        sessionManager.add(session);
         return session;
     }
 
@@ -97,14 +97,14 @@ public class HttpRequest {
         if (jSessionId.isEmpty()) {
             return null;
         }
-        return SESSION_MANAGER.findSession(jSessionId.get());
+        return sessionManager.findSession(jSessionId.get());
     }
 
-    public QueryParams getUriQueryParams() {
+    public QueryParams getQueryParams() {
         return requestLine.getQueryParams();
     }
 
-    public QueryParams getBodyQueryParams() {
-        return requestBody.getQueryParams();
+    public String getBody() {
+        return requestBody.getValue();
     }
 }

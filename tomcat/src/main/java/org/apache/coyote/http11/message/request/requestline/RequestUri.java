@@ -14,7 +14,7 @@ public class RequestUri {
         this.queryParams = queryParams;
     }
 
-    public static RequestUri from(String requestUri) {
+    public static RequestUri from(final String requestUri) {
         final int queryStartIndex = requestUri.indexOf(Regex.QUERY_STRING.getValue());
         if (queryStartIndex < 0) {
             return new RequestUri(requestUri, QueryParams.ofEmpty());

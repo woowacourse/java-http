@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
-import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.message.Regex;
 import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.request.header.Cookie;
@@ -19,8 +16,10 @@ public class HttpResponse {
     private final Headers headers;
     private final String body;
 
-    public HttpResponse(final ContentType contentType, final StatusCode statusCode, final Map<Header, String> headers,
-                        final String body) {
+    private HttpResponse(final ContentType contentType,
+                         final StatusCode statusCode,
+                         final Map<Header, String> headers,
+                         final String body) {
         this.statusCode = statusCode;
         this.headers = Headers.of(contentType, body);
         this.headers.putAll(headers);
@@ -39,12 +38,12 @@ public class HttpResponse {
         return new HttpResponse(StatusCode.OK, body);
     }
 
-    public static HttpResponse ofRedirection(final StatusCode statusCode, final String location) {
-        return new HttpResponse(ContentType.HTML, statusCode, Map.of(Header.LOCATION, location), "");
+    public static HttpResponse ofOk(final ContentType contentType, final String body) {
+        return new HttpResponse(contentType, StatusCode.OK, body);
     }
 
-    public static HttpResponse ofResource(final String path) throws IOException, URISyntaxException {
-        return new HttpResponse(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
+    public static HttpResponse ofRedirection(final StatusCode statusCode, final String location) {
+        return new HttpResponse(ContentType.HTML, statusCode, Map.of(Header.LOCATION, location), "");
     }
 
     public void setCookie(final Cookie cookie) {

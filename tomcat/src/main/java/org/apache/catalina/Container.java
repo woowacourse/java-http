@@ -51,8 +51,7 @@ public class Container implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection, requestMapping, sessionManager);
-        new Thread(processor).start();
+        connector.execute(new Http11Processor(connection, requestMapping, sessionManager));
     }
 
     public void stop() {

@@ -16,7 +16,6 @@ public class LoginController extends AbstractController {
     private static final String PAGE_401 = "/401.html";
     private static final String PAGE_INDEX = "/index.html";
     private final UserService userService = new UserService();
-    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -42,7 +41,7 @@ public class LoginController extends AbstractController {
 
         if (session == null) {
             session = new Session();
-            sessionManager.add(session);
+            SessionManager.getInstance().add(session);
             response.addSessionCookie(session.getId());
             session.setAttribute("user", user.get());
         }

@@ -15,6 +15,7 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        validateDuplicateAccount(user.getAccount());
         database.put(user.getAccount(), user);
     }
 
@@ -27,5 +28,11 @@ public class InMemoryUserRepository {
     }
 
     private InMemoryUserRepository() {
+    }
+
+    public static void validateDuplicateAccount(String account) {
+        if (database.containsKey(account)) {
+            throw new IllegalStateException("이미 저장된 계정입니다.");
+        }
     }
 }

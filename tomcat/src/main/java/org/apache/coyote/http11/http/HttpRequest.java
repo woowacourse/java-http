@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,35 +7,33 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.catalina.Cookies;
-import org.apache.catalina.Session;
+import org.apache.coyote.http11.util.HttpMethod;
 
-public class Http11Request {
+public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpRequestHeaders httpRequestHeaders;
     private final String requestBody;
     private final Cookies cookies;
 
-    private Http11Request(final RequestLine requestLine, final HttpRequestHeaders httpHeaders,
-                          final String requestBody, final Cookies cookies) {
+    private HttpRequest(final RequestLine requestLine, final HttpRequestHeaders httpHeaders,
+                        final String requestBody, final Cookies cookies) {
         this.requestLine = requestLine;
         this.httpRequestHeaders = httpHeaders;
         this.requestBody = requestBody;
         this.cookies = cookies;
     }
 
-    public static Http11Request from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final var requestLine = generateRequestLine(bufferedReader);
         final var httpHeaders = generateHttpHeader(bufferedReader);
         final var requestBody = generateHttpRequestBody(httpHeaders, bufferedReader);
         final var cookies = httpHeaders.getCookies();
-        return new Http11Request(requestLine, httpHeaders, requestBody, cookies);
+        return new HttpRequest(requestLine, httpHeaders, requestBody, cookies);
     }
 
     private static RequestLine generateRequestLine(final BufferedReader bufferedReader) throws IOException {
-        final String line = bufferedReader.readLine();
-        return RequestLine.from(line);
+        return RequestLine.from(bufferedReader.readLine());
     }
 
     private static HttpRequestHeaders generateHttpHeader(final BufferedReader bufferedReader) throws IOException {
@@ -53,8 +51,8 @@ public class Http11Request {
         return HttpRequestHeaders.from(httpHeaders);
     }
 
-    public static String generateHttpRequestBody(final HttpRequestHeaders httpHeaders,
-                                                 final BufferedReader bufferedReader)
+    private static String generateHttpRequestBody(final HttpRequestHeaders httpHeaders,
+                                                  final BufferedReader bufferedReader)
             throws IOException {
         final var contentLength = httpHeaders.getContentLength();
         final var length = contentLength.getContentLength();
@@ -65,29 +63,20 @@ public class Http11Request {
         return new String(body);
     }
 
-    public boolean isStaticResource() {
-        return requestLine.isStaticResource();
-    }
-
     public RequestLine getRequestLine() {
         return requestLine;
-    }
-
-    public HttpRequestHeaders getHttpRequestHeaders() {
-        return httpRequestHeaders;
     }
 
     public String getRequestBody() {
         return requestBody;
     }
 
-    public Cookies getCookieByJSessionId() {
-        return httpRequestHeaders.getCookies();
-    }
-
-    public Session getSession() {
+    public Session getSession(final boolean bool) {
         final Optional<String> jSessionId = cookies.getJSessionId();
-        return jSessionId.map(Session::new).orElseGet(() -> new Session(UUID.randomUUID().toString()));
+        if (bool) {
+            return jSessionId.map(Session::new).orElseGet(() -> new Session(UUID.randomUUID().toString()));
+        }
+        return jSessionId.map(Session::new).orElseGet(null);
     }
 
     public boolean hasCookieByJSessionId() {
@@ -96,5 +85,13 @@ public class Http11Request {
 
     public Optional<String> getJSessionId() {
         return cookies.getJSessionId();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public RequestURI getRequestURI() {
+        return requestLine.getRequestURI();
     }
 }

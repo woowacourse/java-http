@@ -1,4 +1,4 @@
-package nextstep.jwp.presentation;
+package nextstep.jwp.presentation.resolver;
 
 import java.util.HashMap;
 import java.util.Map;

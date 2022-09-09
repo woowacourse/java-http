@@ -1,8 +1,9 @@
-package org.apache.catalina;
+package org.apache.coyote.http11.http;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
@@ -26,7 +27,7 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(final Session session) {
-
+        SESSIONS.remove(session.getId());
     }
 
     public boolean hasSameSessionId(final String id) {

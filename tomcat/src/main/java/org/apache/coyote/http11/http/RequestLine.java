@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
+
+import org.apache.coyote.http11.util.HttpMethod;
 
 public class RequestLine {
 
@@ -24,9 +26,5 @@ public class RequestLine {
 
     public RequestURI getRequestURI() {
         return requestURI;
-    }
-
-    public boolean isStaticResource() {
-        return requestURI.isStaticResource();
     }
 }

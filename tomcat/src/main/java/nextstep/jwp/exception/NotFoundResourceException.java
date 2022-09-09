@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception;
+package nextstep.jwp.exception;
 
 public class NotFoundResourceException extends RuntimeException {
     public NotFoundResourceException() {

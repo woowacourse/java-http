@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 public class ContentLength {
 
     private final int contentLength;
 
-    public ContentLength(final int contentLength) {
+    private ContentLength(final int contentLength) {
         this.contentLength = contentLength;
     }
 

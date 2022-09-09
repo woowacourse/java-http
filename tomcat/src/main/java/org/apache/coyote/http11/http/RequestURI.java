@@ -1,13 +1,10 @@
-package org.apache.coyote.http11;
-
-import org.apache.coyote.http11.util.StaticResourceExtensionSupporter;
+package org.apache.coyote.http11.http;
 
 public class RequestURI {
 
-
     private final String requestURI;
 
-    public RequestURI(final String requestURI) {
+    private RequestURI(final String requestURI) {
         this.requestURI = requestURI;
     }
 
@@ -16,10 +13,6 @@ public class RequestURI {
             return new RequestURI("/index.html");
         }
         return new RequestURI(requestURI);
-    }
-
-    public boolean isStaticResource() {
-        return StaticResourceExtensionSupporter.isStaticResource(requestURI);
     }
 
     public boolean contains(final String login) {

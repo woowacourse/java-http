@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.exception;
+package nextstep.jwp.exception;
 
 public class NotFoundHandlerException extends RuntimeException {
     public NotFoundHandlerException() {

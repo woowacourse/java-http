@@ -1,10 +1,10 @@
 package nextstep.jwp.presentation.controller;
 
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
 
 public interface RequestHandler {
-    String handle(Http11Request request, Http11Response response);
+    String handle(HttpRequest request, HttpResponse response);
 
-    boolean support(Http11Request request);
+    boolean support(HttpRequest request);
 }

@@ -1,13 +1,14 @@
-package org.apache.catalina;
-
-import static nextstep.jwp.HttpCookie.ID;
+package org.apache.coyote.http11.http;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Cookies {
+    private static final String ID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     private Cookies(final Map<String, String> cookies) {
@@ -20,6 +21,9 @@ public class Cookies {
 
     public static Cookies from(final String rowCookieData) {
         final Map<String, String> cookies = new HashMap<>();
+        if (Objects.isNull(rowCookieData)) {
+            return new Cookies(cookies);
+        }
         for (final String cookie : rowCookieData.split("; ")) {
             final String[] keyAndValue = cookie.split("=");
             cookies.put(keyAndValue[0], keyAndValue[1]);

@@ -6,11 +6,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.ChicChocServlet;
+import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+    private RequestMapping requestMapping;
+
+    @BeforeEach
+    void setUp() {
+        requestMapping = new RequestMapping();
+        requestMapping.addServlet("/", new ChicChocServlet());
+    }
 
     @Test
     void process() {

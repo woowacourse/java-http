@@ -1,17 +1,16 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.catalina.Cookies;
 
 public class HttpRequestHeaders {
 
     private final Map<String, String> httpRequestHeaders;
 
-    public HttpRequestHeaders(final Map<String, String> httpHeaders) {
+    private HttpRequestHeaders(final Map<String, String> httpHeaders) {
         this.httpRequestHeaders = httpHeaders;
     }
 
@@ -35,11 +34,11 @@ public class HttpRequestHeaders {
     }
 
     public Cookies getCookies() {
-        final String cookies = httpRequestHeaders.entrySet().stream()
+        final var cookies = httpRequestHeaders.entrySet().stream()
                 .filter(it -> it.getKey().equalsIgnoreCase("Cookie"))
                 .map(Entry::getValue)
                 .findFirst()
-                .orElseGet(() -> "EMPTY");
+                .orElse(null);
         return Cookies.from(cookies);
     }
 }

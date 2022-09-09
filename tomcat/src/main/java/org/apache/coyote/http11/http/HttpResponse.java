@@ -1,15 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import nextstep.jwp.HttpCookie;
-import org.apache.catalina.Cookies;
 import org.apache.coyote.http11.util.HttpStatus;
 import org.apache.coyote.http11.util.PathParser;
 
-public class Http11Response {
+public class HttpResponse {
     private static final String SPACE = " ";
     private static final String RESOURCE_SEPARATOR = "/";
     private static final String HTML_EXTENSION = ".html";
@@ -17,33 +15,10 @@ public class Http11Response {
     private String resourceURI;
     private HttpStatus httpStatus;
     private String location;
-    private String contentType;
-    private String responseBody;
-    private HttpCookie cookie;
     private Cookies cookies;
 
     public String getString() {
         return null;
-    }
-
-    public String getResourceURI() {
-        return resourceURI;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public String getResponseBody() {
-        return responseBody;
     }
 
     public byte[] getBytes() throws IOException {
@@ -68,7 +43,6 @@ public class Http11Response {
         final var contentType = Files.probeContentType(absolutePath);
         final var responseBody = readFile(absolutePath);
 
-//        return HttpMessageSupporter.createMessage(contentType, responseBody);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -91,18 +65,6 @@ public class Http11Response {
 
     public void setLocation(final String location) {
         this.location = RESOURCE_SEPARATOR + location + HTML_EXTENSION;
-    }
-
-    public void setContentType(final String contentType) {
-        this.contentType = contentType;
-    }
-
-    public void setResponseBody(final String responseBody) {
-        this.responseBody = responseBody;
-    }
-
-    public void setCookie(final HttpCookie cookie) {
-        this.cookie = cookie;
     }
 
     public void addCookie(final Cookies cookies) {

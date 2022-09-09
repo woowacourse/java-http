@@ -1,23 +1,25 @@
-package org.apache.catalina.servlet;
+package nextstep.jwp;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.DuplicateAccountException;
+import nextstep.jwp.exception.NotFoundHandlerException;
+import nextstep.jwp.exception.NotFoundResourceException;
 import nextstep.jwp.presentation.controller.LoginPageRequestHandler;
 import nextstep.jwp.presentation.controller.LoginRequestHandler;
 import nextstep.jwp.presentation.controller.RegisterPageRequestHandler;
 import nextstep.jwp.presentation.controller.RegisterRequestHandler;
 import nextstep.jwp.presentation.controller.RequestHandler;
+import nextstep.jwp.presentation.controller.ResourceRequestHandler;
 import nextstep.jwp.presentation.filter.LoginFilter;
-import org.apache.catalina.SessionManager;
-import org.apache.catalina.servlet.exception.NotFoundHandlerException;
-import org.apache.coyote.http11.Http11Request;
-import org.apache.coyote.http11.Http11Response;
+import org.apache.catalina.servlet.AbstractServlet;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.util.HttpStatus;
 
-public class ChicChocServlet {
+public class ChicChocServlet extends AbstractServlet {
 
     private static final String UNAUTHORIZED_PAGE = "401";
     private static final String NOT_FOUND_PAGE = "404";
@@ -26,20 +28,33 @@ public class ChicChocServlet {
     private final ViewResolver viewResolver;
     private final LoginFilter loginFilter;
     private final List<RequestHandler> requestHandlers = new ArrayList<>();
-    private final SessionManager sessionManager;
 
     public ChicChocServlet() {
         this.loginFilter = new LoginFilter();
         this.viewResolver = new ViewResolver();
-        this.sessionManager = new SessionManager();
+        initRequestHandlers();
     }
 
-    public void doService(final Http11Request request, final Http11Response response) {
-        initRequestHandlers();
+    private void initRequestHandlers() {
+        requestHandlers.addAll(
+                List.of(new LoginPageRequestHandler(), new LoginRequestHandler(), new RegisterPageRequestHandler(),
+                        new RegisterRequestHandler(), new ResourceRequestHandler()));
+    }
 
-//        if (supportFilter(request)) {
-//            loginFilter.doFilter(request);
-//        }
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        processRequest(request, response);
+    }
+
+    public void processRequest(final HttpRequest request, final HttpResponse response) {
+        if (supportFilter(request)) {
+            loginFilter.doFilter(request);
+        }
 
         String viewName = null;
         try {
@@ -48,7 +63,7 @@ public class ChicChocServlet {
         } catch (AuthenticationException e) {
             response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(UNAUTHORIZED_PAGE);
-        } catch (NotFoundHandlerException e) {
+        } catch (NotFoundHandlerException | NotFoundResourceException e) {
             response.setStatusCode(HttpStatus.FOUND);
             response.setLocation(NOT_FOUND_PAGE);
         } catch (DuplicateAccountException e) {
@@ -58,24 +73,18 @@ public class ChicChocServlet {
         applyViewName(viewName, response);
     }
 
-    private RequestHandler getHandler(final Http11Request request) {
+    private RequestHandler getHandler(final HttpRequest request) {
         return requestHandlers.stream()
                 .filter(it -> it.support(request))
                 .findFirst()
                 .orElseThrow(NotFoundHandlerException::new);
     }
 
-    private void initRequestHandlers() {
-        requestHandlers.addAll(
-                List.of(new LoginPageRequestHandler(), new LoginRequestHandler(), new RegisterPageRequestHandler(),
-                        new RegisterRequestHandler()));
-    }
-
-    private boolean supportFilter(final Http11Request request) {
+    private boolean supportFilter(final HttpRequest request) {
         return loginFilter.support(request);
     }
 
-    private void applyViewName(final String viewName, final Http11Response response) {
+    private void applyViewName(final String viewName, final HttpResponse response) {
         if (!Objects.isNull(viewName)) {
             viewResolver.resolve(viewName, response);
         }

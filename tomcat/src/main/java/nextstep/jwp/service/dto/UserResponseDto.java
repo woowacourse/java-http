@@ -1,6 +1,6 @@
-package nextstep.jwp.controller.dto;
+package nextstep.jwp.service.dto;
 
-import nextstep.jwp.model.User;
+import nextstep.jwp.domain.User;
 
 public class UserResponseDto {
 

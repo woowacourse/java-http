@@ -3,8 +3,7 @@ package nextstep.jwp.infra;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import nextstep.jwp.model.User;
-import org.junit.jupiter.api.BeforeEach;
+import nextstep.jwp.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

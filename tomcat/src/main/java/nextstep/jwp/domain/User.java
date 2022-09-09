@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain;
 
 import java.util.Objects;
 import nextstep.jwp.exception.UnauthorizedUserException;

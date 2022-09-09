@@ -1,10 +1,10 @@
 package nextstep.jwp.service;
 
 import java.util.NoSuchElementException;
-import nextstep.jwp.controller.dto.UserResponseDto;
+import nextstep.jwp.service.dto.UserResponseDto;
 import nextstep.jwp.infra.InMemoryUserRepository;
-import nextstep.jwp.model.User;
-import nextstep.jwp.model.UserRepository;
+import nextstep.jwp.domain.User;
+import nextstep.jwp.domain.UserRepository;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.Session;
 import org.apache.coyote.http.SessionManager;

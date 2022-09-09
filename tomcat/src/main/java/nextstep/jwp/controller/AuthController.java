@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import static org.apache.coyote.page.PageMapper.getFilePath;
 
 import java.util.NoSuchElementException;
-import nextstep.jwp.controller.dto.UserResponseDto;
+import nextstep.jwp.service.dto.UserResponseDto;
 import nextstep.jwp.exception.UnauthorizedUserException;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.annotation.Controller;

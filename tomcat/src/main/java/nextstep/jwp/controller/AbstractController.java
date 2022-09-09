@@ -13,14 +13,14 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public HttpResponse service(HttpRequest request, HttpResponse response) throws Exception {
         RequestMapping requestMapping = new RequestMapping();
 
         if (request.isGet()) {
-            doGet(request, response);
+            return doGet(request, response);
         }
         if (request.isPost()) {
-            doPost(request, response);
+            return doPost(request, response);
         }
         throw new HttpMethodNotAllowedException("유효하지 않은 HTTP method 입니다.");
     }

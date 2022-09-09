@@ -54,10 +54,6 @@ public class StartLine {
         return uri;
     }
 
-    public boolean hasMethodOf(HttpMethod method) {
-        return this.method.equals(method);
-    }
-
     public HttpMethod getMethod() {
         return method;
     }

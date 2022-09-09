@@ -60,6 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest toRequest(BufferedReader reader) throws IOException {
         final var startLine = StartLine.of(reader.readLine());
+        log.info("processing: {} {}", startLine.getMethod(), startLine.getUri());
         final var headers = readHeaders(reader);
         final var body = readBody(reader, headers);
         return new HttpRequest(startLine, headers, body);

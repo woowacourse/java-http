@@ -12,6 +12,7 @@ import java.util.Optional;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerMapping;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.view.View;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
@@ -38,7 +39,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
-        try (InputStream inputStream = connection.getInputStream(); OutputStream outputStream = connection.getOutputStream();
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
 
@@ -85,6 +87,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getNotFoundResponse() {
         return HttpResponse.notFound()
-                .addResponseBody("페이지를 찾을 수 없습니다.", ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }

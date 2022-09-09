@@ -2,12 +2,12 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.view.View;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.util.FileReader;
 
 public class RegisterController extends AbstractController {
 
@@ -28,9 +28,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        String responseBody = FileReader.readStaticFile("/register.html", this.getClass());
         return HttpResponse.ok()
-                .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.REGISTER.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 
     @Override
@@ -41,6 +40,6 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponse.redirect()
-                .addLocation("/index.html");
+                .addLocation(View.INDEX.getViewFileName());
     }
 }

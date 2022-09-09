@@ -21,7 +21,8 @@ public class HttpRequestFactory {
 
     public static HttpRequest create(BufferedReader reader) {
         try {
-            RequestLine requestLine = parseToRequestLine(reader.readLine());
+            String line = reader.readLine();
+            RequestLine requestLine = parseToRequestLine(line);
             RequestHeaders requestHeaders = parseToRequestHeaders(reader);
             return new HttpRequest(requestLine, requestHeaders, parseToRequestBody(reader, requestHeaders));
         } catch (Exception e) {

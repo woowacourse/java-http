@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.view.View;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.RequestBody;
@@ -13,7 +14,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.util.FileReader;
 
 public class LoginController extends AbstractController {
 
@@ -44,12 +44,12 @@ public class LoginController extends AbstractController {
                 SessionManager.add(session);
 
                 return HttpResponse.redirect()
-                        .addLocation("/index.html")
+                        .addLocation(View.INDEX.getViewFileName())
                         .addCookie(Cookies.ofJSessionId(session.getId()));
             }
         }
         return HttpResponse.redirect()
-                .addLocation("/401.html");
+                .addLocation(View.UNAUTHORIZED.getViewFileName());
     }
 
     @Override
@@ -57,12 +57,11 @@ public class LoginController extends AbstractController {
         Optional<String> session = request.getSession();
         if (session.isPresent() && SessionManager.findSession(session.get()).isPresent()) {
             return HttpResponse.redirect()
-                    .addLocation("/index.html");
+                    .addLocation(View.INDEX.getViewFileName());
         }
 
-        String responseBody = FileReader.readStaticFile("/login.html", this.getClass());
         return HttpResponse.ok()
-                .addResponseBody(responseBody, ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.LOGIN.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
 }
 

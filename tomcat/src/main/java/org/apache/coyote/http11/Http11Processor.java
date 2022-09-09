@@ -71,7 +71,8 @@ public class Http11Processor implements Runnable, Processor {
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
             return HttpResponse.ok()
-                    .addResponseBody(getStaticResourceResponse(request.getPath()), contentType);
+                    .addResponseBody(getStaticResourceResponse(request.getPath()), contentType)
+                    .build();
         }
         return getNotFoundResponse();
     }
@@ -87,6 +88,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getNotFoundResponse() {
         return HttpResponse.notFound()
-                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
     }
 }

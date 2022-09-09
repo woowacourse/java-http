@@ -30,7 +30,8 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         return HttpResponse.ok()
-                .addResponseBody(View.REGISTER.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.REGISTER.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
     }
 
     @Override
@@ -43,10 +44,12 @@ public class RegisterController extends AbstractController {
         if (user.isEmpty()) {
             InMemoryUserRepository.save(new User(account, password, email));
             return HttpResponse.redirect()
-                    .addLocation(View.INDEX.getViewFileName());
+                    .addLocation(View.INDEX.getViewFileName())
+                    .build();
         }
 
         return HttpResponse.redirect()
-                .addLocation(View.UNAUTHORIZED.getViewFileName());
+                .addLocation(View.UNAUTHORIZED.getViewFileName())
+                .build();
     }
 }

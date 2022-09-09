@@ -29,7 +29,9 @@ public class MainController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.ok().addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8);
+        return HttpResponse.ok()
+                .addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
 
     }
 }

@@ -13,6 +13,7 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse doNotFoundRequest() {
         return HttpResponse.notFound()
-                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
     }
 }

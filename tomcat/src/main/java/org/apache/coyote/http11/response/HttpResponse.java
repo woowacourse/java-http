@@ -4,57 +4,83 @@ public class HttpResponse {
 
     private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
 
-    private String protocol = null;
-    private HttpStatus status = null;
-    private String location = null;
-    private Cookie cookie = null;
-    private ContentType contentType = null;
-    private String responseBody = null;
+    private String protocol;
+    private HttpStatus status;
+    private String location;
+    private Cookie cookie;
+    private ContentType contentType;
+    private String responseBody;
 
-    public HttpResponse() {
-    }
-
-    public HttpResponse(String protocol, HttpStatus status) {
+    private HttpResponse(String protocol,
+                         HttpStatus status,
+                         String location,
+                         Cookie cookie,
+                         ContentType contentType,
+                         String responseBody) {
         this.protocol = protocol;
         this.status = status;
-    }
-
-    public static HttpResponse ok() {
-        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.OK);
-    }
-
-    public static HttpResponse redirect() {
-        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.FOUND);
-    }
-
-    public static HttpResponse notFound() {
-        return new HttpResponse(DEFAULT_PROTOCOL, HttpStatus.NOT_FOUND);
-    }
-
-    public HttpResponse addProtocol(String protocol) {
-        this.protocol = protocol;
-        return this;
-    }
-
-    public HttpResponse addStatus(HttpStatus status) {
-        this.status = status;
-        return this;
-    }
-
-    public HttpResponse addLocation(String location) {
         this.location = location;
-        return this;
-    }
-
-    public HttpResponse addResponseBody(String responseBody, ContentType contentType) {
-        this.responseBody = responseBody;
-        this.contentType = contentType;
-        return this;
-    }
-
-    public HttpResponse addCookie(Cookie cookie) {
         this.cookie = cookie;
-        return this;
+        this.contentType = contentType;
+        this.responseBody = responseBody;
+    }
+
+    public static HttpResponseBuilder ok() {
+        return new HttpResponseBuilder()
+                .protocol(DEFAULT_PROTOCOL)
+                .status(HttpStatus.OK);
+    }
+
+    public static HttpResponseBuilder redirect() {
+        return new HttpResponseBuilder()
+                .protocol(DEFAULT_PROTOCOL)
+                .status(HttpStatus.FOUND);
+    }
+
+    public static HttpResponseBuilder notFound() {
+        return new HttpResponseBuilder()
+                .protocol(DEFAULT_PROTOCOL)
+                .status(HttpStatus.NOT_FOUND);
+    }
+
+    public static class HttpResponseBuilder {
+
+        private String protocol;
+        private HttpStatus status;
+        private String location;
+        private Cookie cookie;
+        private ContentType contentType;
+        private String responseBody;
+
+        public HttpResponseBuilder protocol(String protocol) {
+            this.protocol = protocol;
+            return this;
+        }
+
+        public HttpResponseBuilder status(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public HttpResponseBuilder addLocation(String location) {
+            this.location = location;
+            return this;
+        }
+
+        public HttpResponseBuilder addResponseBody(String responseBody, ContentType contentType) {
+            this.responseBody = responseBody;
+            this.contentType = contentType;
+            return this;
+        }
+
+        public HttpResponseBuilder addCookie(Cookie cookie) {
+            this.cookie = cookie;
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(protocol, status, location, cookie, contentType, responseBody);
+        }
     }
 
     public String parseToString() {
@@ -77,7 +103,7 @@ public class HttpResponse {
             sb.append("Content-Type: ").append(contentType.getType()).append(" ").append("\r\n");
             sb.append("Content-Length: ").append(responseBody.getBytes().length).append(" ").append("\r\n");
             sb.append("\r\n");
-            sb.append(responseBody).append(" ").append("\r\n");
+            sb.append(responseBody);
         }
         return sb.toString();
     }

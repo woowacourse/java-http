@@ -52,24 +52,28 @@ public class LoginController extends AbstractController {
 
             return HttpResponse.redirect()
                     .addLocation(View.INDEX.getViewFileName())
-                    .addCookie(Cookies.ofJSessionId(session.getId()));
+                    .addCookie(Cookies.ofJSessionId(session.getId()))
+                    .build();
         }
         return getUnauthorizedResponse();
     }
 
     private HttpResponse getUnauthorizedResponse() {
         return HttpResponse.redirect()
-                .addLocation(View.UNAUTHORIZED.getViewFileName());
+                .addLocation(View.UNAUTHORIZED.getViewFileName())
+                .build();
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         if (isAlreadyLogin(request)) {
             return HttpResponse.redirect()
-                    .addLocation(View.INDEX.getViewFileName());
+                    .addLocation(View.INDEX.getViewFileName())
+                    .build();
         }
         return HttpResponse.ok()
-                .addResponseBody(View.LOGIN.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
+                .addResponseBody(View.LOGIN.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {

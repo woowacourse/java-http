@@ -44,4 +44,8 @@ public class RequestInfo {
     public int hashCode() {
         return Objects.hash(httpMethod, uri);
     }
+
+    public boolean sameHttpMethod(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
 }

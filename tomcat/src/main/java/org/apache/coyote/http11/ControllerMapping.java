@@ -8,23 +8,18 @@ import nextstep.jwp.support.ResourceSuffix;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.http.HttpMethod.GET;
-import static org.apache.http.HttpMethod.POST;
-
 public class ControllerMapping {
 
-    private final Map<RequestInfo, Controller> mapping = new ConcurrentHashMap<>();
+    private final Map<String, Controller> mapping = new ConcurrentHashMap<>();
 
     public ControllerMapping() {
-        mapping.put(new RequestInfo(GET, "/"), new GreetingController());
-        mapping.put(new RequestInfo(GET, "/login"), new ForwardController());
-        mapping.put(new RequestInfo(POST, "/login"), new LoginController(new SessionIdGenerator()));
-        mapping.put(new RequestInfo(GET, "/register"), new ForwardController());
-        mapping.put(new RequestInfo(POST, "/register"), new RegisterController());
+        mapping.put("/", new GreetingController());
+        mapping.put("/login", new LoginController(new SessionIdGenerator()));
+        mapping.put("/register", new RegisterController());
     }
 
     public Controller getController(final RequestInfo requestInfo) {
-        final Controller controller = mapping.get(requestInfo);
+        final Controller controller = mapping.get(requestInfo.getUri());
         if (controller != null) {
             return controller;
         }

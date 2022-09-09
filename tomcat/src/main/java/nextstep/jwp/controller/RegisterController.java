@@ -6,16 +6,24 @@ import nextstep.jwp.http.QueryStringConverter;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
+import nextstep.jwp.support.Resource;
 import nextstep.jwp.support.View;
 import org.apache.http.HttpHeader;
 import org.apache.http.HttpStatus;
 
 import java.util.Map;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     @Override
-    public void service(final Request request, final Response response) {
+    public void doGet(final Request request, final Response response) {
+        final Resource resource = new Resource(View.REGISTER.getValue());
+        response.header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
+                .content(resource.read());
+    }
+
+    @Override
+    public void doPost(final Request request, final Response response) {
         try {
             final User user = convert(request.getContent());
             InMemoryUserRepository.save(user);

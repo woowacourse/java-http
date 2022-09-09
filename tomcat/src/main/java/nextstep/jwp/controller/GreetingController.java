@@ -5,10 +5,10 @@ import nextstep.jwp.http.Response;
 import org.apache.http.HttpHeader;
 import org.apache.http.HttpMime;
 
-public class GreetingController implements Controller {
+public class GreetingController extends AbstractController {
 
     @Override
-    public void service(final Request request, final Response response) {
+    public void doGet(final Request request, final Response response) {
         response.header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue())
                 .content("Hello world!");
     }

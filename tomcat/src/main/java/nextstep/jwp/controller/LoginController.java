@@ -8,6 +8,7 @@ import nextstep.jwp.http.QueryStringConverter;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
+import nextstep.jwp.support.Resource;
 import nextstep.jwp.support.View;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String COOKIE_SESSION_KEY = "JSESSIONID";
 
@@ -31,7 +32,14 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public void service(final Request request, final Response response) {
+    public void doGet(final Request request, final Response response) {
+        final Resource resource = new Resource(View.LOGIN.getValue());
+        response.header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
+                .content(resource.read());
+    }
+
+    @Override
+    public void doPost(final Request request, final Response response) {
         final LoginRequest loginRequest = convert(request.getContent());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
         if (wrappedUser.isPresent()) {

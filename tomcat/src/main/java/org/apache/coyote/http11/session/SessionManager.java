@@ -15,6 +15,10 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
+    public static boolean isExist(String id) {
+        return SESSIONS.containsKey(id);
+    }
+
     public static Optional<Session> findSession(String id) {
         if (SESSIONS.containsKey(id)) {
             return Optional.of(SESSIONS.get(id));

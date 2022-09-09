@@ -54,14 +54,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        Optional<String> session = request.getSession();
-        if (session.isPresent() && SessionManager.findSession(session.get()).isPresent()) {
+        if (isAlreadyLogin(request)) {
             return HttpResponse.redirect()
                     .addLocation(View.INDEX.getViewFileName());
         }
-
         return HttpResponse.ok()
                 .addResponseBody(View.LOGIN.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
-}
 
+    private boolean isAlreadyLogin(HttpRequest request) {
+        return request.getSession()
+                .map(SessionManager::findSession)
+                .isPresent();
+    }
+}

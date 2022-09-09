@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.container.Container;
+import org.apache.container.exception.ContainerNotInitializedException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toResponseFormat().getBytes());
             outputStream.flush();
-        } catch (IOException e) {
+        } catch (IOException | ContainerNotInitializedException e) {
             log.error(e.getMessage(), e);
         }
     }

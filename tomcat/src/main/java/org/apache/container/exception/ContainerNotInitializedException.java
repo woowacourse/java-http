@@ -3,6 +3,6 @@ package org.apache.container.exception;
 public class ContainerNotInitializedException extends RuntimeException {
 
     public ContainerNotInitializedException() {
-        super("기본 요청 핸들러가 지정되지 않았습니다.");
+        super("컨테이너가 올바르게 초기화되지 않았습니다.");
     }
 }

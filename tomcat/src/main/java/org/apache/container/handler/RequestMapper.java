@@ -39,4 +39,8 @@ public class RequestMapper {
     public ExceptionHandler getExceptionHandler() {
         return exceptionHandler;
     }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
 }

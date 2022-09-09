@@ -1,17 +1,17 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.controller.dto.DtoAssembler;
-import nextstep.jwp.exception.ExceptionHandler;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.response.HttpResponse;
+import nextstep.jwp.view.Page;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
     private final UserService userService;
 
-    public RegisterController(UserService userService, ExceptionHandler exceptionHandler) {
-        super("/register", exceptionHandler);
+    public RegisterController(UserService userService) {
+        super("/register");
         this.userService = userService;
     }
 

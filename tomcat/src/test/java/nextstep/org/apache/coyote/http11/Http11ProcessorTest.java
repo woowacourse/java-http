@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.ResourceController;
-import nextstep.jwp.exception.ExceptionHandler;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
@@ -65,8 +64,6 @@ class Http11ProcessorTest {
     }
 
     private RequestMapping toRequestMapping() {
-        final var exceptionHandler = new ExceptionHandler();
-        return RequestMapping.of(List.of(new HomeController(exceptionHandler),
-                new ResourceController(exceptionHandler)));
+        return RequestMapping.of(List.of(new HomeController(), new ResourceController()));
     }
 }

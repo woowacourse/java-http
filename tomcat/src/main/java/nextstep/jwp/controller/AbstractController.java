@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
 import java.util.List;
-import nextstep.jwp.exception.ExceptionHandler;
+import nextstep.jwp.view.ExceptionPage;
 import org.apache.catalina.servlet.Controller;
-import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;
@@ -12,15 +12,13 @@ import org.apache.coyote.support.HttpStatus;
 public abstract class AbstractController implements Controller {
 
     private final List<String> paths;
-    private final ExceptionHandler exceptionHandler;
 
-    protected AbstractController(List<String> paths, ExceptionHandler exceptionHandler) {
+    protected AbstractController(List<String> paths) {
         this.paths = paths;
-        this.exceptionHandler = exceptionHandler;
     }
 
-    protected AbstractController(String path, ExceptionHandler exceptionHandler) {
-        this(List.of(path), exceptionHandler);
+    protected AbstractController(String path) {
+        this(List.of(path));
     }
 
     @Override
@@ -53,7 +51,9 @@ public abstract class AbstractController implements Controller {
     }
 
     private void handleException(HttpException exception, HttpResponse response) {
-        exceptionHandler.handle(exception, response);
+        final var status = exception.getStatus();
+        final var path = ExceptionPage.toUri(status);
+        response.status(status).setViewResource(path);
     }
 
     @Override

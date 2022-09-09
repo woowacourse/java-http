@@ -1,14 +1,13 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.ExceptionHandler;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
 public class ResourceController extends AbstractController {
 
-    public ResourceController(ExceptionHandler exceptionHandler) {
-        super(RequestMapping.DEFAULT_URL, exceptionHandler);
+    public ResourceController() {
+        super(RequestMapping.DEFAULT_URL);
     }
 
     @Override

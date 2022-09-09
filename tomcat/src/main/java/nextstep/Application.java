@@ -12,7 +12,7 @@ public class Application {
     public static void main(String[] args) {
         log.info("web server start.");
         final var tomcat = new Tomcat();
-        tomcat.start();
         tomcat.addRequestMapping("/", new ChicChocServlet());
+        tomcat.start();
     }
 }

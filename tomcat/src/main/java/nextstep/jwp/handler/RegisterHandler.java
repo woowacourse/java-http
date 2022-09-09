@@ -15,7 +15,7 @@ public class RegisterHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static boolean handle(HttpRequest request) {
-        Map<String, String> body = parse(request.getRequestBody());
+        Map<String, String> body = parse(request.getBody());
         String account = body.get("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return false;

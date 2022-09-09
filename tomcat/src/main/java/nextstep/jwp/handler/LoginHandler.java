@@ -16,7 +16,7 @@ public class LoginHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static boolean handle(HttpRequest httpRequest, HttpResponse response) {
-        Map<String, String> body = httpRequest.getParseRequestBody();
+        Map<String, String> body = httpRequest.getParsedRequestBody();
 
         Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));
 

@@ -18,12 +18,8 @@ public class RequestHeaders {
         return new RequestHeaders(ParseUtils.parse(headers, "\r\n", ": "));
     }
 
-    public boolean hasRequestBody() {
-        return headers.containsKey(CONTENT_LENGTH);
-    }
-
     public String getContentLength() {
-        return headers.get(CONTENT_LENGTH);
+        return headers.getOrDefault(CONTENT_LENGTH, "0");
     }
 
     public boolean hasCookies() {

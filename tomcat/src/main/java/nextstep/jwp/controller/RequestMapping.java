@@ -12,8 +12,8 @@ public class RequestMapping {
     );
 
     public Controller getController(HttpRequest request) {
-        if (CONTROLLERS.containsKey(request.getUrl())) {
-            return CONTROLLERS.get(request.getUrl());
+        if (CONTROLLERS.containsKey(request.getPath())) {
+            return CONTROLLERS.get(request.getPath());
         }
 
         return new StaticFileController();

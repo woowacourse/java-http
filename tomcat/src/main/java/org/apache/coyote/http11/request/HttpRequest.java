@@ -15,45 +15,44 @@ public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    private final RequestLine requestline;
+    private final RequestLine startLine;
     private final RequestHeaders headers;
     private final HttpCookie httpCookie;
-    private final String requestBody;
+    private final String body;
     private final Session session;
 
-    public HttpRequest(final RequestLine requestline, final RequestHeaders headers, final HttpCookie httpCookie,
-                       final String requestBody, final Session session) {
-        this.requestline = requestline;
+    public HttpRequest(final RequestLine startLine, final RequestHeaders headers, final HttpCookie httpCookie,
+                       final String body, final Session session) {
+        this.startLine = startLine;
         this.headers = headers;
         this.httpCookie = httpCookie;
-        this.requestBody = requestBody;
+        this.body = body;
         this.session = session;
     }
 
-    public static HttpRequest of(final BufferedReader reader) throws IOException {
+    public static HttpRequest from(final BufferedReader reader) throws IOException {
         final var startLine = reader.readLine();
         if (startLine.isEmpty()) {
             return null;
         }
-        final var requestHeaders = readRequestHeaders(reader);
-        var requestBody = "";
-        if (requestHeaders.hasRequestBody()) {
-            requestBody = readRequestBody(reader, requestHeaders.getContentLength());
-        }
-        return HttpRequest.of(startLine, requestHeaders, requestBody);
+        final var headers = readHeaders(reader);
+        final var body = readBody(reader, headers.getContentLength());
+
+        return HttpRequest.of(startLine, headers, body);
     }
 
-    private static RequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder requestHeaders = new StringBuilder();
+    private static RequestHeaders readHeaders(final BufferedReader bufferedReader) throws IOException {
+        StringBuilder headers = new StringBuilder();
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
-            requestHeaders.append(line)
+            headers.append(line)
                     .append("\r\n");
         }
-        return RequestHeaders.from(requestHeaders.toString());
+
+        return RequestHeaders.from(headers.toString());
     }
 
-    private static String readRequestBody(final BufferedReader reader, final String contentLength) throws IOException {
+    private static String readBody(final BufferedReader reader, final String contentLength) throws IOException {
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         reader.read(buffer, 0, length);
@@ -74,21 +73,20 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, httpCookies, requestBody, new Session());
     }
 
-    public Map<String, String> getParseRequestBody() {
-        return ParseUtils.parse(requestBody, "&", "=");
+    public Map<String, String> getParsedRequestBody() {
+        return ParseUtils.parse(body, "&", "=");
     }
 
-
-    public String getUrl() {
-        return requestline.getPath();
+    public String getPath() {
+        return startLine.getPath();
     }
 
     public HttpCookie getHttpCookie() {
         return httpCookie;
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public String getBody() {
+        return body;
     }
 
     public Session getSession() {
@@ -96,10 +94,10 @@ public class HttpRequest {
     }
 
     public boolean isGet() {
-        return requestline.isMethodGet();
+        return startLine.isMethodGet();
     }
 
     public boolean isPost() {
-        return requestline.isMethodPost();
+        return startLine.isMethodPost();
     }
 }

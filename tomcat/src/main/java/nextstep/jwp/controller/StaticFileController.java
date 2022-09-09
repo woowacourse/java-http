@@ -12,7 +12,7 @@ public class StaticFileController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        String url = request.getUrl();
+        String url = request.getPath();
         if (hasMatchedStaticFile(url)) {
             final String body = readResourceBody(url);
             final ResponseHeaders responseHeaders = readResourceHeader(url, body);

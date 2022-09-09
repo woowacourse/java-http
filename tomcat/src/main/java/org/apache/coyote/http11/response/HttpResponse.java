@@ -8,7 +8,8 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class HttpResponse {
-    private final String protocolVersion = "HTTP/1.1";
+
+    private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
     private Status status;
     private ResponseHeaders responseHeaders;
@@ -48,7 +49,7 @@ public class HttpResponse {
 
     public String toMessage() {
         return String.join("\r\n",
-                protocolVersion + " " + status.getCode() + " " + status.getMessage() + " ",
+                PROTOCOL_VERSION + " " + status.getCode() + " " + status.getMessage() + " ",
                 responseHeaders.toMessage(),
                 "",
                 body

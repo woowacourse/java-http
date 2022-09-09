@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -72,8 +73,10 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {
-        return request.getSession()
-                .map(SessionManager::findSession)
-                .isPresent();
+        Optional<String> session = request.getSession();
+        if (session.isEmpty()) {
+            return false;
+        }
+        return SessionManager.isExist(session.get());
     }
 }

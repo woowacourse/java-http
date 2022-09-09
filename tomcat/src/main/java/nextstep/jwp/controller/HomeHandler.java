@@ -6,12 +6,12 @@ import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
 
-import static org.apache.coyote.utils.Util.getExtension;
+import static org.apache.coyote.model.request.RequestLine.getExtension;
 
 public class HomeHandler extends AbstractHandler {
 
-    public static final String HELLO_WORLD = "Hello world!";
     private static final HomeHandler INSTANCE = new HomeHandler();
+    private static final String HELLO_WORLD = "Hello world!";
 
     public HomeHandler() {
     }

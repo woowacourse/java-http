@@ -4,7 +4,6 @@ import org.apache.coyote.model.request.HttpRequest;
 import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
-import org.apache.coyote.utils.Util;
 
 import static org.apache.coyote.model.request.ContentType.HTML;
 
@@ -21,7 +20,7 @@ public class IndexHandler extends AbstractHandler {
 
     @Override
     public String getResponse(final HttpRequest httpRequest) {
-        String responseBody = Util.getResponseBody(httpRequest.getPath(), getClass());
+        String responseBody = HttpResponse.getResponseBody(httpRequest.getPath(), getClass());
         ResponseLine responseLine = ResponseLine.of(StatusCode.OK);
         HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
         return httpResponse.getResponse();

@@ -10,11 +10,11 @@ import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.model.session.Cookie;
 import org.apache.coyote.model.session.Session;
 import org.apache.coyote.model.session.SessionManager;
-import org.apache.coyote.utils.Util;
 
 import java.util.Optional;
 
-import static org.apache.coyote.utils.Util.createResponse;
+import static org.apache.coyote.model.response.HttpResponse.createResponse;
+import static org.apache.coyote.model.response.HttpResponse.getResponseBody;
 
 
 public class LoginHandler extends AbstractHandler {
@@ -31,20 +31,20 @@ public class LoginHandler extends AbstractHandler {
     @Override
     protected String getMethodResponse(final HttpRequest httpRequest) {
         if (SessionManager.findSession(httpRequest.getCookieKey()).isPresent()) {
-            return createResponse(StatusCode.OK, Util.getResponseBody(INDEX_HTML, getClass()))
+            return createResponse(StatusCode.OK, getResponseBody(INDEX_HTML, getClass()))
                     .getResponse();
         }
-        return createResponse(StatusCode.OK, Util.getResponseBody(LOGIN_HTML, getClass()))
+        return createResponse(StatusCode.OK, getResponseBody(LOGIN_HTML, getClass()))
                 .getResponse();
     }
 
     @Override
     protected String postMethodResponse(final HttpRequest httpRequest) {
         if (!checkUser(httpRequest.getRequestBody())) {
-            return createResponse(StatusCode.UNAUTHORIZED, Util.getResponseBody(CLIENT_ERROR_401, getClass()))
+            return createResponse(StatusCode.UNAUTHORIZED, getResponseBody(CLIENT_ERROR_401, getClass()))
                     .getResponse();
         }
-        HttpResponse httpResponse = createResponse(StatusCode.FOUND, Util.getResponseBody(INDEX_HTML, getClass()));
+        HttpResponse httpResponse = createResponse(StatusCode.FOUND, getResponseBody(INDEX_HTML, getClass()));
         if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
             Cookie cookie = new Cookie();
             RequestBody requestBody = httpRequest.getRequestBody();

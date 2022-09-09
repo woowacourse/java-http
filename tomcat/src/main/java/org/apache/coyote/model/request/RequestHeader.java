@@ -6,10 +6,10 @@ import java.util.Map;
 
 public class RequestHeader {
 
+    private static final String COOKIE = "Cookie";
+    private static final int KEY = 0;
+    private static final int VALUE = 1;
     private static final String CONTENT_LENGTH = "Content-Length";
-    public static final String COOKIE = "Cookie";
-    public static final int KEY = 0;
-    public static final int VALUE = 1;
     private final Map<String, String> requestHeader;
 
     private RequestHeader(final Map<String, String> requestHeader) {

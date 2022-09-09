@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.coyote.model.request.RequestLine.calculatePath;
+import static org.apache.coyote.model.request.RequestLine.getExtension;
+import static org.apache.coyote.model.request.RequestLine.getParam;
+import static org.apache.coyote.model.response.HttpResponse.getResponseBody;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -19,7 +23,7 @@ class UtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = Util.getResponseBody(filename, this.getClass());
+        String actual = getResponseBody(filename, this.getClass());
 
         // then
         assertThat(actual).isNotBlank();
@@ -32,7 +36,7 @@ class UtilTest {
         String filename = "/nonFile";
 
         // when & then
-        assertThatThrownBy(() -> Util.getResponseBody(filename, this.getClass()))
+        assertThatThrownBy(() -> getResponseBody(filename, this.getClass()))
                 .isInstanceOf(NotFoundFileException.class);
     }
 
@@ -43,7 +47,7 @@ class UtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = Util.getExtension(filename);
+        String actual = getExtension(filename);
 
         // then
         assertThat(actual).isEqualTo("html");
@@ -56,7 +60,7 @@ class UtilTest {
         String filename = "/login?account=gugu&password=password";
 
         // when
-        String actual = Util.calculatePath(filename);
+        String actual = calculatePath(filename);
 
         // then
         assertThat(actual).isEqualTo("/login.html");
@@ -72,7 +76,7 @@ class UtilTest {
         expected.put("password", "password");
 
         // when
-        Map<String, String> actual = Util.getParam(filename);
+        Map<String, String> actual = getParam(filename);
 
         // then
         assertThat(actual).isEqualTo(expected);

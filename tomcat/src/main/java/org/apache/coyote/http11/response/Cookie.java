@@ -6,10 +6,18 @@ import java.util.stream.Collectors;
 
 public class Cookie {
 
+    public static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_PARAMETER_DELIMITER = "=";
     private static final String COOKIE_CONNECTOR = "; ";
 
     private final Map<String, String> cookies = new HashMap<>();
+
+
+    public static Cookie ofJSessionId(String id) {
+        Cookie cookie = new Cookie();
+        cookie.addCookie(JSESSIONID, id);
+        return cookie;
+    }
 
     public void addCookie(String key, String value) {
         cookies.put(key, value);

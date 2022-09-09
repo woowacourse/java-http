@@ -10,8 +10,8 @@ import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.Cookie;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
@@ -52,7 +52,7 @@ public class LoginController extends AbstractController {
 
             return HttpResponse.redirect()
                     .addLocation(View.INDEX.getViewFileName())
-                    .addCookie(Cookies.ofJSessionId(session.getId()))
+                    .addCookie(Cookie.ofJSessionId(session.getId()))
                     .build();
         }
         return getUnauthorizedResponse();

@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.util.UUID;
 import nextstep.jwp.config.NextStepConfig;
 import nextstep.jwp.model.User;
-import org.apache.catalina.config.Configuration;
+import org.apache.container.config.Configuration;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

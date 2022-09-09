@@ -13,7 +13,7 @@ import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.MethodNotAllowedException;
-import org.apache.catalina.handler.ExceptionHandler;
+import org.apache.container.handler.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

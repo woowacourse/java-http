@@ -8,10 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.apache.catalina.config.Configuration;
-import org.apache.catalina.handler.ExceptionHandler;
-import org.apache.catalina.handler.RequestHandler;
-import org.apache.catalina.handler.RequestMapper;
+import org.apache.container.Container;
+import org.apache.container.config.Configuration;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapper requestMapper;
-    private final ExceptionHandler exceptionHandler;
+    private final Container container;
 
     public Http11Processor(final Socket connection, final Configuration configuration) {
         this.connection = connection;
-        this.requestMapper = configuration.getRequestMapper();
-        this.exceptionHandler = configuration.getExceptionHandler();
+        this.container = new Container(configuration);
     }
 
     @Override
@@ -41,21 +37,12 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
-            HttpResponse response = respond(httpRequest);
+            HttpResponse response = container.respond(httpRequest);
 
             outputStream.write(response.toResponseFormat().getBytes());
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpResponse respond(final HttpRequest httpRequest) {
-        try {
-            RequestHandler requestHandler = requestMapper.findHandler(httpRequest.getUrl());
-            return requestHandler.service(httpRequest);
-        } catch (Exception e) {
-            return exceptionHandler.handle(e);
         }
     }
 }

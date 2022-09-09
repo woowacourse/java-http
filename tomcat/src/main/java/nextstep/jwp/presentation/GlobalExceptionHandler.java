@@ -1,12 +1,12 @@
 package nextstep.jwp.presentation;
 
-import http.HttpHeaders;
-import http.HttpResponse;
-import http.HttpStatus;
 import http.exception.InvalidHttpMethodException;
 import http.exception.InvalidHttpRequestFormatException;
 import http.exception.QueryStringFormatException;
 import http.exception.ResourceNotFoundException;
+import http.header.HttpHeaders;
+import http.response.HttpResponse;
+import http.response.HttpStatus;
 import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.exception.InvalidLoginFormatException;
 import nextstep.jwp.exception.InvalidPasswordException;

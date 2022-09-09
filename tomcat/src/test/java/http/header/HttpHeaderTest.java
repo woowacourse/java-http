@@ -1,4 +1,4 @@
-package http;
+package http.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -1,6 +1,6 @@
 package org.apache.catalina.handler;
 
-import http.HttpResponse;
+import http.response.HttpResponse;
 
 public interface ExceptionHandler {
 

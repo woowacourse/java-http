@@ -1,8 +1,9 @@
-package http;
+package http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import http.header.ContentType;
 import http.session.Session;
 import http.session.SessionManager;
 import java.io.BufferedReader;

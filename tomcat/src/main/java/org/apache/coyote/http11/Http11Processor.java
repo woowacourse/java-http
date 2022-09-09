@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import http.HttpRequest;
-import http.HttpResponse;
+import http.request.HttpRequest;
+import http.response.HttpResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

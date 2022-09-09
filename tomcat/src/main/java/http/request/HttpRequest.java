@@ -1,5 +1,8 @@
-package http;
+package http.request;
 
+import http.header.ContentType;
+import http.header.HttpCookie;
+import http.header.HttpHeaders;
 import http.session.Session;
 import http.session.SessionManager;
 import http.support.ResourcesUtil;

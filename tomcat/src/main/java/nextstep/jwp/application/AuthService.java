@@ -1,6 +1,6 @@
 package nextstep.jwp.application;
 
-import http.QueryParams;
+import http.request.QueryParams;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.exception.InvalidLoginFormatException;

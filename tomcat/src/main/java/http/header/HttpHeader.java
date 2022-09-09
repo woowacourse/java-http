@@ -1,4 +1,4 @@
-package http;
+package http.header;
 
 import http.exception.InvalidHttpRequestFormatException;
 import java.util.Objects;

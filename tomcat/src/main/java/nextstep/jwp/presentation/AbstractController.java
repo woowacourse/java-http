@@ -1,11 +1,11 @@
 package nextstep.jwp.presentation;
 
-import http.ContentType;
-import http.HttpHeaders;
-import http.HttpMethod;
-import http.HttpRequest;
-import http.HttpResponse;
-import http.HttpStatus;
+import http.header.ContentType;
+import http.header.HttpHeaders;
+import http.request.HttpMethod;
+import http.request.HttpRequest;
+import http.response.HttpResponse;
+import http.response.HttpStatus;
 import http.support.ResourcesUtil;
 import java.io.IOException;
 import nextstep.jwp.exception.MethodNotAllowedException;

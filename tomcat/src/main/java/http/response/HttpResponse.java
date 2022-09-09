@@ -1,5 +1,7 @@
-package http;
+package http.response;
 
+import http.header.HttpHeader;
+import http.header.HttpHeaders;
 import java.util.stream.Collectors;
 
 public class HttpResponse {

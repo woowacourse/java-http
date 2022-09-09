@@ -3,8 +3,8 @@ package nextstep.jwp.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import http.HttpRequest;
-import http.HttpResponse;
+import http.request.HttpRequest;
+import http.response.HttpResponse;
 import http.session.Session;
 import http.session.SessionManager;
 import java.io.BufferedReader;

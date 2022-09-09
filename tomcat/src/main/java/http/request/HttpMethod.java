@@ -1,4 +1,4 @@
-package http;
+package http.request;
 
 import http.exception.InvalidHttpMethodException;
 import java.util.Arrays;

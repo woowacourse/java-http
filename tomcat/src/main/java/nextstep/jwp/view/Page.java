@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.view;
 
 public enum Page {
 

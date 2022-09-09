@@ -3,9 +3,9 @@ package nextstep.jwp.controller;
 import java.io.File;
 import java.net.URL;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.Headers;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
+import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 
 public class StaticFileController extends AbstractController {
@@ -15,10 +15,10 @@ public class StaticFileController extends AbstractController {
         String url = request.getUrl();
         if (hasMatchedStaticFile(url)) {
             final String body = readResourceBody(url);
-            final Headers headers = readResourceHeader(url, body);
+            final ResponseHeaders responseHeaders = readResourceHeader(url, body);
 
             return new ResponseBuilder().status(Status.OK)
-                    .headers(headers)
+                    .headers(responseHeaders)
                     .body(body)
                     .build();
         }

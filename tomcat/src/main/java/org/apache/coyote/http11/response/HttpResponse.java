@@ -11,16 +11,16 @@ public class HttpResponse {
     private final String protocolVersion = "HTTP/1.1";
 
     private Status status;
-    private Headers headers;
+    private ResponseHeaders responseHeaders;
     private String body;
 
     public HttpResponse() {
-        this.headers = new Headers();
+        this.responseHeaders = new ResponseHeaders();
     }
 
-    private HttpResponse(final Status status, final Headers headers, final String body) {
+    private HttpResponse(final Status status, final ResponseHeaders responseHeaders, final String body) {
         this.status = status;
-        this.headers = headers;
+        this.responseHeaders = responseHeaders;
         this.body = body;
     }
 
@@ -49,7 +49,7 @@ public class HttpResponse {
     public String toMessage() {
         return String.join("\r\n",
                 protocolVersion + " " + status.getCode() + " " + status.getMessage() + " ",
-                headers.toMessage(),
+                responseHeaders.toMessage(),
                 "",
                 body
         );
@@ -60,11 +60,11 @@ public class HttpResponse {
     }
 
     public void addCookie(String cookie) {
-        headers.setCookie(cookie);
+        responseHeaders.setCookie(cookie);
     }
 
     public void setHeaders(final Map<String, String> headers) {
-        this.headers = new Headers();
+        this.responseHeaders = new ResponseHeaders();
     }
 
     public void setBody(final String body) {
@@ -75,8 +75,8 @@ public class HttpResponse {
         return status;
     }
 
-    public Headers getHeaders() {
-        return headers;
+    public ResponseHeaders getHeaders() {
+        return responseHeaders;
     }
 
     public String getBody() {
@@ -85,13 +85,13 @@ public class HttpResponse {
 
     public HttpResponse redirect(final String redirectUrl) {
         this.status = Status.FOUND;
-        this.headers.setLocation(redirectUrl);
+        this.responseHeaders.setLocation(redirectUrl);
         return this;
     }
 
     public static class ResponseBuilder {
         private Status status;
-        private Headers headers = new Headers();
+        private ResponseHeaders responseHeaders = new ResponseHeaders();
         private String body = "";
 
         public ResponseBuilder status(final Status status) {
@@ -99,8 +99,8 @@ public class HttpResponse {
             return this;
         }
 
-        public ResponseBuilder headers(final Headers headers) {
-            this.headers = headers;
+        public ResponseBuilder headers(final ResponseHeaders responseHeaders) {
+            this.responseHeaders = responseHeaders;
             return this;
         }
 
@@ -110,7 +110,7 @@ public class HttpResponse {
         }
 
         public HttpResponse build() {
-            return new HttpResponse(status, headers, body);
+            return new HttpResponse(status, responseHeaders, body);
         }
     }
 }

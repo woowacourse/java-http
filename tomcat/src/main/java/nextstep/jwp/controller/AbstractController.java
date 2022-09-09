@@ -7,8 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.HttpMethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.Headers;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeaders;
 
 public abstract class AbstractController implements Controller {
 
@@ -39,14 +39,14 @@ public abstract class AbstractController implements Controller {
         return new String(Files.readAllBytes(path));
     }
 
-    protected Headers readResourceHeader(final String url, final String body) throws IOException {
+    protected ResponseHeaders readResourceHeader(final String url, final String body) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + url);
         final Path path = new File(resource.getFile()).toPath();
 
-        Headers headers = new Headers();
-        headers.setContentType(Files.probeContentType(path));
-        headers.setContentLength(body.getBytes().length);
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.setContentType(Files.probeContentType(path));
+        responseHeaders.setContentLength(body.getBytes().length);
 
-        return headers;
+        return responseHeaders;
     }
 }

@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Headers {
+public class ResponseHeaders {
     private final Map<String, String> headers;
 
-    public Headers() {
+    public ResponseHeaders() {
         this.headers = new HashMap<>();
     }
 

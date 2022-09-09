@@ -83,6 +83,12 @@ public class HttpResponse {
         return body;
     }
 
+    public HttpResponse redirect(final String redirectUrl) {
+        this.status = Status.FOUND;
+        this.headers.setLocation(redirectUrl);
+        return this;
+    }
+
     public static class ResponseBuilder {
         private Status status;
         private Headers headers = new Headers();

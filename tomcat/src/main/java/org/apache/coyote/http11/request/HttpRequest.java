@@ -17,20 +17,20 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "Content-Length";
 
     private final String method;
-    private final String requestUrl;
-    private final Map<String, String> requestParams;
+    private final String url;
+    private final Map<String, String> params;
     private final String protocolVersion;
     private final Map<String, String> headers;
     private final HttpCookie httpCookie;
     private final String requestBody;
     private final Session session;
 
-    public HttpRequest(final String method, final String requestUrl, final Map<String, String> requestParams,
+    public HttpRequest(final String method, final String requestUrl, final Map<String, String> params,
                        final String protocolVersion, final Map<String, String> headers, final HttpCookie httpCookie,
                        final String requestBody, final Session session) {
         this.method = method;
-        this.requestUrl = requestUrl;
-        this.requestParams = requestParams;
+        this.url = requestUrl;
+        this.params = params;
         this.protocolVersion = protocolVersion;
         this.headers = headers;
         this.httpCookie = httpCookie;
@@ -124,12 +124,12 @@ public class HttpRequest {
         return method;
     }
 
-    public String getRequestUrl() {
-        return requestUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public Map<String, String> getRequestParams() {
-        return requestParams;
+    public Map<String, String> getParams() {
+        return params;
     }
 
     public String getProtocolVersion() {

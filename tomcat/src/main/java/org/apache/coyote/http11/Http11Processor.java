@@ -66,8 +66,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getResponse(final HttpRequest httpRequest, final HttpResponse httpResponse)
             throws IOException {
-        final String url = httpRequest.getRequestUrl();
-        final Map<String, String> requestParam = httpRequest.getRequestParams();
+        final String url = httpRequest.getUrl();
+        final Map<String, String> requestParam = httpRequest.getParams();
         final String requestBody = httpRequest.getRequestBody();
         final Map<String, String> headers = new HashMap<>();
         if ("/".equals(url)) {

@@ -22,7 +22,7 @@ class HttpRequestTest {
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo("GET"),
-                () -> assertThat(httpRequest.getRequestUrl()).isEqualTo("/"),
+                () -> assertThat(httpRequest.getUrl()).isEqualTo("/"),
                 () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHeaders()).isEqualTo(
                         Map.of("Content-Type", "text/html;charset=utf-8 ", "Content-Length", "12 "))

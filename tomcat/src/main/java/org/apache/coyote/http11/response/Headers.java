@@ -19,6 +19,10 @@ public class Headers {
         headers.put("Content-Length", String.valueOf(contentLength));
     }
 
+    public void setLocation(String location) {
+        headers.put("Location", location);
+    }
+
     public void setCookie(String cookie) {
         headers.put("Set-Cookie", cookie);
     }

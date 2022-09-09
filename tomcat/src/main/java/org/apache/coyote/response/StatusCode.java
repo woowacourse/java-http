@@ -1,5 +1,7 @@
 package org.apache.coyote.response;
 
+import java.util.Arrays;
+
 public enum StatusCode {
     OK("200 OK"),
     FOUND("302 Found"),
@@ -12,6 +14,17 @@ public enum StatusCode {
 
     StatusCode(final String statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public static StatusCode findSameStatusCode(String statusName) {
+        return Arrays.stream(values())
+                .filter(it -> it.name().equals(statusName))
+                .findAny()
+                .orElse(INTERNAL_SERVER_ERROR);
+    }
+
+    public String getStatusCode() {
+        return statusCode;
     }
 
     @Override

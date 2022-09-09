@@ -12,19 +12,19 @@ import java.nio.file.Files;
 import java.util.UUID;
 import nextstep.jwp.config.NextStepConfig;
 import nextstep.jwp.model.User;
-import org.apache.container.config.Configuration;
+import org.apache.container.Container;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private final Configuration configuration = new NextStepConfig();
+    private final Container container = new Container(new NextStepConfig());
 
     @Test
     void process() {
         // given
         StubSocket socket = new StubSocket();
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -49,7 +49,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -78,7 +78,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -106,7 +106,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -134,7 +134,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -159,7 +159,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -183,7 +183,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -209,7 +209,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -236,7 +236,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -263,7 +263,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -294,7 +294,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -322,7 +322,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -350,7 +350,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -375,7 +375,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -402,7 +402,7 @@ class Http11ProcessorTest {
                 requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -431,7 +431,7 @@ class Http11ProcessorTest {
                 "");
 
         StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket, configuration);
+        Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);

@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.container.config.Configuration;
+import org.apache.container.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +19,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREADS_COUNT = 250;
 
-    private final Configuration configuration;
+    private final Container container;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector(final Configuration configuration) {
-        this(configuration, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
+    public Connector(final Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
     }
 
-    public Connector(final Configuration configuration, final int port, final int acceptCount, final int maxThreads) {
-        this.configuration = configuration;
+    public Connector(final Container container, final int port, final int acceptCount, final int maxThreads) {
+        this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThreads);
@@ -72,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        Http11Processor processor = new Http11Processor(connection, configuration);
+        Http11Processor processor = new Http11Processor(connection, container);
         executorService.submit(processor);
     }
 

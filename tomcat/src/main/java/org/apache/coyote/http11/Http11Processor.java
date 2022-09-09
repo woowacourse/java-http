@@ -86,6 +86,8 @@ public class Http11Processor implements Runnable, Processor {
                     return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/index.html"),
                             httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));
                 }
+                return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/401.html"),
+                        httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));
             }
         }
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),

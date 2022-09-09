@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import org.apache.coyote.StatusLine;
 import org.apache.coyote.http11.utill.FileUtils;
 
 public class HttpResponse {

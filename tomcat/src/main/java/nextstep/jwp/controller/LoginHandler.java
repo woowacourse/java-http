@@ -31,8 +31,9 @@ public class LoginHandler extends AbstractHandler {
     @Override
     protected String getMethodResponse(final HttpRequest httpRequest) {
         if (hasCookie(httpRequest) && checkCookie(httpRequest)) {
-            return createResponse(StatusCode.OK, getResponseBody(INDEX_HTML, getClass()))
-                    .getResponse();
+            HttpResponse httpResponse = createResponse(StatusCode.OK, getResponseBody(INDEX_HTML, getClass()));
+            httpResponse.setHeader(ResponseHeader.LOCATION, INDEX_HTML);
+            return httpResponse.getResponse();
         }
         return createResponse(StatusCode.OK, getResponseBody(LOGIN_HTML, getClass()))
                 .getResponse();
@@ -52,7 +53,9 @@ public class LoginHandler extends AbstractHandler {
             return createResponse(StatusCode.UNAUTHORIZED, getResponseBody(CLIENT_ERROR_401, getClass()))
                     .getResponse();
         }
+
         HttpResponse httpResponse = createResponse(StatusCode.FOUND, getResponseBody(INDEX_HTML, getClass()));
+        httpResponse.setHeader(ResponseHeader.LOCATION, INDEX_HTML);
         if (!httpRequest.existCookie(ResponseHeader.SET_COOKIE)) {
             Cookie cookie = new Cookie();
             RequestBody requestBody = httpRequest.getRequestBody();

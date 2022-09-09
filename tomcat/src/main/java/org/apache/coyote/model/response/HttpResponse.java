@@ -73,4 +73,8 @@ public class HttpResponse {
     public String getBody() {
         return body;
     }
+
+    public void setHeader(String location, String value) {
+        responseHeader.setHeader(location, value);
+    }
 }

@@ -5,6 +5,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.model.request.HttpRequest;
 import org.apache.coyote.model.request.RequestBody;
 import org.apache.coyote.model.response.HttpResponse;
+import org.apache.coyote.model.response.ResponseHeader;
 import org.apache.coyote.model.response.StatusCode;
 
 import static org.apache.coyote.model.response.HttpResponse.createResponse;
@@ -33,8 +34,9 @@ public class RegisterHandler extends AbstractHandler {
     @Override
     protected String postMethodResponse(final HttpRequest httpRequest) {
         saveUser(httpRequest);
-        return createResponse(StatusCode.FOUND, HttpResponse.getResponseBody(INDEX_HTML, getClass()))
-                .getResponse();
+        HttpResponse httpResponse = createResponse(StatusCode.FOUND, HttpResponse.getResponseBody(INDEX_HTML, getClass()));
+        httpResponse.setHeader(ResponseHeader.LOCATION, INDEX_HTML);
+        return httpResponse.getResponse();
     }
 
     @Override

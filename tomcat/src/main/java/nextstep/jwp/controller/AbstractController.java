@@ -33,13 +33,13 @@ public abstract class AbstractController implements Controller {
         return null;
     }
 
-    protected String readResourceBody(String url) throws IOException {
+    protected final String readResourceBody(String url) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(STATIC + url);
         final Path path = new File(resource.getFile()).toPath();
         return new String(Files.readAllBytes(path));
     }
 
-    protected ResponseHeaders readResourceHeader(final String url, final String body) throws IOException {
+    protected final ResponseHeaders readResourceHeader(final String url, final String body) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(STATIC + url);
         final Path path = new File(resource.getFile()).toPath();
 

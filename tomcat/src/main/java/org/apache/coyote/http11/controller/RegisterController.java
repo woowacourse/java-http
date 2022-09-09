@@ -8,13 +8,12 @@ import java.nio.file.Path;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.session.SessionManager;
 
-public class RegisterApiController extends AbstractController {
+public class RegisterController extends AbstractController {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
@@ -22,7 +21,7 @@ public class RegisterApiController extends AbstractController {
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String responseBody = getBody();
 
-        httpResponse.ok(ContentType.HTML, responseBody);
+        httpResponse.ok(responseBody);
     }
 
     private String getBody() throws IOException {

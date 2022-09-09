@@ -20,6 +20,7 @@ public class FrontController {
             controller.service(httpRequest, httpResponse);
         } catch (Exception e) {
             System.out.println("예외발생 : controllerAdvice 추가 예정, controllerAdvice.service(httpRequest, httResponse)");
+            throw new IllegalArgumentException();
         }
         httpResponse.write();
     }
@@ -31,31 +32,4 @@ public class FrontController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 요청이 아닙니다."));
     }
-
-//    private void setSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-//        String cookieValue = httpRequest.getCookieValue();
-//        Cookie cookie = Cookie.of(cookieValue);
-//        Manager sessionManager = new SessionManager();
-//
-//        if (!cookie.hasJSessionId()) {
-//            UUID uuid = UUID.randomUUID();
-//            httpResponse.setCookie(Cookie.fromJSessionId(uuid));
-//            Session session = new Session(uuid.toString());
-//            sessionManager.add(session);
-//            httpRequest.setSession(session);
-//            return;
-//        }
-//        Session session = getSession(cookie, sessionManager);
-//        httpRequest.setSession(session);
-//    }
-//
-//    private Session getSession(Cookie cookie, Manager sessionManager) throws IOException {
-//        Session session = sessionManager.findSession(cookie.getSessionKey());
-//
-//        if (session == null) {
-//            session = new Session(cookie.getSessionKey());
-//            sessionManager.add(session);
-//        }
-//        return session;
-//    }
 }

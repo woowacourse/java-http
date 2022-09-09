@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterApiController;
+import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.RootApiController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
@@ -15,7 +15,7 @@ public class ApiHandlerMapper implements RequestMapper {
     static {
         CONTROLLERS.put("/", new RootApiController());
         CONTROLLERS.put("/login", new LoginController());
-        CONTROLLERS.put("/register", new RegisterApiController());
+        CONTROLLERS.put("/register", new RegisterController());
     }
 
     public Controller mapController(HttpRequest httpRequest) {

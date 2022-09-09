@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-class Http11VersionTest {
+class HttpVersionTest {
 
     @Test
     void Http11_버전을_반환한다() {
@@ -13,10 +13,10 @@ class Http11VersionTest {
         String version = "HTTP/1.1";
 
         // when
-        Http11Version http11Version = Http11Version.of(version);
+        HttpVersion httpVersion = HttpVersion.of(version);
 
         // then
-        assertThat(http11Version.getVersion()).isEqualTo(version);
+        assertThat(httpVersion.getVersion()).isEqualTo(version);
     }
 
     @Test
@@ -25,7 +25,7 @@ class Http11VersionTest {
         String version = "HTTP/3";
 
         // when & then
-        assertThatThrownBy(() -> Http11Version.of(version))
+        assertThatThrownBy(() -> HttpVersion.of(version))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

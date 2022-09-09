@@ -17,7 +17,7 @@ class RequestLineTest {
 
         // then
         assertThat(requestLine).extracting("method", "uri", "httpVersion")
-                .containsExactly(HttpMethod.GET, HttpUri.of("/index.html"), Http11Version.of("HTTP/1.1"));
+                .containsExactly(HttpMethod.GET, HttpUri.of("/index.html"), HttpVersion.of("HTTP/1.1"));
     }
 
     @Test
@@ -28,31 +28,5 @@ class RequestLineTest {
         // when & then
         assertThatThrownBy(() -> RequestLine.of(invalidValue))
                 .isInstanceOf(IndexOutOfBoundsException.class);
-    }
-
-    @Test
-    void httpMethod가_일치하는지_확인한다() {
-        // given
-        String value = "GET /index.html HTTP/1.1";
-        RequestLine requestLine = RequestLine.of(value);
-
-        // when
-        boolean result = requestLine.matchHttpMethod(HttpMethod.GET);
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void httpMethod가_일치하지_않는지_확인한다() {
-        // given
-        String value = "GET /index.html HTTP/1.1";
-        RequestLine requestLine = RequestLine.of(value);
-
-        // when
-        boolean result = requestLine.matchHttpMethod(HttpMethod.POST);
-
-        // then
-        assertThat(result).isFalse();
     }
 }

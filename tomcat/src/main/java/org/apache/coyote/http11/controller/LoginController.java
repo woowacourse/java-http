@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -61,7 +60,7 @@ public class LoginController extends AbstractController {
         }
 
         String responseBody = getBody();
-        httpResponse.ok(ContentType.HTML, responseBody);
+        httpResponse.ok(responseBody);
     }
 
     private String getBody() throws IOException {

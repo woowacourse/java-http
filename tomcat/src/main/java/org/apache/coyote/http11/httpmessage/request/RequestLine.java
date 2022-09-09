@@ -28,10 +28,6 @@ public class RequestLine {
         );
     }
 
-    public boolean matchHttpMethod(HttpMethod httpMethod) {
-        return method == httpMethod;
-    }
-
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
@@ -60,7 +56,5 @@ public class RequestLine {
     @Override
     public int hashCode() {
         return Objects.hash(method, uri, httpVersion);
-
-
     }
 }

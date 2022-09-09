@@ -3,9 +3,11 @@ package org.apache.coyote.http11.httpmessage.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.httpmessage.ContentType;
+import org.apache.coyote.http11.httpmessage.Headers;
+import org.apache.coyote.http11.session.Cookie;
 import org.junit.jupiter.api.Test;
 
 class HeadersTest {
@@ -20,7 +22,7 @@ class HeadersTest {
 
         // then
         assertThat(requestHeader).extracting("headers")
-                .isEqualTo(new LinkedHashMap<>());
+                .isEqualTo(Map.of());
     }
 
     @Test
@@ -47,28 +49,26 @@ class HeadersTest {
     }
 
     @Test
-    void 다른_header들을_추가할_수_있다() {
+    void 다양한_header들을_추가할_수_있다() {
         // given
         Headers headers = Headers.of(List.of("key: value", "name: park"));
 
         // when
-        headers.putAll(Map.of("age", "25", "Content-Type", "text/html"));
+        headers.addSetCookie(Cookie.of("123=456"));
+        headers.addContentLength(3);
+        headers.addLocation("/123.html");
+        headers.addContentType(ContentType.HTML);
 
         // then
-        assertThat(headers).extracting("headers")
-                .isEqualTo(Map.of("key", "value", "name", "park", "age", "25", "Content-Type", "text/html"));
-    }
-
-    @Test
-    void 이미_존재하는_header가_들어오면_값이_업데이트된다() {
-        // given
-        Headers headers = Headers.of(List.of("key: value", "name: park"));
-
-        // when
-        headers.putAll(Map.of("name", "seong", "Content-Type", "text/html"));
-
-        // then
-        assertThat(headers).extracting("headers")
-                .isEqualTo(Map.of("key", "value", "name", "seong", "Content-Type", "text/html"));
+        assertThat(headers.toString())
+                .isEqualTo(
+                        String.join("\r\n",
+                                "key: value ",
+                                "name: park ",
+                                "Set-Cookie: 123=456 ",
+                                "Content-Length: 3 ",
+                                "Location: /123.html ",
+                                "Content-Type: text/html;charset=utf-8 "
+                        ));
     }
 }

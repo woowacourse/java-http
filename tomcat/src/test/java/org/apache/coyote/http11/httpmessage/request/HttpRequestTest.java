@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Map;
+import org.apache.coyote.http11.httpmessage.Headers;
+import org.apache.coyote.http11.session.Cookie;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -19,12 +21,14 @@ class HttpRequestTest {
         // given
         String body = "body=requestBody";
 
-        String requestMessage = "GET /index.html HTTP/1.1\r\n"
-                + "Host: localhost:8080\r\n"
-                + "Connection: keep-alive\r\n"
-                + "Content-Length: " + body.getBytes().length + "\r\n"
-                + "\r\n"
-                + body;
+        String requestMessage = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body
+        );
 
         InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -46,7 +50,7 @@ class HttpRequestTest {
     @Test
     void 잘못된_요청을_받으면_예외를_던진다() throws IOException {
         //given
-        String invalidRequestMessage = "GET /index.html HTTP/1.1" + "Host: localhost:8080" + "Connection: keep-alive";
+        String invalidRequestMessage = "GET/index.htmlHTTP/1.1Host:localhost:8080Connection:keep-alive";
 
         InputStream inputStream = new ByteArrayInputStream(invalidRequestMessage.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -60,56 +64,50 @@ class HttpRequestTest {
     }
 
     @Test
-    void 요청의_method와_uri가_일치하는_지_확인한다() throws IOException {
+    void 요청_헤더에_쿠키가_존재할_때_쿠키를_추출할_수_있다() throws IOException {
         // given
-        String body = "body=requestBody";
-
-        String requestMessage = "GET /index.html HTTP/1.1\r\n"
-                + "Host: localhost:8080\r\n"
-                + "Connection: keep-alive\r\n"
-                + "Content-Length: " + body.getBytes().length + "\r\n"
-                + "\r\n"
-                + body;
-
+        String requestMessage = String.join(
+                "\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Cookie: name=park",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 0 ",
+                "",
+                ""
+        );
         InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
-        inputStream.close();
-        bufferedReader.close();
-
         // when
-        boolean result = httpRequest.matchRequestLine(HttpMethod.GET, Pattern.compile("/index.html"));
+        Cookie cookie = httpRequest.getCookie();
 
         // then
-        assertThat(result).isTrue();
+        assertThat(cookie).extracting("cookies")
+                .isEqualTo(Map.of("name", "park"));
     }
 
     @Test
-    void 요청의_method와_uri가_일치하지_않는_지_확인한다() throws IOException {
+    void 요청_헤더에_쿠키가_존재하지_않을_때_null을_반환한다() throws IOException {
         // given
-        String body = "body=requestBody";
-
-        String requestMessage = "GET /index.html HTTP/1.1\r\n"
-                + "Host: localhost:8080\r\n"
-                + "Connection: keep-alive\r\n"
-                + "Content-Length: " + body.getBytes().length + "\r\n"
-                + "\r\n"
-                + body;
-
+        String requestMessage = String.join(
+                "\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 0 ",
+                "",
+                ""
+        );
         InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
-        inputStream.close();
-        bufferedReader.close();
-
         // when
-        boolean result = httpRequest.matchRequestLine(HttpMethod.POST, Pattern.compile("/index.html"));
+        Cookie cookie = httpRequest.getCookie();
 
         // then
-        assertThat(result).isFalse();
+        assertThat(cookie).isEqualTo(null);
     }
 }

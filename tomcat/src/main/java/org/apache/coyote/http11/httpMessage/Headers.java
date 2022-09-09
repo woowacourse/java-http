@@ -21,7 +21,7 @@ public class Headers {
 
         for (String header : headerLines) {
             String[] keyValue = header.split(": ");
-            headers.put(keyValue[0], keyValue[1]);
+            headers.put(keyValue[0], keyValue[1].trim());
         }
 
         return new Headers(headers);

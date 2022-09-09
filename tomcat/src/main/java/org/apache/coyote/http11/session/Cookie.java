@@ -9,7 +9,7 @@ public class Cookie {
     private static final String JSESSIONID = "JSESSIONID";
     private final Map<String, Object> cookies;
 
-    public Cookie(Map<String, Object> cookies) {
+    private Cookie(Map<String, Object> cookies) {
         this.cookies = cookies;
     }
 

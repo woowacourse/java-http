@@ -49,13 +49,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    // TODO: 2022/09/09 근데 왜 세션을 request에 set 해줬지?
     private void setSession(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String cookieValue = httpRequest.getCookieValue();
         Cookie cookie = Cookie.of(cookieValue);
         Manager sessionManager = new SessionManager();
 
         if (!cookie.hasJSessionId()) {
-             UUID uuid = UUID.randomUUID();
+            UUID uuid = UUID.randomUUID();
             httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
             Session session = new Session(uuid.toString());
             sessionManager.add(session);

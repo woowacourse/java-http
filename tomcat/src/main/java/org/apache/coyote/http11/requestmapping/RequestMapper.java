@@ -5,5 +5,5 @@ import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public interface RequestMapper {
 
-    Controller mapHandler(HttpRequest httpRequest);
+    Controller mapController(HttpRequest httpRequest);
 }

@@ -1,20 +1,36 @@
 package org.apache.coyote.http11.requestmapping;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.filecontroller.FileController;
-import org.apache.coyote.http11.controller.filecontroller.LoginPageController;
+import org.apache.coyote.http11.controller.FileController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class FileHandlerMapper implements RequestMapper {
 
-    private static final List<Controller> FILE_URI_HANDLER = List.of(new LoginPageController(), new FileController());
+    private static final Pattern FILE_URI_PATTERN = Pattern.compile("/.+\\.(html|css|js|ico)");
+
+    private static final Map<Pattern, Controller> CONTROLLERS = new HashMap<>();
+
+    static {
+        CONTROLLERS.put(FILE_URI_PATTERN, new FileController());
+    }
 
     @Override
-    public Controller mapHandler(HttpRequest httpRequest) {
-        return FILE_URI_HANDLER.stream()
-                .filter(handler -> handler.canHandle(httpRequest))
+    public Controller mapController(HttpRequest httpRequest) {
+        return CONTROLLERS.entrySet()
+                .stream()
+                .filter(controller -> this.match(controller.getKey(), httpRequest.getPath()))
+                .map(Entry::getValue)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private boolean match(Pattern pattern, String path) {
+        Matcher matcher = pattern.matcher(path);
+        return matcher.matches();
     }
 }

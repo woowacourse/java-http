@@ -41,6 +41,10 @@ public class RequestLine {
         return uri.getPath();
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -57,6 +61,7 @@ public class RequestLine {
     @Override
     public int hashCode() {
         return Objects.hash(method, uri, httpVersion);
+
 
     }
 }

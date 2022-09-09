@@ -1,28 +1,22 @@
-package org.apache.coyote.http11.controller.filecontroller;
+package org.apache.coyote.http11.controller;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
-import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.httpmessage.ContentType;
-import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 
 public class FileController extends AbstractController {
 
-    private static final Pattern FILE_URI_PATTERN = Pattern.compile("/.+\\.(html|css|js|ico)");
-
     @Override
-    public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.matchRequestLine(HttpMethod.GET, FILE_URI_PATTERN);
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
     }
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
 
         if (resource == null) {
@@ -37,15 +31,5 @@ public class FileController extends AbstractController {
 
         httpResponse.ok(responseBody)
                 .addHeader("Content-Type", contentType.getValue() + ";charset=utf-8 ");
-    }
-
-    @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-
-    }
-
-    @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-
     }
 }

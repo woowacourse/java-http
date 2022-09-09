@@ -1,14 +1,15 @@
-package org.apache.coyote.http11.controller.apicontroller;
+package org.apache.coyote.http11.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.httpmessage.ContentType;
-import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.session.Cookie;
@@ -20,15 +21,10 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final Pattern LOGIN_URI_PATTERN = Pattern.compile("/login");
+    private static final String USER = "user";
 
     @Override
-    public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.matchRequestLine(HttpMethod.POST, LOGIN_URI_PATTERN);
-    }
-
-    @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, Object> parameters = httpRequest.getRequestBody().getParameters();
         final String account = (String) parameters.get("account");
         final String password = (String) parameters.get("password");
@@ -63,19 +59,32 @@ public class LoginController extends AbstractController {
     private void setSession(HttpRequest httpRequest, User user) {
         SessionManager sessionManager = new SessionManager();
         Session session = httpRequest.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute(USER, user);
         sessionManager.add(session);
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        Session session = httpRequest.getSession();
+        if (session.getAttribute(USER) != null) {
+            httpResponse.found("/index.html ")
+                    .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ")
+                    .addHeader("Content-Length", "0 ");
+            return;
+        }
+        String responseBody = getBody();
 
+        httpResponse.ok(responseBody)
+                .addHeader("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8 ");
     }
 
-    @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-
+    private String getBody() throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        File file = new File(resource.getFile());
+        Path path = file.toPath();
+        return new String(Files.readAllBytes(path));
     }
+
 }
 
 

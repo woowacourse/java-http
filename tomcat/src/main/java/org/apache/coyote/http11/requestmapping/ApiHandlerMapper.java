@@ -1,27 +1,25 @@
 package org.apache.coyote.http11.requestmapping;
 
-import java.util.List;
-import org.apache.coyote.http11.controller.apicontroller.LoginController;
-import org.apache.coyote.http11.controller.apicontroller.LoginPageApiController;
-import org.apache.coyote.http11.controller.apicontroller.RegisterApiController;
-import org.apache.coyote.http11.controller.apicontroller.RegisterPageApiController;
-import org.apache.coyote.http11.controller.apicontroller.RootApiController;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterApiController;
+import org.apache.coyote.http11.controller.RootApiController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class ApiHandlerMapper implements RequestMapper {
 
-    private static final List<Controller> API_HANDLERS = List.of(
-            new RootApiController(), new LoginController(), new LoginPageApiController(),
-            new RegisterPageApiController(), new RegisterApiController()
-    );
+    private static final Map<String, Controller> CONTROLLERS = new HashMap<>();
 
-    @Override
-    public Controller mapHandler(HttpRequest httpRequest) {
-        return API_HANDLERS.stream()
-                .filter(apiHandler -> apiHandler.canHandle(httpRequest))
-                .findFirst()
-                .orElse(null);
+    static {
+        CONTROLLERS.put("/", new RootApiController());
+        CONTROLLERS.put("/login", new LoginController());
+        CONTROLLERS.put("/register", new RegisterApiController());
+    }
+
+    public Controller mapController(HttpRequest httpRequest) {
+        return CONTROLLERS.get(httpRequest.getPath());
     }
 }
 

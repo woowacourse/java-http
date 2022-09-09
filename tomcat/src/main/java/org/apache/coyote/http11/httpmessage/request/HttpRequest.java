@@ -75,4 +75,8 @@ public class HttpRequest {
     public void setSession(Session session) {
         this.session = session;
     }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
 }

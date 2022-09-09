@@ -1,10 +1,9 @@
-package org.apache.catalina.support;
+package http.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import http.exception.ResourceNotFoundException;
-import http.support.ResourcesUtil;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;

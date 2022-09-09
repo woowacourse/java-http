@@ -18,9 +18,8 @@ public class RequestLine {
         return new RequestLine(HttpMethod.from(method), parsePath(requestUri), HttpRequestParams.from(requestUri));
     }
 
-    private static String parsePath(final String requestHeader) {
-        return requestHeader.split(" ")[1]
-                .split("\\?")[0];
+    private static String parsePath(final String requestUri) {
+        return requestUri.split("\\?")[0];
     }
 
     public HttpMethod getMethod() {

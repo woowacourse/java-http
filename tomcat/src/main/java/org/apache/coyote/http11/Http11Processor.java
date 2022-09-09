@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = controller.service(httpRequest, httpResponse);
 
-            if (!httpRequest.getHttpCookie().isJSessionId()) {
+            if (!httpRequest.getCookie().isJSessionId()) {
                 response.addCookie(JSessionId.create());
             }
 

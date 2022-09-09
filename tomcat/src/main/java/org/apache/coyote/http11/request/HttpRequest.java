@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.ParseUtils;
@@ -17,28 +18,26 @@ public class HttpRequest {
 
     private final RequestLine startLine;
     private final RequestHeaders headers;
-    private final HttpCookie httpCookie;
     private final String body;
-    private final Session session;
 
-    public HttpRequest(final RequestLine startLine, final RequestHeaders headers, final HttpCookie httpCookie,
-                       final String body, final Session session) {
+    public HttpRequest(final RequestLine startLine, final RequestHeaders headers, final String body) {
         this.startLine = startLine;
         this.headers = headers;
-        this.httpCookie = httpCookie;
         this.body = body;
-        this.session = session;
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
-        final var startLine = reader.readLine();
-        if (startLine.isEmpty()) {
-            return null;
-        }
+        final var line = readStartLine(reader);
         final var headers = readHeaders(reader);
         final var body = readBody(reader, headers.getContentLength());
 
-        return HttpRequest.of(startLine, headers, body);
+        return new HttpRequest(line, headers, body);
+    }
+
+    private static RequestLine readStartLine(final BufferedReader reader) throws IOException {
+        final var startLine = reader.readLine();
+
+        return RequestLine.from(startLine);
     }
 
     private static RequestHeaders readHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -60,19 +59,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public static HttpRequest of(final String startLine, final RequestHeaders headers,
-                                 final String requestBody) {
-        HttpCookie httpCookies = HttpCookie.empty();
-
-        if (headers.hasCookies()) {
-            httpCookies = HttpCookie.from(headers.getCookies());
-        }
-
-        RequestLine requestLine = RequestLine.from(startLine);
-
-        return new HttpRequest(requestLine, headers, httpCookies, requestBody, new Session());
-    }
-
     public Map<String, String> getParsedRequestBody() {
         return ParseUtils.parse(body, "&", "=");
     }
@@ -81,16 +67,28 @@ public class HttpRequest {
         return startLine.getPath();
     }
 
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
+    public HttpCookie getCookie() {
+        HttpCookie httpCookies = HttpCookie.empty();
+
+        if (headers.hasCookies()) {
+            httpCookies = HttpCookie.from(headers.getCookies());
+        }
+        return httpCookies;
+    }
+
+
+    public Session getSession() throws IOException {
+        HttpCookie cookie = getCookie();
+        String sessionId = cookie.getJSessionId();
+        SessionManager sessionManager = new SessionManager();
+        if (sessionId == null) {
+            return null;
+        }
+        return sessionManager.findSession(sessionId);
     }
 
     public String getBody() {
         return body;
-    }
-
-    public Session getSession() {
-        return session;
     }
 
     public boolean isGet() {

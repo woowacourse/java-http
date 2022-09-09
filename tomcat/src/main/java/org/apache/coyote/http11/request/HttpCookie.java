@@ -1,12 +1,11 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.ParseUtils;
 
 public class HttpCookie {
 
@@ -18,10 +17,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(String cookies) {
-        log.info("cookie ::: {}", cookies);
-        Map<String, String> refinedCookies = Arrays.stream(cookies.split("; "))
-                .map(cookie -> cookie.split("="))
-                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
+        Map<String, String> refinedCookies = ParseUtils.parse(cookies, "; ", "=");
 
         return new HttpCookie(refinedCookies);
     }
@@ -36,5 +32,9 @@ public class HttpCookie {
 
     public boolean isJSessionId() {
         return cookies.containsKey("JSESSIONID");
+    }
+
+    public String getJSessionId() {
+        return cookies.get("JSESSIONID");
     }
 }

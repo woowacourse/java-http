@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -15,7 +16,7 @@ public class LoginHandler {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public static boolean handle(HttpRequest httpRequest, HttpResponse response) {
+    public static boolean handle(HttpRequest httpRequest, HttpResponse response) throws IOException {
         Map<String, String> body = httpRequest.getParsedRequestBody();
 
         Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));

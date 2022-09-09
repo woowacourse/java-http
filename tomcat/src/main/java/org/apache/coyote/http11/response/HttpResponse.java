@@ -1,10 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class HttpResponse {
@@ -25,35 +20,9 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse create200Response(final Map<String, String> headers, final String body) {
-        this.setHeaders(headers);
-        this.setBody(body);
-
-        return this;
-    }
-
-    public HttpResponse create302Response(final Map<String, String> headers, final String body) {
-        this.setHeaders(headers);
-        this.setBody(body);
-
-        return this;
-    }
-
-    public HttpResponse create401Response() throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final Path path = new File(resource.getFile()).toPath();
-        final String responseBody = new String(Files.readAllBytes(path));
-
-        return this.create200Response(Map.of("Content-Type", Files.probeContentType(path)), responseBody);
-    }
-
     public String toMessage() {
-        return String.join("\r\n",
-                PROTOCOL_VERSION + " " + status.getCode() + " " + status.getMessage() + " ",
-                responseHeaders.toMessage(),
-                "",
-                body
-        );
+        return String.join("\r\n", PROTOCOL_VERSION + " " + status.getCode() + " " + status.getMessage() + " ",
+                responseHeaders.toMessage(), "", body);
     }
 
     public byte[] toBytes() {
@@ -61,7 +30,7 @@ public class HttpResponse {
     }
 
     public void addCookie(String cookie) {
-        responseHeaders.setCookie(cookie);
+        responseHeaders.setCookie("JSESSIONID=" + cookie);
     }
 
     public void setHeaders(final Map<String, String> headers) {

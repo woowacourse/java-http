@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpRequestBody {
 
@@ -18,7 +17,7 @@ public class HttpRequestBody {
     }
 
     public static HttpRequestBody empty() {
-        return new HttpRequestBody(new ConcurrentHashMap<>());
+        return new HttpRequestBody(new HashMap<>());
     }
 
     public static HttpRequestBody formData(final String message) {

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
@@ -22,7 +21,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders init() {
-        return new HttpHeaders(new ConcurrentHashMap<>(), HttpCookie.empty());
+        return new HttpHeaders(new HashMap<>(), HttpCookie.empty());
     }
 
     public static HttpHeaders request(final List<String> messages) {

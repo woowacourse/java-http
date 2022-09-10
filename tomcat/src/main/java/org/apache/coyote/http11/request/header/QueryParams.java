@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request.header;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class QueryParams {
 
@@ -31,7 +30,7 @@ public class QueryParams {
     }
 
     public static QueryParams empty() {
-        return new QueryParams(new ConcurrentHashMap<>());
+        return new QueryParams(new HashMap<>());
     }
 
     private static void validateParamIsNotDuplicated(final Map<String, String> params, final String key) {

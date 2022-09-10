@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.ResourceSearcher;
 import org.apache.coyote.servlet.servlets.HelloWorldServlet;
 import org.apache.coyote.servlet.servlets.LoginServlet;

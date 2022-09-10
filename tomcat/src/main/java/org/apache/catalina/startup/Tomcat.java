@@ -2,6 +2,7 @@ package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.Servlet;
+import org.apache.catalina.core.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,14 +12,14 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final Servlet servlet;
+    private final ServletContainer servletContainer;
 
-    public Tomcat(final Servlet servlet) {
-        this.servlet = servlet;
+    public Tomcat(final ServletContainer servletContainer) {
+        this.servletContainer = servletContainer;
     }
 
     public void start() {
-        var connector = new Connector(servlet);
+        var connector = new Connector(servletContainer);
         connector.start();
 
         try {

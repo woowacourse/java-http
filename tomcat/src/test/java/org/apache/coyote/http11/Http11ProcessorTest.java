@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.servlet.DispatcherServlet;
+import nextstep.fixtures.ServletContainerFixtures;
 import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -22,7 +22,7 @@ class Http11ProcessorTest {
     void 루트_접속시_환영문구를_반환한다() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new DispatcherServlet());
+        final var processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String expected = 응답을_생성한다(HttpStatus.OK, "text/html", "Hello world!");
 
         // when
@@ -37,7 +37,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = 요청을_생성한다(GET, "/index.html", TEXT_HTML);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
+        final Http11Processor processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String content = readContent("static/index.html");
         final String expected = 응답을_생성한다(HttpStatus.OK, "text/html", content);
 
@@ -53,7 +53,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = 요청을_생성한다(GET, "/css/styles.css", TEXT_CSS);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
+        final Http11Processor processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String content = readContent("static/css/styles.css");
         final String expected = 응답을_생성한다(HttpStatus.OK, "text/css", content);
 
@@ -69,7 +69,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = 요청을_생성한다(GET, "/js/scripts.js", TEXT_JAVASCRIPT);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
+        final Http11Processor processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String content = readContent("static/js/scripts.js");
         final String expected = 응답을_생성한다(HttpStatus.OK, "text/javascript", content);
 
@@ -85,7 +85,7 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = 요청을_생성한다(GET, "/notfound.html", TEXT_HTML);
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet());
+        final Http11Processor processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String content = readContent("static/404.html");
         final String expected = 응답을_생성한다(HttpStatus.BAD_REQUEST, "text/html", content);
 

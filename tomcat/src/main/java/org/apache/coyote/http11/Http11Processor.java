@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.support.RequestParser;
+import org.apache.catalina.core.ServletContainer;
 import org.apache.coyote.Processor;
 import org.apache.coyote.support.Request;
+import org.apache.coyote.support.RequestParser;
 import org.apache.coyote.support.Response;
-import org.apache.catalina.core.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Servlet servlet;
+    private final ServletContainer servletContainer;
 
-    public Http11Processor(final Socket connection, final Servlet servlet) {
+    public Http11Processor(final Socket connection, final ServletContainer servletContainer) {
         this.connection = connection;
-        this.servlet = servlet;
+        this.servletContainer = servletContainer;
     }
 
     @Override
@@ -40,7 +40,9 @@ public class Http11Processor implements Runnable, Processor {
             final Request request = RequestParser.parse(bufferedReader);
             final Response response = new Response(outputStream);
 
-            servlet.service(request, response);
+            servletContainer.findServlet(request.getUri())
+                    .ifPresent(servlet -> servlet.service(request, response));
+
         } catch (Exception e) {
             log.info(e.getMessage());
         }

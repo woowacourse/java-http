@@ -41,22 +41,6 @@ public class AuthController extends AbstractController {
         return getRegister(httpRequest, httpResponse);
     }
 
-    private HttpResponse postRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
-            throws IOException {
-        final User user = new User(httpRequest.getBodyValue(ACCOUNT), httpRequest.getBodyValue(PASSWORD),
-                httpRequest.getBodyValue("email"));
-        InMemoryUserRepository.save(user);
-
-        return redirect(httpRequest, httpResponse);
-    }
-
-    private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
-        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, httpRequest.getUrl());
-        httpHeader.location(REDIRECT_URL);
-        return httpResponse.header(httpHeader).body(httpBody);
-    }
-
     private HttpResponse postLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
             final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
@@ -81,29 +65,6 @@ public class AuthController extends AbstractController {
         final String account = httpRequest.getBodyValue(ACCOUNT);
         final String password = httpRequest.getBodyValue(PASSWORD);
         return authentication(httpRequest, account, password);
-    }
-
-    private HttpResponse getRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
-            throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
-
-        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
-                .contentType(httpRequest.getUrl())
-                .contentLength(httpBody.getBody().getBytes().length);
-
-        return httpResponse.header(httpHeader).body(httpBody);
-    }
-
-    private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (httpRequest.hasJSESSIONID()) {
-            final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
-            if (session.isPresent() && session.get().hasAttribute("user")) {
-                return redirect(httpRequest, httpResponse);
-            }
-        }
-        final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
-        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, LOGIN_URL);
-        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)
@@ -133,5 +94,44 @@ public class AuthController extends AbstractController {
                 .location(REDIRECT_URL);
 
         return new HttpResponse(httpHeader, httpBody);
+    }
+
+    private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, httpRequest.getUrl());
+        httpHeader.location(REDIRECT_URL);
+        return httpResponse.header(httpHeader).body(httpBody);
+    }
+
+    private HttpResponse postRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException {
+        final User user = new User(httpRequest.getBodyValue(ACCOUNT), httpRequest.getBodyValue(PASSWORD),
+                httpRequest.getBodyValue("email"));
+        InMemoryUserRepository.save(user);
+
+        return redirect(httpRequest, httpResponse);
+    }
+
+    private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        if (httpRequest.hasJSESSIONID()) {
+            final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
+            if (session.isPresent() && session.get().hasAttribute("user")) {
+                return redirect(httpRequest, httpResponse);
+            }
+        }
+        final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, LOGIN_URL);
+        return httpResponse.header(httpHeader).body(httpBody);
+    }
+
+    private HttpResponse getRegister(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
+
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.OK)
+                .contentType(httpRequest.getUrl())
+                .contentLength(httpBody.getBody().getBytes().length);
+
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 }

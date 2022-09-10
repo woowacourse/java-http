@@ -174,7 +174,6 @@ class Http11ProcessorTest {
             // then
             String response = socket.output();
 
-            assertThat(response).contains("401 Unauthorized");
             assertThat(response).contains("Location: /401.html");
         }
     }

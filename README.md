@@ -5,7 +5,7 @@
 - [RFC 2616](https://www.rfc-editor.org/rfc/rfc2616)
 - [MDN HTTP](https://developer.mozilla.org/en-US/docs/Web/HTTP)
 
-## 1단계 요구사항
+## 🚀 1단계 요구사항 - HTTP 서버 구현하기
 
 - [x] GET /index.html 응답하기 
   - [x] 인덱스 페이지(http://localhost:8080/index.html)에 접근하도록 구현 
@@ -18,7 +18,7 @@
   - [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html) 띄우기
   - [x] 로그인 페이지에 접속했을 때 Query String을 파싱해서 아이디, 비밀번호가 일치하면 회원을 조회한 결과 보여주기
 
-## 2단계 요구사항
+## 🚀 2단계 요구사항 - 로그인 구현하기
 
 - [x] HTTP Reponse의 상태 응답 코드를 302로 반환 
 - [x] `/login` 페이지에서 아이디는 gugu, 비밀번호는 password를 입력 후
@@ -38,3 +38,15 @@
   - [x] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있음
   - [x] 로그인에 성공하면 HttpSession 객체의 값으로 User 객체 저장
   - [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트
+
+## 🚀 3단계 요구사항 - 리팩터링
+
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [x] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절 제거
+
+
+## 🚀 4단계 요구사항 - 동시성 확장하기
+- [x] Executors로 Thread Pool 적용
+- [x] 동시성 컬렉션 사용하기
+  - 동시성 컬렉션(Concurrent Collections)을 적용해서 스레드 안정성과 원자성을 보장하기

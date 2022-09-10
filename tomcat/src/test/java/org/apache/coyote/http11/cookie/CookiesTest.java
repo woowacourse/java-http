@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,21 +19,5 @@ class CookiesTest {
                 .get();
 
         assertThat(findValue).isEqualTo(value);
-    }
-
-    @Test
-    @DisplayName("세션을 저장하고 찾는다.")
-    void saveSessionAndFind() {
-        final Cookies cookies = new Cookies();
-        final String sessionId = "sessionId";
-        cookies.addSession(sessionId);
-
-        final String findSessionId = cookies.getSessionId()
-                .get();
-
-        assertAll(
-                () -> assertThat(findSessionId).isEqualTo(sessionId),
-                () -> assertThat(findSessionId).isEqualTo(cookies.getValue("JSESSIONID").get())
-        );
     }
 }

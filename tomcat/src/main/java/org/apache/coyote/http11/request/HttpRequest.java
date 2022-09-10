@@ -3,9 +3,9 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Objects;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.cookie.Cookies;
+import org.apache.coyote.http11.header.HttpHeaders;
 
 public class HttpRequest {
 
@@ -45,8 +45,9 @@ public class HttpRequest {
     }
 
     private static String getContentType(final HttpHeaders httpHeaders) {
-        return httpHeaders.getValue(HttpHeaders.CONTENT_TYPE)
-                .orElseThrow(() -> new IllegalArgumentException("필수 헤더가 들어오지 않았습니다." + HttpHeaders.CONTENT_TYPE));
+        return httpHeaders.findOneHeaderByKey(HttpHeaders.CONTENT_TYPE)
+                .orElseThrow(() -> new IllegalArgumentException("필수 헤더가 들어오지 않았습니다." + HttpHeaders.CONTENT_TYPE))
+                .getValue();
     }
 
     public boolean hasSession() {

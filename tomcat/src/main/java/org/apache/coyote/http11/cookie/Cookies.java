@@ -1,64 +1,71 @@
 package org.apache.coyote.http11.cookie;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Cookies {
 
-    private static final String SESSION_KEY = "JSESSIONID";
+    public static final String SESSION_KEY = "JSESSIONID";
+
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String COOKIE_SEPARATOR = "; ";
 
-    private final Map<String, String> cookies;
+    private final List<Cookie> cookies;
 
     public Cookies() {
-        cookies = new HashMap<>();
+        cookies = new ArrayList<>();
     }
 
-    public Cookies(final Map<String, String> cookies) {
+    public Cookies(final List<Cookie> cookies) {
         this();
-        this.cookies.putAll(cookies);
+        this.cookies.addAll(cookies);
     }
 
     public static Cookies from(final String cookieHeaderValue) {
         final String[] rawCookies = cookieHeaderValue.split(COOKIE_SEPARATOR);
-        final Map<String, String> cookies = new HashMap<>();
-        for (String rawCookie : rawCookies) {
-            final int keyValueSeparatorIndex = rawCookie.indexOf(KEY_VALUE_SEPARATOR);
-            cookies.put(
-                    rawCookie.substring(0, keyValueSeparatorIndex),
-                    rawCookie.substring(keyValueSeparatorIndex + 1)
-            );
-        }
+        final List<Cookie> cookies = Arrays.stream(rawCookies)
+                .map(rawCookie -> {
+                    final int keyValueSeparatorIndex = rawCookie.indexOf(KEY_VALUE_SEPARATOR);
+                    final String cookieKey = rawCookie.substring(0, keyValueSeparatorIndex);
+                    final String cookieValue = rawCookie.substring(keyValueSeparatorIndex + 1);
+                    return new Cookie(cookieKey, cookieValue);
+                })
+                .collect(Collectors.toList());
         return new Cookies(cookies);
     }
 
     public static Cookies empty() {
-        return new Cookies(new HashMap<>());
+        return new Cookies(new ArrayList<>());
     }
 
     public String toHeaderValueString() {
-        return cookies.keySet()
-                .stream()
-                .map(key -> key + KEY_VALUE_SEPARATOR + cookies.get(key))
+        return cookies.stream()
+                .map(cookie -> cookie.getKey() + KEY_VALUE_SEPARATOR + cookie.getValue())
                 .collect(Collectors.joining(COOKIE_SEPARATOR));
     }
 
     public Optional<String> getValue(final String cookieKey) {
-        return Optional.ofNullable(cookies.get(cookieKey));
+        return cookies.stream()
+                .filter(cookie -> cookie.getKey().equals(cookieKey))
+                .findAny()
+                .map(Cookie::getValue);
     }
 
     public void addCookie(final String key, final String value) {
-        cookies.put(key, value);
+        cookies.add(new Cookie(key, value));
     }
 
-    public void addSession(final String jSessionId) {
-        cookies.put(SESSION_KEY, jSessionId);
+    public void addSession(final String sessionId) {
+        cookies.add(new Cookie(SESSION_KEY, sessionId));
     }
 
     public Optional<String> getSessionId() {
-        return Optional.ofNullable(cookies.get(SESSION_KEY));
+        return cookies.stream()
+                .filter(cookie -> cookie.getKey().equals(SESSION_KEY))
+                .findAny()
+                .map(Cookie::getValue);
     }
 }

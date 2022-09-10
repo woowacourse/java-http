@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeaders;
 
 public class RedirectResponse extends HttpResponse {
 
@@ -16,8 +17,8 @@ public class RedirectResponse extends HttpResponse {
     }
 
     public static RedirectResponse of(final String redirectUri) {
-        final Map<String, String> header = new HashMap<>();
-        header.put(HttpHeaders.LOCATION, redirectUri);
+        final List<HttpHeader> header = new ArrayList<>();
+        header.add(new HttpHeader(HttpHeaders.LOCATION, redirectUri));
         return new RedirectResponse(
                 ContentType.TEXT_HTML,
                 HttpStatus.FOUND,

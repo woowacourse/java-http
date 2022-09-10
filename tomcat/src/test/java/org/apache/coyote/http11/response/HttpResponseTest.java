@@ -2,10 +2,10 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class HttpResponseTest {
         final HttpResponse httpResponse = new HttpResponse(
                 ContentType.TEXT_PLAIN,
                 HttpStatus.OK,
-                new HttpHeaders(new HashMap<>()),
+                new HttpHeaders(new ArrayList<>()),
                 "Hello world!"
         );
 

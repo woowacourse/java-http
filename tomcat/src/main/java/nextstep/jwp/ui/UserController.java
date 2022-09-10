@@ -1,10 +1,10 @@
 package nextstep.jwp.ui;
 
 import nextstep.jwp.application.UserService;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.BadRequestException;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestParams;
 import org.apache.coyote.http11.request.mapping.controllerscan.Controller;

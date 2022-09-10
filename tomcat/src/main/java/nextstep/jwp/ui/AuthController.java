@@ -2,12 +2,11 @@ package nextstep.jwp.ui;
 
 import java.util.Optional;
 import nextstep.jwp.application.AuthService;
-import nextstep.jwp.application.UserService;
 import nextstep.jwp.application.dto.UserDto;
 import nextstep.jwp.exception.LoginFailException;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestParams;
 import org.apache.coyote.http11.request.mapping.controllerscan.Controller;
@@ -15,6 +14,7 @@ import org.apache.coyote.http11.request.mapping.controllerscan.RequestMapping;
 import org.apache.coyote.http11.response.HtmlResponse;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.RedirectResponse;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +24,7 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private final UserService userService = UserService.getInstance();
-    private final AuthService authService = new AuthService();
+    private final AuthService authService = AuthService.getInstance();
 
     @RequestMapping(method = HttpMethod.GET, uri = "/login")
     public HttpResponse loginPage(final HttpRequest httpRequest) {
@@ -59,7 +58,9 @@ public class AuthController {
 
     private void setSession(final Long userId, final RedirectResponse response) {
         final SessionManager sessionManager = SessionManager.getInstance();
-        final String sessionId = sessionManager.addSession(userId);
-        response.addSession(sessionId);
+        final Session session = new Session();
+        session.setAttribute("userId", userId);
+        sessionManager.add(session);
+        response.addSession(session.getId(), Session.DEFAULT_EXPIRED_MINUTES * 60);
     }
 }

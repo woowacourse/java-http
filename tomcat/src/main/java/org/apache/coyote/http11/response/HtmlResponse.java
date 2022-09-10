@@ -2,9 +2,9 @@ package org.apache.coyote.http11.response;
 
 import java.net.URL;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.NotFoundException;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.support.FileUtils;
 
 public class HtmlResponse extends HttpResponse {

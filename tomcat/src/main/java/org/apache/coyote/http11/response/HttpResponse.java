@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeaders;
 
 public class HttpResponse {
 
@@ -44,7 +44,7 @@ public class HttpResponse {
                 responseBody);
     }
 
-    public void addSession(final String jSessionId) {
-        unnecessaryHeaders.addSetSession(jSessionId);
+    public void addSession(final String sessionId, final int maxAgeSecond) {
+        unnecessaryHeaders.setSession(sessionId, maxAgeSecond);
     }
 }

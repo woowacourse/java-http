@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.domain.User;
 import nextstep.jwp.domain.UserRepository;
+import nextstep.jwp.exception.DuplicateUserException;
 
 public class InMemoryUserRepository implements UserRepository {
 
@@ -22,10 +23,18 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User save(User user) {
+        validateDuplicateUser(user.getAccount());
         User newUser = new User(index++, user.getAccount(), user.getPassword(), user.getEmail());
         database.put(user.getAccount(), newUser);
         return database.get(user.getAccount());
     }
+
+    public void validateDuplicateUser(final String account){
+        if(findByAccount(account).isPresent()){
+            throw new DuplicateUserException();
+        }
+    }
+
 
     @Override
     public Optional<User> findByAccount(String account) {

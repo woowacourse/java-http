@@ -41,10 +41,6 @@ public class AuthService {
         final String email = httpRequest.findQueryByKey("email")
                 .orElseThrow(() -> new NoSuchElementException("이메일을 입력해주세요."));
 
-        if(userRepository.findByAccount(account).isPresent()){
-            throw new IllegalArgumentException("이미 가입된 회원입니다.");
-        }
-
         User savedUser = userRepository.save(new User(account, password, email));
 
         return UserResponseDto.from(savedUser);

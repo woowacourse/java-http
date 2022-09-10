@@ -22,41 +22,47 @@ public class LoginServlet extends AbstractServlet {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Method method = httpRequest.getMethod();
 
         if (method.isGet()) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (method.isPost()) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        return createNotFoundResponse(httpRequest);
+        setNotFound(httpResponse);
     }
 
-    private HttpResponse doGet(final HttpRequest httpRequest) {
+    private void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (sessionManager.isLoginAccount(httpRequest)) {
-            return HttpResponse.of(httpRequest, "/index.html", "302");
+            httpResponse.setStatusCode("302")
+                .setLocation("/index.html");
+            return;
         }
-        return HttpResponse.of(httpRequest, "/login.html", "200");
+        httpResponse.setStatusCode("200")
+            .setBody("/login.html");
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    private void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Map<String, String> bodies = httpRequest.getBodies();
         if (isNotContainEssentialParams(bodies)) {
-            return HttpResponse.of(httpRequest, "/404.html", "404");
+            setNotFound(httpResponse);
+            return;
         }
         final Optional<User> user = UserService.find(bodies.get("account"), bodies.get("password"));
-
-        if (user.isPresent()) {
-            log.info("login success to ID : {}", user.get().getAccount());
-            final HttpResponse httpResponse = HttpResponse.cookie(httpRequest, "/index.html", "302");
-
-            sessionManager.add(user.get(), httpResponse);
-
-            return httpResponse;
+        if (user.isEmpty()) {
+            setUnauthorized(httpResponse);
+            return;
         }
-        return HttpResponse.of(httpRequest, "/401.html", "401");
+
+        log.info("login success to ID : {}", user.get().getAccount());
+        httpResponse.setStatusCode("302")
+            .setLocation("/index.html")
+            .generateSessionId();
+        sessionManager.add(user.get(), httpResponse);
     }
 
     private boolean isNotContainEssentialParams(final Map<String, String> bodies) {

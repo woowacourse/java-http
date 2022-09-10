@@ -20,27 +20,32 @@ public class RegisterServlet extends AbstractServlet {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Method method = httpRequest.getMethod();
 
         if (method.isGet()) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (method.isPost()) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        return createNotFoundResponse(httpRequest);
+        setNotFound(httpResponse);
     }
 
-    private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, "/register.html", "200");
+    private void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.setStatusCode("200")
+            .setBody("/register.html");
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    private void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Map<String, String> bodies = httpRequest.getBodies();
         UserService.save(bodies.get("account"), bodies.get("password"), bodies.get("email"));
         log.info("register success to ID : {}", bodies.get("account"));
 
-        return HttpResponse.of(httpRequest, "/index.html", "302");
+        httpResponse.setLocation("302")
+            .setLocation("/index.html")
+            .setBody("/index.html");
     }
 }

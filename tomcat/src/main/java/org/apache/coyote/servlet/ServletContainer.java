@@ -40,21 +40,15 @@ public class ServletContainer {
 
     public Servlet getServlet(final HttpRequest httpRequest) {
         final String url = httpRequest.getUrl();
+        if (isResource(url)) {
+            return resourceServlet;
+        }
 
         return MAPPINGS.stream()
             .filter(mapping -> mapping.isSameUrl(url))
             .map(Mapping::getServlet)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(String.format("매핑되지 않은 url 입니다. [%s]", url)));
-    }
-
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (isResource(httpRequest)) {
-            return resourceServlet.service(httpRequest);
-        }
-
-        final AbstractServlet abstractServlet = search(httpRequest);
-        return abstractServlet.service(httpRequest);
     }
 
     private static void mapUrlToServlet(final AbstractServlet abstractServlet, final String url) {
@@ -70,17 +64,7 @@ public class ServletContainer {
         }
     }
 
-    private boolean isResource(final HttpRequest httpRequest) {
-        return ResourceSearcher.getInstance().isFile(httpRequest.getUrl());
-    }
-
-    private AbstractServlet search(final HttpRequest httpRequest) {
-        final String url = httpRequest.getUrl();
-
-        return MAPPINGS.stream()
-            .filter(mapping -> mapping.isMapping(url))
-            .map(Mapping::getServlet)
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(String.format("매핑되지 않은 url 입니다. [%s]", url)));
+    private boolean isResource(final String url) {
+        return ResourceSearcher.getInstance().isFile(url);
     }
 }

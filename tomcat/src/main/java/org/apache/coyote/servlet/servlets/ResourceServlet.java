@@ -12,16 +12,18 @@ public class ResourceServlet extends AbstractServlet {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Method method = httpRequest.getMethod();
 
         if (method.isGet()) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
-        return createNotFoundResponse(httpRequest);
+        setNotFound(httpResponse);
     }
 
-    private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, httpRequest.getUrl(), "200");
+    private void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.setStatusCode("200")
+            .setBody(httpRequest.getUrl());
     }
 }

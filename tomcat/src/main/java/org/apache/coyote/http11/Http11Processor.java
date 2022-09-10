@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = HttpResponse.init(httpRequest);
 
             final Servlet servlet = SERVLET_CONTAINER.getServlet(httpRequest);
-            servlet.service(httpRequest);
+            servlet.service(httpRequest, httpResponse);
             final String responseMessage = httpResponse.toMessage();
 
             outputStream.write(responseMessage.getBytes());

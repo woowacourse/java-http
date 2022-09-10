@@ -13,9 +13,17 @@ public abstract class AbstractServlet implements Servlet {
     }
 
     @Override
-    public abstract HttpResponse service(final HttpRequest httpRequest);
+    public abstract void service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    protected HttpResponse createNotFoundResponse(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, "/404.html", "404");
+    protected void setUnauthorized(final HttpResponse httpResponse) {
+        httpResponse.setStatusCode("401")
+            .setLocation("/401.html")
+            .setBody("/401.html");
+    }
+
+    protected void setNotFound(final HttpResponse httpResponse) {
+        httpResponse.setStatusCode("404")
+            .setLocation("/404.html")
+            .setBody("/404.html");
     }
 }

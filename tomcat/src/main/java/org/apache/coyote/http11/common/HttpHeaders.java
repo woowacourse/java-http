@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,15 +67,29 @@ public class HttpHeaders {
     }
 
     private Map<String, String> getAllHeaders() {
-        final Map<String, String> allHeaders = headers.entrySet().stream()
+        final Map<String, String> allHeaders = convertStringFromObject();
+        if (cookie.hasSessionId()) {
+            allHeaders.put(HeaderKeys.SET_COOKIE.getName(), cookie.toMessage());
+        }
+        return sortHeaders(allHeaders);
+    }
+
+    private Map<String, String> convertStringFromObject() {
+        return headers.entrySet().stream()
             .collect(Collectors.toMap(
                 header -> header.getKey().getName(),
                 Map.Entry::getValue
             ));
-        if (cookie.hasSessionId()) {
-            allHeaders.put(HeaderKeys.SET_COOKIE.getName(), cookie.toMessage());
-        }
-        return allHeaders;
+    }
+
+    private Map<String, String> sortHeaders(final Map<String, String> headers) {
+        return headers.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue,
+                LinkedHashMap::new
+            ));
     }
 
     private void excludeLastEmpty(final StringBuilder message) {

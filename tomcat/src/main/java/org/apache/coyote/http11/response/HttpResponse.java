@@ -17,7 +17,7 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;
-    private final HttpResponseBody body;
+    private HttpResponseBody body;
 
     private HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final HttpResponseBody body) {
         this.statusLine = statusLine;
@@ -33,50 +33,44 @@ public class HttpResponse {
         return new HttpResponse(statusLine, httpHeaders, body);
     }
 
-    public static HttpResponse of(final HttpRequest httpRequest, final String resource, final String statusCode) {
-        final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
-
-        final String contentType = selectContentType(resource);
-        final HttpResponseBody body = loadResourceContent(resource);
-        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body.getValue());
-        addLocation(httpHeaders, statusCode, resource);
-
-        return new HttpResponse(statusLine, httpHeaders, body);
+    public HttpResponse setStatusCode(final String statusCode) {
+        statusLine.setStatusCode(statusCode);
+        return this;
     }
 
-    public static HttpResponse cookie(final HttpRequest httpRequest, final String resource, final String statusCode) {
-        final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
-
-        final String contentType = selectContentType(resource);
-        final HttpResponseBody body = loadResourceContent(resource);
-        final HttpHeaders httpHeaders = createHttpHeaders(contentType, body.getValue())
-            .generateSessionId();
-        addLocation(httpHeaders, statusCode, resource);
-
-        return new HttpResponse(statusLine, httpHeaders, body);
+    public HttpResponse setLocation(final String redirect) {
+        httpHeaders.add(HeaderKeys.LOCATION, redirect);
+        return this;
     }
 
-    private static String selectContentType(final String resource) {
+    public HttpResponse setBody(final String resource) {
+        final String contentType = selectContentType(resource);
+        body = loadResourceContent(resource);
+
+        setHttpHeaders(contentType, body.getValue());
+        return this;
+    }
+
+    public HttpResponse generateSessionId() {
+        httpHeaders.generateSessionId();
+        return this;
+    }
+
+    private void setHttpHeaders(final String contentType, final String body) {
+        int length = body.getBytes().length;
+
+        httpHeaders.add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
+            .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
+    }
+
+    private String selectContentType(final String resource) {
         final String[] fileElements = resource.split(FILE_REGEX);
 
         return ResourceType.getContentType(fileElements[EXTENSION_LOCATION]);
     }
 
-    private static HttpResponseBody loadResourceContent(final String resource) {
+    private HttpResponseBody loadResourceContent(final String resource) {
         return HttpResponseBody.from(RESOURCE_SEARCHER.loadContent(resource));
-    }
-
-    private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
-        int length = body.getBytes().length;
-        return HttpHeaders.init()
-            .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
-            .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
-    }
-
-    private static void addLocation(final HttpHeaders httpHeaders, final String statusCode, final String resource) {
-        if (StatusCode.isRedirect(statusCode)) {
-            httpHeaders.add(HeaderKeys.LOCATION, resource);
-        }
     }
 
     public String toMessage() {

@@ -21,12 +21,12 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         final Optional<User> user = findUser(request);
 
-        String responseBody = ResourceGenerator.getStaticResource("/");
+        String responseBody = ResourceGenerator.getStaticResource(Url.ROOT.getValue());
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            responseBody = ResourceGenerator.getStaticResource("/401");
+            responseBody = ResourceGenerator.getStaticResource(Url.UNAUTHORIZED.getValue());
             response.setStatus(Status.UNAUTHORIZED)
                     .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                    .setLocation("/401")
+                    .setLocation(Url.UNAUTHORIZED.getValue())
                     .setBody(responseBody)
                     .build();
             return;
@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
 
         response.setStatus(Status.FOUND)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .setLocation("/")
+                .setLocation(Url.ROOT.getValue())
                 .setBody(responseBody)
                 .build();
     }
@@ -57,15 +57,15 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException("No such cookie"));
         Optional<Session> session = new SessionManager().findSession(sessionId);
         if (session.isPresent()) {
-            final String indexPage = ResourceGenerator.getStaticResource("/index");
+            final String indexPage = ResourceGenerator.getStaticResource(Url.ROOT.getValue());
             response.setStatus(Status.FOUND)
-                    .setLocation("/index")
+                    .setLocation(Url.ROOT.getValue())
                     .setContentLength(indexPage.getBytes(StandardCharsets.UTF_8).length)
                     .setBody(indexPage)
                     .build();
             return;
         }
-        final String loginPage = ResourceGenerator.getStaticResource("/login");
+        final String loginPage = ResourceGenerator.getStaticResource(Url.LOGIN.getValue());
         response.setContentLength(loginPage.getBytes(StandardCharsets.UTF_8).length)
                 .setBody(loginPage)
                 .build();

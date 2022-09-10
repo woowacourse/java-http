@@ -10,7 +10,7 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
-        final String responseBody = ResourceGenerator.getStaticResource("/");
+        final String responseBody = ResourceGenerator.getStaticResource(Url.ROOT.getValue());
 
         response.setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setBody(responseBody)

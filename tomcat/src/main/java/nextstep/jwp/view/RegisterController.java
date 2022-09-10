@@ -26,14 +26,14 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(new User(account, password, email));
 
         response.setStatus(Status.FOUND)
-                .setLocation("/")
+                .setLocation(Url.ROOT.getValue())
                 .setContentType(MediaType.TEXT_HTML)
                 .build();
     }
 
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
-        final String responseBody = ResourceGenerator.getStaticResource("/register");
+        final String responseBody = ResourceGenerator.getStaticResource(Url.REGISTER.getValue());
         response.setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setBody(responseBody)
                 .build();

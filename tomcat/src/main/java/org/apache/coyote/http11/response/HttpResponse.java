@@ -15,6 +15,9 @@ public class HttpResponse {
     private static final String FILE_REGEX = "\\.";
     private static final int EXTENSION_LOCATION = 1;
 
+    private static final String UNAUTHORIZED_RESOURCE = "/401.html";
+    private static final String NOT_FOUNT_RESOURCE = "/404.html";
+
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;
     private HttpResponseBody body;
@@ -54,6 +57,18 @@ public class HttpResponse {
     public HttpResponse generateSessionId() {
         httpHeaders.generateSessionId();
         return this;
+    }
+
+    public void unauthorized() {
+        setStatusCode(StatusCode.UNAUTHORIZED)
+            .setLocation(UNAUTHORIZED_RESOURCE)
+            .setBody(UNAUTHORIZED_RESOURCE);
+    }
+
+    public void notFound() {
+        setStatusCode(StatusCode.NOT_FOUND)
+            .setLocation(NOT_FOUNT_RESOURCE)
+            .setBody(NOT_FOUNT_RESOURCE);
     }
 
     private void setHttpHeaders(final String contentType, final String body) {

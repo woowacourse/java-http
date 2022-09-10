@@ -35,10 +35,6 @@ public class LoginServlet extends AbstractServlet {
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Map<String, String> bodies = httpRequest.getBodies();
-        if (isNotContainEssentialParams(bodies)) {
-            setNotFound(httpResponse);
-            return;
-        }
         final Optional<User> user = UserService.find(bodies.get("account"), bodies.get("password"));
         if (user.isEmpty()) {
             setUnauthorized(httpResponse);
@@ -50,9 +46,5 @@ public class LoginServlet extends AbstractServlet {
             .setLocation("/index.html")
             .generateSessionId();
         sessionManager.add(user.get(), httpResponse);
-    }
-
-    private boolean isNotContainEssentialParams(final Map<String, String> bodies) {
-        return !bodies.containsKey("account") || !bodies.containsKey("password");
     }
 }

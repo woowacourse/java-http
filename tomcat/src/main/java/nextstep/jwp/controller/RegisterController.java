@@ -8,15 +8,13 @@ import nextstep.jwp.exception.InvalidUserException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.StatusCode;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        super.doPost(request, response);
-        response.setStatusCode(StatusCode.CREATE);
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        response.sendRedirect(INDEX_PAGE_URL);
 
         registerUser(request);
     }

@@ -218,7 +218,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        var expected = "HTTP/1.1 201 CREATE \r\n" +
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Location: ./index.html \r\n" +
                 "\r\n";

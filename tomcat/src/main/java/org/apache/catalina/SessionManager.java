@@ -37,7 +37,7 @@ public class SessionManager implements Manager {
     }
 
     public boolean isLoginAccount(final HttpRequest httpRequest) {
-        if (httpRequest.doesNotHaveSessionId()) {
+        if (httpRequest.doesNotContainSessionId()) {
             return false;
         }
         return sessions.entrySet().stream()

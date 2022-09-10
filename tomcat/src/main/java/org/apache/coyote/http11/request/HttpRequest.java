@@ -22,7 +22,7 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
-    public boolean doesNotHaveSessionId() {
+    public boolean doesNotContainSessionId() {
         return !headers.hasSessionId();
     }
 

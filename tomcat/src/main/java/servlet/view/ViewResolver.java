@@ -23,7 +23,6 @@ public class ViewResolver {
 
     public HttpResponse getResponse(ResponseEntity entity) {
         String url = entity.getUri();
-        System.out.println("url = " + url);
         HttpStatus status = entity.getStatus();
         Map<String, String> headers = entity.getHeaders();
 

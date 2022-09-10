@@ -17,14 +17,22 @@ public enum ContentType {
         this.MIMEType = mimeType;
     }
 
-    public static ContentType matchMIMEType(String extension) {
+    public String getMIMEType() {
+        return MIMEType;
+    }
+
+    public static ContentType getContentType(final String url) {
+        if (url.contains(".")) {
+            final String[] splitExtension = url.split("\\" + ".");
+            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
+        }
+        return ContentType.HTML;
+    }
+
+    private static ContentType matchMIMEType(String extension) {
         return Arrays.stream(values())
                 .filter(type -> type.extension.equals(extension))
                 .findAny()
                 .orElseThrow(ContentNotFoundException::new);
-    }
-
-    public String getMIMEType() {
-        return MIMEType;
     }
 }

@@ -6,7 +6,6 @@ import org.apache.coyote.http11.utils.PairConverter;
 
 public class HttpHeader {
 
-    private static final String EXTENSION_DELIMITER = ".";
     private static final String HTTP_VERSION = "HTTP/1.1";
 
     private Map<String, String> headers;
@@ -35,11 +34,7 @@ public class HttpHeader {
     }
 
     private ContentType getContentType(final String url) {
-        if (url.contains(EXTENSION_DELIMITER)) {
-            final String[] splitExtension = url.split("\\" + EXTENSION_DELIMITER);
-            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
-        }
-        return ContentType.HTML;
+        return ContentType.getContentType(url);
     }
 
     public HttpHeader contentLength(final int contentLength) {

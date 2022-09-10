@@ -27,17 +27,21 @@ public class UserController {
     public HttpResponse register(final HttpRequest httpRequest) {
         final RequestParams requestParams = httpRequest.getRequestParams();
         try {
-            final String account = requestParams.getValue("account")
-                    .orElseThrow(() -> new BadRequestException("account 파라미터가 존재하지 않습니다."));
-            final String password = requestParams.getValue("password")
-                    .orElseThrow(() -> new BadRequestException("password 파라미터가 존재하지 않습니다."));
-            final String email = requestParams.getValue("email")
-                    .orElseThrow(() -> new BadRequestException("email 파라미터가 존재하지 않습니다."));
+            final String account = getAccountFromRequestParam(requestParams, "account", "account 파라미터가 존재하지 않습니다.");
+            final String password = getAccountFromRequestParam(requestParams, "password", "password 파라미터가 존재하지 않습니다.");
+            final String email = getAccountFromRequestParam(requestParams, "email", "email 파라미터가 존재하지 않습니다.");
 
             userService.save(account, password, email);
             return RedirectResponse.of("/index.html");
         } catch (final BadRequestException e) {
             return RedirectResponse.of("/400.html");
         }
+    }
+
+    private String getAccountFromRequestParam(final RequestParams requestParams,
+                                              final String key,
+                                              final String exceptionMessage) {
+        return requestParams.getValue(key)
+                .orElseThrow(() -> new BadRequestException(exceptionMessage));
     }
 }

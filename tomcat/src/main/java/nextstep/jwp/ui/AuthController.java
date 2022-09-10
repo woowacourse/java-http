@@ -4,6 +4,7 @@ import java.util.Optional;
 import nextstep.jwp.application.AuthService;
 import nextstep.jwp.application.dto.UserDto;
 import nextstep.jwp.exception.LoginFailException;
+import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.header.HttpHeaders;
@@ -29,6 +30,8 @@ public class AuthController {
     @RequestMapping(method = HttpMethod.GET, uri = "/login")
     public HttpResponse loginPage(final HttpRequest httpRequest) {
         if (httpRequest.hasSession()) {
+            final Session session = httpRequest.getSession()
+                    .orElseThrow(() -> new UnauthorizedException("로그인된 세션을 찾을 수 없습니다."));
             return RedirectResponse.of("/index.html");
         }
         return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login");
@@ -40,15 +43,13 @@ public class AuthController {
         final Optional<String> account = getRequestParams.getValue("account");
         final Optional<String> password = getRequestParams.getValue("password");
         try {
-            final String accountValue = account
-                    .orElseThrow(LoginFailException::new);
-            final String passwordValue = password
-                    .orElseThrow(LoginFailException::new);
+            final String accountValue = account.orElseThrow(LoginFailException::new);
+            final String passwordValue = password.orElseThrow(LoginFailException::new);
             final UserDto loginUser = authService.login(accountValue, passwordValue);
 
             final RedirectResponse response = RedirectResponse.of("/index.html");
             if (!httpRequest.hasSession()) {
-                setSession(loginUser.getId(), response);
+                setSessionUserId(loginUser.getId(), response);
             }
             return response;
         } catch (final LoginFailException e) {
@@ -56,7 +57,7 @@ public class AuthController {
         }
     }
 
-    private void setSession(final Long userId, final RedirectResponse response) {
+    private void setSessionUserId(final Long userId, final RedirectResponse response) {
         final SessionManager sessionManager = SessionManager.getInstance();
         final Session session = new Session();
         session.setAttribute("userId", userId);

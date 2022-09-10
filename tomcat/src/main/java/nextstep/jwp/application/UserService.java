@@ -24,11 +24,4 @@ public class UserService {
         final User savedUser = userRepository.save(new User(account, password, email));
         return savedUser.getId();
     }
-
-    public UserDto findByAccount(final String account) {
-        final User user = userRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("찾는 유저가 없습니다."));
-
-        return UserDto.from(user);
-    }
 }

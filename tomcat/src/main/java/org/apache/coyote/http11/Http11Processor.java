@@ -91,8 +91,8 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(header -> header.startsWith(HttpHeaders.CONTENT_LENGTH))
                 .findAny()
                 .map(contentLengthHeader -> {
-                    final int headerKeyValueSeparatorIndex = contentLengthHeader.indexOf(":");
-                    return Integer.parseInt(contentLengthHeader.substring(headerKeyValueSeparatorIndex + 2).trim());
+                    final int keyValueSeparatorIndex = contentLengthHeader.indexOf(":");
+                    return Integer.parseInt(contentLengthHeader.substring(keyValueSeparatorIndex + 2).trim());
                 })
                 .orElse(0);
     }

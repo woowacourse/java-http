@@ -2,10 +2,13 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.header.HttpHeaders;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -52,6 +55,17 @@ public class HttpRequest {
 
     public boolean hasSession() {
         return headers.hasSession();
+    }
+
+    public Optional<Session> getSession() {
+        final Optional<String> sessionId = headers.getCookies()
+                .getSessionId();
+        if (sessionId.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return SessionManager.getInstance()
+                .findSession(sessionId.orElseThrow());
     }
 
     public RequestLine getRequestLine() {

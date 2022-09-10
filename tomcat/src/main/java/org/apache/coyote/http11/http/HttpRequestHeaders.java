@@ -27,7 +27,7 @@ public class HttpRequestHeaders {
 
     public ContentLength getContentLength() {
         final Entry<String, String> contentLength = httpRequestHeaders.entrySet().stream()
-                .filter(it -> it.getKey().equalsIgnoreCase("content-length"))
+                .filter(it -> it.getKey().equalsIgnoreCase("Content-length"))
                 .findFirst()
                 .orElseGet(() -> new SimpleEntry<>("Content-length", "0"));
         return ContentLength.from(contentLength.getValue());

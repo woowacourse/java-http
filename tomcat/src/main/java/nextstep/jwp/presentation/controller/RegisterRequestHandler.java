@@ -1,5 +1,7 @@
 package nextstep.jwp.presentation.controller;
 
+import static nextstep.jwp.presentation.ResourceLocation.ROOT;
+
 import customservlet.RequestHandler;
 import nextstep.jwp.application.MemberService;
 import nextstep.jwp.dto.request.RegisterRequest;
@@ -22,7 +24,8 @@ public class RegisterRequestHandler implements RequestHandler {
     public String handle(final HttpRequest request, final HttpResponse response) {
         memberService.register(RegisterRequest.from(FormDataResolver.resolve(request.getRequestBody())));
         response.setStatusCode(HttpStatus.FOUND);
-        return "index";
+        response.setLocation(ROOT.getLocation());
+        return null;
     }
 
     @Override

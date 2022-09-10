@@ -1,5 +1,7 @@
 package nextstep.jwp.presentation.controller;
 
+import static nextstep.jwp.presentation.ResourceLocation.ROOT;
+
 import customservlet.RequestHandler;
 import customservlet.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
@@ -22,7 +24,8 @@ public class LoginPageRequestHandler implements RequestHandler {
         final Session session = request.getSession(true);
         if (sessionManager.isValid(session)) {
             response.setStatusCode(HttpStatus.FOUND);
-            return "index";
+            response.setLocation(ROOT.getLocation());
+            return null;
         }
         response.setStatusCode(HttpStatus.OK);
         return "login";

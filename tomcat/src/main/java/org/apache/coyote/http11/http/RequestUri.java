@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.http;
 
+import java.util.Objects;
+
 public class RequestUri {
 
     private final String requestUri;
@@ -21,5 +23,22 @@ public class RequestUri {
 
     public String getRequestUri() {
         return requestUri;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RequestUri that = (RequestUri) o;
+        return Objects.equals(requestUri, that.requestUri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestUri);
     }
 }

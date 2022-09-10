@@ -12,11 +12,11 @@ import org.apache.coyote.http11.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginFilter {
+public class LoginInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginInterceptor.class);
 
-    public void doFilter(final HttpRequest request) {
+    public void preHandle(final HttpRequest request) {
         final Map<String, String> params = FormDataResolver.resolve(request.getRequestBody());
         final LoginRequest loginRequest = LoginRequest.from(params);
         final Optional<User> user = findByAccount(loginRequest.getAccount());

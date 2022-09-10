@@ -1,5 +1,7 @@
 package nextstep.jwp.presentation.controller;
 
+import static nextstep.jwp.presentation.ResourceLocation.ROOT;
+
 import customservlet.RequestHandler;
 import customservlet.SessionManager;
 import nextstep.jwp.application.MemberService;
@@ -32,7 +34,8 @@ public class LoginRequestHandler implements RequestHandler {
         sessionManager.add(session);
         response.addCookie(Cookies.ofJSessionId(session.getId()));
         response.setStatusCode(HttpStatus.FOUND);
-        return "index";
+        response.setLocation(ROOT.getLocation());
+        return null;
     }
 
     @Override

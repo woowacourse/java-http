@@ -1,23 +1,21 @@
 package org.apache.coyote.http11.http;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import org.apache.coyote.http11.util.HttpMethod;
 import org.junit.jupiter.api.Test;
 
 class RequestLineTest {
     @Test
-    void BufferedReader에서_첫_줄을_읽어서_RequestLine을_생성() {
-        // given
-        final String request = String.join(System.lineSeparator(), "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ");
-        final BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8))));
-        // when
+    void RequestLine으로_HttpMethod_RequestUri를_생성() {
+        // given, when
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1 ");
 
         // then
-//        assertThat(actual).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(requestLine.getRequestUri()).isEqualTo(RequestUri.from("/index.html"))
+        );
     }
-
 }

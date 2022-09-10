@@ -18,7 +18,7 @@ class ResponseHeadersTest {
         // given
         ResponseEntity responseEntity = ResponseEntity.body(body);
         ResponseHeaders responseHeaders = new ResponseHeaders();
-        RequestHeaders requestHeaders = RequestHeaders.of(List.of(""));
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("eden: king"));
 
         // when
         responseHeaders.setHeaders(requestHeaders, responseEntity);

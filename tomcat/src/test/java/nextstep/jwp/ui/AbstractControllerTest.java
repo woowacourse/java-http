@@ -1,11 +1,11 @@
 package nextstep.jwp.ui;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import java.util.List;
+import nextstep.jwp.exception.NotSupportedHttpMethodException;
 import nextstep.jwp.exception.ResourceNotFoundException;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
@@ -27,7 +27,7 @@ class AbstractControllerTest {
 
         // when & then
         assertThatThrownBy(() -> controller.service(httpRequest, new HttpResponse()))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(NotSupportedHttpMethodException.class);
     }
 
 }

@@ -20,7 +20,7 @@ public class ResponseHeaders {
     public void setHeaders(RequestHeaders requestHeaders, ResponseEntity responseEntity) {
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
-            values.put(LOCATION_HEADER, PROTOCOL + requestHeaders.getHeader(HOST) + responseBody.split(":")[1]);
+            values.put(LOCATION_HEADER, PROTOCOL + requestHeaders.getHeader(HOST) + "/" + responseBody.split(":")[1]);
             return;
         }
         ContentType contentType = ContentType.findContentType(responseEntity.getResponseBody());

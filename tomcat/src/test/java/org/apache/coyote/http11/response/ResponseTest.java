@@ -106,7 +106,7 @@ class ResponseTest {
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 302 + " " + "FOUND" + " ";
-        String expectedLocationHeader = "Location: http://localhost:8080/index.html ";
-        assertThat(httpResponse.asString()).contains(List.of(expectedStartLine, expectedLocationHeader));
+        String expectedLocation = "index.html ";
+        assertThat(httpResponse.asString()).contains(List.of(expectedStartLine, expectedLocation));
     }
 }

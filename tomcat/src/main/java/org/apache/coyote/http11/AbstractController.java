@@ -1,6 +1,6 @@
-package nextstep.jwp.ui;
+package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.ResourceNotFoundException;
+import nextstep.jwp.exception.NotSupportedHttpMethodException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        throw new ResourceNotFoundException();
+        throw new NotSupportedHttpMethodException();
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) { /* NOOP */ }

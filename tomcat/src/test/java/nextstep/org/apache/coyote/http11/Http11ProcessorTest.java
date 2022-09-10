@@ -10,7 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import nextstep.jwp.RequestMapping;
+import nextstep.jwp.ui.FileController;
+import org.apache.coyote.http11.RequestMapping;
 import nextstep.jwp.ui.HomeController;
 import nextstep.jwp.ui.LoginController;
 import org.apache.coyote.http11.Http11Processor;
@@ -23,8 +24,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
-        RequestMapping.registerController(Map.of("/", new HomeController()));
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.registerController("/", new HomeController());
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -52,7 +54,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.setFileController(new FileController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -80,7 +84,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.setFileController(new FileController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.run();
@@ -109,9 +115,10 @@ class Http11ProcessorTest {
                 "Content-Length: " + "a=b&b=a@w".getBytes().length,
                 "",
                 "a=b&b=a@w");
-        RequestMapping.registerController(Map.of("/login", new LoginController()));
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.registerController("/login", new LoginController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.run();

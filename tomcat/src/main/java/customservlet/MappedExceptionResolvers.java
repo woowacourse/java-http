@@ -2,6 +2,8 @@ package customservlet;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
 
 public class MappedExceptionResolvers {
 
@@ -17,7 +19,12 @@ public class MappedExceptionResolvers {
         return new MappedExceptionResolvers(exceptionResolvers);
     }
 
-    public ExceptionResolver get(final Exception exception) {
+    public void resolveException(final RuntimeException exception, final HttpRequest request,
+                                 final HttpResponse response) {
+        getResolver(exception).resolveException(request, response);
+    }
+
+    private ExceptionResolver getResolver(final Exception exception) {
         return exceptionResolvers.entrySet()
                 .stream()
                 .filter(it -> it.getKey().isInstance(exception))

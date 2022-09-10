@@ -70,8 +70,7 @@ public class ChicChocServlet extends AbstractServlet {
             final var viewName = handler.handle(request, response);
             applyViewName(viewName, response);
         } catch (RuntimeException e) {
-            final var exceptionResolver = mappedExceptionResolvers.get(e);
-            exceptionResolver.resolveException(request, response);
+            mappedExceptionResolvers.resolveException(e, request, response);
         }
     }
 

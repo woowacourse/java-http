@@ -14,7 +14,7 @@ class HttpRequestTest {
     @DisplayName("url내의 쿼리문을 키/값 쌍으로 매핑하여 값으로 찾아온다.")
     void hasQuery_true() {
         final HttpRequest httpRequest = new HttpRequest(
-                "GET /login?account=gugu&password=password HTTP/1.1",
+                new HttpRequestLine("GET /login?account=gugu&password=password HTTP/1.1"),
                 new Header(new HashMap<>()),
                 ""
         );
@@ -31,7 +31,7 @@ class HttpRequestTest {
         headerMap.put("Content-Type","application/x-www-form-urlencoded");
 
         final HttpRequest httpRequest = new HttpRequest(
-                "GET /login",
+                new HttpRequestLine("GET /login"),
                 new Header(headerMap),
                 "account=gugu&password=password"
         );
@@ -45,7 +45,7 @@ class HttpRequestTest {
     @DisplayName("쿼리스트링이 없다면 예외를 반환한다.")
     void getQueryByValue_NotFoundQuery() {
         final HttpRequest httpRequest = new HttpRequest(
-                "GET /login",
+                new HttpRequestLine("GET /login"),
                 new Header(new HashMap<>()),
                 ""
         );

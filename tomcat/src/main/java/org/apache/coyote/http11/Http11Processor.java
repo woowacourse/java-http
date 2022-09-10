@@ -30,7 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public synchronized void process(final Socket connection) {
+    public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);

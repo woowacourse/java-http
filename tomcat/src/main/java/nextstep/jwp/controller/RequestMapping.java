@@ -14,7 +14,7 @@ public class RequestMapping {
         CONTROLLER_MAPPER.put("/register", new RegisterController());
     }
 
-    public Controller getController(final HttpRequest request) {
+    public Controller mapController(final HttpRequest request) {
         final String uri = request.getUri();
         return CONTROLLER_MAPPER.getOrDefault(uri, new DefaultController());
     }

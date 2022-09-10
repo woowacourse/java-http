@@ -1,76 +1,35 @@
 package org.apache.coyote.http11.common;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.session.HttpCookie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Headers {
 
-    private static final Logger log = LoggerFactory.getLogger(Headers.class);
     private static final String COOKIE = "Cookie";
     private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
 
-    private final Map<String, Object> values;
+    private final Map<String, String> values;
+    private HttpCookie httpCookie;
 
-    private Headers(final Map<String, Object> values) {
-        this.values = values;
+    public Headers() {
+        this.values = new HashMap<>();
+        this.httpCookie = new HttpCookie();
     }
 
-    public static Headers from(final Entry<String, Object>... headers) {
-        final Map<String, Object> values = new LinkedHashMap<>();
-        for (final Entry<String, Object> header : headers) {
-            values.put(header.getKey(), header.getValue());
-        }
-        return new Headers(values);
-    }
-
-    public static Headers from(final BufferedReader bufferedReader) {
-        try {
-            return new Headers(parseHeaders(bufferedReader));
-        } catch (final IOException e) {
-            log.error("invalid request header", e);
-            throw new IllegalArgumentException("올바른 HTTP Request Header 형식이 아닙니다.");
-        }
-    }
-
-    private static Map<String, Object> parseHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, Object> headers = new LinkedHashMap<>();
-
-        while (bufferedReader.ready()) {
-            final String line = bufferedReader.readLine();
-            Objects.requireNonNull(line);
-            if ("".equals(line)) {
-                break;
-            }
-            addHeader(headers, line);
-        }
-        return headers;
-    }
-
-    private static void addHeader(final Map<String, Object> headers, final String line) {
-        final String[] field = line.split(": ");
-        validateFieldLength(field);
-        if (field[0].equals(COOKIE)) {
-            final HttpCookie httpCookie = HttpCookie.from(field[1]);
-            headers.put(COOKIE, httpCookie);
-            return;
-        }
-        headers.put(field[0], field[1].trim());
-    }
-
-    private static void validateFieldLength(final String[] field) {
+    public void add(final String header) {
+        final String[] field = header.split(": ");
         if (field.length != DEFAULT_HEADER_FIELD_LENGTH) {
             throw new IllegalArgumentException("올바른 Header Field 형식이 아닙니다.");
         }
+        if (field[0].equals(COOKIE)) {
+            this.httpCookie = HttpCookie.from(field[1]);
+        }
+        values.put(field[0].trim(), field[1].trim());
     }
 
     public Object findField(final String fieldName) {
@@ -79,15 +38,15 @@ public class Headers {
     }
 
     public Optional<String> findCookie(final String name) {
-        final Optional<Object> cookies = Optional.ofNullable(values.get(COOKIE));
+        final Optional<String> cookies = Optional.ofNullable(values.get(COOKIE));
         if (cookies.isEmpty()) {
             return Optional.empty();
         }
 
-        return ((HttpCookie) cookies.get()).findCookie(name);
+        return httpCookie.findCookie(name);
     }
 
-    public Map<String, Object> getValues() {
+    public Map<String, String> getValues() {
         return values;
     }
 
@@ -97,5 +56,21 @@ public class Headers {
                 .stream()
                 .map(e -> e.getKey() + ": " + e.getValue())
                 .collect(Collectors.joining("\r\n"));
+    }
+
+    public void setContentType(final ContentType contentType) {
+        values.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+    }
+
+    public void setContentLength(final String contents) {
+        values.put("Content-Length", String.valueOf(contents.getBytes().length));
+    }
+
+    public void setLocation(final String location) {
+        values.put("Location", location);
+    }
+
+    public void setCookie(final String cookie) {
+        values.put("Set-Cookie", "JSESSIONID=" + cookie);
     }
 }

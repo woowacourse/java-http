@@ -10,6 +10,10 @@ public class HttpCookie {
 
     private final Map<String, String> values;
 
+    public HttpCookie() {
+        this.values = new HashMap<>();
+    }
+
     private HttpCookie(final Map<String, String> values) {
         this.values = values;
     }
@@ -34,7 +38,7 @@ public class HttpCookie {
         if (pair.length != DEFAULT_COOKIE_PAIR_SIZE) {
             throw new IllegalArgumentException("올바른 Http Cookie 형식이 아닙니다.");
         }
-        cookies.put(pair[0], pair[1].trim());
+        cookies.put(pair[0].trim(), pair[1].trim());
     }
 
     public Map<String, String> getValues() {

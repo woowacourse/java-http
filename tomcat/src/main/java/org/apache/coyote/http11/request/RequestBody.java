@@ -1,45 +1,16 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.common.Headers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RequestBody {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestBody.class);
     private static final int DEFAULT_QUERY_PARAMETER_PAIR_SIZE = 2;
 
     private final String contents;
 
-    private RequestBody(final String contents) {
+    public RequestBody(final String contents) {
         this.contents = contents;
-    }
-
-    public static RequestBody of(final BufferedReader bufferedReader, final Headers headers) {
-        try {
-            return readBody(bufferedReader, headers);
-        } catch (final IOException e) {
-            log.error("invalid input", e);
-            throw new IllegalArgumentException("올바른 Request Body 형식이 아닙니다.");
-        }
-
-    }
-
-    private static RequestBody readBody(final BufferedReader bufferedReader, final Headers headers)
-            throws IOException {
-        if (bufferedReader.ready()) {
-            final int contentLength = Integer.parseInt((String) headers.findField("Content-Length"));
-            final char[] contents = new char[contentLength];
-            bufferedReader.read(contents, 0, contentLength);
-
-            return new RequestBody(new String(contents));
-        }
-
-        return new RequestBody("");
     }
 
     public Map<String, String> parseApplicationFormData() {
@@ -63,9 +34,5 @@ public class RequestBody {
             throw new IllegalArgumentException("올바른 application/x-www-form-urlencoded 형식이 아닙니다.");
         }
         params.put(pair[0], pair[1]);
-    }
-
-    public String getContents() {
-        return contents;
     }
 }

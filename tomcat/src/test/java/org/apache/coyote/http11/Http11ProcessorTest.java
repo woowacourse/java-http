@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,14 +35,15 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final var expected = String.join("\r\n",
+            final var expected = List.of(
                     "HTTP/1.1 200 OK",
                     "Content-Type: text/html;charset=utf-8",
                     "Content-Length: 12",
                     "",
                     "Hello world!");
 
-            assertThat(socket.output()).isEqualTo(expected);
+            final String[] output = socket.output().split("\r\n");
+            assertThat(output).containsAll(expected);
         }
 
         @ParameterizedTest(name = "GET {0} 요청 시 {1}를 응답한다.")
@@ -62,13 +64,13 @@ class Http11ProcessorTest {
             // then
             final URL resource = getResource(fileName);
 
-            final var expected = String.join("\r\n", "HTTP/1.1 200 OK",
+            final var expected = List.of("HTTP/1.1 200 OK",
                     "Content-Type: " + contentType + ";charset=utf-8",
                     "Content-Length: " + contentLength,
                     "",
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-
-            assertThat(socket.output()).isEqualTo(expected);
+            final String[] output = socket.output().split("\r\n");
+            assertThat(output).containsAll(expected);
         }
 
         @Test
@@ -99,13 +101,13 @@ class Http11ProcessorTest {
             // then
             final URL resource = getResource("static/login.html");
 
-            final var expected = String.join("\r\n", "HTTP/1.1 200 OK",
+            final var expected = List.of("HTTP/1.1 200 OK",
                     "Content-Type: text/html;charset=utf-8",
                     "Content-Length: 3797",
                     "",
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
 
         @Disabled("HttpResponse를 구현한 뒤 테스트 가능하도록 변경")
@@ -121,18 +123,18 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final var expected = String.join("\r\n", "HTTP/1.1 302 Found",
+            final var expected = List.of("HTTP/1.1 302 Found",
                     "Location: /index.html",
                     "",
                     "");
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
 
         @ParameterizedTest
         @CsvSource({"account=pepper&password=pwd", "account=gugu&password=pwd"})
         @DisplayName("로그인 실패 시 /401.html 페이지로 리다이렉트한다.")
-        void invalidAccount_ExceptionThrown(final String query) {
+        void invalidAccount_redirect(final String query) {
             // given
             final String httpRequest = createPostRequest("/login", query);
             final var socket = new StubSocket(httpRequest);
@@ -142,12 +144,12 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final var expected = String.join("\r\n", "HTTP/1.1 302 Found",
+            final var expected = List.of("HTTP/1.1 302 Found",
                     "Location: /401.html",
                     "",
                     "");
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
 
         @ParameterizedTest
@@ -165,13 +167,13 @@ class Http11ProcessorTest {
             // then
             final URL resource = getResource("static/register.html");
 
-            final var expected = String.join("\r\n", "HTTP/1.1 200 OK",
+            final var expected = List.of("HTTP/1.1 200 OK",
                     "Content-Type: text/html;charset=utf-8",
                     "Content-Length: 4319",
                     "",
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
 
         @Test
@@ -187,13 +189,13 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final var expected = String.join("\r\n", "HTTP/1.1 302 Found",
+            final var expected = List.of("HTTP/1.1 302 Found",
                     "Location: /index.html",
                     "",
                     ""
             );
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
 
         private String createGetRequest(final String uri) {

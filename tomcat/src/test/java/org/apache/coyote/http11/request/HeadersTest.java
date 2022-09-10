@@ -4,10 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import org.apache.coyote.http11.common.Headers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,44 +13,32 @@ import org.junit.jupiter.api.Test;
 class HeadersTest {
 
     @Nested
-    @DisplayName("생성자는")
-    class Constructor {
+    @DisplayName("add 메서드는")
+    class Add {
 
         @Test
-        @DisplayName("BufferedReader를 사용하여 객체를 생성한다.")
+        @DisplayName("헤더 필드를 추가한다.")
         void success() {
             // given
-            final String request = String.join("\r\n",
-                    "Host: localhost:8080",
-                    "Connection: keep-alive",
-                    "Accept: */*",
-                    "");
-            final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final String headerField = "Host: localhost:8080";
+            final Headers headers = new Headers();
 
             // when
-            final Headers headers = Headers.from(bufferedReader);
+            headers.add(headerField);
 
             // then
-            assertThat(headers.getValues()).contains(
-                    entry("Host", "localhost:8080"),
-                    entry("Connection", "keep-alive"),
-                    entry("Accept", "*/*")
-            );
+            assertThat(headers.getValues()).contains(entry("Host", "localhost:8080"));
         }
 
         @Test
         @DisplayName("헤더 필드가 올바른 형식이 아닌 경우 예외를 던진다.")
         void invalidHeaderField_ExceptionThrown() {
             // given
-            final String request = String.join("\r\n",
-                    "Connection= keep-alive",
-                    "");
-            final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final String headerField = "Connection= keep-alive";
+            final Headers headers = new Headers();
 
             // when & then
-            assertThatThrownBy(() -> Headers.from(bufferedReader))
+            assertThatThrownBy(() -> headers.add(headerField))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("올바른 Header Field 형식이 아닙니다.");
         }

@@ -16,7 +16,6 @@ public class AbstractController implements Controller {
 
     @Override
     public ResponseEntity service(HttpRequest request) {
-        System.out.println("this.getClass() = " + this.getClass());
         if (request.getMethod() == HttpMethod.GET) {
             return doGet(request);
         }

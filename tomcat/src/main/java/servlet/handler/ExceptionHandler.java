@@ -5,7 +5,7 @@ import servlet.mapping.ResponseEntity;
 
 public interface ExceptionHandler {
 
-    void service(Exception e, ResponseEntity entity);
+    ResponseEntity service();
 
     List<Class<? extends Exception>> getExceptionClass();
 }

@@ -24,8 +24,12 @@ public class HandlerMappingImpl implements HandlerMapping {
     private Controller findController(HttpRequest request) {
         Path path = request.getPath();
         return controllers.stream()
-                .filter(controller -> Path.of(controller.getPath()).equals(path))
+                .filter(controller -> isSamePath(path, controller))
                 .findFirst()
                 .orElse(resourceFinder);
+    }
+
+    private boolean isSamePath(Path path, Controller controller) {
+        return Path.of(controller.getPath()).equals(path);
     }
 }

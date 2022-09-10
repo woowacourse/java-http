@@ -11,8 +11,8 @@ public class BaseHandler implements ExceptionHandler {
 
 
     @Override
-    public void service(Exception e, ResponseEntity entity) {
-        entity.clone(new ResponseEntity("/500.html", HttpStatus.INTERNAL_SERVER_ERROR));
+    public ResponseEntity service() {
+        return new ResponseEntity("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override

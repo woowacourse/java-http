@@ -15,8 +15,8 @@ public class UnauthorizedHandler implements ExceptionHandler {
             InvalidPasswordException.class);
 
     @Override
-    public void service(Exception e, ResponseEntity entity) {
-        entity.clone(new ResponseEntity("/401.html", HttpStatus.UNAUTHORIZED));
+    public ResponseEntity service() {
+        return new ResponseEntity("/401.html", HttpStatus.UNAUTHORIZED);
     }
 
     @Override

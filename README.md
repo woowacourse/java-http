@@ -44,6 +44,7 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 - [ ] 테스트 코드 추가
 - [x] boolean 메소드가 아닌 문자열/클래스를 저장하기
 - [x] Path 마지막에 slash 포함 시 제거
+- [x] 예외처리 시 doService 리턴값을 ResponseEntity 로 지정
 
 #### 1차 피드백
 

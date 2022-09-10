@@ -42,3 +42,4 @@ public class Path {
         return Objects.hash(getPath());
     }
 }
+

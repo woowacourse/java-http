@@ -22,12 +22,7 @@ public class ExceptionMappingImpl implements ExceptionMapping {
     @Override
     public ResponseEntity map(Exception exception) {
         LOG.error(String.valueOf(exception.getClass()), exception);
-
-        ExceptionHandler exceptionHandler = findHandler(exception);
-
-        ResponseEntity entity = new ResponseEntity();
-        exceptionHandler.service(exception, entity);
-        return entity;
+        return findHandler(exception).service();
     }
 
     private ExceptionHandler findHandler(Exception exception) {

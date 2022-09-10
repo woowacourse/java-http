@@ -11,8 +11,8 @@ public class MethodNotAllowedHandler implements ExceptionHandler {
     private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(MethodNotAllowedException.class);
 
     @Override
-    public void service(Exception e, ResponseEntity entity) {
-        entity.clone(new ResponseEntity("/405.html", HttpStatus.METHOD_NOT_ALLOWED));
+    public ResponseEntity service() {
+        return new ResponseEntity("/405.html", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @Override

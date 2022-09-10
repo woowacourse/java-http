@@ -11,8 +11,8 @@ public class NotFoundHandler implements ExceptionHandler {
     private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(NoSuchElementException.class);
 
     @Override
-    public void service(Exception e, ResponseEntity entity) {
-        entity.clone(new ResponseEntity("/404.html", HttpStatus.NOT_FOUND));
+    public ResponseEntity service() {
+        return new ResponseEntity("/404.html", HttpStatus.NOT_FOUND);
     }
 
     @Override

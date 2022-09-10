@@ -24,6 +24,7 @@ public class AuthController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String AUTHORIZED_URL = "/401.html";
+    private static final String USER_ATTRIBUTE_KEY = "user";
 
 
     @Override
@@ -48,7 +49,7 @@ public class AuthController extends AbstractController {
             if (session.isEmpty()) {
                 return requireAuthByRequestInfo(httpRequest);
             }
-            if (session.get().hasAttribute("user")) {
+            if (session.get().hasAttribute(USER_ATTRIBUTE_KEY)) {
                 return redirect(httpRequest, httpResponse);
             }
         }
@@ -86,7 +87,7 @@ public class AuthController extends AbstractController {
 
     private HttpResponse assignCookie(final HttpRequest httpRequest, final User user) throws IOException {
         final Session session = SessionManager.add(HttpCookie.makeJSESSIONID());
-        session.addAttribute("user", user);
+        session.addAttribute(USER_ATTRIBUTE_KEY, user);
 
         final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
         final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
@@ -117,7 +118,7 @@ public class AuthController extends AbstractController {
     private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
             final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
-            if (session.isPresent() && session.get().hasAttribute("user")) {
+            if (session.isPresent() && session.get().hasAttribute(USER_ATTRIBUTE_KEY)) {
                 return redirect(httpRequest, httpResponse);
             }
         }

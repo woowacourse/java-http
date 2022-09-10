@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package customservlet;
 
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.Location;

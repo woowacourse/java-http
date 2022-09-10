@@ -3,7 +3,7 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
-import nextstep.jwp.ChicChocServlet;
+import customservlet.ChicChocServlet;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.BeforeEach;

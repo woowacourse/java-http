@@ -1,6 +1,6 @@
 package nextstep;
 
-import nextstep.jwp.ChicChocServlet;
+import customservlet.ChicChocServlet;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;

@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation.controller;
 
+import customservlet.RequestHandler;
 import nextstep.jwp.application.MemberService;
 import nextstep.jwp.dto.request.RegisterRequest;
 import nextstep.jwp.presentation.resolver.FormDataResolver;

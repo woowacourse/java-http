@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package customservlet;
 
 import static org.apache.coyote.http11.util.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.http11.util.HttpStatus.FOUND;
@@ -17,7 +17,6 @@ import nextstep.jwp.presentation.controller.LoginPageRequestHandler;
 import nextstep.jwp.presentation.controller.LoginRequestHandler;
 import nextstep.jwp.presentation.controller.RegisterPageRequestHandler;
 import nextstep.jwp.presentation.controller.RegisterRequestHandler;
-import nextstep.jwp.presentation.controller.RequestHandler;
 import nextstep.jwp.presentation.controller.ResourceRequestHandler;
 import nextstep.jwp.presentation.filter.LoginFilter;
 import org.apache.catalina.servlet.AbstractServlet;

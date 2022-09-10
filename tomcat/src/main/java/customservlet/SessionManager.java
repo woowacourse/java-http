@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package customservlet;
 
 import java.util.Map;
 import java.util.Map.Entry;

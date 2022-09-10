@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateUserException;
-import nextstep.jwp.exception.InvalidUserException;
+import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
@@ -35,7 +35,10 @@ public class RegisterController extends AbstractController {
 
     private void validateUserInformation(final String account, final String password, final String email) {
         if (account == null || password == null || email == null) {
-            throw new InvalidUserException("가입하려는 유저 정보중 입력되지 않은 값이 있습니다.");
+            throw new InvalidSignUpFormatException("가입하려는 유저 정보중 입력되지 않은 값이 있습니다.");
+        }
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
+            throw new InvalidSignUpFormatException("가입하려는 유저 정보중 공백이 있습니다.");
         }
     }
 

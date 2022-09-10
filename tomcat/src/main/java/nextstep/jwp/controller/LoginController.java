@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.InvalidUserException;
+import nextstep.jwp.exception.UserLoginException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.reqeust.HttpRequest;
@@ -48,7 +48,7 @@ public class LoginController extends AbstractController {
 
         User user = findUser(account);
         if (!user.checkPassword(password)) {
-            throw new InvalidUserException("비밀번호가 일치하지 않습니다.");
+            throw new UserLoginException("비밀번호가 일치하지 않습니다.");
         }
 
         Session session = createSession(user);

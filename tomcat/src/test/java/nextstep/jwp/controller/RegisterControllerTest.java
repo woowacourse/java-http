@@ -7,8 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import nextstep.jwp.exception.InvalidUserException;
-import nextstep.jwp.exception.QueryStringFormatException;
+import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +37,7 @@ class RegisterControllerTest {
         // when & then
         RegisterController registerController = new RegisterController();
         assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
-                .isInstanceOf(InvalidUserException.class);
+                .isInstanceOf(InvalidSignUpFormatException.class);
     }
 
 }

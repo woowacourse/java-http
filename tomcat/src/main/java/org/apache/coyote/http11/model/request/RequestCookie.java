@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.model.request;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RequestCookie {
 
@@ -16,12 +17,12 @@ public class RequestCookie {
     }
 
     public static RequestCookie from(final String input) {
-        Map<String, String> cookies = new HashMap<>();
-        String[] splitInput = input.split(COOKIE_DELIMITER);
-        for (String splitCookie : splitInput) {
-            String[] cookie = splitCookie.split(COOKIE_KEY_VALUE_DELIMITER);
-            cookies.put(cookie[KEY_INDEX], cookie[VALUE_INDEX]);
-        }
+        Map<String, String> cookies = Arrays.stream(input.split(COOKIE_DELIMITER))
+                .map(splitInput -> splitInput.split(COOKIE_KEY_VALUE_DELIMITER))
+                .collect(Collectors.toMap(
+                        cookie -> cookie[KEY_INDEX],
+                        cookie -> cookie[VALUE_INDEX]
+                ));
         return new RequestCookie(cookies);
     }
 

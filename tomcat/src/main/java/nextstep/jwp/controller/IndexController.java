@@ -19,21 +19,21 @@ public class IndexController extends AbstractController {
 
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public HttpResponse service() {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return doGet(httpRequest);
+            return doGet();
         }
-        return HttpResponse.createNotFoundResponse(httpRequest, getClass());
+        return HttpResponse.createMethodNotAllowed(httpRequest, getClass());
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet() {
         String responseBody = FileReader.getFile(INDEX_RESOURCE_PATH, getClass());
         return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, responseBody);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected HttpResponse doPost() {
         throw new IllegalArgumentException("올바르지 않은 Method 요청입니다.");
     }
 }

@@ -23,12 +23,12 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public HttpResponse service() {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return doGet(httpRequest);
+            return doGet();
         }
         if (httpRequest.matchRequestMethod(Method.POST)) {
-            return doPost(httpRequest);
+            return doPost();
         }
         HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(), ContentType.HTML);
         response.addLocationHeader(NOT_FOUND_RESOURCE_PATH);
@@ -36,13 +36,13 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet() {
         return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML,
                 FileReader.getFile(REGISTER_RESOURCE_PATH, getClass()));
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected HttpResponse doPost() {
         saveUser(httpRequest.getBody());
         HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(), ContentType.HTML);
         response.addLocationHeader(INDEX_RESOURCE_PATH);

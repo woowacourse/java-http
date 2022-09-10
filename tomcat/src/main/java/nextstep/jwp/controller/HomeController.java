@@ -17,20 +17,20 @@ public class HomeController extends AbstractController {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public HttpResponse service() {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, RESPONSE_BODY);
+            return doGet();
         }
-        return HttpResponse.createNotFoundResponse(httpRequest, getClass());
+        return HttpResponse.createMethodNotAllowed(httpRequest, getClass());
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return null;
+    protected HttpResponse doGet() {
+        return HttpResponse.of(ResponseStatusCode.OK, httpRequest.getVersion(), ContentType.HTML, RESPONSE_BODY);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected HttpResponse doPost() {
         throw new IllegalArgumentException("올바르지 않은 Method 요청입니다.");
     }
 }

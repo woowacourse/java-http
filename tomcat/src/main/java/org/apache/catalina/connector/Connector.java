@@ -13,12 +13,11 @@ import org.slf4j.LoggerFactory;
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_MAX_THREAD_COUNT = 250;
-    private final ExecutorService executorService;
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
@@ -70,7 +69,7 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        executorService.execute(processor);
     }
 
     public void stop() {

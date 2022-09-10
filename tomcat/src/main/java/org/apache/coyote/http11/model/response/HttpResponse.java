@@ -37,9 +37,9 @@ public class HttpResponse {
         return new HttpResponse(ResponseLine.of(statusCode, version), headers, "");
     }
 
-    public static HttpResponse createNotFoundResponse(final HttpRequest httpRequest, final Class<?> classes) {
-        String body = FileReader.getFile("/404.html", classes);
-        return HttpResponse.of(ResponseStatusCode.NOT_FOUND, httpRequest.getVersion(), ContentType.HTML, body);
+    public static HttpResponse createMethodNotAllowed(final HttpRequest httpRequest, final Class<?> classes) {
+        String body = FileReader.getFile("/405.html", classes);
+        return HttpResponse.of(ResponseStatusCode.METHOD_NOT_ALLOWED, httpRequest.getVersion(), ContentType.HTML, body);
     }
 
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {

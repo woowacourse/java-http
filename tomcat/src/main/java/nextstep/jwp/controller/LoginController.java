@@ -27,18 +27,18 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public HttpResponse service() {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return doGet(httpRequest);
+            return doGet();
         }
         if (httpRequest.matchRequestMethod(Method.POST)) {
-            return doPost(httpRequest);
+            return doPost();
         }
         throw new IllegalArgumentException("올바르지 않은 Method 요청입니다.");
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet() {
         Optional<String> jSessionCookieValue = httpRequest.getJSessionCookieValue();
         if (alreadyLoginStatus(jSessionCookieValue)) {
             HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, httpRequest.getVersion(),
@@ -55,7 +55,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected HttpResponse doPost() {
         Map<String, String> body = httpRequest.getBody();
         Optional<User> maybeUser = InMemoryUserRepository.findByAccount(body.get("account"));
 

@@ -6,18 +6,20 @@ import java.util.List;
 import org.apache.coyote.Controller;
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.StaticResourceController;
+import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.common.HttpRequest;
-import org.apache.coyote.http11.util.RequestMapping;
+import nextstep.jwp.config.JwpRequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestMappingTest {
+class JwpRequestMappingTest {
 
     @Test
     @DisplayName("등록한 Path와 일치하는 Controller를 찾는다.")
     void findController() {
         // when
-        final Controller controller = RequestMapping.findController(HttpRequest.from(
+        final RequestMapping requestMapping = new JwpRequestMapping();
+        final Controller controller = requestMapping.findController(HttpRequest.from(
                 List.of("GET /login HTTP/1.1")
         ));
 
@@ -29,7 +31,8 @@ class RequestMappingTest {
     @DisplayName("매핑되는 Controller가 없다면 StaticResourceController를 반환한다.")
     void findNotMappedController() {
         // when
-        final Controller controller = RequestMapping.findController(HttpRequest.from(
+        final RequestMapping requestMapping = new JwpRequestMapping();
+        final Controller controller = requestMapping.findController(HttpRequest.from(
                 List.of("GET /test.html HTTP/1.1")
         ));
 

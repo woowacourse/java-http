@@ -8,8 +8,6 @@ import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
-    private static final SessionManager SESSION_MANAGER = SessionManager.instance();
-
     private final RequestLine requestLine;
     private final RequestHeader header;
     private final RequestBody body;
@@ -25,7 +23,7 @@ public class HttpRequest {
 
     public Session generateSession() {
         final Session session = Session.generate();
-        SESSION_MANAGER.add(session);
+        SessionManager.add( session);
         return session;
     }
 
@@ -45,7 +43,7 @@ public class HttpRequest {
 
     public boolean existSession() {
         return Optional.ofNullable(cookies.getSessionId())
-                .map(SESSION_MANAGER::findSession)
+                .map(SessionManager::findSession)
                 .isPresent();
     }
 

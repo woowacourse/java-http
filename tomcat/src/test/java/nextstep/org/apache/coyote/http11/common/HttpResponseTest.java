@@ -32,7 +32,7 @@ public class HttpResponseTest {
         response.setBody("Hello world!");
         response.setStatus(HttpStatus.OK);
 
-        final String actual = response.toString();
+        final String actual = response.toResponseMessage();
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -61,7 +61,7 @@ public class HttpResponseTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
         );
 
-        final String actual = response.toString();
+        final String actual = response.toResponseMessage();
 
         assertThat(actual).isEqualTo(expected);
     }

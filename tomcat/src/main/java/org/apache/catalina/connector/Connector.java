@@ -18,6 +18,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
+    private static final int TERMINATION_LIMIT_SECONDS = 60;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -91,8 +92,8 @@ public class Connector implements Runnable {
     }
 
     private void terminationWhenTimeLimitExceeded() throws InterruptedException {
-        if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-            executorService.shutdown();
+        if (!executorService.awaitTermination(TERMINATION_LIMIT_SECONDS, TimeUnit.SECONDS)) {
+            executorService.shutdownNow();
         }
     }
 

@@ -3,10 +3,12 @@ package org.apache.coyote.http11.response;
 import static nextstep.jwp.utils.FileReader.readFile;
 
 import java.io.IOException;
-import java.util.Map.Entry;
 import org.apache.coyote.http11.request.ContentType;
 
 public class HttpResponse {
+
+    private static final String CRLF = "\r\n";
+    private static final String HTTP_VERSION = "HTTP/1.1 ";
 
     private final HttpStatus httpStatus;
     private final ResponseHeader headers;
@@ -62,17 +64,9 @@ public class HttpResponse {
     }
 
     public String getHttpResponse() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getMessage() + " ")
-                .append("\r\n");
-        for (Entry<String, String> header : headers.getHeaders().entrySet()) {
-            stringBuilder.append(header.getKey() + ": " + header.getValue() + " ")
-                    .append("\r\n");
-        }
-        stringBuilder.append("\r\n")
-                .append(body);
-
-        return stringBuilder.toString();
+        return String.join(CRLF,
+                HTTP_VERSION + httpStatus.statusToResponse(),
+                headers.headerToResponse(),
+                body);
     }
 }

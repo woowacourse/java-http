@@ -7,6 +7,8 @@ public enum HttpStatus {
     UNAUTHORIZED(401, "UNAUTHORIZED", "/401.html"),
     NOT_FOUND(404, "NOT FOUND", "/404.html");
 
+    private static final String END_OF_STATUS = " ";
+
     private final int code;
     private final String message;
     private final String filePath;
@@ -17,12 +19,8 @@ public enum HttpStatus {
         this.filePath = filePath;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+    public String statusToResponse() {
+        return code + END_OF_STATUS + message + " ";
     }
 
     public String getFilePath() {

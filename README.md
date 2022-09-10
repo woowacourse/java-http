@@ -51,4 +51,4 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 - [x] GET, POST 이외에 throw 처리하기, ResponseEntity 바로 리턴하기!
 - [x] exception 을 if나 try 로 잡지 않고 핸들러처럼 처리하기
     - [x] `getclass()` 활용
-- [ ] 쿠키 있을 때, 쿠키 내부 유저 값 검증하기
+- [x] 쿠키 있을 때, 쿠키 내부 유저 값 검증하기

@@ -21,7 +21,7 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     public ResponseEntity goLoginPage(HttpRequest request) {
-        if (request.isCookieExist()) {
+        if (request.hasValidSession()) {
             Session session = request.getSession(true);
             return ResponseEntity.found()
                     .addLocation("/index.html")

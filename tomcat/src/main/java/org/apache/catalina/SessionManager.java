@@ -46,4 +46,8 @@ public class SessionManager implements Manager {
                 .findFirst()
                 .orElse(null);
     }
+
+    public void removeAll() {
+        SESSIONS.clear();
+    }
 }

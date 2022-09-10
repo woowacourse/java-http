@@ -8,11 +8,17 @@ import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        SessionManager.get().removeAll();
+    }
 
     @Test
     @DisplayName("웰컴 페이지를 응답한다.")

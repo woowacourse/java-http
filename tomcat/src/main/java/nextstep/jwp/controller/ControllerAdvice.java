@@ -48,14 +48,10 @@ public class ControllerAdvice {
         try {
             Class<? extends Exception> exceptionClass = exception.getClass();
             Method method = getMethod(exceptionClass);
-            method.invoke(this, httpResponse, cast(exceptionClass, exception));
+            method.invoke(this, httpResponse, exceptionClass.cast(exception));
         } catch (InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private <T> T cast(Class<T> exceptionClass, Exception e) {
-        return exceptionClass.cast(e);
     }
 
     public void handle(HttpResponse httpResponse, BadRequestException exception) {

@@ -18,7 +18,7 @@ public class FrontController {
     private static final List<RequestMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
     private static final ControllerAdvice CONTROLLER_ADVICE = new ControllerAdvice();
 
-    public void doService(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public static void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
             Controller controller = getController(httpRequest);
             controller.service(httpRequest, httpResponse);
@@ -29,7 +29,7 @@ public class FrontController {
         httpResponse.write();
     }
 
-    private Controller getController(HttpRequest httpRequest) {
+    private static Controller getController(HttpRequest httpRequest) {
         return HANDLER_MAPPERS.stream()
                 .map(mapper -> mapper.mapController(httpRequest))
                 .filter(Objects::nonNull)
@@ -37,7 +37,7 @@ public class FrontController {
                 .orElseThrow(() -> new ControllerNotFoundException(httpRequest + "\n요청을 처리할 수 있는 controller가 없습니다."));
     }
 
-    private Exception getTargetException(Exception exception) {
+    private static Exception getTargetException(Exception exception) {
         if (exception instanceof InvocationTargetException) {
             InvocationTargetException invocationTargetException = (InvocationTargetException) exception;
             exception = (Exception) invocationTargetException.getTargetException();

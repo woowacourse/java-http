@@ -3,6 +3,7 @@ package nextstep.jwp.servlet;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.CustomNotFoundException;
+import nextstep.jwp.exception.RequestException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.interceptor.Interceptor;
 import nextstep.jwp.interceptor.LoginInterceptor;
@@ -50,6 +51,8 @@ public class DispatcherServlet implements Servlet {
             makeRedirectResponse(View.UNAUTHORIZED.getValue(), response);
         } catch (CustomNotFoundException | NotFoundException e) {
             makeErrorResponse(HttpStatus.NOT_FOUND, View.NOT_FOUND, response);
+        } catch (RequestException e) {
+            makeErrorResponse(HttpStatus.BAD_REQUEST, View.BAD_REQUEST, response);
         } catch (Exception e) {
             makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR, response);
         }

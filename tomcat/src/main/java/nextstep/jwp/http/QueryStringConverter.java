@@ -16,7 +16,7 @@ public class QueryStringConverter {
 
     public static Map<String, String> convert(final String queryString) {
         final Map<String, String> paramMapping = new HashMap<>();
-        if (queryString == null) {
+        if (queryString == null || queryString.isBlank()) {
             return paramMapping;
         }
         for (String keyValue : queryString.split(APPEND_DELIMITER)) {

@@ -21,6 +21,7 @@ public abstract class AbstractController implements Controller {
             } else if (HttpMethod.POST == method) {
                 doPost(request, response);
             }
+            throw new IllegalStateException("처리하지 않는 HTTP Method 요청입니다.");
         } catch (final ResourceNotFoundException notFoundException) {
             response.setBody(StaticResource.notFound());
             response.setStatus(HttpStatus.NOT_FOUND);

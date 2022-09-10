@@ -8,3 +8,16 @@
 - [x] MyHttpResponse 메서드 수정
     - [x] String으로 변경해주는 메서드 생성
 - [x] Http11Processor - 불필요한 `;` 제거
+
+## 2, 3, 4단계 - 2차 피드백
+
+- [ ] get().get() 제거
+- [ ] depth 줄이기
+    - LoginController
+- [ ] 미사용 log -> 사용하거나 제거하거나
+- [ ] 클래스와 필드 이름이 동일할 경우 헷갈리기때문에 이름 변경 필요
+- [ ] 오타 수정
+    - RequestBody - DELIMITER
+- [ ] Log 사용 시 {}를 통한 문자열 출력
+- [ ] 미사용 생성자 제거
+    - HttpResponse

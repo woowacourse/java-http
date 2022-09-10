@@ -17,19 +17,27 @@ public class HttpResponse {
         this.headers = new HttpHeaders();
     }
 
+    public void defaultForward() {
+        status = HttpStatus.OK;
+        headers.addContentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue());
+    }
+
     public void forward(final HttpPath path) {
-        if (path.getValue().equals("/")) {
-            headers.addContentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue());
-        }
+        status = HttpStatus.OK;
         ContentType contentType = RequestContentTypeUtils.find(path.getValue());
         headers.addContentType(contentType.getValue());
+    }
+
+    public void errorForward(final HttpStatus notFound, final HttpPath path) {
+        forward(path);
+        status = notFound;
     }
 
     public void redirect(final String url) {
         headers.addLocation(url);
     }
 
-    public void flush() throws IOException {
+    public void write() throws IOException {
         if (body != null) {
             headers.addContentLength(body.getBytes().length);
         }

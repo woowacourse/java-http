@@ -13,6 +13,6 @@ public class ResourceController extends AbstractController {
         response.setStatus(HttpStatus.OK);
         response.forward(request.getPath());
         response.setBody(body);
-        response.flush();
+        response.write();
     }
 }

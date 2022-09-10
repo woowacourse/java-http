@@ -28,10 +28,6 @@ public class HttpRequestLine {
         return path.isQuery();
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public HttpPath getPath() {
         return path;
     }

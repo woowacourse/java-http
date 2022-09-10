@@ -2,26 +2,22 @@ package org.apache.coyote.http11.http;
 
 public class HttpRequest {
 
-    private final HttpRequestLine startLine;
+    private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final String body;
 
     public HttpRequest(final HttpRequestLine httpRequestStartLine, final HttpHeaders headers, final String body) {
-        this.startLine = httpRequestStartLine;
+        this.requestLine = httpRequestStartLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public HttpMethod getMethod() {
-        return startLine.getMethod();
-    }
-
     public HttpPath getPath() {
-        return startLine.getPath();
+        return requestLine.getPath();
     }
 
     public HttpVersion getVersion() {
-        return startLine.getVersion();
+        return requestLine.getVersion();
     }
 
     public HttpHeaders getHeaders() {
@@ -30,5 +26,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public boolean isEqualToMethod(final HttpMethod httpMethod) {
+        return requestLine.isEqualToMethod(httpMethod);
     }
 }

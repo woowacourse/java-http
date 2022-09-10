@@ -90,6 +90,23 @@ class Http11ProcessorTest {
         assertThat(response).contains("text/js;charset=utf-8");
     }
 
+    @Test
+    @DisplayName("존재하지 않는 페이지를 요청할 경우 404 페이지를 반환한다.")
+    void notFound() {
+        // given
+        String httpRequest = 요청한다("GET", "in.html");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String response = socket.output();
+
+        assertThat(response).contains("404 Not Found");
+    }
+
     @Nested
     @DisplayName("로그인 요청시")
     class Login {

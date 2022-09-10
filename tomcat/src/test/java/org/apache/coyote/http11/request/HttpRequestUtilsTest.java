@@ -39,7 +39,7 @@ public class HttpRequestUtilsTest {
             HttpRequest httpRequest = HttpRequestUtils.newHttpRequest(bufferedReader);
 
             assertAll(
-                    () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
+                    () -> assertThat(httpRequest.isEqualToMethod(HttpMethod.GET)).isTrue(),
                     () -> assertThat(httpRequest.getPath().getValue()).isEqualTo("/index.html"),
                     () -> assertThat(httpRequest.getVersion()).isEqualTo(HttpVersion.HTTP_1_1)
             );

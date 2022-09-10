@@ -25,6 +25,14 @@ public class RequestMapping {
         if (path.isDefault()) {
             return DEFAULT;
         }
-        return controllers.getOrDefault(path.getDomainPath(), RESOURCE);
+
+        if (path.isDefaultResource()) {
+            return RESOURCE;
+        }
+        return controllers.getOrDefault(path.getDomainPath(), notFound());
+    }
+
+    private static Controller notFound() {
+        return new NotFoundController();
     }
 }

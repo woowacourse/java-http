@@ -43,9 +43,9 @@ public class LoginController extends AbstractController {
 
     private void write(final HttpRequest request, final HttpResponse response) throws IOException {
         String body = FileUtils.readAllBytes(request.getPath().getValue());
-        response.setStatus(HttpStatus.OK);
         response.setBody(body);
-        response.flush();
+        response.forward(request.getPath());
+        response.write();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class LoginController extends AbstractController {
     private void redirect(final HttpResponse response, final String redirectUrl) throws IOException {
         response.setStatus(HttpStatus.FOUND);
         response.redirect(redirectUrl);
-        response.flush();
+        response.write();
     }
 
     private Map<String, String> getAccountAndPassword(final HttpRequest httpRequest) {
@@ -93,7 +93,7 @@ public class LoginController extends AbstractController {
 
         response.setStatus(HttpStatus.FOUND);
         response.setHeaders(httpHeaders);
-        response.flush();
+        response.write();
     }
 
     private void setSession(final User user, final String cookie) {

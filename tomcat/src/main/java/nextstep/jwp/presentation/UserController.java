@@ -21,10 +21,9 @@ public class UserController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         String body = FileUtils.readAllBytes(request.getPath().getValue());
-        response.setStatus(HttpStatus.OK);
         response.forward(request.getPath());
         response.setBody(body);
-        response.flush();
+        response.write();
     }
 
     @Override
@@ -38,7 +37,7 @@ public class UserController extends AbstractController {
         if (byAccount.isPresent()) {
             response.setStatus(HttpStatus.NOT_FOUND);
             response.redirect("/404.html");
-            response.flush();
+            response.write();
             return;
         }
 
@@ -70,6 +69,6 @@ public class UserController extends AbstractController {
         httpHeaders.addLocation("/index.html ");
         httpHeaders.addCookie(Session.JSESSIONID + "=" + cookie);
         response.setHeaders(httpHeaders);
-        response.flush();
+        response.write();
     }
 }

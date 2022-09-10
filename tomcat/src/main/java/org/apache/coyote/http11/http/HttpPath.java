@@ -27,6 +27,10 @@ public class HttpPath {
         return value.equals(DEFAULT_PATH);
     }
 
+    public boolean isDefaultResource() {
+        return RequestContentTypeUtils.isDefault(value);
+    }
+
     public ContentType getContentType() {
         return RequestContentTypeUtils.find(value);
     }

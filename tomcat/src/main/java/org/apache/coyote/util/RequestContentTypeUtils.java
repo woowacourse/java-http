@@ -28,8 +28,9 @@ public enum RequestContentTypeUtils {
         return requestContentTypeUtils.contentType;
     }
 
-    public static boolean isExist(final String uri) {
+    public static boolean isDefault(final String uri) {
         return Arrays.stream(RequestContentTypeUtils.values())
+                .filter(it -> !uri.endsWith(HTML.extension))
                 .anyMatch(it -> uri.endsWith(it.extension));
     }
 }

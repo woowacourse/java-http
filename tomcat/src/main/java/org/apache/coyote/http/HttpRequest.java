@@ -1,11 +1,9 @@
 package org.apache.coyote.http;
 
-import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -41,7 +39,7 @@ public class HttpRequest {
     }
 
     private boolean isFormUrlEncoded() {
-        final String contentType = header.getHeaderMap().get("Content-Type");
+        final String contentType = header.getHeaderContent().get("Content-Type");
         return contentType!= null && contentType.equals("application/x-www-form-urlencoded");
     }
 

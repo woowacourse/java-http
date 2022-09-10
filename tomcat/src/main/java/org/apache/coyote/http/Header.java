@@ -9,15 +9,15 @@ public class Header {
     private static final String BLANK = " ";
 
     private HttpCookie cookie;
-    private Map<String, String> headerMap;
+    private Map<String, String> headerContents;
 
     public Header(final Map<String, String> header) {
         this.cookie = HttpCookie.from(header.get("Cookie"));
-        this.headerMap = header;
+        this.headerContents = header;
     }
 
-    public Map<String, String> getHeaderMap() {
-        return headerMap;
+    public Map<String, String> getHeaderContent() {
+        return headerContents;
     }
 
     public HttpCookie getCookie() {
@@ -26,7 +26,7 @@ public class Header {
 
     public String getHeaderMapForMessage() {
         final StringBuilder stringBuilder = new StringBuilder();
-        for (Entry<String, String> entry : headerMap.entrySet()) {
+        for (Entry<String, String> entry : headerContents.entrySet()) {
             stringBuilder.append(entry.getKey() + MESSAGE_DELIMITER + entry.getValue() + BLANK);
         }
         return stringBuilder.toString();

@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
     private final Map<String, String> cookieMap;
 
     public HttpCookie(){
@@ -29,7 +30,7 @@ public class HttpCookie {
     }
 
     public boolean checkJSessionIdInCookie(){
-        if(!cookieMap.containsKey("JSESSIONID")){
+        if(!cookieMap.containsKey(JSESSIONID)){
             return false;
         }
         return true;
@@ -37,8 +38,8 @@ public class HttpCookie {
 
     public Map<String, String> ofJSessionId(final String jSessionId){
         final HashMap<String, String> setCookie = new HashMap<>();
-        setCookie.put("JSESSIONID", jSessionId);
-        cookieMap.put("JSESSIONID", jSessionId);
+        setCookie.put(JSESSIONID, jSessionId);
+        cookieMap.put(JSESSIONID, jSessionId);
         return setCookie;
     }
 }

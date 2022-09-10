@@ -82,10 +82,6 @@ public class HttpRequest {
         return getFullUri();
     }
 
-    public Header getHeader() {
-        return header;
-    }
-
     public String getBody() {
         return body;
     }

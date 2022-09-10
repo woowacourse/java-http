@@ -14,16 +14,14 @@ public class HandlerMapper {
 
     static {
         cache = Map.ofEntries(
-                Map.entry("GET /", new IndexController()),
-                Map.entry("GET /login", new LoginController()),
-                Map.entry("POST /login", new LoginController()),
-                Map.entry("POST /register", new RegisterController()),
-                Map.entry("GET /register", new RegisterController())
+                Map.entry("/", new IndexController()),
+                Map.entry("/login", new LoginController()),
+                Map.entry("/register", new RegisterController())
         );
         staticResourceController = new StaticResourceController();
     }
 
     public static Controller of(final Request request) {
-        return cache.getOrDefault(request.getRequestIdentifier(), staticResourceController);
+        return cache.getOrDefault(request.getPath(), staticResourceController);
     }
 }

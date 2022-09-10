@@ -15,7 +15,7 @@ public class HomeController extends AbstractController {
         final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/404.html");
         httpHeader.location("/404.html");
 
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     @Override
@@ -23,6 +23,6 @@ public class HomeController extends AbstractController {
         final HttpBody httpBody = new HttpBody("Hello world!");
         final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, httpRequest.getUrl());
 
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 }

@@ -23,7 +23,7 @@ public abstract class AbstractController implements Controller {
                 .contentLength(httpBody.getBody().getBytes().length)
                 .location("/404.html");
 
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     protected HttpHeader defaultHeader(final StatusCode statusCode, final HttpBody httpBody, final String url) {

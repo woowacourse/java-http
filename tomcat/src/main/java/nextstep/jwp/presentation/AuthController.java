@@ -47,30 +47,30 @@ public class AuthController extends AbstractController {
                 httpRequest.getBodyValue("email"));
         InMemoryUserRepository.save(user);
 
-        return redirect(httpRequest);
+        return redirect(httpRequest, httpResponse);
     }
 
-    private HttpResponse redirect(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
         final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, httpRequest.getUrl());
         httpHeader.location(REDIRECT_URL);
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     private HttpResponse postLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
             final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
             if (session.isEmpty()) {
-                return requireAuthByRequestInfo(httpRequest, httpResponse);
+                return requireAuthByRequestInfo(httpRequest);
             }
             if (session.get().hasAttribute("user")) {
-                return redirect(httpRequest);
+                return redirect(httpRequest, httpResponse);
             }
         }
-        return requireAuthByRequestInfo(httpRequest, httpResponse);
+        return requireAuthByRequestInfo(httpRequest);
     }
 
-    private HttpResponse requireAuthByRequestInfo(final HttpRequest httpRequest, final HttpResponse httpResponse)
+    private HttpResponse requireAuthByRequestInfo(final HttpRequest httpRequest)
             throws IOException {
         if (QueryParam.isQueryParam(httpRequest.getUrl())) {
             final QueryParam queryParam = new QueryParam(httpRequest.getUrl());
@@ -91,19 +91,19 @@ public class AuthController extends AbstractController {
                 .contentType(httpRequest.getUrl())
                 .contentLength(httpBody.getBody().getBytes().length);
 
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     private HttpResponse getLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.hasJSESSIONID()) {
             final Optional<Session> session = SessionManager.findSession(httpRequest.getJSESSIONID());
             if (session.isPresent() && session.get().hasAttribute("user")) {
-                return redirect(httpRequest);
+                return redirect(httpRequest, httpResponse);
             }
         }
         final HttpBody httpBody = HttpBody.createByUrl(LOGIN_URL);
         final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, LOGIN_URL);
-        return new HttpResponse(httpHeader, httpBody);
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 
     private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)

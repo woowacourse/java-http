@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.InvalidUserException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.reqeust.HttpRequest;
@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
     private static final String UNAUTHORIZED_ERROR_PAGE_URL = "./401.html";
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         super.doGet(request, response);
         checkAlreadyLoginUser(request, response);
     }
@@ -36,10 +36,8 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response)
-            throws UncheckedServletException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         super.doPost(request, response);
-
         Login(request, response);
     }
 
@@ -51,9 +49,9 @@ public class LoginController extends AbstractController {
 
         User user = findUser(account);
         if (!user.checkPassword(password)) {
-            response.sendRedirect(UNAUTHORIZED_ERROR_PAGE_URL);
-            return;
+            throw new InvalidUserException("비밀번호가 일치하지 않습니다.");
         }
+
         Session session = createSession(user);
         response.setCookie(HttpCookie.fromJSessionId(session.getId()));
     }

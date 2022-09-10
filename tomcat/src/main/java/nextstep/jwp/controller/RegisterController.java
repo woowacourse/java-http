@@ -11,7 +11,7 @@ import nextstep.jwp.model.User;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         super.doPost(request, response);
         registerUser(request);
     }

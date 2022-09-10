@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.FileNotFoundException;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.StatusCode;
@@ -30,11 +28,11 @@ public abstract class AbstractController implements Controller {
         response.setResponseBody(responseBody);
     }
 
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response.setStatusCode(StatusCode.OK);
     }
 
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         response.sendRedirect(INDEX_PAGE_URL);
     }
 

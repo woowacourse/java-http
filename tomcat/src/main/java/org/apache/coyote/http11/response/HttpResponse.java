@@ -30,7 +30,6 @@ public class HttpResponse {
                 getContentType(),
                 getContentLength(),
                 getLocation(),
-                "",
                 responseBody);
     }
 

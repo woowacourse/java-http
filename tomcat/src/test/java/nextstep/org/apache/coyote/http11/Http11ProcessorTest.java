@@ -236,7 +236,6 @@ class Http11ProcessorTest {
             // then
             String response = socket.output();
 
-            System.out.println(response);
             assertThat(response).contains("404 Not Found");
             assertThat(response).contains("Location: /404.html");
         }

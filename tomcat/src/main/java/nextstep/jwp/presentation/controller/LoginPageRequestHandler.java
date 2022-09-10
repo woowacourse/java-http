@@ -4,6 +4,7 @@ import java.util.Optional;
 import nextstep.jwp.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.Location;
 import org.apache.coyote.http11.http.RequestLine;
 import org.apache.coyote.http11.util.HttpMethod;
 import org.apache.coyote.http11.util.HttpStatus;
@@ -12,17 +13,17 @@ public class LoginPageRequestHandler implements RequestHandler {
     private final SessionManager sessionManager;
 
     public LoginPageRequestHandler() {
-        this.sessionManager = new SessionManager();
+        this.sessionManager = SessionManager.getSessionManager();
     }
 
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
         final Optional<String> jSessionId = request.getJSessionId();
         if (jSessionId.isPresent()) {
-            System.out.println(jSessionId.get());
             if (sessionManager.hasSameSessionId(jSessionId.get())) {
                 response.setStatusCode(HttpStatus.FOUND);
-                return "index";
+                response.setLocation(Location.from("/index.html"));
+                return null;
             }
         }
         response.setStatusCode(HttpStatus.OK);

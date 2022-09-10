@@ -2,7 +2,6 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.net.URL;
 import nextstep.jwp.ChicChocServlet;
 import org.apache.catalina.servlet.RequestMapping;
@@ -12,11 +11,9 @@ import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
-    private RequestMapping requestMapping;
-
     @BeforeEach
     void setUp() {
-        requestMapping = new RequestMapping();
+        final var requestMapping = RequestMapping.getRequestMapping();
         requestMapping.addServlet("/", new ChicChocServlet());
     }
 
@@ -38,7 +35,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1 ",

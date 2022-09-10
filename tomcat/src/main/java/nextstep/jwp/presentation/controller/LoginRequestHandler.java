@@ -19,18 +19,12 @@ public class LoginRequestHandler implements RequestHandler {
 
     public LoginRequestHandler() {
         this.memberService = new MemberService();
-        this.sessionManager = new SessionManager();
+        this.sessionManager = SessionManager.getSessionManager();
     }
 
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
         final var session = request.getSession(true);
-        if (request.hasCookieByJSessionId()) {
-            sessionManager.findSession(session.getId());
-            response.setStatusCode(HttpStatus.FOUND);
-            response.setLocation(Location.from("/index.html"));
-            return null;
-        }
         final String requestBody = request.getRequestBody();
         final LoginRequest loginRequest = LoginRequest.from(FormDataResolver.resolve(requestBody));
         memberService.login(loginRequest);

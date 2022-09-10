@@ -6,7 +6,7 @@ import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.util.HttpMethod;
 
-public class AbstractServlet implements Servlet {
+public abstract class AbstractServlet implements Servlet {
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
         final HttpMethod httpMethod = request.getHttpMethod();

@@ -7,7 +7,15 @@ import java.util.Optional;
 import org.apache.coyote.http11.http.RequestURI;
 
 public class RequestMapping {
+    private static final RequestMapping requestMapping = new RequestMapping();
     private static final Map<String, Servlet> urlMap = new HashMap<>();
+
+    private RequestMapping() {
+    }
+
+    public static RequestMapping getRequestMapping() {
+        return requestMapping;
+    }
 
     public void addServlet(final String url, Servlet servlet) {
         urlMap.put(url, servlet);

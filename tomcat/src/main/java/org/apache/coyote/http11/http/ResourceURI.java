@@ -11,7 +11,7 @@ public class ResourceURI {
 
     private final String viewName;
 
-    public ResourceURI(final String viewName) {
+    private ResourceURI(final String viewName) {
         this.viewName = viewName;
     }
 

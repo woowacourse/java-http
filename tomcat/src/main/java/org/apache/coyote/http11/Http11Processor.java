@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.util.HttpStatus.NOT_FOUND;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +12,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.ResourceURI;
-import org.apache.coyote.http11.util.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping();
+        this.requestMapping = RequestMapping.getRequestMapping();
     }
 
     @Override
@@ -45,8 +46,8 @@ public class Http11Processor implements Runnable, Processor {
             final var servlet = requestMapping.getServlet(httpRequest.getRequestURI());
 
             // 지원하는 서블릿이 없는 경우 404페이지 랜더링
-            servlet.ifPresentOrElse(value -> value.service(httpRequest, httpResponse), () -> {
-                httpResponse.setStatusCode(HttpStatus.NOT_FOUND);
+            servlet.ifPresentOrElse(it -> it.service(httpRequest, httpResponse), () -> {
+                httpResponse.setStatusCode(NOT_FOUND);
                 httpResponse.setResourceURI(NOT_FOUND_PAGE);
             });
 

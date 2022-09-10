@@ -8,9 +8,14 @@ import org.apache.catalina.Manager;
 import org.apache.coyote.http11.http.Session;
 
 public class SessionManager implements Manager {
+    private static final SessionManager sessionManager = new SessionManager();
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public SessionManager() {
+    private SessionManager() {
+    }
+
+    public static SessionManager getSessionManager() {
+        return sessionManager;
     }
 
     @Override

@@ -14,17 +14,14 @@ public class HttpRequest {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String URL_DELIMITER = "?";
 
-    private final HttpMethod httpMethod;
-    private final String uri;
+    private final HttpRequestLine httpRequestLine;
     private final Header header;
     private final String body;
     private final Session session;
 
 
-    public HttpRequest(final String requestLine, Header header, String body) {
-        final String[] parseRequest = requestLine.split(" ");
-        this.httpMethod = HttpMethod.from(parseRequest[0]);
-        this.uri = parseRequest[1];
+    public HttpRequest(final HttpRequestLine httpRequestLine, Header header, String body) {
+        this.httpRequestLine = httpRequestLine;
         this.header = header;
         this.body = body;
         this.session = SessionManager.add()
@@ -32,8 +29,8 @@ public class HttpRequest {
     }
 
     public Optional<String> findQueryByKey(String queryKey){
-        if(hasQueryInUri(uri)){
-            return findValue(queryKey, uri);
+        if(hasQueryInUri(getFullUri())){
+            return findValue(queryKey, getFullUri());
         }
 
         if(isFormUrlEncoded()){
@@ -70,15 +67,19 @@ public class HttpRequest {
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return httpRequestLine.getHttpMethod();
+    }
+
+    public String getFullUri(){
+        return httpRequestLine.getUri();
     }
 
     public String getUri() {
-        Integer index = uri.indexOf(URL_DELIMITER);
-        if (hasQueryInUri(uri)) {
-            return uri.substring(0, index);
+        Integer index = getFullUri().indexOf(URL_DELIMITER);
+        if (hasQueryInUri(getFullUri())) {
+            return getFullUri().substring(0, index);
         }
-        return uri;
+        return getFullUri();
     }
 
     public Header getHeader() {

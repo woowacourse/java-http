@@ -13,10 +13,10 @@ public class HttpRequestBuilder {
     private static final int START = 0;
 
     public static HttpRequest makeRequest(final BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
+        final HttpRequestLine httpRequestLine = new HttpRequestLine(bufferedReader.readLine());
         final Map<String, String> header = makeHeader(bufferedReader);
         final String body = makeBody(bufferedReader,header);
-        return new HttpRequest(requestLine, new Header(header) , body);
+        return new HttpRequest(httpRequestLine, new Header(header) , body);
     }
 
     private static Map<String, String> makeHeader(BufferedReader bufferedReader) throws IOException {

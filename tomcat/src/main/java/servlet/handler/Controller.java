@@ -6,5 +6,5 @@ import servlet.mapping.ResponseEntity;
 public interface Controller {
     ResponseEntity service(HttpRequest request);
 
-    boolean isMapped(HttpRequest request);
+    String getPath();
 }

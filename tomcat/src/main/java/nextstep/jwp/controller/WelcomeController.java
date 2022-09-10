@@ -1,18 +1,19 @@
 package nextstep.jwp.controller;
 
-import java.util.List;
 import org.apache.coyote.http11.request.HttpRequest;
+import servlet.handler.AbstractController;
 import servlet.mapping.ResponseEntity;
 
 public class WelcomeController extends AbstractController {
 
-    @Override
-    protected ResponseEntity doGet(HttpRequest request) {
-        return ResponseEntity.ok("/welcome.html");
+    private static final String PATH = "";
+
+    public WelcomeController() {
+        super(PATH);
     }
 
     @Override
-    public boolean isMapped(HttpRequest request) {
-        return request.getPath().isIn(List.of("/", ""));
+    protected ResponseEntity doGet(HttpRequest request) {
+        return ResponseEntity.ok("/welcome.html");
     }
 }

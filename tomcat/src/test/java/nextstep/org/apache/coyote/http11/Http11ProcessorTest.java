@@ -18,7 +18,14 @@ class Http11ProcessorTest {
     @DisplayName("웰컴 페이지를 응답한다.")
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = String.join(CRLF,
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when

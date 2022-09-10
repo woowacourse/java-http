@@ -3,7 +3,6 @@ package servlet;
 import java.util.List;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.controller.WelcomeController;
 import nextstep.jwp.controller.exception.MethodNotAllowedHandler;
 import nextstep.jwp.controller.exception.NotFoundHandler;
@@ -19,7 +18,7 @@ public class Config {
     private final UserService userService = new UserService();
 
     private final List<Controller> controllers =
-            List.of(new ResourceController(), new WelcomeController(),
+            List.of(new WelcomeController(),
                     new LoginController(userService), new RegisterController(userService));
     private final List<ExceptionHandler> exceptionHandlers =
             List.of(new NotFoundHandler(), new UnauthorizedHandler(), new MethodNotAllowedHandler());

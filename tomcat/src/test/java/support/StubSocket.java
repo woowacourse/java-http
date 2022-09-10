@@ -21,10 +21,6 @@ public class StubSocket extends Socket {
         this.outputStream = new ByteArrayOutputStream();
     }
 
-    public StubSocket() {
-        this("GET / HTTP/1.1" + CRLF + "Host: localhost:8080" + CRLF + CRLF);
-    }
-
     public InetAddress getInetAddress() {
         try {
             return InetAddress.getLocalHost();

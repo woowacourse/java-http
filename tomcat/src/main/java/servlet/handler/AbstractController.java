@@ -1,17 +1,22 @@
-package nextstep.jwp.controller;
+package servlet.handler;
 
 import nextstep.jwp.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
-import servlet.handler.Controller;
 import servlet.mapping.ResponseEntity;
 
 public class AbstractController implements Controller {
 
-    private static final String ERROR_405_MESSAGE = "매핑되는 메소드가 없습니다.";
+    private final String ERROR_405_MESSAGE = "매핑되는 메소드가 없습니다.";
+    private final String path;
+
+    public AbstractController(String path) {
+        this.path = path;
+    }
 
     @Override
     public ResponseEntity service(HttpRequest request) {
+        System.out.println("this.getClass() = " + this.getClass());
         if (request.getMethod() == HttpMethod.GET) {
             return doGet(request);
         }
@@ -21,9 +26,8 @@ public class AbstractController implements Controller {
         throw new MethodNotAllowedException(ERROR_405_MESSAGE);
     }
 
-    @Override
-    public boolean isMapped(HttpRequest request) {
-        return false;
+    public String getPath() {
+        return path;
     }
 
 

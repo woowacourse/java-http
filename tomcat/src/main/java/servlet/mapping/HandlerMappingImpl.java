@@ -1,12 +1,15 @@
 package servlet.mapping;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import servlet.handler.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.element.Path;
+import servlet.handler.Controller;
+import servlet.handler.ResourceFinder;
 
 public class HandlerMappingImpl implements HandlerMapping {
+
     private final List<Controller> controllers;
+    private final ResourceFinder resourceFinder = new ResourceFinder();
 
     public HandlerMappingImpl(List<Controller> controllers) {
         this.controllers = controllers;
@@ -19,9 +22,10 @@ public class HandlerMappingImpl implements HandlerMapping {
     }
 
     private Controller findController(HttpRequest request) {
+        Path path = request.getPath();
         return controllers.stream()
-                .filter(element -> element.isMapped(request))
+                .filter(controller -> Path.of(controller.getPath()).equals(path))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("매핑되는 컨트롤러 메소드가 없습니다." + request.getPath()));
+                .orElse(resourceFinder);
     }
 }

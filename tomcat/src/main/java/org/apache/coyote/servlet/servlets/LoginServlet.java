@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.header.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +24,11 @@ public class LoginServlet extends AbstractServlet {
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (sessionManager.isLoginAccount(httpRequest)) {
-            httpResponse.setStatusCode("302")
+            httpResponse.setStatusCode(StatusCode.FOUND)
                 .setLocation("/index.html");
             return;
         }
-        httpResponse.setStatusCode("200")
+        httpResponse.setStatusCode(StatusCode.OK)
             .setBody("/login.html");
     }
 
@@ -45,7 +46,7 @@ public class LoginServlet extends AbstractServlet {
         }
 
         log.info("login success to ID : {}", user.get().getAccount());
-        httpResponse.setStatusCode("302")
+        httpResponse.setStatusCode(StatusCode.FOUND)
             .setLocation("/index.html")
             .generateSessionId();
         sessionManager.add(user.get(), httpResponse);

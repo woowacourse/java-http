@@ -12,8 +12,8 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
-    public void setStatusCode(final String statusCode) {
-        this.statusCode = StatusCode.from(statusCode);
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String toMessage() {

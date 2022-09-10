@@ -33,7 +33,7 @@ public class HttpResponse {
         return new HttpResponse(statusLine, httpHeaders, body);
     }
 
-    public HttpResponse setStatusCode(final String statusCode) {
+    public HttpResponse setStatusCode(final StatusCode statusCode) {
         statusLine.setStatusCode(statusCode);
         return this;
     }

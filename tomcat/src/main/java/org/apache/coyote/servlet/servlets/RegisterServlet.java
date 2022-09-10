@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.header.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class RegisterServlet extends AbstractServlet {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.setStatusCode("200")
+        httpResponse.setStatusCode(StatusCode.OK)
             .setBody("/register.html");
     }
 

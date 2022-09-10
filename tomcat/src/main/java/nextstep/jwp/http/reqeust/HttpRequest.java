@@ -2,7 +2,6 @@ package nextstep.jwp.http.reqeust;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpHeader;
 
@@ -37,11 +36,11 @@ public class HttpRequest {
         return httpRequestLine.getPath();
     }
 
-    public Map<String, String> getRequestBodies() {
-        return httpRequestBody.getValues();
-    }
-
     public String getCookie() {
         return httpHeaders.getCookie();
+    }
+
+    public String getBody() {
+        return httpRequestBody.getBody();
     }
 }

@@ -25,14 +25,14 @@ public class HttpHeader {
         this.values = new LinkedHashMap<>();
 
         String headerLine = bufferReader.readLine();
-        while (isValidHeaderForm(headerLine)) {
+        while (isValidHeaderFormat(headerLine)) {
             String[] value = headerLine.split(HEADER_SEPARATOR, SPLIT_SIZE);
             addValue(value[KEY_INDEX], value[VALUE_INDEX]);
             headerLine = bufferReader.readLine();
         }
     }
 
-    private boolean isValidHeaderForm(final String headerLine) {
+    private boolean isValidHeaderFormat(final String headerLine) {
         return headerLine != null && !headerLine.isBlank();
     }
 

@@ -6,6 +6,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
@@ -44,9 +45,10 @@ public class LoginController extends AbstractController {
     }
 
     private void Login(final HttpRequest request, final HttpResponse response) {
-        Map<String, String> requestBodies = request.getRequestBodies();
-        String account = requestBodies.get("account");
-        String password = requestBodies.get("password");
+        QueryParams queryParams = new QueryParams(request.getBody());
+        Map<String, String> queries = queryParams.getValues();
+        String account = queries.get("account");
+        String password = queries.get("password");
 
         User user = findUser(account);
         if (!user.checkPassword(password)) {

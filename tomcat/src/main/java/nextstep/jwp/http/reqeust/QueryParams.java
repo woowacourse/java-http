@@ -2,6 +2,7 @@ package nextstep.jwp.http.reqeust;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.QueryStringFormatException;
 
 public class QueryParams {
 
@@ -24,8 +25,22 @@ public class QueryParams {
         String[] queries = queryString.split(QUERY_CONNECTOR);
 
         for (String query : queries) {
+            validateQueryFormat(query);
             String[] value = query.split(QUERY_SEPARATOR);
             this.values.put(value[KEY_INDEX], value[VALUE_INDEX]);
         }
+    }
+
+    private void validateQueryFormat(final String query) {
+        if (!query.contains(QUERY_SEPARATOR) || query.isBlank()) {
+            throw new QueryStringFormatException();
+        }
+        if (query.split(QUERY_SEPARATOR).length != 2) {
+            throw new QueryStringFormatException();
+        }
+    }
+
+    public Map<String, String> getValues() {
+        return values;
     }
 }

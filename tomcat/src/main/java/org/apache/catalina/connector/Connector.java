@@ -18,7 +18,7 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_ACCEPT_COUNT = 350;
     private static final int DEFAULT_THREAD_POOL_SIZE = 250;
 
     private final ServerSocket serverSocket;
@@ -26,20 +26,24 @@ public class Connector implements Runnable {
     private final ExecutorService executorService;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_POOL_SIZE);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_POOL_SIZE, DEFAULT_THREAD_POOL_SIZE, 60, TimeUnit.SECONDS);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final int port,
+                     final int acceptCount,
+                     final int corePoolSize,
+                     final int maxThreads,
+                     final int keepAliveTime,
+                     final TimeUnit timeUnit) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = new ThreadPoolExecutor(
-                1,
+                corePoolSize,
                 maxThreads,
-                30,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(acceptCount)
+                keepAliveTime,
+                timeUnit,
+                new LinkedBlockingQueue<>()
         );
-
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

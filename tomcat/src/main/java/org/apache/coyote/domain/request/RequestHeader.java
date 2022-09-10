@@ -24,13 +24,11 @@ public class RequestHeader {
 
     public static RequestHeader from(BufferedReader inputReader) throws IOException {
         Map<String, String> requestHeader = new HashMap<>();
-        while (inputReader.ready()) {
-            String line = inputReader.readLine();
-            if (line.equals(EMPTY_HEADER)) {
-                break;
-            }
+        String line = inputReader.readLine();
+        while (inputReader.ready() && !line.equals(EMPTY_HEADER)) {
             String[] header = line.split(HEADER_REGEX);
             requestHeader.put(header[HEADER_KEY], header[HEADER_VALUE]);
+            line = inputReader.readLine();
         }
         return new RequestHeader(requestHeader);
     }

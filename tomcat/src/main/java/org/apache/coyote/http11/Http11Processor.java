@@ -37,9 +37,10 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(inputBufferedReader);
+            final RequestMapping requestMapping = new RequestMapping();
             HttpResponse httpResponse = new HttpResponse();
-            RequestMapping requestMapping = new RequestMapping();
             requestMapping.getController(httpRequest).service(httpRequest, httpResponse);
+
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

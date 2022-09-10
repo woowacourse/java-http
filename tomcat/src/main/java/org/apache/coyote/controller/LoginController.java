@@ -45,24 +45,30 @@ public class LoginController extends AbstractController {
                 request.getRequestBody().getRequestBody().get(ACCOUNT_KEY));
         if (user.isPresent()) {
             log.info(user.get().toString());
-            if (user.get().checkPassword(request.getRequestBody().getRequestBody().get(PASSWORD_KEY))) {
-                Session session = request.getSession();
-                session.setAttribute(USER_SESSION_KEY, user);
-                SessionManager.add(session);
-                request.getHttpCookie().add(session);
-                response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
-                        .header(RedirectUrl.from(INDEX_HTML))
-                        .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                        .header(request.getHttpCookie());
-                log.info("[Login Controller] doPost - User Session Create & Login ");
-                return;
-            }
+            login(user.get(), request, response);
+            return;
         }
         response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
                 .header(RedirectUrl.from(HTML_401_PAGE))
                 .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                 .header(request.getHttpCookie());
-        log.info("[Login Controller] doPost - Login Failed ");
+        log.info("[Login Controller] doPost - Not Found User Account ");
+    }
+
+    private void login(User user, HttpRequest request, HttpResponse response) {
+        if (user.checkPassword(request.getRequestBody().getRequestBody().get(PASSWORD_KEY))) {
+            Session session = request.getSession();
+            session.setAttribute(USER_SESSION_KEY, user);
+            SessionManager.add(session);
+            request.getHttpCookie().add(session);
+            response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
+                    .header(RedirectUrl.from(INDEX_HTML))
+                    .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
+                    .header(request.getHttpCookie());
+            log.info("[Login Controller] doPost - User Session Create & Login ");
+            return;
+        }
+        log.info("[Login Controller] doPost - Login Failed(Invalid Password)");
     }
 
     @Override

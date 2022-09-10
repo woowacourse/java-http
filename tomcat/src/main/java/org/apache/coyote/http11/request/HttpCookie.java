@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +12,7 @@ public class HttpCookie {
     private final Map<String, String> cookies;
 
     private HttpCookie(final Map<String, String> cookies) {
-        this.cookies = new ConcurrentHashMap<>(cookies);
+        this.cookies = new HashMap<>(cookies);
     }
 
     public static HttpCookie from(final String cookieHeader) {

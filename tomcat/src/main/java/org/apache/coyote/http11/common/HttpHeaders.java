@@ -20,6 +20,10 @@ public class HttpHeaders {
         this.cookie = cookie;
     }
 
+    public static HttpHeaders init() {
+        return new HttpHeaders(new ConcurrentHashMap<>(), HttpCookie.empty());
+    }
+
     public static HttpHeaders request(final List<String> messages) {
         final Map<HeaderKeys, String> headers = new HashMap<>();
         HttpCookie cookie = HttpCookie.empty();
@@ -32,10 +36,6 @@ public class HttpHeaders {
             headers.put(HeaderKeys.from(headerElement[KEY]), headerElement[VALUE]);
         }
         return new HttpHeaders(headers, cookie);
-    }
-
-    public static HttpHeaders response() {
-        return new HttpHeaders(new ConcurrentHashMap<>(), HttpCookie.empty());
     }
 
     public HttpHeaders add(final HeaderKeys key, final String value) {

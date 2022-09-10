@@ -7,6 +7,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestGenerator;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.servlet.ServletContainer;
+import org.apache.coyote.servlet.servlets.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,10 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest httpRequest = HttpRequestGenerator.createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = SERVLET_CONTAINER.service(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.init(httpRequest);
+
+            final Servlet servlet = SERVLET_CONTAINER.getServlet(httpRequest);
+            servlet.service(httpRequest);
             final String responseMessage = httpResponse.toMessage();
 
             outputStream.write(responseMessage.getBytes());

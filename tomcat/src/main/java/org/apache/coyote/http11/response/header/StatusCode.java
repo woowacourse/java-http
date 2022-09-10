@@ -14,12 +14,18 @@ public enum StatusCode {
     NOT_FOUND(404, "Not Found"),
     ;
 
+    private static final StatusCode DEFAULT = OK;
+
     private final int code;
     private final String name;
 
     StatusCode(final int code, final String name) {
         this.code = code;
         this.name = name;
+    }
+
+    public static StatusCode init() {
+        return DEFAULT;
     }
 
     public static StatusCode from(final String statusCode) {

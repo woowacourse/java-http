@@ -22,6 +22,10 @@ public class Mapping {
         return abstractServlet;
     }
 
+    public boolean isSameUrl(final String url) {
+        return this.url.equals(url);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o)

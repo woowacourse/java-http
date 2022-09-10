@@ -25,6 +25,14 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public static HttpResponse init(final HttpRequest httpRequest) {
+        final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.init());
+        final HttpHeaders httpHeaders = HttpHeaders.init();
+        final HttpResponseBody body = HttpResponseBody.init();
+
+        return new HttpResponse(statusLine, httpHeaders, body);
+    }
+
     public static HttpResponse of(final HttpRequest httpRequest, final String resource, final String statusCode) {
         final StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), StatusCode.from(statusCode));
 
@@ -55,12 +63,12 @@ public class HttpResponse {
     }
 
     private static HttpResponseBody loadResourceContent(final String resource) {
-        return new HttpResponseBody(RESOURCE_SEARCHER.loadContent(resource));
+        return HttpResponseBody.from(RESOURCE_SEARCHER.loadContent(resource));
     }
 
     private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
         int length = body.getBytes().length;
-        return HttpHeaders.response()
+        return HttpHeaders.init()
             .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
             .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
     }

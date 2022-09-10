@@ -12,6 +12,7 @@ import org.apache.coyote.servlet.servlets.LoginServlet;
 import org.apache.coyote.servlet.servlets.RegisterServlet;
 import org.apache.coyote.servlet.servlets.ResourceServlet;
 import org.apache.coyote.servlet.servlets.AbstractServlet;
+import org.apache.coyote.servlet.servlets.Servlet;
 
 public class ServletContainer {
 
@@ -35,6 +36,16 @@ public class ServletContainer {
         mapUrlToServlet(new RegisterServlet(servletContainer.sessionManager), "/register");
 
         return servletContainer;
+    }
+
+    public Servlet getServlet(final HttpRequest httpRequest) {
+        final String url = httpRequest.getUrl();
+
+        return MAPPINGS.stream()
+            .filter(mapping -> mapping.isSameUrl(url))
+            .map(Mapping::getServlet)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(String.format("매핑되지 않은 url 입니다. [%s]", url)));
     }
 
     public HttpResponse service(final HttpRequest httpRequest) {

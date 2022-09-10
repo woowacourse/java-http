@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -16,32 +15,25 @@ public abstract class AbstractController implements Controller {
     protected static final String INDEX_PAGE_URL = "./index.html";
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response)
-            throws IOException, UncheckedServletException {
+    public void service(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
         if (request.hasPostMethod()) {
             doPost(request, response);
         }
         if (request.hasGetMethod()) {
             doGet(request, response);
         }
+
+        String path = resourcePath(request.getPath());
+        String responseBody = new ClassPathResource().getStaticContent(path);
+        response.setContentLength(responseBody.getBytes().length);
+        response.setResponseBody(responseBody);
     }
 
     protected void doGet(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
-        String path = resourcePath(request.getPath());
-        String responseBody = new ClassPathResource().getStaticContent(path);
-
         response.setStatusCode(StatusCode.OK);
-        response.setContentLength(responseBody.getBytes().length);
-        response.setResponseBody(responseBody);
     }
 
     protected void doPost(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
-        String path = resourcePath(request.getPath());
-        String responseBody = new ClassPathResource().getStaticContent(path);
-
-        response.setStatusCode(StatusCode.OK);
-        response.setContentLength(responseBody.getBytes().length);
-        response.setResponseBody(responseBody);
         response.sendRedirect(INDEX_PAGE_URL);
     }
 

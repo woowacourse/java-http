@@ -1,6 +1,6 @@
 package nextstep.jwp.config;
 
-import nextstep.jwp.controller.ExceptionHandler;
+import nextstep.jwp.controller.AppExceptionHandler;
 import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
@@ -20,12 +20,12 @@ public class AppConfiguration implements Configuration {
     }
 
     @Override
-    public void setExceptionHandler(final RequestMapping requestMapping) {
-        requestMapping.setExceptionHandler(new ExceptionHandler());
+    public void setResourceController(final RequestMapping requestMapping) {
+        requestMapping.setResourceController(new ResourceController());
     }
 
     @Override
-    public void setResourceController(final RequestMapping requestMapping) {
-        requestMapping.setResourceController(new ResourceController());
+    public void setExceptionHandler(final RequestMapping requestMapping) {
+        requestMapping.setExceptionHandler(new AppExceptionHandler());
     }
 }

@@ -8,15 +8,15 @@ import nextstep.jwp.http.response.HttpResponse;
 public class RequestMapping {
 
     private final Map<String, Controller> controllers = new HashMap<>();
-    private Controller exceptionHandler;
     private Controller resourceController;
+    private ExceptionHandler exceptionHandler;
 
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) {
         try {
             Controller controller = findController(request.getPath());
             controller.service(request, response);
-        } catch (final Exception e) {
-            exceptionHandler.service(request, response);
+        } catch (final Exception exception) {
+            exceptionHandler.handle(exception, response);
         }
     }
 
@@ -31,11 +31,11 @@ public class RequestMapping {
         this.controllers.put(path, controller);
     }
 
-    public void setExceptionHandler(final Controller exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
-    }
-
     public void setResourceController(final Controller resourceController) {
         this.resourceController = resourceController;
+    }
+
+    public void setExceptionHandler(final ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
     }
 }

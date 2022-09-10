@@ -14,7 +14,7 @@ public class ControllerContainer {
         configuration.setResourceController(requestMapping);
     }
 
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) {
         requestMapping.service(request, response);
     }
 }

@@ -23,12 +23,12 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, Executors.newFixedThreadPool(DEFAULT_MAX_THREAD_COUNT));
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final ExecutorService executorService) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(DEFAULT_MAX_THREAD_COUNT);
+        this.executorService = executorService;
         this.stopped = false;
     }
 

@@ -9,6 +9,7 @@ public class RequestHeaders {
     private static final String COOKIE_HEADER = "Cookie";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String JSESSIONID_NAME = "JSESSIONID";
+    public static final String HOST = "Host";
 
     private final Map<String, String> headers;
     private final HttpCookie cookie;

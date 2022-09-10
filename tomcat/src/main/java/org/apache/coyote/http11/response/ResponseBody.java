@@ -12,7 +12,7 @@ import nextstep.jwp.exception.ResourceNotFoundException;
 
 public class ResponseBody {
 
-    private static final String STATIC_PATH = "static/";
+    public static final String STATIC_PATH = "static/";
 
     private final String value;
 

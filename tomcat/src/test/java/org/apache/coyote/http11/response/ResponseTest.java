@@ -37,7 +37,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        httpResponse.initResponseValues(responseEntity);
+        httpResponse.initResponseValues(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "html" + ";charset=utf-8 ";
@@ -55,7 +55,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        httpResponse.initResponseValues(responseEntity);
+        httpResponse.initResponseValues(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "css" + ";charset=utf-8 ";
@@ -72,7 +72,7 @@ class ResponseTest {
         // when
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
-        httpResponse.initResponseValues(responseEntity);
+        httpResponse.initResponseValues(httpRequest, responseEntity);
 
         // then
         String expectedContentType = "Content-Type: text/" + "javascript" + ";charset=utf-8 ";
@@ -87,7 +87,7 @@ class ResponseTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        httpResponse.initResponseValues(responseEntity);
+        httpResponse.initResponseValues(httpRequest, responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 200 + " " + "OK" + " ";
@@ -102,7 +102,7 @@ class ResponseTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when
-        httpResponse.initResponseValues(responseEntity);
+        httpResponse.initResponseValues(httpRequest, responseEntity);
 
         // then
         String expectedStartLine = "HTTP/1.1 " + 302 + " " + "FOUND" + " ";

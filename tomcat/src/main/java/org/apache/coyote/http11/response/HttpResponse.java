@@ -1,18 +1,20 @@
 package org.apache.coyote.http11.response;
 
-public class HttpResponse {
+import static org.apache.coyote.http11.response.ResponseHeaders.CONTENT_LENGTH_HEADER;
+import static org.apache.coyote.http11.response.ResponseHeaders.SET_COOKIE_HEADER;
 
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String SET_COOKIE_HEADER = "Set-Cookie";
+import org.apache.coyote.http11.request.HttpRequest;
+
+public class HttpResponse {
 
     private General general;
     private final ResponseHeaders headers = new ResponseHeaders();
     private ResponseBody responseBody;
 
-    public void initResponseValues(ResponseEntity responseEntity) {
+    public void initResponseValues(HttpRequest request, ResponseEntity responseEntity) {
         this.general = new General(responseEntity.getHttpStatus());
         this.responseBody = ResponseBody.of(responseEntity);
-        this.headers.setHeaders(responseEntity);
+        this.headers.setHeaders(request.getRequestHeaders(), responseEntity);
         setContentLength(headers, responseBody.getContentLength());
     }
 

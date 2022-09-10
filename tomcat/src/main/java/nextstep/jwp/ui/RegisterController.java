@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.initResponseValues(ResponseEntity.body(REGISTER_PAGE_PATH));
+        response.initResponseValues(request, ResponseEntity.body(REGISTER_PAGE_PATH));
     }
 
     @Override
@@ -23,9 +23,8 @@ public class RegisterController extends AbstractController {
         RequestBody requestBody = request.getRequestBody();
         saveUser(requestBody);
         ResponseEntity responseEntity = ResponseEntity.body(REDIRECT_INDEX_PAGE_PATH).status(HttpStatus.REDIRECT);
-        response.initResponseValues(responseEntity);
+        response.initResponseValues(request, responseEntity);
     }
-
 
     private static void saveUser(RequestBody requestBody) {
         String account = requestBody.get("account");

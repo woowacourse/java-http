@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.request.RequestHeaders;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -19,9 +18,10 @@ class ResponseHeadersTest {
         // given
         ResponseEntity responseEntity = ResponseEntity.body(body);
         ResponseHeaders responseHeaders = new ResponseHeaders();
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of(""));
 
         // when
-        responseHeaders.setHeaders(responseEntity);
+        responseHeaders.setHeaders(requestHeaders, responseEntity);
 
         // then
         assertThat(responseHeaders.asString()).contains(expected);
@@ -42,9 +42,10 @@ class ResponseHeadersTest {
         String body = "redirect:index.html";
         ResponseEntity responseEntity = ResponseEntity.body(body).status(HttpStatus.REDIRECT);
         ResponseHeaders responseHeaders = new ResponseHeaders();
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("Host: localhost:8080"));
 
         // when
-        responseHeaders.setHeaders(responseEntity);
+        responseHeaders.setHeaders(requestHeaders, responseEntity);
 
         // then
         assertThat(responseHeaders.asString()).contains("Location: http://localhost:8080/index.html ");

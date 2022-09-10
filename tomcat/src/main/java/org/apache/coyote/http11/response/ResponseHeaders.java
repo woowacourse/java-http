@@ -1,21 +1,26 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.request.RequestHeaders.HOST;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.RequestHeaders;
 
 public class ResponseHeaders {
 
     private static final String LOCATION_HEADER = "Location";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String HOST = "http://localhost:8080/";
+    public static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    public static final String SET_COOKIE_HEADER = "Set-Cookie";
+    private static final String PROTOCOL = "http://";
 
     private final Map<String, String> values = new LinkedHashMap<>();
 
-    public void setHeaders(ResponseEntity responseEntity) {
+    public void setHeaders(RequestHeaders requestHeaders, ResponseEntity responseEntity) {
         if (responseEntity.getHttpStatus().isRedirect()) {
             String responseBody = responseEntity.getResponseBody();
-            values.put(LOCATION_HEADER, HOST + responseBody.split(":")[1]);
+            values.put(LOCATION_HEADER, PROTOCOL + requestHeaders.getHeader(HOST) + responseBody.split(":")[1]);
             return;
         }
         ContentType contentType = ContentType.findContentType(responseEntity.getResponseBody());

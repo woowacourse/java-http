@@ -1,6 +1,5 @@
 package nextstep.jwp.ui;
 
-import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.InvalidRequestException;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String LOGIN_PAGE_PATH = "login.html";
     private static final String REDIRECT_INDEX_PAGE_PATH = "redirect:index.html";
     private static final String REDIRECT_401_PAGE_PATH = "redirect:401.html";
@@ -26,13 +25,13 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         Session session = request.getSession();
         ResponseEntity responseEntity = login(session);
-        response.initResponseValues(responseEntity);
+        response.initResponseValues(request, responseEntity);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         ResponseEntity responseEntity = login(request);
-        response.initResponseValues(responseEntity);
+        response.initResponseValues(request, responseEntity);
     }
 
     private ResponseEntity login(Session session) {
@@ -51,7 +50,7 @@ public class LoginController extends AbstractController {
         } catch (UserNotFoundException | AuthenticationException | InvalidRequestException e) {
             return ResponseEntity.body(REDIRECT_401_PAGE_PATH).status(HttpStatus.REDIRECT);
         }
-        return ResponseEntity.body(REDIRECT_401_PAGE_PATH).status(HttpStatus.REDIRECT);
+        return ResponseEntity.body(REDIRECT_INDEX_PAGE_PATH).status(HttpStatus.REDIRECT);
     }
 
     private static void validateUser(HttpRequest httpRequest) {

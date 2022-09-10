@@ -106,8 +106,9 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=eden ",
+                "Content-Length: " + "a=b&b=a@w".getBytes().length,
                 "",
-                "");
+                "a=b&b=a@w");
         RequestMapping.registerController(Map.of("/login", new LoginController()));
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

@@ -10,6 +10,6 @@ public class HomeController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.initResponseValues(ResponseEntity.body(WELCOME_MESSAGE));
+        response.initResponseValues(request, ResponseEntity.body(WELCOME_MESSAGE));
     }
 }

@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse httpResponse = new HttpResponse();
 
             setRequest(bufferedReader, httpRequest, httpResponse);
-            Controller controller = RequestMapping.getController(httpRequest.getPath());
+            Controller controller = RequestMapping.findController(httpRequest.getPath());
             controller.service(httpRequest, httpResponse);
 
             bufferedWriter.write(httpResponse.asString());
@@ -60,11 +60,11 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         setStartLine(httpRequest, bufferedReader);
         setRequestHeaders(httpRequest, httpResponse, bufferedReader);
-        setResponseBody(httpRequest, bufferedReader);
+        setRequestBody(httpRequest, bufferedReader);
     }
 
     private void setStartLine(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
-        final StartLine startLine = new StartLine(bufferedReader.readLine());
+        StartLine startLine = new StartLine(bufferedReader.readLine());
         httpRequest.setStartLine(startLine);
     }
 
@@ -88,8 +88,10 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeaders;
     }
 
-    private void setResponseBody(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
-        httpRequest.setRequestBody(RequestBody.of(readRequestBody(httpRequest.getRequestHeaders(), bufferedReader)));
+    private void setRequestBody(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
+        String rawRequestBody = readRequestBody(httpRequest.getRequestHeaders(), bufferedReader);
+        RequestBody requestBody = RequestBody.of(rawRequestBody);
+        httpRequest.setRequestBody(requestBody);
     }
 
     private String readRequestBody(RequestHeaders requestHeaders, BufferedReader bufferedReader)

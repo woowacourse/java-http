@@ -17,7 +17,7 @@ public enum HttpMethod {
     }
 
     private boolean isSameMethod(String inputHttpMethod) {
-        return name().equals(inputHttpMethod);
+        return name().equalsIgnoreCase(inputHttpMethod);
     }
 
     public boolean isGetMethod() {

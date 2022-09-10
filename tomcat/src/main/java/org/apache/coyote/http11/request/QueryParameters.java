@@ -37,14 +37,18 @@ public class QueryParameters {
 
     private static void putKeyValues(Map<String, String> queryParameters, String queryParameter) {
         String[] eachQueryParameters = queryParameter.split("&");
-        for (String q : eachQueryParameters) {
-            String[] keyValues = q.split("=");
-            if (keyValues.length == 1) {
-                queryParameters.put(keyValues[KEY_INDEX], null);
-                continue;
-            }
-            queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
+        for (String queryParameterSet : eachQueryParameters) {
+            putByQueryParameterExisting(queryParameters, queryParameterSet);
         }
+    }
+
+    private static void putByQueryParameterExisting(Map<String, String> queryParameters, String queryParameter) {
+        String[] keyValues = queryParameter.split("=");
+        if (keyValues.length == 1) {
+            queryParameters.put(keyValues[KEY_INDEX], null);
+            return;
+        }
+        queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
     }
 
     public String get(String name) {

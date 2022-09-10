@@ -17,7 +17,7 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_BACKLOG_COUNT = 100;
+    private static final int DEFAULT_BACKLOG_COUNT = 350;
     private static final int DEFAULT_POOL_SIZE = 250;
     private static final int DEFAULT_CORE_SIZE = 50;
     private static final long DEFAULT_KEEP_ALIVE_TIME = 120L;

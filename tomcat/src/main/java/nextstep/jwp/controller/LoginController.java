@@ -24,7 +24,6 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
         super.doGet(request, response);
-
         checkAlreadyLoginUser(request, response);
     }
 

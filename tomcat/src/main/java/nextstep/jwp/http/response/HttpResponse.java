@@ -38,7 +38,7 @@ public class HttpResponse {
     }
 
     public void setCookie(final HttpCookie cookie) {
-        this.httpHeaders.addValue(SET_COOKIE, cookie.getCookie());
+        this.httpHeaders.addValue(SET_COOKIE, cookie.getSession());
     }
 
     public void setStatusCode(final StatusCode statusCode) {

@@ -16,14 +16,14 @@ public class QueryParams {
     public QueryParams(final String queryString) {
         this.values = new HashMap<>();
 
-        if (queryString != null) {
-            addValueFrom(queryString);
+        if (queryString == null) {
+            throw new QueryStringFormatException();
         }
+        String[] queries = queryString.split(QUERY_CONNECTOR);
+        addQueries(queries);
     }
 
-    private void addValueFrom(final String queryString) {
-        String[] queries = queryString.split(QUERY_CONNECTOR);
-
+    private void addQueries(final String[] queries) {
         for (String query : queries) {
             validateQueryFormat(query);
             String[] value = query.split(QUERY_SEPARATOR);

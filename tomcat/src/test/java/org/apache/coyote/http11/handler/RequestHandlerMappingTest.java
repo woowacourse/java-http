@@ -20,9 +20,9 @@ class RequestHandlerMappingTest {
             "GET /css/style.css HTTP/1.1 : StaticResourceController"}, delimiterString = " : "
     )
     void matchController(String startLine, String controllerName) {
-        final HttpHeader httpHeader = new HttpHeader(startLine, "");
+        final HttpHeader httpHeader = new HttpHeader("");
         final HttpBody httpBody = new HttpBody("");
-        final HttpRequest httpRequest = new HttpRequest(httpHeader, httpBody);
+        final HttpRequest httpRequest = new HttpRequest(startLine, httpHeader, httpBody);
 
         assertThat(RequestHandlerMapping.getHandler(httpRequest)
                 .getClass()

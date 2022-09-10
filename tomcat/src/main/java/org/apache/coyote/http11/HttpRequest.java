@@ -2,16 +2,23 @@ package org.apache.coyote.http11;
 
 public class HttpRequest {
 
+    private final String requestLine;
     private final HttpHeader httpHeader;
     private final HttpBody httpBody;
 
-    public HttpRequest(final HttpHeader httpHeader, final HttpBody httpBody) {
+    public HttpRequest(final String requestLine, final HttpHeader httpHeader, final HttpBody httpBody) {
+        this.requestLine = requestLine;
         this.httpHeader = httpHeader;
         this.httpBody = httpBody;
     }
 
     public boolean hasJSESSIONID() {
         return httpHeader.hasJSESSIONID();
+    }
+
+    public boolean matchMethod(final String method) {
+        final String requestLineMethod = requestLine.split(" ")[0];
+        return requestLineMethod.equals(method);
     }
 
     public String getJSESSIONID() {
@@ -22,11 +29,7 @@ public class HttpRequest {
         return httpBody.getValue(key);
     }
 
-    public String getMethod() {
-        return httpHeader.getMethod();
-    }
-
     public String getUrl() {
-        return httpHeader.getUrl();
+        return requestLine.split(" ")[1];
     }
 }

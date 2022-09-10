@@ -21,7 +21,7 @@ public class HttpRequestMapping {
     }
 
     public boolean match(final HttpRequest httpRequest) {
-        return getUrlExceptQueryParam(httpRequest).equals(url) && httpRequest.getMethod().equals(method);
+        return getUrlExceptQueryParam(httpRequest).equals(url) && httpRequest.matchMethod(method);
     }
 
     private String getUrlExceptQueryParam(final HttpRequest httpRequest) {

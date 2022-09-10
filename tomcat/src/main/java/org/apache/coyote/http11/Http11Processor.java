@@ -36,9 +36,9 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final String requestLine = reader.readLine();
-            final HttpHeader httpHeader = getHeaders(reader, requestLine);
+            final HttpHeader httpHeader = getHeaders(reader);
             final HttpBody httpBody = getBody(reader);
-            final HttpRequest httpRequest = new HttpRequest(httpHeader, httpBody);
+            final HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, httpBody);
 
             final Controller handler = RequestHandlerMapping.getHandler(httpRequest);
 
@@ -50,13 +50,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpHeader getHeaders(final BufferedReader reader, final String startLine) throws IOException {
+    private HttpHeader getHeaders(final BufferedReader reader) throws IOException {
         StringBuilder headers = new StringBuilder();
         String header;
         while ((header = reader.readLine()) != null && header.length() != 0) {
             headers.append(header).append("\n");
         }
-        return new HttpHeader(startLine, headers.toString());
+        return new HttpHeader(headers.toString());
     }
 
     private HttpBody getBody(final BufferedReader reader) throws IOException {

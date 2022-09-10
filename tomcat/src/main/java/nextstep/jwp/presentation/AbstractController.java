@@ -11,10 +11,10 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (httpRequest.getMethod().equals("POST")) {
+        if (httpRequest.matchMethod("POST")) {
             return doPost(httpRequest, httpResponse);
         }
-        if (httpRequest.getMethod().equals("GET")) {
+        if (httpRequest.matchMethod("GET")) {
             return doGet(httpRequest, httpResponse);
         }
         final HttpBody httpBody = HttpBody.createByUrl("/404.html");

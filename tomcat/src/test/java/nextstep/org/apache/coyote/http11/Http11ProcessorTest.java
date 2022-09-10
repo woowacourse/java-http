@@ -93,7 +93,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/css/styles.css");
         final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         var expected = String.join("\r\n",

@@ -20,13 +20,12 @@ class AuthControllerTest {
         final AuthController authController = new AuthController();
 
         final String requestLine = "POST /register HTTP/1.1";
-        final HttpHeader httpHeader = new HttpHeader(requestLine,
-                String.join("\r\n",
+        final HttpHeader httpHeader = new HttpHeader(String.join("\r\n",
                         "Content-Type: text/html;charset=utf-8 ",
                         "Content-Length: keep-alive "));
         final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
 
-        authController.service(new HttpRequest(httpHeader, httpBody), new HttpResponse());
+        authController.service(new HttpRequest(requestLine, httpHeader, httpBody), new HttpResponse());
 
         final User user = InMemoryUserRepository.findByAccount("green").get();
 
@@ -42,13 +41,14 @@ class AuthControllerTest {
         final AuthController authController = new AuthController();
 
         final String requestLine = "POST /login.html HTTP/1.1";
-        final HttpHeader httpHeader = new HttpHeader(requestLine,
-                String.join("\r\n",
+        final HttpHeader httpHeader = new HttpHeader(String.join("\r\n",
                         "Content-Type: text/html;charset=utf-8 ",
                         "Content-Length: keep-alive "));
         final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
 
-        final HttpResponse httpResponse = authController.service(new HttpRequest(httpHeader, httpBody),
+        final HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, httpBody);
+
+        final HttpResponse httpResponse = authController.service(httpRequest,
                 new HttpResponse());
 
         assertThat(httpResponse.getResponse()).contains("302 Found");

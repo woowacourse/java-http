@@ -13,8 +13,7 @@ class HttpResponseTest {
     @DisplayName("존재하지 않는 파일인 경우 예외가 발생한다.")
     @Test
     void notExistFileException() {
-        final HttpHeader httpHeader = new HttpHeader("GET /login.css HTTP/1.1",
-                String.join("\r\n",
+        final HttpHeader httpHeader = new HttpHeader(String.join("\r\n",
                         "Content-Type: text/html;charset=utf-8 ",
                         "Content-Length: 12 ",
                         ""));

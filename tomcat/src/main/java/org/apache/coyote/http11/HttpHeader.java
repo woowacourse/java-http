@@ -9,11 +9,9 @@ public class HttpHeader {
     private static final String EXTENSION_DELIMITER = ".";
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    private String startLine;
     private Map<String, String> headers;
 
-    public HttpHeader(final String requestStartLine, final String headers) {
-        this.startLine = requestStartLine;
+    public HttpHeader(final String headers) {
         this.headers = PairConverter.toMap(headers, "\n", ": ");
     }
 
@@ -22,7 +20,7 @@ public class HttpHeader {
     }
 
     public HttpHeader startLine(final StatusCode statusCode) {
-        this.startLine = HTTP_VERSION + statusCode.getStatusMessage();
+        headers.put(HTTP_VERSION, statusCode.getStatusMessage());
         return this;
     }
 
@@ -74,26 +72,25 @@ public class HttpHeader {
         throw new RuntimeException("JSESSIONID가 없습니다.");
     }
 
-    public String getStartLine() {
-        return startLine;
-    }
-
-    public String getMethod() {
-        return getStartLine().split(" ")[0];
-    }
-
-    public String getUrl() {
-        return getStartLine().split(" ")[1];
-    }
-
     public String getHeaderByFormat() {
-        StringBuilder response = new StringBuilder(startLine + "\r\n");
+        StringBuilder response = new StringBuilder();
+
+        getRequestLineFormat(response);
         for (String key : headers.keySet()) {
+            if (key.equals(HTTP_VERSION)) {
+                continue;
+            }
             response.append(key)
                     .append(": ")
                     .append(headers.get(key))
                     .append(" \r\n");
         }
         return response.toString();
+    }
+
+    private void getRequestLineFormat(final StringBuilder response) {
+        response.append("HTTP/1.1")
+                .append(headers.get("HTTP/1.1"))
+                .append(" \r\n");
     }
 }

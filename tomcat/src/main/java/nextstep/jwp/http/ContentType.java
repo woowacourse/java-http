@@ -6,8 +6,7 @@ public enum ContentType {
 
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css;charset=utf-8"),
-    JS("js", "text/js;charset=utf-8"),
-    TEXT("", "text/html;charset=utf-8");
+    JS("js", "text/js;charset=utf-8");
 
     private String extension;
     private String contentType;
@@ -20,8 +19,8 @@ public enum ContentType {
     public static String findContentType(final String otherUrl) {
         return Arrays.stream(values())
                 .filter(value -> otherUrl.contains(value.extension))
-                .findFirst()
+                .findAny()
                 .map(value -> value.contentType)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElse("html");
     }
 }

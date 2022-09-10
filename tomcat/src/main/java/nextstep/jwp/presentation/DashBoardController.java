@@ -20,8 +20,9 @@ public class DashBoardController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
-        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, httpRequest.getUrl());
+        final String url = httpRequest.getUrl();
+        final HttpBody httpBody = HttpBody.createByUrl(url);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, url);
 
         return httpResponse.header(httpHeader).body(httpBody);
     }

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +20,26 @@ import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class FileControllerTest {
+
+    private static String 파일_요청_메시지(String requestLine, String body) {
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+    }
+
+    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
+        HttpRequest httpRequest;
+        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            httpRequest = HttpRequest.of(bufferedReader);
+        }
+        return httpRequest;
+    }
 
     @Test
     void FileController는_file요청이_들어오면_파일내용을_반환한다() throws Exception {
@@ -50,31 +72,10 @@ class FileControllerTest {
         FileController fileController = new FileController();
 
         // when
-        fileController.service(httpRequest, httpResponse);
+        assertThatThrownBy(() -> fileController.service(httpRequest, httpResponse))
+                .isInstanceOf(InvocationTargetException.class);
 
-        // then
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.of(outputStream, httpRequest).notFound());
-    }
-
-    private static String 파일_요청_메시지(String requestLine, String body) {
-        return String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080 ",
-                "Accept: text/html;q=0.1 ",
-                "Connection: keep-alive",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body);
-    }
-
-    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
-        HttpRequest httpRequest;
-        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            httpRequest = HttpRequest.of(bufferedReader);
-        }
-        return httpRequest;
+        outputStream.close();
     }
 
     private String getBody(String uri) throws IOException {

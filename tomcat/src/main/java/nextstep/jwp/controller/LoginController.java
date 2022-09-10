@@ -6,8 +6,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.unauthorized.UserAccountException;
+import nextstep.jwp.exception.unauthorized.UserPasswordException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -23,32 +24,25 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        Map<String, Object> parameters = httpRequest.getRequestBody().getParameters();
+        Map<String, Object> parameters = httpRequest.getRequestBodyParameters();
         final String account = (String) parameters.get("account");
         final String password = (String) parameters.get("password");
 
-        Optional<User> user = findUser(account);
+        User user = getUser(account);
 
-        if (user.isEmpty()) {
-            httpResponse.unAuthorized();
-            return;
+        if (!user.checkPassword(password)) {
+            throw new UserPasswordException("user 의 " + account + "에 해당하는 " + password + "가 아닙니다.");
         }
 
-        User existedUser = user.orElseThrow();
-
-        if (!existedUser.checkPassword(password)) {
-            httpResponse.unAuthorized();
-            return;
-        }
-
-        log.info("로그인 성공! 아이디: " + existedUser.getAccount());
-        SESSION_MANAGER.setUserSession(httpResponse, existedUser);
+        log.info("로그인 성공! 아이디: " + user.getAccount());
+        SESSION_MANAGER.setUserSession(httpResponse, user);
 
         httpResponse.found("/index.html");
     }
 
-    private Optional<User> findUser(String account) {
-        return InMemoryUserRepository.findByAccount(account);
+    private User getUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UserAccountException(account + " account에 해당하는 유저는 존재하지 않습니다."));
     }
 
     @Override

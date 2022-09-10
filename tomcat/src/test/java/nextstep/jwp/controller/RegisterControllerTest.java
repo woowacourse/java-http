@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -9,10 +10,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -62,7 +63,7 @@ class RegisterControllerTest {
     }
 
     @Test
-    void registerController는_회원가입에_실패하면_INTERNAL_SERVER_ERROR를_반환한다() throws Exception {
+    void registerController는_회원가입에_실패하면_예외를_던진다() throws Exception {
         // given
         String body = "account=gugu&password=&email=hkkang@woowahan.com";
         String requestMessage = 요청_메시지("POST /register HTTP/1.1 ", body);
@@ -73,12 +74,10 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
 
         // when
-        registerController.service(httpRequest, httpResponse);
-        outputStream.close();
+        assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
+                .isInstanceOf(InvocationTargetException.class);
 
-        // then
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(httpResponse.sendError());
+        outputStream.close();
     }
 
     @Test

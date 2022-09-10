@@ -21,13 +21,9 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        try {
-            Method method = methods.get(httpRequest.getMethod());
-            method.invoke(this, httpRequest, httpResponse);
-        } catch (Exception e) {
-            httpResponse.notFound();
-        }
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        Method method = methods.get(httpRequest.getMethod());
+        method.invoke(this, httpRequest, httpResponse);
     }
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {

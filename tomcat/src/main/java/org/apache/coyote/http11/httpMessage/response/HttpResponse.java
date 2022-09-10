@@ -49,6 +49,13 @@ public class HttpResponse {
                 .content(ContentType.HTML, 0);
     }
 
+    public HttpResponse badRequest() {
+        return this.httpStatus(HttpStatus.FOUND)
+                .location("/400.html")
+                .content(ContentType.HTML, 0)
+                .responseBody("");
+    }
+
     public HttpResponse unAuthorized() {
         return this.httpStatus(HttpStatus.FOUND)
                 .location("/401.html")
@@ -62,7 +69,7 @@ public class HttpResponse {
                 .content(ContentType.HTML, 0);
     }
 
-    public HttpResponse sendError() {
+    public HttpResponse Error() {
         return this.httpStatus(HttpStatus.FOUND)
                 .location("/500.html")
                 .content(ContentType.HTML, 0);

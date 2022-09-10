@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.httpmessage.Headers;
 import org.apache.coyote.http11.session.Cookie;
@@ -59,6 +60,10 @@ public class HttpRequest {
         return Cookie.of(cookie);
     }
 
+    public Map<String, Object> getRequestBodyParameters() {
+        return requestBody.getParameters();
+    }
+
     public HttpVersion getHttpVersion() {
         return requestLine.getHttpVersion();
     }
@@ -73,5 +78,14 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "requestLine=" + requestLine +
+                ", headers=" + headers +
+                ", requestBody=" + requestBody +
+                '}';
     }
 }

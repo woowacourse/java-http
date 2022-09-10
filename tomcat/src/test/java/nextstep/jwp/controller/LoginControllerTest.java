@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -9,10 +10,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -64,7 +65,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void LoginController는_존재하지않는_account가_요청되면_401_을_반환한다() throws Exception {
+    void LoginController는_존재하지않는_account가_요청되면_예외를_던진다() throws Exception {
         // given
         final String body = "account=gogo&password=password";
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
@@ -75,18 +76,15 @@ class LoginControllerTest {
 
         LoginController loginController = new LoginController();
 
-        // when
-        loginController.service(httpRequest, httpResponse);
-
-        // then
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.of(outputStream, httpRequest).unAuthorized());
+        // when & then
+        assertThatThrownBy(() -> loginController.service(httpRequest, httpResponse))
+                .isInstanceOf(InvocationTargetException.class);
 
         outputStream.close();
     }
 
     @Test
-    void LoginController는_password가_일치하지않으면_401_을_반환한다() throws Exception {
+    void LoginController는_password가_일치하지않으면_예외를_던진다() throws Exception {
         // given
         final String body = "account=gogo&password=invalidpassword";
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
@@ -96,12 +94,9 @@ class LoginControllerTest {
 
         LoginController loginController = new LoginController();
 
-        // when
-        loginController.service(httpRequest, httpResponse);
-
-        // then
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.of(outputStream, httpRequest).unAuthorized());
+        // when & then
+        assertThatThrownBy(() -> loginController.service(httpRequest, httpResponse))
+                .isInstanceOf(InvocationTargetException.class);
 
         outputStream.close();
     }

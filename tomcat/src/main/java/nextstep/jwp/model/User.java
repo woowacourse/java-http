@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.badRequest.RegisterInvalidParameterException;
+
 public class User {
 
     private final Long id;
@@ -22,20 +24,20 @@ public class User {
     }
 
     private void validateAccount(String account) {
-        if (account.isBlank()) {
-            throw new IllegalArgumentException("account가 빈 값입니다.");
+        if (account == null || account.isBlank()) {
+            throw new RegisterInvalidParameterException(account + "은 회원가입에 부적절한 account 입니다.");
         }
     }
 
     private void validatePassword(String password) {
-        if (password.isBlank()) {
-            throw new IllegalArgumentException("password가 빈 값입니다.");
+        if (password == null || password.isBlank()) {
+            throw new RegisterInvalidParameterException(password + "은 회원가입에 부적절한 password 입니다.");
         }
     }
 
     private void validateEmail(String email) {
-        if (email.isBlank()) {
-            throw new IllegalArgumentException("email 빈 값입니다.");
+        if (email == null || email.isBlank()) {
+            throw new RegisterInvalidParameterException(email + "은 회원가입에 부적절한 email 입니다.");
         }
     }
 

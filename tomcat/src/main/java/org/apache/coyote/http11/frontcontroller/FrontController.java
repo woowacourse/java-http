@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.frontcontroller;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerAdvice;
+import nextstep.jwp.exception.notfound.ControllerNotFoundException;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.requestmapping.ApiHandlerMapper;
@@ -13,14 +16,15 @@ import org.apache.coyote.http11.requestmapping.RequestMapper;
 public class FrontController {
 
     private static final List<RequestMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
+    private static final ControllerAdvice CONTROLLER_ADVICE = new ControllerAdvice();
 
     public void doService(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
             Controller controller = getController(httpRequest);
             controller.service(httpRequest, httpResponse);
-        } catch (Exception e) {
-            System.out.println("예외발생 : controllerAdvice 추가 예정, controllerAdvice.service(httpRequest, httResponse)");
-            throw new IllegalArgumentException();
+        } catch (Exception exception) {
+            Exception targetException = getTargetException(exception);
+            CONTROLLER_ADVICE.handleException(httpResponse, targetException);
         }
         httpResponse.write();
     }
@@ -30,6 +34,14 @@ public class FrontController {
                 .map(mapper -> mapper.mapController(httpRequest))
                 .filter(Objects::nonNull)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 요청이 아닙니다."));
+                .orElseThrow(() -> new ControllerNotFoundException(httpRequest + "\n요청을 처리할 수 있는 controller가 없습니다."));
+    }
+
+    private Exception getTargetException(Exception exception) {
+        if (exception instanceof InvocationTargetException) {
+            InvocationTargetException invocationTargetException = (InvocationTargetException) exception;
+            exception = (Exception) invocationTargetException.getTargetException();
+        }
+        return exception;
     }
 }

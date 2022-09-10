@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -8,12 +9,33 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class RootApiControllerTest {
+
+    private static String 루트_요청_메시지(String requestLine, String body) {
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+    }
+
+    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
+        HttpRequest httpRequest;
+        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            httpRequest = HttpRequest.of(bufferedReader);
+        }
+        return httpRequest;
+    }
 
     @Test
     void rootApiHandler는_root요청_처리_시_helloWorld를_반환한다() throws Exception {
@@ -36,7 +58,7 @@ class RootApiControllerTest {
     }
 
     @Test
-    void rootApiHandler는_Post요청이_들어오면_notFound를_반환한다() throws Exception {
+    void rootApiHandler는_Post요청이_들어오면_예외를_던진다() throws Exception {
         // given
         String body = "";
         String requestMessage = 루트_요청_메시지("POST / HTTP/1.1 ", body);
@@ -44,34 +66,12 @@ class RootApiControllerTest {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
 
-        RootApiController registerApiController = new RootApiController();
+        RootApiController rootApiController = new RootApiController();
 
         // when
-        registerApiController.service(httpRequest, httpResponse);
+        assertThatThrownBy(() -> rootApiController.service(httpRequest, httpResponse))
+                .isInstanceOf(InvocationTargetException.class);
+
         outputStream.close();
-
-        // then
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.of(outputStream, httpRequest).notFound());
-    }
-
-    private static String 루트_요청_메시지(String requestLine, String body) {
-        return String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080 ",
-                "Accept: text/html;q=0.1 ",
-                "Connection: keep-alive",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body);
-    }
-
-    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
-        HttpRequest httpRequest;
-        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            httpRequest = HttpRequest.of(bufferedReader);
-        }
-        return httpRequest;
     }
 }

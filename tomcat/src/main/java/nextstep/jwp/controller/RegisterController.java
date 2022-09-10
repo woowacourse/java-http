@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String responseBody = getBody();
 
         httpResponse.ok(responseBody);
@@ -34,21 +34,16 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestBody requestBody = httpRequest.getRequestBody();
-        try {
-            Map<String, Object> parameters = requestBody.getParameters();
-            String account = (String) parameters.get("account");
-            String password = (String) parameters.get("password");
-            String email = (String) parameters.get("email");
 
-            User user = new User(account, password, email);
+        Map<String, Object> parameters = requestBody.getParameters();
+        String account = (String) parameters.get("account");
+        String password = (String) parameters.get("password");
+        String email = (String) parameters.get("email");
 
-            InMemoryUserRepository.save(user);
-            SESSION_MANAGER.setUserSession(httpResponse, user);
-        } catch (Exception e) {
-            // TODO: 2022/09/10 controllerAdvice에서 잡도록 변경
-            httpResponse.sendError();
-            return;
-        }
+        User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+        SESSION_MANAGER.setUserSession(httpResponse, user);
 
         httpResponse.found("/index.html");
     }

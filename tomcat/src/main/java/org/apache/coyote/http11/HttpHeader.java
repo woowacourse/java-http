@@ -7,6 +7,8 @@ import org.apache.coyote.http11.utils.PairConverter;
 public class HttpHeader {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
 
     private Map<String, String> headers;
 
@@ -24,7 +26,7 @@ public class HttpHeader {
     }
 
     public HttpHeader cookie(final String cookie) {
-        headers.put("Set-Cookie", "JSESSIONID=" + cookie);
+        headers.put("Set-Cookie", JSESSIONID + "=" + cookie);
         return this;
     }
 
@@ -49,22 +51,22 @@ public class HttpHeader {
 
     public boolean hasJSESSIONID() {
         if (hasCookie()) {
-            final HttpCookie httpCookie = new HttpCookie(this.headers.get("Cookie"));
-            return httpCookie.containsKey("JSESSIONID");
+            final HttpCookie httpCookie = new HttpCookie(this.headers.get(COOKIE));
+            return httpCookie.containsKey(JSESSIONID);
         }
         return false;
     }
 
     public boolean hasCookie() {
-        return headers.containsKey("Cookie");
+        return headers.containsKey(COOKIE);
     }
 
     public String getJSESSIONID() {
         if (hasJSESSIONID()) {
-            final HttpCookie httpCookie = new HttpCookie(this.headers.get("Cookie"));
-            return httpCookie.getJSESSIONID();
+            final HttpCookie httpCookie = new HttpCookie(this.headers.get(COOKIE));
+            return httpCookie.getJSESSIONID(JSESSIONID);
         }
-        throw new RuntimeException("JSESSIONID가 없습니다.");
+        throw new RuntimeException(JSESSIONID + "가 없습니다.");
     }
 
     public String getHeaderByFormat() {

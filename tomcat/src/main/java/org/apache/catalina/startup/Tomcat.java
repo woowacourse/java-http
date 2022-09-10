@@ -12,16 +12,11 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final ServletContainer servletContainer;
-
-    public Tomcat(final ServletContainer servletContainer) {
-        this.servletContainer = servletContainer;
-    }
+    private final ServletContainer servletContainer = new ServletContainer();
 
     public void start() {
         var connector = new Connector(servletContainer);
         connector.start();
-
         try {
             // make the application wait until we press any key.
             System.in.read();
@@ -31,5 +26,9 @@ public class Tomcat {
             log.info("web server stop.");
             connector.stop();
         }
+    }
+
+    public void registerServlet(final String uri, final Servlet servlet) {
+        servletContainer.registerServlet(uri, servlet);
     }
 }

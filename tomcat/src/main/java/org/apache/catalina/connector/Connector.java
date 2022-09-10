@@ -33,9 +33,9 @@ public class Connector implements Runnable {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = new ThreadPoolExecutor(
+                1,
                 maxThreads,
-                maxThreads,
-                10,
+                30,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(acceptCount)
         );

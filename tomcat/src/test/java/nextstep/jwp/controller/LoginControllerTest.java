@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     @Test
-    void get메서드로_로그인을_하면_로그인_페이지로_이동한다() throws IOException {
+    void get메서드로_로그인을_하면_로그인_페이지로_이동한다() throws IOException, URISyntaxException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -46,7 +47,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void post메서드로_로그인을_성공하면_302_status_code를_반환한다() throws IOException {
+    void post메서드로_로그인을_성공하면_302_status_code를_반환한다() throws IOException, URISyntaxException {
         // given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -70,7 +71,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void post메서드로_로그인을_실패하면_401_status_code를_반환한다() throws IOException {
+    void post메서드로_로그인을_실패하면_401_status_code를_반환한다() throws IOException, URISyntaxException {
         // given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -94,7 +95,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void post메서드로_첫로그인을_성공하면_응답에_setCookie가_존재한다() throws IOException {
+    void post메서드로_첫로그인을_성공하면_응답에_setCookie가_존재한다() throws IOException, URISyntaxException {
         // given
         String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -118,7 +119,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void get메서드로_로그인을_할때_sessionId가_있으면_index페이지로_이동한다() throws IOException {
+    void get메서드로_로그인을_할때_sessionId가_있으면_index페이지로_이동한다() throws IOException, URISyntaxException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",

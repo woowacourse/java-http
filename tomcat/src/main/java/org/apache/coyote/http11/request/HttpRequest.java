@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 public class HttpRequest {
@@ -16,7 +17,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest read(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest read(BufferedReader bufferedReader) throws IOException, URISyntaxException {
         RequestStartLine startLine = RequestStartLine.from(bufferedReader.readLine());
         RequestHeader header = RequestHeader.parse(bufferedReader);
         RequestBody body = RequestBody.from(bufferedReader, header.getContentLength());
@@ -37,7 +38,7 @@ public class HttpRequest {
     }
 
     public String getUrl() {
-        return startLine.getPath().getUrl();
+        return startLine.getPath().getPath();
     }
 
     public Map<String, String> getBody() {

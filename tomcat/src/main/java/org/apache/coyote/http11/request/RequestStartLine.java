@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class RequestStartLine {
 
     private static final int HTTP_METHOD_INDEX = 0;
@@ -7,18 +10,18 @@ public class RequestStartLine {
     private static final String START_LINE_DELIMITER = " ";
 
     private final HttpMethod httpMethod;
-    private final Path path;
+    private final Url url;
 
-    private RequestStartLine(final HttpMethod httpMethod, final Path path) {
+    private RequestStartLine(final HttpMethod httpMethod, final Url url) {
         this.httpMethod = httpMethod;
-        this.path = path;
+        this.url = url;
     }
 
-    public static RequestStartLine from(final String request) {
+    public static RequestStartLine from(final String request) throws URISyntaxException {
         String[] requestSegment = request.split(START_LINE_DELIMITER);
         return new RequestStartLine(
                 HttpMethod.from(requestSegment[HTTP_METHOD_INDEX]),
-                Path.parsePath(requestSegment[HTTP_PATH_INDEX])
+                Url.parseUrl(new URI(requestSegment[HTTP_PATH_INDEX]))
         );
     }
 
@@ -30,7 +33,7 @@ public class RequestStartLine {
         return httpMethod.equals(HttpMethod.POST);
     }
 
-    public Path getPath() {
-        return path;
+    public Url getPath() {
+        return url;
     }
 }

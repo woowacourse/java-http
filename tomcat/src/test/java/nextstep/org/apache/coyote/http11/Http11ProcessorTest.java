@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.controller.RequestMapper;
 import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.http11.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
@@ -20,7 +21,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket,
-                new Dispatcher(new ViewResolver(), new ErrorHandler()));
+                new Dispatcher(new ViewResolver(), new RequestMapper(), new ErrorHandler()));
 
         // when
         processor.process(socket);
@@ -48,7 +49,7 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket,
-                new Dispatcher(new ViewResolver(), new ErrorHandler()));
+                new Dispatcher(new ViewResolver(), new RequestMapper(), new ErrorHandler()));
 
         // when
         processor.process(socket);

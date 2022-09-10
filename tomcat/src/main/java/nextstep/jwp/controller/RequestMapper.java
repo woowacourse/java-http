@@ -1,14 +1,12 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.controller.HomeController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.handler.Controller;
+import org.apache.coyote.handler.RequestMapping;
 import org.apache.coyote.handler.ResourceHandler;
 
-public class RequestMapping {
+public class RequestMapper implements RequestMapping {
 
     private static final Map<String, Controller> requestMap = new HashMap<>();
 
@@ -18,7 +16,8 @@ public class RequestMapping {
         requestMap.put("/register", new RegisterController());
     }
 
-    public static Controller find(final String requestUri) {
+    @Override
+    public Controller find(final String requestUri) {
         Controller controller = requestMap.get(requestUri);
         if (controller == null) {
             return new ResourceHandler();

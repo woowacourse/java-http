@@ -12,10 +12,14 @@ import java.nio.file.Paths;
 import java.util.Map;
 import nextstep.jwp.exception.LoginFailException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.service.LoginService;
+import nextstep.jwp.model.User;
 import nextstep.jwp.service.RegisterService;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +29,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String RESOURCES_PREFIX = "static";
     private static final String INDEX_REDIRECT_PAGE = "/index.html";
     private static final String ERROR_REDIRECT_PAGE = "/401.html";
-    private static final String JSESSIONID = "JSESSIONID";
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String EMPTY_VALUE = "";
 
     private final Socket connection;
 
@@ -58,10 +63,10 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(HttpRequest httpRequest) throws URISyntaxException, IOException {
         HttpMethod httpMethod = httpRequest.getHttpMethod();
         String httpUrl = httpRequest.getHttpUrl();
-        HttpCookie httpCookie = new HttpCookie();
+        HttpCookie httpCookie = httpRequest.getCookies();
 
         if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/favicon.ico")) {
-            return "";
+            return toResponse(HttpStatus.OK, httpCookie, FileType.HTML, EMPTY_VALUE);
         }
 
         if (HttpMethod.GET.equals(httpMethod) && httpUrl.equals("/")) {
@@ -69,14 +74,34 @@ public class Http11Processor implements Runnable, Processor {
             return toResponse(HttpStatus.OK, httpCookie, FileType.HTML, responseBody);
         }
 
+        if (HttpMethod.GET.equals(httpMethod) && httpUrl.startsWith("/login")) {
+            String jSessionId = httpCookie.getJSessionId();
+            Session session = SESSION_MANAGER.findSession(jSessionId)
+                    .orElseGet(() -> new Session(EMPTY_VALUE));
+
+            if (!session.getId().isBlank()) {
+                UserService userService = new UserService();
+                User user = userService.getUser(session);
+                if (userService.isValidUser(user)) {
+                    return toRedirectResponse(httpCookie, INDEX_REDIRECT_PAGE);
+                }
+            }
+        }
+
         if (HttpMethod.POST.equals(httpMethod) && httpUrl.startsWith("/login")) {
             Map<String, String> requestBody = httpRequest.getRequestBody();
-            LoginService loginService = new LoginService();
+            UserService userService = new UserService();
 
             try {
-                loginService.login(requestBody);
+                userService.login(requestBody);
                 String identifier = UUIDGenerator.generate();
-                httpCookie.addCookie(JSESSIONID, identifier);
+                httpCookie.addJSessionId(identifier);
+
+                Session session = httpRequest.getSession();
+                User user = userService.findUser(requestBody);
+                session.setAttribute("user", user);
+                SESSION_MANAGER.add(session);
+
                 return toRedirectResponse(httpCookie, INDEX_REDIRECT_PAGE);
             } catch (LoginFailException e) {
                 return toRedirectResponse(httpCookie, ERROR_REDIRECT_PAGE);

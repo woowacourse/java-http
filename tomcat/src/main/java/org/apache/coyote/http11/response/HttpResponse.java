@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
     private HttpStatus status;

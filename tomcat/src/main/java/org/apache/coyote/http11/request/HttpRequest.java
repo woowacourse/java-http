@@ -1,20 +1,26 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.util.HttpStartLineParser;
 import org.apache.coyote.http11.util.StringUtils;
 
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String COOKIE = "Cookie";
 
     private HttpMethod httpMethod;
     private String httpUrl;
     private Map<String, String> queryParams;
     private HttpHeaders headers = new HttpHeaders();
+    private HttpCookie cookie = new HttpCookie();
     private Map<String, String> requestBody = new HashMap<>();
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
@@ -24,6 +30,7 @@ public class HttpRequest {
         this.httpUrl = httpStartLineParser.getHttpUrl();
         this.queryParams = httpStartLineParser.getQueryParams();
         parseHeaders(bufferedReader);
+        parseCookie();
 
         if (HttpMethod.POST.equals(httpMethod)) {
             parseRequestBody(bufferedReader);
@@ -38,6 +45,13 @@ public class HttpRequest {
             String value = header[1].trim();
             headers.add(key, value);
             line = bufferedReader.readLine();
+        }
+    }
+
+    private void parseCookie() {
+        String value = headers.getHeaders().get(COOKIE);
+        if (value != null) {
+            cookie.addCookies(value);
         }
     }
 
@@ -63,5 +77,13 @@ public class HttpRequest {
 
     public Map<String, String> getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        return new Session(getCookies().getJSessionId());
+    }
+
+    public HttpCookie getCookies() {
+        return cookie;
     }
 }

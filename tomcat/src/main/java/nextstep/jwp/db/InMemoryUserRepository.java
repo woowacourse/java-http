@@ -28,4 +28,14 @@ public class InMemoryUserRepository {
     }
 
     private InMemoryUserRepository() {}
+
+    public static boolean isValidUser(User user) {
+        String account = user.getAccount();
+        if (!existsByAccount(account)) {
+            return false;
+        }
+
+        User dbUser = database.get(account);
+        return dbUser.equals(user);
+    }
 }

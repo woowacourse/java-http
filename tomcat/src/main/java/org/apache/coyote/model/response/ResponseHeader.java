@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 public class ResponseHeader {
 
     public static final String SET_COOKIE = "Set-Cookie";
+    public static final String LOCATION = "Location";
     protected static final String CONTENT_TYPE = "Content-Type";
     protected static final String CONTENT_LENGTH = "Content-Length";
     private static final String HEADER_DELIMITER = ": ";
@@ -31,5 +32,9 @@ public class ResponseHeader {
                 .stream()
                 .map(key -> key + HEADER_DELIMITER + responseHeader.get(key))
                 .collect(Collectors.joining(" \r\n"));
+    }
+
+    public void setHeader(String location, String value) {
+        responseHeader.put(location, value);
     }
 }

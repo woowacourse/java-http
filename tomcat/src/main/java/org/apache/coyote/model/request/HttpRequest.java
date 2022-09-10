@@ -23,7 +23,7 @@ public class HttpRequest {
             final RequestBody requestBody = createBody(reader, requestHeader.getContentLength());
             return new HttpRequest(requestLine, requestHeader, requestBody);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Request 생성 오류");
+            throw new IllegalArgumentException("Request Error");
         }
     }
 
@@ -41,12 +41,16 @@ public class HttpRequest {
             reader.read(buffer, 0, contentLength);
             return RequestBody.of(new String(buffer));
         } catch (Exception e) {
-            throw new IllegalArgumentException("Request Body 생성 오류");
+            throw new IllegalArgumentException("Request Body Error");
         }
     }
 
-    public boolean checkMethod(final Method method) {
-        return requestLine.checkMethod(method);
+    public boolean checkGetMethod() {
+        return requestLine.checkMethod(Method.GET);
+    }
+
+    public boolean checkPostMethod() {
+        return requestLine.checkMethod(Method.POST);
     }
 
     public Map<String, String> getParams() {

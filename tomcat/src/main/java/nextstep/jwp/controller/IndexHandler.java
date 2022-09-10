@@ -1,25 +1,26 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.model.request.HttpRequest;
 import org.apache.coyote.model.response.HttpResponse;
 import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
-import org.apache.coyote.utils.Util;
 
 import static org.apache.coyote.model.request.ContentType.HTML;
 
-public class IndexHandler implements Handler {
+public class IndexHandler extends AbstractHandler {
 
-    private static final String INDEX_HTML = "/index.html";
-    private final HttpRequest httpRequest;
+    private static final IndexHandler INSTANCE = new IndexHandler();
 
-    public IndexHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    private IndexHandler() {
+    }
+
+    public static IndexHandler getINSTANCE() {
+        return INSTANCE;
     }
 
     @Override
-    public String getResponse() {
-        String responseBody = Util.getResponseBody(INDEX_HTML, getClass());
+    public String getResponse(final HttpRequest httpRequest) {
+        String responseBody = HttpResponse.getResponseBody(httpRequest.getPath(), getClass());
         ResponseLine responseLine = ResponseLine.of(StatusCode.OK);
         HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
         return httpResponse.getResponse();

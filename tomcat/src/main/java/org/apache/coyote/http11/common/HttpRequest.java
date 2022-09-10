@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.common;
 
-import static org.apache.catalina.Session.JSESSIONID;
+import static org.apache.catalina.session.Session.JSESSIONID;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.constant.HttpMethod;
 
 public class HttpRequest {

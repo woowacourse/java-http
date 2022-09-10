@@ -10,8 +10,8 @@ public class HttpCookie {
     public HttpCookie() {
     }
 
-    public HttpCookie(final String[] cookies) {
-        init(cookies);
+    public HttpCookie(final String cookies) {
+        init(cookies.split(";"));
     }
 
     private void init(final String[] cookies) {

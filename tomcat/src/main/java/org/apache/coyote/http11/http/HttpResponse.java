@@ -43,7 +43,7 @@ public class HttpResponse {
         }
 
         outputStream.write(version.getValue() + " " + status.getValue() + " \r\n"
-                + headers.getAllToString() + "\r\n"
+                + headers.getResponse() + "\r\n"
                 + body);
     }
 

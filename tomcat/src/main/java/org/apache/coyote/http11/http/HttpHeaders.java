@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.util.HttpHeaderParser;
 
 public class HttpHeaders {
 
@@ -12,9 +13,6 @@ public class HttpHeaders {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String LOCATION = "Location";
-
-    private static final String DELIMITER = ":";
-    private static final int KEY = 0;
 
     private final Map<String, String> headers = new HashMap<>();
 
@@ -26,29 +24,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders of(final List<String[]> headers) {
-        return new HttpHeaders(toMap(headers));
-    }
-
-    public static Map<String, String> toMap(final List<String[]> headers) {
-        Map<String, String> values = new HashMap<>();
-        for (String[] header : headers) {
-            values.put(parseKey(header[KEY]), parseValue(header));
-        }
-        return values;
-    }
-
-    private static String parseKey(final String key) {
-        return key.replace(DELIMITER, "");
-    }
-
-    private static String parseValue(final String[] value) {
-        return String.join("", getHeaderValues(value));
-    }
-
-    private static String[] getHeaderValues(final String[] value) {
-        String[] result = new String[value.length - 1];
-        System.arraycopy(value, 1, result, 0, value.length - 1);
-        return result;
+        return HttpHeaderParser.parse(headers);
     }
 
     public void addContentType(final String value) {
@@ -72,14 +48,14 @@ public class HttpHeaders {
         if (cookies == null) {
             return new HttpCookie();
         }
-        return new HttpCookie(cookies.split(";"));
+        return new HttpCookie(cookies);
     }
 
     public String getValue(final String key) {
         return headers.get(key);
     }
 
-    public String getAllToString() {
+    public String getResponse() {
         return headers.keySet().stream()
                 .map(key -> key + ": " + headers.get(key) + " \r\n")
                 .collect(Collectors.joining());

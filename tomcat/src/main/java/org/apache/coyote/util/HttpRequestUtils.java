@@ -2,6 +2,7 @@ package org.apache.coyote.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpMethod;
@@ -33,10 +34,11 @@ public class HttpRequestUtils {
     }
 
     private static HttpHeaders toHeaders(final BufferedReader bufferedReader) {
-        return HttpHeaders.of(bufferedReader.lines()
+        List<String[]> collect = bufferedReader.lines()
                 .takeWhile(line -> !"".equals(line))
                 .map(line -> line.split(MESSAGE_DELIMITER))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        return HttpHeaders.of(collect);
     }
 
     private static String toBody(final HttpHeaders httpHeaders, final BufferedReader reader) throws IOException {

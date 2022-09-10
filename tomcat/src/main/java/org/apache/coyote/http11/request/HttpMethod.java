@@ -9,7 +9,7 @@ public enum HttpMethod {
     public static HttpMethod from(String method) {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.name().equals(method))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(method + "는 존재하지 않는 http method입니다."));
     }
 }

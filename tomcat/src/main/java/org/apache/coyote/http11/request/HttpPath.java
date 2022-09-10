@@ -58,12 +58,9 @@ public class HttpPath {
     }
 
     private static void addParams(final Map<String, String> params, final String[] allParams) {
-        final int paramCount = allParams.length;
-        int index = 0;
-        while (index < paramCount) {
-            final String[] param = allParams[index].split(QUERY_PARAM_VALUE_DELIMITER);
+        for (String paramNameAndValue : allParams) {
+            final String[] param = paramNameAndValue.split(QUERY_PARAM_VALUE_DELIMITER);
             params.put(param[PARAM_NAME_INDEX], param[PARAM_VALUE_INDEX]);
-            index++;
         }
     }
 

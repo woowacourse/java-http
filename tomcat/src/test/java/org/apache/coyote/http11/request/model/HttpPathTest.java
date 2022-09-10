@@ -58,4 +58,20 @@ class HttpPathTest {
 
         assertThat(httpPath.isQuery()).isTrue();
     }
+
+    @Test
+    @DisplayName("기본 경로일 경우 true를 반환한다.")
+    void isDefaultPath() {
+        HttpPath path = new HttpPath("/");
+
+        assertThat(path.isDefault()).isTrue();
+    }
+
+    @Test
+    @DisplayName("도메인 경로를 반환한다.")
+    void getDomainPath() {
+        HttpPath path = new HttpPath("/index.html");
+
+        assertThat(path.getDomainPath()).isEqualTo("/index");
+    }
 }

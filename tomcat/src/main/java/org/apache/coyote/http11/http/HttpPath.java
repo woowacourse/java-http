@@ -6,6 +6,8 @@ import org.apache.coyote.util.RequestContentTypeUtils;
 public class HttpPath {
 
     private static final String QUERY_PARAMETER = "?";
+    private static final String DEFAULT_PATH = "/";
+    private static final int DOMAIN = 0;
 
     private final String value;
 
@@ -21,8 +23,16 @@ public class HttpPath {
         return value.contains(QUERY_PARAMETER);
     }
 
+    public boolean isDefault() {
+        return value.equals(DEFAULT_PATH);
+    }
+
     public ContentType getContentType() {
         return RequestContentTypeUtils.find(value);
+    }
+
+    public String getDomainPath() {
+        return value.split("\\.")[DOMAIN];
     }
 
     public String getValue() {

@@ -12,22 +12,19 @@ public class RequestMapping {
 
     private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
+    private static final Controller DEFAULT = new DefaultController();
+    private static final Controller RESOURCE = new ResourceController();
+
     static {
         controllers.put("/index", new HomeController());
         controllers.put("/login", new LoginController());
         controllers.put("/register", new UserController());
     }
 
-    public Controller getController(final HttpPath path) {
-        String value = path.getValue();
-        if (value.equals("/")) {
-            return new DefaultController();
+    public static Controller getController(final HttpPath path) {
+        if (path.isDefault()) {
+            return DEFAULT;
         }
-        String[] split = value.split("\\.");
-        Controller controller = controllers.get(split[0]);
-        if (controller == null) {
-            return new ResourceController();
-        }
-        return controller;
+        return controllers.getOrDefault(path.getDomainPath(), RESOURCE);
     }
 }

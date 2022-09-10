@@ -13,7 +13,6 @@ import java.util.Map;
 import nextstep.jwp.exception.LoginFailException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -110,10 +109,10 @@ public class Http11Processor implements Runnable, Processor {
 
         if (HttpMethod.POST.equals(httpMethod) && httpUrl.startsWith("/register")) {
             Map<String, String> requestBody = httpRequest.getRequestBody();
-            RegisterService registerService = new RegisterService();
+            UserService userService = new UserService();
 
             try {
-                registerService.register(requestBody);
+                userService.register(requestBody);
                 return toRedirectResponse(httpCookie, INDEX_REDIRECT_PAGE);
             } catch (LoginFailException e) {
                 return toRedirectResponse(httpCookie, ERROR_REDIRECT_PAGE);

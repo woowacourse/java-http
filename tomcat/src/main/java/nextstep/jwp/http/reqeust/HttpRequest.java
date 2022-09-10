@@ -2,6 +2,8 @@ package nextstep.jwp.http.reqeust;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpHeader;
 
@@ -15,8 +17,18 @@ public class HttpRequest {
 
     public HttpRequest(final BufferedReader bufferReader) throws IOException {
         this.httpRequestLine = HttpRequestLine.from(bufferReader.readLine());
-        this.httpHeaders = new HttpHeader(bufferReader);
+        this.httpHeaders = new HttpHeader(readHttpHeaders(bufferReader));
         this.httpRequestBody = new HttpRequestBody(bufferReader, httpHeaders.getValues(CONTENT_LENGTH));
+    }
+
+    private List<String> readHttpHeaders(final BufferedReader bufferReader) throws IOException {
+        List<String> headers = new ArrayList<>();
+
+        String headerLine = bufferReader.readLine();
+        while (headerLine != null && !headerLine.isBlank()) {
+            headers.add(headerLine);
+        }
+        return headers;
     }
 
     public String findContentType() {

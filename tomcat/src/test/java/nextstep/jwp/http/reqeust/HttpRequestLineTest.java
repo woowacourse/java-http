@@ -2,8 +2,7 @@ package nextstep.jwp.http.reqeust;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.exception.RequestLineException;
-import org.apache.commons.lang3.ObjectUtils.Null;
+import nextstep.jwp.exception.RequestLineFormatException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +27,6 @@ class HttpRequestLineTest {
 
         //when & then
         assertThatThrownBy(() -> HttpRequestLine.from(invalidRequestLine))
-                .isInstanceOf(RequestLineException.class);
+                .isInstanceOf(RequestLineFormatException.class);
     }
 }

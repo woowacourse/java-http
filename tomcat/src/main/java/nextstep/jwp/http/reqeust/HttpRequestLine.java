@@ -2,7 +2,7 @@ package nextstep.jwp.http.reqeust;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import nextstep.jwp.exception.RequestLineException;
+import nextstep.jwp.exception.RequestLineFormatException;
 
 public class HttpRequestLine {
 
@@ -37,7 +37,7 @@ public class HttpRequestLine {
 
     private static void validateRequestLineFormat(final String[] requestLines) {
         if (requestLines.length != REQUEST_LINE_CONTENT_COUNT) {
-            throw new RequestLineException("잘못된 RequestLine의 형식 입니다.");
+            throw new RequestLineFormatException("잘못된 RequestLine의 형식 입니다.");
         }
     }
 
@@ -45,7 +45,7 @@ public class HttpRequestLine {
         try {
             return new URI(uri);
         } catch (URISyntaxException e) {
-            throw new RequestLineException("잘못된 URI 형식입니다.");
+            throw new RequestLineFormatException("잘못된 URI 형식입니다.");
         }
     }
 

@@ -1,10 +1,10 @@
 package nextstep.jwp.http;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.HeaderFormatException;
 
 public class HttpHeader {
 
@@ -21,19 +21,23 @@ public class HttpHeader {
         this.values = new LinkedHashMap<>();
     }
 
-    public HttpHeader(final BufferedReader bufferReader) throws IOException {
+    public HttpHeader(final List<String> headers) {
         this.values = new LinkedHashMap<>();
 
-        String headerLine = bufferReader.readLine();
-        while (isValidHeaderFormat(headerLine)) {
-            String[] value = headerLine.split(HEADER_SEPARATOR, SPLIT_SIZE);
+        for (String header : headers) {
+            validateHeaderFormat(header);
+            String[] value = header.split(HEADER_SEPARATOR, SPLIT_SIZE);
             addValue(value[KEY_INDEX], value[VALUE_INDEX]);
-            headerLine = bufferReader.readLine();
         }
     }
 
-    private boolean isValidHeaderFormat(final String headerLine) {
-        return headerLine != null && !headerLine.isBlank();
+    private void validateHeaderFormat(final String header) {
+        if (!header.contains(HEADER_SEPARATOR) || header.isBlank()) {
+            throw new HeaderFormatException();
+        }
+        if (header.split(HEADER_SEPARATOR).length != 2) {
+            throw new HeaderFormatException();
+        }
     }
 
     public void addValue(final String key, final String value) {

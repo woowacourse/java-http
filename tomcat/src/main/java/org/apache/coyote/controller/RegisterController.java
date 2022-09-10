@@ -4,11 +4,11 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.domain.request.HttpRequest;
 import org.apache.coyote.domain.request.RequestBody;
-import org.apache.coyote.domain.response.statusline.ContentType;
 import org.apache.coyote.domain.response.HttpResponse;
-import org.apache.coyote.domain.response.statusline.HttpStatusCode;
 import org.apache.coyote.domain.response.RedirectUrl;
 import org.apache.coyote.domain.response.ResponseBody;
+import org.apache.coyote.domain.response.statusline.ContentType;
+import org.apache.coyote.domain.response.statusline.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +25,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        log.info("[Register Controller] doGet - {}", request.getRequestLine().getPath().getPath());
         response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.OK)
                 .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                 .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()));
@@ -32,6 +33,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        log.info("[Register Controller] doPost - {}", request.getRequestBody().getRequestBody().get("account"));
         response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
                 .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
                 .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()))

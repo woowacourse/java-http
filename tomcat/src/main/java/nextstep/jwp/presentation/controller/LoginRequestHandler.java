@@ -7,7 +7,6 @@ import nextstep.jwp.presentation.resolver.FormDataResolver;
 import org.apache.coyote.http11.http.Cookies;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
-import org.apache.coyote.http11.http.Location;
 import org.apache.coyote.http11.http.RequestLine;
 import org.apache.coyote.http11.util.HttpMethod;
 import org.apache.coyote.http11.util.HttpStatus;
@@ -19,21 +18,20 @@ public class LoginRequestHandler implements RequestHandler {
 
     public LoginRequestHandler() {
         this.memberService = new MemberService();
-        this.sessionManager = SessionManager.getSessionManager();
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
-        final var session = request.getSession(true);
-        final String requestBody = request.getRequestBody();
-        final LoginRequest loginRequest = LoginRequest.from(FormDataResolver.resolve(requestBody));
+        final var loginRequest = LoginRequest.from(FormDataResolver.resolve(request.getRequestBody()));
         memberService.login(loginRequest);
-        response.setStatusCode(HttpStatus.FOUND);
-        response.setLocation(Location.from("/index.html"));
+
+        final var session = request.getSession(true);
         session.setAttribute("user", loginRequest.getAccount());
         sessionManager.add(session);
         response.addCookie(Cookies.ofJSessionId(session.getId()));
-        return null;
+        response.setStatusCode(HttpStatus.FOUND);
+        return "index";
     }
 
     @Override

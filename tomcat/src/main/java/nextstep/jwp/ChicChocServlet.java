@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import static org.apache.coyote.http11.util.HttpStatus.BAD_REQUEST;
+import static org.apache.coyote.http11.util.HttpStatus.FOUND;
+import static org.apache.coyote.http11.util.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.http11.util.HttpStatus.UNAUTHORIZED;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,15 +23,8 @@ import nextstep.jwp.presentation.filter.LoginFilter;
 import org.apache.catalina.servlet.AbstractServlet;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
-import org.apache.coyote.http11.http.Location;
-import org.apache.coyote.http11.util.HttpStatus;
 
 public class ChicChocServlet extends AbstractServlet {
-
-    private static final Location UNAUTHORIZED_PAGE = Location.from("/401.html");
-    private static final Location NOT_FOUND_PAGE = Location.from("/404.html");
-    private static final Location INTERNAL_SERVER_ERROR_PAGE = Location.from("/500.html");
-    private static final Location BAD_REQUEST_PAGE = Location.from("/400.html");
 
     private final ViewResolver viewResolver;
     private final LoginFilter loginFilter;
@@ -64,19 +62,17 @@ public class ChicChocServlet extends AbstractServlet {
             final var handler = getHandler(request);
             viewName = handler.handle(request, response);
         } catch (AuthenticationException e) {
-            response.setStatusCode(HttpStatus.FOUND);
-            response.setLocation(UNAUTHORIZED_PAGE);
+            response.setStatusCode(FOUND);
+            viewName = UNAUTHORIZED.getValue();
         } catch (NotFoundHandlerException | NotFoundResourceException e) {
-            response.setStatusCode(HttpStatus.FOUND);
-            response.setLocation(NOT_FOUND_PAGE);
-        } catch (DuplicateAccountException e) {
-            response.setStatusCode(HttpStatus.FOUND);
-            response.setLocation(BAD_REQUEST_PAGE);
-        } catch (InvalidSessionException e) {
-            response.setStatusCode(HttpStatus.FOUND);
-            response.setLocation(INTERNAL_SERVER_ERROR_PAGE);
+            response.setStatusCode(FOUND);
+            viewName = NOT_FOUND.getValue();
+        } catch (DuplicateAccountException | InvalidSessionException e) {
+            response.setStatusCode(FOUND);
+            viewName = BAD_REQUEST.getValue();
+        } finally {
+            applyViewName(viewName, response);
         }
-        applyViewName(viewName, response);
     }
 
     private RequestHandler getHandler(final HttpRequest request) {

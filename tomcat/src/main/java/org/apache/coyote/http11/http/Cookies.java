@@ -31,11 +31,6 @@ public class Cookies {
         return new Cookies(cookies);
     }
 
-    public boolean hasCookieByJSessionId() {
-        return cookies.entrySet().stream()
-                .anyMatch(it -> it.getKey().equalsIgnoreCase(ID));
-    }
-
     public Optional<String> getJSessionId() {
         return cookies.entrySet().stream()
                 .filter(it -> it.getKey().equalsIgnoreCase(ID))

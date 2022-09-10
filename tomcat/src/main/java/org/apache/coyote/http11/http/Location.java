@@ -12,7 +12,6 @@ public class Location {
         return new Location(location);
     }
 
-
     public String getLocationLine() {
         return "Location: " + location;
     }

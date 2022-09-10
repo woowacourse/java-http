@@ -8,13 +8,14 @@ import org.apache.catalina.Manager;
 import org.apache.coyote.http11.http.Session;
 
 public class SessionManager implements Manager {
+
     private static final SessionManager sessionManager = new SessionManager();
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
 
-    public static SessionManager getSessionManager() {
+    public static SessionManager getInstance() {
         return sessionManager;
     }
 
@@ -37,8 +38,8 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
-    public boolean hasSameSessionId(final String id) {
+    public boolean isValid(final Session session) {
         return SESSIONS.entrySet().stream()
-                .anyMatch(it -> it.getKey().equalsIgnoreCase(id));
+                .anyMatch(it -> it.getValue().isSame(session));
     }
 }

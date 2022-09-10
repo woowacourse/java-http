@@ -13,7 +13,7 @@ public class Application {
     public static void main(String[] args) {
         log.info("web server start.");
         final var tomcat = new Tomcat();
-        final RequestMapping requestMapping = RequestMapping.getRequestMapping();
+        final var requestMapping = RequestMapping.getInstance();
         requestMapping.addServlet("/", new ChicChocServlet());
         tomcat.start();
     }

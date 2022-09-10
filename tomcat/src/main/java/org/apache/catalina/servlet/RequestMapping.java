@@ -6,13 +6,14 @@ import java.util.Map.Entry;
 import org.apache.coyote.http11.http.HttpRequest;
 
 public class RequestMapping {
+
     private static final RequestMapping requestMapping = new RequestMapping();
     private static final Map<String, Servlet> urlMap = new HashMap<>();
 
     private RequestMapping() {
     }
 
-    public static RequestMapping getRequestMapping() {
+    public static RequestMapping getInstance() {
         return requestMapping;
     }
 

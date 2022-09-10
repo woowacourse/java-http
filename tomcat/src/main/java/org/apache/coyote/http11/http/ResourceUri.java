@@ -5,18 +5,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.util.PathParser;
 
-public class ResourceURI {
+public class ResourceUri {
 
     private static final String SPACE = " ";
 
     private final String viewName;
 
-    private ResourceURI(final String viewName) {
+    private ResourceUri(final String viewName) {
         this.viewName = viewName;
     }
 
-    public static ResourceURI from(final String viewName) {
-        return new ResourceURI(viewName);
+    public static ResourceUri from(final String viewName) {
+        return new ResourceUri(viewName);
     }
 
     public String getContent() throws IOException {

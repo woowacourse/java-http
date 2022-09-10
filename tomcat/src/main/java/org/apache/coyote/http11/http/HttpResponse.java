@@ -11,7 +11,7 @@ public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final OutputStream outputStream;
-    private ResourceURI resourceURI;
+    private ResourceUri resourceUri;
     private HttpStatus httpStatus;
     private Location location;
     private Cookies cookies;
@@ -25,16 +25,16 @@ public class HttpResponse {
     }
 
     private byte[] getBytes() throws IOException {
-        return getHttpMessage().getBytes();
+        return getHttpMessage();
     }
 
-    private String getHttpMessage() throws IOException {
+    private byte[] getHttpMessage() throws IOException {
         final var stringBuilder = new StringBuilder();
         appendStatusLine(stringBuilder);
         appendLocationLine(stringBuilder);
         appendCookieLine(stringBuilder);
         appendContent(stringBuilder);
-        return stringBuilder.toString();
+        return stringBuilder.toString().getBytes();
     }
 
     private void appendStatusLine(final StringBuilder stringBuilder) {
@@ -43,7 +43,7 @@ public class HttpResponse {
     }
 
     private String getStatusLine() {
-        return HTTP_VERSION + SPACE + httpStatus.getValue() + SPACE;
+        return HTTP_VERSION + SPACE + httpStatus.getHttpStatus() + SPACE;
     }
 
     private void appendLocationLine(final StringBuilder stringBuilder) {
@@ -61,8 +61,8 @@ public class HttpResponse {
     }
 
     private void appendContent(final StringBuilder stringBuilder) throws IOException {
-        if (!Objects.isNull(resourceURI)) {
-            stringBuilder.append(resourceURI.getContent());
+        if (!Objects.isNull(resourceUri)) {
+            stringBuilder.append(resourceUri.getContent());
         }
     }
 
@@ -74,8 +74,12 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public void setResourceURI(final ResourceURI resourceURI) {
-        this.resourceURI = resourceURI;
+    public void addCookie(final Cookies cookies) {
+        this.cookies = cookies;
+    }
+
+    public void setResourceUri(final ResourceUri resourceUri) {
+        this.resourceUri = resourceUri;
     }
 
     public void setStatusCode(final HttpStatus httpStatus) {
@@ -86,7 +90,7 @@ public class HttpResponse {
         this.location = location;
     }
 
-    public void addCookie(final Cookies cookies) {
-        this.cookies = cookies;
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

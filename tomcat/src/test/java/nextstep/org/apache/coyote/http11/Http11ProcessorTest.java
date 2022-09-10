@@ -13,7 +13,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
     @BeforeEach
     void setUp() {
-        final var requestMapping = RequestMapping.getRequestMapping();
+        final var requestMapping = RequestMapping.getInstance();
         requestMapping.addServlet("/", new ChicChocServlet());
     }
 

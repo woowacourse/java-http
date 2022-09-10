@@ -7,6 +7,7 @@ import org.apache.coyote.http11.http.RequestLine;
 import org.apache.coyote.http11.util.HttpStatus;
 
 public class RegisterPageRequestHandler implements RequestHandler {
+
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
         response.setStatusCode(HttpStatus.OK);

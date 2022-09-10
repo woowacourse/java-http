@@ -66,6 +66,10 @@ public class HttpRequest {
         return new String(body);
     }
 
+    public boolean containUrl(final String url) {
+        return requestLine.containUrl(url);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -82,23 +86,11 @@ public class HttpRequest {
         return jSessionId.map(Session::new).orElseGet(null);
     }
 
-    public Optional<String> getJSessionId() {
-        return cookies.getJSessionId();
-    }
-
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
 
-    public RequestUri getRequestURI() {
+    public RequestUri getRequestUri() {
         return requestLine.getRequestUri();
-    }
-
-    public boolean hasCookieByJSessionId() {
-        return cookies.hasCookieByJSessionId();
-    }
-
-    public boolean containUrl(final String url) {
-        return requestLine.containUrl(url);
     }
 }

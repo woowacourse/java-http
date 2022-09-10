@@ -69,9 +69,10 @@ public class AuthController extends AbstractController {
 
     private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)
             throws IOException {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            LOGGER.info(user.get().toString());
+        final Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+        if (findUser.isPresent() && findUser.get().checkPassword(password)) {
+            final User user = findUser.get();
+            LOGGER.info(user.toString());
             return assignCookie(httpRequest, user);
         }
 
@@ -82,9 +83,9 @@ public class AuthController extends AbstractController {
         return new HttpResponse(httpHeader, httpBody);
     }
 
-    private HttpResponse assignCookie(final HttpRequest httpRequest, final Optional<User> user) throws IOException {
+    private HttpResponse assignCookie(final HttpRequest httpRequest, final User user) throws IOException {
         final Session session = SessionManager.add(HttpCookie.makeJSESSIONID());
-        session.addAttribute("user", user.get());
+        session.addAttribute("user", user);
 
         final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
         final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)

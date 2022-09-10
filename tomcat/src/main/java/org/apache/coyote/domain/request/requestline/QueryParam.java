@@ -7,16 +7,17 @@ public class QueryParam {
 
     private static final String QUERY_STRING_REGEX = "&";
     private static final String QUERY_MAP_DELIMITER = "=";
+    private static final String EMPTY_QUERY_STRING = "";
 
-    private final Map<String, String> queryParam;
+    private final Map<String, String> parameters;
 
-    private QueryParam(Map<String, String> queryParam) {
-        this.queryParam = queryParam;
+    private QueryParam(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
     public static QueryParam from(String queryString) {
         Map<String, String> queryMap = new HashMap<>();
-        if (queryString.equals("")) {
+        if (queryString.equals(EMPTY_QUERY_STRING)) {
             return new QueryParam(queryMap);
         }
         String[] queryParams = queryString.split(QUERY_STRING_REGEX);
@@ -28,6 +29,6 @@ public class QueryParam {
     }
 
     public String getQueryValue(String key) {
-        return queryParam.get(key);
+        return parameters.get(key);
     }
 }

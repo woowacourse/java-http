@@ -11,11 +11,11 @@ public class Path {
     private static final int QUERY_STRING_INDEX = 1;
     private static final int ONLY_PATH_EXIST = 1;
 
-    private final String path;
+    private final String uri;
     private final QueryParam queryParam;
 
-    private Path(String path, QueryParam queryParam) {
-        this.path = path;
+    private Path(String uri, QueryParam queryParam) {
+        this.uri = uri;
         this.queryParam = queryParam;
     }
 
@@ -34,8 +34,8 @@ public class Path {
         return values[QUERY_STRING_INDEX];
     }
 
-    public String getPath() {
-        return path;
+    public String getUri() {
+        return uri;
     }
 
     public QueryParam getQueryParam() {
@@ -43,9 +43,9 @@ public class Path {
     }
     
     public String getFilePath(){
-        if (!path.contains(EXTENSION_REGEX) && !path.equals(HOME_URI)) {
-            return path+HTML_EXTENSION;
+        if (!uri.contains(EXTENSION_REGEX) && !uri.equals(HOME_URI)) {
+            return uri +HTML_EXTENSION;
         }
-        return path;
+        return uri;
     }
 }

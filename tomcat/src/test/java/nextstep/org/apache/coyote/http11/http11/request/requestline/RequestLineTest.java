@@ -19,7 +19,7 @@ public class RequestLineTest {
         // then
         assertAll(
                 () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(requestLine.getPath().getPath()).isEqualTo("/login"),
+                () -> assertThat(requestLine.getPath().getUri()).isEqualTo("/login"),
                 () -> assertThat(requestLine.getPath().getQueryParam().getQueryValue("account")).isEqualTo("gugu"),
                 () -> assertThat(requestLine.getPath().getQueryParam().getQueryValue("password")).isEqualTo("password"),
                 () -> assertThat(requestLine.getHttpVersion()).isEqualTo(HttpVersion.HTTP_10)

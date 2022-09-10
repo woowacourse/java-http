@@ -16,7 +16,7 @@ public class PathTest {
         Path path = Path.from(pathUrl);
         // then
         assertAll(
-                () -> assertThat(path.getPath()).isEqualTo("/login"),
+                () -> assertThat(path.getUri()).isEqualTo("/login"),
                 () -> assertThat(path.getQueryParam().getQueryValue("account")).isEqualTo("gugu"),
                 () -> assertThat(path.getQueryParam().getQueryValue("password")).isEqualTo("password")
         );

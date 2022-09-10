@@ -16,10 +16,10 @@ public class RequestHeader {
     private static final String COOKIE_KEY = "Cookie";
     private static final String DEFAULT_COOKIE = "";
 
-    private final Map<String, String> requestHeader;
+    private final Map<String, String> headers;
 
-    private RequestHeader(Map<String, String> requestHeader) {
-        this.requestHeader = requestHeader;
+    private RequestHeader(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     public static RequestHeader from(BufferedReader inputReader) throws IOException {
@@ -34,10 +34,10 @@ public class RequestHeader {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(requestHeader.getOrDefault(CONTENT_LENGTH_KEY, DEFAULT_CONTENT_LENGTH));
+        return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH_KEY, DEFAULT_CONTENT_LENGTH));
     }
 
     public String getCookies() {
-        return requestHeader.getOrDefault(COOKIE_KEY, DEFAULT_COOKIE);
+        return headers.getOrDefault(COOKIE_KEY, DEFAULT_COOKIE);
     }
 }

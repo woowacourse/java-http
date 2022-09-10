@@ -42,7 +42,7 @@ public class LoginController extends AbstractController {
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Optional<User> user = InMemoryUserRepository.findByAccount(
-                request.getRequestBody().getRequestBody().get(ACCOUNT_KEY));
+                request.getRequestBody().getBodies().get(ACCOUNT_KEY));
         if (user.isPresent()) {
             log.info(user.get().toString());
             login(user.get(), request, response);
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
     }
 
     private void login(User user, HttpRequest request, HttpResponse response) {
-        if (user.checkPassword(request.getRequestBody().getRequestBody().get(PASSWORD_KEY))) {
+        if (user.checkPassword(request.getRequestBody().getBodies().get(PASSWORD_KEY))) {
             Session session = request.getSession();
             session.setAttribute(USER_SESSION_KEY, user);
             SessionManager.add(session);
@@ -73,6 +73,6 @@ public class LoginController extends AbstractController {
 
     @Override
     public boolean handle(HttpRequest httpRequest) {
-        return URL.equals(httpRequest.getRequestLine().getPath().getPath());
+        return URL.equals(httpRequest.getRequestLine().getPath().getUri());
     }
 }

@@ -18,8 +18,8 @@ public class StatusLine {
 
     public String generateResponseString() {
         return "\r\n" + httpVersion.getMessage() + " "
-                + httpStatusCode.getStatusCode() + " "
-                + httpStatusCode.getStatusMessage() + "\r\n";
+                + httpStatusCode.getCode() + " "
+                + httpStatusCode.getMessage() + "\r\n";
     }
 
     public HttpVersion getHttpVersion() {

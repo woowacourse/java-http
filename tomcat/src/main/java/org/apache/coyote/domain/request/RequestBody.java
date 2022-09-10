@@ -12,10 +12,10 @@ public class RequestBody {
     private static final int BODY_KEY = 0;
     private static final int BODY_VALUE = 1;
 
-    private final Map<String, String> requestBody;
+    private final Map<String, String> bodies;
 
-    public RequestBody(Map<String, String> requestBody) {
-        this.requestBody = requestBody;
+    public RequestBody(Map<String, String> bodies) {
+        this.bodies = bodies;
     }
 
     public static RequestBody of(BufferedReader inputReader, int contentLength) throws IOException {
@@ -38,7 +38,7 @@ public class RequestBody {
         return requestBody;
     }
 
-    public Map<String, String> getRequestBody() {
-        return requestBody;
+    public Map<String, String> getBodies() {
+        return bodies;
     }
 }

@@ -2,10 +2,10 @@ package org.apache.coyote.domain.response;
 
 public class RedirectUrl implements Header{
 
-    private final String redirectUrl;
+    private final String value;
 
-    private RedirectUrl(String redirectUrl) {
-        this.redirectUrl = redirectUrl;
+    private RedirectUrl(String value) {
+        this.value = value;
     }
 
     public static RedirectUrl from(String redirectUrl) {
@@ -14,6 +14,6 @@ public class RedirectUrl implements Header{
 
     @Override
     public String getHeader() {
-        return "Location: " + redirectUrl + "\r\n";
+        return "Location: " + value + "\r\n";
     }
 }

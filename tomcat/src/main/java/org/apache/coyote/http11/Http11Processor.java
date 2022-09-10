@@ -7,7 +7,7 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import org.apache.catalina.core.ControllerContainer;
+import org.apache.catalina.core.controller.ControllerContainer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ControllerContainer container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final ControllerContainer container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(bufferReader);
             HttpResponse httpResponse = new HttpResponse(httpRequest.findContentType());
 
-            ControllerContainer.service(httpRequest, httpResponse);
+            container.service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getResponseTemplate().getBytes());
             outputStream.flush();

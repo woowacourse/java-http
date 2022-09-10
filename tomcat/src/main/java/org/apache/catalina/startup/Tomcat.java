@@ -1,11 +1,11 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.Configuration;
+import org.apache.catalina.core.config.Configuration;
+import org.apache.catalina.core.controller.ControllerContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
@@ -18,7 +18,8 @@ public class Tomcat {
     }
 
     public void start() {
-        var connector = new Connector(configuration);
+        ControllerContainer container = new ControllerContainer(configuration);
+        var connector = new Connector(container);
         connector.start();
 
         try {

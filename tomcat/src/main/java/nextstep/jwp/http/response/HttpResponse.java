@@ -15,7 +15,7 @@ public class HttpResponse {
     private String version = "HTTP/1.1";
     private StatusCode statusCode;
     private HttpHeader httpHeaders = new HttpHeader();
-    private String responseBody;
+    private String responseBody = "";
 
     public HttpResponse() {
     }

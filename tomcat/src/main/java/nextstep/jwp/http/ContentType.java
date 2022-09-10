@@ -16,11 +16,18 @@ public enum ContentType {
         this.contentType = contentType;
     }
 
-    public static String findContentType(final String otherUrl) {
+    public static ContentType findContentType(final String otherUrl) {
         return Arrays.stream(values())
                 .filter(value -> otherUrl.contains(value.extension))
                 .findAny()
-                .map(value -> value.contentType)
-                .orElse("html");
+                .orElse(HTML);
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }

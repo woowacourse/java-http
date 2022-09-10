@@ -19,7 +19,6 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final String UNAUTHORIZED_ERROR_PAGE_URL = "./401.html";
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {

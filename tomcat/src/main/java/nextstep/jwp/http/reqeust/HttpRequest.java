@@ -27,6 +27,7 @@ public class HttpRequest {
         String headerLine = bufferReader.readLine();
         while (headerLine != null && !headerLine.isBlank()) {
             headers.add(headerLine);
+            headerLine = bufferReader.readLine();
         }
         return headers;
     }
@@ -42,8 +43,9 @@ public class HttpRequest {
     }
 
     public String findContentType() {
-        String url = getPath();
-        return ContentType.findContentType(url);
+        String path = getPath();
+        ContentType type = ContentType.findContentType(path);
+        return type.getContentType();
     }
 
     public boolean hasPostMethod() {

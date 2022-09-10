@@ -12,6 +12,9 @@ public class SessionManager {
     }
 
     public Session findSession(final String id) {
+        if (SESSIONS.isEmpty()) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 }

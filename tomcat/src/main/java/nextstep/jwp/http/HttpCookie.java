@@ -21,11 +21,10 @@ public class HttpCookie {
     public HttpCookie(final String rawCookie) {
         this.values = new HashMap<>();
 
-        if (rawCookie == null) {
-            throw new CookieFormatException();
+        if (rawCookie != null) {
+            String[] cookies = rawCookie.split(COOKIE_CONNECTOR);
+            addCookies(cookies);
         }
-        String[] cookies = rawCookie.split(COOKIE_CONNECTOR);
-        addCookies(cookies);
     }
 
     private void addCookies(String[] cookies) {

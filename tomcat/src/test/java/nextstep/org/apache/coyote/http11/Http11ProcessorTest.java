@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.config.AppConfiguration;
 import nextstep.jwp.exception.UserNotFoundException;
+import org.apache.catalina.core.controller.ControllerContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final var processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -46,7 +49,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -76,7 +80,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -96,17 +101,18 @@ class Http11ProcessorTest {
 
     @DisplayName("/login url로 접근하면 login.html파일을 전달한다.")
     @Test
-    void 로_전송하면_css_파일을_반환한다() throws IOException {
+    void 로그인_url로_접근하면_login_html_파일을_반환한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive ",
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -124,27 +130,6 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/login url에 POST로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
-    @Test
-    void notFoundUser() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/html;charset=utf-8",
-                "Connection: keep-alive ",
-                "Content-Length: 32",
-                "",
-                "account=leaver&password=password ");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(UserNotFoundException.class);
-    }
-
     @DisplayName("/login url에 POST로 접근할 때, 로그인을 실패하면 ./401.html로 접근한다.")
     @Test
     void fail_login() throws IOException {
@@ -159,7 +144,8 @@ class Http11ProcessorTest {
                 "account=gugu&password=invalidpassword");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -170,10 +156,8 @@ class Http11ProcessorTest {
 
         var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "Location: ./401.html \r\n" +
-                "\r\n" +
-                responseBody;
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -190,7 +174,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -220,10 +205,11 @@ class Http11ProcessorTest {
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com ");
+                "account=newId&password=password&email=hkkang%40woowahan.com ");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final Http11Processor processor = new Http11Processor(socket, container);
 
         // when
         processor.process(socket);
@@ -232,12 +218,38 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
+        var expected = "HTTP/1.1 201 CREATE \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "Location: ./index.html \r\n" +
-                "\r\n" +
-                responseBody;
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("존재하지 않는 resource로 접근시 ./401.html로 리다이렉트 시킨다.")
+    @Test
+    void not_found_resource() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET invalidUrl HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final var socket = new StubSocket();
+        final ControllerContainer container = new ControllerContainer(new AppConfiguration());
+        final var processor = new Http11Processor(socket, container);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 12 ",
+                "",
+                "Hello world!");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

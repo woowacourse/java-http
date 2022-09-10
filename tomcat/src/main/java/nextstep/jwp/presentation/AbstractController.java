@@ -10,6 +10,7 @@ import org.apache.coyote.http11.StatusCode;
 public abstract class AbstractController implements Controller {
 
     protected static final String NOT_FOUND_URL = "/404.html";
+    protected static final String REDIRECT_URL = "/index.html";
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {

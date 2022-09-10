@@ -15,7 +15,7 @@ class RequestHandlerMappingTest {
     @ParameterizedTest
     @CsvSource(value = {
             "GET /index.html HTTP/1.1 : DashBoardController",
-            "POST /login HTTP/1.1 : AuthController",
+            "POST /login HTTP/1.1 : LoginController",
             "GET / HTTP/1.1 : HomeController",
             "GET /css/style.css HTTP/1.1 : StaticResourceController"}, delimiterString = " : "
     )

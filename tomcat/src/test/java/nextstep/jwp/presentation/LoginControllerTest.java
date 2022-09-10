@@ -12,33 +12,14 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class AuthControllerTest {
-
-    @DisplayName("사용자 회원가입이 정상적으로 처리된다.")
-    @Test
-    void userRegister() throws IOException {
-        final AuthController authController = new AuthController();
-
-        final String requestLine = "POST /register HTTP/1.1";
-        final HttpHeader httpHeader = new HttpHeader(String.join("\r\n",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: keep-alive "));
-        final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
-
-        authController.service(new HttpRequest(requestLine, httpHeader, httpBody), new HttpResponse());
-
-        final User user = InMemoryUserRepository.findByAccount("green").get();
-
-        assertThat(user.getAccount()).isEqualTo("green");
-        assertThat(user.checkPassword("1234")).isTrue();
-    }
+class LoginControllerTest {
 
     @DisplayName("사용자 로그인이 정상적으로 처리된다.")
     @Test
     void userLogin() throws IOException {
         InMemoryUserRepository.save(new User("green", "1234", "green@0wooteco.com&"));
 
-        final AuthController authController = new AuthController();
+        final LoginController loginController = new LoginController();
 
         final String requestLine = "POST /login.html HTTP/1.1";
         final HttpHeader httpHeader = new HttpHeader(String.join("\r\n",
@@ -48,7 +29,7 @@ class AuthControllerTest {
 
         final HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, httpBody);
 
-        final HttpResponse httpResponse = authController.service(httpRequest,
+        final HttpResponse httpResponse = loginController.service(httpRequest,
                 new HttpResponse());
 
         assertThat(httpResponse.getResponse()).contains("302 Found");

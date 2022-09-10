@@ -20,7 +20,6 @@ public class HttpResponse {
     public void forward(final HttpPath path) {
         if (path.getValue().equals("/")) {
             headers.addContentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue());
-            return;
         }
         ContentType contentType = RequestContentTypeUtils.find(path.getValue());
         headers.addContentType(contentType.getValue());
@@ -36,7 +35,7 @@ public class HttpResponse {
         }
 
         outputStream.write(version.getValue() + " " + status.getValue() + " \r\n"
-                + headers.getAllToString() + " " + "\r\n"
+                + headers.getAllToString() + "\r\n"
                 + body);
     }
 

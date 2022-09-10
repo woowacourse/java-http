@@ -9,6 +9,7 @@ public enum RequestContentTypeUtils {
     HTML(".html", ContentType.TEXT_HTML_CHARSET_UTF_8),
     CSS(".css", ContentType.TEXT_CSS_CHARSET_UTF_8),
     JS(".js", ContentType.TEXT_JS_CHARSET_UTF_8),
+    ICON(".ico", ContentType.IMAGE_X_ICON)
     ;
 
     private final String extension;

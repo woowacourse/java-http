@@ -1,4 +1,4 @@
-package nextstep.jwp.http.response;
+package jakarta.http.response;
 
 public enum StatusCode {
 

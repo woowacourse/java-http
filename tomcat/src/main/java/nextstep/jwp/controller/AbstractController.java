@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.StatusCode;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.response.HttpResponse;
+import jakarta.http.response.StatusCode;
 import nextstep.jwp.io.ClassPathResource;
-import nextstep.java.servlet.Controller;
+import jakarta.controller.Controller;
 
 public abstract class AbstractController implements Controller {
 

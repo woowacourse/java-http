@@ -1,11 +1,11 @@
-package nextstep.jwp.http.reqeust;
+package jakarta.http.reqeust;
 
+import jakarta.http.ContentType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpHeader;
+import jakarta.http.HttpHeader;
 
 public class HttpRequest {
 

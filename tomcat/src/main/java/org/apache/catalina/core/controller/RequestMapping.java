@@ -2,10 +2,10 @@ package org.apache.catalina.core.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.java.servlet.Controller;
-import nextstep.java.servlet.ExceptionHandler;
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import jakarta.controller.Controller;
+import jakarta.controller.ExceptionHandler;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.response.HttpResponse;
 
 public class RequestMapping {
 

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.reqeust;
+package jakarta.http.reqeust;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -1,8 +1,8 @@
-package nextstep.java.servlet;
+package jakarta.controller;
 
 
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.response.HttpResponse;
 
 public interface Controller {
 

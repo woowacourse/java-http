@@ -1,4 +1,4 @@
-package nextstep.jwp.http.reqeust;
+package jakarta.http.reqeust;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

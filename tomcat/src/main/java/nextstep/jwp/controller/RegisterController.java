@@ -5,9 +5,9 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateUserException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.reqeust.QueryParams;
-import nextstep.jwp.http.response.HttpResponse;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.reqeust.QueryParams;
+import jakarta.http.response.HttpResponse;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {

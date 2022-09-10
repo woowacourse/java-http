@@ -6,8 +6,8 @@ import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.QueryStringFormatException;
 import nextstep.jwp.exception.UserLoginException;
 import nextstep.jwp.exception.UserNotFoundException;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.java.servlet.ExceptionHandler;
+import jakarta.http.response.HttpResponse;
+import jakarta.controller.ExceptionHandler;
 
 public class AppExceptionHandler implements ExceptionHandler {
 

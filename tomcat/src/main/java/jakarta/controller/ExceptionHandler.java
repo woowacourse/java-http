@@ -1,6 +1,6 @@
-package nextstep.java.servlet;
+package jakarta.controller;
 
-import nextstep.jwp.http.response.HttpResponse;
+import jakarta.http.response.HttpResponse;
 
 public interface ExceptionHandler {
 

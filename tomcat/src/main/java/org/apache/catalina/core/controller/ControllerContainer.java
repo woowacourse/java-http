@@ -1,7 +1,7 @@
 package org.apache.catalina.core.controller;
 
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.response.HttpResponse;
 import org.apache.catalina.core.config.Configuration;
 
 public class ControllerContainer {

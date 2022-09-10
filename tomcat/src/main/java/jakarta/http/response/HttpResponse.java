@@ -1,8 +1,8 @@
-package nextstep.jwp.http.response;
+package jakarta.http.response;
 
+import jakarta.http.HttpCookie;
+import jakarta.http.HttpHeader;
 import java.util.StringJoiner;
-import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpHeader;
 
 public class HttpResponse {
 

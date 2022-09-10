@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package jakarta.http;
 
 import java.util.LinkedHashMap;
 import java.util.List;

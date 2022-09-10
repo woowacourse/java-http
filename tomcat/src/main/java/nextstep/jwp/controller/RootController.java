@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.StatusCode;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.response.HttpResponse;
+import jakarta.http.response.StatusCode;
 
 public class RootController extends AbstractController {
 

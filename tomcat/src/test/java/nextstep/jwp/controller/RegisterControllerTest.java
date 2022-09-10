@@ -1,4 +1,6 @@
-package org.apache.coyote.core.controller;
+package nextstep.jwp.controller;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -10,21 +12,20 @@ import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginControllerTest {
+class RegisterControllerTest {
 
-    @DisplayName("./login url 접근 시, 유저의 비밀번호가 일치하면 예외가 발생하지 않는다.")
+    @DisplayName("회원가입을 할 때, account, password, email 중 공백인 값이 있으면 예외를 발생한다.")
     @Test
-    void login() throws IOException {
+    void register_null_password() throws IOException {
         // given
         String httpRequestProtocol = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
+                "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
+                "Content-Length: 32",
                 "",
-                "account=gugu&password= &email=hkkang%40woowahan.com ");
+                "account=gugu&password=invalidpassword");
 
         InputStream inputStream = new ByteArrayInputStream(httpRequestProtocol.getBytes());
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -33,7 +34,9 @@ class LoginControllerTest {
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then
-        LoginController controller = new LoginController();
-        controller.service(httpRequest, httpResponse);
+        RegisterController registerController = new RegisterController();
+        assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
+                .isInstanceOf(IllegalArgumentException.class);
     }
+
 }

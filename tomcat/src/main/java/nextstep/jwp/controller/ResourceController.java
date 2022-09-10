@@ -1,11 +1,11 @@
-package org.apache.coyote.core.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 
-public class IndexController extends AbstractController {
+public class ResourceController extends AbstractController {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response)

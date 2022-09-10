@@ -1,4 +1,4 @@
-package org.apache.coyote.core.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -6,6 +6,7 @@ import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.StatusCode;
 import nextstep.jwp.io.ClassPathResource;
+import org.apache.catalina.core.Controller;
 
 public abstract class AbstractController implements Controller {
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.core.controller;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;

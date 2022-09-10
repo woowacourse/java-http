@@ -29,6 +29,6 @@ public class RegisterRequestHandler implements RequestHandler {
     @Override
     public boolean support(final HttpRequest request) {
         final RequestLine requestLine = request.getRequestLine();
-        return requestLine.getRequestURI().contains("register") && (requestLine.getHttpMethod() == HttpMethod.POST);
+        return requestLine.getRequestUri().containUrl("register") && (requestLine.getHttpMethod() == HttpMethod.POST);
     }
 }

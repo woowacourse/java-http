@@ -5,17 +5,17 @@ import org.apache.coyote.http11.util.HttpMethod;
 public class RequestLine {
 
     private final HttpMethod httpMethod;
-    private final RequestURI requestURI;
+    private final RequestUri requestUri;
 
-    private RequestLine(final HttpMethod httpMethod, final RequestURI requestURI) {
+    private RequestLine(final HttpMethod httpMethod, final RequestUri requestURI) {
         this.httpMethod = httpMethod;
-        this.requestURI = requestURI;
+        this.requestUri = requestURI;
     }
 
     public static RequestLine from(final String line) {
         final String[] lines = line.split(" ");
         final var httpMethod = HttpMethod.from(lines[0]);
-        final var requestURI = RequestURI.from(lines[1]);
+        final var requestURI = RequestUri.from(lines[1]);
 
         return new RequestLine(httpMethod, requestURI);
     }
@@ -24,7 +24,11 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public RequestURI getRequestURI() {
-        return requestURI;
+    public RequestUri getRequestUri() {
+        return requestUri;
+    }
+
+    public boolean containUrl(final String url) {
+        return requestUri.containUrl(url);
     }
 }

@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.util.HttpStatus.NOT_FOUND;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.servlet.RequestMapping;
@@ -37,22 +33,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            final var httpRequest = HttpRequest.from(bufferedReader);
-            final var httpResponse = new HttpResponse();
-
-            // 지원하는 서블릿을 찾는다.
-            final var servlet = requestMapping.getServlet(httpRequest.getRequestURI());
-
-            // 지원하는 서블릿이 없는 경우 404페이지 랜더링
-            servlet.ifPresentOrElse(it -> it.service(httpRequest, httpResponse), () -> {
-                httpResponse.setStatusCode(NOT_FOUND);
-                httpResponse.setResourceURI(NOT_FOUND_PAGE);
-            });
-
-            outputStream.write(httpResponse.getBytes());
-            outputStream.flush();
+            final var httpRequest = HttpRequest.from(inputStream);
+            final var httpResponse = HttpResponse.from(outputStream);
+            final var servlet = requestMapping.getServlet(httpRequest);
+            servlet.service(httpRequest, httpResponse);
+            httpResponse.write();
+            httpResponse.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +26,8 @@ public class HttpRequest {
         this.cookies = cookies;
     }
 
-    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
+        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final var requestLine = generateRequestLine(bufferedReader);
         final var httpHeaders = generateHttpHeader(bufferedReader);
         final var requestBody = generateHttpRequestBody(httpHeaders, bufferedReader);
@@ -87,11 +90,15 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public RequestURI getRequestURI() {
-        return requestLine.getRequestURI();
+    public RequestUri getRequestURI() {
+        return requestLine.getRequestUri();
     }
 
     public boolean hasCookieByJSessionId() {
         return cookies.hasCookieByJSessionId();
+    }
+
+    public boolean containUrl(final String url) {
+        return requestLine.containUrl(url);
     }
 }

@@ -29,6 +29,6 @@ public class LoginFilter {
 
     public boolean support(final HttpRequest request) {
         final var requestLine = request.getRequestLine();
-        return requestLine.getRequestURI().contains("login") && request.getHttpMethod() == POST;
+        return requestLine.getRequestUri().containUrl("login") && request.getHttpMethod() == POST;
     }
 }

@@ -33,6 +33,6 @@ public class LoginPageRequestHandler implements RequestHandler {
     @Override
     public boolean support(final HttpRequest request) {
         final RequestLine requestLine = request.getRequestLine();
-        return requestLine.getRequestURI().contains("login") && (requestLine.getHttpMethod() == HttpMethod.GET);
+        return requestLine.getRequestUri().containUrl("login") && (requestLine.getHttpMethod() == HttpMethod.GET);
     }
 }

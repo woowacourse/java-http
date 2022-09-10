@@ -3,8 +3,7 @@ package org.apache.catalina.servlet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import org.apache.coyote.http11.http.RequestURI;
+import org.apache.coyote.http11.http.HttpRequest;
 
 public class RequestMapping {
     private static final RequestMapping requestMapping = new RequestMapping();
@@ -21,12 +20,12 @@ public class RequestMapping {
         urlMap.put(url, servlet);
     }
 
-    public Optional<Servlet> getServlet(final RequestURI requestURI) {
-        final String rowRequestURI = requestURI.getRequestURI();
+    public Servlet getServlet(final HttpRequest httpRequest) {
         return urlMap.entrySet()
                 .stream()
-                .filter(it -> rowRequestURI.contains(it.getKey()))
+                .filter(it -> httpRequest.containUrl(it.getKey()))
                 .map(Entry::getValue)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(NotFoundServletException::new);
     }
 }

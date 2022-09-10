@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.http;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 import org.apache.coyote.http11.util.HttpStatus;
 
@@ -9,12 +10,21 @@ public class HttpResponse {
     private static final String SPACE = " ";
     private static final String HTTP_VERSION = "HTTP/1.1";
 
+    private final OutputStream outputStream;
     private ResourceURI resourceURI;
     private HttpStatus httpStatus;
     private Location location;
     private Cookies cookies;
 
-    public byte[] getBytes() throws IOException {
+    private HttpResponse(final OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public static HttpResponse from(final OutputStream outputStream) {
+        return new HttpResponse(outputStream);
+    }
+
+    private byte[] getBytes() throws IOException {
         return getHttpMessage().getBytes();
     }
 
@@ -54,6 +64,14 @@ public class HttpResponse {
         if (!Objects.isNull(resourceURI)) {
             stringBuilder.append(resourceURI.getContent());
         }
+    }
+
+    public void write() throws IOException {
+        outputStream.write(getBytes());
+    }
+
+    public void flush() throws IOException {
+        outputStream.flush();
     }
 
     public void setResourceURI(final ResourceURI resourceURI) {

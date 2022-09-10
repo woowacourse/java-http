@@ -9,7 +9,7 @@ public class ResourceRequestHandler implements RequestHandler {
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
         final var requestURI = request.getRequestURI();
-        final var rowRequestURI = requestURI.getRequestURI();
+        final var rowRequestURI = requestURI.getRequestUri();
         PathParser.checkPath(rowRequestURI);
         response.setStatusCode(HttpStatus.OK);
         return rowRequestURI;

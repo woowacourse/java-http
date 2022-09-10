@@ -19,7 +19,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String defaultErrorPage = "/404.html";
+    private static final String DEFAULT_NOT_FOUND_VIEW = "/404.html";
 
     private final Socket connection;
     private final ServletContainer servletContainer;
@@ -31,8 +31,6 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        final Thread thread = Thread.currentThread();
-        log.info("ThreadName: {}", thread.getName());
         process(connection);
     }
 
@@ -56,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void makeErrorResponse(final Response response) {
-        final Resource resource = new Resource(defaultErrorPage);
+        final Resource resource = new Resource(DEFAULT_NOT_FOUND_VIEW);
         response.httpStatus(HttpStatus.NOT_FOUND)
                 .header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
                 .content(resource.read());

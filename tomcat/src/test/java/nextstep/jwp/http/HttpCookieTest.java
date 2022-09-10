@@ -1,6 +1,6 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.exception.InvalidCookieException;
+import nextstep.jwp.exception.InvalidException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +45,6 @@ class HttpCookieTest {
 
         // when, then
         assertThatThrownBy(() -> HttpCookie.create(expected))
-                .isInstanceOf(InvalidCookieException.class);
+                .isInstanceOf(InvalidException.class);
     }
 }

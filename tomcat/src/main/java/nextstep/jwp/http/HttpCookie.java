@@ -1,6 +1,6 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.exception.InvalidCookieException;
+import nextstep.jwp.exception.InvalidException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +43,7 @@ public class HttpCookie {
 
     private static void validateKeyValueSize(final String[] seperatedKeyValue) {
         if (seperatedKeyValue.length != KEY_VALUE_SIZE) {
-            throw new InvalidCookieException();
+            throw new InvalidException("올바른 쿠키 형태가 아닙니다.");
         }
     }
 

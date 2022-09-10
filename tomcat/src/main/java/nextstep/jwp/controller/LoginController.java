@@ -42,23 +42,24 @@ public class LoginController extends AbstractController {
         final LoginRequest loginRequest = convert(request.getContent());
         final User user = InMemoryUserRepository.findByAccount(loginRequest.getAccount())
                 .orElseThrow(UnauthorizedException::new);
-
-        if (user.isSamePassword(loginRequest.getPassword())) {
-            log.debug(user.toString());
-            final Session session = makeSession(user);
-            final HttpCookie responseCookie = makeCookie(session);
-            response.header(HttpHeader.SET_COOKIE, responseCookie.parse())
-                    .header(HttpHeader.LOCATION, View.INDEX.getValue())
-                    .httpStatus(HttpStatus.FOUND);
-            return;
+        if (isPasswordNotMatch(user, loginRequest.getPassword())) {
+            throw new UnauthorizedException();
         }
-
-        throw new UnauthorizedException();
+        log.debug(user.toString());
+        final Session session = makeSession(user);
+        final HttpCookie responseCookie = makeCookie(session);
+        response.header(HttpHeader.SET_COOKIE, responseCookie.parse())
+                .header(HttpHeader.LOCATION, View.INDEX.getValue())
+                .httpStatus(HttpStatus.FOUND);
     }
 
     private LoginRequest convert(final String queryString) {
         final Map<String, String> paramMapping = QueryStringConverter.convert(queryString);
         return LoginRequest.of(paramMapping);
+    }
+
+    private boolean isPasswordNotMatch(final User user, final String password) {
+        return !user.isSamePassword(password);
     }
 
     private Session makeSession(final User user) {

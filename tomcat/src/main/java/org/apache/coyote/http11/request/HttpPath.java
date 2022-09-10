@@ -36,14 +36,14 @@ public class HttpPath {
         return filePath.concat(DEFAULT_EXTENSION);
     }
 
-    private static String getFilePath(String uri) {
+    private static String getFilePath(final String uri) {
         if (uri.contains(QUERY_PARAM_DELIMITER)) {
             return uri.substring(0, uri.indexOf(QUERY_PARAM_DELIMITER));
         }
         return uri;
     }
 
-    private static boolean isDefaultPath(String filePath) {
+    private static boolean isDefaultPath(final String filePath) {
         return filePath.equals(DEFAULT_URL);
     }
 
@@ -72,15 +72,7 @@ public class HttpPath {
         return path.equals(DEFAULT_URL);
     }
 
-    public boolean hasQueryParams() {
-        return params.size() > 0;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public String getParam(final String name) {
-        return params.get(name);
     }
 }

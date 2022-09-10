@@ -29,12 +29,12 @@ public class HttpRequest {
         return httpPath.isDefaultRequest();
     }
 
-    public boolean hasQueryParams() {
-        return httpPath.hasQueryParams();
+    public boolean isPostMethod() {
+        return httpMethod.isPost();
     }
 
-    public String getParam(final String name) {
-        return httpPath.getParam(name);
+    public String getRequestBodyValue(final String key) {
+        return httpRequestBody.getValue(key);
     }
 
     public ContentType getContentType() {

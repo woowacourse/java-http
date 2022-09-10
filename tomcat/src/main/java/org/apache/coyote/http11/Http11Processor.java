@@ -66,6 +66,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String parseRequestBody(final HttpMethod method, final int contentLength, final BufferedReader reader)
+            throws IOException {
+        if (method.isPost() && contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
+    }
+
     private Map<String, String> parseRequestHeaders(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         String line;
@@ -78,26 +88,16 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private String parseRequestBody(final HttpMethod method, final int contentLength, final BufferedReader reader)
-            throws IOException {
-        if (method.isPost() && contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
-    }
-
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isDefaultRequest()) {
             return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),
                     DEFAULT_RESPONSE_BODY);
         }
         if (httpRequest.isLoginRequest()) {
-            if (httpRequest.hasQueryParams()) {
-                final User user = InMemoryUserRepository.findByAccount(httpRequest.getParam("account"))
+            if (httpRequest.isPostMethod()) {
+                final User user = InMemoryUserRepository.findByAccount(httpRequest.getRequestBodyValue("account"))
                         .orElseThrow(UserNotFoundException::new);
-                if (user.checkPassword(httpRequest.getParam("password"))) {
+                if (user.checkPassword(httpRequest.getRequestBodyValue("password"))) {
                     log.info(String.format("user : %s", user));
                     return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/index.html"),
                             httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));

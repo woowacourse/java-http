@@ -45,30 +45,28 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = HandlerMapper.of(request);
             controller.service(request, response);
             bufferedReader.close();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
     private String getRequestMessage(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder actual = new StringBuilder();
+        final StringBuilder rawRequest = new StringBuilder();
         String line;
         while (true) {
             line = bufferedReader.readLine();
             if (line.equals("")) {
                 break;
             }
-            actual.append(line)
+            rawRequest.append(line)
                     .append("\r\n");
         }
 
-        actual.append("\r\n");
+        rawRequest.append("\r\n");
         while (bufferedReader.ready()) {
             char a = (char) bufferedReader.read();
-            actual.append(a);
+            rawRequest.append(a);
         }
-        return actual.toString();
+        return rawRequest.toString();
     }
 }

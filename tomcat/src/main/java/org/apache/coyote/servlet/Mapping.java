@@ -14,10 +14,6 @@ public class Mapping {
         this.url = url;
     }
 
-    public boolean isMapping(final String url) {
-        return this.url.equals(url);
-    }
-
     public AbstractServlet getServlet() {
         return abstractServlet;
     }

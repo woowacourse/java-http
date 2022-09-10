@@ -35,10 +35,6 @@ public enum StatusCode {
             .orElseThrow(() -> new IllegalArgumentException(String.format("존재하지 않는 상태코드 입니다. [%s]", statusCode)));
     }
 
-    public static boolean isRedirect(final String statusCode) {
-        return isSame(statusCode, FOUND);
-    }
-
     private static boolean isSame(final String statusCode, final StatusCode existCode) {
         return String.valueOf(existCode.code).equals(statusCode) || existCode.name.equals(statusCode);
     }

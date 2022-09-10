@@ -56,8 +56,8 @@ public class HttpResponse {
                 .responseBody("");
     }
 
-    public void notFound() {
-        this.httpStatus(HttpStatus.FOUND)
+    public HttpResponse notFound() {
+        return this.httpStatus(HttpStatus.FOUND)
                 .location("/404.html")
                 .content(ContentType.HTML, 0);
     }

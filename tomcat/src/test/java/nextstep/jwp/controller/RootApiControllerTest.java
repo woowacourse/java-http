@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import nextstep.jwp.controller.RootApiController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -34,6 +33,26 @@ class RootApiControllerTest {
         // then
         assertThat(httpResponse).usingRecursiveComparison()
                 .isEqualTo(httpResponse.ok(ContentType.HTML, "Hello world!"));
+    }
+
+    @Test
+    void rootApiHandler는_Post요청이_들어오면_notFound를_반환한다() throws Exception {
+        // given
+        String body = "";
+        String requestMessage = 루트_요청_메시지("POST / HTTP/1.1 ", body);
+        HttpRequest httpRequest = httpRequest_생성(requestMessage);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+
+        RootApiController registerApiController = new RootApiController();
+
+        // when
+        registerApiController.service(httpRequest, httpResponse);
+        outputStream.close();
+
+        // then
+        assertThat(httpResponse).usingRecursiveComparison()
+                .isEqualTo(HttpResponse.of(outputStream, httpRequest).notFound());
     }
 
     private static String 루트_요청_메시지(String requestLine, String body) {

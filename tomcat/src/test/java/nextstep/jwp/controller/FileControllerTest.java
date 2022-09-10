@@ -12,33 +12,12 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.controller.FileController;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class FileControllerTest {
-
-    private static String 파일_요청_메시지(String requestLine, String body) {
-        return String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080 ",
-                "Accept: text/html;q=0.1 ",
-                "Connection: keep-alive",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body);
-    }
-
-    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
-        HttpRequest httpRequest;
-        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            httpRequest = HttpRequest.of(bufferedReader);
-        }
-        return httpRequest;
-    }
 
     @Test
     void FileController는_file요청이_들어오면_파일내용을_반환한다() throws Exception {
@@ -58,6 +37,44 @@ class FileControllerTest {
 
         assertThat(httpResponse).usingRecursiveComparison()
                 .isEqualTo(HttpResponse.of(outputStream, httpRequest).ok(ContentType.HTML, body));
+    }
+
+    @Test
+    void FileController는_없는_file요청이_들어오면_notFound를_반환한다() throws Exception {
+        // given
+        String requestMessage = 파일_요청_메시지("GET /invalidFile.html HTTP/1.1 ", "");
+        HttpRequest httpRequest = httpRequest_생성(requestMessage);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+
+        FileController fileController = new FileController();
+
+        // when
+        fileController.service(httpRequest, httpResponse);
+
+        // then
+        assertThat(httpResponse).usingRecursiveComparison()
+                .isEqualTo(HttpResponse.of(outputStream, httpRequest).notFound());
+    }
+
+    private static String 파일_요청_메시지(String requestLine, String body) {
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+    }
+
+    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
+        HttpRequest httpRequest;
+        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            httpRequest = HttpRequest.of(bufferedReader);
+        }
+        return httpRequest;
     }
 
     private String getBody(String uri) throws IOException {

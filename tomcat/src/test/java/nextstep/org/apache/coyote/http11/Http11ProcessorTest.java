@@ -298,9 +298,21 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        processor.run();
+
+        // then
+        var expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /404.html ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        String actual = socket.output();
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

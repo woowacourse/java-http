@@ -12,7 +12,7 @@ public class FileController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
+        httpResponse.notFound();
     }
 
     @Override

@@ -17,8 +17,10 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.header.HttpVersion;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpPath;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -51,7 +53,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequestLine httpRequestLine = HttpRequestLine.from(reader.readLine());
             final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
-            final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
+            final HttpRequestBody httpRequestBody = HttpRequestBody.from(
+                    parseRequestBody(httpRequestLine.getMethod(), httpHeaders.getContentLength(), reader));
+            final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);
 
             final HttpResponse httpResponse = createHttpResponse(httpRequest);
 
@@ -72,6 +76,16 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(name, value);
         }
         return headers;
+    }
+
+    private String parseRequestBody(final HttpMethod method, final int contentLength, final BufferedReader reader)
+            throws IOException {
+        if (method.isPost() && contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws IOException {

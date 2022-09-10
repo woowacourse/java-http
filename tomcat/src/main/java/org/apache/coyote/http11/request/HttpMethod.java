@@ -19,4 +19,8 @@ public enum HttpMethod {
                 .findFirst()
                 .orElseThrow(() -> new HttpMethodNotSupportException(value));
     }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

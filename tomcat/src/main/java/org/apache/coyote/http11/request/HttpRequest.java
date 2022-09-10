@@ -10,12 +10,15 @@ public class HttpRequest {
     private final HttpPath httpPath;
     private final HttpVersion httpVersion;
     private final HttpHeaders httpHeaders;
+    private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeaders httpHeaders) {
+    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeaders httpHeaders,
+                       HttpRequestBody httpRequestBody) {
         this.httpMethod = httpRequestLine.getMethod();
         this.httpPath = httpRequestLine.getPath();
         this.httpVersion = httpRequestLine.getVersion();
         this.httpHeaders = httpHeaders;
+        this.httpRequestBody = httpRequestBody;
     }
 
     public boolean isLoginRequest() {

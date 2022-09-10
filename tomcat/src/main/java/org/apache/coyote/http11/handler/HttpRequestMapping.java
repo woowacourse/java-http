@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import java.util.Objects;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.QueryParam;
 
 public class HttpRequestMapping {
 

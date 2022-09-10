@@ -8,8 +8,6 @@ import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.StaticResourceController;
 import nextstep.jwp.presentation.AuthController;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestMapping;
-import org.apache.coyote.http11.QueryParam;
 
 public class RequestHandlerMapping {
 

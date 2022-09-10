@@ -1,7 +1,9 @@
 package org.apache.coyote.http;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +20,16 @@ public class SessionManager {
 
     public static Optional<Session> findSession(String id) {
         return Optional.ofNullable(SESSIONS.get(id));
+    }
+
+    public static List<Session> findExpiredSession(){
+        final List<Session> expiredSessions = new ArrayList<>();
+        for (Entry<String, Session> entry : SESSIONS.entrySet()) {
+            if(entry.getValue().isExpired()){
+                expiredSessions.add(entry.getValue());
+            }
+        }
+        return expiredSessions;
     }
 
     public static void remove(Session session) {

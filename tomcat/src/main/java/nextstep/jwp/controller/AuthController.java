@@ -19,7 +19,8 @@ public class AuthController {
 
     @RequestMapping(value = "/login", httpMethod = HttpMethod.GET)
     public HttpResponse loginPage(final HttpRequest httpRequest) {
-        if (!httpRequest.getSession().isLoggedInUser()) {
+        if (httpRequest.getSession().isLoggedInUser()) {
+            httpRequest.getSession().changeLastAccessedTime();
             return HttpResponse.redirect("/index.html")
                     .addCookie(httpRequest.getCookie(), httpRequest.getSession())
                     .build();

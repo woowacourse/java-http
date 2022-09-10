@@ -23,6 +23,7 @@ public class AuthController extends AbstractController {
     private static final String LOGIN_URL = "/login.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String AUTHORIZED_URL = "/401.html";
 
 
     @Override
@@ -76,9 +77,9 @@ public class AuthController extends AbstractController {
             return assignCookie(httpRequest, user);
         }
 
-        final HttpBody httpBody = HttpBody.createByUrl("/401.html");
-        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/401.html");
-        httpHeader.location("/401.html");
+        final HttpBody httpBody = HttpBody.createByUrl(AUTHORIZED_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, AUTHORIZED_URL);
+        httpHeader.location(AUTHORIZED_URL);
 
         return new HttpResponse(httpHeader, httpBody);
     }

@@ -9,6 +9,8 @@ import org.apache.coyote.http11.StatusCode;
 
 public abstract class AbstractController implements Controller {
 
+    protected static final String NOT_FOUND_URL = "/404.html";
+
     @Override
     public HttpResponse service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (httpRequest.matchMethod("POST")) {
@@ -17,11 +19,11 @@ public abstract class AbstractController implements Controller {
         if (httpRequest.matchMethod("GET")) {
             return doGet(httpRequest, httpResponse);
         }
-        final HttpBody httpBody = HttpBody.createByUrl("/404.html");
+        final HttpBody httpBody = HttpBody.createByUrl(NOT_FOUND_URL);
         final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
-                .contentType("/404.html")
+                .contentType(NOT_FOUND_URL)
                 .contentLength(httpBody.getBody().getBytes().length)
-                .location("/404.html");
+                .location(NOT_FOUND_URL);
 
         return httpResponse.header(httpHeader).body(httpBody);
     }

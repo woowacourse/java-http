@@ -11,9 +11,9 @@ public class DashBoardController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl("/404.html");
-        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, "/404.html");
-        httpHeader.location("/404.html");
+        final HttpBody httpBody = HttpBody.createByUrl(NOT_FOUND_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, NOT_FOUND_URL);
+        httpHeader.location(NOT_FOUND_URL);
 
         return httpResponse.header(httpHeader).body(httpBody);
     }

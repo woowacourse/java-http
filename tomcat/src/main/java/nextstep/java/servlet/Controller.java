@@ -1,4 +1,4 @@
-package org.apache.catalina.core.controller;
+package nextstep.java.servlet;
 
 
 import nextstep.jwp.http.reqeust.HttpRequest;

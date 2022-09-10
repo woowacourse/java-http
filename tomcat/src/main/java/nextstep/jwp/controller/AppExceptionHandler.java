@@ -7,7 +7,7 @@ import nextstep.jwp.exception.QueryStringFormatException;
 import nextstep.jwp.exception.UserLoginException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.http.response.HttpResponse;
-import org.apache.catalina.core.controller.ExceptionHandler;
+import nextstep.java.servlet.ExceptionHandler;
 
 public class AppExceptionHandler implements ExceptionHandler {
 

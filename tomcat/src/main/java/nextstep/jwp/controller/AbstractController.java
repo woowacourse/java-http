@@ -4,7 +4,7 @@ import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.StatusCode;
 import nextstep.jwp.io.ClassPathResource;
-import org.apache.catalina.core.controller.Controller;
+import nextstep.java.servlet.Controller;
 
 public abstract class AbstractController implements Controller {
 

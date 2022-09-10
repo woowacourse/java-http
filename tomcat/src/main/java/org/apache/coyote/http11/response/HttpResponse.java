@@ -1,103 +1,107 @@
 package org.apache.coyote.http11.response;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
+import org.apache.coyote.http11.FileType;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.ViewResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
-    private HttpStatus status;
-    private HttpCookie cookie;
-    private String mimeType;
-    private String responseBody;
-    private String location;
 
-    public HttpResponse(HttpStatus status, HttpCookie cookie, String mimeType, String responseBody,
-                        String location) {
-        this.status = status;
-        this.cookie = cookie;
-        this.mimeType = mimeType;
-        this.responseBody = responseBody;
-        this.location = location;
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String RESOURCES_PREFIX = "static";
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
+
+    private DataOutputStream dos;
+    private Map<String, String> headers = new LinkedHashMap<>();
+
+    public HttpResponse(DataOutputStream dataOutputStream) {
+        dos = dataOutputStream;
     }
 
-    public static class HttpResponseBuilder {
-        private HttpStatus status;
-        private HttpCookie cookie;
-        private String mimeType;
-        private String responseBody;
-        private String location;
+    public void forward(String url) {
+        try {
+            String fileName = ViewResolver.convert(url);
+            File file = getFile(fileName);
+            FileType fileType = FileType.from(fileName);
+            headers.put(CONTENT_TYPE, fileType.getMimeType());
 
-        public HttpResponseBuilder() {
+            byte[] body = Files.readAllBytes(file.toPath());
+            headers.put(CONTENT_LENGTH, body.length + "");
+
+            response200Header(body.length);
+            responseBody(body);
+        } catch (IOException | URISyntaxException e) {
+            log.error(e.getMessage());
         }
+    }
 
-        public HttpResponseBuilder status(HttpStatus status) {
-            this.status = status;
-            return this;
+    private void response200Header(int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            processHeaders();
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
+    }
 
-        public HttpResponseBuilder cookie(HttpCookie cookie) {
-            this.cookie = cookie;
-            return this;
+    private void responseBody(byte[] body) {
+        try {
+            dos.write(body, 0, body.length);
+            dos.writeBytes("\r\n");
+            dos.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
+    }
 
-        public HttpResponseBuilder mimeType(String mimeType) {
-            this.mimeType = mimeType;
-            return this;
+    private File getFile(String fileName) throws URISyntaxException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(RESOURCES_PREFIX + fileName);
+
+        return Paths.get(resource.toURI()).toFile();
+    }
+
+    public void sendRedirect(String redirectUrl) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + redirectUrl + " \r\n");
+            processHeaders();
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
+    }
 
-        public HttpResponseBuilder responseBody(String responseBody) {
-            this.responseBody = responseBody;
-            return this;
-        }
-
-        public HttpResponseBuilder location(String location) {
-            this.location = location;
-            return this;
-        }
-
-        public String toResponse() {
-            if (!cookie.isExistCookie()) {
-                return String.join("\r\n",
-                        "HTTP/1.1 " + status.getStatusCode() + " ",
-                        "Content-Type: " + mimeType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
+    private void processHeaders() {
+        try {
+            Set<String> keys = headers.keySet();
+            for (String key : keys) {
+                dos.writeBytes(key + ": " + headers.get(key) + " \r\n");
             }
-
-            return String.join("\r\n",
-                    "HTTP/1.1 " + status.getStatusCode() + " ",
-                    toCookieHeader(),
-                    "Content-Type: " + mimeType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
+    }
 
-        public String toRedirectResponse() {
-            List<String> response = new LinkedList<>();
-            response.add("HTTP/1.1 " + status.getStatusCode() + " ");
-            if (cookie.isExistCookie()) {
-                response.add(toCookieHeader());
-            }
-            response.add("Location: " + location + " ");
-            return response.stream()
-                    .collect(Collectors.joining("\r\n"));
-        }
-
-        private String toCookieHeader() {
-            List<String> result = new ArrayList<>();
-            Map<String, String> cookies = cookie.getCookies();
-            for (String key : cookies.keySet()) {
-                String value = cookies.get(key);
-                String header = "Set-Cookie: " + key + "=" + value + " ";
-                result.add(header);
-            }
-            return String.join("\r\n", result);
+    public void addCookie(HttpCookie cookie) {
+        Map<String, String> cookies = cookie.getCookies();
+        Set<String> keySet = cookies.keySet();
+        for (String key : keySet) {
+            String value = cookies.get(key);
+            headers.put("Set-Cookie", key + "=" + value);
         }
     }
 }

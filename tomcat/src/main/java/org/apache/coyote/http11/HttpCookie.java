@@ -22,14 +22,6 @@ public class HttpCookie {
         return cookies.get(key);
     }
 
-    public boolean isExistCookie() {
-        return !cookies.isEmpty();
-    }
-
-    public Map<String, String> getCookies() {
-        return new HashMap<>(cookies);
-    }
-
     public void addJSessionId(String identifier) {
         cookies.put(JSESSIONID, identifier);
     }
@@ -44,5 +36,9 @@ public class HttpCookie {
             String[] keyAndValues = cookie.split(KEY_AND_VALUE_DELIMITER);
             cookies.put(keyAndValues[0], keyAndValues[1]);
         }
+    }
+
+    public Map<String, String> getCookies() {
+        return cookies;
     }
 }

@@ -16,7 +16,7 @@ public class HttpRequest {
     private static final String COOKIE = "Cookie";
 
     private HttpMethod httpMethod;
-    private String httpUrl;
+    private String path;
     private Map<String, String> queryParams;
     private HttpHeaders headers = new HttpHeaders();
     private HttpCookie cookie = new HttpCookie();
@@ -26,10 +26,9 @@ public class HttpRequest {
         String startLine = bufferedReader.readLine();
         RequestLine requestLine = new RequestLine(startLine);
         this.httpMethod = requestLine.getHttpMethod();
-        this.httpUrl = requestLine.getHttpUrl();
+        this.path = requestLine.getHttpUrl();
         this.queryParams = requestLine.getQueryParams();
         parseHeaders(bufferedReader);
-        parseCookie();
 
         if (HttpMethod.POST.equals(httpMethod)) {
             parseRequestBody(bufferedReader);
@@ -42,15 +41,11 @@ public class HttpRequest {
             String[] header = line.split(HEADER_DELIMITER);
             String key = header[0];
             String value = header[1].trim();
+            if (key.equals(COOKIE)) {
+                cookie.addCookies(value);
+            }
             headers.add(key, value);
             line = bufferedReader.readLine();
-        }
-    }
-
-    private void parseCookie() {
-        String value = headers.getHeaders().get(COOKIE);
-        if (value != null) {
-            cookie.addCookies(value);
         }
     }
 
@@ -66,8 +61,8 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public String getHttpUrl() {
-        return httpUrl;
+    public String getPath() {
+        return path;
     }
 
     public HttpHeaders getHeaders() {

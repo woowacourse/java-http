@@ -23,7 +23,8 @@ class Http11ProcessorTest {
     private static final String RESOURCES_PREFIX = "static";
 
     @Test
-    void process() {
+    @DisplayName("http://localhost:8080/에 접속하면 index.html 페이지를 보여준다.")
+    void process() throws IOException {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
@@ -32,12 +33,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + "/index.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())) +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -64,7 +66,8 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())) +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -89,12 +92,11 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + "/css/styles.css");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: 211992 \r\n" +
+                "Content-Type: text/css \r\n" +
+                "Content-Length: 211991 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())) +
-                System.lineSeparator();
-
+                "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -118,10 +120,11 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource(RESOURCES_PREFIX + "/js/scripts.js");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: application/javascript;charset=utf-8 \r\n" +
+                "Content-Type: application/javascript \r\n" +
                 "Content-Length: 976 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())) +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -152,7 +155,8 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + file.length() + " \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())) +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

@@ -25,18 +25,18 @@ public class RegisterController extends AbstractController {
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("[Register Controller] doGet - {}", request.getRequestLine().getPath().getUri());
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.OK)
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()));
+        log.info("[Register Controller] doGet - {}", request.getUri());
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.OK)
+                .header(ContentType.from(request.getFilePath()))
+                .responseBody(ResponseBody.from(request.getFilePath()));
     }
 
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("[Register Controller] doPost - {}", request.getRequestBody().getBodies().get("account"));
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()))
+        log.info("[Register Controller] doPost - {}", request.getBodyValue(ACCOUNT_KEY));
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.FOUND)
+                .header(ContentType.from(request.getFilePath()))
+                .responseBody(ResponseBody.from(request.getFilePath()))
                 .header(RedirectUrl.from(register(request)));
     }
 
@@ -47,9 +47,9 @@ public class RegisterController extends AbstractController {
 
     private static String register(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
-        String account = requestBody.getBodies().get(ACCOUNT_KEY);
-        String password = requestBody.getBodies().get(PASSWORD_KEY);
-        String email = requestBody.getBodies().get(EMAIL_KEY);
+        String account = requestBody.getValue(ACCOUNT_KEY);
+        String password = requestBody.getValue(PASSWORD_KEY);
+        String email = requestBody.getValue(EMAIL_KEY);
         User user = new User(InMemoryUserRepository.size() + INCREMENT_ID, account, password, email);
         InMemoryUserRepository.save(user);
         return INDEX_HTML;

@@ -41,4 +41,8 @@ public class RequestBody {
     public Map<String, String> getBodies() {
         return bodies;
     }
+
+    public String getValue(String key) {
+        return bodies.get(key);
+    }
 }

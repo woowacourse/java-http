@@ -11,7 +11,7 @@
 
 ## 2, 3, 4단계 - 2차 피드백
 
-- [ ] get().get() 제거
+- [x] get().get() 제거
 - [x] depth 줄이기
     - LoginController
     - RequestHeader

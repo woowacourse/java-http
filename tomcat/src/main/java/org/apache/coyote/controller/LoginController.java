@@ -27,43 +27,42 @@ public class LoginController extends AbstractController {
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.getHttpCookie().hasJSESSIONID() && request.checkSession()) {
-            response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
+        if (request.hasJSESSIONID() && request.checkSession()) {
+            response.responseLine(request.getHttpVersion(), HttpStatusCode.FOUND)
                     .header(RedirectUrl.from(INDEX_HTML));
             log.info("[Login Controller] doGet - Exist Session ");
             return;
         }
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.OK)
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()));
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.OK)
+                .header(ContentType.from(request.getFilePath()))
+                .responseBody(ResponseBody.from(request.getFilePath()));
         log.info("[Login Controller] doGet - Not Exist Session ");
     }
 
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        Optional<User> user = InMemoryUserRepository.findByAccount(
-                request.getRequestBody().getBodies().get(ACCOUNT_KEY));
+        Optional<User> user = InMemoryUserRepository.findByAccount(request.getBodyValue(ACCOUNT_KEY));
         if (user.isPresent()) {
             log.info(user.get().toString());
             login(user.get(), request, response);
             return;
         }
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.FOUND)
                 .header(RedirectUrl.from(HTML_401_PAGE))
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
+                .header(ContentType.from(request.getFilePath()))
                 .header(request.getHttpCookie());
         log.info("[Login Controller] doPost - Not Found User Account ");
     }
 
     private void login(User user, HttpRequest request, HttpResponse response) {
-        if (user.checkPassword(request.getRequestBody().getBodies().get(PASSWORD_KEY))) {
+        if (user.checkPassword(request.getBodyValue(PASSWORD_KEY))) {
             Session session = request.getSession();
             session.setAttribute(USER_SESSION_KEY, user);
             SessionManager.add(session);
             request.getHttpCookie().add(session);
-            response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.FOUND)
+            response.responseLine(request.getHttpVersion(), HttpStatusCode.FOUND)
                     .header(RedirectUrl.from(INDEX_HTML))
-                    .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
+                    .header(ContentType.from(request.getFilePath()))
                     .header(request.getHttpCookie());
             log.info("[Login Controller] doPost - User Session Create & Login ");
             return;
@@ -73,6 +72,6 @@ public class LoginController extends AbstractController {
 
     @Override
     public boolean handle(HttpRequest httpRequest) {
-        return URL.equals(httpRequest.getRequestLine().getPath().getUri());
+        return URL.equals(httpRequest.getUri());
     }
 }

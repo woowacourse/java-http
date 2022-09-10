@@ -1,6 +1,6 @@
 package org.apache.coyote.domain.response;
 
-public class RedirectUrl implements Header{
+public class RedirectUrl implements Header {
 
     private final String value;
 

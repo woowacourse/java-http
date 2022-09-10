@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.domain.HttpCookie;
+import org.apache.coyote.domain.request.requestline.HttpVersion;
 import org.apache.coyote.domain.request.requestline.RequestLine;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -71,5 +72,29 @@ public class HttpRequest {
         }
         Optional<Object> user = session.get().getAttribute(SESSION_USER_KEY);
         return user.isPresent();
+    }
+
+    public String getFilePath() {
+        return requestLine.getFilePath();
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
+    public String getBodyValue(String key) {
+        return requestBody.getValue(key);
+    }
+
+    public boolean hasJSESSIONID() {
+        return httpCookie.hasJSESSIONID();
+    }
+
+    public HttpVersion getHttpVersion() {
+        return requestLine.getHttpVersion();
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
     }
 }

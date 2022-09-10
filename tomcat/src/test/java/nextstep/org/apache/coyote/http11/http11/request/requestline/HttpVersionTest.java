@@ -9,7 +9,7 @@ public class HttpVersionTest {
 
     @Test
     void getVersionTest() {
-        String message =  "HTTP/0.9";
+        String message = "HTTP/0.9";
 
         assertThat(HttpVersion.from(message)).isEqualTo(HttpVersion.HTTP_09);
     }

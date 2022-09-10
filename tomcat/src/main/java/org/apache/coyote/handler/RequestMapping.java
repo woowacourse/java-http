@@ -16,7 +16,7 @@ public class RequestMapping {
     private static final List<Controller> controllers = List.of(new LoginController(), new RegisterController());
 
     public Controller getController(HttpRequest httpRequest) {
-        log.info("[RequestMapping] {}, request mapping" + httpRequest.getRequestLine().getPath().getFilePath());
+        log.info("[RequestMapping] {}, request mapping" + httpRequest.getFilePath());
         return controllers.stream()
                 .filter(controller -> controller.handle(httpRequest))
                 .findFirst()

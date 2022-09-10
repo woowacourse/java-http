@@ -36,4 +36,16 @@ public class RequestLine {
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
+
+    public String getFilePath() {
+        return path.getFilePath();
+    }
+
+    public String getUri() {
+        return path.getUri();
+    }
+
+    public boolean isGet() {
+        return this.httpMethod.equals(HttpMethod.GET);
+    }
 }

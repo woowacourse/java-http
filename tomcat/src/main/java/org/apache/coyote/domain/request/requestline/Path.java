@@ -41,10 +41,10 @@ public class Path {
     public QueryParam getQueryParam() {
         return queryParam;
     }
-    
-    public String getFilePath(){
+
+    public String getFilePath() {
         if (!uri.contains(EXTENSION_REGEX) && !uri.equals(HOME_URI)) {
-            return uri +HTML_EXTENSION;
+            return uri + HTML_EXTENSION;
         }
         return uri;
     }

@@ -14,18 +14,18 @@ public class StaticFileController extends AbstractController {
 
     @Override
     void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("[StaticFileController] doGet - {}", request.getRequestLine().getPath().getFilePath());
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.OK)
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()));
+        log.info("[StaticFileController] doGet - {}", request.getFilePath());
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.OK)
+                .header(ContentType.from(request.getFilePath()))
+                .responseBody(ResponseBody.from(request.getFilePath()));
     }
 
     @Override
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        log.info("[StaticFileController] doPost - {}", request.getRequestLine().getPath().getFilePath());
-        response.responseLine(request.getRequestLine().getHttpVersion(), HttpStatusCode.OK)
-                .header(ContentType.from(request.getRequestLine().getPath().getFilePath()))
-                .responseBody(ResponseBody.from(request.getRequestLine().getPath().getFilePath()));
+        log.info("[StaticFileController] doPost - {}", request.getFilePath());
+        response.responseLine(request.getHttpVersion(), HttpStatusCode.OK)
+                .header(ContentType.from(request.getFilePath()))
+                .responseBody(ResponseBody.from(request.getFilePath()));
     }
 
     @Override

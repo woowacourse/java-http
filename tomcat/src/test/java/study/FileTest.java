@@ -4,14 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
@@ -43,8 +41,7 @@ class FileTest {
         final URL resource = getClass().getClassLoader().getResource(fileName);
         final Path path = Paths.get(resource.toURI());
 
-
-         BufferedReader br = Files.newBufferedReader(path);
+        BufferedReader br = Files.newBufferedReader(path);
 
         // todo
         final List<String> actual = br.lines().collect(Collectors.toList());

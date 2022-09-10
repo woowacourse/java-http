@@ -8,7 +8,6 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.util.HttpStartLineParser;
 import org.apache.coyote.http11.util.StringUtils;
 
 public class HttpRequest {
@@ -25,10 +24,10 @@ public class HttpRequest {
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         String startLine = bufferedReader.readLine();
-        HttpStartLineParser httpStartLineParser = new HttpStartLineParser(startLine);
-        this.httpMethod = httpStartLineParser.getHttpMethod();
-        this.httpUrl = httpStartLineParser.getHttpUrl();
-        this.queryParams = httpStartLineParser.getQueryParams();
+        RequestLine requestLine = new RequestLine(startLine);
+        this.httpMethod = requestLine.getHttpMethod();
+        this.httpUrl = requestLine.getHttpUrl();
+        this.queryParams = requestLine.getQueryParams();
         parseHeaders(bufferedReader);
         parseCookie();
 

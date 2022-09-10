@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.util.StringUtils;
 
-public class HttpStartLineParser {
+public class RequestLine {
 
     private static final String START_LINE_DELIMITER = " ";
     private static final String QUERY_STRING_DELIMITER = "?";
@@ -13,7 +14,7 @@ public class HttpStartLineParser {
     private final String httpUrl;
     private Map<String, String> queryParams = new HashMap<>();
 
-    public HttpStartLineParser(String startLine) {
+    public RequestLine(String startLine) {
         String[] startLines = startLine.split(START_LINE_DELIMITER);
         httpMethod = HttpMethod.from(startLines[0]);
         httpUrl = parseUrlWithQueryString(startLines[1]);

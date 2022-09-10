@@ -13,13 +13,13 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, ResponseEntity entity) {
-        entity.clone(userService.goLoginPage(request));
+    protected ResponseEntity doGet(HttpRequest request) {
+        return userService.goLoginPage(request);
     }
 
     @Override
-    protected void doPost(HttpRequest request, ResponseEntity entity) {
-        entity.clone(userService.login(request));
+    protected ResponseEntity doPost(HttpRequest request) {
+        return userService.login(request);
     }
 
     @Override

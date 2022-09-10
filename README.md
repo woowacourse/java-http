@@ -41,10 +41,12 @@ SessionManager 클래스에서 Session 컬렉션은 여러 스레드가 동시�
 - [x] 프린트문 제거
 - [x] GET, POST 메서드가 아닌 요청에 대한 예외 처리
 - [x] 이미 로그인한 사용자가 로그인 페이지에 접근했을 때 /index.html 로 리다이렉트 하는 기능 추가
+- [ ] 테스트 코드 추가
+- [ ] boolean 메소드가 아닌 문자열을 저장하기
 
 #### 1차 피드백
 
-- [ ] GET, POST 이외에 throw 처리하기, ResponseEntity 바로 리턴하기!
-- [ ] exception을 if나 try로 잡지 않고 핸들러처럼 처리하기
-    - [ ] getclass() 활용
+- [x] GET, POST 이외에 throw 처리하기, ResponseEntity 바로 리턴하기!
+- [ ] exception 을 if나 try 로 잡지 않고 핸들러처럼 처리하기
+    - [ ] `getclass()` 활용
 - [ ] 쿠키 있을 때, 쿠키 내부 유저 값 검증하기

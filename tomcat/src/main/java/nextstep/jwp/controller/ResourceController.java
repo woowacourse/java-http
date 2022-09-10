@@ -7,9 +7,9 @@ import servlet.mapping.ResponseEntity;
 public class ResourceController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, ResponseEntity entity) {
+    protected ResponseEntity doGet(HttpRequest request) {
         Path path = request.getPath();
-        entity.clone(ResponseEntity.ok(path.getPath()));
+        return ResponseEntity.ok(path.getPath());
     }
 
     @Override

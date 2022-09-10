@@ -2,7 +2,7 @@ package servlet.mapping;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import nextstep.jwp.controller.Controller;
+import servlet.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerMappingImpl implements HandlerMapping {
@@ -15,10 +15,7 @@ public class HandlerMappingImpl implements HandlerMapping {
     @Override
     public ResponseEntity map(HttpRequest request) {
         Controller controller = findController(request);
-
-        ResponseEntity entity = new ResponseEntity();
-        controller.service(request, entity);
-        return entity;
+        return controller.service(request);
     }
 
     private Controller findController(HttpRequest request) {

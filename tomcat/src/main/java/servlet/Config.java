@@ -1,7 +1,6 @@
 package servlet;
 
 import java.util.List;
-import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;

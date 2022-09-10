@@ -13,13 +13,13 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, ResponseEntity entity) {
-        entity.clone(ResponseEntity.ok("/register.html"));
+    protected ResponseEntity doGet(HttpRequest request) {
+        return ResponseEntity.ok("/register.html");
     }
 
     @Override
-    protected void doPost(HttpRequest request, ResponseEntity entity) {
-        entity.clone(userService.register(request));
+    protected ResponseEntity doPost(HttpRequest request) {
+        return userService.register(request);
     }
 
     @Override

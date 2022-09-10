@@ -7,8 +7,8 @@ import servlet.mapping.ResponseEntity;
 public class WelcomeController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, ResponseEntity entity) {
-        entity.clone(ResponseEntity.ok("/welcome.html"));
+    protected ResponseEntity doGet(HttpRequest request) {
+        return ResponseEntity.ok("/welcome.html");
     }
 
     @Override

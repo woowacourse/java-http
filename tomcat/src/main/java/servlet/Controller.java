@@ -1,10 +1,10 @@
-package nextstep.jwp.controller;
+package servlet;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import servlet.mapping.ResponseEntity;
 
 public interface Controller {
-    void service(HttpRequest request, ResponseEntity entity);
+    ResponseEntity service(HttpRequest request);
 
     boolean isMapped(HttpRequest request);
 }

@@ -15,10 +15,19 @@ public class HttpBody {
     private static final String DEFAULT_EXTENSION = "html";
     private static final String EXTENSION_DELIMITER = ".";
 
-    private String body;
+    private final String body;
+    private final Map<String, String> bodyToKeyValue;
 
     public HttpBody(final String body) {
         this.body = body;
+        this.bodyToKeyValue = bodyToMap(body);
+    }
+
+    private Map<String, String> bodyToMap(final String body) {
+        if (body.contains("&") && body.contains("=")) {
+            return PairConverter.toMap(body, "&", "=");
+        }
+        return Map.of();
     }
 
     public static HttpBody createByUrl(final String url) throws IOException {
@@ -26,9 +35,8 @@ public class HttpBody {
     }
 
     public String getValue(final String key) {
-        final Map<String, String> bodyMap = PairConverter.toMap(body, "&", "=");
-        if (bodyMap.containsKey(key)) {
-            return bodyMap.get(key);
+        if (bodyToKeyValue.containsKey(key)) {
+            return bodyToKeyValue.get(key);
         }
         throw new ElementNotFoundException();
     }

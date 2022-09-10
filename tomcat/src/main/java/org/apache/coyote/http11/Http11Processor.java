@@ -63,26 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             actual.append(line)
                     .append("\r\n");
         }
-//        System.out.println(actual);
-        actual.append("\r\n");
-        while (bufferedReader.ready()) {
-            char a = (char) bufferedReader.read();
-            actual.append(a);
-        }
-        return actual.toString();
-    }
 
-    private String getRequestMessage(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder actual = new StringBuilder();
-        String line;
-        while (true) {
-            line = bufferedReader.readLine();
-            if (line.equals("")) {
-                break;
-            }
-            actual.append(line)
-                    .append("\r\n");
-        }
         actual.append("\r\n");
         while (bufferedReader.ready()) {
             char a = (char) bufferedReader.read();

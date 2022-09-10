@@ -8,9 +8,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.controller.RequestMapper;
 import org.apache.coyote.handler.ErrorHandler;
+import org.apache.coyote.handler.ViewResolver;
 import org.apache.coyote.http11.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.ViewResolver;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

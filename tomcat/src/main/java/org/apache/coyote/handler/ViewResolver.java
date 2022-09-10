@@ -1,11 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.handler;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatus;
-import org.apache.util.ResourceUtil;
+import org.apache.coyote.util.ResourceUtil;
 
 public class ViewResolver {
 
@@ -45,11 +42,7 @@ public class ViewResolver {
     }
 
     private String getContentType(final String uri) {
-        try {
-            return Files.probeContentType(ResourceUtil.getPath(uri));
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
-        }
+        return ResourceUtil.getContentType(uri);
     }
 
     private String getResource(final String uri) {

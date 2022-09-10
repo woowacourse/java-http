@@ -8,9 +8,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.handler.ErrorHandler;
 import org.apache.coyote.handler.RequestMapping;
+import org.apache.coyote.handler.ViewResolver;
 import org.apache.coyote.http11.Dispatcher;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

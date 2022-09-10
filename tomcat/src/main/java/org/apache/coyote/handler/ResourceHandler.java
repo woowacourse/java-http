@@ -1,23 +1,16 @@
 package org.apache.coyote.handler;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Map;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.util.ResourceUtil;
+import org.apache.coyote.util.ResourceUtil;
 
 public class ResourceHandler implements Controller {
 
     @Override
     public String service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         Map<String, String> httpHeaders = httpRequest.getHttpHeaders();
-        try {
-            httpResponse.setContentType(Files.probeContentType(ResourceUtil.getPath(httpRequest.getRequestUri())));
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
-        }
+        httpResponse.setContentType(ResourceUtil.getContentType(httpRequest.getRequestUri()));
         return ResourceUtil.getResource(httpRequest.getRequestUri());
     }
 

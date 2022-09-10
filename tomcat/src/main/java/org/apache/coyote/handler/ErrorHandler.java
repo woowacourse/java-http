@@ -7,7 +7,7 @@ import org.apache.coyote.exception.InvalidRequestException;
 import org.apache.coyote.exception.UserNotFoundException;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatus;
-import org.apache.util.ResourceUtil;
+import org.apache.coyote.util.ResourceUtil;
 
 public class ErrorHandler {
 

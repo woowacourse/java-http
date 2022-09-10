@@ -1,10 +1,14 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.core.ServletContainer;
+import org.apache.catalina.support.Resource;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.apache.coyote.support.Request;
 import org.apache.coyote.support.RequestParser;
 import org.apache.coyote.support.Response;
+import org.apache.coyote.support.ResponseFlusher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +19,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String defaultErrorPage = "/404.html";
 
     private final Socket connection;
     private final ServletContainer servletContainer;
@@ -41,10 +46,19 @@ public class Http11Processor implements Runnable, Processor {
             final Response response = new Response(outputStream);
 
             servletContainer.findServlet(request.getUri())
-                    .ifPresent(servlet -> servlet.service(request, response));
+                    .ifPresentOrElse(servlet -> servlet.service(request, response),
+                            () -> makeErrorResponse(response));
 
+            ResponseFlusher.flush(response);
         } catch (Exception e) {
             log.info(e.getMessage());
         }
+    }
+
+    private void makeErrorResponse(final Response response) {
+        final Resource resource = new Resource(defaultErrorPage);
+        response.httpStatus(HttpStatus.NOT_FOUND)
+                .header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
+                .content(resource.read());
     }
 }

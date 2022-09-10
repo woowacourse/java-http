@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import org.apache.coyote.support.Request;
 import org.apache.coyote.support.Response;
-import nextstep.jwp.support.Resource;
+import org.apache.catalina.support.Resource;
 import org.apache.coyote.HttpHeader;
 
 public class ResourceController extends AbstractController {

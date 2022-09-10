@@ -8,7 +8,7 @@ import nextstep.jwp.http.QueryStringConverter;
 import org.apache.coyote.support.Request;
 import org.apache.coyote.support.Response;
 import nextstep.jwp.model.User;
-import nextstep.jwp.support.Resource;
+import org.apache.catalina.support.Resource;
 import nextstep.jwp.support.View;
 import nextstep.jwp.http.Session;
 import nextstep.jwp.http.SessionManager;

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.fixtures.ServletContainerFixtures;
+import org.apache.catalina.core.ServletContainer;
 import org.apache.coyote.HttpStatus;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -81,13 +82,29 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 파일을_찾지_못하면_BadRequest가_발생한다() throws IOException {
+    void 파일을_찾지_못하면_NOT_FOUND가_발생한다() throws IOException {
         // given
         final String httpRequest = 요청을_생성한다(GET, "/notfound.html", TEXT_HTML);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, ServletContainerFixtures.기본_URI로_생성());
         final String content = readContent("static/404.html");
-        final String expected = 응답을_생성한다(HttpStatus.BAD_REQUEST, "text/html", content);
+        final String expected = 응답을_생성한다(HttpStatus.NOT_FOUND, "text/html", content);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 요청을_처리할_서블릿을_찾지_못하면_404페이지를_반환한다() throws IOException {
+        // given
+        final String httpRequest = 요청을_생성한다(GET, "/", TEXT_HTML);
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, new ServletContainer());
+        final String content = readContent("static/404.html");
+        final String expected = 응답을_생성한다(HttpStatus.NOT_FOUND, "text/html", content);
 
         // when
         processor.process(socket);

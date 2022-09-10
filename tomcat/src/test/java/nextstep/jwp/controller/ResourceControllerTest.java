@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.CustomNotFoundException;
+import org.apache.catalina.exception.ResourceNotFoundException;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpMime;
 import org.apache.coyote.support.Request;
@@ -48,6 +48,6 @@ class ResourceControllerTest {
 
         // when, then
         assertThatThrownBy(() -> controller.service(request, new Response(new MockOutputStream())))
-                .isInstanceOf(CustomNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

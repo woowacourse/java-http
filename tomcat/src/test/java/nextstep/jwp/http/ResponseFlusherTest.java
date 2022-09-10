@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.support.Response;
+import org.apache.coyote.support.ResponseFlusher;
 import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;

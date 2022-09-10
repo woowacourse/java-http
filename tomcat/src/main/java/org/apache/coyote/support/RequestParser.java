@@ -1,6 +1,6 @@
 package org.apache.coyote.support;
 
-import nextstep.jwp.exception.FileAccessException;
+import org.apache.catalina.exception.FileAccessException;
 import org.apache.coyote.Headers;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpMethod;

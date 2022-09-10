@@ -1,7 +1,7 @@
-package nextstep.jwp.support;
+package org.apache.catalina.support;
 
-import nextstep.jwp.exception.FileAccessException;
-import nextstep.jwp.exception.CustomNotFoundException;
+import org.apache.catalina.exception.FileAccessException;
+import org.apache.catalina.exception.ResourceNotFoundException;
 import org.apache.coyote.HttpMime;
 
 import java.io.File;
@@ -29,12 +29,11 @@ public class Resource {
 
     private void validateExist(final URL resource) {
         if (resource == null) {
-            throw new CustomNotFoundException("자원을 찾지 못했음 : " + target);
+            throw new ResourceNotFoundException(target);
         }
     }
 
     private String read(final File file) {
-
         try {
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {

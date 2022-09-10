@@ -1,4 +1,4 @@
-package nextstep.jwp.exception;
+package org.apache.catalina.exception;
 
 public class FileAccessException extends RuntimeException {
 

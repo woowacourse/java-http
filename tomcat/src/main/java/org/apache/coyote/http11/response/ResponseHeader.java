@@ -7,16 +7,8 @@ public class ResponseHeader {
 
     private final Map<String, String> headers;
 
-    public ResponseHeader(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
-    public static ResponseHeader of(String contentType, String contentLength) {
-        Map<String, String> header = new HashMap<>();
-        header.put("Content-Type", contentType);
-        header.put("Content-Length", contentLength);
-
-        return new ResponseHeader(header);
+    public ResponseHeader() {
+        this.headers = new HashMap<>();
     }
 
     public void addHeader(String headerType, String headerValue) {

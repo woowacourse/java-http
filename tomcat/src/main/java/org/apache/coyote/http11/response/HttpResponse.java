@@ -28,42 +28,35 @@ public class HttpResponse {
     }
 
     public static HttpResponse ok(ContentType contentType, String responseBody) {
-        ResponseHeader header = ResponseHeader.of(
-                contentType.getContent(),
-                String.valueOf(responseBody.getBytes().length)
-        );
+        ResponseHeader header = new ResponseHeader();
+        header.addHeader("Content-Type", contentType.getContent());
+        header.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponse(HttpStatus.OK, header, responseBody);
     }
 
-    public static HttpResponse found(String url) throws IOException {
-        String responseBody = readFile(url);
-        ResponseHeader header = ResponseHeader.of(
-                ContentType.HTML.getContent(),
-                String.valueOf(responseBody.getBytes().length)
-        );
+    public static HttpResponse found(String url) {
+        ResponseHeader header = new ResponseHeader();
+        header.addHeader("Location", url);
 
-        return new HttpResponse(HttpStatus.FOUND, header, responseBody);
+        return new HttpResponse(HttpStatus.FOUND, header, "");
     }
 
     public static HttpResponse unAuthorized() throws IOException {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        String responseBody = readFile(status.getFilePath());
-        ResponseHeader header = ResponseHeader.of(
-                ContentType.findByUrl(status.getFilePath()).getContent(),
-                String.valueOf(responseBody.getBytes().length)
-        );
-
-        return new HttpResponse(status, header, responseBody);
+        return clientExceptionResponse(status);
     }
 
     public static HttpResponse notFound() throws IOException {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        return clientExceptionResponse(status);
+    }
+
+    private static HttpResponse clientExceptionResponse(HttpStatus status) throws IOException {
         String responseBody = readFile(status.getFilePath());
-        ResponseHeader header = ResponseHeader.of(
-                ContentType.findByUrl(status.getFilePath()).getContent(),
-                String.valueOf(responseBody.getBytes().length)
-        );
+        ResponseHeader header = new ResponseHeader();
+        header.addHeader("Content-Type", ContentType.findByUrl(status.getFilePath()).getContent());
+        header.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponse(status, header, responseBody);
     }

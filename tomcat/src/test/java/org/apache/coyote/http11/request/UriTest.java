@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-public class UriTest {
+class UriTest {
 
     @DisplayName("Uri로부터 경로를 파싱한다")
     @ParameterizedTest

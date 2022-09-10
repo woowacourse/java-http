@@ -9,11 +9,6 @@ import org.utils.ResourceGenerator;
 public class IndexController extends AbstractController {
 
     @Override
-    protected void doPost(final Request request, final Response response) throws Exception {
-        super.doPost(request, response);
-    }
-
-    @Override
     protected void doGet(final Request request, final Response response) throws Exception {
         final String responseBody = ResourceGenerator.getStaticResource("/");
 

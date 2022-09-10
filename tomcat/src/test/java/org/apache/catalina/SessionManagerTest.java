@@ -14,6 +14,6 @@ class SessionManagerTest {
         final String jsessionid = HttpCookie.makeJSESSIONID();
         final Session session = SessionManager.add(jsessionid);
 
-        assertThat(SessionManager.findSession(jsessionid)).isEqualTo(session);
+        assertThat(SessionManager.findSession(jsessionid).get()).isEqualTo(session);
     }
 }

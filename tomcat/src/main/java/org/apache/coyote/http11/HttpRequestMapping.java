@@ -4,20 +4,32 @@ import java.util.Objects;
 
 public class HttpRequestMapping {
 
-    private final String uri;
+    private final String url;
     private final String method;
 
-    public HttpRequestMapping(final String uri, final String method) {
-        this.uri = uri;
+    public HttpRequestMapping(final String url, final String method) {
+        this.url = url;
         this.method = method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getUrl() {
+        return url;
     }
 
     public String getMethod() {
         return method;
+    }
+
+    public boolean match(final HttpRequest httpRequest) {
+        return getUrlExceptQueryParam(httpRequest).equals(url) && httpRequest.getMethod().equals(method);
+    }
+
+    private String getUrlExceptQueryParam(final HttpRequest httpRequest) {
+        String url = httpRequest.getUrl();
+        if (QueryParam.isQueryParam(url)) {
+            return url.split("\\?")[0];
+        }
+        return httpRequest.getUrl();
     }
 
     @Override
@@ -29,11 +41,11 @@ public class HttpRequestMapping {
             return false;
         }
         final HttpRequestMapping that = (HttpRequestMapping) o;
-        return Objects.equals(getUri(), that.getUri()) && Objects.equals(getMethod(), that.getMethod());
+        return Objects.equals(getUrl(), that.getUrl()) && Objects.equals(getMethod(), that.getMethod());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUri(), getMethod());
+        return Objects.hash(getUrl(), getMethod());
     }
 }

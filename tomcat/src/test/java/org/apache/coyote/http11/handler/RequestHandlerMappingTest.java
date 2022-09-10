@@ -2,6 +2,9 @@ package org.apache.coyote.http11.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.HttpBody;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,7 +20,11 @@ class RequestHandlerMappingTest {
             "GET /css/style.css HTTP/1.1 : StaticResourceController"}, delimiterString = " : "
     )
     void matchController(String startLine, String controllerName) {
-        assertThat(RequestHandlerMapping.getHandler(startLine)
+        final HttpHeader httpHeader = new HttpHeader(startLine, "");
+        final HttpBody httpBody = new HttpBody("");
+        final HttpRequest httpRequest = new HttpRequest(httpHeader, httpBody);
+
+        assertThat(RequestHandlerMapping.getHandler(httpRequest)
                 .getClass()
                 .getSimpleName())
                 .isEqualTo(controllerName);

@@ -198,7 +198,7 @@ class Http11ProcessorTest {
         final String cookie = output.split("\r\n")[1];
         final String sessionId = cookie.split("JSESSIONID=")[1].trim();
 
-        final Session session = SessionManager.findSession(sessionId);
+        final Session session = SessionManager.findSession(sessionId).get();
         assertThat(session.hasAttribute("user")).isTrue();
         assertThat(session.getId()).isEqualTo(sessionId);
     }

@@ -1,8 +1,10 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.DuplicateUserException;
+import nextstep.jwp.exception.InvalidUserException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
@@ -24,6 +26,7 @@ public class RegisterController extends AbstractController {
         String email = queries.get("email");
 
         validateUserInformation(account, password, email);
+        validateExistAccount(account);
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -31,7 +34,14 @@ public class RegisterController extends AbstractController {
 
     private void validateUserInformation(final String account, final String password, final String email) {
         if (account == null || password == null || email == null) {
-            throw new IllegalArgumentException();
+            throw new InvalidUserException("가입하려는 유저 정보중 입력되지 않은 값이 있습니다.");
+        }
+    }
+
+    private void validateExistAccount(final String account) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent()) {
+            throw new DuplicateUserException();
         }
     }
 }

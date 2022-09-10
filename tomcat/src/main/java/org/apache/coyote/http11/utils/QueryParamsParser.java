@@ -9,10 +9,14 @@ public class QueryParamsParser {
     private static final int PARAM_VALUE_INDEX = 1;
 
     public static HashMap<String, String> parseByBody(final String requestBody) {
-        final HashMap<String, String> data = new HashMap<>();
-        final String[] params = requestBody.split("&");
-        initData(data, params);
-        return data;
+        try {
+            final HashMap<String, String> data = new HashMap<>();
+            final String[] params = requestBody.split("&");
+            initData(data, params);
+            return data;
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            return new HashMap<>();
+        }
     }
 
     private static void initData(final Map<String, String> data, final String[] params) {

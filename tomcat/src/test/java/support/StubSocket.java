@@ -11,16 +11,14 @@ import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
 
+    private static final int PORT = 8080;
+
     private final String request;
     private final ByteArrayOutputStream outputStream;
 
     public StubSocket(final String request) {
         this.request = request;
         this.outputStream = new ByteArrayOutputStream();
-    }
-
-    public StubSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
     }
 
     public InetAddress getInetAddress() {
@@ -32,7 +30,7 @@ public class StubSocket extends Socket {
     }
 
     public int getPort() {
-        return 8080;
+        return PORT;
     }
 
     public InputStream getInputStream() {

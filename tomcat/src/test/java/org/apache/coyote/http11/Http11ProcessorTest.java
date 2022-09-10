@@ -18,7 +18,9 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final String httpRequest = "GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n";
+
+        final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
 
         // when

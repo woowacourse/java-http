@@ -6,7 +6,9 @@ public enum ResourceSuffix {
 
     HTML(".html"),
     CSS(".css"),
-    JAVASCRIPT(".js");
+    JAVASCRIPT(".js"),
+    IMAGE(".svg"),
+    ;
 
     private final String value;
 

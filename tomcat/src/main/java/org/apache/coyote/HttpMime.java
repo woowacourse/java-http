@@ -13,7 +13,7 @@ public enum HttpMime {
     TEXT_JAVASCRIPT("text/javascript"),
     IMAGE_PNG("image/png"),
     IMAGE_JPEG("image/jpeg"),
-    ;
+    IMAGE_SVG("image/svg+xml");
 
     private final String value;
 

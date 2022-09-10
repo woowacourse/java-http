@@ -63,4 +63,8 @@ public class Resource {
             throw new FileAccessException();
         }
     }
+
+    public String getTarget() {
+        return target;
+    }
 }

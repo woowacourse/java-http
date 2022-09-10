@@ -11,7 +11,7 @@ public class RequestInfo {
     private final String queryString;
 
     public RequestInfo(final HttpMethod httpMethod, final String uri) {
-        this(httpMethod, uri, null);
+        this(httpMethod, uri, "");
     }
 
     public RequestInfo(final HttpMethod httpMethod, final String uri, final String queryString) {

@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
-import servlet.Controller;
+import servlet.handler.Controller;
 import servlet.mapping.ResponseEntity;
 
 public class AbstractController implements Controller {

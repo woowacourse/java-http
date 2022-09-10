@@ -2,7 +2,7 @@ package servlet.mapping;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import servlet.Controller;
+import servlet.handler.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerMappingImpl implements HandlerMapping {

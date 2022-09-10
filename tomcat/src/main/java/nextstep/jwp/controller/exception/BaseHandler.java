@@ -1,9 +1,14 @@
 package nextstep.jwp.controller.exception;
 
+import java.util.List;
 import org.apache.coyote.http11.response.element.HttpStatus;
+import servlet.handler.ExceptionHandler;
 import servlet.mapping.ResponseEntity;
 
 public class BaseHandler implements ExceptionHandler {
+
+    private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(Exception.class);
+
 
     @Override
     public void service(Exception e, ResponseEntity entity) {
@@ -11,7 +16,7 @@ public class BaseHandler implements ExceptionHandler {
     }
 
     @Override
-    public boolean isMapped(Exception e) {
-        return true;
+    public List<Class<? extends Exception>> getExceptionClass() {
+        return EXCEPTION_CLASS;
     }
 }

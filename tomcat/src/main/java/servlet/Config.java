@@ -5,11 +5,12 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.controller.WelcomeController;
-import nextstep.jwp.controller.exception.ExceptionHandler;
 import nextstep.jwp.controller.exception.MethodNotAllowedHandler;
 import nextstep.jwp.controller.exception.NotFoundHandler;
 import nextstep.jwp.controller.exception.UnauthorizedHandler;
 import nextstep.jwp.service.UserService;
+import servlet.handler.Controller;
+import servlet.handler.ExceptionHandler;
 
 public class Config {
 

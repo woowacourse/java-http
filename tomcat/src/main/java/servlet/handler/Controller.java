@@ -1,4 +1,4 @@
-package servlet;
+package servlet.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import servlet.mapping.ResponseEntity;

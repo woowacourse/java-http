@@ -8,7 +8,7 @@ import java.util.Map;
 public class RequestBody {
 
     private static final String BODY_REGEX = "&";
-    private static final String BODY_DELIMETER = "=";
+    private static final String BODY_DELIMITER = "=";
     private static final int BODY_KEY = 0;
     private static final int BODY_VALUE = 1;
 
@@ -32,7 +32,7 @@ public class RequestBody {
         }
         String[] bodies = body.split(BODY_REGEX);
         for (String data : bodies) {
-            String[] keyAndValue = data.split(BODY_DELIMETER);
+            String[] keyAndValue = data.split(BODY_DELIMITER);
             requestBody.put(keyAndValue[BODY_KEY], keyAndValue[BODY_VALUE]);
         }
         return requestBody;

@@ -33,7 +33,7 @@ public class HttpBody {
         throw new ElementNotFoundException();
     }
 
-    protected static String getContent(final String url) throws FileNotFoundException, IOException {
+    private static String getContent(final String url) throws FileNotFoundException, IOException {
         final URL resource = HttpBody.class
                 .getClassLoader()
                 .getResource(RESOURCE_PATH + url + getExtension(url));

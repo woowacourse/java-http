@@ -8,7 +8,7 @@ import nextstep.jwp.interceptor.Interceptor;
 import nextstep.jwp.interceptor.LoginInterceptor;
 import nextstep.jwp.support.View;
 import org.apache.catalina.core.Servlet;
-import org.apache.catalina.exception.ResourceNotFoundException;
+import org.apache.catalina.exception.NotFoundException;
 import org.apache.catalina.support.Resource;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpStatus;
@@ -48,7 +48,7 @@ public class DispatcherServlet implements Servlet {
             controller.service(request, response);
         } catch (UnauthorizedException e) {
             makeRedirectResponse(View.UNAUTHORIZED.getValue(), response);
-        } catch (CustomNotFoundException | ResourceNotFoundException e) {
+        } catch (CustomNotFoundException | NotFoundException e) {
             makeErrorResponse(HttpStatus.NOT_FOUND, View.NOT_FOUND, response);
         } catch (Exception e) {
             makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR, response);

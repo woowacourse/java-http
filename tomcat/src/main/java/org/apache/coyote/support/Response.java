@@ -24,11 +24,6 @@ public class Response {
         this.outputStream = outputStream;
     }
 
-    public Response httpVersion(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
-        return this;
-    }
-
     public Response httpStatus(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
         return this;

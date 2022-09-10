@@ -20,16 +20,8 @@ public class RequestInfo {
         this.queryString = queryString;
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     public String getUri() {
         return this.uri;
-    }
-
-    public String getQueryString() {
-        return queryString;
     }
 
     public boolean sameHttpMethod(final HttpMethod httpMethod) {

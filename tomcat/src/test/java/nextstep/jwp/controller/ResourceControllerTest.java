@@ -1,12 +1,12 @@
 package nextstep.jwp.controller;
 
-import org.apache.catalina.exception.ResourceNotFoundException;
+import nextstep.jwp.http.MockOutputStream;
+import org.apache.catalina.exception.NotFoundException;
+import org.apache.coyote.Headers;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpMime;
 import org.apache.coyote.support.Request;
 import org.apache.coyote.support.RequestInfo;
-import org.apache.coyote.Headers;
-import nextstep.jwp.http.MockOutputStream;
 import org.apache.coyote.support.Response;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +48,6 @@ class ResourceControllerTest {
 
         // when, then
         assertThatThrownBy(() -> controller.service(request, new Response(new MockOutputStream())))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 }

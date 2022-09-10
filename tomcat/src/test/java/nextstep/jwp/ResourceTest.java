@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import org.apache.catalina.exception.ResourceNotFoundException;
+import org.apache.catalina.exception.NotFoundException;
 import org.apache.catalina.support.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +25,7 @@ class ResourceTest {
         // given, when. then
         final Resource resource = new Resource("/notfound.html");
         assertThatThrownBy(resource::read)
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @ParameterizedTest

@@ -5,20 +5,19 @@ import nextstep.jwp.dto.LoginRequest;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.QueryStringConverter;
-import org.apache.coyote.support.Request;
-import org.apache.coyote.support.Response;
-import nextstep.jwp.model.User;
-import org.apache.catalina.support.Resource;
-import nextstep.jwp.support.View;
 import nextstep.jwp.http.Session;
 import nextstep.jwp.http.SessionManager;
+import nextstep.jwp.model.User;
+import nextstep.jwp.support.View;
+import org.apache.catalina.support.Resource;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpStatus;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
@@ -41,19 +40,19 @@ public class LoginController extends AbstractController {
     @Override
     public void doPost(final Request request, final Response response) {
         final LoginRequest loginRequest = convert(request.getContent());
-        final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
-        if (wrappedUser.isPresent()) {
-            final User user = wrappedUser.get();
-            if (user.isSamePassword(loginRequest.getPassword())) {
-                log.debug(user.toString());
-                final Session session = makeSession(user);
-                final HttpCookie responseCookie = makeCookie(session);
-                response.header(HttpHeader.SET_COOKIE, responseCookie.parse())
-                        .header(HttpHeader.LOCATION, View.INDEX.getValue())
-                        .httpStatus(HttpStatus.FOUND);
-                return;
-            }
+        final User user = InMemoryUserRepository.findByAccount(loginRequest.getAccount())
+                .orElseThrow(UnauthorizedException::new);
+
+        if (user.isSamePassword(loginRequest.getPassword())) {
+            log.debug(user.toString());
+            final Session session = makeSession(user);
+            final HttpCookie responseCookie = makeCookie(session);
+            response.header(HttpHeader.SET_COOKIE, responseCookie.parse())
+                    .header(HttpHeader.LOCATION, View.INDEX.getValue())
+                    .httpStatus(HttpStatus.FOUND);
+            return;
         }
+
         throw new UnauthorizedException();
     }
 

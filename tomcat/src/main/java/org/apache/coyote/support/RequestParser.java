@@ -1,6 +1,7 @@
 package org.apache.coyote.support;
 
 import org.apache.catalina.exception.FileAccessException;
+import org.apache.catalina.exception.NotFoundException;
 import org.apache.coyote.Headers;
 import org.apache.coyote.HttpHeader;
 import org.apache.coyote.HttpMethod;
@@ -36,7 +37,7 @@ public class RequestParser {
         if (httpMethod.isPresent()) {
             return new RequestInfo(httpMethod.get(), getUri(line), getQueryString(line));
         }
-        throw new RuntimeException("요청 정보를 찾을 수 없음");
+        throw new NotFoundException("요청 정보를 찾을 수 없음");
     }
 
     private static String getUri(final String line) {

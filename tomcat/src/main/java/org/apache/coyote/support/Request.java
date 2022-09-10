@@ -18,10 +18,6 @@ public class Request {
         return requestInfo.getUri();
     }
 
-    public String getQueryString() {
-        return requestInfo.getQueryString();
-    }
-
     public RequestInfo getRequestInfo() {
         return requestInfo;
     }

@@ -24,10 +24,6 @@ public class Session {
         values.put(key, value);
     }
 
-    public void removeAttribute(final String key) {
-        values.remove(key);
-    }
-
     public void invalidate() {
         values.clear();
         final SessionManager sessionManager = SessionManager.get();

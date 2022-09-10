@@ -1,7 +1,7 @@
 package org.apache.catalina.support;
 
 import org.apache.catalina.exception.FileAccessException;
-import org.apache.catalina.exception.ResourceNotFoundException;
+import org.apache.catalina.exception.NotFoundException;
 import org.apache.coyote.HttpMime;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class Resource {
 
     private void validateExist(final URL resource) {
         if (resource == null) {
-            throw new ResourceNotFoundException(target);
+            throw new NotFoundException(target + " 자원을 찾을 수 없음");
         }
     }
 

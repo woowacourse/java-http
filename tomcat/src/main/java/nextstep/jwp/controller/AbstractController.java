@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.io.FileNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -15,7 +16,7 @@ public abstract class AbstractController implements Controller {
     protected static final String INDEX_PAGE_URL = "./index.html";
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws UncheckedServletException {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasPostMethod()) {
             doPost(request, response);
         }

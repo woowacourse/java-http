@@ -1,6 +1,5 @@
 package org.apache.catalina.core;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.controller.ResourceController;
@@ -11,7 +10,7 @@ public class RequestMapping {
 
     private final Map<String, Controller> controllers = new HashMap<>();
 
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         Controller controller = findController(request.getPath());
         controller.service(request, response);
     }

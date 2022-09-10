@@ -1,11 +1,11 @@
-package org.apache.coyote.controller;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.handler.AbstractController;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
 public class HomeController extends AbstractController {
-
+    
     private static final String DEFAULT_MESSAGE = "Hello world!";
 
     @Override

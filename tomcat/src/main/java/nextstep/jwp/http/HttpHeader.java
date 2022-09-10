@@ -44,17 +44,22 @@ public class HttpHeader {
         this.values.put(key, value);
     }
 
-    public String createHeaderTemplate() {
-        return values.entrySet().stream()
-                .map(header -> header.getKey() + HEADER_SEPARATOR + header.getValue() + BLANK)
-                .collect(Collectors.joining(LINE_SEPARATOR));
-    }
-
-    public String getValues(final String key) {
-        return values.get(key);
+    public boolean hasContentLength() {
+        String contentLength = values.get("Content-Length");
+        return contentLength != null && !contentLength.equals("0");
     }
 
     public String getCookie() {
         return values.get("Cookie");
+    }
+
+    public String getContentLength() {
+        return values.get("Content-Length");
+    }
+
+    public String createHeaderTemplate() {
+        return values.entrySet().stream()
+                .map(header -> header.getKey() + HEADER_SEPARATOR + header.getValue() + BLANK)
+                .collect(Collectors.joining(LINE_SEPARATOR));
     }
 }

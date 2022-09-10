@@ -9,19 +9,19 @@ import nextstep.jwp.http.HttpHeader;
 
 public class HttpRequest {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String EMPTY_REQUEST_BODY = " ";
 
     private final HttpRequestLine httpRequestLine;
-    private final HttpHeader httpHeaders;
-    private final HttpRequestBody httpRequestBody;
+    private final HttpHeader httpHeader;
+    private final String httpRequestBody;
 
     public HttpRequest(final BufferedReader bufferReader) throws IOException {
         this.httpRequestLine = HttpRequestLine.from(bufferReader.readLine());
-        this.httpHeaders = new HttpHeader(readHttpHeaders(bufferReader));
-        this.httpRequestBody = new HttpRequestBody(bufferReader, httpHeaders.getValues(CONTENT_LENGTH));
+        this.httpHeader = new HttpHeader(readHeaders(bufferReader));
+        this.httpRequestBody = readBody(bufferReader, httpHeader);
     }
 
-    private List<String> readHttpHeaders(final BufferedReader bufferReader) throws IOException {
+    private List<String> readHeaders(final BufferedReader bufferReader) throws IOException {
         List<String> headers = new ArrayList<>();
 
         String headerLine = bufferReader.readLine();
@@ -29,6 +29,16 @@ public class HttpRequest {
             headers.add(headerLine);
         }
         return headers;
+    }
+
+    private String readBody(final BufferedReader bufferReader, final HttpHeader httpHeader) throws IOException {
+        if (!httpHeader.hasContentLength()) {
+            return EMPTY_REQUEST_BODY;
+        }
+        int length = Integer.parseInt(httpHeader.getContentLength());
+        char[] buffer = new char[length];
+        bufferReader.read(buffer, 0, length);
+        return new String(buffer);
     }
 
     public String findContentType() {
@@ -49,10 +59,10 @@ public class HttpRequest {
     }
 
     public String getCookie() {
-        return httpHeaders.getCookie();
+        return httpHeader.getCookie();
     }
 
     public String getBody() {
-        return httpRequestBody.getBody();
+        return httpRequestBody;
     }
 }

@@ -16,13 +16,6 @@ public class HttpResponse {
         this.responseHeader = new ArrayList<>();
     }
 
-    public HttpResponse(final StatusLine statusLine,
-                        final ResponseBody responseBody) {
-        this.statusLine = statusLine;
-        this.responseBody = responseBody;
-        this.responseHeader = new ArrayList<>();
-    }
-
     public HttpResponse responseLine(HttpVersion httpVersion, HttpStatusCode httpStatusCode) {
         this.statusLine = StatusLine.of(httpVersion, httpStatusCode);
         return this;

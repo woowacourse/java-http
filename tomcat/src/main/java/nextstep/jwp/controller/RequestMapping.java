@@ -4,13 +4,13 @@ import java.util.stream.Stream;
 
 import org.apache.support.Controller;
 
-import nextstep.jwp.service.AuthService;
+import nextstep.jwp.Container;
 
 public enum RequestMapping {
 
-    INDEX("/", new IndexController()),
-    LOGIN("/login", new LoginController(new AuthService())),
-    REGISTER("/register", new RegisterController(new AuthService())),
+    INDEX("/", Container.indexController),
+    LOGIN("/login", Container.loginController),
+    REGISTER("/register", Container.registerController),
     ;
 
     private static final ResourceController DEFAULT_CONTROLLER = new ResourceController();

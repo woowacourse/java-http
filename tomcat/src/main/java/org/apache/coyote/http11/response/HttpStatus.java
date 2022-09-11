@@ -1,8 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-
 public enum HttpStatus {
 
     OK(200, "OK"),
@@ -16,11 +13,7 @@ public enum HttpStatus {
         this.message = message;
     }
 
-    public static String getStatusCodeAndMessage(int code) {
-        return Arrays.stream(values())
-                .filter(statusCode -> statusCode.code == code)
-                .map(statusCode -> statusCode.code + " " + statusCode.message)
-                .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+    public String getStatusCodeAndMessage() {
+        return this.code + " " + this.message;
     }
 }

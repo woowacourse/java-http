@@ -8,6 +8,6 @@ class HttpStatusTest {
 
     @Test
     void getCodeAndMessage() {
-        assertThat(HttpStatus.getStatusCodeAndMessage(200)).isEqualTo("200 OK");
+        assertThat(HttpStatus.OK.getStatusCodeAndMessage()).isEqualTo("200 OK");
     }
 }

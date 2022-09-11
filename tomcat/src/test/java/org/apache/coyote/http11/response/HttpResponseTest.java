@@ -13,7 +13,7 @@ class HttpResponseTest {
     @Test
     void createResponse() throws IOException {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        httpResponse.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         httpResponse.addContentTypeHeader(ContentType.findContentType("/index.html"));
         httpResponse.addBodyFromFile("/index.html");
 
@@ -31,7 +31,7 @@ class HttpResponseTest {
     @Test
     void addHeader() {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        httpResponse.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         httpResponse.addContentTypeHeader(ContentType.findContentType("/index.html"));
         httpResponse.addBodyFromFile("/index.html");
 

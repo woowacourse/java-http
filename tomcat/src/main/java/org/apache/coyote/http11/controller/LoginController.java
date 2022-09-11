@@ -29,14 +29,14 @@ public class LoginController extends AbstractController {
                 .orElseThrow(NoSuchElementException::new);
 
         if (!user.checkPassword(queryParameters.find("password"))) {
-            response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
+            response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
             response.addBodyFromFile("/401.html");
             return;
         }
 
         log.info("user : " + user);
         addCookieToHeader(request, response, user);
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
+        response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
         response.addBodyFromFile("/index.html");
     }
 
@@ -74,13 +74,13 @@ public class LoginController extends AbstractController {
     }
 
     private void createIndexPageResponse(HttpResponse response) {
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
+        response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBodyFromFile("/index.html");
     }
 
     private void createLoginPageResponse(String path, HttpResponse response) {
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBodyFromFile(path.concat("." + ContentType.HTML.getExtension()));
     }

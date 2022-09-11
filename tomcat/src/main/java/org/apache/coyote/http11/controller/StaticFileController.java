@@ -10,7 +10,7 @@ public class StaticFileController extends AbstractController {
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         if (ContentType.isExistExtension(request.getPath())) {
-            response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+            response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
             response.addContentTypeHeader(ContentType.findContentType(request.getPath()));
             response.addBodyFromFile(request.getPath());
         }

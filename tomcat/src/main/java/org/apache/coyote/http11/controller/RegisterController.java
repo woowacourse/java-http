@@ -24,14 +24,14 @@ public class RegisterController extends AbstractController {
     }
 
     private void createIndexPageResponse(HttpResponse response) {
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBodyFromFile("/index.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBodyFromFile(request.getPath().concat("." + ContentType.HTML.getExtension()));
     }

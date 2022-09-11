@@ -9,7 +9,7 @@ public class RootController extends AbstractController {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        response.addStatusLine(HttpStatus.getStatusCodeAndMessage(200));
+        response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
         response.addBody("Hello world!");
     }

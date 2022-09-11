@@ -26,13 +26,12 @@ public class HttpRequest {
 
     private static List<String> extractHeaders(BufferedReader bufferedReader) throws IOException {
         List<String> headers = new ArrayList<>();
-        while (true) {
-            String line = bufferedReader.readLine();
-            if (line == null || line.isBlank()) {
-                break;
-            }
+
+        String line;
+        while (!(line = bufferedReader.readLine()).isBlank()) {
             headers.add(line);
         }
+
         return headers;
     }
 

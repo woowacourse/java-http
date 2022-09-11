@@ -40,7 +40,7 @@ public enum StaticHandlerMethod {
         final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
 
-        if (dto.fileName.contains("login") && isAlreadyLogin(request)) {
+        if (isLoginPage(dto) && isAlreadyLogin(request)) {
             alreadyLoginEvent(request, response);
             return;
         }
@@ -48,6 +48,10 @@ public enum StaticHandlerMethod {
         response.addStatus(HttpStatus.OK)
                 .add(HttpMessage.CONTENT_TYPE, contentType)
                 .body(responseBody);
+    }
+
+    private boolean isLoginPage(final FileDto dto) {
+        return dto.fileName.contains("login");
     }
 
     private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {

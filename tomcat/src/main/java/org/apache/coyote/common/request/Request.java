@@ -1,5 +1,6 @@
 package org.apache.coyote.common.request;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,7 @@ import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.header.Cookie;
 import org.apache.coyote.common.header.Header;
-import org.apache.coyote.common.request.parser.UrlParser;
+import org.apache.coyote.common.request.parser.UriParser;
 import org.apache.coyote.common.request.parser.bodyparser.BodyParserMapper;
 
 public class Request {
@@ -21,7 +22,6 @@ public class Request {
     private static final int METHOD = 0;
     private static final int URL = 1;
     private static final int HTTP_VERSION = 2;
-    private static final String PATH_QUERY_STRING_DELIMITER = "?";
     private static final String HEADER_BODY_DELIMITER = "";
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
 
@@ -39,12 +39,11 @@ public class Request {
         final String[] parsedRequest = rawRequest.split("\r\n");
         final String[] requestStartLine = parsedRequest[START_LINE].split(" ");
 
-        final String url = requestStartLine[URL];
+        final URI uri = URI.create(requestStartLine[URL]);
         this.method = RequestMethod.of(requestStartLine[METHOD]);
         this.httpVersion = HttpVersion.of(requestStartLine[HTTP_VERSION]);
-        final int queryStringDelimiterIndex = url.indexOf(PATH_QUERY_STRING_DELIMITER);
-        this.path = UrlParser.getPath(url, queryStringDelimiterIndex);
-        this.queryString = UrlParser.getQueryString(url, queryStringDelimiterIndex);
+        this.path = UriParser.getPath(uri);
+        this.queryString = UriParser.getQueryString(uri);
 
         final int headerBodyDelimiterIndex = getHeaderBodyDelimiterIndex(parsedRequest);
         this.headers = parseHeaders(parsedRequest, headerBodyDelimiterIndex);

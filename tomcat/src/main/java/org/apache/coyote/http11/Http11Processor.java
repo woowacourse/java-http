@@ -1,19 +1,16 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Map;
-import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.Optional;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,86 +32,31 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            final var request = readRequestHeader(bufferedReader);
-            final var response = getResponse(HttpRequest.from(request));
+            final var httpRequest = HttpRequest.read(bufferedReader);
+            final var httpResponse = getHttpResponse(httpRequest);
 
-            outputStream.write(response.getBytes());
+            String httpResponse1 = httpResponse.getHttpResponse();
+            outputStream.write(httpResponse1.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder header = new StringBuilder();
+    private HttpResponse getHttpResponse(final HttpRequest httpRequest) throws Exception {
+        Optional<RequestMapping> requestMapping = RequestMapping.findController(httpRequest);
 
-        while (bufferedReader.ready()) {
-            header.append(bufferedReader.readLine())
-                    .append("\r\n");
+        if (requestMapping.isEmpty()) {
+            return HttpResponse.notFound();
         }
 
-        return header.toString();
-    }
-
-    private String getResponse(final HttpRequest httpRequest) throws IOException {
-        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
-    }
-
-    private String getResponse(String url, final Map<String, String> requestParam) throws IOException {
-        if ("/".equals(url)) {
-            final var responseBody = "Hello world!";
-
-            return createResponse(ContentType.HTML, responseBody);
-        }
-
-        if ("/index.html".equals(url)) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.HTML, responseBody);
-        }
-
-        if ("/login".equals(url)) {
-            final String responseBody = readFile(url + ".html");
-
-            User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
-                    .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저입니다."));
-            if (user.checkPassword(requestParam.get("password"))) {
-                log.info(user.toString());
-            }
-
-            return createResponse(ContentType.HTML, responseBody);
-        }
-
-        if (url.contains(".css")) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.CSS, responseBody);
-        }
-
-        if (url.contains(".js")) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.JAVASCRIPT, responseBody);
-        }
-
-        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
-    }
-
-    private String readFile(String url) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + url);
-        return Files.readString(new File(Objects.requireNonNull(resource).getFile()).toPath());
-    }
-
-    private String createResponse(ContentType contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        RequestMapping controller = requestMapping.get();
+        return controller.process(httpRequest);
     }
 }

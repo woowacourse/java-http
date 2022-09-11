@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.stream.Stream;
-import org.apache.coyote.http11.exception.HttpMethodNotSupportException;
+import org.apache.coyote.http11.exception.UnsupportedHttpMethodException;
 
 public enum HttpMethod {
     GET("get"),
@@ -17,7 +17,7 @@ public enum HttpMethod {
         return Stream.of(values())
                 .filter(it -> it.value.equalsIgnoreCase(value))
                 .findFirst()
-                .orElseThrow(() -> new HttpMethodNotSupportException(value));
+                .orElseThrow(() -> new UnsupportedHttpMethodException(value));
     }
 
     public boolean isPost() {

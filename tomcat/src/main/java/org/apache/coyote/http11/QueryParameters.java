@@ -37,7 +37,7 @@ public class QueryParameters {
         result.put(pair.get(KEY_INDEX), pair.get(VALUE_INDEX));
     }
 
-    public Map<String, String> getValue() {
-        return value;
+    public String find(String key) {
+        return value.get(key);
     }
 }

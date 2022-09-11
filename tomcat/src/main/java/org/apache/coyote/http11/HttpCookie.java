@@ -36,7 +36,7 @@ public class HttpCookie {
         values.put(pair.get(KEY_INDEX), pair.get(VALUE_INDEX));
     }
 
-    public Map<String, String> getValues() {
-        return values;
+    public String find(String key) {
+        return values.get(key);
     }
 }

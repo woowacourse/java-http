@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -25,12 +24,11 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         QueryParameters queryParameters = new QueryParameters(request.getRequestBody());
-        Map<String, String> mappedQuery = queryParameters.getValue();
 
-        User user = InMemoryUserRepository.findByAccount(mappedQuery.get("account"))
+        User user = InMemoryUserRepository.findByAccount(queryParameters.find("account"))
                 .orElseThrow(NoSuchElementException::new);
 
-        if (!user.checkPassword(mappedQuery.get("password"))) {
+        if (!user.checkPassword(queryParameters.find("password"))) {
             response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
             response.addBodyFromFile("/401.html");
             return;
@@ -68,7 +66,7 @@ public class LoginController extends AbstractController {
     private boolean isNotNullSession(HttpRequest request) throws IllegalAccessException {
         if (request.getRequestHeaders().isExistCookie()) {
             HttpCookie cookie = request.getRequestHeaders().getCookie();
-            String jsessionid = cookie.getValues().get("JSESSIONID");
+            String jsessionid = cookie.find("JSESSIONID");
             Session session = sessionManager.findSession(jsessionid);
             return session != null;
         }

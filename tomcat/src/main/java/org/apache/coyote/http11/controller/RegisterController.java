@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.QueryParameters;
@@ -14,9 +13,11 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         QueryParameters queryParameters = new QueryParameters(request.getRequestBody());
-        Map<String, String> mappedQuery = queryParameters.getValue();
 
-        User user = new User(mappedQuery.get("account"), mappedQuery.get("password"), mappedQuery.get("email"));
+        User user = new User(
+                queryParameters.find("account"),
+                queryParameters.find("password"),
+                queryParameters.find("email"));
         InMemoryUserRepository.save(user);
 
         createIndexPageResponse(response);

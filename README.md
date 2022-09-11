@@ -59,3 +59,14 @@ HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다
 
 그리고 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
 ```
+
+## 3단계 요구사항
+
+- [ ] HttpRequest 클래스 구현하기
+- [ ] HttpResponse 클래스 구현하기
+- [ ] Controller 인터페이스 추가하기
+
+## 4단계 요구사항
+
+- [ ] Executors로 Thread Pool 적용
+- [ ] 동시성 컬렉션 사용하기

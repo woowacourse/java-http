@@ -45,7 +45,7 @@ public class Connector implements Runnable {
                 maxThreads,
                 keepAliveTime,
                 timeUnit,
-                new LinkedBlockingQueue<>()
+                new LinkedBlockingQueue<>(acceptCount)
         );
     }
 

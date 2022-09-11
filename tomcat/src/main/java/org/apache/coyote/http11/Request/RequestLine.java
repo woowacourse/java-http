@@ -1,5 +1,6 @@
-package nextstep.jwp.model;
+package org.apache.coyote.http11.Request;
 
+import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.model.Parameters;
 
 public class RequestLine {

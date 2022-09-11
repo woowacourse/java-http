@@ -1,7 +1,6 @@
-package nextstep.jwp.model;
+package org.apache.coyote.http11.model;
 
 import java.util.Map;
-import org.apache.coyote.http11.model.Parameters;
 
 public class HttpCookie {
 

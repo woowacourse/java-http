@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.coyote.http11.Response;
 
 import java.util.HashMap;
 import java.util.Map;

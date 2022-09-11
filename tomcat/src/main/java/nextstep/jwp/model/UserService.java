@@ -4,70 +4,70 @@ import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_REGISTER_EXCEPTI
 
 import java.util.Map;
 import java.util.Optional;
-
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.InvalidHttpRequestException;
-
 public class UserService {
 
-	private static final Logger log = LoggerFactory.getLogger(UserService.class);
-	private static final String ID = "account";
-	private static final String PASSWORD = "password";
-	private static final String EMAIL = "email";
-	private static Long autoIncrementCount = 1L;
+    private static final UserService INSTANCE = new UserService();
 
-	private UserService() {
-	}
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final String ID = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+    private static Long autoIncrementCount = 1L;
 
-	public static boolean login(HttpRequest request) {
-		if (request.hasCookie() && SessionManager.hasSession(request.getCookie())) {
-			return findUserBySession(request);
-		}
+    private UserService() {
+    }
 
-		return false;
-	}
+    public boolean findUserBySession(HttpRequest request) {
+        return SessionManager.hasSession(request.getCookie());
+    }
 
-	public static boolean findUserBySession(HttpRequest request) {
-		return SessionManager.hasSession(request.getCookie());
-	}
+    public User login(Map<String, String> params) {
+        if (params.isEmpty()) {
+            return null;
+        }
+        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get(ID));
+        if (optionalUser.isPresent()) {
+            return findUser(params, optionalUser);
+        }
+        return null;
+    }
 
-	public static User login(Map<String, String> params) {
-		if (params.isEmpty()) {
-			return null;
-		}
-		final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get(ID));
-		if (optionalUser.isPresent()) {
-			User user = optionalUser.get();
-			if (user.checkPassword(params.get(PASSWORD))) {
-				loggingInfoUser(params, user);
-				return user;
-			}
-		}
+    private User findUser(Map<String, String> params, Optional<User> optionalUser) {
+        User user = optionalUser.get();
+        if (user.checkPassword(params.get(PASSWORD))) {
+            loggingInfoUser(params, user);
+            return user;
+        }
+        return null;
+    }
 
-		return null;
-	}
+    public User register(Map<String, String> params) {
+        if (params.isEmpty() || params.size() < 3) {
+            throw new InvalidHttpRequestException(INVALID_HTTP_REGISTER_EXCEPTION);
+        }
+        User user = getUser(params);
+        InMemoryUserRepository.save(user);
+        return user;
+    }
 
-	public static User register(Map<String, String> params) {
-		if (params.isEmpty() || params.size() < 3) {
-			throw new InvalidHttpRequestException(INVALID_HTTP_REGISTER_EXCEPTION);
-		}
-		User user = getUser(params);
-		InMemoryUserRepository.save(user);
-		return user;
-	}
+    private User getUser(Map<String, String> params) {
+        return new User(++autoIncrementCount, params.get(ID), params.get(PASSWORD), params.get(EMAIL));
+    }
 
-	private static User getUser(Map<String, String> params) {
-		return new User(++autoIncrementCount, params.get(ID), params.get(PASSWORD), params.get(EMAIL));
-	}
+    private void loggingInfoUser(Map<String, String> params, User user) {
+        if (user.checkPassword(params.get(PASSWORD))) {
+            log.info(" 로그인 성공! 아이디 : " + user.getAccount());
+        }
+    }
 
-	private static void loggingInfoUser(Map<String, String> params, User user) {
-		if (user.checkPassword(params.get(PASSWORD))) {
-			log.info(" 로그인 성공! 아이디 : " + user.getAccount());
-		}
-	}
+    public static UserService getInstance() {
+        return INSTANCE;
+    }
 }

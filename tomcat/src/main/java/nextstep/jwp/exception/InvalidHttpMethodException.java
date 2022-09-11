@@ -1,14 +1,14 @@
 package nextstep.jwp.exception;
 
 public class InvalidHttpMethodException extends RuntimeException {
-	private final String message;
+    private final String message;
 
-	public InvalidHttpMethodException(ExceptionType e) {
-		this.message = e.getMessage();
-	}
+    public InvalidHttpMethodException(ExceptionType e) {
+        this.message = e.getMessage();
+    }
 
-	@Override
-	public String getMessage() {
-		return message;
-	}
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }

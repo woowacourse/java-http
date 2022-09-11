@@ -4,5 +4,5 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Handler {
-	void handle(HttpRequest httpRequest, HttpResponse httpResponse);
+    void handle(final HttpRequest httpRequest, final HttpResponse httpResponse);
 }

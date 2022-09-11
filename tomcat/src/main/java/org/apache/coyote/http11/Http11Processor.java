@@ -8,11 +8,7 @@ import java.net.Socket;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpCookie;
-import org.apache.coyote.http11.request.HttpHeaders;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void submitResponse(OutputStream outputStream, HttpResponse response) throws IOException {
-        String httpResponse = response.to();
+        String httpResponse = response.toResponse();
         outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }

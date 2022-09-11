@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.request.HttpCookie;
 
@@ -11,12 +10,6 @@ public class HttpResponse {
     private String resource;
 
     public HttpResponse() {
-    }
-
-    public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String resource) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.resource = resource;
     }
 
     public HttpResponse setStatusLine(StatusLine statusLine) {
@@ -43,8 +36,7 @@ public class HttpResponse {
         this.headers.put("Set-Cookie", values + " " + cookie.getResponse());
     }
 
-    public String to() throws IOException {
-
+    public String toResponse() {
         String statusLineResponse = statusLine.getResponse();
         String headersResponse = headers.getHeader().entrySet()
                 .stream()

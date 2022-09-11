@@ -5,6 +5,10 @@ import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class ResponseHeaders {
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+
     private final Map<String, String> header;
 
     private ResponseHeaders(Map<String, String> header) {
@@ -13,13 +17,13 @@ public class ResponseHeaders {
 
     public static ResponseHeaders create(HttpRequest request, String resource) {
         Map<String, String> mp = new LinkedHashMap<>();
-        mp.put("Content-Type", ContentType.from(request.getPath()));
-        mp.put("Content-Length", String.valueOf(resource.getBytes().length));
+        mp.put(CONTENT_TYPE, ContentType.from(request.getPath()));
+        mp.put(CONTENT_LENGTH, String.valueOf(resource.getBytes().length));
         return new ResponseHeaders(mp);
     }
 
     public String getCookieValue() {
-        return header.get("Set-Cookie");
+        return header.get(SET_COOKIE);
     }
 
     public void put(String key, String value) {

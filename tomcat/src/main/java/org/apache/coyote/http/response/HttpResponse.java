@@ -16,18 +16,18 @@ public class HttpResponse {
         this(HttpVersion.HTTP11, httpStatus, responseBody, HttpHeader.init(contentType, responseBody));
     }
 
-    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String responseBody,
-                        final String redirectUrl) {
-        this(HttpVersion.HTTP11, httpStatus, responseBody,
-                HttpHeader.init(contentType, responseBody, redirectUrl));
-    }
-
     private HttpResponse(final HttpVersion version, final HttpStatus httpStatus, final String responseBody,
                          final HttpHeader httpHeader) {
         this.version = version;
         this.httpStatus = httpStatus;
         this.responseBody = responseBody;
         this.httpHeader = httpHeader;
+    }
+
+    public static HttpResponse createResponseByRedirectUrl(final HttpStatus httpStatus, final ContentType contentType,
+                                                           final String responseBody, final String redirectUrl) {
+        return new HttpResponse(HttpVersion.HTTP11, httpStatus, responseBody,
+                HttpHeader.init(contentType, responseBody, redirectUrl));
     }
 
     public String convertTemplate() {

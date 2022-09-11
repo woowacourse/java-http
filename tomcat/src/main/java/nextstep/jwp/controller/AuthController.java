@@ -30,7 +30,7 @@ public class AuthController extends AbstractController {
     }
 
     private HttpResponse redirectByAlreadyLogin(final String responseBody) {
-        return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
+        return HttpResponse.createResponseByRedirectUrl(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
     }
 
     @Override
@@ -45,15 +45,16 @@ public class AuthController extends AbstractController {
         final String password = request.getParameter("password");
 
         if (account.isEmpty() || password.isEmpty() || !isSuccessLogin(account, password)) {
-            return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, LOGIN_PAGE);
+            return HttpResponse.createResponseByRedirectUrl(HttpStatus.FOUND, ContentType.HTML, responseBody,
+                    LOGIN_PAGE);
         }
         final User user = new User(account, password);
         return successLoginResponse(user, responseBody);
     }
 
     private HttpResponse successLoginResponse(final User user, final String responseBody) {
-        final HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody,
-                INDEX_PAGE);
+        final HttpResponse httpResponse = HttpResponse.createResponseByRedirectUrl(HttpStatus.FOUND, ContentType.HTML,
+                responseBody, INDEX_PAGE);
         final Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session);

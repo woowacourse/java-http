@@ -25,7 +25,7 @@ public class UserController extends AbstractController {
         final Path path = PathUtils.load(url + HTML_EXTENSION);
         saveUser(request);
         final String responseBody = new String(Files.readAllBytes(path));
-        return new HttpResponse(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
+        return HttpResponse.createResponseByRedirectUrl(HttpStatus.FOUND, ContentType.HTML, responseBody, INDEX_PAGE);
     }
 
     private void saveUser(final HttpRequest request) {
@@ -40,7 +40,7 @@ public class UserController extends AbstractController {
         }
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        log.info("회웝가입 성공 user={}", user);
+        log.info("회원가입 성공 user={}", user);
     }
 
     @Override

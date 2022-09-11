@@ -13,7 +13,8 @@ public class PathUtils {
     }
 
     public static Path load(String path) throws URISyntaxException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource(RESOURCE_ROOT_DIRECTORY_PATH + path);
+        final ClassLoader classLoader = PathUtils.class.getClassLoader();
+        URL resource = classLoader.getResource(RESOURCE_ROOT_DIRECTORY_PATH + path);
         if (resource == null) {
             throw new IllegalArgumentException(path + "가 존재하지 않습니다.");
         }

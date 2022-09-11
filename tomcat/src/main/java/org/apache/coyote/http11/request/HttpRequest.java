@@ -21,15 +21,15 @@ public class HttpRequest {
         this.cookies = cookies;
     }
 
-    public Session generateSession() {
-        final Session session = Session.generate();
-        SessionManager.add(session);
-        return session;
-    }
-
     public Session generateSession(final Map<String, Object> attributes) {
         final Session session = generateSession();
         session.setAttributes(attributes);
+        return session;
+    }
+
+    private Session generateSession() {
+        final Session session = Session.generate();
+        SessionManager.add(session);
         return session;
     }
 

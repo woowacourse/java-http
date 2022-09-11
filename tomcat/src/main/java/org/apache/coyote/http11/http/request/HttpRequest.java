@@ -20,14 +20,14 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest of(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
         if (startLine == null) {
             throw new IllegalArgumentException("request가 비어있습니다.");
         }
 
-        final HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.of(startLine);
-        final HttpHeaders headers = HttpHeaders.of(bufferedReader);
+        final HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(startLine);
+        final HttpHeaders headers = HttpHeaders.from(bufferedReader);
         final String body = readBody(bufferedReader, headers);
 
         return new HttpRequest(httpRequestStartLine, headers, body);

@@ -22,7 +22,7 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
-    public static HttpHeaders of(final BufferedReader bufferedReader) throws IOException {
+    public static HttpHeaders from(final BufferedReader bufferedReader) throws IOException {
         return new HttpHeaders(readAllHeaders(bufferedReader));
     }
 

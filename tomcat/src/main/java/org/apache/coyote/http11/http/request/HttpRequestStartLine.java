@@ -18,15 +18,15 @@ public class HttpRequestStartLine {
         this.httpVersion = httpVersion;
     }
 
-    public static HttpRequestStartLine of(final String startLine) {
+    public static HttpRequestStartLine from(final String startLine) {
         return parseStartLine(startLine);
     }
 
     private static HttpRequestStartLine parseStartLine(final String startLine) {
         final List<String> startLineInfos = parseStartLineInfos(startLine);
-        final HttpMethod method = HttpMethod.of(startLineInfos.get(0));
+        final HttpMethod method = HttpMethod.from(startLineInfos.get(0));
         final String path = startLineInfos.get(1);
-        final HttpVersion version = HttpVersion.of(startLineInfos.get(2));
+        final HttpVersion version = HttpVersion.from(startLineInfos.get(2));
 
         return new HttpRequestStartLine(method, path, version);
     }

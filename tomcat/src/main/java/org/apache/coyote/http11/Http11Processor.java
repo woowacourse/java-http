@@ -37,6 +37,8 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final HttpResponse response = handle(httpRequest);
 
+            log.info(httpRequest.getRequestLine().getPath()); // thread 확인용 log
+
             outputStream.write(response.toResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {

@@ -68,5 +68,5 @@ HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다
 
 ## 4단계 요구사항
 
-- [ ] Executors로 Thread Pool 적용
+- [x] Executors로 Thread Pool 적용
 - [ ] 동시성 컬렉션 사용하기

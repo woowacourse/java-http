@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.handler.StaticResourceHandler.readFile;
+
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;

@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.handler.StaticResourceHandler.readFile;
+
 import java.io.IOException;
 import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;

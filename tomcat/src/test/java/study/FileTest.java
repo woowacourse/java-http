@@ -44,4 +44,15 @@ class FileTest {
 
         assertThat(actual).containsOnly("nextstep");
     }
+
+    @DisplayName("Files.probeContentType() 메서드를 테스트한다.")
+    @Test
+    void probeContentType() throws IOException {
+//        String uri = "/index.html";
+//        final URL resource = getClass().getClassLoader().getResource(fileName);
+//        assert resource != null;
+//        final Path path = new File(resource.getPath()).toPath();
+        final String contentType = Files.probeContentType(Path.of("/index.css"));
+        System.out.println("contentType = " + contentType);
+    }
 }

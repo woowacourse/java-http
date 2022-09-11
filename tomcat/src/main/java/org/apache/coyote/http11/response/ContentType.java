@@ -1,31 +1,17 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public enum ContentType {
+public class ContentType {
 
-    DEFAULT("html", "text/html"),
-    CSS("css", "text/css"),
-    JS("js", "text/javascript"),
-    CSV("svg", "image/svg+xml"),
-    ICO("ico", "image/x-icon"),
-    JSON("json", "Application/json"),
-    ;
-
-    private final String type;
-    private final String name;
-
-    ContentType(String type, String name) {
-        this.type = type;
-        this.name = name;
-    }
-
-    public static String find(String uri) {
-        ContentType foundContentType = Arrays.stream(ContentType.values())
-                .filter(contentType -> uri.endsWith(contentType.type))
-                .findAny()
-                .orElse(DEFAULT);
-
-        return foundContentType.name;
+    public static String find(String uri) throws IOException {
+        final Path path = Path.of(uri);
+        String contentType = Files.probeContentType(path);
+//        if(contentType == null) {
+//            contentType = "text/html";
+//        }
+        return contentType;
     }
 }

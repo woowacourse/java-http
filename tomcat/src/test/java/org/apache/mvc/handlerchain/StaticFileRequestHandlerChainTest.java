@@ -40,7 +40,5 @@ class StaticFileRequestHandlerChainTest {
                 body);
 
         assertThat(response.getAsString()).contains(expected);
-
-        Collections.synchronizedMap()
     }
 }

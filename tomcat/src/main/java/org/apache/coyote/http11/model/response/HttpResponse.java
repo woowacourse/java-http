@@ -3,7 +3,8 @@ package org.apache.coyote.http11.model.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.model.session.Cookie;
+import nextstep.jwp.controller.support.FileReader;
+import org.apache.coyote.http11.model.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -36,6 +37,11 @@ public class HttpResponse {
         return new HttpResponse(ResponseLine.of(statusCode, version), headers, "");
     }
 
+    public static HttpResponse createMethodNotAllowed(final HttpRequest httpRequest, final Class<?> classes) {
+        String body = FileReader.getFile("/405.html", classes);
+        return HttpResponse.of(ResponseStatusCode.METHOD_NOT_ALLOWED, httpRequest.getVersion(), ContentType.HTML, body);
+    }
+
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, contentType.getType() + ";charset=utf-8 ");
@@ -43,8 +49,8 @@ public class HttpResponse {
         return headers;
     }
 
-    public void addCookie(Cookie cookie) {
-        headers.put(SET_COOKIE, cookie.getCookieToString());
+    public void addCookie(String jSessionCookieValue) {
+        headers.put(SET_COOKIE, jSessionCookieValue);
     }
 
     public void addLocationHeader(final String location) {

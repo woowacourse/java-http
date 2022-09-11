@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -57,15 +58,15 @@ public class HttpRequest {
                 .getBody();
     }
 
-    public String getCookieKey() {
-        return headers.getCookieKey();
-    }
-
     public boolean matchTarget(final String input) {
         return requestLine.matchTarget(input);
     }
 
     public String getVersion() {
         return requestLine.getVersion();
+    }
+
+    public Optional<String> getJSessionCookieValue() {
+        return headers.getJSessionToString();
     }
 }

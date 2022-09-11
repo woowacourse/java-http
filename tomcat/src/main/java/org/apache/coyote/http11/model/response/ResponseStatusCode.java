@@ -5,6 +5,7 @@ public enum ResponseStatusCode {
     UNAUTHORIZED("401"),
     FOUND("302"),
     NOT_FOUND("404"),
+    METHOD_NOT_ALLOWED("405"),
     ;
 
     private final String statusCode;

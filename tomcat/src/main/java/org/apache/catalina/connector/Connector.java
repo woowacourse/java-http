@@ -71,9 +71,7 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            if (threadPoolExecutor.getQueue().size() < DEFAULT_ACCEPT_COUNT) {
-                process(serverSocket.accept());
-            }
+            process(serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

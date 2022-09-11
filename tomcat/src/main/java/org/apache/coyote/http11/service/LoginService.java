@@ -19,6 +19,7 @@ public class LoginService {
     private static final String FAIL_URL = "/401.html";
 
     private static final LoginService loginService = new LoginService();
+    private static final String USER = "user";
 
     private LoginService() {
     }
@@ -56,7 +57,7 @@ public class LoginService {
 
     private LoginResult saveSession(User user) {
         SessionManager sessionManager = new SessionManager();
-        Session session = new Session(UUID.randomUUID().toString());
+        Session session = new Session(USER);
         session.setAttribute(session.getId(), user);
         sessionManager.add(session);
         return new LoginResult(SUCCESS_URL, session);

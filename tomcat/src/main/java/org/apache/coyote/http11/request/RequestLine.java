@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.support.HttpMethod;
 
 public class RequestLine {
 

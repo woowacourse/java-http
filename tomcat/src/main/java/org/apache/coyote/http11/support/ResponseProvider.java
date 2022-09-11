@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.support;
 
 import nextstep.jwp.LoginFailureException;
 import nextstep.jwp.controller.Controller;
@@ -10,7 +10,7 @@ public class ResponseProvider {
 
     public static HttpResponse createResponse(HttpRequest httpRequest) throws Exception {
         final String requestUri = httpRequest.getRequestUri();
-        final Controller controller = ControllerMapping.find(requestUri);
+        final Controller controller = RequestMapping.find(requestUri);
 
         try {
             final HttpResponse response = controller.getResponse(httpRequest);

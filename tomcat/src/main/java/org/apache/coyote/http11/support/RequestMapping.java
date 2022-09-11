@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.support;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -9,7 +9,7 @@ import nextstep.jwp.controller.HomePageController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 
-public enum ControllerMapping {
+public enum RequestMapping {
     LOGIN(url -> url.contains("/login"), controller -> new LoginController()),
     REGISTER(url -> url.contains("/register"), controller -> new RegisterController()),
     HOME(url -> url.contains("/"), controller -> new HomePageController());
@@ -17,7 +17,7 @@ public enum ControllerMapping {
     private final Predicate<String> findUrl;
     private final Function<String, AbstractController> findController;
 
-    ControllerMapping(Predicate<String> findUrl, Function<String, AbstractController> findController) {
+    RequestMapping(Predicate<String> findUrl, Function<String, AbstractController> findController) {
         this.findUrl = findUrl;
         this.findController = findController;
     }
@@ -27,7 +27,7 @@ public enum ControllerMapping {
                 .findController.apply(requestUri);
     }
 
-    private static ControllerMapping findUrl(String requestUri) {
+    private static RequestMapping findUrl(String requestUri) {
         return Arrays.stream(values())
                 .filter(controllerMapper -> controllerMapper.findUrl.test(requestUri))
                 .findAny()

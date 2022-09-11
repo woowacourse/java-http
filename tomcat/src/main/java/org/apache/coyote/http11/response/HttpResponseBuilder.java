@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.HeaderField.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HeaderField.CONTENT_TYPE;
-import static org.apache.coyote.http11.HeaderField.LOCATION;
+import static org.apache.coyote.http11.support.HeaderField.CONTENT_LENGTH;
+import static org.apache.coyote.http11.support.HeaderField.CONTENT_TYPE;
+import static org.apache.coyote.http11.support.HeaderField.LOCATION;
 
 import java.io.IOException;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.support.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponseBuilder {

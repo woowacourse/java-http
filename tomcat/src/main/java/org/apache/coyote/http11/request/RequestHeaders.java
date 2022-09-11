@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.HeaderField.COOKIE;
+import static org.apache.coyote.http11.support.HeaderField.COOKIE;
 
 import java.util.Map;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.support.HttpCookie;
 
 public class RequestHeaders {
 

@@ -9,6 +9,8 @@ import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.ResponseHeaders;
+import org.apache.coyote.http11.support.HttpStatus;
+import org.apache.coyote.http11.support.ResponseProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

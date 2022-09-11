@@ -1,13 +1,13 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.HeaderField.SET_COOKIE;
+import static org.apache.coyote.http11.support.HeaderField.SET_COOKIE;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.support.HttpCookie;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;

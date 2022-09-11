@@ -64,8 +64,12 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public RequestHeader getRequestHeader() {

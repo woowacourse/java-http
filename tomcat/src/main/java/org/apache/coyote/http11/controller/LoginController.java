@@ -40,7 +40,7 @@ public final class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        final String path = Path.from(request.getRequestLine().getPath());
+        final String path = Path.from(request.getPath());
 
         final Session session = getSession(request);
         if (session != null) {
@@ -48,7 +48,7 @@ public final class LoginController extends AbstractController {
             return HttpResponse.found("/index.html");
         }
 
-        final String body = Files.readFile(Path.from(request.getRequestLine().getPath()));
+        final String body = Files.readFile(Path.from(request.getPath()));
         final String contentType = getContentType(path);
 
         return HttpResponse.ok(body)
@@ -63,8 +63,8 @@ public final class LoginController extends AbstractController {
         return SESSION_MANAGER.findSession(jSessionId);
     }
 
-    private String getJSessionId(final HttpRequest httpRequest) {
-        final String cookieHeader = httpRequest.getRequestHeader().get(Headers.COOKIE);
+    private String getJSessionId(final HttpRequest request) {
+        final String cookieHeader = request.getRequestHeader().get(Headers.COOKIE);
         if (cookieHeader == null) {
             return null;
         }

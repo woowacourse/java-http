@@ -34,10 +34,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final HttpResponse response = handle(httpRequest);
+            final HttpRequest request = HttpRequest.from(bufferedReader);
+            final HttpResponse response = handle(request);
 
-            log.info(httpRequest.getRequestLine().getPath()); // thread 확인용 log
+            log.info(request.getPath()); // thread 확인용 log
 
             outputStream.write(response.toResponse().getBytes());
             outputStream.flush();
@@ -46,10 +46,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        final String path = httpRequest.getRequestLine().getPath();
+    private HttpResponse handle(final HttpRequest request) throws IOException {
+        final String path = request.getPath();
         final Controller controller = RequestMapping.fromPath(path);
 
-        return controller.service(httpRequest);
+        return controller.service(request);
     }
 }

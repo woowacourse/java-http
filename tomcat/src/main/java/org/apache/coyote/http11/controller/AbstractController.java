@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(final HttpRequest request) throws IOException {
-        final String method = request.getRequestLine().getMethod();
+        final String method = request.getMethod();
         if (method.equals("GET")) {
             return doGet(request);
         }

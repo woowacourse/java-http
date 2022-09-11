@@ -35,14 +35,14 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String request = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final var socket = new StubSocket(request);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when

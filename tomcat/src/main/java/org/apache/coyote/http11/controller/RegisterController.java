@@ -28,7 +28,7 @@ public final class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        final String path = Path.from(request.getRequestLine().getPath());
+        final String path = Path.from(request.getPath());
         final String body = Files.readFile(path);
         return HttpResponse.ok(body);
     }

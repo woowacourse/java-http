@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import org.apache.coyote.StatusCode;
+import org.apache.coyote.common.StatusCode;
 
 public class StatusLine {
 

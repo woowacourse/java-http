@@ -2,7 +2,7 @@ package org.apache.coyote.response;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.ContentType;
+import org.apache.coyote.common.ContentType;
 
 public class ResponseHeader {
 
@@ -17,6 +17,10 @@ public class ResponseHeader {
         values.put("Content-Type", contentType.getValue());
         values.put("Content-Length", length);
         return new ResponseHeader(values);
+    }
+
+    public void setSession(final String sessionId) {
+        values.put("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
     @Override

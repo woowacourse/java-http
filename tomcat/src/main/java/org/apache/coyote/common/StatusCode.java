@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.common;
 
 public enum StatusCode {
 

@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HttpHeader {
+public class RequestHeader {
 
     private final Map<String, String> values;
 
-    private HttpHeader(final Map<String, String> values) {
+    private RequestHeader(final Map<String, String> values) {
         this.values = values;
     }
 
-    public static HttpHeader parse(final String lines) {
-        return new HttpHeader(toMap(List.of(lines.split("\r\n"))));
+    public static RequestHeader parse(final String lines) {
+        return new RequestHeader(toMap(List.of(lines.split("\r\n"))));
     }
 
     private static Map<String, String> toMap(List<String> lines) {

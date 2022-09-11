@@ -1,8 +1,9 @@
 package org.apache.coyote.response;
 
 import java.io.IOException;
-import org.apache.coyote.StaticFile;
-import org.apache.coyote.StatusCode;
+import org.apache.coyote.common.StaticFile;
+import org.apache.coyote.common.StatusCode;
+import org.apache.coyote.session.Session;
 
 public class HttpResponse {
 
@@ -30,6 +31,10 @@ public class HttpResponse {
         final String content = StaticFile.load(path);
         this.header = ResponseHeader.of(StaticFile.parseContentType(path), String.valueOf(content.getBytes().length));
         this.body = new ResponseBody(content);
+    }
+
+    public void setSession(final Session session) {
+        header.setSession(session.getId());
     }
 
     @Override

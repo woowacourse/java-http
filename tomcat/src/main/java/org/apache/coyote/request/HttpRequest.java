@@ -3,14 +3,16 @@ package org.apache.coyote.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.coyote.common.HttpCookie;
+import org.apache.coyote.session.Session;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeader header;
+    private final RequestHeader header;
     private final RequestBody body;
 
-    private HttpRequest(final RequestLine requestLine, final HttpHeader header, final RequestBody body) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeader header, final RequestBody body) {
         this.requestLine = requestLine;
         this.header = header;
         this.body = body;
@@ -18,7 +20,7 @@ public class HttpRequest {
 
     public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
-        final HttpHeader header = HttpHeader.parse(splitHeader(bufferedReader));
+        final RequestHeader header = RequestHeader.parse(splitHeader(bufferedReader));
         final RequestBody body = RequestBody.parse(splitBody(bufferedReader, header));
         return new HttpRequest(requestLine, header, body);
     }
@@ -32,14 +34,14 @@ public class HttpRequest {
         return lines.toString();
     }
 
-    private static String splitBody(final BufferedReader bufferedReader, final HttpHeader header) throws IOException {
+    private static String splitBody(final BufferedReader bufferedReader, final RequestHeader header) throws IOException {
         final int contentLength = calculateContentLength(header);
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    private static int calculateContentLength(final HttpHeader header) {
+    private static int calculateContentLength(final RequestHeader header) {
         final String contentLength = header.get("Content-Length");
         if (contentLength == null) {
             return 0;
@@ -49,6 +51,11 @@ public class HttpRequest {
 
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
         return requestLine.isSameHttpMethod(httpMethod);
+    }
+
+    public Session getSession() {
+        return new Session(HttpCookie.parse(header.get("Cookie"))
+                .getSessionId());
     }
 
     public String getPath() {

@@ -44,26 +44,6 @@ class LoginControllerTest {
 //        outputStream.close();
 //    }
 
-    private static String 로그인_요청_메시지(String requestLine, String body) {
-        return String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080 ",
-                "Accept: text/html;q=0.1 ",
-                "Connection: keep-alive",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body);
-    }
-
-    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
-        HttpRequest httpRequest;
-        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            httpRequest = HttpRequest.of(bufferedReader);
-        }
-        return httpRequest;
-    }
-
     @Test
     void LoginController는_존재하지않는_account가_요청되면_예외를_던진다() throws Exception {
         // given
@@ -72,7 +52,7 @@ class LoginControllerTest {
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
         LoginController loginController = new LoginController();
 
@@ -89,16 +69,13 @@ class LoginControllerTest {
         final String body = "account=gogo&password=invalidpassword";
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
         LoginController loginController = new LoginController();
 
         // when & then
         assertThatThrownBy(() -> loginController.service(httpRequest, httpResponse))
                 .isInstanceOf(InvocationTargetException.class);
-
-        outputStream.close();
     }
 
     @Test
@@ -106,8 +83,7 @@ class LoginControllerTest {
         // given
         final String requestMessage = 로그인_요청_메시지("GET /login HTTP/1.1 ", "");
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
         LoginController loginController = new LoginController();
 
@@ -118,9 +94,27 @@ class LoginControllerTest {
 
         // then
         assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.of(outputStream, httpRequest).ok(ContentType.HTML, body));
+                .isEqualTo(HttpResponse.from(httpRequest).ok(ContentType.HTML, body));
+    }
 
-        outputStream.close();
+    private String 로그인_요청_메시지(String requestLine, String body) {
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+    }
+
+    private HttpRequest httpRequest_생성(String requestMessage) throws IOException {
+        HttpRequest httpRequest;
+        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            httpRequest = HttpRequest.of(bufferedReader);
+        }
+        return httpRequest;
     }
 
     private String getBody(String uri) throws IOException {

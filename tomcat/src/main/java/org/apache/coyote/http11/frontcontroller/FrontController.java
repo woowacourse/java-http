@@ -26,7 +26,6 @@ public class FrontController {
             Exception targetException = getTargetException(exception);
             CONTROLLER_ADVICE.handleException(httpResponse, targetException);
         }
-        httpResponse.write();
     }
 
     private static Controller getController(HttpRequest httpRequest) {

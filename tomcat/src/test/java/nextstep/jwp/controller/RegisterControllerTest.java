@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,18 +20,8 @@ import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {
 
-    private static String 요청_메시지(String requestLine, String body) {
-        return String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080 ",
-                "Accept: text/html;q=0.1 ",
-                "Connection: keep-alive",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body);
-    }
 
-//    @Test
+    //    @Test
 //    void registerController는_회원가입을_진행할_수_있다() throws Exception {
 //        // given
 //        String body = "account=gugo&password=password&email=hkkang@woowahan.com";
@@ -52,32 +41,19 @@ class RegisterControllerTest {
 //
 //        outputStream.close();
 //    }
-
-    private static HttpRequest httpRequest_생성(String requestMessage) throws IOException {
-        HttpRequest httpRequest;
-        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            httpRequest = HttpRequest.of(bufferedReader);
-        }
-        return httpRequest;
-    }
-
     @Test
     void registerController는_회원가입에_실패하면_예외를_던진다() throws Exception {
         // given
         String body = "account=gugu&password=&email=hkkang@woowahan.com";
         String requestMessage = 요청_메시지("POST /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
         RegisterController registerController = new RegisterController();
 
         // when
         assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
                 .isInstanceOf(InvocationTargetException.class);
-
-        outputStream.close();
     }
 
     @Test
@@ -86,20 +62,38 @@ class RegisterControllerTest {
         String body = "";
         String requestMessage = 요청_메시지("GET /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
         RegisterController registerController = new RegisterController();
 
         // when
         registerController.service(httpRequest, httpResponse);
-        outputStream.close();
 
         String expected = getBody("static/register.html");
 
         // then
         assertThat(httpResponse).usingRecursiveComparison()
                 .isEqualTo(httpResponse.ok(ContentType.HTML, expected));
+    }
+
+    private String 요청_메시지(String requestLine, String body) {
+        return String.join("\r\n",
+                requestLine,
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+    }
+
+    private HttpRequest httpRequest_생성(String requestMessage) throws IOException {
+        HttpRequest httpRequest;
+        try (InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            httpRequest = HttpRequest.of(bufferedReader);
+        }
+        return httpRequest;
     }
 
     private String getBody(String uri) throws IOException {

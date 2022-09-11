@@ -32,10 +32,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            HttpResponse httpResponse = HttpResponse.of(outputStream, httpRequest);
+            HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
             FrontController.service(httpRequest, httpResponse);
+
+            String result = httpResponse.toString();
+            outputStream.write(result.getBytes());
+            outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

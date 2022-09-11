@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.http11.common.Headers;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,29 +14,24 @@ public class HttpResponse {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final Headers headers;
     private StatusLine statusLine;
-    private Headers headers;
     private String body;
 
     public HttpResponse() {
-        this.body = "";
+        this.headers = new Headers();
     }
 
-    public void ok(final HttpRequest httpRequest) {
-        final String requestUri = httpRequest.getUri();
-        final ContentType contentType = ContentType.findByUri(requestUri);
-
-        this.statusLine = StatusLine.from(httpRequest.getProtocolVersion(), StatusCode.OK);
-        this.body = createResponseBody(requestUri);
-        this.headers = Headers.from(Map.entry("Content-Type", contentType.getValue() + ";charset=utf-8"),
-                Map.entry("Content-Length", String.valueOf(body.getBytes().length)));
-
+    public void ok(final String pathUri) {
+        body = findResource(pathUri);
+        headers.setContentType(ContentType.findByUri(pathUri));
+        headers.setContentLength(body);
+        statusLine = StatusLine.from(StatusCode.OK);
     }
 
-    public String createResponseBody(final String pathUri) {
+    private String findResource(final String pathUri) {
         final URL url = getClass().getClassLoader().getResource("static" + pathUri);
         Objects.requireNonNull(url);
-
         try {
             final File file = new File(url.getPath());
             final Path path = file.toPath();
@@ -49,34 +42,34 @@ public class HttpResponse {
         }
     }
 
-    @Override
-    public String toString() {
-        return String.join("\r\n", statusLine.toString(),
-                headers.toString(),
-                "",
-                body);
+    public void redirect(final String redirectUri) {
+        statusLine = StatusLine.from(StatusCode.FOUND);
+        headers.setLocation(redirectUri);
     }
 
-    public void setStatus(final HttpRequest request, final StatusCode statusCode) {
-        this.statusLine = StatusLine.from(request.getProtocolVersion(), statusCode);
+    public void setStatus(final StatusCode statusCode) {
+        this.statusLine = StatusLine.from(statusCode);
     }
 
     public void setHeaders(final ContentType contentType) {
-        this.headers = Headers.from(Map.entry("Content-Type", contentType.getValue() + ";charset=utf-8"),
-                Map.entry("Content-Length", String.valueOf(body.getBytes().length)));
+        headers.setContentType(contentType);
+        headers.setContentLength(body);
     }
 
-    public void setHeaders(final String location, final String jSessionId) {
-        this.headers = Headers.from(Map.entry("Location", location),
-                Map.entry("Set-Cookie", "JSESSIONID=" + jSessionId));
+    public void setHeaders(final String location, final String cookie) {
+        headers.setLocation(location);
+        headers.setCookie(cookie);
     }
 
     public void setBody(final String body) {
         this.body = body;
     }
 
-    public void redirect(final HttpRequest request, final String redirectUri) {
-        this.statusLine = StatusLine.from(request.getProtocolVersion(), StatusCode.FOUND);
-        this.headers = Headers.from(Map.entry("Location", redirectUri));
+    @Override
+    public String toString() {
+        return String.join("\r\n", statusLine.toString(),
+                headers.toString(),
+                "",
+                body);
     }
 }

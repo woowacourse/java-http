@@ -2,6 +2,8 @@ package org.apache.coyote.http11.response;
 
 public class StatusLine {
 
+    private static final String DEFAULT_PROTOCOL_VERSION = "HTTP/1.1";
+
     private final String protocolVersion;
     private final int statusCode;
     private final String statusMessage;
@@ -12,8 +14,8 @@ public class StatusLine {
         this.statusMessage = statusMessage;
     }
 
-    public static StatusLine from(final String protocolVersion, final StatusCode statusCode) {
-        return new StatusLine(protocolVersion, statusCode.getValue(), statusCode.getReasonPhrase());
+    public static StatusLine from(final StatusCode statusCode) {
+        return new StatusLine(DEFAULT_PROTOCOL_VERSION, statusCode.getValue(), statusCode.getReasonPhrase());
     }
 
     @Override

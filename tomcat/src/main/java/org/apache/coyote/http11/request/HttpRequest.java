@@ -86,12 +86,8 @@ public class HttpRequest {
         return requestLine.isPost();
     }
 
-    public String getUri() {
+    public String getPathUri() {
         return requestLine.getPath();
-    }
-
-    public String getProtocolVersion() {
-        return requestLine.getProtocolVersion();
     }
 
     public RequestLine getRequestLine() {

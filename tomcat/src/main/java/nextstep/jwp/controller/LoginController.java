@@ -5,7 +5,6 @@ import java.util.UUID;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.session.Session;
@@ -28,10 +27,10 @@ public class LoginController extends AbstractController {
             SessionManager.add(session);
             session.setAttribute("user", user);
 
-            response.setStatus(request, StatusCode.FOUND);
+            response.setStatus(StatusCode.FOUND);
             response.setHeaders("/index.html", jSessionId);
         } catch (final IllegalArgumentException e) {
-            response.redirect(request, "/401.html");
+            response.redirect("/401.html");
         }
     }
 
@@ -39,13 +38,9 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final Optional<String> jSessionId = request.findCookie("JSESSIONID");
         if (jSessionId.isPresent() && SessionManager.findSession(jSessionId.get()).isPresent()) {
-            response.redirect(request, "/index.html");
+            response.redirect("/index.html");
             return;
         }
-
-        final String responseBody = response.createResponseBody("/login.html");
-        response.setBody(responseBody);
-        response.setHeaders(ContentType.HTML);
-        response.setStatus(request, StatusCode.OK);
+        response.ok("/login.html");
     }
 }

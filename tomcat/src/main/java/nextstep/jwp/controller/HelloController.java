@@ -11,6 +11,6 @@ public class HelloController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setBody("Hello world!");
         response.setHeaders(ContentType.HTML);
-        response.setStatus(request, StatusCode.OK);
+        response.setStatus(StatusCode.OK);
     }
 }

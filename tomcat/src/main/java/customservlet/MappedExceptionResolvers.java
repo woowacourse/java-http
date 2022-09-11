@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 public class MappedExceptionResolvers {
 
     private static final MappedExceptionResolvers mappedExceptionResolvers = new MappedExceptionResolvers();
-    private static final Map<Class<? extends RuntimeException>, ExceptionResolver> exceptionResolvers = new HashMap<>();
+    private static final Map<Class<? extends RuntimeException>, ExceptionResolver> urlMap = new HashMap<>();
 
     private MappedExceptionResolvers() {
     }
@@ -18,7 +18,7 @@ public class MappedExceptionResolvers {
     }
 
     public ExceptionResolver getResolver(final Exception exception) {
-        return exceptionResolvers.entrySet()
+        return urlMap.entrySet()
                 .stream()
                 .filter(it -> it.getKey().isInstance(exception))
                 .map(Entry::getValue)
@@ -28,6 +28,6 @@ public class MappedExceptionResolvers {
 
     public void addResolver(final Class<? extends RuntimeException> exceptionClass,
                             final ExceptionResolver exceptionResolver) {
-        exceptionResolvers.put(exceptionClass, exceptionResolver);
+        urlMap.put(exceptionClass, exceptionResolver);
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.net.URL;
 import nextstep.jwp.ServletConfigurationImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,18 +22,20 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        try (final var socket = new StubSocket()) {
+            final var processor = new Http11Processor(socket);
 
-        // when
-        processor.process(socket);
+            // when
+            processor.process(socket);
 
-        // then
-        var expected = String.join(System.lineSeparator(),
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ");
+            // then
+            var expected = String.join(System.lineSeparator(),
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ");
 
-        assertThat(socket.output()).contains(expected);
+            assertThat(socket.output()).contains(expected);
+        } catch (IOException e) {
+        }
     }
 
     @Test
@@ -44,20 +47,21 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "",
                 "");
+        try (final var socket = new StubSocket(httpRequest)) {
+            final Http11Processor processor = new Http11Processor(socket);
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+            // when
+            processor.process(socket);
 
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = String.join(System.lineSeparator(),
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "");
-        assertThat(socket.output()).contains(expected);
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            var expected = String.join(System.lineSeparator(),
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "");
+            assertThat(socket.output()).contains(expected);
+        } catch (IOException e) {
+        }
     }
 
     @Test
@@ -70,24 +74,26 @@ class Http11ProcessorTest {
                 "Content-length: 30 ",
                 "",
                 "account=a&password=a&email=a@a");
-        var stubSocket = new StubSocket(request);
-        final var http11Processor = new Http11Processor(stubSocket);
-        http11Processor.process(stubSocket);
+        try (final var socket1 = new StubSocket(request)) {
+            final var http11Processor = new Http11Processor(socket1);
+            http11Processor.process(socket1);
 
-        request = String.join(System.lineSeparator(),
-                "Post /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-length: 20 ",
-                "",
-                "account=a&password=a");
-        stubSocket = new StubSocket(request);
+            request = String.join(System.lineSeparator(),
+                    "Post /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-length: 20 ",
+                    "",
+                    "account=a&password=a");
+            try (final var socket2 = new StubSocket(request)) {
+                // when
+                http11Processor.process(socket2);
 
-        // when
-        http11Processor.process(stubSocket);
-
-        // then
-        assertThat(stubSocket.output()).contains("HTTP/1.1 302 Found ", "Location: /index.html");
+                // then
+                assertThat(socket2.output()).contains("HTTP/1.1 302 Found ", "Location: /index.html");
+            }
+        } catch (IOException ignore) {
+        }
     }
 
     @Test
@@ -100,13 +106,15 @@ class Http11ProcessorTest {
                 "Content-length: 23 ",
                 "",
                 "account=gugu&password=a");
-        final var stubSocket = new StubSocket(request);
-        final var http11Processor = new Http11Processor(stubSocket);
+        try (final var stubSocket = new StubSocket(request)) {
+            final var http11Processor = new Http11Processor(stubSocket);
 
-        // when
-        http11Processor.process(stubSocket);
+            // when
+            http11Processor.process(stubSocket);
 
-        // then
-        assertThat(stubSocket.output()).contains("HTTP/1.1 302 Found ", "Location: /401.html");
+            // then
+            assertThat(stubSocket.output()).contains("HTTP/1.1 302 Found ", "Location: /401.html");
+        } catch (IOException ignore) {
+        }
     }
 }

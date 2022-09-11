@@ -25,10 +25,6 @@ public class HttpResponse {
     }
 
     private byte[] getBytes() throws IOException {
-        return getHttpMessage();
-    }
-
-    private byte[] getHttpMessage() throws IOException {
         final var stringBuilder = new StringBuilder();
         appendStatusLine(stringBuilder);
         appendLocationLine(stringBuilder);
@@ -88,9 +84,5 @@ public class HttpResponse {
 
     public void setLocation(final Location location) {
         this.location = location;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import customservlet.exception.NotFoundHandlerException;
 import org.apache.coyote.http11.http.HttpRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,11 @@ class MappedRequestHandlersTest {
         this.mappedRequestHandlers = MappedRequestHandlers.getInstance();
         this.requestHandlerInfo = mock(RequestHandlerInfo.class);
         this.requestHandler = mock(RequestHandler.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mappedRequestHandlers.deleteRequestHandler(requestHandlerInfo);
     }
 
     @Test

@@ -30,4 +30,8 @@ public class RequestMapping {
                 .findFirst()
                 .orElseThrow(NotFoundServletException::new);
     }
+
+    public void deleteServlet(final String url) {
+        urlMap.remove(url);
+    }
 }

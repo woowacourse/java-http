@@ -30,4 +30,8 @@ public class MappedRequestHandlers {
                 .findFirst()
                 .orElseThrow(NotFoundHandlerException::new);
     }
+
+    public void deleteRequestHandler(final RequestHandlerInfo requestHandlerInfo) {
+        urlMap.remove(requestHandlerInfo);
+    }
 }

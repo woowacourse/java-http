@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.coyote.http11.exception.NotFoundServletException;
 import org.apache.coyote.http11.http.HttpRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,12 @@ class RequestMappingTest {
     void setUp() {
         servlet = mock(Servlet.class);
         httpRequest = mock(HttpRequest.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        final RequestMapping requestMapping = RequestMapping.getInstance();
+        requestMapping.deleteServlet("/login");
     }
 
     @Test

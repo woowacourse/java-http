@@ -1,7 +1,6 @@
 package nextstep.jwp.presentation;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -28,12 +27,9 @@ public class UserController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        Map<String, String> values = getUser(request);
-        String account = values.get("account");
-        String password = values.get("password");
-        String email = values.get("email");
+        User user = getUser(request);
 
-        Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
+        Optional<User> byAccount = InMemoryUserRepository.findByAccount(user.getAccount());
         if (byAccount.isPresent()) {
             response.setStatus(HttpStatus.NOT_FOUND);
             response.redirect("/404.html");
@@ -41,20 +37,17 @@ public class UserController extends AbstractController {
             return;
         }
 
-        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         redirect(response, user);
     }
 
-    private Map<String, String> getUser(final HttpRequest httpRequest) {
-        String body = httpRequest.getBody();
-        String[] split = body.split("&");
-        Map<String, String> values = new HashMap<>();
-        for (String value : split) {
-            String[] keyAndValue = value.split("=");
-            values.put(keyAndValue[0], keyAndValue[1]);
-        }
-        return values;
+    private User getUser(final HttpRequest httpRequest) {
+        UserRequestHandler requestHandler = new UserRequestHandler();
+        Map<String, String> attribute = requestHandler.handle(httpRequest);
+        String account = attribute.get("account");
+        String password = attribute.get("password");
+        String email = attribute.get("email");
+        return new User(account, password, email);
     }
 
     private void redirect(final HttpResponse response, final User user) throws IOException {

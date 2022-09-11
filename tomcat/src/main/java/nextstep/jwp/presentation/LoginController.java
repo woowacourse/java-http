@@ -1,10 +1,10 @@
 package nextstep.jwp.presentation;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.model.UserRequest;
 import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpRequest;
@@ -50,10 +50,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        Map<String, String> values = getAccountAndPassword(request);
-        String account = values.get("account");
-        String password = values.get("password");
+        UserRequestHandler requestHandler = new UserRequestHandler();
+        Map<String, String> attribute = requestHandler.handle(request);
+        String account = attribute.get("account");
+        String password = attribute.get("password");
+        UserRequest user = new UserRequest(account, password);
+        login(user, response);
+    }
 
+    private void login(final UserRequest request, final HttpResponse response) throws IOException {
+        String account = request.getAccount();
+        String password = request.getPassword();
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("not found account"));
 
@@ -63,7 +70,7 @@ public class LoginController extends AbstractController {
         }
 
         log.info(user.toString());
-        response(response, user);
+        forward(response, user);
     }
 
     private void redirect(final HttpResponse response, final String redirectUrl) throws IOException {
@@ -72,18 +79,7 @@ public class LoginController extends AbstractController {
         response.write();
     }
 
-    private Map<String, String> getAccountAndPassword(final HttpRequest httpRequest) {
-        String body = httpRequest.getBody();
-        String[] split = body.split("&");
-        Map<String, String> values = new HashMap<>();
-        for (String value : split) {
-            String[] keyAndValue = value.split("=");
-            values.put(keyAndValue[0], keyAndValue[1]);
-        }
-        return values;
-    }
-
-    private void response(final HttpResponse response, final User user) throws IOException {
+    private void forward(final HttpResponse response, final User user) throws IOException {
         String cookie = CookieUtils.ofJSessionId();
         setSession(user, cookie);
 

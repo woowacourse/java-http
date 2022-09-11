@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.config.JwpRequestMapping;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -159,5 +160,82 @@ class Http11ProcessorTest {
         );
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인 성공 시 302 상태코드를 반환하고 /index 로 리다이렉트 한다.")
+    @Test
+    void loginSuccess_redirect() {
+        // given
+        final String inputData = "account=gugu&password=password";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + inputData.getBytes().length,
+                "",
+                inputData);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
+
+        // when
+        processor.process(socket);
+
+        // then
+        final var expectedLocation = "Location: /index";
+        final var expectedResponseLine = "HTTP/1.1 302 Found";
+
+        Assertions.assertAll(
+                () -> assertThat(socket.output()).contains(expectedLocation),
+                () -> assertThat(socket.output()).contains(expectedResponseLine)
+        );
+    }
+
+    @DisplayName("로그인 이후 /login 으로 요청 시 세션을 확인하여 /index 로 리다이렉트 한다.")
+    @Test
+    void afterLogin_loginRedirect() {
+        // given
+        var socket = new StubSocket(loginRequest());
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
+
+        processor.process(socket);
+        final String[] split = socket.output().split("Set-Cookie: ");
+        final String jSessionId = split[1].strip();
+
+        // when
+        final String request = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: " + jSessionId,
+                "",
+                ""
+        );
+        socket = new StubSocket(request);
+
+        processor.process(socket);
+        final String output = socket.output();
+
+        // then
+        final var expectedLocation = "Location: /index";
+        final var expectedResponseLine = "HTTP/1.1 302 Found";
+
+        Assertions.assertAll(
+                () -> assertThat(output).contains(expectedLocation),
+                () -> assertThat(output).contains(expectedResponseLine)
+        );
+    }
+
+    private static String loginRequest() {
+        final String inputData = "account=gugu&password=password";
+
+        return String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + inputData.getBytes().length,
+                "",
+                inputData);
     }
 }

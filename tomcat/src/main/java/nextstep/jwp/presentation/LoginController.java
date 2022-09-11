@@ -52,8 +52,6 @@ public class LoginController extends AbstractController {
             LOG.error(exception.getMessage(), exception);
             throw new UnauthorizedException();
         }
-
-        response.setBody(StaticResource.ofRequest(request));
     }
 
     private User getUser(final Session session) {

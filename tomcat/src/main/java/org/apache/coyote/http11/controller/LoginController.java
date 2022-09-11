@@ -11,7 +11,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController implements Handler {
 
+    private static final LoginController INSTANCE = new LoginController();
     private static final String LOGIN_HTML_URL = "/login.html";
+
+    private LoginController() {
+    }
 
     @Override
     public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
@@ -30,5 +34,9 @@ public class LoginController implements Handler {
 
     private boolean isRequestLoginPage(HttpRequest httpRequest) {
         return httpRequest.getParams().isEmpty() && !httpRequest.hasCookie();
+    }
+
+    public static LoginController getINSTANCE() {
+        return INSTANCE;
     }
 }

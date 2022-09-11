@@ -10,6 +10,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceController implements Handler {
+
+    private static final ResourceController INSTANCE = new ResourceController();
+
+    private ResourceController() {
+    }
+
     @Override
     public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String path = httpRequest.getUrl();
@@ -22,5 +28,9 @@ public class ResourceController implements Handler {
             e.printStackTrace();
             throw new InternalException(SERVER_EXCEPTION.getMessage());
         }
+    }
+
+    public static ResourceController getINSTANCE() {
+        return INSTANCE;
     }
 }

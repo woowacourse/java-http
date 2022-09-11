@@ -12,8 +12,13 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController implements Handler {
 
+    private static final RegisterController INSTANCE = new RegisterController();
+
     private static final String SUCCEED_REDIRECT_URL = "/index.html";
     private static final String REGISTER_PAGE_URL = "/register.html";
+
+    private RegisterController() {
+    }
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -28,5 +33,9 @@ public class RegisterController implements Handler {
             e.printStackTrace();
             throw new InternalException(SERVER_EXCEPTION.getMessage());
         }
+    }
+
+    public static RegisterController getINSTANCE() {
+        return INSTANCE;
     }
 }

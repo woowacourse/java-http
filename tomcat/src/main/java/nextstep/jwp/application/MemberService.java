@@ -14,10 +14,11 @@ public class MemberService {
     public void login(final LoginRequest loginRequest) {
         final Optional<User> user = findByAccount(loginRequest.getAccount());
         if (user.isPresent()) {
-            if (!user.get().checkPassword(loginRequest.getPassword())) {
-                throw new AuthenticationException();
+            if (user.get().checkPassword(loginRequest.getPassword())) {
+                return;
             }
         }
+        throw new AuthenticationException();
     }
 
     public void register(final RegisterRequest registerRequest) {

@@ -1,4 +1,4 @@
-package nextstep.jwp.exception;
+package customservlet.exception;
 
 public class BadRequestException extends RuntimeException {
 

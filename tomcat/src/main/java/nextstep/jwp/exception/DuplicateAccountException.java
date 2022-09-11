@@ -1,5 +1,7 @@
 package nextstep.jwp.exception;
 
+import customservlet.exception.BadRequestException;
+
 public class DuplicateAccountException extends BadRequestException {
 
     public DuplicateAccountException() {

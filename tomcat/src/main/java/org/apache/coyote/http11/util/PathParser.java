@@ -2,7 +2,7 @@ package org.apache.coyote.http11.util;
 
 import java.nio.file.Path;
 import java.util.Objects;
-import nextstep.jwp.exception.NotFoundResourceException;
+import org.apache.coyote.http11.exception.NotFoundResourceException;
 
 public class PathParser {
 

@@ -1,9 +1,9 @@
 package customservlet;
 
+import customservlet.exception.InvalidSessionException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import nextstep.jwp.exception.InvalidSessionException;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.http.Session;
 

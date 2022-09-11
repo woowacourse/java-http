@@ -1,4 +1,6 @@
-package nextstep.jwp.exception;
+package customservlet.exception;
+
+import org.apache.coyote.http11.exception.NotFoundException;
 
 public class NotFoundHandlerException extends NotFoundException {
     public NotFoundHandlerException() {

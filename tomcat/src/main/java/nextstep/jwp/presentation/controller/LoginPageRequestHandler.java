@@ -6,9 +6,7 @@ import customservlet.RequestHandler;
 import customservlet.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
-import org.apache.coyote.http11.http.RequestLine;
 import org.apache.coyote.http11.http.Session;
-import org.apache.coyote.http11.util.HttpMethod;
 import org.apache.coyote.http11.util.HttpStatus;
 
 public class LoginPageRequestHandler implements RequestHandler {
@@ -29,11 +27,5 @@ public class LoginPageRequestHandler implements RequestHandler {
         }
         response.setStatusCode(HttpStatus.OK);
         return "login";
-    }
-
-    @Override
-    public boolean support(final HttpRequest request) {
-        final RequestLine requestLine = request.getRequestLine();
-        return requestLine.getRequestUri().containUrl("login") && (requestLine.getHttpMethod() == HttpMethod.GET);
     }
 }

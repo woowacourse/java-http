@@ -1,4 +1,6 @@
-package nextstep.jwp.exception;
+package customservlet.exception;
+
+import customservlet.exception.BadRequestException;
 
 public class InvalidSessionException extends BadRequestException {
 

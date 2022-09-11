@@ -7,6 +7,7 @@ import org.apache.coyote.http11.util.HttpStatus;
 import org.apache.coyote.http11.util.PathParser;
 
 public class ResourceRequestHandler implements RequestHandler {
+
     @Override
     public String handle(final HttpRequest request, final HttpResponse response) {
         final var requestUri = request.getRequestUri();
@@ -14,10 +15,5 @@ public class ResourceRequestHandler implements RequestHandler {
         PathParser.checkPath(rowRequestUri);
         response.setStatusCode(HttpStatus.OK);
         return rowRequestUri;
-    }
-
-    @Override
-    public boolean support(final HttpRequest request) {
-        return true;
     }
 }

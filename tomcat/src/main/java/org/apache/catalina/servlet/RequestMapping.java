@@ -3,6 +3,7 @@ package org.apache.catalina.servlet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.exception.NotFoundServletException;
 import org.apache.coyote.http11.http.HttpRequest;
 
 public class RequestMapping {

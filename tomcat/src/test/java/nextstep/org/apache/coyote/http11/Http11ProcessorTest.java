@@ -3,18 +3,19 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
-import customservlet.ChicChocServlet;
-import org.apache.catalina.servlet.RequestMapping;
+import nextstep.jwp.ServletConfigurationImpl;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
     @BeforeEach
     void setUp() {
-        final var requestMapping = RequestMapping.getInstance();
-        requestMapping.addServlet("/", new ChicChocServlet());
+        final var servletConfiguration = new ServletConfigurationImpl();
+        servletConfiguration.addServlet();
+        servletConfiguration.addRequestHandler();
     }
 
     @Test

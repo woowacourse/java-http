@@ -3,7 +3,7 @@ package org.apache.coyote.http11.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.exception.NotFoundResourceException;
+import org.apache.coyote.http11.exception.NotFoundResourceException;
 import org.junit.jupiter.api.Test;
 
 class PathParserTest {

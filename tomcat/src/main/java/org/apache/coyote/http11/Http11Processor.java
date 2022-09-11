@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.exception.UncheckedServletException;
 import org.apache.catalina.servlet.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.http.HttpRequest;

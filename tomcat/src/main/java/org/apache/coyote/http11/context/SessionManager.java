@@ -22,6 +22,6 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(Session session) {
-        throw new UnsupportedOperationException();
+        SESSIONS.remove(session.getId());
     }
 }

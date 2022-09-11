@@ -1,6 +1,5 @@
 package nextstep.jwp.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.util.StringUtil;
 
 public class User {

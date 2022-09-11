@@ -16,7 +16,7 @@ class HttpCookieTest {
         // then
         Assertions.assertAll(
                 () -> assertThat(cookie.find("hello")).isEqualTo("world"),
-                () -> assertThat(cookie.find("name")).isEqualTo("kth")
+                () -> assertThat(cookie.find("name")).isEqualTo("akth")
         );
     }
 

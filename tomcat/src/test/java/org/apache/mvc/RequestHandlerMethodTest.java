@@ -62,22 +62,6 @@ class RequestHandlerMethodTest {
     }
 
     @Test
-    void throwsExceptionWithInvalidParameterLength() {
-        // given & when
-        Controller controller = new Controller() {
-            public ResponseEntity myMethod(HttpRequest httpRequest, int a) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
-            }
-        };
-
-        // then
-        assertThatThrownBy(() -> new RequestHandlerMethod(
-                controller,
-                controller.getClass().getMethod("myMethod", HttpRequest.class, int.class)
-        )).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void throwsExceptionWithInvalidParameterType() {
         // given & when
         Controller controller = new Controller() {

@@ -6,26 +6,28 @@ import org.junit.jupiter.api.Test;
 
 class SessionManagerTest {
 
+    private static final SessionManager MANAGER = new SessionManager();
+
     @Test
     void addSession() {
         // given
-        SessionManager manager = new SessionManager();
         Session session = new Session("my-id");
         // when
-        manager.add(session);
+        MANAGER.add(session);
         // then
-        assertThat(manager.findSession("my-id")).isEqualTo(session);
+        assertThat(MANAGER.findSession("my-id")).isEqualTo(session);
+        MANAGER.remove(session);
     }
 
     @Test
     void addDuplicatedSession() {
         // given
-        SessionManager manager = new SessionManager();
         Session session = new Session("my-id");
         // when
-        manager.add(session);
-        manager.add(session);
+        MANAGER.add(session);
+        MANAGER.add(session);
         // then
-        assertThat(manager.findSession("my-id")).isEqualTo(session);
+        assertThat(MANAGER.findSession("my-id")).isEqualTo(session);
+        MANAGER.remove(session);
     }
 }

@@ -20,14 +20,14 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        response.statusCode(HttpStatus.METHOD_NOT_ALLOWED);
+        response.statusCode(HttpStatus.NOT_FOUND);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.statusCode(HttpStatus.METHOD_NOT_ALLOWED);
+        response.statusCode(HttpStatus.NOT_FOUND);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
-        response.statusCode(HttpStatus.METHOD_NOT_ALLOWED);
+        response.statusCode(HttpStatus.NOT_FOUND);
     }
 }

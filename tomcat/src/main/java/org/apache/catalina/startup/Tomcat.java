@@ -25,11 +25,11 @@ public class Tomcat {
     }
 
     public void start(final int port,
-                      final int backlogCount,
+                      final int acceptCount,
                       final int maxThreadSize,
                       final int coreThreadSize,
                       final long keepAliveTimeSecond) {
-        var connector = new Connector(port, backlogCount, maxThreadSize, coreThreadSize, keepAliveTimeSecond);
+        var connector = new Connector(port, acceptCount, maxThreadSize, coreThreadSize, keepAliveTimeSecond);
         connector.start();
 
         try {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -17,32 +16,32 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_BACKLOG_COUNT = 350;
+    private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_POOL_SIZE = 250;
     private static final int DEFAULT_CORE_SIZE = 50;
     private static final long DEFAULT_KEEP_ALIVE_TIME = 120L;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor threadPoolExecutor;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_BACKLOG_COUNT, DEFAULT_POOL_SIZE, DEFAULT_CORE_SIZE, DEFAULT_KEEP_ALIVE_TIME);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_POOL_SIZE, DEFAULT_CORE_SIZE, DEFAULT_KEEP_ALIVE_TIME);
     }
 
     public Connector(final int port,
-                     final int backlogCount,
+                     final int acceptCount,
                      final int maxThreadSize,
                      final int coreThreadSize,
                      final long keepAliveTimeSecond) {
-        this.serverSocket = createServerSocket(port, backlogCount);
+        this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = new ThreadPoolExecutor(
+        this.threadPoolExecutor = new ThreadPoolExecutor(
                 maxThreadSize,
                 coreThreadSize,
                 keepAliveTimeSecond,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>()
+                new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT)
         );
     }
 
@@ -72,7 +71,9 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            if (threadPoolExecutor.getQueue().size() < DEFAULT_ACCEPT_COUNT) {
+                process(serverSocket.accept());
+            }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -84,7 +85,7 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        threadPoolExecutor.submit(processor);
     }
 
     public void stop() {
@@ -107,6 +108,6 @@ public class Connector implements Runnable {
     }
 
     private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_BACKLOG_COUNT);
+        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

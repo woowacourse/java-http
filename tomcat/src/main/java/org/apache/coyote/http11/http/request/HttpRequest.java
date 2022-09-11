@@ -60,11 +60,11 @@ public class HttpRequest {
         return body;
     }
 
-    public HttpMethod getHttpMethod() {
-        return startLine.getHttpMethod();
-    }
-
     public String getUrl() {
         return startLine.getPath();
+    }
+
+    public boolean isGetMethod() {
+        return startLine.getHttpMethod().isGet();
     }
 }

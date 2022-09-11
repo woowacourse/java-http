@@ -8,8 +8,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import nextstep.jwp.controller.Handler;
-import org.apache.coyote.http11.http.HandlerMapper;
+import nextstep.jwp.controller.Controller;
+import org.apache.coyote.http11.http.RequestMapper;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -45,8 +45,8 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            final Handler handler = HandlerMapper.getHandlerFrom(httpRequest);
-            final HttpResponse httpResponse = handler.handle(httpRequest);
+            final Controller controller = RequestMapper.getHandlerFrom(httpRequest);
+            final HttpResponse httpResponse = controller.service(httpRequest);
             final String response = httpResponse.generateResponse();
 
             outputStream.write(response.getBytes());

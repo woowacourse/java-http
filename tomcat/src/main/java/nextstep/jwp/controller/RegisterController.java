@@ -1,6 +1,7 @@
-package nextstep.jwp.controller.resource;
+package nextstep.jwp.controller;
 
-import static nextstep.jwp.controller.resource.ResourceUrls.INDEX_HTML;
+import static nextstep.jwp.controller.ResourceUrls.INDEX_HTML;
+import static nextstep.jwp.controller.ResourceUrls.REGISTER_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
@@ -13,12 +14,23 @@ import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
-public class RegisterHandler extends ResourceHandler {
+public class RegisterController extends ResourceController {
 
     private final UserService userService = UserService.getInstance();
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    public HttpResponse service(final HttpRequest httpRequest) {
+        if (httpRequest.isGetMethod()) {
+            return doGet();
+        }
+        return doPost(httpRequest);
+    }
+
+    private HttpResponse doGet() {
+        return generateResourceResponse(REGISTER_HTML);
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
 
         final Map<String, String> queryParams = Parser.parseQueryParams(body);

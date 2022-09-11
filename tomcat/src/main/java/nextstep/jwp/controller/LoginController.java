@@ -1,16 +1,16 @@
-package nextstep.jwp.controller.auth;
+package nextstep.jwp.controller;
 
-import static nextstep.jwp.controller.resource.ResourceUrls.INDEX_HTML;
-import static nextstep.jwp.controller.resource.ResourceUrls.LOGIN_HTML;
-import static nextstep.jwp.controller.resource.ResourceUrls.UNAUTHORIZED_HTML;
+import static nextstep.jwp.controller.ResourceUrls.INDEX_HTML;
+import static nextstep.jwp.controller.ResourceUrls.LOGIN_HTML;
+import static nextstep.jwp.controller.ResourceUrls.UNAUTHORIZED_HTML;
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import nextstep.jwp.application.AuthorizeService;
 import nextstep.jwp.application.UserService;
-import nextstep.jwp.controller.Handler;
 import nextstep.jwp.dto.UserLoginRequest;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.webutils.Parser;
@@ -19,12 +19,28 @@ import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
-public class LoginHandler implements Handler {
+public class LoginController extends ResourceController {
 
+    private final AuthorizeService authorizeService = AuthorizeService.getInstance();
     private final UserService userService = UserService.getInstance();
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    public HttpResponse service(final HttpRequest httpRequest) {
+        if (httpRequest.isGetMethod()) {
+            return doGet(httpRequest);
+        }
+        return doPost(httpRequest);
+    }
+
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        if (authorizeService.isAuthorized(httpRequest)) {
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
+            return HttpResponse.of(HTTP11, REDIRECT, location);
+        }
+        return generateResourceResponse(LOGIN_HTML);
+    }
+
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
         return generateLoginResponse(body);
     }

@@ -23,4 +23,8 @@ public enum HttpMethod {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("해당하는 HttpHeaderType이 없습니다. " + value));
     }
+
+    public boolean isGet() {
+        return this.equals(GET);
+    }
 }

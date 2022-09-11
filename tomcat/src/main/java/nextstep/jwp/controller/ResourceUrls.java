@@ -1,6 +1,9 @@
-package nextstep.jwp.controller.resource;
+package nextstep.jwp.controller;
 
 abstract public class ResourceUrls {
+
+    private ResourceUrls() {
+    }
 
     public static final String INDEX_HTML = "/index.html";
     public static final String UNAUTHORIZED_HTML = "/401.html";

@@ -1,20 +1,28 @@
 package nextstep.jwp.vo;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static nextstep.jwp.vo.HttpHeader.JSESSION_ID;
 
 
 public class HttpCookie {
-    private static final String NO_JSESSION_ID = "";
+    private static final String NO_COOKIE = "";
+    private static final String COOKIE = "Cookie";
+    private static final String COOKIE_DELIMITER = "; ";
 
-    private final Map<String, String> cookies;
+    private final FormData cookies;
 
-    public HttpCookie(Map<String, String> cookies) {
+    private HttpCookie(FormData cookies) {
         this.cookies = cookies;
     }
 
+    public static HttpCookie from(Map<String, String> headers) {
+        FormData formData = FormData.from(headers.getOrDefault(COOKIE, NO_COOKIE).split(COOKIE_DELIMITER));
+        return new HttpCookie(formData);
+    }
+
     public String getJsessionId() {
-        return this.cookies.getOrDefault(JSESSION_ID.getValue(), NO_JSESSION_ID);
+        return this.cookies.get(JSESSION_ID.getValue());
     }
 }

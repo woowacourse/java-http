@@ -19,6 +19,9 @@ public class User {
         if (account == null || password == null || email == null) {
             throw new IllegalArgumentException("값을 입력해야 합니다.");
         }
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            throw new IllegalArgumentException("값을 입력해야 합니다.");
+        }
     }
 
     public User(String account, String password, String email) {

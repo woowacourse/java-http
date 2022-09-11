@@ -12,7 +12,7 @@ import static nextstep.jwp.vo.HttpHeader.*;
 
 public class DefaultController implements Controller {
 
-    private static final String PREFIX = "static/";
+    private static final String PREFIX = "static";
 
     private static final DefaultController INSTANCE = new DefaultController();
 

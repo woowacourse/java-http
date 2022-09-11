@@ -145,9 +145,7 @@ class Http11ProcessorTest {
 
             // then
             final var expected = List.of("HTTP/1.1 302 Found",
-                    "Location: /401.html",
-                    "",
-                    "");
+                    "Location: /401.html");
 
             assertThat(socket.output().split("\r\n")).containsAll(expected);
         }
@@ -190,10 +188,7 @@ class Http11ProcessorTest {
 
             // then
             final var expected = List.of("HTTP/1.1 302 Found",
-                    "Location: /index.html",
-                    "",
-                    ""
-            );
+                    "Location: /index.html");
 
             assertThat(socket.output().split("\r\n")).containsAll(expected);
         }

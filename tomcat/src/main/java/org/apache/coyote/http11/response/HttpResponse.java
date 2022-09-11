@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +21,16 @@ public class HttpResponse {
 
     public HttpResponse() {
         this.headers = new Headers();
+        this.body = "";
+    }
+
+    public void write(final OutputStream outputStream) {
+        try {
+            outputStream.write(this.toString().getBytes());
+            outputStream.flush();
+        } catch (final IOException e) {
+            log.error("output stream exception", e);
+        }
     }
 
     public void ok(final String pathUri) {

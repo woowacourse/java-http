@@ -34,23 +34,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final HttpResponse response = route(httpRequest);
-            final String responseAsString = response.toString();
+            final HttpRequest request = HttpRequest.from(bufferedReader);
+            final HttpResponse response = new HttpResponse();
+            final Controller controller = RequestMapping.mapController(request);
 
-            outputStream.write(responseAsString.getBytes());
-            outputStream.flush();
+            controller.service(request, response);
+            response.write(outputStream);
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpResponse route(final HttpRequest httpRequest) {
-        final RequestMapping requestMapping = new RequestMapping();
-        final HttpResponse httpResponse = new HttpResponse();
-        final Controller controller = requestMapping.mapController(httpRequest);
-
-        controller.service(httpRequest, httpResponse);
-        return httpResponse;
     }
 }

@@ -10,7 +10,14 @@ import org.apache.coyote.http.session.Session;
 public class HttpHeader {
 
     private static final String HEADER_SEPARATOR = ":";
-    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_LENGTH_KEY = "Content-Length";
+    private static final String CONTENT_TYPE_KEY = "Content-Type";
+    private static final String LOCATION_KEY = "Location";
+    private static final String COOKIE_KEY = "Cookie";
+    public static final String JSESSIONID_KEY = "JSESSIONID";
+    public static final String SET_COOKIE = "Set-Cookie";
+    private static final String PRINT_FORMAT = "%s: %s ";
+    public static final String KEY_VALUE_DELIMITER = "=";
     private static final int SPLIT_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -32,14 +39,14 @@ public class HttpHeader {
 
     public static HttpHeader init(final ContentType contentType, final String responseBody) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", contentType.getType() + ";charset-utf-8");
-        headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        headers.put(CONTENT_TYPE_KEY, contentType.getType() + ";charset-utf-8");
+        headers.put(CONTENT_LENGTH_KEY, String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         return new HttpHeader(headers);
     }
 
     public static HttpHeader init(final ContentType contentType, final String responseBody, final String redirectUrl) {
         HttpHeader headers = init(contentType, responseBody);
-        headers.addHeader("Location", redirectUrl);
+        headers.addHeader(LOCATION_KEY, redirectUrl);
         return headers;
     }
 
@@ -48,21 +55,21 @@ public class HttpHeader {
     }
 
     public void addJSessionId(final Session session) {
-        values.put("Set-Cookie", "JSESSIONID=" + session.getId());
+        values.put(SET_COOKIE, JSESSIONID_KEY + KEY_VALUE_DELIMITER + session.getId());
     }
 
     public boolean isContainContentLength() {
-        return values.containsKey(CONTENT_LENGTH);
+        return values.containsKey(CONTENT_LENGTH_KEY);
     }
 
     public int getContentLength() {
-        return Integer.parseInt(values.get(CONTENT_LENGTH).trim());
+        return Integer.parseInt(values.get(CONTENT_LENGTH_KEY).trim());
     }
 
     public String print() {
         return values.entrySet()
                 .stream()
-                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .map(entry -> String.format(PRINT_FORMAT, entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
@@ -71,6 +78,6 @@ public class HttpHeader {
     }
 
     public HttpCookie getCookiesData() {
-        return HttpCookie.from(values.get("Cookie"));
+        return HttpCookie.from(values.get(COOKIE_KEY));
     }
 }

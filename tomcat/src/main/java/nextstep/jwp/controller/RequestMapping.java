@@ -15,6 +15,9 @@ public class RequestMapping {
         controllers.put("/login", new AuthController());
     }
 
+    private RequestMapping() {
+    }
+
     public static Controller findController(String requestUrl) {
         if (controllers.containsKey(requestUrl)) {
             return controllers.get(requestUrl);

@@ -59,4 +59,12 @@ public class HttpRequest {
     public String getBody() {
         return body;
     }
+
+    public HttpMethod getHttpMethod() {
+        return startLine.getHttpMethod();
+    }
+
+    public String getUrl() {
+        return startLine.getPath();
+    }
 }

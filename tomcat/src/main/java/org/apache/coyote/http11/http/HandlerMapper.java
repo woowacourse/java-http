@@ -15,6 +15,7 @@ import nextstep.jwp.controller.resource.LoginPageHandler;
 import nextstep.jwp.controller.resource.RegisterHandler;
 import nextstep.jwp.controller.resource.RegisterPageHandler;
 import org.apache.coyote.http11.http.request.HttpMethod;
+import org.apache.coyote.http11.http.request.HttpRequest;
 
 public enum HandlerMapper {
     HOME(GET, Constants.HOME_URL_REGEX, new HomeHandler()),
@@ -35,7 +36,9 @@ public enum HandlerMapper {
         this.handler = handler;
     }
 
-    public static Handler getHandlerFrom(final HttpMethod httpMethod, final String url) {
+    public static Handler getHandlerFrom(final HttpRequest httpRequest) {
+        final HttpMethod httpMethod = httpRequest.getHttpMethod();
+        final String url = httpRequest.getUrl();
         return Arrays.stream(HandlerMapper.values())
                 .filter(it -> matchUrl(url, it) && matchMethod(httpMethod, it))
                 .findFirst()

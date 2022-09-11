@@ -11,8 +11,12 @@ public class UserService {
     private UserService() {
     }
 
+    private static class UserServiceGenerator {
+        private static final UserService INSTANCE = new UserService();
+    }
+
     public static UserService getInstance() {
-        return new UserService();
+        return UserServiceGenerator.INSTANCE;
     }
 
     public void save(final UserRegisterRequest userRegisterRequest) {

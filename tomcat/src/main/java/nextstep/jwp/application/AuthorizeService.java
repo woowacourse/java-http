@@ -12,8 +12,12 @@ public class AuthorizeService {
     private AuthorizeService() {
     }
 
+    private static class AuthorizeServiceGenerator{
+        private static final AuthorizeService INSTANCE = new AuthorizeService();
+    }
+
     public static AuthorizeService getInstance() {
-        return new AuthorizeService();
+        return AuthorizeServiceGenerator.INSTANCE;
     }
 
     public boolean isAuthorized(final HttpRequest httpRequest) {

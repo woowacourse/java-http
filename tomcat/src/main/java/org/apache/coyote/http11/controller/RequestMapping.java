@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Arrays;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMapping {

@@ -1,6 +1,5 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -9,6 +8,8 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.QueryParameters;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.controller.AbstractController;
+import nextstep.jwp.exception.UnAuthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,27 +26,36 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         QueryParameters queryParameters = new QueryParameters(request.getRequestBody());
 
-        User user = InMemoryUserRepository.findByAccount(queryParameters.find("account"))
-                .orElseThrow(NoSuchElementException::new);
+        try {
+            User user = findUser(queryParameters.find("account"));
+            validatePassword(user, queryParameters.find("password"));
 
-        if (!user.checkPassword(queryParameters.find("password"))) {
-            response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
-            response.addBodyFromFile("/401.html");
-            return;
+            log.info("user : " + user);
+            addCookieToHeader(request, response, user);
+            createRedirectResponse("Location: /index.html", response);
+        } catch (UnAuthorizedException e) {
+            createRedirectResponse("Location: /401.html", response);
         }
+    }
 
-        log.info("user : " + user);
-        addCookieToHeader(request, response, user);
-        response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
-        response.addBodyFromFile("/index.html");
+    private User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(UnAuthorizedException::new);
+    }
+
+    private void validatePassword(User user, String password) {
+        if (!user.checkPassword(password)) {
+            throw new UnAuthorizedException();
+        }
     }
 
     private void addCookieToHeader(HttpRequest request, HttpResponse response, User user) {
-        if (!request.getRequestHeaders().isExistCookie()) {
-            UUID uuid = UUID.randomUUID();
-            storeSession(uuid, user);
-            response.addHeader("Set-Cookie: JSESSIONID=" + uuid);
+        if (request.getRequestHeaders().isExistCookie() && isNotNullSession(request)) {
+            return;
         }
+        UUID uuid = UUID.randomUUID();
+        storeSession(uuid, user);
+        response.addHeader("Set-Cookie: JSESSIONID=" + uuid);
     }
 
     private void storeSession(UUID uuid, User user) {
@@ -54,8 +64,13 @@ public class LoginController extends AbstractController {
         sessionManager.add(session);
     }
 
+    private void createRedirectResponse(String locationHeader, HttpResponse response) {
+        response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
+        response.addHeader(locationHeader);
+    }
+
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IllegalAccessException {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (isNotNullSession(request)) {
             createIndexPageResponse(response);
             return;
@@ -63,7 +78,7 @@ public class LoginController extends AbstractController {
         createLoginPageResponse(request.getPath(), response);
     }
 
-    private boolean isNotNullSession(HttpRequest request) throws IllegalAccessException {
+    private boolean isNotNullSession(HttpRequest request) {
         if (request.getRequestHeaders().isExistCookie()) {
             HttpCookie cookie = request.getRequestHeaders().getCookie();
             String jsessionid = cookie.find("JSESSIONID");
@@ -76,7 +91,7 @@ public class LoginController extends AbstractController {
     private void createIndexPageResponse(HttpResponse response) {
         response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
         response.addContentTypeHeader(ContentType.HTML.getContentType());
-        response.addBodyFromFile("/index.html");
+        response.addHeader("Location: /index.html");
     }
 
     private void createLoginPageResponse(String path, HttpResponse response) {

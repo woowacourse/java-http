@@ -149,6 +149,6 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
-        assertThat(socket.output()).contains("200 OK");
+        assertThat(socket.output()).contains("302 Found");
     }
 }

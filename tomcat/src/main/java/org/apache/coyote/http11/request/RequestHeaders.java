@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.apache.coyote.http11.HttpCookie;
 
 public class RequestHeaders {
@@ -38,9 +39,9 @@ public class RequestHeaders {
         return value.containsKey("Cookie");
     }
 
-    public HttpCookie getCookie() throws IllegalAccessException {
+    public HttpCookie getCookie() {
         if (!isExistCookie()) {
-            throw new IllegalAccessException();
+            throw new NoSuchElementException();
         }
         return HttpCookie.from(value.get("Cookie"));
     }

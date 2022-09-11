@@ -31,4 +31,11 @@ public class HttpRequest {
     public boolean isEqualToMethod(final HttpMethod httpMethod) {
         return requestLine.isEqualToMethod(httpMethod);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "requestLine=" + requestLine +
+                '}';
+    }
 }

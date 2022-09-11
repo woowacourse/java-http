@@ -63,10 +63,6 @@ public class FileName {
         return this.baseName.equals(baseName);
     }
 
-    public String getBaseName() {
-        return baseName;
-    }
-
     public String getExtension() {
         return extension;
     }

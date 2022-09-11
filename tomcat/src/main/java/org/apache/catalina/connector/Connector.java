@@ -29,20 +29,12 @@ public class Connector implements Runnable {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
-        this(port, acceptCount, DEFAULT_MAX_THREADS);
-    }
-
      // maxThreads를 추가했다.
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         // 생성자에서 스레드 풀 생성
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-    }
-
-    public Connector(final int maxThreads) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
     }
 
     public static Connector getInstance() {
@@ -87,7 +79,6 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-//        this.start();
         this.executorService.execute(processor);
     }
 

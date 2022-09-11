@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HtmlLoader {
 
@@ -19,6 +20,7 @@ public class HtmlLoader {
         }
         Path path = new File(resource.getFile()).toPath();
         List<String> actual = Files.readAllLines(path);
-        return String.join(DELIMITER, actual) + DELIMITER;
+        return actual.stream()
+                .collect(Collectors.joining(DELIMITER, "", DELIMITER));
     }
 }

@@ -5,7 +5,7 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.vo.Response;
 import nextstep.jwp.vo.ResponseStatus;
 
-import static nextstep.jwp.vo.HttpHeader.LOCATION;
+import static nextstep.jwp.vo.HeaderKey.LOCATION;
 
 public class RegisterService {
 
@@ -25,11 +25,11 @@ public class RegisterService {
         try {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            response.addHeader(LOCATION.getValue(), SUCCESS_URL)
+            response.addHeader(LOCATION.getName(), SUCCESS_URL)
                     .addBlankLine();
             return response;
         } catch (IllegalArgumentException e) {
-            response.addHeader(LOCATION.getValue(), FAIL_URL)
+            response.addHeader(LOCATION.getName(), FAIL_URL)
                     .addBlankLine();
             return response;
         }

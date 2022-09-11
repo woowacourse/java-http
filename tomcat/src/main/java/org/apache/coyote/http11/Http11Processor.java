@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.Request;
-import nextstep.jwp.vo.RequestMethod;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestControllerMapper;
@@ -14,7 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static nextstep.jwp.vo.HttpHeader.*;
+import static nextstep.jwp.vo.HeaderKey.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -62,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             requestStrings.add(now.trim());
         }
         int bodyLength = requestStrings.stream()
-                .filter(each -> each.startsWith(CONTENT_LENGTH.getValue()))
+                .filter(each -> each.startsWith(CONTENT_LENGTH.getName()))
                 .map(each -> Integer.parseInt(each.split(CONTENT_LENGTH_DELIMITER)[1]))
                 .findFirst()
                 .orElse(EMPTY_BODY_LENGTH);

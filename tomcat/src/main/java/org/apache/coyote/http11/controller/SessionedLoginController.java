@@ -10,7 +10,7 @@ import org.apache.coyote.http11.HtmlLoader;
 
 import java.io.IOException;
 
-import static nextstep.jwp.vo.HttpHeader.*;
+import static nextstep.jwp.vo.HeaderKey.*;
 
 public class SessionedLoginController implements Controller {
 
@@ -31,9 +31,9 @@ public class SessionedLoginController implements Controller {
         }
 
         return Response.from(ResponseStatus.OK)
-                .addHeader(CONTENT_TYPE.getValue(),
-                        "text/" + fileName.getExtension() + CHARSET_UTF_8.getValue())
-                .addHeader(CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length))
+                .addHeader(CONTENT_TYPE.getName(),
+                        "text/" + fileName.getExtension() + CHARSET_UTF_8.getName())
+                .addHeader(CONTENT_LENGTH.getName(), String.valueOf(responseBody.getBytes().length))
                 .addBlankLine()
                 .addBody(responseBody);
     }

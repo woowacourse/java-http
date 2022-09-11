@@ -11,7 +11,7 @@ import org.apache.catalina.SessionManager;
 import java.util.Optional;
 import java.util.UUID;
 
-import static nextstep.jwp.vo.HttpHeader.*;
+import static nextstep.jwp.vo.HeaderKey.*;
 
 public class LoginService {
 
@@ -31,11 +31,11 @@ public class LoginService {
         LoginResult loginResult = generateResult(account, password);
         Response response = Response.from(ResponseStatus.FOUND);
         if (loginResult.getSession() != null) {
-            response.addHeader(SET_COOKIE.getValue(),
-                    JSESSION_ID.getValue() + "=" + loginResult.getSession().getId());
+            response.addHeader(SET_COOKIE.getName(),
+                    JSESSION_ID.getName() + "=" + loginResult.getSession().getId());
 
         }
-        return response.addHeader(LOCATION.getValue(), loginResult.getRedirectUrl())
+        return response.addHeader(LOCATION.getName(), loginResult.getRedirectUrl())
                 .addBlankLine();
     }
 

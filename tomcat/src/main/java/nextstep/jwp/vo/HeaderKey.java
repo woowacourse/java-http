@@ -1,6 +1,6 @@
 package nextstep.jwp.vo;
 
-public enum HttpHeader {
+public enum HeaderKey {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
@@ -10,13 +10,13 @@ public enum HttpHeader {
     SET_COOKIE("Set-Cookie"),
     LOCATION("Location");
 
-    private final String value;
+    private final String name;
 
-    HttpHeader(String value) {
-        this.value = value;
+    HeaderKey(String name) {
+        this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public String getName() {
+        return name;
     }
 }

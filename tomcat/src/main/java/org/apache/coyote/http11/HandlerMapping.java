@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.apache.coyote.http11.model.ContentType;
@@ -8,6 +7,7 @@ import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
+import nextstep.jwp.handler.Controller;
 import nextstep.jwp.handler.IndexController;
 import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.NotMappedErrorController;
@@ -16,22 +16,22 @@ import nextstep.jwp.handler.ResourceController;
 
 public enum HandlerMapping {
 
-    DEFAULT("/", (request, response) -> IndexController.getInstance().service(request, response)),
-    LOGIN("/login", (request, response) -> LoginController.getInstance().service(request, response)),
-    REGISTER("/register", (request, response) -> RegisterController.getInstance().service(request, response)),
-    STATIC_FILE(Constants.NULL, (request, response) -> ResourceController.getInstance().service(request, response)),
-    NOF_FOUND(Constants.NULL, (request, response) -> NotMappedErrorController.getInstance().service(request, response));
+    DEFAULT("/", IndexController.getInstance()),
+    LOGIN("/login", LoginController.getInstance()),
+    REGISTER("/register", RegisterController.getInstance()),
+    STATIC_FILE(Constants.NULL, ResourceController.getInstance()),
+    NOF_FOUND(Constants.NULL, NotMappedErrorController.getInstance());
 
     private static class Constants {
         private static final String NULL = "null";
     }
 
     private final String url;
-    private final BiConsumer<HttpRequest, HttpResponse> executor;
+    private final Controller controller;
 
-    HandlerMapping(String url, BiConsumer<HttpRequest, HttpResponse> executor) {
+    HandlerMapping(String url, Controller controller) {
         this.url = url;
-        this.executor = executor;
+        this.controller = controller;
     }
 
     public static HandlerMapping findHandler(HttpRequest request) {
@@ -47,6 +47,6 @@ public enum HandlerMapping {
     }
 
     public void execute(HttpRequest request, HttpResponse response) {
-        this.executor.accept(request, response);
+        this.controller.service(request, response);
     }
 }

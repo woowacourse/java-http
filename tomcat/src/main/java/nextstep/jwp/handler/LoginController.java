@@ -8,7 +8,6 @@ import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
@@ -48,14 +47,13 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         Optional<User> findUser = InMemoryUserRepository.findByAccount(request.getBodyValue(ACCOUNT));
-        User user = findUser.orElseThrow(MemberNotFoundException::new);
-        if (!user.checkPassword(request.getBodyValue(PASSWORD))) {
+        if (findUser.isEmpty() || !findUser.get().checkPassword(request.getBodyValue(PASSWORD))) {
             HttpResponse.redirect(response, UNAUTHORIZED_PAGE);
             return;
         }
 
         Session session = new Session();
-        session.setAttribute("user", user);
+        session.setAttribute("user", findUser.get());
         sessionManager.add(session);
 
         HttpResponse.redirect(response, INDEX_PAGE);

@@ -103,7 +103,7 @@ class LoginControllerTest {
         assertThat(session).isNotNull();
     }
 
-    @DisplayName("Put /login 경로로 로그인이 실패하면 302 Found와 함께 401 페이지를 반환한다.")
+    @DisplayName("Put /login 경로로 로그인시 비밀번호가 일치하지 않으면 302 Found와 함께 401 페이지를 반환한다.")
     @Test
     void performPutMethodWithWrongPassword() throws IOException {
         LoginController loginController = LoginController.getInstance();
@@ -115,6 +115,30 @@ class LoginControllerTest {
                 + "Accept: */*\n"
                 + "\n"
                 + "account=rex&password=password123\n";
+
+        HttpRequest httpRequest = HttpRequestGenerator.generate(request);
+        HttpResponse httpResponse = new HttpResponse();
+        loginController.service(httpRequest, httpResponse);
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/401.html")
+        );
+    }
+
+    @DisplayName("Put /login 경로로 로그인시 잘못된 UserId면 302 Found와 함께 401 페이지를 반환한다.")
+    @Test
+    void performPutMethodWithWrongUserId() throws IOException {
+        LoginController loginController = LoginController.getInstance();
+        String request = "POST /login HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Connection: keep-alive\n"
+                + "Content-Length: 32\n"
+                + "Content-Type: application/x-www-form-urlencoded\n"
+                + "Accept: */*\n"
+                + "\n"
+                + "account=rex123&password=password\n";
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         HttpResponse httpResponse = new HttpResponse();

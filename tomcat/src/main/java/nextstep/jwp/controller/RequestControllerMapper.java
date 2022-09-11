@@ -26,12 +26,10 @@ public enum RequestControllerMapper {
     }
 
     public static Controller mapByRequest(Request request) {
-        Optional<RequestControllerMapper> result = Arrays.stream(RequestControllerMapper.values())
+        return Arrays.stream(RequestControllerMapper.values())
                 .filter(each -> request.canMapped(each.method, each.url))
-                .findFirst();
-        if (result.isPresent()) {
-            return result.get().controller;
-        }
-        return DefaultController.getInstance();
+                .map(each -> each.controller)
+                .findFirst()
+                .orElse(DefaultController.getInstance());
     }
 }

@@ -29,14 +29,13 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
-        User user;
         try {
-            user = LoginService.login(httpRequest.getBody());
-        } catch (NoSuchElementException | IllegalArgumentException e) {
+            User user = LoginService.login(httpRequest.getBody());
+            HttpResponse response = HttpResponse.found("/index.html");
+            response.addCookie(SessionStorage.getSession(user.getAccount()));
+            return response;
+        } catch (NoSuchElementException | IllegalArgumentException | NullPointerException e) {
             return HttpResponse.unAuthorized();
         }
-        HttpResponse response = HttpResponse.found("/index.html");
-        response.addCookie(SessionStorage.getSession(user.getAccount()));
-        return response;
     }
 }

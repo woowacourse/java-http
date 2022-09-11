@@ -36,12 +36,4 @@ public class URL {
     public Map<String, String> getParams() {
         return params;
     }
-
-    @Override
-    public String toString() {
-        return "URL{" +
-                "path='" + path + '\'' +
-                ", params=" + params +
-                '}';
-    }
 }

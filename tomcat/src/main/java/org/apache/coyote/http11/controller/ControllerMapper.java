@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.controller;
 
+import static nextstep.jwp.exception.ExceptionType.INVALID_HANDLER_EXCEPTION;
+
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
@@ -24,7 +26,7 @@ public enum ControllerMapper {
                 .filter(it -> it.regex.test(path))
                 .map(ControllerMapper::getHandler)
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("일치하는 Handler 를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException(INVALID_HANDLER_EXCEPTION.getMessage()));
     }
 
     public Handler getHandler() {

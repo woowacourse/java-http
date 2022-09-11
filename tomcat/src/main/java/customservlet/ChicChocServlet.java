@@ -11,10 +11,11 @@ public class ChicChocServlet extends AbstractServlet {
     private final MappedRequestHandlers mappedRequestHandlers;
     private final MappedExceptionResolvers mappedExceptionResolvers;
 
-    public ChicChocServlet() {
-        this.viewResolver = new ViewResolver();
-        this.mappedRequestHandlers = MappedRequestHandlers.getInstance();
-        this.mappedExceptionResolvers = MappedExceptionResolvers.getInstance();
+    public ChicChocServlet(final ViewResolver viewResolver, final MappedRequestHandlers mappedRequestHandlers,
+                           final MappedExceptionResolvers mappedExceptionResolvers) {
+        this.viewResolver = viewResolver;
+        this.mappedRequestHandlers = mappedRequestHandlers;
+        this.mappedExceptionResolvers = mappedExceptionResolvers;
     }
 
     @Override
@@ -27,7 +28,7 @@ public class ChicChocServlet extends AbstractServlet {
         processRequest(request, response);
     }
 
-    public void processRequest(final HttpRequest request, final HttpResponse response) {
+    private void processRequest(final HttpRequest request, final HttpResponse response) {
         try {
             final var handler = mappedRequestHandlers.getHandler(request);
             final var viewName = handler.handle(request, response);

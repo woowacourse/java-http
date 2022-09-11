@@ -6,6 +6,7 @@ import customservlet.MappedRequestHandlers;
 import customservlet.RequestHandlerInfo;
 import customservlet.ServletConfiguration;
 import customservlet.SessionManager;
+import customservlet.ViewResolver;
 import customservlet.exception.BadRequestException;
 import nextstep.jwp.application.MemberService;
 import nextstep.jwp.exception.AuthenticationException;
@@ -50,6 +51,9 @@ public class ServletConfigurationImpl implements ServletConfiguration, TomcatCon
     @Override
     public void addServlet() {
         final RequestMapping requestMapping = RequestMapping.getInstance();
-        requestMapping.addServlet("/", new ChicChocServlet());
+        requestMapping.addServlet("/", new ChicChocServlet(new ViewResolver(),
+                MappedRequestHandlers.getInstance(),
+                MappedExceptionResolvers.getInstance()
+        ));
     }
 }

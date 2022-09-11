@@ -13,9 +13,7 @@ class HttpResponseTest {
     @Test
     void createResponse() throws IOException {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
-        httpResponse.addContentTypeHeader(ContentType.findContentType("/index.html"));
-        httpResponse.addBodyFromFile("/index.html");
+        httpResponse.createStaticFileResponse("/index.html");
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK\r\n" +
@@ -31,9 +29,7 @@ class HttpResponseTest {
     @Test
     void addHeader() {
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
-        httpResponse.addContentTypeHeader(ContentType.findContentType("/index.html"));
-        httpResponse.addBodyFromFile("/index.html");
+        httpResponse.createStaticFileResponse("/index.html");
 
         httpResponse.addHeader(
                 "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");

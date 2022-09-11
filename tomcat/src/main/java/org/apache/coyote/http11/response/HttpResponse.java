@@ -32,7 +32,7 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void addBodyFromFile(String fileName) {
+    private void addBodyFromFile(String fileName) {
         String body = readFile("static" + fileName);
         this.headers.add("Content-Length: " + body.getBytes().length);
         this.body = body;
@@ -51,6 +51,18 @@ public class HttpResponse {
 
     public void addHeader(String header) {
         this.headers.add(header);
+    }
+
+    public void createRedirectResponse(String location) {
+        addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
+        addContentTypeHeader(ContentType.findContentType(location));
+        addHeader("Location: " + location);
+    }
+
+    public void createStaticFileResponse(String path) {
+        addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
+        addContentTypeHeader(ContentType.findContentType(path));
+        addBodyFromFile(path);
     }
 
     public String makeResponse() {

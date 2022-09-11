@@ -7,7 +7,6 @@ import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 
 public class RegisterController extends AbstractController {
 
@@ -21,19 +20,11 @@ public class RegisterController extends AbstractController {
                 queryParameters.find("email"));
         InMemoryUserRepository.save(user);
 
-        createIndexPageResponse(response);
-    }
-
-    private void createIndexPageResponse(HttpResponse response) {
-        response.addStatusLine(HttpStatus.FOUND.getStatusCodeAndMessage());
-        response.addContentTypeHeader(ContentType.HTML.getContentType());
-        response.addHeader("Location: /index.html");
+        response.createRedirectResponse("/index.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.addStatusLine(HttpStatus.OK.getStatusCodeAndMessage());
-        response.addContentTypeHeader(ContentType.HTML.getContentType());
-        response.addBodyFromFile(request.getPath().concat("." + ContentType.HTML.getExtension()));
+        response.createStaticFileResponse(request.getPath().concat("." + ContentType.HTML.getExtension()));
     }
 }

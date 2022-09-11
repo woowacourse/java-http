@@ -20,6 +20,6 @@ public class HttpStatusLine {
 	}
 
 	public String generateStatusLine() {
-		return String.join(GAP, version.getVersion(), statusCode.toResponseString(),"");
+		return String.join(GAP, version.getVersion(), statusCode.toResponseString(), "");
 	}
 }

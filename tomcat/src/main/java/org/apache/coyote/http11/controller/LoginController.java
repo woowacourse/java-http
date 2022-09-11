@@ -1,10 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import static nextstep.jwp.model.UserService.findUserBySession;
-import static org.apache.coyote.http11.response.HttpResponseFactory.getFoundHttpResponse;
-import static org.apache.coyote.http11.response.HttpResponseFactory.getLoginHttpResponse;
-import static org.apache.coyote.http11.response.HttpResponseFactory.getOKHttpResponse;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -18,32 +13,36 @@ import nextstep.jwp.model.UserService;
 
 public class LoginController implements Handler {
 
+	private static final String SUCCEED_REDIRECT_URL = "/index.html";
+	private static final String FAILED_REDIRECT_URL = "/401.html";
+	private static final String LOGIN_HTML_URL = "/login.html";
+
 	@Override
-	public HttpResponse handle(HttpRequest httpRequest) {
-
-		final String fileName = "/login.html";
-		final String succeedRedirectUrl = "/index.html";
-		final String failedRedirectUrl = "/401.html";
-
+	public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
 		try {
-			if (httpRequest.getParams().isEmpty() && !httpRequest.hasCookie()) {
-				return getOKHttpResponse(fileName);
-			}
-			if (httpRequest.getParams().isEmpty() && httpRequest.hasCookie()) {
-				if (findUserBySession(httpRequest)) {
-					return getFoundHttpResponse(succeedRedirectUrl);
-				}
-				return getOKHttpResponse(fileName);
+			if (isRequestLoginPage(httpRequest)) {
+				httpResponse.setOkResponse(LOGIN_HTML_URL);
+				return;
 			}
 			final User succeedLoginUser = UserService.login(httpRequest.getParams());
-			if (succeedLoginUser != null) {
-				return getLoginHttpResponse(succeedRedirectUrl, succeedLoginUser);
+
+			if (isSucceedLogin(succeedLoginUser)) {
+				httpResponse.setSessionAndCookieWithOkResponse(succeedLoginUser, SUCCEED_REDIRECT_URL);
+				return;
 			}
-			return getFoundHttpResponse(failedRedirectUrl);
+			httpResponse.setFoundResponse(FAILED_REDIRECT_URL);
+
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 			throw new InternalException("서버 에러가 발생했습니다.");
 		}
 	}
 
+	private boolean isSucceedLogin(User succeedLoginUser) {
+		return succeedLoginUser != null;
+	}
+
+	private boolean isRequestLoginPage(HttpRequest httpRequest) {
+		return httpRequest.getParams().isEmpty() && !httpRequest.hasCookie();
+	}
 }

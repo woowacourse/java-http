@@ -1,12 +1,8 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.response.HttpResponseFactory.getLoginHttpResponse;
-import static org.apache.coyote.http11.response.HttpResponseFactory.getOKHttpResponse;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -14,27 +10,21 @@ import com.sun.jdi.InternalException;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserService;
-import nextstep.jwp.util.Parser;
 
 public class RegisterController implements Handler {
+
+	private static final String SUCCEED_REDIRECT_URL = "/index.html";
+	private static final String REGISTER_PAGE_URL = "/register.html";
+
 	@Override
-	public HttpResponse handle(HttpRequest httpRequest) {
-
-		final String fileName = "/register.html";
-		final String succeedRedirectUrl = "/index.html";
-		final String fileType = Parser.parseFileType(fileName);
-
+	public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
 		try {
-			if (httpRequest.getRequestBody().isEmpty()) {
-				return getOKHttpResponse(fileName);
-			}
-
-			if (httpRequest.requestPOST()) {
+			if (httpRequest.requestPOST() && !httpRequest.getRequestBody().isEmpty()) {
 				final User user = UserService.register(httpRequest.getRequestBody());
-				return getLoginHttpResponse(succeedRedirectUrl, user);
+				httpResponse.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
+				return;
 			}
-
-			return getOKHttpResponse(fileName, ContentType.from(fileType).getValue());
+			httpResponse.setOkResponse(REGISTER_PAGE_URL);
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 			throw new InternalException("서버 에러가 발생했습니다.");

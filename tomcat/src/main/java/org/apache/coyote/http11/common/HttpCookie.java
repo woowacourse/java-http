@@ -17,11 +17,9 @@ public class HttpCookie {
 
 	public static HttpCookie from(String data) {
 		return new HttpCookie(Parser.parseCookieString(data));
-
 	}
 
 	public static String generateCookieValue(String uuid) {
 		return String.join(DELIMITER, JSESSIONID, uuid);
 	}
-
 }

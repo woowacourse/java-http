@@ -41,10 +41,6 @@ public class RequestLine {
 		}
 	}
 
-	public boolean hasUrl(String url) {
-		return this.url.getPath().equals(url);
-	}
-
 	public HttpMethod getMethod() {
 		return method;
 	}

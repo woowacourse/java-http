@@ -20,7 +20,7 @@ public enum HttpStatus {
     }
 
     public String statusToResponse() {
-        return code + END_OF_STATUS + message + " ";
+        return code + END_OF_STATUS + message + END_OF_STATUS;
     }
 
     public String getFilePath() {

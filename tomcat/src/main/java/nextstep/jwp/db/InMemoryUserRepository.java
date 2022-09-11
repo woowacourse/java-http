@@ -23,7 +23,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    public static void validateDuplicateAccount(String account) {
+    private static void validateDuplicateAccount(String account) {
         if (database.containsKey(account)) {
             throw new IllegalStateException("이미 저장된 계정입니다.");
         }

@@ -10,10 +10,10 @@ public class RequestHeaders {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> headers;
+    private final Map<String, String> value;
 
-    private RequestHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    private RequestHeaders(Map<String, String> value) {
+        this.value = value;
     }
 
     public static RequestHeaders from(List<String> headers) {
@@ -28,31 +28,31 @@ public class RequestHeaders {
     }
 
     public int getContentLength() {
-        if (headers.containsKey("Content-Length")) {
-            return Integer.parseInt(headers.get("Content-Length"));
+        if (value.containsKey("Content-Length")) {
+            return Integer.parseInt(value.get("Content-Length"));
         }
         return 0;
     }
 
     public boolean isExistCookie() {
-        return headers.containsKey("Cookie");
+        return value.containsKey("Cookie");
     }
 
     public HttpCookie getCookie() throws IllegalAccessException {
         if (!isExistCookie()) {
             throw new IllegalAccessException();
         }
-        return HttpCookie.from(headers.get("Cookie"));
+        return HttpCookie.from(value.get("Cookie"));
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public Map<String, String> getValue() {
+        return value;
     }
 
     @Override
     public String toString() {
         return "RequestHeaders{" +
-                "headers=" + headers +
+                "headers=" + value +
                 '}';
     }
 }

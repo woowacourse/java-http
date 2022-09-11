@@ -45,10 +45,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse executeRequest(BufferedReader bufferedReader) throws Exception {
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest request = HttpRequest.from(bufferedReader);
         HttpResponse response = new HttpResponse();
-        Controller controller = RequestMapping.getController(httpRequest);
-        controller.service(httpRequest, response);
+        Controller controller = RequestMapping.getController(request);
+        controller.service(request, response);
         return response;
     }
 }

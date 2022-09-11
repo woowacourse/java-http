@@ -7,7 +7,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.Query;
+import org.apache.coyote.http11.QueryParameters;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,13 +24,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Query queryMapper = new Query(request.getRequestBody());
-        Map<String, String> parameters = queryMapper.getMappedQuery();
+        QueryParameters queryParameters = new QueryParameters(request.getRequestBody());
+        Map<String, String> mappedQuery = queryParameters.getValue();
 
-        User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
+        User user = InMemoryUserRepository.findByAccount(mappedQuery.get("account"))
                 .orElseThrow(NoSuchElementException::new);
 
-        if (!user.checkPassword(parameters.get("password"))) {
+        if (!user.checkPassword(mappedQuery.get("password"))) {
             response.addStatusLine(HttpStatus.getStatusCodeAndMessage(302));
             response.addBodyFromFile("/401.html");
             return;

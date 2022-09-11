@@ -7,13 +7,13 @@ import java.util.Map;
 import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.Test;
 
-class QueryTest {
+class QueryParametersTest {
 
     @Test
     void queryMapping() {
         RequestBody body = RequestBody.from("account=gugu&password=password&email=hkkang%40woowahan.com".toCharArray());
-        Query query = new Query(body);
-        Map<String, String> mappedQuery = query.getMappedQuery();
+        QueryParameters queryParameters = new QueryParameters(body);
+        Map<String, String> mappedQuery = queryParameters.getValue();
 
         assertAll(
                 () -> assertThat(mappedQuery.get("account")).isEqualTo("gugu"),

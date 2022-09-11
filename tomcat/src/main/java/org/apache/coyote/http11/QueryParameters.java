@@ -5,20 +5,20 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.request.RequestBody;
 
-public class Query {
+public class QueryParameters {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final String query;
+    private final Map<String, String> value;
 
-    public Query(RequestBody body) {
-        this.query = body.getBody();
+    public QueryParameters(RequestBody body) {
+        this.value = getMappedQuery(body.getValue());
     }
 
-    public Map<String, String> getMappedQuery() {
+    private Map<String, String> getMappedQuery(String query) {
         Map<String, String> result = new HashMap<>();
-        List<String> parameterPairs = List.of(this.query.split("&"));
+        List<String> parameterPairs = List.of(query.split("&"));
 
         for (String parameterPair : parameterPairs) {
             insertParameter(result, parameterPair);
@@ -35,5 +35,9 @@ public class Query {
             return;
         }
         result.put(pair.get(KEY_INDEX), pair.get(VALUE_INDEX));
+    }
+
+    public Map<String, String> getValue() {
+        return value;
     }
 }

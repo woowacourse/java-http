@@ -30,8 +30,8 @@ class HttpRequestTest {
                 () -> assertThat(request.getRequestLine().getMethod()).isEqualTo("GET"),
                 () -> assertThat(request.getRequestLine().getPath()).isEqualTo("/index.html"),
                 () -> assertThat(request.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(request.getRequestHeaders().getHeaders()).hasSize(2),
-                () -> assertThat(request.getRequestBody().getBody()).isEqualTo("")
+                () -> assertThat(request.getRequestHeaders().getValue()).hasSize(2),
+                () -> assertThat(request.getRequestBody().getValue()).isEqualTo("")
         );
     }
 }

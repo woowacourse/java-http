@@ -23,12 +23,4 @@ public class Session {
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
-
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
-    }
 }

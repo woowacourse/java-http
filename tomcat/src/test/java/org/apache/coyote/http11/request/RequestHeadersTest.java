@@ -18,9 +18,9 @@ class RequestHeadersTest {
     @Test
     void mappingHeader() {
         assertAll(
-                () -> assertThat(headers.getHeaders().get("Host")).isEqualTo("localhost:8080"),
-                () -> assertThat(headers.getHeaders().get("Connection")).isEqualTo("keep-alive"),
-                () -> assertThat(headers.getHeaders().get("Content-Length")).isEqualTo("12")
+                () -> assertThat(headers.getValue().get("Host")).isEqualTo("localhost:8080"),
+                () -> assertThat(headers.getValue().get("Connection")).isEqualTo("keep-alive"),
+                () -> assertThat(headers.getValue().get("Content-Length")).isEqualTo("12")
         );
     }
 

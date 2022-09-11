@@ -11,6 +11,7 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.util.StaticFileUtil;
 
 public class RegisterController extends AbstractController {
+
     @Override
     protected HttpResponse handleGet(final HttpRequest request) {
         return new HttpResponse.Builder()

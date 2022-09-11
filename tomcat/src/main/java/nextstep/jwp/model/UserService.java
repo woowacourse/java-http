@@ -49,12 +49,21 @@ public class UserService {
     }
 
     public User register(Map<String, String> params) {
-        if (params.isEmpty() || params.size() < 3) {
-            throw new InvalidHttpRequestException(INVALID_HTTP_REGISTER_EXCEPTION);
-        }
+        validateResister(params);
         User user = getUser(params);
         InMemoryUserRepository.save(user);
         return user;
+    }
+
+    private void validateResister(final Map<String, String> params) {
+        if (isValidRegister(params)) {
+            throw new InvalidHttpRequestException(INVALID_HTTP_REGISTER_EXCEPTION);
+        }
+    }
+
+    private boolean isValidRegister(final Map<String, String> params) {
+        return params.isEmpty() || !params.containsKey(ID) || !params.containsKey(PASSWORD) || !params.containsKey(
+                EMAIL);
     }
 
     private User getUser(Map<String, String> params) {

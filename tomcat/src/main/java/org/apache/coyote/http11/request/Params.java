@@ -3,7 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
 
 import utils.StringSplitter;
 
@@ -38,7 +39,7 @@ public class Params {
 
     private void validateParameterNameExist(final String name) {
         if (!params.containsKey(name)) {
-            throw new NoSuchElementException("파라미터를 찾을 수 없습니다 : " + name);
+            throw new ParameterNotFoundException(name);
         }
     }
 

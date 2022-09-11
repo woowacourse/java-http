@@ -4,10 +4,12 @@ import java.util.stream.Stream;
 
 import org.apache.support.Controller;
 
+import nextstep.jwp.service.AuthService;
+
 public enum RequestMapping {
 
     INDEX("/", new IndexController()),
-    LOGIN("/login", new LoginController()),
+    LOGIN("/login", new LoginController(new AuthService())),
     REGISTER("/register", new RegisterController()),
     ;
 

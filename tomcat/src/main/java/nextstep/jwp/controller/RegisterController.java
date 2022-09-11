@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
-import java.util.NoSuchElementException;
-
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -29,7 +28,7 @@ public class RegisterController extends AbstractController {
             InMemoryUserRepository.save(user);
             return redirectToIndex();
 
-        } catch (final NoSuchElementException e) {
+        } catch (final ParameterNotFoundException e) {
             return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
         }
     }

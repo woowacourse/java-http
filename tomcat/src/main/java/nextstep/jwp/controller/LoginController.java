@@ -1,19 +1,23 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UserNotFoundException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.AuthService;
 
 public class LoginController extends AbstractController {
+
+    private final AuthService authService;
+
+    public LoginController(final AuthService authService) {
+        this.authService = authService;
+    }
 
     @Override
     protected final HttpResponse doPost(final HttpRequest request) {
@@ -27,23 +31,16 @@ public class LoginController extends AbstractController {
             final String account = params.find("account");
             final String password = params.find("password");
 
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(UserNotFoundException::new);
+            final Session session = authService.login(account, password);
 
-            if (user.checkPassword(password)) {
-                final Session session = request.generateSession(Map.of("user", user));
+            return HttpResponse.found()
+                    .setCookie(session)
+                    .location("/index.html");
 
-                return HttpResponse.found()
-                        .setCookie(session)
-                        .location("/index.html");
-            }
-
+        } catch (final UserNotFoundException | LoginFailedException e) {
             return fail(HttpStatus.UNAUTHORIZED, Page.UNAUTHORIZED);
 
-        } catch (final UserNotFoundException e) {
-            return fail(HttpStatus.UNAUTHORIZED, Page.UNAUTHORIZED);
-
-        } catch (final NoSuchElementException e) {
+        } catch (final ParameterNotFoundException e) {
             return fail(HttpStatus.BAD_REQUEST, Page.BAD_REQUEST);
         }
     }

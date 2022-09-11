@@ -11,8 +11,12 @@ public class SessionManager {
     private SessionManager () {
     }
 
-    public static void add(final Session session) {
+    public static Session generate(final Map<String, Object> attributes) {
+        final Session session = Session.generate();
+        session.setAttributes(attributes);
+
         sessions.put(session.getId(), session);
+        return session;
     }
 
     public static Session findSession(final String id) {

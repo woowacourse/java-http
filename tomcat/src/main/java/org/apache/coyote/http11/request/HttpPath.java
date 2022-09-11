@@ -64,14 +64,6 @@ public class HttpPath {
         }
     }
 
-    public boolean isLoginRequest() {
-        return path.contains("login");
-    }
-
-    public boolean isDefaultRequest() {
-        return path.equals(DEFAULT_URL);
-    }
-
     public String getPath() {
         return path;
     }

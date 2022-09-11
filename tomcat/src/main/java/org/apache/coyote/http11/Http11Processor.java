@@ -4,27 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.exception.UserNotFoundException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.handler.RequestMapping;
 import org.apache.coyote.http11.header.HttpHeaders;
-import org.apache.coyote.http11.header.HttpVersion;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpPath;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +23,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String HEADER_DELIMITER = ":";
-    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -51,12 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequestLine httpRequestLine = HttpRequestLine.from(reader.readLine());
-            final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
-            final HttpRequestBody httpRequestBody = HttpRequestBody.from(
-                    parseRequestBody(httpRequestLine.getMethod(), httpHeaders.getContentLength(), reader));
-            final HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);
-
+            final HttpRequest httpRequest = createHttpRequest(reader);
             final HttpResponse httpResponse = createHttpResponse(httpRequest);
 
             outputStream.write(httpResponse.getResponseAsBytes());
@@ -66,14 +51,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestBody(final HttpMethod method, final int contentLength, final BufferedReader reader)
-            throws IOException {
-        if (method.isPost() && contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
+    private HttpRequest createHttpRequest(final BufferedReader reader) throws IOException {
+        final HttpRequestLine httpRequestLine = HttpRequestLine.from(reader.readLine());
+        final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
+        final HttpRequestBody httpRequestBody = HttpRequestBody.from(
+                parseRequestBody(httpRequestLine.getMethod(), httpHeaders.getContentLength(), reader));
+        return new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);
     }
 
     private Map<String, String> parseRequestHeaders(final BufferedReader reader) throws IOException {
@@ -88,31 +71,19 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isDefaultRequest()) {
-            return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),
-                    DEFAULT_RESPONSE_BODY);
+    private String parseRequestBody(final HttpMethod method, final int contentLength, final BufferedReader reader)
+            throws IOException {
+        if (method.isPost() && contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
         }
-        if (httpRequest.isLoginRequest()) {
-            if (httpRequest.isPostMethod()) {
-                final User user = InMemoryUserRepository.findByAccount(httpRequest.getRequestBodyValue("account"))
-                        .orElseThrow(UserNotFoundException::new);
-                if (user.checkPassword(httpRequest.getRequestBodyValue("password"))) {
-                    log.info(String.format("user : %s", user));
-                    return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/index.html"),
-                            httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));
-                }
-                return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.FOUND, new Location("/401.html"),
-                        httpRequest.getContentType(), readFile(httpRequest.getHttpPath()));
-            }
-        }
-        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK, Location.empty(), httpRequest.getContentType(),
-                readFile(httpRequest.getHttpPath()));
+        return "";
     }
 
-    private String readFile(final HttpPath httpPath) throws IOException {
-        final String filePath = String.format("static%s", httpPath.getPath());
-        final URL resource = this.getClass().getClassLoader().getResource(filePath);
-        return Files.readString(Path.of(Objects.requireNonNull(resource).getPath()));
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws IOException {
+        final RequestMapping requestMapping = new RequestMapping();
+        final Controller controller = requestMapping.getController(httpRequest);
+        return controller.service(httpRequest);
     }
 }

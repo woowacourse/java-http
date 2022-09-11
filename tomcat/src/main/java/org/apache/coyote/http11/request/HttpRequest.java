@@ -6,31 +6,19 @@ import org.apache.coyote.http11.header.HttpVersion;
 
 public class HttpRequest {
 
-    private final HttpMethod httpMethod;
-    private final HttpPath httpPath;
-    private final HttpVersion httpVersion;
+    private final HttpRequestLine httpRequestLine;
     private final HttpHeaders httpHeaders;
     private final HttpRequestBody httpRequestBody;
 
     public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeaders httpHeaders,
                        HttpRequestBody httpRequestBody) {
-        this.httpMethod = httpRequestLine.getMethod();
-        this.httpPath = httpRequestLine.getPath();
-        this.httpVersion = httpRequestLine.getVersion();
+        this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
         this.httpRequestBody = httpRequestBody;
     }
 
-    public boolean isLoginRequest() {
-        return httpPath.isLoginRequest();
-    }
-
-    public boolean isDefaultRequest() {
-        return httpPath.isDefaultRequest();
-    }
-
-    public boolean isPostMethod() {
-        return httpMethod.isPost();
+    public boolean isSameMethod(final HttpMethod method) {
+        return httpRequestLine.isSameMethod(method);
     }
 
     public String getRequestBodyValue(final String key) {
@@ -38,10 +26,14 @@ public class HttpRequest {
     }
 
     public ContentType getContentType() {
-        return ContentType.from(httpPath.getPath());
+        return ContentType.from(httpRequestLine.getPath());
     }
 
-    public HttpPath getHttpPath() {
-        return httpPath;
+    public String getHttpPath() {
+        return httpRequestLine.getPath();
+    }
+
+    public HttpVersion getHttpVersion() {
+        return httpRequestLine.getVersion();
     }
 }

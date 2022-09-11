@@ -26,12 +26,16 @@ public class HttpRequestLine {
                 HttpVersion.from(values[PROTOCOL_VERSION_INDEX]));
     }
 
+    public boolean isSameMethod(final HttpMethod method) {
+        return this.method == method;
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
 
-    public HttpPath getPath() {
-        return path;
+    public String getPath() {
+        return path.getPath();
     }
 
     public HttpVersion getVersion() {

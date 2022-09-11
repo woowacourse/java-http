@@ -27,10 +27,10 @@ public class IndexController extends ResourceController {
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
         if (authorizeService.isAuthorized(httpRequest)) {
-            return generateResourceResponse(INDEX_HTML);
+            return generateResourceResponse(INDEX_HTML.getValue());
         }
 
-        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), LOGIN_HTML);
+        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), LOGIN_HTML.getValue());
         return HttpResponse.of(HTTP11, REDIRECT, location);
     }
 }

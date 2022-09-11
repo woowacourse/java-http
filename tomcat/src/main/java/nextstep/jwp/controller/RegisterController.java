@@ -27,7 +27,7 @@ public class RegisterController extends ResourceController {
     }
 
     private HttpResponse doGet() {
-        return generateResourceResponse(REGISTER_HTML);
+        return generateResourceResponse(REGISTER_HTML.getValue());
     }
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
@@ -42,7 +42,7 @@ public class RegisterController extends ResourceController {
         final UserRegisterRequest userRegisterRequest = new UserRegisterRequest(account, password, email);
         userService.save(userRegisterRequest);
 
-        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
+        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
         return HttpResponse.of(HTTP11, REDIRECT, location);
     }
 

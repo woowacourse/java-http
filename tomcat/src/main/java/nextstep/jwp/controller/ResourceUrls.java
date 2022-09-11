@@ -1,12 +1,19 @@
 package nextstep.jwp.controller;
 
-abstract public class ResourceUrls {
+public enum ResourceUrls {
 
-    private ResourceUrls() {
+    INDEX_HTML("/index.html"),
+    UNAUTHORIZED_HTML("/401.html"),
+    REGISTER_HTML("/register.html"),
+    LOGIN_HTML("/login.html");
+
+    private final String value;
+
+    ResourceUrls(final String value) {
+        this.value = value;
     }
 
-    public static final String INDEX_HTML = "/index.html";
-    public static final String UNAUTHORIZED_HTML = "/401.html";
-    public static final String REGISTER_HTML = "/register.html";
-    public static final String LOGIN_HTML = "/login.html";
+    public String getValue() {
+        return value;
+    }
 }

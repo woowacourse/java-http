@@ -34,10 +34,10 @@ public class LoginController extends ResourceController {
 
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         if (authorizeService.isAuthorized(httpRequest)) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
             return HttpResponse.of(HTTP11, REDIRECT, location);
         }
-        return generateResourceResponse(LOGIN_HTML);
+        return generateResourceResponse(LOGIN_HTML.getValue());
     }
 
     protected HttpResponse doPost(final HttpRequest httpRequest) {
@@ -50,15 +50,15 @@ public class LoginController extends ResourceController {
         try {
             final UserLoginRequest userLoginRequest = getUserLoginRequest(queryParams);
             userService.login(userLoginRequest);
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
             final HttpCookie cookie = SessionManager.createCookie();
             final HttpHeader cookieHeader = HttpHeader.of("Set-Cookie", cookie.toHeaderValue());
             return HttpResponse.of(HTTP11, REDIRECT, location, cookieHeader);
         } catch (IllegalArgumentException exception) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), UNAUTHORIZED_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), UNAUTHORIZED_HTML.getValue());
             return HttpResponse.of(HTTP11, REDIRECT, location);
         } catch (NoSuchElementException exception) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), LOGIN_HTML);
+            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), LOGIN_HTML.getValue());
             return HttpResponse.of(HTTP11, REDIRECT, location);
         }
     }

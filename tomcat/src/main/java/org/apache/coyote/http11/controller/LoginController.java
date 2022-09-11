@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session.Session;
 import org.apache.coyote.http11.Request.HttpRequest;
 import org.apache.coyote.http11.Response.HttpResponse;
+import org.apache.coyote.http11.model.Headers;
 import org.apache.coyote.http11.model.HttpCookie;
 import org.apache.coyote.http11.model.Parameters;
 import org.apache.coyote.http11.model.Path;
@@ -63,7 +64,7 @@ public final class LoginController extends AbstractController {
     }
 
     private String getJSessionId(final HttpRequest httpRequest) {
-        final String cookieHeader = httpRequest.getRequestHeader().get("Cookie");
+        final String cookieHeader = httpRequest.getRequestHeader().get(Headers.COOKIE);
         if (cookieHeader == null) {
             return null;
         }

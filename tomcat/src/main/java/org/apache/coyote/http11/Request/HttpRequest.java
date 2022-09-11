@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.model.Headers;
 
 public class HttpRequest {
+
+    private static final String END_OF_HEADER = "";
+    private static final String HEADER_DELIMITER = ":";
 
     private RequestLine requestLine;
     private RequestHeader requestHeader;
@@ -22,29 +26,42 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        // RequestLine
-        final RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-
-        // RequestHeader
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Length", "0");
-        while (bufferedReader.ready()) {
-            final String input = bufferedReader.readLine();
-            if (input.equals("")) {
-                break;
-            }
-            final String[] header = input.split(":");
-            headers.put(header[0].trim(), header[1].trim());
-        }
-        final RequestHeader requestHeader = new RequestHeader(headers);
-
-        // RequestBody
-        final int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        final String requestBody = new String(buffer);
+        final RequestLine requestLine = getRequestLine(bufferedReader);
+        final RequestHeader requestHeader = getRequestHeader(bufferedReader);
+        final String requestBody = getRequestBody(bufferedReader, requestHeader);
 
         return new HttpRequest(requestLine, requestHeader, requestBody);
+    }
+
+    private static RequestLine getRequestLine(final BufferedReader bufferedReader) throws IOException {
+        return new RequestLine(bufferedReader.readLine());
+    }
+
+    private static RequestHeader getRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        while (bufferedReader.ready()) {
+            final String input = bufferedReader.readLine();
+            if (input.equals(END_OF_HEADER)) {
+                break;
+            }
+            final String[] header = input.split(HEADER_DELIMITER);
+            headers.put(header[0].trim(), header[1].trim());
+        }
+
+        return new RequestHeader(headers);
+    }
+
+    private static String getRequestBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
+            throws IOException {
+        final String input = requestHeader.get(Headers.CONTENT_LENGTH);
+        if (input == null) {
+            return "";
+        }
+        final int contentLength = Integer.parseInt(input);
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     public RequestLine getRequestLine() {

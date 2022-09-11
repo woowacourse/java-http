@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.Response;
 
+import org.apache.coyote.http11.model.Headers;
+import org.apache.coyote.http11.model.Status;
+
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
@@ -13,17 +16,16 @@ public class HttpResponse {
 
     public static HttpResponse ok(final String body) {
         final HttpResponse response = new HttpResponse();
-        response.statusLine = new StatusLine(HTTP_VERSION, 200, "OK");
+        response.statusLine = createStatusLine(Status.OK);
         response.responseBody = body;
-        response.header.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-//        response.header.addContentType("charset=utf-8");
+        response.header.addHeader(Headers.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
         return response;
     }
 
     public static HttpResponse found(final String location) {
         final HttpResponse response = new HttpResponse();
-        response.statusLine = new StatusLine(HTTP_VERSION, 302, "Found");
+        response.statusLine = createStatusLine(Status.FOUND);
         response.header.setLocation(location);
 
         return response;
@@ -31,7 +33,7 @@ public class HttpResponse {
 
     public static HttpResponse notFound() {
         final HttpResponse response = new HttpResponse();
-        response.statusLine = new StatusLine(HTTP_VERSION, 404, "Not Found");
+        response.statusLine = createStatusLine(Status.NOT_FOUND);
         response.header.setLocation("/404.html");
 
         return response;
@@ -39,16 +41,21 @@ public class HttpResponse {
 
     public static HttpResponse methodNotAllowed() {
         final HttpResponse response = new HttpResponse();
-        response.statusLine = new StatusLine(HTTP_VERSION, 405, "Method Not Allowed");
+        response.statusLine = createStatusLine(Status.METHOD_NOT_ALLOWED);
 
         return response;
     }
 
+    private static StatusLine createStatusLine(final Status status) {
+        return new StatusLine(HTTP_VERSION, status.code(), status.message());
+    }
+
     public String toResponse() {
-        return statusLine.getResponse() + "\r\n" +
-                header.getResponse() + "\r\n" +
-                "\r\n" +
-                responseBody;
+        return String.join("\r\n",
+                statusLine.getResponse(),
+                header.getResponse(),
+                "",
+                responseBody);
     }
 
     public HttpResponse cookie(final String cookie) {

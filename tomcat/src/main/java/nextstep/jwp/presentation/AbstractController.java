@@ -10,7 +10,7 @@ public class AbstractController implements Controller {
     protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) {
         if (request.getHttpMethod().equals(HttpMethod.GET)) {
             doGet(request, response);
             return;

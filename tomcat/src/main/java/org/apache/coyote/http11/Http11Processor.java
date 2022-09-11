@@ -38,14 +38,10 @@ public class Http11Processor implements Runnable, Processor {
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            RequestLine requestLine = RequestLine.extract(bufferedReader.readLine());
-            HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
-            HttpCookie cookie = HttpCookie.extract(httpHeaders);
-            String requestBody = extractRequestBody(bufferedReader, httpHeaders, requestLine.getHttpMethod());
-
-            HttpRequest request = new HttpRequest(requestLine, httpHeaders, cookie, requestBody);
+            HttpRequest request = HttpRequest.from(bufferedReader);
             Controller controller = RequestMapping.getController(request);
             log.info("controller : {}", controller);
+
             HttpResponse response = new HttpResponse();
             controller.service(request, response);
             submitResponse(outputStream, response);
@@ -59,18 +55,4 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }
-
-    private String extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders, HttpMethod httpMethod)
-            throws IOException {
-        String requestBody = "";
-        if (httpMethod.equals(HttpMethod.POST)) {
-            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        log.info("requestBody : {}", requestBody);
-        return requestBody;
-    }
-
 }

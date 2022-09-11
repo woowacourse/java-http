@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import org.apache.catalina.HttpSession;
 import org.apache.catalina.SessionManager;
 
@@ -15,6 +17,24 @@ public class HttpRequest {
         this.httpHeaders = httpHeaders;
         this.cookie = cookie;
         this.requestBody = requestBody;
+    }
+
+    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
+        RequestLine requestLine = RequestLine.extract(bufferedReader.readLine());
+        HttpHeaders httpHeaders = HttpHeaders.create(bufferedReader);
+        String requestBody = extractRequestBody(bufferedReader, requestLine, httpHeaders);
+        return new HttpRequest(requestLine, httpHeaders, HttpCookie.extract(httpHeaders), requestBody);
+    }
+
+    private static String extractRequestBody(BufferedReader bufferedReader, RequestLine requestLine,
+                                             HttpHeaders httpHeaders) throws IOException {
+        if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
+            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
     }
 
     public HttpSession getSession() {

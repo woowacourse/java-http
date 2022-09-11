@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.response.StatusCode.*;
-
 import java.util.Optional;
 
 import org.apache.coyote.http11.request.HttpRequest;
@@ -29,7 +27,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         if (SessionManager.contains(request.getCookie(JSESSIONID))) {
-            return redirect(INDEX_PATH);
+            return HttpResponse.redirectTo(HTTP_VERSION_1_1, INDEX_PATH);
         }
         return fileReader.readFile(LOGIN_PATH, HTTP_VERSION_1_1);
     }
@@ -43,7 +41,7 @@ public class LoginController extends AbstractController {
             return login(user.get());
         }
 
-        return redirect(UNAUTHORIZED_PATH);
+        return HttpResponse.redirectTo(HTTP_VERSION_1_1, UNAUTHORIZED_PATH);
     }
 
     private boolean isLoginSuccess(Optional<User> user, RequestBody requestBody) {
@@ -62,12 +60,7 @@ public class LoginController extends AbstractController {
             .setAttribute("user", user);
         SessionManager.add(session);
 
-        return redirect(INDEX_PATH)
+        return HttpResponse.redirectTo(HTTP_VERSION_1_1, INDEX_PATH)
             .addHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
-    }
-
-    private HttpResponse redirect(String locationUri) {
-        return HttpResponse.of(HTTP_VERSION_1_1, FOUND)
-            .addHeader("Location", locationUri);
     }
 }

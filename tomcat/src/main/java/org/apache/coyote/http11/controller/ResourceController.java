@@ -2,7 +2,6 @@ package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.util.FileReader;
 
 public class ResourceController extends AbstractController {
@@ -15,11 +14,6 @@ public class ResourceController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        if (request.getPath().equals("/")) {
-            return HttpResponse.of(HTTP_VERSION_1_1, StatusCode.OK, "Hello world!")
-                .addHeader("Content-Type", "text/html;charset=utf-8")
-                .addHeader("Content-Length", "12");
-        }
         return fileReader.readFile(request.getPath(), HTTP_VERSION_1_1);
     }
 

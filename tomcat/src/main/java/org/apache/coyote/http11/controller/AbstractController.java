@@ -10,7 +10,10 @@ public abstract class AbstractController implements Controller {
         if (httpRequest.getHttpMethod() == HttpMethod.POST) {
             return doPost(httpRequest);
         }
-        return doGet(httpRequest);
+        if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+            return doGet(httpRequest);
+        }
+        throw new IllegalArgumentException("지원하지 않는 HTTP Method입니다.");
     }
 
     protected abstract HttpResponse doGet(HttpRequest request);

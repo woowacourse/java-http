@@ -8,6 +8,7 @@ public enum RequestMapping {
     LOGIN("/login", new LoginController()),
     REGISTER("/register", new RegisterController()),
     INDEX("/index.html", new IndexController()),
+    ROOT("/", new RootController()),
     RESOURCE("", new ResourceController()),
     ;
 

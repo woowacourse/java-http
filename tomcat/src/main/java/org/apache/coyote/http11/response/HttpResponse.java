@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,13 +15,14 @@ public class HttpResponse {
         this.responseHeader = new LinkedHashMap<>();
         this.responseBody = responseBody;
     }
-
-    public static HttpResponse of(String protocolVersion, StatusCode statusCode) {
-        return new HttpResponse(protocolVersion, statusCode, "");
-    }
-
+    
     public static HttpResponse of(String protocolVersion, StatusCode statusCode, String responseBody) {
         return new HttpResponse(protocolVersion, statusCode, responseBody);
+    }
+
+    public static HttpResponse redirectTo(String protocolVersion, String locationUri) {
+        return new HttpResponse(protocolVersion, StatusCode.FOUND, "")
+            .addHeader("Location", locationUri);
     }
 
     public HttpResponse addHeader(String key, String value) {

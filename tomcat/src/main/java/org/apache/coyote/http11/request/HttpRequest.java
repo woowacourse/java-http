@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HttpRequest {
+    private static final String COOKIE_EMPTY = "";
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -66,6 +67,6 @@ public class HttpRequest {
             return HttpCookie.of(requestHeader.get("Cookie"))
                 .getOrDefault(key);
         }
-        throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
+        return COOKIE_EMPTY;
     }
 }

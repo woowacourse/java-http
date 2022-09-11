@@ -17,7 +17,7 @@ class RequestLineTest {
 
         // then
         assertThat(requestLine).extracting("method", "uri", "httpVersion")
-                .containsExactly(HttpMethod.GET, HttpUri.of("/index.html"), HttpVersion.of("HTTP/1.1"));
+                .containsExactly(HttpMethod.GET, HttpUri.of("/index.html"), HttpVersion.from("HTTP/1.1"));
     }
 
     @Test

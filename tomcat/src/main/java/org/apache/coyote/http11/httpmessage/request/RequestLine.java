@@ -24,7 +24,7 @@ public class RequestLine {
         return new RequestLine(
                 HttpMethod.of(method),
                 HttpUri.of(uri),
-                HttpVersion.of(version)
+                HttpVersion.from(version)
         );
     }
 

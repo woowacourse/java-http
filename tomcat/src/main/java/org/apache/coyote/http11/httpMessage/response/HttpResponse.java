@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.httpmessage.response;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.Headers;
@@ -11,26 +10,23 @@ import org.apache.coyote.http11.session.Cookie;
 
 public class HttpResponse {
 
-    private final OutputStream outputStream;
     private final StatusLine statusLine;
     private final Headers headers;
     private final ResponseBody responseBody;
 
-    private HttpResponse(OutputStream outputStream, StatusLine statusLine, Headers headers, ResponseBody responseBody) {
-        this.outputStream = outputStream;
+    public HttpResponse(StatusLine statusLine, Headers headers, ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.responseBody = responseBody;
     }
 
-    // TODO: 2022/09/09 session까지 확인해주기
-    public static HttpResponse of(OutputStream outputStream, HttpRequest httpRequest) {
+    public static HttpResponse from(HttpRequest httpRequest) {
         HttpVersion httpVersion = httpRequest.getHttpVersion();
         StatusLine statusLine = StatusLine.from(httpVersion);
         Headers headers = new Headers(new LinkedHashMap<>());
         ResponseBody responseBody = new ResponseBody("");
 
-        return new HttpResponse(outputStream, statusLine, headers, responseBody);
+        return new HttpResponse(statusLine, headers, responseBody);
     }
 
     public HttpResponse ok(String body) throws IOException {
@@ -108,13 +104,6 @@ public class HttpResponse {
     public HttpResponse responseBody(String body) {
         responseBody.addBody(body);
         return this;
-    }
-
-    public void write() throws IOException {
-        String result = this.toString();
-
-        outputStream.write(result.getBytes());
-        outputStream.flush();
     }
 
     @Override

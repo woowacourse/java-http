@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpmessage.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.exception.notfound.HttpVersionNotFoundException;
 import org.junit.jupiter.api.Test;
 
 class HttpVersionTest {
@@ -13,7 +14,7 @@ class HttpVersionTest {
         String version = "HTTP/1.1";
 
         // when
-        HttpVersion httpVersion = HttpVersion.of(version);
+        HttpVersion httpVersion = HttpVersion.from(version);
 
         // then
         assertThat(httpVersion.getVersion()).isEqualTo(version);
@@ -25,7 +26,7 @@ class HttpVersionTest {
         String version = "HTTP/3";
 
         // when & then
-        assertThatThrownBy(() -> HttpVersion.of(version))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> HttpVersion.from(version))
+                .isInstanceOf(HttpVersionNotFoundException.class);
     }
 }

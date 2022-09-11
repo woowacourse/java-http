@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.httpmessage.request;
 
+import java.util.Arrays;
+import nextstep.jwp.exception.notfound.HttpVersionNotFoundException;
+
 public enum HttpVersion {
 
     HTTP_11_VERSION("HTTP/1.1");
@@ -9,15 +12,11 @@ public enum HttpVersion {
         this.version = version;
     }
 
-    public static HttpVersion of(String version) {
-        validate(version);
-        return HTTP_11_VERSION;
-    }
-
-    private static void validate(String version) {
-        if (!"HTTP/1.1".equals(version)) {
-            throw new IllegalArgumentException("처리할 수 없는 Http Version 입니다.");
-        }
+    public static HttpVersion from(String version) {
+        return Arrays.stream(values())
+                .filter(httpVersion -> httpVersion.version.equals(version))
+                .findFirst()
+                .orElseThrow(() -> new HttpVersionNotFoundException(version + " 는 처리할 수 없는 Http Version 입니다."));
     }
 
     public String getVersion() {

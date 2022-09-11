@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.utils.QueryParser;
+import org.apache.coyote.http11.utils.QueryParser;
 
 public class RequestBody {
 

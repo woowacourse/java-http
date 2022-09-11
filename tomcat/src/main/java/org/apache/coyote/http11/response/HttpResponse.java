@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import static nextstep.jwp.utils.FileReader.readFile;
+import static org.apache.coyote.http11.utils.FileReader.readFile;
 
 import java.io.IOException;
 import org.apache.coyote.http11.request.ContentType;

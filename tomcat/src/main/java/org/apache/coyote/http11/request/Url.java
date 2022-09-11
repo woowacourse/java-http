@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.net.URI;
 import java.util.Map;
-import nextstep.jwp.utils.QueryParser;
+import org.apache.coyote.http11.utils.QueryParser;
 
 public class Url {
 

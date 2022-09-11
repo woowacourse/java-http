@@ -52,7 +52,7 @@ public class LoginController extends AbstractController {
     protected final HttpResponse doGet(final HttpRequest request) {
         if (request.existSession()) {
             return redirectToIndex();
-       }
+        }
         return success(HttpStatus.OK, Page.LOGIN);
     }
 }

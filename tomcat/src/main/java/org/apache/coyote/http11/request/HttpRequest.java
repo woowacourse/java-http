@@ -23,7 +23,7 @@ public class HttpRequest {
 
     public Session generateSession() {
         final Session session = Session.generate();
-        SessionManager.add( session);
+        SessionManager.add(session);
         return session;
     }
 

@@ -35,7 +35,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
-        return HttpResponse.ok()
-                .body(Page.REGISTER.getResource());
+        return success(HttpStatus.OK, Page.REGISTER);
     }
 }

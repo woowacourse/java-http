@@ -13,6 +13,8 @@ import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
+    private final ResponseHelper responseHelper = new ResponseHelper();
+
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> bodyParams = request.getBody();
@@ -30,6 +32,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.loadResource("/register.html");
+        responseHelper.loadResource(response, "/register.html");
     }
 }

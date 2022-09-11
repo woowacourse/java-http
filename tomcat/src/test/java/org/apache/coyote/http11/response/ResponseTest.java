@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.controller.ResponseHelper;
+
 class ResponseTest {
 
     HttpResponse response;
@@ -58,7 +60,8 @@ class ResponseTest {
     @DisplayName("Resource를 불러온다.")
     @Test
     void loadResource() throws IOException {
-        response.loadResource("/index.html");
+        ResponseHelper responseHelper = new ResponseHelper();
+        responseHelper.loadResource(response, "/index.html");
 
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -69,7 +72,9 @@ class ResponseTest {
     @DisplayName("일반적인 문자열을 Response에 실어 보낸다.")
     @Test
     void loadRawString() throws IOException {
-        response.loadRawString("abcdefgh");
+        ResponseHelper responseHelper = new ResponseHelper();
+
+        responseHelper.loadRawString(response, "abcdefgh");
 
         assertThat(response.toMessage()).contains("abcdefgh");
     }

@@ -5,8 +5,9 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceController extends AbstractController {
 
+    ResponseHelper responseHelper = new ResponseHelper();
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.loadResource(request.getUrl());
+        responseHelper.loadResource(response, request.getUrl());
     }
 }

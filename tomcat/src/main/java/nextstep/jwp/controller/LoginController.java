@@ -23,6 +23,7 @@ public class LoginController extends AbstractController {
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final SessionManager sessionManager = new SessionManager();
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final ResponseHelper responseHelper = new ResponseHelper();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -39,7 +40,8 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.loadResource("/401.html");
+        ResponseHelper responseHelper = new ResponseHelper();
+        responseHelper.loadResource(response, "/401.html");
         response.statusCode(HttpStatus.REDIRECT);
     }
 
@@ -62,13 +64,13 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.loadResource("/login.html");
+        responseHelper.loadResource(response, "/login.html");
     }
 
     private void processSessionLogin(HttpResponse response, String jSessionId) throws IOException {
         HttpSession session = sessionManager.findSession(jSessionId);
         if (session == null || session.get("user") == null) {
-            response.loadResource("/login.html");
+            responseHelper.loadResource(response, "/login.html");
             return;
         }
         User user = (User) session.get("user");

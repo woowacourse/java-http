@@ -17,7 +17,6 @@ public class HttpResponse {
 
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String HEADER_DELIMITER = ": ";
-    private static final String RESOURCE_FOLDER = "static";
 
     private final HttpStatusLine httpStatusLine;
     private final Map<String, String> responseHeader;
@@ -44,27 +43,6 @@ public class HttpResponse {
 
     public void addCookie(String cookieKey, String cookieValue) {
         cookie.setCookie(cookieKey, cookieValue);
-    }
-
-    public void loadResource(String url) throws IOException {
-        URL resource = getClass().getClassLoader()
-                .getResource(RESOURCE_FOLDER + url);
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        File targetFile = new File(resource.getFile());
-        long fileSize = targetFile.length();
-
-        statusCode(HttpStatus.OK);
-        addHeader(HttpHeader.CONTENT_TYPE.value(), HttpContent.extensionToContentType(extension));
-        addHeader(HttpHeader.CONTENT_LENGTH.value(), Long.toString(fileSize));
-        body(new String(Files.readAllBytes(targetFile.toPath())));
-    }
-
-    public void loadRawString(String responseData) throws IOException {
-
-        statusCode(HttpStatus.OK);
-        addHeader(HttpHeader.CONTENT_TYPE.value(), HttpContent.HTML.getContentType());
-        addHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(responseData.getBytes().length));
-        body(responseData);
     }
 
     public String toMessage() {

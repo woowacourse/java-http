@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -12,13 +13,18 @@ public abstract class AbstractController implements Controller {
     public HttpResponse service(final HttpRequest request) {
         final RequestMethod method = request.getMethod();
 
-        if (method.equals(RequestMethod.GET)) {
-            return doGet(request);
+        try {
+            if (method.equals(RequestMethod.GET)) {
+                return doGet(request);
+            }
+            if (method.equals(RequestMethod.POST)) {
+                return doPost(request);
+            }
+            return methodNotAllowed();
+
+        } catch (final ParameterNotFoundException e) {
+            return fail(HttpStatus.BAD_REQUEST, Page.BAD_REQUEST);
         }
-        if (method.equals(RequestMethod.POST)) {
-            return doPost(request);
-        }
-        return methodNotAllowed();
     }
 
     protected HttpResponse doPost(final HttpRequest request) {

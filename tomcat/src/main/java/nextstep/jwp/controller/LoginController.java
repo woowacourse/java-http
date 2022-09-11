@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.exception.ParameterNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -39,9 +38,6 @@ public class LoginController extends AbstractController {
 
         } catch (final UserNotFoundException | LoginFailedException e) {
             return fail(HttpStatus.UNAUTHORIZED, Page.UNAUTHORIZED);
-
-        } catch (final ParameterNotFoundException e) {
-            return fail(HttpStatus.BAD_REQUEST, Page.BAD_REQUEST);
         }
     }
 

@@ -1,12 +1,10 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.exception.ParameterNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AccountDuplicatedException;
 import nextstep.jwp.service.AuthService;
 
@@ -31,9 +29,6 @@ public class RegisterController extends AbstractController {
             return redirectToIndex();
 
         } catch (final AccountDuplicatedException e) {
-            return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
-
-        } catch (final ParameterNotFoundException e) {
             return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
         }
     }

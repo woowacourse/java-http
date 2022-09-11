@@ -1,5 +1,6 @@
 package nextstep.jwp.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +26,7 @@ public class Parser {
         Objects.nonNull(url);
         int startQueryIndex = findStartQueryString(url);
         if (startQueryIndex < 0) {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
         String queryString = extractQueryString(url, startQueryIndex);
         return parseQueryString(queryString);

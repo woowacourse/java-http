@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static nextstep.jwp.exception.ExceptionType.INVALID_REQUEST_LINE_EXCEPTION;
+import static nextstep.jwp.exception.ExceptionType.NOT_FOUND_COOKIE_EXCEPTION;
 import static org.apache.coyote.http11.common.HttpHeaderType.COOKIE;
 
 import java.io.BufferedReader;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.exception.InvalidHttpRequestException;
 
 public class RequestHeaders {
 
@@ -55,9 +57,9 @@ public class RequestHeaders {
     }
 
     public int getContentLength() {
-		if (headers.containsKey(CONTENT_LENGTH)) {
-			return Integer.parseInt(headers.get(CONTENT_LENGTH));
-		}
+        if (headers.containsKey(CONTENT_LENGTH)) {
+            return Integer.parseInt(headers.get(CONTENT_LENGTH));
+        }
         return 0;
     }
 
@@ -70,6 +72,9 @@ public class RequestHeaders {
     }
 
     public String findCookie() {
+        if (hasCookie()) {
+            throw new InvalidHttpRequestException(NOT_FOUND_COOKIE_EXCEPTION);
+        }
         return headers.get(COOKIE.getValue());
     }
 }

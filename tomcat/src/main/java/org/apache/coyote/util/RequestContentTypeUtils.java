@@ -30,7 +30,10 @@ public enum RequestContentTypeUtils {
 
     public static boolean isDefault(final String uri) {
         return Arrays.stream(RequestContentTypeUtils.values())
-                .filter(it -> !uri.endsWith(HTML.extension))
-                .anyMatch(it -> uri.endsWith(it.extension));
+                .anyMatch(extension -> isNotHtml(uri, extension));
+    }
+
+    private static boolean isNotHtml(final String uri, final RequestContentTypeUtils contentType) {
+        return !uri.endsWith(HTML.extension) && uri.endsWith(contentType.extension);
     }
 }

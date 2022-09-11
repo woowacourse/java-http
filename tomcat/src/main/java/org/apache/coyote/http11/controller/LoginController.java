@@ -5,15 +5,12 @@ import static nextstep.jwp.exception.ExceptionType.SERVER_EXCEPTION;
 import com.sun.jdi.InternalException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController implements Handler {
 
-    private static final String SUCCEED_REDIRECT_URL = "/index.html";
-    private static final String FAILED_REDIRECT_URL = "/401.html";
     private static final String LOGIN_HTML_URL = "/login.html";
 
     @Override
@@ -23,22 +20,12 @@ public class LoginController implements Handler {
                 httpResponse.setOkResponse(LOGIN_HTML_URL);
                 return;
             }
-            final User succeedLoginUser = UserService.getInstance().login(httpRequest.getParams());
-
-            if (isSucceedLogin(succeedLoginUser)) {
-                httpResponse.setSessionAndCookieWithOkResponse(succeedLoginUser, SUCCEED_REDIRECT_URL);
-                return;
-            }
-            httpResponse.setFoundResponse(FAILED_REDIRECT_URL);
+            UserService.getInstance().login(httpRequest, httpResponse);
 
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             throw new InternalException(SERVER_EXCEPTION.getMessage());
         }
-    }
-
-    private boolean isSucceedLogin(final User succeedLoginUser) {
-        return succeedLoginUser != null;
     }
 
     private boolean isRequestLoginPage(HttpRequest httpRequest) {

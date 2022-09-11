@@ -1,13 +1,17 @@
 package nextstep.jwp.model;
 
+import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_LOGIN_EXCEPTION;
 import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_REGISTER_EXCEPTION;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +20,8 @@ public class UserService {
     private static final UserService INSTANCE = new UserService();
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final String SUCCEED_REDIRECT_URL = "/index.html";
+    private static final String FAILED_REDIRECT_URL = "/401.html";
     private static final String ID = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
@@ -28,15 +34,25 @@ public class UserService {
         return SessionManager.hasSession(request.getCookie());
     }
 
-    public User login(Map<String, String> params) {
-        if (params.isEmpty()) {
-            return null;
-        }
+    public void login(final HttpRequest httpRequest, final HttpResponse httpResponse)
+            throws IOException, URISyntaxException {
+
+        final Map<String, String> params = httpRequest.getParams();
+
+        validateLoginParams(params);
         final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get(ID));
         if (optionalUser.isPresent()) {
-            return findUser(params, optionalUser);
+            final User user = findUser(params, optionalUser);
+            httpResponse.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
+            return;
         }
-        return null;
+        httpResponse.setFoundResponse(FAILED_REDIRECT_URL);
+    }
+
+    private void validateLoginParams(final Map<String, String> params) {
+        if (params.isEmpty()) {
+            throw new InvalidHttpRequestException(INVALID_HTTP_LOGIN_EXCEPTION);
+        }
     }
 
     private User findUser(Map<String, String> params, Optional<User> optionalUser) {

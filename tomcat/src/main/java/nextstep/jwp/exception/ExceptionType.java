@@ -5,6 +5,7 @@ public enum ExceptionType {
     SERVER_EXCEPTION("서버 에러가 발생했습니다."),
     INVALID_HTTP_METHOD_EXCEPTION("잘못된 HTTP Method 형식입니다."),
     INVALID_HTTP_REGISTER_EXCEPTION("잘못된 회원가입 요청입니다."),
+    INVALID_HTTP_LOGIN_EXCEPTION("잘못된 로그인 요청입니다."),
     INVALID_REQUEST_LINE_EXCEPTION("잘못된 REQUEST LINE 형식입니다."),
     INVALID_REQUEST_BODY_EXCEPTION("잘못된 REQUEST BODY 형식입니다."),
     INVALID_URL_EXCEPTION("잘못된 URL 형식입니다."),

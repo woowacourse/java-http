@@ -16,30 +16,26 @@ import org.slf4j.LoggerFactory;
 
 public class Response {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private static final String RESPONSE_MESSAGE_DELIMITER = "\r\n";
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final String HEADER_BODY_DELIMITER = "";
     private static final String HEADER_VALUE_DELIMITER = ";";
 
-    private final OutputStream outputStream;
     private final HttpVersion httpVersion;
     private Status status;
     private final Map<String, String> headers;
     private String body;
 
-    public static ResponseBuilder builder(final HttpVersion httpVersion, final OutputStream outputStream) {
-        return new ResponseBuilder(httpVersion, outputStream);
+    public static ResponseBuilder builder(final HttpVersion httpVersion) {
+        return new ResponseBuilder(httpVersion);
     }
 
     private Response(final HttpVersion httpVersion, final Status status, final Map<String, String> headers,
-                     final String body, final OutputStream outputStream) {
+                     final String body) {
         this.httpVersion = httpVersion;
         this.status = status;
         this.headers = headers;
         this.body = body;
-        this.outputStream = outputStream;
     }
 
     public String getResponse() {
@@ -99,26 +95,15 @@ public class Response {
         return this;
     }
 
-    public void build() {
-        try {
-            outputStream.write(getResponse().getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.info(e.getMessage(), e);
-        }
-    }
-
     public static class ResponseBuilder {
 
-        private final OutputStream outputStream;
         private final HttpVersion httpVersion;
         private final Status status;
         private final Map<String, String> headers;
         private String body;
 
-        ResponseBuilder(final HttpVersion httpVersion, final OutputStream outputStream) {
+        ResponseBuilder(final HttpVersion httpVersion) {
             this.httpVersion = httpVersion;
-            this.outputStream = outputStream;
             this.status = Status.OK;
             this.headers = new HashMap<>();
             headers.put(Header.CONTENT_TYPE.getValue(), MediaType.TEXT_HTML.getValue());
@@ -126,7 +111,7 @@ public class Response {
         }
 
         public Response build() {
-            return new Response(httpVersion, status, this.headers, this.body, this.outputStream);
+            return new Response(httpVersion, status, this.headers, this.body);
         }
 
         public ResponseBuilder setJSessionIdCookie(final Cookie cookie) {

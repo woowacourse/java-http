@@ -14,7 +14,7 @@ class ResponseTest {
     @DisplayName("원하는 응답값을 생성한다.")
     @Test
     void createResponse() {
-        final Response response = Response.builder(HttpVersion.HTTP11, null)
+        final Response response = Response.builder(HttpVersion.HTTP11)
                 .build();
 
         final String actual = response.setContentType(MediaType.TEXT_CSS)
@@ -23,7 +23,7 @@ class ResponseTest {
                 .getResponse();
 
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 200 OK",
                 "Content-Length: 11 ",
                 "Content-Type: text/css;charset=utf-8 ",
                 "",

@@ -13,7 +13,6 @@ public class IndexController extends AbstractController {
         final String responseBody = ResourceGenerator.getStaticResource(Url.ROOT.getValue());
 
         response.setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .setBody(responseBody)
-                .build();
+                .setBody(responseBody);
     }
 }

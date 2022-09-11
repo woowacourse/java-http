@@ -25,8 +25,8 @@ public class StaticResourceController extends AbstractController {
         final MediaType mediaType = MediaType.of(getFileExtension(request.getPath()));
         response.setContentType(mediaType, Charset.UTF8)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .setBody(responseBody)
-                .build();
+                .setBody(responseBody);
+//                .build();
     }
 
     private FileExtension getFileExtension(final String path) {

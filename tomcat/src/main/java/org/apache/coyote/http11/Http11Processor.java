@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.controller.Controller;
@@ -39,11 +38,14 @@ public class Http11Processor implements Runnable, Processor {
             final String requestMessage = getRequestMessage(bufferedReader);
             final Request request = new Request(requestMessage);
 
-            final Response response = Response.builder(HttpVersion.HTTP11, outputStream)
+            final Response response = Response.builder(HttpVersion.HTTP11)
                     .setJSessionIdCookie(request.getCookie())
                     .build();
             final Controller controller = HandlerMapper.of(request);
             controller.service(request, response);
+
+            outputStream.write(response.getResponse().getBytes());
+            outputStream.flush();
             bufferedReader.close();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

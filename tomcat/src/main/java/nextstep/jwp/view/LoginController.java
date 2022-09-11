@@ -27,8 +27,7 @@ public class LoginController extends AbstractController {
             response.setStatus(Status.UNAUTHORIZED)
                     .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                     .setLocation(Url.UNAUTHORIZED.getValue())
-                    .setBody(responseBody)
-                    .build();
+                    .setBody(responseBody);
             return;
         }
 
@@ -41,8 +40,7 @@ public class LoginController extends AbstractController {
         response.setStatus(Status.FOUND)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setLocation(Url.ROOT.getValue())
-                .setBody(responseBody)
-                .build();
+                .setBody(responseBody);
     }
 
     private Optional<User> findUser(final Request request) {
@@ -61,13 +59,11 @@ public class LoginController extends AbstractController {
             response.setStatus(Status.FOUND)
                     .setLocation(Url.ROOT.getValue())
                     .setContentLength(indexPage.getBytes(StandardCharsets.UTF_8).length)
-                    .setBody(indexPage)
-                    .build();
+                    .setBody(indexPage);
             return;
         }
         final String loginPage = ResourceGenerator.getStaticResource(Url.LOGIN.getValue());
         response.setContentLength(loginPage.getBytes(StandardCharsets.UTF_8).length)
-                .setBody(loginPage)
-                .build();
+                .setBody(loginPage);
     }
 }

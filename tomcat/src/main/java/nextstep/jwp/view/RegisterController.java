@@ -27,15 +27,13 @@ public class RegisterController extends AbstractController {
 
         response.setStatus(Status.FOUND)
                 .setLocation(Url.ROOT.getValue())
-                .setContentType(MediaType.TEXT_HTML)
-                .build();
+                .setContentType(MediaType.TEXT_HTML);
     }
 
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
         final String responseBody = ResourceGenerator.getStaticResource(Url.REGISTER.getValue());
         response.setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                .setBody(responseBody)
-                .build();
+                .setBody(responseBody);
     }
 }

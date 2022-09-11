@@ -34,7 +34,6 @@ public class Http11Processor implements Runnable, Processor {
             final var httpRequest = HttpRequest.from(inputStream);
             final var httpResponse = HttpResponse.from(outputStream);
             final var servlet = requestMapping.getServlet(httpRequest);
-            // 여기서부터 테스트 작성하기!!
             servlet.service(httpRequest, httpResponse);
             httpResponse.write();
             httpResponse.flush();

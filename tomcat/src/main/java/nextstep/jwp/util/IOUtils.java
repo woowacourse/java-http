@@ -1,11 +1,11 @@
 package nextstep.jwp.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 
 public class IOUtils {
@@ -19,9 +19,9 @@ public class IOUtils {
 	}
 
 	public static String readResourceFile(final String fileName) throws IOException, URISyntaxException {
-		final ClassLoader classLoader = IOUtils.class.getClassLoader();
-		final URI resource = Objects.requireNonNull(classLoader.getResource(STATIC_PATH + fileName)).toURI();
-		final Path path = Path.of(resource.getPath());
-		return Files.readString(path);
+		final URL url = Objects.requireNonNull(
+			Thread.currentThread().getContextClassLoader().getResource(STATIC_PATH + fileName));
+		final File file = new File(url.getFile());
+		return new String(Files.readAllBytes(file.toPath()));
 	}
 }

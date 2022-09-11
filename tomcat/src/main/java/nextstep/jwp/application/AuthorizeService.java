@@ -9,6 +9,8 @@ import org.apache.coyote.http11.http.request.HttpRequest;
 
 public class AuthorizeService {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private AuthorizeService() {
     }
 
@@ -28,7 +30,7 @@ public class AuthorizeService {
 
         final HttpHeader httpHeader = headers.get(COOKIE.getValue());
         final Optional<String> jsessionid = httpHeader.getValues().stream()
-                .filter(it -> it.contains("JSESSIONID"))
+                .filter(it -> it.contains(JSESSIONID))
                 .findFirst();
 
         return jsessionid.isPresent();

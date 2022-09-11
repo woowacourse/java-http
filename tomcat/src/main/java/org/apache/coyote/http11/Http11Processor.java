@@ -29,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequestFactory.parse(inputStream);
-            final HttpResponse response = RequestMapping.createResponse(httpRequest);
+            final HttpResponse response = ResponseProvider.createResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

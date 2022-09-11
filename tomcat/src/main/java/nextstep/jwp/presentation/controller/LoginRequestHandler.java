@@ -17,9 +17,9 @@ public class LoginRequestHandler implements RequestHandler {
     private final MemberService memberService;
     private final SessionManager sessionManager;
 
-    public LoginRequestHandler() {
-        this.memberService = new MemberService();
-        this.sessionManager = SessionManager.getInstance();
+    public LoginRequestHandler(final MemberService memberService, final SessionManager sessionManager) {
+        this.memberService = memberService;
+        this.sessionManager = sessionManager;
     }
 
     @Override

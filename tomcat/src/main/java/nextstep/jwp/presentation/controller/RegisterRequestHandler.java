@@ -14,8 +14,8 @@ public class RegisterRequestHandler implements RequestHandler {
 
     private final MemberService memberService;
 
-    public RegisterRequestHandler() {
-        this.memberService = new MemberService();
+    public RegisterRequestHandler(final MemberService memberService) {
+        this.memberService = memberService;
     }
 
     @Override

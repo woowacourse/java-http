@@ -70,20 +70,27 @@ public class HttpRequest {
         return requestLine.containUrl(url);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
     public String getRequestBody() {
         return requestBody;
     }
 
     public Session getSession(final boolean bool) {
+        if (Objects.isNull(cookies)) {
+            return getSessionWithoutCookie(bool);
+        }
+
         final Optional<String> jSessionId = cookies.getJSessionId();
         if (bool) {
             return jSessionId.map(Session::new).orElseGet(() -> new Session(UUID.randomUUID().toString()));
         }
-        return jSessionId.map(Session::new).orElseGet(null);
+        return jSessionId.map(Session::new).orElseGet(() -> null);
+    }
+
+    private Session getSessionWithoutCookie(final boolean bool) {
+        if (bool) {
+            return new Session(UUID.randomUUID().toString());
+        }
+        return null;
     }
 
     public HttpMethod getHttpMethod() {

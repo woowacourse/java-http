@@ -13,8 +13,8 @@ public class LoginPageRequestHandler implements RequestHandler {
 
     private final SessionManager sessionManager;
 
-    public LoginPageRequestHandler() {
-        this.sessionManager = SessionManager.getInstance();
+    public LoginPageRequestHandler(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @Override

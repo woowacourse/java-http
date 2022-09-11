@@ -7,12 +7,12 @@ import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-import nextstep.jwp.handler.Controller;
-import nextstep.jwp.handler.IndexController;
-import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.NotMappedErrorController;
-import nextstep.jwp.handler.RegisterController;
-import nextstep.jwp.handler.ResourceController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.NotMappedErrorController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceController;
 
 public enum HandlerMapping {
 

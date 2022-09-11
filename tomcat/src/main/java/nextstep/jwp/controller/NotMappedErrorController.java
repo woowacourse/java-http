@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 public class NotMappedErrorController extends AbstractController {
 

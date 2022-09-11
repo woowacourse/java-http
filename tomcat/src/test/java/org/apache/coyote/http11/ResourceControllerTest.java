@@ -15,7 +15,7 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.handler.ResourceController;
+import nextstep.jwp.controller.ResourceController;
 
 class ResourceControllerTest {
 

@@ -32,10 +32,6 @@ public class QueryParams {
         }
     }
 
-    public boolean isNotEmpty() {
-        return !values.isEmpty();
-    }
-
     public Map<String, String> getParams() {
         return values;
     }

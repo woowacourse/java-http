@@ -7,14 +7,16 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JS("js", "text/javascript"),
+    ICO("ico", "image/x-icon"),
+    SVG("svg", "image/svg"),
     ;
 
     private final String extension;
-    private final String contentType;
+    private final String type;
 
     ContentType(final String extension, final String contentType) {
         this.extension = extension;
-        this.contentType = contentType;
+        this.type = contentType;
     }
 
     public static ContentType findContentType(final String url) {
@@ -24,11 +26,7 @@ public enum ContentType {
                 .orElseThrow(() -> new IllegalArgumentException("확장자가 적절하지 않습니다."));
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
-    public String getContentType() {
-        return contentType;
+    public String getType() {
+        return type;
     }
 }

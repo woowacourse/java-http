@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.Request;
 
-import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.model.Parameters;
 
 public class RequestLine {
@@ -28,8 +27,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        return Path.fromUri(uri)
-                .get();
+        return uri.split("\\?")[0];
     }
 
     public String getVersion() {

@@ -62,9 +62,9 @@ HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다
 
 ## 3단계 요구사항
 
-- [ ] HttpRequest 클래스 구현하기
-- [ ] HttpResponse 클래스 구현하기
-- [ ] Controller 인터페이스 추가하기
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [x] Controller 인터페이스 추가하기
 
 ## 4단계 요구사항
 

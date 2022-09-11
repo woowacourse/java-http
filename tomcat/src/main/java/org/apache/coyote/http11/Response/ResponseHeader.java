@@ -32,4 +32,8 @@ public class ResponseHeader {
     public void setCookie(final String cookie) {
         headers.put("Set-Cookie", cookie);
     }
+
+    public void setLocation(final String location) {
+        headers.put("Location", location);
+    }
 }

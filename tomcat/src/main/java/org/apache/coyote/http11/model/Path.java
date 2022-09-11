@@ -1,30 +1,30 @@
 package org.apache.coyote.http11.model;
 
-public class Path {
+import java.util.Arrays;
+import org.apache.coyote.http11.utils.Files;
 
-    private static final Path LOGIN_PAGE_URL = new Path("/login.html");
-    private static final String LOGIN_PATH = "/login";
-    private static final Path REGISTER_PAGE_URL = new Path("/register.html");
-    private static final String REGISTER_PATH = "/register";
+public enum Path {
+
+    LOGIN("/login", "/login.html"),
+    REGISTER("/register", "/register.html");
 
     private final String path;
+    private final String fileName;
 
-    public Path(final String path) {
+    Path(final String path, final String fileName) {
         this.path = path;
+        this.fileName = fileName;
     }
 
-    public static Path fromUri(final String uri) {
-        final String path = uri.split("\\?")[0];
-        if (path.equals(LOGIN_PATH)) {
-            return LOGIN_PAGE_URL;
+    public static String from(final String path) {
+        if (Files.existsFile(path)) {
+            return path;
         }
-        if (path.equals(REGISTER_PATH)) {
-            return REGISTER_PAGE_URL;
-        }
-        return new Path(path);
-    }
 
-    public String get() {
-        return path;
+        return Arrays.stream(Path.values())
+                .filter(it -> it.path.equals(path))
+                .findFirst()
+                .map(it -> it.fileName)
+                .orElseThrow(() -> new IllegalArgumentException("path가 잘못되었습니다. [path : " + path + "]"));
     }
 }

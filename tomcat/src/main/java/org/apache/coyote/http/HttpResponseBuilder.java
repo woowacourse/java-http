@@ -42,7 +42,7 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder body(final String bodyValue) {
-        header.put("Content-Type", "text/html");
+        header.put("Content-Type", "text/html;charset=utf-8");
         this.body = bodyValue;
         return this;
     }

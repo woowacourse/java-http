@@ -58,6 +58,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 "HTTP/1.1 " + this.getHttpStatus() + " ",
                 this.getHeader().getHeaderMapForMessage(),
+                "Content-Length: " + this.getBody().length() + " ",
                 "",
                 this.getBody());
     }

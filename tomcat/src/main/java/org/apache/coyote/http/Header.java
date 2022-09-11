@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 public class Header {
 
-    private static final String MESSAGE_DELIMITER = " : ";
+    private static final String MESSAGE_DELIMITER = ": ";
     private static final String BLANK = " ";
 
     private HttpCookie cookie;

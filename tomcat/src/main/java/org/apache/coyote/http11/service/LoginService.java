@@ -57,8 +57,8 @@ public class LoginService {
 
     private LoginResult saveSession(User user) {
         SessionManager sessionManager = new SessionManager();
-        Session session = new Session(USER);
-        session.setAttribute(session.getId(), user);
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute(USER, user);
         sessionManager.add(session);
         return new LoginResult(SUCCESS_URL, session);
     }

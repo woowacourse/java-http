@@ -10,9 +10,7 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
-        if (!SESSIONS.containsKey(session.getId())) {
-            SESSIONS.put(session.getId(), session);
-        }
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override

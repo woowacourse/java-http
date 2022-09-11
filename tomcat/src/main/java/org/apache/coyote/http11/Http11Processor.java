@@ -4,20 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestCookie;
-import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.RequestReader;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.support.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.support.Controller;
 import nextstep.jwp.controller.RequestMapping;
 
 public class Http11Processor implements Runnable, Processor {
@@ -41,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = readHttpRequest(bufferedReader);
+            final HttpRequest request = RequestReader.readHttpRequest(bufferedReader);
             final Controller controller = RequestMapping.from(request.getPath());
             final HttpResponse response = controller.service(request);
 
@@ -50,37 +45,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest readHttpRequest(final BufferedReader reader) throws IOException {
-        final RequestLine requestLine = RequestLine.parse(reader.readLine());
-        final RequestHeader header = readHeaders(reader);
-        final RequestBody body = readBody(reader);
-        final RequestCookie cookies = RequestCookie.parse(header);
-
-        return new HttpRequest(requestLine, header, body, cookies);
-    }
-
-    private RequestHeader readHeaders(final BufferedReader reader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-
-        final String endOfHeader = "";
-        while (true) {
-            final String line = reader.readLine();
-            if (endOfHeader.equals(line)) {
-                break;
-            }
-            lines.add(line);
-        }
-        return RequestHeader.parse(lines);
-    }
-
-    private RequestBody readBody(final BufferedReader reader) throws IOException {
-        final StringBuilder builder = new StringBuilder();
-        while (reader.ready()) {
-            builder.append((char) reader.read());
-        }
-        final String body = builder.toString();
-        return RequestBody.parse(body);
     }
 }

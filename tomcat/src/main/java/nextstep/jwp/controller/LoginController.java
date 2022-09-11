@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.model.Request;
-import org.apache.coyote.http11.service.LoginService;
-import nextstep.jwp.vo.FileName;
-import nextstep.jwp.vo.FormData;
-import nextstep.jwp.vo.Response;
+import nextstep.jwp.service.LoginService;
+import nextstep.jwp.model.FileName;
+import nextstep.jwp.model.FormData;
+import nextstep.jwp.model.Response;
 
 import java.io.IOException;
 

@@ -1,5 +1,7 @@
 package nextstep.jwp.vo;
 
+import nextstep.jwp.model.FormData;
+
 import java.util.Map;
 
 import static nextstep.jwp.vo.HeaderKey.JSESSION_ID;

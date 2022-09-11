@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.service;
+package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.vo.LoginResult;
-import nextstep.jwp.vo.Response;
+import nextstep.jwp.model.Response;
 import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;

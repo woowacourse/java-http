@@ -1,4 +1,4 @@
-package nextstep.jwp.vo;
+package nextstep.jwp.model;
 
 import java.util.Arrays;
 import java.util.Collections;

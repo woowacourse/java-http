@@ -1,6 +1,5 @@
-package nextstep.jwp.vo;
+package nextstep.jwp.model;
 
-import java.util.Collections;
 import java.util.List;
 
 public class FileName {

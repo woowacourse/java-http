@@ -1,4 +1,6 @@
-package nextstep.jwp.vo;
+package nextstep.jwp.model;
+
+import nextstep.jwp.vo.ResponseStatus;
 
 import java.util.ArrayList;
 import java.util.List;

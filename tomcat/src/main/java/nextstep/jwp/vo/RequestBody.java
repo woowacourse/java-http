@@ -1,9 +1,6 @@
 package nextstep.jwp.vo;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import nextstep.jwp.model.FormData;
 
 public class RequestBody {
 

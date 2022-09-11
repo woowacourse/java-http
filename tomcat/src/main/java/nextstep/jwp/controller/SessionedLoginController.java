@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.model.Request;
-import nextstep.jwp.vo.FileName;
+import nextstep.jwp.model.FileName;
 import nextstep.jwp.vo.HttpCookie;
-import nextstep.jwp.vo.Response;
+import nextstep.jwp.model.Response;
 import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HtmlLoader;

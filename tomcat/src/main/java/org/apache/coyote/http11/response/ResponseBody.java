@@ -27,10 +27,6 @@ public class ResponseBody {
                 .orElse(DEFAULT_BODY);
     }
 
-    public String getBytesLength() {
-        return body.getBytes().length + " ";
-    }
-
     public String getBody() {
         return body;
     }

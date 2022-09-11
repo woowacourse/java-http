@@ -17,11 +17,15 @@ public class HttpResponse {
     }
 
     public static HttpResponse create(HttpStatus status, ResponseHeaders header, ResponseBody body) {
-        return new HttpResponse(HTTP_VERSION + status.code, header, body);
+        final String responseLine = HTTP_VERSION + status.code;
+        return new HttpResponse(responseLine, header, body);
     }
 
     public byte[] getBytes() {
-        String response = String.join("\r\n", responseLine, headers.getStringHeaders(), body.getBody());
+        String response = String.join("\r\n",
+                responseLine,
+                headers.getStringHeaders(),
+                body.getBody());
         return response.getBytes();
     }
 

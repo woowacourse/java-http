@@ -7,9 +7,16 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.exception.AccountDuplicatedException;
+import nextstep.jwp.service.AuthService;
 
 public class RegisterController extends AbstractController {
+
+    private final AuthService authService;
+
+    public RegisterController(final AuthService authService) {
+        this.authService = authService;
+    }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
@@ -20,22 +27,15 @@ public class RegisterController extends AbstractController {
             final String password = params.find("password");
             final String email = params.find("email");
 
-            if (isUserPresent(account)) {
-                return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
-            }
-
-            final User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
+            authService.register(account, password, email);
             return redirectToIndex();
+
+        } catch (final AccountDuplicatedException e) {
+            return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
 
         } catch (final ParameterNotFoundException e) {
             return redirect(HttpStatus.FOUND, Page.BAD_REQUEST.getPath());
         }
-    }
-
-    private boolean isUserPresent(final String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .isPresent();
     }
 
     @Override

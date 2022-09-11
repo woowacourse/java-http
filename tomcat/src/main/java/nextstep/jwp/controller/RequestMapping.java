@@ -10,7 +10,7 @@ public enum RequestMapping {
 
     INDEX("/", new IndexController()),
     LOGIN("/login", new LoginController(new AuthService())),
-    REGISTER("/register", new RegisterController()),
+    REGISTER("/register", new RegisterController(new AuthService())),
     ;
 
     private static final ResourceController DEFAULT_CONTROLLER = new ResourceController();

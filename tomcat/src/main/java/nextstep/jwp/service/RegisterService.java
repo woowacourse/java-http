@@ -1,8 +1,8 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import nextstep.jwp.model.Response;
+import nextstep.jwp.model.User;
 import nextstep.jwp.vo.ResponseStatus;
 
 import static nextstep.jwp.vo.HeaderKey.LOCATION;

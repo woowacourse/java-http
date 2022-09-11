@@ -1,9 +1,12 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.exception.InvalidRequest;
-import nextstep.jwp.vo.*;
+import nextstep.jwp.vo.HttpCookie;
+import nextstep.jwp.vo.RequestBody;
+import nextstep.jwp.vo.RequestHeaders;
+import nextstep.jwp.vo.RequestMethod;
 
-import java.util.*;
+import java.util.List;
 
 public class Request {
     private static final String HEADER_DELIMITER = ": ";

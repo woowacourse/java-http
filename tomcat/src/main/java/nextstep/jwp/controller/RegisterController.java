@@ -1,20 +1,16 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.Request;
-import nextstep.jwp.service.RegisterService;
-import nextstep.jwp.model.FileName;
 import nextstep.jwp.model.FormData;
+import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
-
-import java.io.IOException;
+import nextstep.jwp.service.RegisterService;
 
 public class RegisterController implements Controller {
 
     private static final RegisterController INSTANCE = new RegisterController();
 
     @Override
-    public Response respond(Request request) throws IOException {
-        FileName fileName = request.getFileName();
+    public Response respond(Request request) {
         FormData requestBody = request.getBody();
 
         return RegisterService.signUp(

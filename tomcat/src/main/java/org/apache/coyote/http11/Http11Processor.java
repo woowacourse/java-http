@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RequestControllerMapper;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.Request;
 import org.apache.coyote.Processor;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.RequestControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static nextstep.jwp.vo.HeaderKey.*;
+import static nextstep.jwp.vo.HeaderKey.CONTENT_LENGTH;
 
 public class Http11Processor implements Runnable, Processor {
 

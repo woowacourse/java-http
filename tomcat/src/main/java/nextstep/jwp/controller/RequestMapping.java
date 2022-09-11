@@ -2,6 +2,8 @@ package nextstep.jwp.controller;
 
 import java.util.stream.Stream;
 
+import org.apache.support.Controller;
+
 public enum RequestMapping {
 
     INDEX("/", new IndexController()),

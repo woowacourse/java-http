@@ -17,7 +17,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nextstep.jwp.controller.Controller;
+import org.apache.support.Controller;
 import nextstep.jwp.controller.RequestMapping;
 
 public class Http11Processor implements Runnable, Processor {

@@ -23,9 +23,6 @@ public class StaticFileRequestHandlerChain implements RequestHandlerChain {
     @Override
     public HttpResponse handle(HttpRequest request, HttpResponse response) {
         String filePath = UrlUtil.joinUrl(LOCATION, request.getPath());
-        // /login.html
-        // "redirect:login.html"
-        // "<html
         try {
             File file = FileUtil.loadFile(filePath);
             return response.update(HttpStatus.OK, readAsString(file))

@@ -6,10 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.coyote.http11.fixture.TestController;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.exception.TempException;
 import org.apache.mvc.handlerchain.RequestHandlerMethod;
 import org.junit.jupiter.api.Test;
 
@@ -60,23 +58,7 @@ class RequestHandlerMethodTest {
         assertThatThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
-        )).isInstanceOf(TempException.class);
-    }
-
-    @Test
-    void throwsExceptionWithInvalidParameterLength() {
-        // given & when
-        Controller controller = new Controller() {
-            public ResponseEntity myMethod(HttpRequest httpRequest, int a) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
-            }
-        };
-
-        // then
-        assertThatThrownBy(() -> new RequestHandlerMethod(
-                controller,
-                controller.getClass().getMethod("myMethod", HttpRequest.class, int.class)
-        )).isInstanceOf(TempException.class);
+        )).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -92,7 +74,7 @@ class RequestHandlerMethodTest {
         assertThatThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", int.class)
-        )).isInstanceOf(TempException.class);
+        )).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -109,6 +91,6 @@ class RequestHandlerMethodTest {
         assertThatThrownBy(() -> new RequestHandlerMethod(
                 invalidInstance,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
-        )).isInstanceOf(TempException.class);
+        )).isInstanceOf(IllegalArgumentException.class);
     }
 }

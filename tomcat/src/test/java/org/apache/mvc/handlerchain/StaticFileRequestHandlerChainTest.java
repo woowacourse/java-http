@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -26,15 +27,17 @@ class StaticFileRequestHandlerChainTest {
 
         StaticFileRequestHandlerChain chain = new StaticFileRequestHandlerChain(null);
         // when
-        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(httpRequest.getBytes())), HttpResponse.initial());
+        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(httpRequest.getBytes())),
+                HttpResponse.initial());
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         List<String> expected = List.of("HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
-                "Content-Length: 5564",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+                body);
 
         assertThat(response.getAsString()).contains(expected);
     }

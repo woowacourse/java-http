@@ -3,10 +3,8 @@ package org.apache.mvc.handlerchain;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import org.apache.coyote.exception.InvocationException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.exception.TempException;
 import org.apache.mvc.Controller;
 
 public class RequestHandlerMethod {
@@ -28,22 +26,19 @@ public class RequestHandlerMethod {
 
     private void validateInstanceType(Object instance) {
         if (!(instance instanceof Controller)) {
-            throw new TempException();
+            throw new IllegalArgumentException("Instance of request handler must be class of controller");
         }
     }
 
     private void validateReturnType(Class<?> clazz) {
         if (!clazz.equals(ResponseEntity.class)) {
-            throw new TempException();
+            throw new IllegalArgumentException("Return type of request handler must be ResponseEntity");
         }
     }
 
     private void validateParameter(Parameter[] parameters) {
-        if (parameters.length != 1) {
-            throw new TempException();
-        }
-        if (!HttpRequest.class.equals(parameters[0].getType())) {
-            throw new TempException();
+        if (parameters.length < 1 || !HttpRequest.class.equals(parameters[0].getType())) {
+            throw new IllegalArgumentException("First parameter of request handler must be HttpRequest");
         }
     }
 
@@ -52,7 +47,7 @@ public class RequestHandlerMethod {
             Object result = method.invoke(instance, httpRequest);
             return castToResponseEntity(result);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new InvocationException(e, "Exception on method invocation");
+            throw new IllegalStateException("exception on method invocation", e);
         }
     }
 

@@ -8,7 +8,7 @@ import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
-    private AtomicLong id = new AtomicLong(1L);
+    private final AtomicLong id = new AtomicLong(1L);
     private final Map<String, User> database = new ConcurrentHashMap<>();
 
     public InMemoryUserRepository() {
@@ -19,6 +19,9 @@ public class InMemoryUserRepository {
     public void save(User user) {
         if (!user.hasId()) {
             user = user.setId(id.getAndIncrement());
+        }
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalStateException("already joined user");
         }
         database.put(user.getAccount(), user);
     }

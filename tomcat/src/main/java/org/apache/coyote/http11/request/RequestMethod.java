@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
-import org.apache.exception.TempException;
 
 public enum RequestMethod {
     GET,
@@ -16,6 +15,6 @@ public enum RequestMethod {
         return Arrays.stream(values())
                 .filter(value -> value.name().equalsIgnoreCase(string))
                 .findAny()
-                .orElseThrow(TempException::new);
+                .orElseThrow(() -> new IllegalArgumentException("Request Method " + string + " is unsupported"));
     }
 }

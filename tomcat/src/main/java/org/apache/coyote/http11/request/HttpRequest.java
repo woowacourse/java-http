@@ -8,14 +8,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.context.Context;
 import org.apache.coyote.http11.context.HttpCookie;
-import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.context.Session;
 import org.apache.coyote.http11.context.SessionManager;
-import org.apache.exception.TempException;
+import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.util.NumberUtil;
+import org.apache.util.StringUtil;
 
 public class HttpRequest {
 
@@ -27,7 +28,7 @@ public class HttpRequest {
     private final Context context;
 
     private HttpRequest(RequestGeneral requestGeneral, RequestHeaders requestHeaders, RequestBody requestBody,
-                       Context context) {
+                        Context context) {
         this.requestGeneral = requestGeneral;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
@@ -46,13 +47,13 @@ public class HttpRequest {
     }
 
     private static RequestGeneral readGeneralLine(BufferedReader reader) {
-        return RequestGeneral.parse(readOneLine(reader));
+        return RequestGeneral.parse(StringUtil.readOneLine(reader));
     }
 
     private static RequestHeaders readHeaderLines(BufferedReader reader) {
         List<String> lines = new ArrayList<>();
         String line;
-        while (!"".equals(line = readOneLine(reader))) {
+        while (!"".equals(line = StringUtil.readOneLine(reader))) {
             lines.add(line);
         }
         return RequestHeaders.parse(lines);
@@ -85,34 +86,32 @@ public class HttpRequest {
         }
     }
 
-    private static String readOneLine(BufferedReader reader) {
-        try {
-            return reader.readLine();
-        } catch (IOException e) {
-            throw new TempException();
-        }
-    }
-
     private static Context parseOrCreateContext(RequestHeaders headers) {
         RequestHeader cookieHeader = headers.findHeader("Cookie");
         if (cookieHeader == null) {
             return Context.createNew();
         }
         HttpCookie cookie = HttpCookie.parse(cookieHeader.getValue());
-        return new Context(MANAGER.findSession(cookie.find(SESSION_NAME)), cookie);
+        Session session = findOrCreateSession(cookie.find(SESSION_NAME));
+
+        return new Context(session, cookie);
     }
 
-    public Session getSession(boolean isCreate) {
-        Session findSession = MANAGER.findSession(context.getSession().getId());
+    private static Session findOrCreateSession(String uuid) {
+        Session findSession = MANAGER.findSession(uuid);
         if (findSession != null) {
             return findSession;
         }
-        if (!isCreate) {
-            return null;
+        Session createSession = new Session(UUID.randomUUID().toString());
+        MANAGER.add(createSession);
+        return createSession;
+    }
+
+    public Optional<Session> getSession(boolean isCreate) {
+        if (!isCreate && MANAGER.findSession(context.getSession().getId()) == null) {
+            return Optional.empty();
         }
-        Session session = new Session(UUID.randomUUID().toString());
-        MANAGER.add(session);
-        return session;
+        return Optional.of(findOrCreateSession(context.getSession().getId()));
     }
 
     public String getPath() {
@@ -129,10 +128,6 @@ public class HttpRequest {
 
     public Context getContext() {
         return context;
-    }
-
-    public HttpCookie getCookie() {
-        return context.getCookie();
     }
 
     @Override

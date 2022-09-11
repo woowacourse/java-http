@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import org.apache.coyote.http11.header.HttpVersion;
-import org.apache.exception.TempException;
 import org.apache.util.StringUtil;
 
 public class RequestGeneral {
@@ -33,12 +32,8 @@ public class RequestGeneral {
 
     private static void validateSize(List<String> generalStrings) {
         if (generalStrings.size() != 3) {
-            throw new TempException();
+            throw new IllegalArgumentException("The Request Line is inappropriate");
         }
-    }
-
-    public RequestGeneral redirectPath(String path) {
-        return new RequestGeneral(method, new RequestPath(path, null), httpVersion);
     }
 
     public RequestMethod getMethod() {
@@ -47,10 +42,6 @@ public class RequestGeneral {
 
     public RequestPath getPath() {
         return path;
-    }
-
-    public String getParameter(String field) {
-        return path.getParameter(field);
     }
 
     public HttpVersion getHttpVersion() {

@@ -3,31 +3,29 @@ package nextstep.jwp.controller;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public enum RequestMapping {
-    RESOURCE(HttpRequest::isResource, (request, response) -> new ResourceController().service(request, response)),
-    LOGIN(request -> request.compareUrl("/login"),
-            (request, response) -> new LoginController().service(request, response)),
-    REGISTER(request -> request.compareUrl("/register"),
-            (request, response) -> new RegisterController().service(request, response)),
-    BASE(request -> request.compareUrl("/"), (request, response) -> new BaseController().service(request, response));
+    RESOURCE(HttpRequest::isResource, (request, response) -> new ResourceController()),
+    LOGIN(request -> request.compareUrl("/login"), new LoginController()),
+    REGISTER(request -> request.compareUrl("/register"), new RegisterController()),
+    BASE(request -> request.compareUrl("/"), new BaseController());
 
-    Predicate<HttpRequest> predicate;
-    MethodGenerator generator;
+    private final Predicate<HttpRequest> predicate;
+    private final Controller controller;
 
-    RequestMapping(Predicate<HttpRequest> predicate, MethodGenerator generator) {
+    RequestMapping(Predicate<HttpRequest> predicate, Controller controller) {
         this.predicate = predicate;
-        this.generator = generator;
+        this.controller = controller;
     }
 
-    public static void mapping(HttpRequest request, HttpResponse response) throws Exception {
-        Arrays.stream(values())
+    public static Controller mapping(HttpRequest request, HttpResponse response) throws Exception {
+        return Arrays.stream(values())
                 .filter(mapping -> mapping.predicate.test(request))
-                .map(mapping -> mapping.generator)
+                .map(mapping -> mapping.controller)
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 url입니다."))
-                .generate(request, response);
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 url입니다."));
     }
 }

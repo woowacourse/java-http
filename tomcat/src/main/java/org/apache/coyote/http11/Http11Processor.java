@@ -11,6 +11,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestAssembler;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.RequestMapping;
 
 public class Http11Processor implements Runnable, Processor {
@@ -45,7 +46,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void execute(OutputStream outputStream, HttpRequest request) throws Exception {
         HttpResponse response = new HttpResponse();
-        RequestMapping.mapping(request, response);
+        Controller controller = RequestMapping.mapping(request, response);
+
+        controller.service(request, response);
 
         outputStream.write(response.toMessage().getBytes());
         outputStream.flush();

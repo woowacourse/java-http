@@ -19,8 +19,8 @@ public abstract class AbstractController implements Controller {
             return doPost(httpRequest);
         }
 
-        return HttpResponse.init(HttpStatusCode.INTERNAL_SERVER_ERROR)
-                .setBodyByPath("/500.html");
+        return HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+                .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
     }
 
     protected abstract HttpResponse doGet(final HttpRequest httpRequest);

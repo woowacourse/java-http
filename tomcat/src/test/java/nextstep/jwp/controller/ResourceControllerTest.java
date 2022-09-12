@@ -1,11 +1,11 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http.HttpStatusCode.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http.HttpStatusCode.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.apache.coyote.controller.Controller;
+import org.apache.coyote.http.HttpStatusCode;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -34,11 +34,11 @@ class ResourceControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("POST /css/styles.css 요청은 500.html을 응답한다.")
+    @DisplayName("POST /css/styles.css 요청은 405를 응답한다.")
     void doPost() throws IOException {
         // given
-        final HttpResponse expectedResponse = HttpResponse.init(INTERNAL_SERVER_ERROR)
-                .setBodyByPath("/500.html");
+        final HttpResponse expectedResponse = HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+                .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
         final String expected = new String(expectedResponse.toResponseBytes());
 
         final Controller resourceController = ResourceController.getInstance();

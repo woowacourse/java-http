@@ -24,6 +24,8 @@ public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ACCOUNT_KEY = "account";
+    public static final String EMAIL_KEY = "email";
+    public static final String PASSWORD_KEY = "password";
 
     @Override
     protected HttpResponse handleGet(HttpRequest request) {
@@ -40,8 +42,8 @@ public class RegisterController extends AbstractController {
         QueryParams queryParams = httpRequest.getFormData();
         try {
             String account = queryParams.get(ACCOUNT_KEY);
-            String email = queryParams.get("email");
-            String password = queryParams.get("password");
+            String email = queryParams.get(EMAIL_KEY);
+            String password = queryParams.get(PASSWORD_KEY);
             Optional<User> user = InMemoryUserRepository.findByAccount(account);
             if (user.isEmpty()) {
                 User savedUser = new User(account, password, email);

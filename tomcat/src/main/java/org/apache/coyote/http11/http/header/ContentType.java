@@ -1,7 +1,6 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.header;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 public enum ContentType {
 
@@ -9,16 +8,14 @@ public enum ContentType {
 	CSS("css", "text/css;charset=utf-8"),
 	JS("js", "application/javascript;charset=utf-8"),
 	FORM_DATA("form-data", "application/x-www-form-urlencoded"),
-	ALL("", "*/*")
-
-	;
+	ALL("", "*/*");
 
 	private final String extension;
-	private final String format;
+	private final String value;
 
-	ContentType(String extension, String format) {
+	ContentType(String extension, String value) {
 		this.extension = extension;
-		this.format = format;
+		this.value = value;
 	}
 
 	public static ContentType from(String extension) {
@@ -28,7 +25,7 @@ public enum ContentType {
 			.orElse(ALL);
 	}
 
-	public String getFormat() {
-		return format;
+	public String value() {
+		return value;
 	}
 }

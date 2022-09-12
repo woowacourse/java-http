@@ -4,6 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.coyote.http11.http.header.ContentType;
+import org.apache.coyote.http11.http.header.Cookie;
+import org.apache.coyote.http11.http.header.HttpHeader;
+import org.apache.coyote.http11.http.header.HttpHeaders;
+import org.apache.coyote.http11.http.session.Session;
+import org.apache.coyote.http11.http.session.SessionManager;
+
 public class HttpRequest {
 
 	private static final String START_LINE_DELIMITER = " ";
@@ -49,10 +56,6 @@ public class HttpRequest {
 		return new String(body);
 	}
 
-	public boolean isStaticResourceRequest() {
-		return url.contains(EXTENSION_DELIMITER);
-	}
-
 	public String getQueryString(String key) {
 		return requestParams.getOrDefault(key);
 	}
@@ -70,6 +73,12 @@ public class HttpRequest {
 			return split[EXTENSION_INDEX];
 		}
 		return EMPTY_BODY;
+	}
+
+	public Session getSession() {
+		Cookie cookie = httpHeaders.getCookie();
+		return SessionManager.findSession(cookie)
+			.orElse(SessionManager.add(new Session()));
 	}
 
 	public String getUrl() {

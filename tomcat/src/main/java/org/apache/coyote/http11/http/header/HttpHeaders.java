@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.header;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +25,17 @@ public class HttpHeaders {
 		String line;
 		while (!(line = requestReader.readLine()).isBlank()) {
 			String[] header = line.split(HEADER_DELIMITER);
-			setHeader(header[HEADER_KEY_INDEX], header[HEADER_VALUE_INDEX]);
+			injectHeaders(header[HEADER_KEY_INDEX], header[HEADER_VALUE_INDEX]);
 		}
 	}
 
-	private void setHeader(String key, String value) {
+	private void injectHeaders(String key, String value) {
 		HttpHeader.from(key)
 			.ifPresent(header -> this.headers.put(header, value));
+	}
+
+	public void addHeader(HttpHeader httpHeader, String value) {
+		this.headers.put(httpHeader, value);
 	}
 
 	public List<HttpHeader> getHeaders() {
@@ -46,6 +49,12 @@ public class HttpHeaders {
 
 	public Optional<String> findValue(HttpHeader header) {
 		return Optional.ofNullable(headers.get(header));
+	}
+
+	public Cookie getCookie() {
+		return Optional.ofNullable(headers.get(HttpHeader.COOKIE))
+			.map(Cookie::new)
+			.orElse(new Cookie());
 	}
 
 	@Override

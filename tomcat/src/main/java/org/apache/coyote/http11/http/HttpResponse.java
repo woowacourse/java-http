@@ -1,16 +1,24 @@
 package org.apache.coyote.http11.http;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.coyote.http11.http.header.Cookie;
+import org.apache.coyote.http11.http.header.HttpHeader;
+import org.apache.coyote.http11.http.header.HttpHeaders;
 
 public class HttpResponse {
 
-	private final StatusCode statusCode;
-	private final String responseBody;
+	private HttpStatus httpStatus;
+	private String responseBody;
 	private final HttpHeaders httpHeaders;
 
-	private HttpResponse(StatusCode statusCode, String responseBody, Map<HttpHeader, String> headers) {
-		this.statusCode = statusCode;
+	public HttpResponse() {
+		this(null, null, new HashMap<>());
+	}
+
+	public HttpResponse(HttpStatus httpStatus, String responseBody, Map<HttpHeader, String> headers) {
+		this.httpStatus = httpStatus;
 		this.responseBody = responseBody;
 		this.httpHeaders = new HttpHeaders(headers);
 	}
@@ -22,8 +30,8 @@ public class HttpResponse {
 	private String getFullMessage() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("HTTP/1.1 ")
-			.append(statusCode.getValue())
-			.append(statusCode.getMessage())
+			.append(httpStatus.value())
+			.append(httpStatus.getMessage())
 			.append("\r\n");
 
 		for (HttpHeader key : httpHeaders.getHeaders()) {
@@ -42,53 +50,32 @@ public class HttpResponse {
 		return stringBuilder.toString();
 	}
 
-	public static HttpResponseBuilder builder() {
-		return new HttpResponseBuilder();
+	public void addCookie(String key, String value) {
+		httpHeaders.addHeader(HttpHeader.SET_COOKIE, new Cookie(key, value).values());
 	}
 
-	public static HttpResponseBuilder OK() {
-		return new HttpResponseBuilder()
-			.statusCode(StatusCode.OK);
+	public void setStatus(HttpStatus httpStatus) {
+		this.httpStatus = httpStatus;
 	}
 
-	public static HttpResponseBuilder FOUND() {
-		return new HttpResponseBuilder()
-			.statusCode(StatusCode.FOUND);
+	public void setBody(String body) {
+		this.responseBody = body;
+		this.addHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 	}
 
-	public static class HttpResponseBuilder {
-		private StatusCode statusCode;
-		private String responseBody;
-		private final Map<HttpHeader, String> headers = new LinkedHashMap<>();
+	public void addHeader(HttpHeader httpHeader, String value) {
+		this.httpHeaders.addHeader(httpHeader, value);
+	}
 
-		private HttpResponseBuilder() {
-		}
-
-		public HttpResponseBuilder statusCode(StatusCode statusCode) {
-			this.statusCode = statusCode;
-			return this;
-		}
-
-		public HttpResponseBuilder responseBody(String responseBody) {
-			this.responseBody = responseBody;
-			this.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
-			return this;
-		}
-
-		public HttpResponseBuilder setHeader(HttpHeader httpHeader, String value) {
-			this.headers.put(httpHeader, value);
-			return this;
-		}
-
-		public HttpResponse build() {
-			return new HttpResponse(statusCode, responseBody, headers);
-		}
+	public void sendRedirect(String redirectUrl) {
+		setStatus(HttpStatus.FOUND);
+		addHeader(HttpHeader.LOCATION, redirectUrl);
 	}
 
 	@Override
 	public String toString() {
 		return "===HttpResponse===" + "\r\n" +
-			"statusCode=" + statusCode + "\r\n" +
+			"statusCode=" + httpStatus + "\r\n" +
 			"headers=" + httpHeaders + "\r\n" +
 			'}';
 	}

@@ -8,10 +8,10 @@ import java.util.Objects;
 public class PageMapper {
 
     private final static String STATIC = "static" + File.separator;
+    private static final String START_OF_FILE_DIRECTORY = "/";
 
     public static Path getFilePath(final String url) {
-        String fileName = FileName.findFileName(url).getFileName();
-        return getPath(fileName);
+        return getPath(START_OF_FILE_DIRECTORY + url + ".html");
     }
 
     public static Path getPath(String url) {

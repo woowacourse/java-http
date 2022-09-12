@@ -44,7 +44,7 @@ class InMemoryUserRepositoryTest {
             users.add(new User("test"+ i , "password","test1@test.com"));
         }
 
-        for (User testUser :users) {
+        for (User testUser : users) {
             executorService.execute(() -> {
                 userRepository.save(testUser);
                 countDownLatch.countDown();

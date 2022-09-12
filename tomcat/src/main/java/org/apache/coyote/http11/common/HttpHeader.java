@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpHeader {
 
-    private static final String CRLF = " \r\n";
+    private static final String CRLF = " " + System.lineSeparator();
 
     private final Map<HttpHeaderType, List<String>> header;
 

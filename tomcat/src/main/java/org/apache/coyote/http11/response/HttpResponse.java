@@ -23,7 +23,9 @@ import org.apache.coyote.http11.common.SessionManager;
 
 public class HttpResponse {
 
-    private static final String CRLF = "\r\n";
+//    private static final String CRLF = " " + System.lineSeparator();
+
+    private static final String CRLF = System.lineSeparator();
 
     private HttpStatusLine httpStatusLine;
     private ResponseHeaders headers;

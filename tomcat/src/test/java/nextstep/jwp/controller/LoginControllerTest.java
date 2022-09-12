@@ -13,7 +13,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import support.TestRequest;
 
-public class LoginControllerTest {
+class LoginControllerTest {
 
     @Test
     @DisplayName("Login 상태가 아닌 경우 login.html 페이지를 반환한다.")

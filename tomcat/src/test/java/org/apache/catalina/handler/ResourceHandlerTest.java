@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import support.TestRequest;
 
-public class ResourceHandlerTest {
+class ResourceHandlerTest {
 
     @Test
     @DisplayName("RequestUri에 해당하는 파일을 읽어온다.")

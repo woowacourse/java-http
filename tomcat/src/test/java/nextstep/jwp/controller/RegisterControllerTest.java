@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import nextstep.jwp.db.InMemoryUserRepository;
 import support.TestRequest;
 
-public class RegisterControllerTest {
+class RegisterControllerTest {
 
     @Test
     @DisplayName("GET 요청이 올 경우 register.html 파일을 응답한다.")

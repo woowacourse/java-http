@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class QueryParamsTest {
+class QueryParamsTest {
 
     @Test
     @DisplayName("QueryString으로 주어진 경우 Value를 조회한다.")

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import support.TestRequest;
 
-public class HttpResponseTest {
+class HttpResponseTest {
 
     @Test
     @DisplayName("기본 HttpResponse의 생성 결과를 검증한다.")

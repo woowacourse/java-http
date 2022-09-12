@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import support.TestRequest;
 
-public class HttpRequestTest {
+class HttpRequestTest {
 
     @ParameterizedTest
     @CsvSource(value = {"GET:true", "POST:false"}, delimiter = ':')

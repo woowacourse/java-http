@@ -72,10 +72,6 @@ public class HttpRequest {
         return startLine;
     }
 
-    public HttpRequestBody getBody() {
-        return body;
-    }
-
     public String getUri() {
         return startLine.getUri();
     }

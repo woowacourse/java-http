@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
@@ -21,20 +19,6 @@ public class HttpRequestStartLine {
         this.uri = uri;
         this.protocol = protocol;
         this.queryParams = queryParams;
-    }
-
-    public static HttpRequestStartLine from(final BufferedReader reader) throws IOException {
-        final String startLine = reader.readLine();
-        if (startLine == null) {
-            throw new IllegalArgumentException("잘못된 입력입니다.");
-        }
-
-        final String[] startLineContents = startLine.split(" ");
-
-        return new HttpRequestStartLine(HttpMethod.findMethod(startLineContents[0]),
-                takeUri(startLineContents[1]),
-                startLineContents[2],
-                takeQueryParams(startLineContents[1]));
     }
 
     public static HttpRequestStartLine from(final String startLine) {

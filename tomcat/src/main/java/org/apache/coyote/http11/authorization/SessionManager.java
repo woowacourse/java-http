@@ -20,8 +20,4 @@ public class SessionManager {
     public Optional<Session> findSession(final String id) {
         return Optional.ofNullable(SESSIONS.get(id));
     }
-
-    public void remove(final String id) {
-        SESSIONS.remove(id);
-    }
 }

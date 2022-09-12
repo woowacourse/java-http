@@ -19,8 +19,13 @@ public class HttpRequestHeader {
 
     public static HttpRequestHeader from(final List<String> rawHeader) {
         final Map<String, Object> parsedHeaders = new HashMap<>();
+
         for (final String header : rawHeader) {
             parseRawHeader(parsedHeaders, header);
+        }
+
+        if (parsedHeaders.containsKey("Cookie")) {
+            parsedHeaders.put("Cookie", HttpCookie.from(parsedHeaders.get("Cookie").toString()));
         }
 
         return new HttpRequestHeader(parsedHeaders);
@@ -30,11 +35,6 @@ public class HttpRequestHeader {
         final String[] parsedHeader = header.split(": ");
         final String headerName = parsedHeader[NAME_INDEX];
         final String headerValue = parsedHeader[VALUE_INDEX].trim();
-
-        if (headerName.equals("Cookie")) {
-            parsedHeaders.put(headerName, HttpCookie.from(headerValue));
-            return;
-        }
         parsedHeaders.put(headerName, headerValue);
     }
 

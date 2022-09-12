@@ -25,4 +25,8 @@ public class SessionManager {
         }
         return sessions.get(id);
     }
+
+    public static boolean exist(final String id) {
+        return sessions.containsKey(id);
+    }
 }

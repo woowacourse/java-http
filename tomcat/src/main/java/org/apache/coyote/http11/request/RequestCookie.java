@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.request;
 
-import java.util.NoSuchElementException;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
 
 public class RequestCookie {
 
+    private static final String HEADER_NAME = "Cookie";
     private static final String JSESSIONID = "JSESSIONID";
 
     private final Params cookies;
@@ -13,20 +15,23 @@ public class RequestCookie {
     }
 
     public static RequestCookie parse(final RequestHeader header) {
-        return new RequestCookie(parseCookie(header));
+        final Params cookies = parseCookie(header);
+        return new RequestCookie(cookies);
     }
 
     private static Params parseCookie(final RequestHeader header) {
-        return header.find("Cookie")
+        return header.find(HEADER_NAME)
                 .map(Params::parse)
                 .orElse(Params.empty());
     }
 
-    public String getSessionId() {
+    public boolean existSession() {
         try {
-            return cookies.find(JSESSIONID);
-        } catch (final NoSuchElementException e) {
-            return null;
+            final String sessionId = cookies.find(JSESSIONID);
+            return SessionManager.exist(sessionId);
+
+        } catch (final ParameterNotFoundException e) {
+            return false;
         }
     }
 }

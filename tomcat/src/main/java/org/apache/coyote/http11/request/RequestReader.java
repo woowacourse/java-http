@@ -14,9 +14,8 @@ public class RequestReader {
         final RequestLine requestLine = RequestLine.parse(reader.readLine());
         final RequestHeader header = readHeaders(reader);
         final RequestBody body = readBody(reader);
-        final RequestCookie cookies = RequestCookie.parse(header);
 
-        return new HttpRequest(requestLine, header, body, cookies);
+        return new HttpRequest(requestLine, header, body);
     }
 
     private static RequestHeader readHeaders(final BufferedReader reader) throws IOException {

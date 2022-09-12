@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
+import org.apache.coyote.http11.request.RequestCookie;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -44,7 +45,8 @@ public class RegisterController extends AbstractController {
 
     private HttpResponse ifSessionNotExist(final HttpRequest request,
                                            final Function<Params, HttpResponse> function) {
-        if (request.existSession()) {
+        final RequestCookie cookie = RequestCookie.parse(request.getHeader());
+        if (cookie.existSession()) {
             return redirectToIndex();
         }
         return function.apply(request.getParamsFromBody());

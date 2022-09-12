@@ -8,7 +8,7 @@ public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         log.info("web server start.");
         final var tomcat = new Tomcat();
         tomcat.start();

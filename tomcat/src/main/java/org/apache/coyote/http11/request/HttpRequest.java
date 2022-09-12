@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.response.Cookie;
 
 public class HttpRequest {
@@ -41,13 +38,8 @@ public class HttpRequest {
     }
 
     private Optional<String> extractSessionValue(String cookieValue) {
-        Map<String, String> cookies = Arrays.stream(cookieValue.split(COOKIE_CONNECTOR))
-                .collect(Collectors.toMap(cookie -> cookie.split(COOKIE_PARAMETER_DELIMITER)[KEY_INDEX],
-                        cookie -> cookie.split(COOKIE_PARAMETER_DELIMITER)[VALUE_INDEX]));
-        if (cookies.containsKey(Cookie.JSESSIONID)) {
-            return Optional.of(cookies.get(Cookie.JSESSIONID));
-        }
-        return Optional.empty();
+        Cookie cookie = Cookie.of(cookieValue);
+        return cookie.getJSessionValue();
     }
 
     public String getPath() {

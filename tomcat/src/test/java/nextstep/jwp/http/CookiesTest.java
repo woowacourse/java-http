@@ -3,9 +3,7 @@ package nextstep.jwp.http;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.Cookie;
 import org.apache.http.Cookies;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +31,7 @@ class CookiesTest {
     void getJSessionId() {
         Cookies cookies = Cookies.parse("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
 
-        String actual = cookies.getJSessionId().orElseThrow();
+        String actual = cookies.findJSessionId().orElseThrow();
 
         String expected = "656cef62-e3c4-40bc-a8df-94732920ed46";
         assertThat(actual).isEqualTo(expected);

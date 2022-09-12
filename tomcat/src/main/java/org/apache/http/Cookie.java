@@ -8,6 +8,7 @@ public class Cookie {
     private static final int COOKIE_DIVIDED_LIMIT = 2;
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
+    private static final String JSESSIONID_KEY = "JSESSIONID";
 
     private final String key;
     private final String value;
@@ -25,8 +26,12 @@ public class Cookie {
         return new Cookie(key, value);
     }
 
-    public boolean isSame(String key) {
-        return this.key.equals(key);
+    public static Cookie fromByJSessionId(String id) {
+        return new Cookie(JSESSIONID_KEY, id);
+    }
+
+    public boolean isJSessionCookie() {
+        return JSESSIONID_KEY.equals(this.key);
     }
 
     public String getValue() {

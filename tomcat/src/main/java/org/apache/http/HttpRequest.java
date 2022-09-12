@@ -108,7 +108,7 @@ public class HttpRequest {
 
     public boolean isLoggedInUser() {
         return httpHeaders.getCookie()
-            .getJSessionId()
+            .findJSessionId()
             .filter(SessionManager::contains)
             .isPresent();
     }

@@ -51,7 +51,7 @@ public class HttpResponse {
     }
 
     private String writeSetCookieOfHeader() {
-        return cookies.getJSessionId()
+        return cookies.findJSessionId()
             .map(it -> SET_COOKIE_HEADER_WITH_JSESSIONID + it + " \r\n")
             .orElse("");
     }

@@ -3,7 +3,6 @@ package nextstep.jwp.handler;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.DashBoardController;
 import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.RegisterController;
 import nextstep.jwp.presentation.StaticResourceController;

@@ -45,7 +45,7 @@ public class HttpResponse {
         return makeResponse().getBytes();
     }
 
-    public String makeResponse() {
+    private String makeResponse() {
         final String messageHead = makeMessageHead(statusLine);
 
         return String.join(LINE_BREAK,

@@ -11,6 +11,10 @@ public class StaticController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = request.path();
+        if (path.equals("/") || path.isEmpty()) {
+            response.body("hello world!");
+            return;
+        }
         String body = new String(Files.readAllBytes(StaticFile.findByPath(path)
                 .toPath()));
         response.setHeader("Content-Type", ContentType.fromUri(path).value());

@@ -6,28 +6,26 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.util.StringUtils;
 
 public class HttpRequest {
 
+    private static final String START_LINE_DELIMITER = " ";
     private static final String HEADER_DELIMITER = ": ";
     private static final String COOKIE = "Cookie";
 
     private HttpMethod httpMethod;
     private String path;
-    private Map<String, String> queryParams;
     private HttpHeaders headers = new HttpHeaders();
     private HttpCookie cookie = new HttpCookie();
     private Map<String, String> requestBody = new HashMap<>();
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         String startLine = bufferedReader.readLine();
-        RequestLine requestLine = new RequestLine(startLine);
+        RequestLine requestLine = new RequestLine(startLine.split(START_LINE_DELIMITER));
         this.httpMethod = requestLine.getHttpMethod();
-        this.path = requestLine.getHttpUrl();
-        this.queryParams = requestLine.getQueryParams();
+        this.path = requestLine.getPath();
         parseHeaders(bufferedReader);
 
         if (HttpMethod.POST.equals(httpMethod)) {
@@ -69,15 +67,15 @@ public class HttpRequest {
         return headers;
     }
 
+    public HttpCookie getCookie() {
+        return cookie;
+    }
+
     public Map<String, String> getRequestBody() {
         return requestBody;
     }
 
     public Session getSession() {
-        return new Session(getCookies().getJSessionId());
-    }
-
-    public HttpCookie getCookies() {
-        return cookie;
+        return new Session(getCookie().getJSessionId());
     }
 }

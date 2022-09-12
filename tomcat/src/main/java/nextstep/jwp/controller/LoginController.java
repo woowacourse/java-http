@@ -16,7 +16,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> requestBody = request.getRequestBody();
-        HttpCookie httpCookie = request.getCookies();
+        HttpCookie httpCookie = request.getCookie();
         UserService userService = new UserService();
 
         try {
@@ -38,7 +38,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        HttpCookie httpCookie = request.getCookies();
+        HttpCookie httpCookie = request.getCookie();
         String jSessionId = httpCookie.getJSessionId();
         Session session = SessionManager.findSession(jSessionId)
                 .orElseGet(() -> new Session(EMPTY_VALUE));

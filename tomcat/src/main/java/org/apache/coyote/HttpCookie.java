@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package org.apache.coyote;
 
 import nextstep.jwp.exception.InvalidException;
 

@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import nextstep.jwp.exception.InvalidException;
+import org.apache.coyote.HttpCookie;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

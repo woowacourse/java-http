@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import nextstep.jwp.http.Session;
+import org.apache.coyote.Session;
 
 import java.io.IOException;
 

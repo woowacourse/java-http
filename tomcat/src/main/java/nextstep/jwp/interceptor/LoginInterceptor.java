@@ -1,9 +1,9 @@
 package nextstep.jwp.interceptor;
 
-import nextstep.jwp.http.HttpCookie;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.support.ResponseFlusher;
-import nextstep.jwp.http.Session;
-import nextstep.jwp.http.SessionManager;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import nextstep.jwp.support.View;
 import org.apache.coyote.Headers;
 import org.apache.coyote.HttpHeader;

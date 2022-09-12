@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.Session;
-import nextstep.jwp.http.SessionManager;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.Headers;
 import nextstep.jwp.http.MockOutputStream;
 import org.apache.coyote.support.Request;

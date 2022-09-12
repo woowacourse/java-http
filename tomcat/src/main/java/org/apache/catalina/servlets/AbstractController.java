@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.Resource;
 import org.apache.coyote.http11.ResourceLocator;
+import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -69,8 +70,8 @@ public abstract class AbstractController implements Controller {
 
     protected Map<String, String> parseFormPayload(HttpRequest request, HttpResponse response) {
         HttpHeaders headers = request.getHeaders();
-        String contentType = headers.get("Content-Type");
-        if (!contentType.equals("application/x-www-form-urlencoded")) {
+        ContentType contentType = headers.getContentType();
+        if (contentType != ContentType.APPLICATION_FORM_URLENCODED) {
             response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             return null;
         }

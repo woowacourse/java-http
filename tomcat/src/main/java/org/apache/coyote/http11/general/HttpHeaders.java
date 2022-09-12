@@ -40,12 +40,12 @@ public class HttpHeaders {
         return values.get(key);
     }
 
-    public boolean containsKey(String key) {
-        return values.containsKey(key);
+    public ContentType getContentType() {
+        return ContentType.of(values.get("Content-Type"));
     }
 
-    public Map<String, String> getValues() {
-        return values;
+    public boolean containsKey(String key) {
+        return values.containsKey(key);
     }
 
     public String toHttpResponse() {

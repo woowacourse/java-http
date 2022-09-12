@@ -21,7 +21,7 @@ class LoginControllerTest {
         LoginController loginController = new LoginController(new ResourceLocator("/static"));
         HttpRequest httpRequest = new HttpRequest(
                 StartLine.from("POST /login HTTP/1.1\r\n"),
-                HttpHeaders.from(List.of("Content-Type: text/html\r\n")),
+                HttpHeaders.from(List.of("Content-Type: text/html")),
                 null
         );
         HttpResponse httpResponse = new HttpResponse(HttpStatus.OK);

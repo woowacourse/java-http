@@ -4,7 +4,6 @@ import static nextstep.jwp.exception.ExceptionType.SERVER_EXCEPTION;
 
 import com.sun.jdi.InternalException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -21,15 +20,15 @@ public class RegisterController implements Handler {
     }
 
     @Override
-    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
-            if (httpRequest.requestPOST() && !httpRequest.getRequestBody().isEmpty()) {
+            if (httpRequest.isPost() && !httpRequest.getRequestBody().isEmpty()) {
                 final User user = UserService.getInstance().register(httpRequest.getRequestBody());
                 httpResponse.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
                 return;
             }
             httpResponse.setOkResponse(REGISTER_PAGE_URL);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new InternalException(SERVER_EXCEPTION.getMessage());
         }

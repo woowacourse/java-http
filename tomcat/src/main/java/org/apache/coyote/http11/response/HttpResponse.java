@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import static nextstep.jwp.exception.ExceptionType.SERVER_EXCEPTION;
 import static org.apache.coyote.http11.common.ContentType.UTF;
 import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
@@ -9,8 +10,8 @@ import static org.apache.coyote.http11.common.StatusCode.FOUND;
 import static org.apache.coyote.http11.common.StatusCode.OK;
 import static org.apache.coyote.http11.common.Version.HTTP_1_1;
 
+import com.sun.jdi.InternalException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.UUID;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.IOUtils;
@@ -37,8 +38,20 @@ public class HttpResponse {
                 responseBody);
     }
 
-    public void setResponseBody(String fileName) throws IOException, URISyntaxException {
+    public void setResponseBody(String fileName) throws IOException {
         responseBody = IOUtils.readResourceFile(fileName);
+    }
+
+    public void setRedirectUrl(String url) {
+        try {
+            setResponseBody(url);
+            this.httpStatusLine = HttpStatusLine.of(HTTP_1_1, FOUND);
+            headers.add(HttpHeader.of(LOCATION, url));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalException(SERVER_EXCEPTION.getMessage());
+        }
+
     }
 
     public void setResponseBodyContent(String content) {
@@ -53,9 +66,6 @@ public class HttpResponse {
         this.httpStatusLine = HttpStatusLine.of(HTTP_1_1, FOUND);
     }
 
-    public void setRedirectUrl(String redirectUrl) {
-        headers.add(HttpHeader.of(LOCATION, redirectUrl));
-    }
 
     public void setCookie(String sessionId) {
         headers.add(HttpHeader.of(SET_COOKIE, HttpCookie.generateCookieValue(sessionId)));
@@ -67,15 +77,18 @@ public class HttpResponse {
         headers.add(contentType, contentLength);
     }
 
-    public void setOkResponse(String fileName) throws
-            IOException,
-            URISyntaxException {
-        setResponseBody(fileName);
-        setOkHttpStatusLine();
-        setOKHeader(ContentType.from(fileName));
+    public void setOkResponse(String fileName) {
+        try {
+            setResponseBody(fileName);
+            setOkHttpStatusLine();
+            setOKHeader(ContentType.from(fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalException(SERVER_EXCEPTION.getMessage());
+        }
     }
 
-    public void setSessionAndCookieWithOkResponse(User user, String url) throws IOException, URISyntaxException {
+    public void setSessionAndCookieWithOkResponse(User user, String url) throws IOException {
         final Session session = setSession(user);
         setFoundHttpStatusLine();
         setResponseBody(url);
@@ -84,10 +97,15 @@ public class HttpResponse {
         setCookie(session.getId());
     }
 
-    public void setFoundResponse(String fileName) throws IOException, URISyntaxException {
-        setResponseBody(fileName);
-        setFoundHttpStatusLine();
-        setOKHeader(ContentType.from(fileName));
+    public void setFoundResponse(String fileName) {
+        try {
+            setResponseBody(fileName);
+            setFoundHttpStatusLine();
+            setOKHeader(ContentType.from(fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalException(SERVER_EXCEPTION.getMessage());
+        }
     }
 
     private Session setSession(User succeedLoginUser) {

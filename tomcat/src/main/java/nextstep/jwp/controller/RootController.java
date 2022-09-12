@@ -13,7 +13,7 @@ public class RootController implements Handler {
     }
 
     @Override
-    public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         httpResponse.setResponseBodyContent("Hello world!");
         httpResponse.setOkHttpStatusLine();
         httpResponse.setOKHeader(HTML);

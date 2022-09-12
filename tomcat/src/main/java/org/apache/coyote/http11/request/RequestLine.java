@@ -43,6 +43,10 @@ public class RequestLine {
         return method;
     }
 
+    public boolean isMatchHttpMethod(final HttpMethod method){
+        return method.isMatch(method);
+    }
+
     public String getUrl() {
         return url.getPath();
     }

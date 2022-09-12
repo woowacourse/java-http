@@ -4,10 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import nextstep.jwp.controller.ControllerMapper;
+import nextstep.jwp.controller.Handler;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,18 +35,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final Servlet servlet = new Servlet(reader);
-            if (!CookieFilter.doFilter(servlet.getRequest(), servlet.getResponse())) {
-                servlet.service();
+            final HttpRequest request = HttpRequest.from(reader);
+            final HttpResponse response = new HttpResponse();
+
+            if (!CookieFilter.doFilter(request, response)) {
+                final Handler controller = ControllerMapper.findController(request.getUrl());
+                controller.service(request, response);
             }
 
-            outputStream.write(servlet.getResponse().generateHttpResponse().getBytes(StandardCharsets.UTF_8));
+            outputStream.write(response.generateHttpResponse().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 }

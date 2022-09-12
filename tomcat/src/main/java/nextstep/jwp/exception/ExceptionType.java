@@ -3,6 +3,9 @@ package nextstep.jwp.exception;
 public enum ExceptionType {
 
     SERVER_EXCEPTION("서버 에러가 발생했습니다."),
+    NOT_FOUND_USER_EXCEPTION("존재하지 않는 User 입니다."),
+    MISS_MATCH_USER_PASSWORD_EXCEPTION("User 의 Password 가 일치하지 않습니다."),
+    INVALID_HTTP_METHOD_TYPE_EXCEPTION("현재 지원하는 HTTP Method 형식이 아닙니다."),
     INVALID_HTTP_METHOD_EXCEPTION("잘못된 HTTP Method 형식입니다."),
     INVALID_HTTP_REGISTER_EXCEPTION("잘못된 회원가입 요청입니다."),
     INVALID_HTTP_LOGIN_EXCEPTION("잘못된 로그인 요청입니다."),

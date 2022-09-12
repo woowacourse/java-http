@@ -40,10 +40,6 @@ public class HttpRequest {
         return requestLine.getUrl();
     }
 
-    public boolean requestPOST() {
-        return requestLine.getMethod().isMatch(HttpMethod.POST);
-    }
-
     public Map<String, String> getParams() {
         return requestLine.getParams();
     }
@@ -56,6 +52,14 @@ public class HttpRequest {
 
     public boolean hasCookie() {
         return requestHeaders.hasCookie();
+    }
+
+    public boolean isGet() {
+        return requestLine.isMatchHttpMethod(HttpMethod.GET);
+    }
+
+    public boolean isPost() {
+        return requestLine.isMatchHttpMethod(HttpMethod.POST);
     }
 
     public RequestLine getRequestLine() {

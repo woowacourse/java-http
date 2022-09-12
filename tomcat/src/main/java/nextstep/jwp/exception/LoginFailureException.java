@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.exception;
 
 public class LoginFailureException extends RuntimeException {
 

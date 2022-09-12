@@ -1,6 +1,6 @@
 package nextstep.jwp.service;
 
-import nextstep.jwp.LoginFailureException;
+import nextstep.jwp.exception.LoginFailureException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;

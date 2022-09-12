@@ -9,10 +9,6 @@ public class ViewResolver {
     private static final String DEFAULT_PATH = "/";
     private static final String REDIRECT = "redirect:";
     private static final String EXTENSION = ".html";
-    private static final String CONTENT_TYPE = "text/html";
-
-    public ViewResolver() {
-    }
 
     public void resolve(final String path, final HttpResponse response) {
         if (path.startsWith(REDIRECT)) {
@@ -37,8 +33,8 @@ public class ViewResolver {
                 .setResponseBody(getResource(uri));
     }
 
-    private String createUri(final String substring) {
-        return DEFAULT_PATH + substring + EXTENSION;
+    private String createUri(final String path) {
+        return DEFAULT_PATH + path + EXTENSION;
     }
 
     private String getContentType(final String uri) {

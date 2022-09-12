@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.common.ContentType.HTML;
 

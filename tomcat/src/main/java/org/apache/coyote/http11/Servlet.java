@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import org.apache.coyote.http11.controller.ControllerMapper;
-import org.apache.coyote.http11.controller.Handler;
+import nextstep.jwp.controller.ControllerMapper;
+import nextstep.jwp.controller.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

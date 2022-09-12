@@ -77,7 +77,7 @@ Cookie 필드에 값이 추가된다.
 
 ## 리팩터링 내용 정리
 
-- [ ] controller Mapping 로직 개선
+- [x] controller Mapping 로직 개선
 - [ ] controller 내부에 서블릿 동작 원리와 유사하게 doGet, doPost 적용
 - [ ] custom controller 에 적절하게 doGet, doPost 오버라이드 해서 동작 정리
 - [ ] response create 로직 개편

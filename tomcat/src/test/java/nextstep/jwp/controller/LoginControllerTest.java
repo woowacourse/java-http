@@ -17,6 +17,7 @@ import org.apache.http.QueryParams;
 import org.apache.http.StatusCode;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -68,16 +69,36 @@ class LoginControllerTest {
         Session session = SessionManager.generateNewSession();
         session.createAttribute("user", user);
         SessionManager.add(session);
-        Cookies cookies = Cookies.fromJSessionId(session.getId());
         LoginController loginController = new LoginController();
 
         HttpResponse actual = loginController.handlePost(httpRequest);
 
         HttpResponse expected = HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
-            FileUtils.readFile(getResource("/index.html")), cookies);
+            FileUtils.readFile(getResource("/index.html")));
         assertThat(actual).usingRecursiveComparison()
             .ignoringFieldsOfTypes(Cookies.class)
             .isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Post 메서드는 로그인에 성공하면 Set-Cookies 헤더에 JsessionId를 포함한다.")
+    void handlePost_login_contains_setCookies() {
+        InMemoryUserRepository.save(new User("leo", "password", "leo@gmail.com"));
+        User user = InMemoryUserRepository.findByAccount("leo")
+            .orElseThrow();
+        String requestBody = "account=gugu&password=password";
+        HttpRequest httpRequest = new HttpRequest(HttpMethod.POST, "/login", "login",
+            QueryParams.empty(), HttpHeaders.parse(List.of("Accept: text/html,*/*;q=0.1",
+            "Content-Type: application/x-www-form-urlencoded")), requestBody);
+        Session session = SessionManager.generateNewSession();
+        session.createAttribute("user", user);
+        SessionManager.add(session);
+        LoginController loginController = new LoginController();
+
+        HttpResponse httpResponse = loginController.handlePost(httpRequest);
+        String response = new String(httpResponse.writeResponse());
+
+        assertThat(response).containsPattern("JSESSIONID=");
     }
 
     @Test

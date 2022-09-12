@@ -1,7 +1,6 @@
 package nextstep.jwp.controller.path;
 
 import java.util.Map;
-import nextstep.jwp.controller.FrontController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import web.request.HttpRequest;

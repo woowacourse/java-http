@@ -10,10 +10,10 @@ import web.util.StaticResourceFinder;
 
 public class HttpResponse {
 
-    public static final String EMPTY_VALUE = "EMPTY_VALUE";
-    public static final String SPACE = " ";
-    public static final String MESSAGE_BOUNDARY = "";
-    public static final String HEADER_ELEMENT_DELIMITER = ": ";
+    private static final String EMPTY_VALUE = "EMPTY_VALUE";
+    private static final String SPACE = " ";
+    private static final String MESSAGE_BOUNDARY = "";
+    private static final String HEADER_ELEMENT_DELIMITER = ": ";
 
     private StatusLine statusLine;
     private final Map<String, String> header;

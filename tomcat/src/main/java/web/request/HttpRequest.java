@@ -10,9 +10,14 @@ import java.util.Optional;
 
 public class HttpRequest {
 
-    public static final String WHITE_SPACE = " ";
-    public static final String HEADER_KEY_VALUE_DELIMITER = ":";
-    public static final String EMPTY_BODY = "";
+    private static final String WHITE_SPACE = " ";
+    private static final String HEADER_KEY_VALUE_DELIMITER = ":";
+    private static final String EMPTY_BODY = "";
+    private static final int METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    public static final int HEADER_KEY_INDEX = 0;
+    public static final int HEADER_VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final Map<String, String> header;
@@ -26,7 +31,11 @@ public class HttpRequest {
 
     private RequestLine parseRequestLine(final String firstLine) {
         String[] requestLine = firstLine.split(WHITE_SPACE);
-        return new RequestLine(requestLine[0], requestLine[1], requestLine[2]);
+        return new RequestLine(
+                requestLine[METHOD_INDEX],
+                requestLine[REQUEST_URI_INDEX],
+                requestLine[HTTP_VERSION_INDEX]
+        );
     }
 
     private Map<String, String> parseHeader(final BufferedReader bufferedReader) throws IOException {
@@ -39,7 +48,7 @@ public class HttpRequest {
         Map<String, String> header = new LinkedHashMap<>();
         for (String s : headerLines) {
             String[] headerLine = s.split(HEADER_KEY_VALUE_DELIMITER);
-            header.put(headerLine[0].trim(), headerLine[1].trim());
+            header.put(headerLine[HEADER_KEY_INDEX].strip(), headerLine[HEADER_VALUE_INDEX].strip());
         }
         return header;
     }

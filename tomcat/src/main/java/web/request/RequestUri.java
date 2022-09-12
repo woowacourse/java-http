@@ -4,8 +4,8 @@ import java.util.Optional;
 
 public class RequestUri {
 
-    public static final String STATIC_RESOURCE_TYPE_DELIMITER = ".";
-    public static final String QUERY_STRING_DELIMITER = "?";
+    private static final String STATIC_RESOURCE_TYPE_DELIMITER = ".";
+    private static final String QUERY_STRING_DELIMITER = "?";
 
     private String value;
 

@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.http.response;
 
+import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.http11.http.response.HttpStatus.*;
+
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.header.HttpHeader;
@@ -13,14 +17,18 @@ public class HttpResponse {
     private static final String BLANK_LETTER = " ";
     private static final String COLON_LETTER = ":";
     private static final String SEMI_COLON_LETTER = ";";
+    private static final HttpVersion DEFAULT_HTTP_VERSION = HttpVersion.HTTP11;
 
-    private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
-    private final HttpHeaders headers;
-    private final String body;
+    private HttpVersion httpVersion = DEFAULT_HTTP_VERSION;
+    private HttpStatus httpStatus = OK;
+    private HttpHeaders headers = new HttpHeaders();
+    private String body = "";
+
+    public HttpResponse() {
+    }
 
     private HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus,
-                        final HttpHeaders headers, final String body) {
+                         final HttpHeaders headers, final String body) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.headers = headers;
@@ -51,6 +59,21 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void setHttpStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void addHeader(final HttpHeader httpHeader) {
+        headers.add(httpHeader);
+    }
+
+    public void setBody(final String body) {
+        final int length = body.getBytes(StandardCharsets.UTF_8).length;
+        final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH.getValue(), String.valueOf(length));
+        addHeader(contentLength);
+        this.body = body;
     }
 
     public String generateResponse() {

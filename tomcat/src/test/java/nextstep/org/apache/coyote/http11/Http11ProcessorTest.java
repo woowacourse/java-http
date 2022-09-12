@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -79,11 +80,12 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3797 \r\n" +
+                "Content-Length: " + file.getBytes(UTF_8).length + " \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                file;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

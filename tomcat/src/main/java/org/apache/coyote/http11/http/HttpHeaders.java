@@ -14,9 +14,12 @@ import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
 
 public class HttpHeaders {
-    private final Map<String, HttpHeader> headers;
+    private Map<String, HttpHeader> headers = new LinkedHashMap<>();
 
     private static final String COLON_LETTER = ":";
+
+    public HttpHeaders() {
+    }
 
     private HttpHeaders(final Map<String, HttpHeader> headers) {
         this.headers = headers;
@@ -79,5 +82,9 @@ public class HttpHeaders {
 
     public void put(final String httpHeaderType, final HttpHeader httpHeader) {
         headers.put(httpHeaderType, httpHeader);
+    }
+
+    public void add(final HttpHeader httpHeader) {
+        headers.put(httpHeader.getHttpHeaderType(), httpHeader);
     }
 }

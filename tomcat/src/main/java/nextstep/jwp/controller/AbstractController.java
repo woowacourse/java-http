@@ -6,19 +6,21 @@ import org.apache.coyote.http11.http.response.HttpResponse;
 
 abstract class AbstractController implements Controller {
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest,
+                        final HttpResponse httpResponse) {
         if (httpRequest.isGetMethod()) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
 
-        return doPost(httpRequest);
+        doPost(httpRequest, httpResponse);
     }
 
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         throw new NotFoundControllerException("해당하는 메서드의 컨트롤러를 찾을 수 없습니다. " + httpRequest.getUrl());
     }
 
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         throw new NotFoundControllerException("해당하는 메서드의 컨트롤러를 찾을 수 없습니다. " + httpRequest.getUrl());
     }
 }

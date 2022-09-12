@@ -3,9 +3,6 @@ package nextstep.jwp.controller;
 import static nextstep.jwp.controller.ResourceUrls.INDEX_HTML;
 import static nextstep.jwp.controller.ResourceUrls.LOGIN_HTML;
 import static nextstep.jwp.controller.ResourceUrls.UNAUTHORIZED_HTML;
-import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
-import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
-import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -25,35 +22,33 @@ public class LoginController extends ResourceController {
     private final UserService userService = UserService.getInstance();
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (authorizeService.isAuthorized(httpRequest)) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
-            return HttpResponse.of(HTTP11, REDIRECT, location);
+            setRedirectHeader(httpResponse, INDEX_HTML);
+            return;
         }
-        return generateResourceResponse(LOGIN_HTML.getValue());
+        setResource(LOGIN_HTML.getValue(), httpResponse);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final String body = httpRequest.getBody();
-        return generateLoginResponse(body);
+        login(body, httpResponse);
     }
 
-    private HttpResponse generateLoginResponse(final String body) {
+    private void login(final String body, final HttpResponse httpResponse) {
         final Map<String, String> queryParams = Parser.parseQueryParams(body);
         try {
             final UserLoginRequest userLoginRequest = getUserLoginRequest(queryParams);
             userService.login(userLoginRequest);
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
             final HttpCookie cookie = SessionManager.createCookie();
             final HttpHeader cookieHeader = HttpHeader.of("Set-Cookie", cookie.toHeaderValue());
-            return HttpResponse.of(HTTP11, REDIRECT, location, cookieHeader);
+            setRedirectHeader(httpResponse, INDEX_HTML);
+            httpResponse.addHeader(cookieHeader);
         } catch (IllegalArgumentException exception) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), UNAUTHORIZED_HTML.getValue());
-            return HttpResponse.of(HTTP11, REDIRECT, location);
+            setRedirectHeader(httpResponse, UNAUTHORIZED_HTML);
         } catch (NoSuchElementException exception) {
-            final HttpHeader location = HttpHeader.of(LOCATION.getValue(), LOGIN_HTML.getValue());
-            return HttpResponse.of(HTTP11, REDIRECT, location);
+            setRedirectHeader(httpResponse, LOGIN_HTML);
         }
     }
 

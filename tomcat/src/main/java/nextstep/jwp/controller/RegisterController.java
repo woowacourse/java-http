@@ -2,15 +2,11 @@ package nextstep.jwp.controller;
 
 import static nextstep.jwp.controller.ResourceUrls.INDEX_HTML;
 import static nextstep.jwp.controller.ResourceUrls.REGISTER_HTML;
-import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
-import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
-import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.dto.UserRegisterRequest;
 import org.apache.catalina.webutils.Parser;
-import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
@@ -19,12 +15,14 @@ public class RegisterController extends ResourceController {
     private final UserService userService = UserService.getInstance();
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return generateResourceResponse(REGISTER_HTML.getValue());
+    protected void doGet(final HttpRequest httpRequest,
+                         final HttpResponse httpResponse) {
+        setResource(REGISTER_HTML.getValue(), httpResponse);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest,
+                          final HttpResponse httpResponse) {
         final String body = httpRequest.getBody();
 
         final Map<String, String> queryParams = Parser.parseQueryParams(body);
@@ -35,9 +33,7 @@ public class RegisterController extends ResourceController {
         final String password = queryParams.get("password");
         final UserRegisterRequest userRegisterRequest = new UserRegisterRequest(account, password, email);
         userService.save(userRegisterRequest);
-
-        final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
-        return HttpResponse.of(HTTP11, REDIRECT, location);
+        setRedirectHeader(httpResponse, INDEX_HTML);
     }
 
     private void validateRegisterParams(final Map<String, String> queryParams) {

@@ -3,7 +3,6 @@ package nextstep.jwp.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
@@ -18,7 +17,7 @@ public class IOUtils {
         return String.copyValueOf(bodyArr);
     }
 
-    public static String readResourceFile(final String fileName) throws IOException, URISyntaxException {
+    public static String readResourceFile(final String fileName) throws IOException {
         final URL url = Objects.requireNonNull(
                 Thread.currentThread().getContextClassLoader().getResource(STATIC_PATH + fileName));
         final File file = new File(url.getFile());

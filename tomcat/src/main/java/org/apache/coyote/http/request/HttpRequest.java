@@ -59,8 +59,8 @@ public class HttpRequest {
         if (!hasQueryString(uri)) {
             return Collections.emptyMap();
         }
-        final int prefixIndex = uri.indexOf(QUERY_STRING_PREFIX);
-        final String queryString = uri.substring(prefixIndex + PATH);
+        final int queryStringPrefixIndex = uri.indexOf(QUERY_STRING_PREFIX);
+        final String queryString = uri.substring(queryStringPrefixIndex + 1);
 
         return StringParser.split(queryString, QUERY_STRING_FIELD_DELIMITER, QUERY_STRING_KEY_VALUE_DELIMITER);
     }

@@ -12,8 +12,11 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
+    private SessionManager() {}
+
     public static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
+        log.info("[Session Manger] Session Create - Session ID : {}", session.getId());
     }
 
     public static Optional<Session> findSession(final String id) {

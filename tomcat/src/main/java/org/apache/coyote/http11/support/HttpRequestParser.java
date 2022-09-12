@@ -10,6 +10,7 @@ import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.HttpHeaders;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.RequestBody;
+import org.apache.coyote.http11.http.RequestLine;
 
 public class HttpRequestParser {
 
@@ -25,11 +26,13 @@ public class HttpRequestParser {
 
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         String startLine = bufferedReader.readLine();
+        RequestLine requestLine = RequestLine.of(startLine);
+
         HttpHeaders httpHeaders = extractHeaders(bufferedReader);
         RequestBody requestBody = extractBody(bufferedReader, httpHeaders);
         HttpCookie httpCookie = extractCookie(httpHeaders);
 
-        return HttpRequest.of(startLine, httpHeaders, requestBody, httpCookie);
+        return HttpRequest.of(requestLine, httpHeaders, requestBody, httpCookie);
     }
 
     private static HttpHeaders extractHeaders(BufferedReader bufferedReader) throws IOException {

@@ -23,7 +23,8 @@ class FrontControllerTest {
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = frontController.performRequest(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        frontController.performRequest(httpRequest, httpResponse);
 
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),

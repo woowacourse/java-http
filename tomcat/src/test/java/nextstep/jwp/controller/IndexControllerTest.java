@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -15,7 +15,7 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class IndexHandlerTest {
+class IndexControllerTest {
 
     @DisplayName("GET /login 경로로 요청시 200 OK와 함께 Hello world가 담긴 HttpResponse를 반환한다.")
     @Test
@@ -25,7 +25,8 @@ class IndexHandlerTest {
                 + "Host: localhost:8080\n"
                 + "Connection: keep-alive\n";
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = frontController.performRequest(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        frontController.performRequest(httpRequest, httpResponse);
 
         String expectedResponseBody = "Hello world!";
 

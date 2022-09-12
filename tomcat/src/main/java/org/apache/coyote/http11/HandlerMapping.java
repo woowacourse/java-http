@@ -1,37 +1,37 @@
 package org.apache.coyote.http11;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-import nextstep.jwp.handler.IndexHandler;
-import nextstep.jwp.handler.LoginHandler;
-import nextstep.jwp.handler.RegisterHandler;
-import nextstep.jwp.handler.ResourceHandler;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.NotMappedErrorController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceController;
 
 public enum HandlerMapping {
 
-    DEFAULT("/", IndexHandler::perform),
-    LOGIN("/login", LoginHandler::perform),
-    REGISTER("/register", RegisterHandler::perform),
-    STATIC_FILE(Constants.NULL, ResourceHandler::perform),
-    NOF_FOUND(Constants.NULL, HandlerMapping::returnNotFountResponse);
+    DEFAULT("/", IndexController.getInstance()),
+    LOGIN("/login", LoginController.getInstance()),
+    REGISTER("/register", RegisterController.getInstance()),
+    STATIC_FILE(Constants.NULL, ResourceController.getInstance()),
+    NOF_FOUND(Constants.NULL, NotMappedErrorController.getInstance());
 
     private static class Constants {
         private static final String NULL = "null";
     }
 
     private final String url;
-    private final Function<HttpRequest, HttpResponse> executor;
+    private final Controller controller;
 
-    HandlerMapping(String url, Function<HttpRequest, HttpResponse> executor) {
+    HandlerMapping(String url, Controller controller) {
         this.url = url;
-        this.executor = executor;
+        this.controller = controller;
     }
 
     public static HandlerMapping findHandler(HttpRequest request) {
@@ -46,13 +46,7 @@ public enum HandlerMapping {
                 .orElse(NOF_FOUND);
     }
 
-    public static HttpResponse returnNotFountResponse(HttpRequest request) {
-        return new HttpResponse.Builder()
-                .statusCode(HttpStatus.NOT_FOUND)
-                .build();
-    }
-
-    public HttpResponse execute(HttpRequest request) {
-        return this.executor.apply(request);
+    public void execute(HttpRequest request, HttpResponse response) {
+        this.controller.service(request, response);
     }
 }

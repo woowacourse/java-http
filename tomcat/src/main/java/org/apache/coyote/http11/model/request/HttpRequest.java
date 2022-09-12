@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.http11.model.HttpHeaderType;
-import org.apache.coyote.http11.model.HttpMethod;
 
 public class HttpRequest {
 
@@ -49,8 +48,12 @@ public class HttpRequest {
         return HttpRequestHeader.from(requestHeader);
     }
 
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
     }
 
     public String getUri() {

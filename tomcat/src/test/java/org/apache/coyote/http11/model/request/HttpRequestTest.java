@@ -27,7 +27,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         assertAll(
-                () -> assertThat(httpRequest.getMethod().getValue()).isEqualTo("POST"),
+                () -> assertThat(httpRequest.isPost()).isTrue(),
                 () -> assertThat(httpRequest.getUri()).isEqualTo("/register"),
                 () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHeaderValue("Host")).isEqualTo("localhost:8080"),
@@ -75,7 +75,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequestGenerator.generate(request);
         assertAll(
-                () -> assertThat(httpRequest.getMethod().getValue()).isEqualTo("POST"),
+                () -> assertThat(httpRequest.isPost()).isTrue(),
                 () -> assertThat(httpRequest.getUri()).isEqualTo("/register"),
                 () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHeaderValue("Host")).isEqualTo("localhost:8080"),

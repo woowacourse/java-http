@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,27 +13,36 @@ import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-public class ResourceHandler {
+public class ResourceController extends AbstractController {
 
     private static final String STATIC_RESOURCE_PATH = "static";
 
-    public static HttpResponse perform(HttpRequest httpRequest) {
-        return returnResource(httpRequest.getUri());
+    private static final ResourceController INSTANCE = new ResourceController();
+
+    public static ResourceController getInstance() {
+        return INSTANCE;
     }
 
-    public static HttpResponse returnResource(String fileName) {
+    private ResourceController() {
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        returnResource(request.getUri(), response);
+    }
+
+    public static void returnResource(String fileName, HttpResponse response) {
         try {
             Path filePath = findFilePath(fileName);
             String content = new String(Files.readAllBytes(filePath));
 
             String contentType = ContentType.findContentType(fileName);
-            return new HttpResponse.Builder()
-                    .statusCode(HttpStatus.OK)
-                    .header(HttpHeaderType.CONTENT_TYPE, contentType)
-                    .responseBody(content)
-                    .build();
+
+            response.statusCode(HttpStatus.OK);
+            response.addHeader(HttpHeaderType.CONTENT_TYPE, contentType);
+            response.responseBody(content);
         } catch (IOException | FileNotExistException e) {
-            return HttpResponse.notFound();
+            response.statusCode(HttpStatus.NOT_FOUND);
         }
     }
 

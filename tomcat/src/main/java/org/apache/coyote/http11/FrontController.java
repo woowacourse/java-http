@@ -5,8 +5,8 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 
 public class FrontController {
 
-    public HttpResponse performRequest(HttpRequest request) {
+    public void performRequest(HttpRequest request, HttpResponse response) {
         HandlerMapping handler = HandlerMapping.findHandler(request);
-        return handler.execute(request);
+        handler.execute(request, response);
     }
 }

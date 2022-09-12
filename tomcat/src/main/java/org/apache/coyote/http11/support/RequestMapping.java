@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.support;
 
 import java.util.Map;
-import nextstep.jwp.controller.Controller;
+import org.apache.catalina.Controller;
 import nextstep.jwp.controller.HomePageController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;

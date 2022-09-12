@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.support;
 
 import nextstep.jwp.LoginFailureException;
-import nextstep.jwp.controller.Controller;
+import org.apache.catalina.Controller;
 import nextstep.jwp.controller.ControllerAdvice;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

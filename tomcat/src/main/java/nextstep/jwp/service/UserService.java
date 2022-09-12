@@ -34,8 +34,10 @@ public class UserService {
 
     public void saveUser(SaveUserDto saveUserDto) {
         final var account = saveUserDto.getAccount();
-        userRepository.findByAccount(account)
-                .orElseThrow(HttpException::ofBadRequest);
+        final var existingAccount = userRepository.findByAccount(account);
+        if (existingAccount.isPresent()) {
+            throw HttpException.ofBadRequest();
+        }
         final var savedUser = userRepository.save(new User(account, saveUserDto.getPassword(), saveUserDto.getEmail()));
         log.info("회원가입 성공! - {}", savedUser);
     }

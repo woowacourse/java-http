@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.net.URL;
+import java.util.Objects;
 import org.apache.http.ContentType;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -14,14 +15,17 @@ public class StaticFileController extends AbstractController {
 
     @Override
     protected HttpResponse handleGet(HttpRequest request) {
-        URL resource = getResource(request);
-        if (resource == null) {
+        if (cannotFound(request)) {
             return notFound();
         }
-        return HttpResponse.of(StatusCode.OK, request.getFileExtension(), FileUtils.readFile(resource));
+        return HttpResponse.of(StatusCode.OK, request.getFileExtension(), FileUtils.readFile(getResource(request)));
     }
 
-    public URL getResource(HttpRequest request) {
+    private boolean cannotFound(HttpRequest request) {
+        return Objects.isNull(getResource(request));
+    }
+
+    private URL getResource(HttpRequest request) {
         String path = request.getPath();
         if (request.matches(ContentType.TEXT_PLAIN)) {
             String filePath =

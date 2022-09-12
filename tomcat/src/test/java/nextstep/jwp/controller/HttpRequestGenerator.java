@@ -29,7 +29,7 @@ public class HttpRequestGenerator {
         Session session = new Session();
         session.setAttribute("user", new User("account", "password", "email"));
 
-        SessionManager sessionManager = new SessionManager();
+        SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 
         String httpRequest = String.join("\r\n",

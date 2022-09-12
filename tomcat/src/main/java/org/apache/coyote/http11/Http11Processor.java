@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerAdapter;
-import nextstep.jwp.controller.ControllerMapper;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse processRequest(HttpRequest request) {
-        Optional<Controller> controller = ControllerMapper.findController(request.getUri());
+        Optional<Controller> controller = RequestMapping.getController(request.getUri());
 
         if (controller.isEmpty()) {
             return HttpResponse.notFound();

@@ -6,14 +6,14 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found");
 
     private final int code;
-    private final String text;
+    private final String message;
 
-    HttpStatus(int code, String text) {
+    HttpStatus(int code, String message) {
         this.code = code;
-        this.text = text;
+        this.message = message;
     }
 
     public String toResponseString() {
-        return code + " " + text;
+        return code + " " + message;
     }
 }

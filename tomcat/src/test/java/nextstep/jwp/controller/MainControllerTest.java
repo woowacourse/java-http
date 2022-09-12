@@ -14,7 +14,7 @@ import nextstep.jwp.util.FileReader;
 
 class MainControllerTest {
 
-    private final MainController controller = new MainController();
+    private final Controller controller = MainController.getInstance();
 
     @Test
     @DisplayName("get 요청시 Hello world!를 반환한다.")

@@ -14,13 +14,13 @@ public class HttpRequestStartLine {
     private static final char START_QUERY_PARAM = '?';
 
     private final String method;
-    private final String uri;
+    private final String path;
     private final Map<String, String> queryParam;
     private final String version;
 
-    private HttpRequestStartLine(String method, String uri, Map<String, String> queryParam, String version) {
+    private HttpRequestStartLine(String method, String path, Map<String, String> queryParam, String version) {
         this.method = method;
-        this.uri = uri;
+        this.path = path;
         this.queryParam = queryParam;
         this.version = version;
     }
@@ -46,7 +46,7 @@ public class HttpRequestStartLine {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 }

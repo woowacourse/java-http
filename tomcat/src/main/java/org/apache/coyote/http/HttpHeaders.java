@@ -15,6 +15,10 @@ public enum HttpHeaders {
         this.value = value;
     }
 
+    public boolean isSameValue(final String value) {
+        return this.value.equals(value);
+    }
+
     public String getValue() {
         return value;
     }

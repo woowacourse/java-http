@@ -27,14 +27,13 @@ public class RequestHeader {
         String header;
         while (!"".equals((header = bufferedReader.readLine()))) {
             final String[] splitHeader = header.split(HEADER_DELIMITER);
-            if (splitHeader[KEY].equals(COOKIE.getValue())) {
-                final RequestCookie cookie = RequestCookie.from(splitHeader[VALUE].trim());
-                values.put(splitHeader[KEY], cookie);
-                continue;
-            }
             values.put(splitHeader[KEY], splitHeader[VALUE].trim());
         }
 
+        if(values.containsKey(COOKIE.getValue())){
+            final String cookies = (String) values.get(COOKIE.getValue());
+            values.put(COOKIE.getValue(), RequestCookie.from(cookies.trim()));
+        }
         return new RequestHeader(values);
     }
 

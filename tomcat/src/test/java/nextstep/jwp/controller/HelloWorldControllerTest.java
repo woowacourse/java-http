@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class HelloWorldControllerTest {
 
     @Test
-    @DisplayName("Response로 \"Hello world!\" 를 반환한다.")
+    @DisplayName("Get 메서드는 ResponseBody로 \"Hello world!\" 를 반환한다.")
     void handleGet() {
         HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, "/", "/", QueryParams.empty(),
             HttpHeaders.parse(List.of()), null);

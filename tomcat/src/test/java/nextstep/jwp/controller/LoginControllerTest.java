@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     @Test
-    @DisplayName("세션이 유효하면 ResponseBody로 index.html을 반환한다.")
+    @DisplayName("Get 메서드는 세션이 유효하면 ResponseBody로 index.html을 반환한다.")
     void handleGet_valid_session() {
         Session session = SessionManager.generateNewSession();
         SessionManager.add(session);
@@ -41,7 +41,7 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("세션이 유효하지 않으면 ResponseBody로 login.html을 반환한다.")
+    @DisplayName("Get 메서드는 세션이 유효하지 않으면 ResponseBody로 login.html을 반환한다.")
     void handleGet_inValid_session() {
         HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, "/login", "/login",
             QueryParams.empty(), HttpHeaders.parse(List.of()), null);
@@ -56,7 +56,7 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("로그인에 성공한다.")
+    @DisplayName("Post 메서드는 올바른 아이디와 비밀번호를 받으면 로그인에 성공한다.")
     void handlePost_login_success() {
         InMemoryUserRepository.save(new User("leo", "password", "leo@gmail.com"));
         User user = InMemoryUserRepository.findByAccount("leo")
@@ -81,7 +81,7 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("로그인에 실패한다.")
+    @DisplayName("Post 메서드는 올바르지 않은 아이디와 비밀번호를 받으면 로그인에 실패한다.")
     void handlePost_login_fail() {
         String requestBody = "account=invaild&password=invalid";
         HttpRequest httpRequest = new HttpRequest(HttpMethod.POST, "/login", "login",

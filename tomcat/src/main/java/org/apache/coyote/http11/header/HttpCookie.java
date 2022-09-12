@@ -31,4 +31,12 @@ public class HttpCookie {
         }
         return new HttpCookie(values);
     }
+
+    public boolean hasCookie() {
+        return !values.isEmpty();
+    }
+
+    public String getSessionId() {
+        return values.get("JSESSIONID");
+    }
 }

@@ -14,8 +14,12 @@ public class HttpRequestHeaders {
 
     public int getContentLength() {
         if (values.containsKey(CONTENT_LENGTH_KEY)) {
-            return Integer.parseInt(values.get("Content-Length"));
+            return Integer.parseInt(values.get(CONTENT_LENGTH_KEY));
         }
         return 0;
+    }
+
+    public String getCookie() {
+        return values.get("Cookie");
     }
 }

@@ -16,6 +16,10 @@ public class Session {
         values.put(name, value);
     }
 
+    public Object getAttribute(final String name) {
+        return values.get(name);
+    }
+
     public String getId() {
         return id;
     }

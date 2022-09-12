@@ -15,4 +15,8 @@ public class SessionManager {
         session.setAttribute("user", user);
         return session;
     }
+
+    public static Session findSession(final String id) {
+        return SESSIONS.get(id);
+    }
 }

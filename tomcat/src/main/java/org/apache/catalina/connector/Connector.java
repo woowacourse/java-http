@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,9 +83,21 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
-            threadPoolExecutor.shutdown();
+            shutdownExecutorAndAwaitTerminate();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void shutdownExecutorAndAwaitTerminate() {
+        threadPoolExecutor.shutdown();
+        try {
+            if (threadPoolExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                threadPoolExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            threadPoolExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

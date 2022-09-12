@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,10 +27,6 @@ public class SingletonContainer {
     private SingletonContainer() {
     }
 
-    public static <T> T getObject(final Class<T> clazz) {
-        return (T) singletons.get(clazz);
-    }
-
     public static void registerSingletons() {
         try {
             registerControllers();
@@ -38,6 +35,14 @@ public class SingletonContainer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <T> T getObject(final Class<T> clazz) {
+        return (T) singletons.get(clazz);
+    }
+
+    public static Map<Class<?>, Object> getAllObjects() {
+        return Collections.unmodifiableMap(singletons);
     }
 
     private static Set<AbstractController> getAbstractControllers() {

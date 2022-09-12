@@ -8,7 +8,7 @@ import java.util.Objects;
 public class PageMapper {
 
     private final static String STATIC = "static" + File.separator;
-    private static final String START_OF_FILE_DIRECTORY = "/";
+    private static final String START_OF_FILE_DIRECTORY = File.separator;
 
     public static Path getFilePath(final String url) {
         return getPath(START_OF_FILE_DIRECTORY + url + ".html");

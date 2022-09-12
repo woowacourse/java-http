@@ -18,7 +18,6 @@ public class RequestHandlerMapping {
         handlers = new HashMap<>();
         handlers.put(new HttpRequestMapping("/login"), new LoginController());
         handlers.put(new HttpRequestMapping("/login.html"), new LoginController());
-        handlers.put(new HttpRequestMapping("/index.html"), new DashBoardController());
         handlers.put(new HttpRequestMapping("/"), new HomeController());
         handlers.put(new HttpRequestMapping("/register.html"), new RegisterController());
         handlers.put(new HttpRequestMapping("/register"), new RegisterController());

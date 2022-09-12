@@ -15,7 +15,7 @@ class RequestHandlerMappingTest {
     @DisplayName("url에 매칭이 되는 controller 반환")
     @ParameterizedTest
     @CsvSource(value = {
-            "GET /index.html HTTP/1.1 : DashBoardController",
+            "GET /index.html HTTP/1.1 : StaticResourceController",
             "POST /login HTTP/1.1 : LoginController",
             "GET / HTTP/1.1 : HomeController",
             "GET /css/style.css HTTP/1.1 : StaticResourceController"}, delimiterString = " : "

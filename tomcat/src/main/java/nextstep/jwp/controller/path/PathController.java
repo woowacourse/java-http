@@ -1,6 +1,7 @@
 package nextstep.jwp.controller.path;
 
 import nextstep.jwp.controller.Controller;
+import web.HttpMethod;
 import web.request.HttpRequest;
 import web.response.HttpResponse;
 
@@ -13,13 +14,13 @@ public abstract class PathController implements Controller {
     }
 
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (httpRequest.getRequestLine().getMethod().equals("GET")) {
+        if (httpRequest.getRequestLine().getMethod().equals(HttpMethod.GET)) {
             throw new UnsupportedOperationException("[ERROR] 현재 Path 에서 GET Method 를 지원하지 않습니다.");
         }
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (httpRequest.getRequestLine().getMethod().equals("POST")) {
+        if (httpRequest.getRequestLine().getMethod().equals(HttpMethod.POST)) {
             throw new UnsupportedOperationException("[ERROR] 현재 Path 에서 POST Method 를 지원하지 않습니다.");
         }
     }

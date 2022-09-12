@@ -8,8 +8,8 @@ public class QueryStringParser {
 
     private static final String QUERY_STRING_ELEMENT_DELIMITER = "&";
     private static final String QUERY_STRING_KEY_VALUE_DELIMITER = "=";
-    public static final int ELEMENT_KEY_INDEX = 0;
-    public static final int ELEMENT_VALUE_INDEX = 1;
+    private static final int ELEMENT_KEY_INDEX = 0;
+    private static final int ELEMENT_VALUE_INDEX = 1;
 
     public static Map<String, String> parseQueryString(final String value) {
         return Arrays.stream(

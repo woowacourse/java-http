@@ -6,6 +6,7 @@ public class RequestUri {
 
     private static final String STATIC_RESOURCE_TYPE_DELIMITER = ".";
     private static final String QUERY_STRING_DELIMITER = "?";
+    private static final int PATH_INDEX = 0;
 
     private String value;
 
@@ -14,7 +15,7 @@ public class RequestUri {
     }
 
     public String parsePath() {
-        return this.value.split("\\" + QUERY_STRING_DELIMITER)[0];
+        return this.value.split("\\" + QUERY_STRING_DELIMITER)[PATH_INDEX];
     }
 
     public Optional<String> findStaticResourceType() {

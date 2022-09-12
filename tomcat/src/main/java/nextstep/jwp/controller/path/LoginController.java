@@ -8,6 +8,7 @@ import nextstep.jwp.model.User;
 import session.CookieParser;
 import session.Session;
 import session.SessionManager;
+import web.HttpMethod;
 import web.request.HttpRequest;
 import web.request.RequestUri;
 import web.response.HttpResponse;
@@ -27,8 +28,8 @@ public class LoginController extends PathController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String method = httpRequest.getRequestLine().getMethod();
-        if (method.equals("GET")) {
+        HttpMethod method = httpRequest.getRequestLine().getMethod();
+        if (method.equals(HttpMethod.GET)) {
             Optional<String> cookieValue = httpRequest.getHeaderValue("Cookie");
             if (cookieValue.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(cookieValue.get())) {
                 HttpResponseSetter.set302Redirect(httpResponse, "http://localhost:8080/index.html");
@@ -40,9 +41,9 @@ public class LoginController extends PathController {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String method = httpRequest.getRequestLine().getMethod();
+        HttpMethod method = httpRequest.getRequestLine().getMethod();
         String body = httpRequest.getBody();
-        if (method.equals("POST")) {
+        if (method.equals(HttpMethod.POST)) {
             login(httpResponse, body);
         }
     }

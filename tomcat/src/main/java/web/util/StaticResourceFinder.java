@@ -11,6 +11,8 @@ import web.request.RequestUri;
 
 public class StaticResourceFinder {
 
+    private static final String STATIC_RESOURCE_DEFAULT_DIRECTORY = "static";
+
     public static boolean isStaticResourceExist(final RequestUri requestUri) {
         try {
             Optional<String> staticResource = findStaticResource(requestUri);
@@ -24,7 +26,7 @@ public class StaticResourceFinder {
         try {
             URL resourceUrl = StaticResourceFinder.class
                     .getClassLoader()
-                    .getResource("static" + requestUri.getValue());
+                    .getResource(STATIC_RESOURCE_DEFAULT_DIRECTORY + requestUri.getValue());
             if (resourceUrl == null) {
                 return Optional.empty();
             }

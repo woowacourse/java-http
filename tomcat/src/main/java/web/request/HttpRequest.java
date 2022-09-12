@@ -11,13 +11,13 @@ import java.util.Optional;
 public class HttpRequest {
 
     private static final String WHITE_SPACE = " ";
-    private static final String HEADER_KEY_VALUE_DELIMITER = ":";
+    private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final String EMPTY_BODY = "";
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
-    public static final int HEADER_KEY_INDEX = 0;
-    public static final int HEADER_VALUE_INDEX = 1;
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final Map<String, String> header;

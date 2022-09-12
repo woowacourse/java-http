@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 
-public enum ContentType {
+public enum MediaType {
 
     IMAGE_SVG("image/svg+xml", List.of("svg")),
     APPLICATION_JS("application/javascript", List.of("js")),
@@ -15,13 +15,13 @@ public enum ContentType {
     private final String type;
     private final List<String> extensions;
 
-    ContentType(final String type, final List<String> extensions) {
+    MediaType(final String type, final List<String> extensions) {
         this.type = type;
         this.extensions = extensions;
     }
 
-    public static ContentType extension(final String extension) {
-        return Arrays.stream(ContentType.values())
+    public static MediaType fromExtension(final String extension) {
+        return Arrays.stream(MediaType.values())
                 .filter(v -> v.extensions.contains(extension))
                 .findFirst()
                 .orElseThrow(UnsupportedContentTypeException::new);

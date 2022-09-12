@@ -10,17 +10,17 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class StaticResource {
 
     private final String content;
-    private final ContentType contentType;
+    private final MediaType mediaType;
 
-    public StaticResource(final String content, final ContentType contentType) {
+    public StaticResource(final String content, final MediaType mediaType) {
         this.content = content;
-        this.contentType = contentType;
+        this.mediaType = mediaType;
     }
 
     public static StaticResource path(final String path) {
         final var content = readContent(path);
         final var extension = path.split("\\.")[1];
-        return new StaticResource(content, ContentType.extension(extension));
+        return new StaticResource(content, MediaType.fromExtension(extension));
     }
 
     private static String readContent(final String path) {
@@ -45,7 +45,7 @@ public class StaticResource {
     }
 
     public String getContentType() {
-        return contentType.getType();
+        return mediaType.getType();
     }
 
     public String getContentLength() {

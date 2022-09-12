@@ -33,8 +33,8 @@ public class ResponseStatusLine {
         return String.join(
                 " ",
                 version,
-                String.valueOf(status.getCode()),
-                status.getMessage(),
+                String.valueOf(status.getStatusCode()),
+                status.getReasonPhrase(),
                 ""
                 );
     }

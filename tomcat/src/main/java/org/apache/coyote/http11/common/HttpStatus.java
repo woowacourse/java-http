@@ -12,19 +12,19 @@ public enum HttpStatus {
 
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
-    private final int code;
-    private final String message;
+    private final int statusCode;
+    private final String reasonPhrase;
 
-    HttpStatus(final int code, final String message) {
-        this.code = code;
-        this.message = message;
+    HttpStatus(final int statusCode, final String reasonPhrase) {
+        this.statusCode = statusCode;
+        this.reasonPhrase = reasonPhrase;
     }
 
-    public int getCode() {
-        return code;
+    public int getStatusCode() {
+        return statusCode;
     }
 
-    public String getMessage() {
-        return message;
+    public String getReasonPhrase() {
+        return reasonPhrase;
     }
 }

@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import nextstep.jwp.exception.InternalServerException;
 import nextstep.jwp.exception.badRequest.BadRequestException;
 import nextstep.jwp.exception.notfound.NotFoundException;
 import nextstep.jwp.exception.unauthorized.UnAuthorizedException;
@@ -27,21 +28,12 @@ public class ControllerAdvice {
             HANDLER_MAPPING.put(IOException.class, getHandleMethod(IOException.class));
             HANDLER_MAPPING.put(RuntimeException.class, getHandleMethod(RuntimeException.class));
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException(e.getMessage() + " method를 찾을 수 없습니다.");
         }
     }
 
     private static Method getHandleMethod(Class<? extends Exception> exceptionClass) throws NoSuchMethodException {
         return ControllerAdvice.class.getDeclaredMethod("handle", HttpResponse.class, exceptionClass);
-    }
-
-    private static Method getMethod(Class<? extends Exception> exceptionClass) {
-        return HANDLER_MAPPING.entrySet()
-                .stream()
-                .filter(handlerMapping -> handlerMapping.getKey().isAssignableFrom(exceptionClass))
-                .map(Entry::getValue)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("처리할 수 있는 예외가 아닙니다."));
     }
 
     public void handleException(HttpResponse httpResponse, Exception exception) {
@@ -50,8 +42,17 @@ public class ControllerAdvice {
             Method method = getMethod(exceptionClass);
             method.invoke(this, httpResponse, exceptionClass.cast(exception));
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException(exception.getMessage() + " 예외를 처리할 수 없습니다.");
         }
+    }
+
+    private Method getMethod(Class<? extends Exception> exceptionClass) {
+        return HANDLER_MAPPING.entrySet()
+                .stream()
+                .filter(handlerMapping -> handlerMapping.getKey().isAssignableFrom(exceptionClass))
+                .map(Entry::getValue)
+                .findFirst()
+                .orElseThrow(() -> new InternalServerException("처리할 수 있는 예외가 아닙니다."));
     }
 
     public void handle(HttpResponse httpResponse, BadRequestException exception) {

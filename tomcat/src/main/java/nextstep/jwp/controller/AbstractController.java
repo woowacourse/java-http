@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.InternalServerException;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -16,7 +17,7 @@ public abstract class AbstractController implements Controller {
             methods.put(HttpMethod.GET, getClass().getDeclaredMethod("doGet", HttpRequest.class, HttpResponse.class));
             methods.put(HttpMethod.POST, getClass().getDeclaredMethod("doPost", HttpRequest.class, HttpResponse.class));
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException(e.getMessage() + " 메소드를 찾을 수 없습니다.");
         }
     }
 

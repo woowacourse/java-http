@@ -19,7 +19,8 @@ public class HttpStatusLine {
         return new HttpStatusLine(version, statusCode);
     }
 
-    public String generateStatusLine() {
+    @Override
+    public String toString() {
         return String.join(GAP, version.getVersion(), statusCode.toResponseString(), "");
     }
 }

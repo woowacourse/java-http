@@ -62,14 +62,6 @@ public class HttpRequest {
         return requestLine.isMatchHttpMethod(HttpMethod.POST);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
-    }
-
     public Map<String, String> getRequestBody() {
         return requestBody.getRequestBody();
     }

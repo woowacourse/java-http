@@ -5,6 +5,7 @@ import java.util.Map;
 import nextstep.jwp.model.User;
 
 public class Session {
+
     private final String id;
     private final Map<String, User> values = new HashMap<>();
 

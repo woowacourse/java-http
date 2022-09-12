@@ -17,13 +17,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setOkResponse(REGISTER_PAGE_URL);
+        response.ok(REGISTER_PAGE_URL);
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final User user = UserService.getInstance().register(request.getRequestBody());
-        response.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
+        response.redirectWithCookie(user, SUCCEED_REDIRECT_URL);
     }
 
     public static RegisterController getINSTANCE() {

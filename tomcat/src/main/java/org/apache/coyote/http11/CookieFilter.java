@@ -14,12 +14,12 @@ public class CookieFilter {
         try {
             if (request.getUrl().contains(LOGIN) && request.hasCookie()) {
                 UserService.getInstance().validateUserBySession(request);
-                response.setFoundResponse(SUCCEED_REDIRECT_URL);
+                response.found(SUCCEED_REDIRECT_URL);
                 return true;
             }
             return false;
         } catch (RuntimeException e) {
-            response.setOkResponse(LOGIN_HTML);
+            response.ok(LOGIN_HTML);
             return true;
         }
     }

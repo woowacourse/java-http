@@ -16,7 +16,7 @@ public class RootController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setResponseBodyContent("Hello world!");
         response.setOkHttpStatusLine();
-        response.setOKHeader(HTML);
+        response.okHeader(HTML);
     }
 
     public static RootController getINSTANCE() {

@@ -18,10 +18,9 @@ import org.slf4j.LoggerFactory;
 public class UserService {
 
     private static final UserService INSTANCE = new UserService();
-
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
-    private static final String SUCCEED_REDIRECT_URL = "/index.html";
 
+    private static final String SUCCEED_REDIRECT_URL = "/index.html";
     private static final String ID = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
@@ -30,21 +29,16 @@ public class UserService {
     private UserService() {
     }
 
-    public boolean findUserBySession(HttpRequest request) {
-        return SessionManager.hasSession(request.getCookie());
-    }
-
     public void validateUserBySession(HttpRequest request) {
         SessionManager.findSession(request.getCookie());
     }
 
-    public void login(final HttpRequest httpRequest, final HttpResponse httpResponse)
-            throws Exception {
+    public void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final Map<String, String> params = httpRequest.getParams();
         validateLoginParams(params);
 
         final User user = findUser(params);
-        httpResponse.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
+        httpResponse.redirectWithCookie(user, SUCCEED_REDIRECT_URL);
     }
 
     private void validateLoginParams(final Map<String, String> params) {

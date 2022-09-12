@@ -12,7 +12,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setOkResponse(LOGIN_HTML_URL);
+        response.ok(LOGIN_HTML_URL);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
         try {
             UserService.getInstance().login(request, response);
         } catch (Exception e) {
-            response.setFoundResponse(FAILED_REDIRECT_URL);
+            response.found(FAILED_REDIRECT_URL);
         }
     }
 

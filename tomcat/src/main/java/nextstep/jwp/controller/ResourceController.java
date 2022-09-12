@@ -15,7 +15,7 @@ public class ResourceController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String path = request.getUrl();
         final String fileName = Parser.convertResourceFileName(path);
-        response.setOkResponse(fileName);
+        response.ok(fileName);
     }
 
     public static ResourceController getINSTANCE() {

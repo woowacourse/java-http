@@ -39,10 +39,6 @@ public class RequestLine {
         }
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public boolean isMatchHttpMethod(final HttpMethod method){
         return method.isMatch(method);
     }
@@ -53,6 +49,10 @@ public class RequestLine {
 
     public Map<String, String> getParams() {
         return url.getParams();
+    }
+
+    public HttpMethod getMethod() {
+        return method;
     }
 
     public String getVersion() {

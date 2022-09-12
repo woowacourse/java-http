@@ -37,8 +37,8 @@ public class HttpCookie {
         return this;
     }
 
-    public String getJSessionId() {
-        return values.get(JSESSIONID);
+    public String find(final String key) {
+        return values.get(key);
     }
 
     public String joinToString() {

@@ -47,7 +47,7 @@ public class Headers {
     public String getJSessionId() {
         if (values.containsKey("Cookie")) {
             HttpCookie cookie = HttpCookie.of(values.get("Cookie"));
-            return cookie.getJSessionId();
+            return cookie.find("JSESSIONID");
         }
         return null;
     }

@@ -32,11 +32,14 @@ public class InMemoryUserRepository {
 
     public static Optional<User> findByAccountAndPassword(String account, String password) {
         Optional<User> foundUser = findByAccount(account);
-        if (foundUser.isPresent()) {
-            foundUser.get().checkPassword(password);
+        if (foundUser.isPresent() && isPasswordMatched(foundUser.get(), password)) {
             return foundUser;
         }
         return Optional.empty();
+    }
+
+    private static boolean isPasswordMatched(final User user, final String password) {
+        return user.checkPassword(password);
     }
 
     private InMemoryUserRepository() {

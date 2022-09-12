@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 class UserControllerTest {
 
-    private final UserController userController = new UserController();
+    private final UserController userController = UserController.getInstance();
 
     private HttpRequest getHttpRequest(final String rawRequestLine, final List<String> rawRequestHeader,
                                        final String requestBody) {

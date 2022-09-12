@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class ControllerAdviceTest {
 
-    private final ControllerAdvice controllerAdvice = new ControllerAdvice();
+    private final ControllerAdvice controllerAdvice = ControllerAdvice.getInstance();
 
     @Test
     @DisplayName("handleException 메소드는 입력 받은 예외에 따라 매핑된 html 페이지와 리다이렉트 상태 코드를 담은 ResponseEntity를 반환한다.")

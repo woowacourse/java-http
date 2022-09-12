@@ -25,8 +25,7 @@ import org.junit.jupiter.api.Test;
 
 class HttpFrontServletTest {
 
-    private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(
-            new RequestHandlerMapping(), new ControllerAdvice());
+    private final HttpFrontServlet httpFrontServlet = HttpFrontServlet.getInstance();
 
     private HttpRequest getHttpRequest(final String rawRequestLine) {
         final HttpRequestLine requestLine = HttpRequestLine.from(rawRequestLine);

@@ -12,7 +12,8 @@ import org.apache.coyote.http11.response.file.FileHandler;
 
 public class HttpFrontServlet {
 
-    private static HttpFrontServlet instance;
+    private static final HttpFrontServlet instance = new HttpFrontServlet(
+            RequestHandlerMapping.getInstance(), ControllerAdvice.getInstance());
 
     private final RequestHandlerMapping requestHandlerMapping;
     private final ControllerAdvice controllerAdvice;
@@ -23,8 +24,7 @@ public class HttpFrontServlet {
     }
 
     public static HttpFrontServlet getInstance() {
-        return Objects.requireNonNullElseGet(instance,
-                () -> instance = new HttpFrontServlet(new RequestHandlerMapping(), new ControllerAdvice()));
+        return instance;
     }
 
     public ResponseEntity service(final HttpRequest httpRequest) {

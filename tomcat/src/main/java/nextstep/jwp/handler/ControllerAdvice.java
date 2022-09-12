@@ -13,6 +13,7 @@ import org.apache.coyote.http11.response.ResponseEntity;
 
 public class ControllerAdvice {
 
+    private static final ControllerAdvice instance = new ControllerAdvice();
     private static final Map<Class<? extends RuntimeException>, HttpStatus> exceptionMapping = new HashMap<>();
 
     static {
@@ -20,6 +21,12 @@ public class ControllerAdvice {
         exceptionMapping.put(UncheckedServletException.class, NOT_FOUND);
         exceptionMapping.put(IllegalStateException.class, NOT_FOUND);
         exceptionMapping.put(UnauthorizedException.class, UNAUTHORIZED);
+    }
+
+    private ControllerAdvice() {}
+
+    public static ControllerAdvice getInstance() {
+        return instance;
     }
 
     public <T extends Exception> ResponseEntity handleException(final Class<T> exception) {

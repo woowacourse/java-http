@@ -9,12 +9,19 @@ import nextstep.jwp.handler.UserController;
 
 public class RequestHandlerMapping {
 
+    private static final RequestHandlerMapping instance = new RequestHandlerMapping();
     private static final Map<String, RequestHandler> handlers = new ConcurrentHashMap<>();
 
     static {
-        handlers.put("/", new HomeController());
-        handlers.put("/login", new LoginController());
-        handlers.put("/register", new UserController());
+        handlers.put("/", HomeController.getInstance());
+        handlers.put("/login", LoginController.getInstance());
+        handlers.put("/register", UserController.getInstance());
+    }
+
+    private RequestHandlerMapping() {}
+
+    public static RequestHandlerMapping getInstance() {
+        return instance;
     }
 
     public RequestHandler getHandler(final String path) {

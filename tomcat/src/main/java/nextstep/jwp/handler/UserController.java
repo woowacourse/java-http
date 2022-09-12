@@ -10,9 +10,17 @@ import org.apache.coyote.http11.response.HttpResponseHeader;
 
 public class UserController extends HttpRequestHandler {
 
+    private static final UserController instance = new UserController();
+
     private static final String PASSWORD_KEY = "password";
     private static final String ACCOUNT_KEY = "account";
     private static final String EMAIL_KEY = "email";
+
+    private UserController() {}
+
+    public static UserController getInstance() {
+        return instance;
+    }
 
     @Override
     public HandlerResponseEntity doGet(final HttpRequest httpRequest, final HttpResponseHeader responseHeader) {

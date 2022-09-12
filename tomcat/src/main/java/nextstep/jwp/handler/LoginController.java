@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.time.LocalDateTime;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
@@ -15,11 +16,18 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends HttpRequestHandler {
 
+    private static final LoginController instance = new LoginController();
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
     private final SessionManager sessionManager = new SessionManager();
+
+    private LoginController() {}
+
+    public static LoginController getInstance() {
+        return instance;
+    }
 
     @Override
     public HandlerResponseEntity doGet(final HttpRequest httpRequest, final HttpResponseHeader responseHeader) {

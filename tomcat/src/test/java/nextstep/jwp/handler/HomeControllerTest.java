@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class HomeControllerTest {
 
-    private final HomeController homeController = new HomeController();
+    private final HomeController homeController = HomeController.getInstance();
 
     private HttpRequest getHttpRequest() {
         final HttpRequestLine requestLine = HttpRequestLine.from("GET / HTTP/1.1");

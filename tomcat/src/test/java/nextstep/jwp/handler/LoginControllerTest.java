@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
-    private final LoginController loginController = new LoginController();
+    private final LoginController loginController = LoginController.getInstance();
 
     private HttpRequest getHttpRequest(final String rawRequestLine, final List<String> rawRequestHeader,
                                        final String requestBody) {

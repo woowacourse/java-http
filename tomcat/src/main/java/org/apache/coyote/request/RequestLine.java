@@ -1,7 +1,5 @@
 package org.apache.coyote.request;
 
-import java.util.Map;
-
 public class RequestLine {
 
     private static final String REQUEST_LINE_SEPARATOR = " ";
@@ -25,11 +23,11 @@ public class RequestLine {
         String path = tokens[PATH_INDEX];
         int index = path.indexOf(QUERY_PARAM_SEPARATOR);
         if (index == NOT_EXIST) {
-            return new RequestLine(HttpMethod.of(tokens[HTTP_METHOD_INDEX]), path, QueryParams.from(null));
+            return new RequestLine(HttpMethod.from(tokens[HTTP_METHOD_INDEX]), path, QueryParams.from(null));
         }
         String requestUri = path.substring(0, index);
         String parameter = path.substring(index + 1);
-        return new RequestLine(HttpMethod.of(tokens[HTTP_METHOD_INDEX]), requestUri, QueryParams.from(parameter));
+        return new RequestLine(HttpMethod.from(tokens[HTTP_METHOD_INDEX]), requestUri, QueryParams.from(parameter));
     }
 
     public boolean isGet() {
@@ -48,7 +46,7 @@ public class RequestLine {
         return requestUri;
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams.getValue();
+    public QueryParams getQueryParams() {
+        return queryParams;
     }
 }

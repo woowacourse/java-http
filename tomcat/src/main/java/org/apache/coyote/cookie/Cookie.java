@@ -1,5 +1,7 @@
 package org.apache.coyote.cookie;
 
+import java.util.Objects;
+
 public class Cookie {
 
     private static final String JSESSION = "JSESSIONID";
@@ -34,5 +36,22 @@ public class Cookie {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Cookie cookie = (Cookie) o;
+        return Objects.equals(name, cookie.name) && Objects.equals(value, cookie.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
     }
 }

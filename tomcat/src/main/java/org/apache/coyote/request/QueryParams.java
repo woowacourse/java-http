@@ -2,6 +2,8 @@ package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.coyote.exception.InvalidRequestException;
 
 public class QueryParams {
 
@@ -29,7 +31,8 @@ public class QueryParams {
         return new QueryParams(queryParams);
     }
 
-    public Map<String, String> getValue() {
-        return value;
+    public String getValue(final String name) {
+        return Optional.ofNullable(value.get(name))
+                .orElseThrow(InvalidRequestException::new);
     }
 }

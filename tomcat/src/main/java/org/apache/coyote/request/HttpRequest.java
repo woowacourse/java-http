@@ -9,7 +9,7 @@ import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
-    
+
     private static final String SESSION = "JSESSIONID";
 
     private final RequestLine requestLine;
@@ -51,7 +51,7 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public Map<String, String> getQueryParams() {
+    public QueryParams getQueryParams() {
         return requestLine.getQueryParams();
     }
 

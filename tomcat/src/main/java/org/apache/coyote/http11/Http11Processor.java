@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = toHttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
-
+            log.info("path : {}", Thread.activeCount());
             dispatcher.doDispatch(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getResponse());

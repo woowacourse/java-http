@@ -3,17 +3,21 @@ package org.apache.coyote.http11.handler;
 import java.util.HashMap;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.HttpResponseHeader;
-import org.apache.coyote.http11.response.ResponseEntity;
 
-public class ServletResponseEntity extends ResponseEntity {
+public class ServletResponseEntity {
 
     private static final String EMPTY_BODY = "";
 
+    private final HttpStatus httpStatus;
+    private final HttpResponseHeader httpResponseHeader;
+    private final String body;
     private final String resource;
 
     public ServletResponseEntity(final HttpStatus httpStatus, final HttpResponseHeader headers, final String body,
                                  final String resource) {
-        super(httpStatus, headers, body);
+        this.httpStatus = httpStatus;
+        this.httpResponseHeader = headers;
+        this.body = body;
         this.resource = resource;
     }
 
@@ -38,6 +42,18 @@ public class ServletResponseEntity extends ResponseEntity {
 
     public boolean isEmptyResource() {
         return resource.isEmpty();
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public HttpResponseHeader getHttpHeader() {
+        return httpResponseHeader;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public String getResource() {

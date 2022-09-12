@@ -25,7 +25,7 @@ class FileControllerTest {
         // given
         String requestMessage = 파일_요청_메시지("GET /index.html HTTP/1.1 ", "");
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         FileController fileController = new FileController();
 
@@ -36,7 +36,7 @@ class FileControllerTest {
         String body = getBody("/index.html");
 
         assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.from(httpRequest).ok(ContentType.HTML, body));
+                .isEqualTo(HttpResponse.from(httpRequest.getHttpVersion()).ok(ContentType.HTML, body));
     }
 
     @Test
@@ -44,7 +44,7 @@ class FileControllerTest {
         // given
         String requestMessage = 파일_요청_메시지("GET /invalidFile.html HTTP/1.1 ", "");
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         FileController fileController = new FileController();
 

@@ -3,7 +3,6 @@ package org.apache.coyote.http11.httpmessage.response;
 import java.util.LinkedHashMap;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.Headers;
-import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.HttpVersion;
 import org.apache.coyote.http11.session.Cookie;
 
@@ -19,8 +18,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse from(HttpRequest httpRequest) {
-        HttpVersion httpVersion = httpRequest.getHttpVersion();
+    public static HttpResponse from(HttpVersion httpVersion) {
         StatusLine statusLine = StatusLine.from(httpVersion);
         Headers headers = new Headers(new LinkedHashMap<>());
         ResponseBody responseBody = new ResponseBody("");

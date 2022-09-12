@@ -47,7 +47,7 @@ class RegisterControllerTest {
         String body = "account=gugu&password=&email=hkkang@woowahan.com";
         String requestMessage = 요청_메시지("POST /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         RegisterController registerController = new RegisterController();
 
@@ -62,7 +62,7 @@ class RegisterControllerTest {
         String body = "";
         String requestMessage = 요청_메시지("GET /register HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         RegisterController registerController = new RegisterController();
 

@@ -52,7 +52,7 @@ class LoginControllerTest {
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         LoginController loginController = new LoginController();
 
@@ -69,7 +69,7 @@ class LoginControllerTest {
         final String body = "account=gogo&password=invalidpassword";
         final String requestMessage = 로그인_요청_메시지("POST /login HTTP/1.1 ", body);
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         LoginController loginController = new LoginController();
 
@@ -83,7 +83,7 @@ class LoginControllerTest {
         // given
         final String requestMessage = 로그인_요청_메시지("GET /login HTTP/1.1 ", "");
         final HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         LoginController loginController = new LoginController();
 
@@ -94,7 +94,7 @@ class LoginControllerTest {
 
         // then
         assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(HttpResponse.from(httpRequest).ok(ContentType.HTML, body));
+                .isEqualTo(HttpResponse.from(httpRequest.getHttpVersion()).ok(ContentType.HTML, body));
     }
 
     private String 로그인_요청_메시지(String requestLine, String body) {

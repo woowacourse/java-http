@@ -22,7 +22,7 @@ class RootApiControllerTest {
         String body = "";
         String requestMessage = 루트_요청_메시지("GET / HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         RootApiController registerApiController = new RootApiController();
 
@@ -40,7 +40,7 @@ class RootApiControllerTest {
         String body = "";
         String requestMessage = 루트_요청_메시지("POST / HTTP/1.1 ", body);
         HttpRequest httpRequest = httpRequest_생성(requestMessage);
-        final HttpResponse httpResponse = HttpResponse.from(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.from(httpRequest.getHttpVersion());
 
         RootApiController rootApiController = new RootApiController();
 

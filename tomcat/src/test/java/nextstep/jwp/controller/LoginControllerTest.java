@@ -13,7 +13,9 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.request.HttpHeader;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.HttpRequestBody;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -37,7 +39,8 @@ class LoginControllerTest {
         final String requestBody = "account=" + account + "&password=" + password;
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", HttpHeader.from(Map.of()),
+                HttpRequestBody.from(requestBody));
         final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
         loginController.service(httpRequest, httpResponse);
@@ -61,7 +64,8 @@ class LoginControllerTest {
         final String requestBody = "account=gugu&password=password";
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", HttpHeader.from(Map.of()),
+                HttpRequestBody.from(requestBody));
         final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
         loginController.service(httpRequest, httpResponse);
@@ -77,8 +81,9 @@ class LoginControllerTest {
         final String requestBody = "account=gugu&password=password";
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of("Cookie", "JSESSIONID=randomid"),
-                requestBody);
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1",
+                HttpHeader.from(Map.of("Cookie", "JSESSIONID=randomid")),
+                HttpRequestBody.from(requestBody));
         final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());
         final LoginController loginController = new LoginController();
         loginController.service(httpRequest, httpResponse);
@@ -93,7 +98,7 @@ class LoginControllerTest {
         // given
         final String account = "gugu";
         final String requestBody = "account=" + account + "&password=password";
-        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", HttpHeader.from(Map.of()), HttpRequestBody.from(requestBody));
 
         // when
         final HttpResponse httpResponse = HttpResponse.from(new ByteArrayOutputStream());

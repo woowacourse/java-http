@@ -1,11 +1,9 @@
 package org.apache.coyote.request;
 
-import static org.apache.coyote.request.startline.HttpMethod.*;
+import static org.apache.coyote.request.startline.HttpMethod.GET;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.cookie.Cookie;
 import org.apache.coyote.cookie.Cookies;
@@ -15,39 +13,32 @@ import org.apache.coyote.request.startline.StartLine;
 
 public class HttpRequest {
 
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
-    private static final String HEADER_DELIMITER = ": ";
     private static final String HTML_EXTENSION = ".html";
     private static final String QUERY_START_CHARACTER = "?";
     private static final String ROOT = "/";
     private static final String EXTENSION_CHARACTER = ".";
     private static final String DEFAULT_PAGE_URL = "/index.html";
-    private static final String COOKIE_HEADER = "Cookie";
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final StartLine startLine;
-    private final Cookies cookies;
+    private final HttpHeader httpHeader;
     private final HttpRequestBody requestBody;
 
-    private HttpRequest(StartLine startLine, Cookies cookies, HttpRequestBody requestBody) {
+    private HttpRequest(StartLine startLine, HttpHeader httpHeader, HttpRequestBody requestBody) {
         this.startLine = startLine;
-        this.cookies = cookies;
+        this.httpHeader = httpHeader;
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers, final String requestBody) {
-        final String cookie = headers.get(COOKIE_HEADER);
-
-        return new HttpRequest(StartLine.from(startLine), Cookies.from(cookie), HttpRequestBody.from(requestBody));
+    public static HttpRequest of(final String startLine, final HttpHeader header, final HttpRequestBody requestBody) {
+        return new HttpRequest(StartLine.from(startLine), header, requestBody);
     }
 
     public static HttpRequest readRequest(final BufferedReader bufferedReader) throws IOException {
         final String httpStartLine = bufferedReader.readLine();
-        final Map<String, String> httpHeaderLines = readHttpHeaderLines(bufferedReader);
-        final String requestBody = readRequestBody(bufferedReader, httpHeaderLines);
+        final HttpHeader httpHeader = HttpHeader.readHttpHeaderLines(bufferedReader);
+        final HttpRequestBody requestBody = HttpRequestBody.readRequestBody(bufferedReader, httpHeader);
 
-        return HttpRequest.of(httpStartLine, httpHeaderLines, requestBody);
+        return HttpRequest.of(httpStartLine, httpHeader, requestBody);
     }
 
     public String getRequestPath() {
@@ -62,11 +53,11 @@ public class HttpRequest {
     }
 
     public Cookies getCookies() {
-        return cookies;
+        return httpHeader.getCookies();
     }
 
     public Optional<Cookie> getJSessionCookie() {
-        return cookies.getJSessionCookie();
+        return httpHeader.getJSessionCookie();
     }
 
     public QueryParams getQueryParams() {
@@ -74,35 +65,6 @@ public class HttpRequest {
             return startLine.getQueryParams();
         }
         return requestBody.getBodyWithQueryParam();
-    }
-
-    private static Map<String, String> readHttpHeaderLines(BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> httpHeaderLines = new HashMap<>();
-        String line;
-
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.isBlank()) {
-                break;
-            }
-            final String[] header = line.split(HEADER_DELIMITER);
-            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX].trim());
-        }
-
-        return httpHeaderLines;
-    }
-
-    private static String readRequestBody(BufferedReader bufferedReader, Map<String, String> httpHeaderLines)
-            throws IOException {
-        final String contentLengthHeader = httpHeaderLines.get(CONTENT_LENGTH);
-        if (contentLengthHeader == null) {
-            return "";
-        }
-
-        final int contentLength = Integer.parseInt(contentLengthHeader.trim());
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
     }
 
     private String makeDefaultRequestUrl(String requestUrl) {

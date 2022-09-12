@@ -15,7 +15,7 @@ class HttpRequestTest {
     void getRequestUrlWithoutQuery() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of()), HttpRequestBody.from(""));
 
         // when
         final String url = sut.getRequestPath();
@@ -29,7 +29,7 @@ class HttpRequestTest {
     void getRequestUrl() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of()), HttpRequestBody.from(""));
 
         // when
         final String requestPath = sut.getRequestPath();
@@ -43,12 +43,12 @@ class HttpRequestTest {
     void getCookies() {
         // given
         String startLine = "GET /index.html HTTP/1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of(
                 "Host", "localhost:8080",
                 "Connection", "keep-alive",
                 "Accept", "*/*",
                 "Cookie", "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
-        ), "");
+        )), HttpRequestBody.from(""));
 
         // when
         final Cookies cookies = sut.getCookies();

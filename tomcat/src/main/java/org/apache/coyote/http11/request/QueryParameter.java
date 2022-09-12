@@ -10,11 +10,11 @@ public class QueryParameter {
 
     private final Map<String, String> queryParameters;
 
-    public QueryParameter(final Map<String, String> queryParams) {
+    private QueryParameter(final Map<String, String> queryParams) {
         this.queryParameters = queryParams;
     }
 
-    public static QueryParameter of(final String queryString) {
+    public static QueryParameter from(final String queryString) {
         final Map<String, String> queryParams = new HashMap<>();
         if (!queryString.isEmpty()) {
             parseQueryString(queryParams, queryString);

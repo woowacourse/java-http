@@ -29,10 +29,10 @@ class HttpFrontServletTest {
             new RequestHandlerMapping(), new ControllerAdvice());
 
     private HttpRequest getHttpRequest(final String rawRequestLine, final String requestBody) {
-        final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
+        final HttpRequestLine requestLine = HttpRequestLine.from(rawRequestLine);
         final List<String> rawRequest = new ArrayList<>();
         rawRequest.add("name: eve");
-        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(rawRequest);
 
         return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
     }
@@ -66,7 +66,7 @@ class HttpFrontServletTest {
 
         @Test
         @DisplayName("body를 반환하는 핸들러가 실행되면 해당 body 정보가 포함된 ResponseEntity를 반환한다.")
-        void success_body() throws IOException {
+        void success_body() {
             // given
             final String rawRequestLine = "POST /login?account=gugu&password=password HTTP/1.1";
             final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
@@ -84,7 +84,7 @@ class HttpFrontServletTest {
 
         @Test
         @DisplayName("입력 받은 path와 매핑되는 핸들러가 없다면 Redirect Not Found ResponseEntity를 반환한다.")
-        void success_notFountResponse() throws IOException {
+        void success_notFountResponse() {
             // given
             final String rawRequestLine = "GET /wrong HTTP/1.1";
             final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
@@ -103,7 +103,7 @@ class HttpFrontServletTest {
 
         @Test
         @DisplayName("매핑한 핸들러 실행 도중 IllegalArgumentException 예외가 발생하면 Redirect Not Found ResponseEntity를 반환한다.")
-        void success_ServerErrorResponse() throws IOException {
+        void success_ServerErrorResponse() {
             // given
             final String rawRequestLine = "POST /login?account=wrong&password=password HTTP/1.1";
             final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");

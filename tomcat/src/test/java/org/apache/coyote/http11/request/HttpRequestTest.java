@@ -19,10 +19,10 @@ class HttpRequestTest {
         @DisplayName("body가 form data 형식이 아니라면 쿼리 스트링을 파싱하여 QueryParameter에 저장한다.")
         void success_queryString() {
             // given
-            final HttpRequestLine httpRequestLine = HttpRequestLine.of("GET /path?id=yujeong HTTP/1.1");
+            final HttpRequestLine httpRequestLine = HttpRequestLine.from("GET /path?id=yujeong HTTP/1.1");
             final List<String> rawRequest = new ArrayList<>();
             rawRequest.add("name: eve");
-            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
+            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(rawRequest);
 
             // when
             final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpRequestHeader, "");
@@ -40,11 +40,11 @@ class HttpRequestTest {
         @DisplayName("form data 형식의 body를 입력 받으면 파싱하여 QueryParameter에 저장한다.")
         void success_formDataBody() {
             // given
-            final HttpRequestLine httpRequestLine = HttpRequestLine.of("GET /path HTTP/1.1");
+            final HttpRequestLine httpRequestLine = HttpRequestLine.from("GET /path HTTP/1.1");
             final List<String> rawRequest = new ArrayList<>();
             rawRequest.add("name: eve");
             rawRequest.add("Content-Type: application/x-www-form-urlencoded");
-            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(rawRequest);
+            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(rawRequest);
 
             // when
             final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpRequestHeader, "id=yujeong");

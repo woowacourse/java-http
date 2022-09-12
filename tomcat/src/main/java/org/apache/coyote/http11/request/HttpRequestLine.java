@@ -21,7 +21,7 @@ public class HttpRequestLine {
         this.queryString = queryString;
     }
 
-    public static HttpRequestLine of(final String rawRequestLine) {
+    public static HttpRequestLine from(final String rawRequestLine) {
         final String[] parsedLine = rawRequestLine.split(" ");
 
         final String method = parsedLine[METHOD_INDEX];

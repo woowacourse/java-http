@@ -22,9 +22,9 @@ public class HttpRequest {
     public static HttpRequest of(final HttpRequestLine requestLine, final HttpRequestHeader httpRequestHeader,
                                  final String requestBody) {
         if (httpRequestHeader.isFormDataType()) {
-            return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.of(requestBody), "");
+            return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.from(requestBody), "");
         }
-        return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.of(requestLine.getQueryString()),
+        return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.from(requestLine.getQueryString()),
                 requestBody);
     }
 

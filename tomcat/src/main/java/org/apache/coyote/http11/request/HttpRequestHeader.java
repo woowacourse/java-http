@@ -17,7 +17,7 @@ public class HttpRequestHeader {
         this.headers = headers;
     }
 
-    public static HttpRequestHeader of(final List<String> rawHeader) {
+    public static HttpRequestHeader from(final List<String> rawHeader) {
         final Map<String, Object> parsedHeaders = new HashMap<>();
         for (final String header : rawHeader) {
             parseRawHeader(parsedHeaders, header);
@@ -32,7 +32,7 @@ public class HttpRequestHeader {
         final String headerValue = parsedHeader[VALUE_INDEX].trim();
 
         if (headerName.equals("Cookie")) {
-            parsedHeaders.put(headerName, HttpCookie.of(headerValue));
+            parsedHeaders.put(headerName, HttpCookie.from(headerValue));
             return;
         }
         parsedHeaders.put(headerName, headerValue);

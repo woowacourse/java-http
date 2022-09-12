@@ -44,7 +44,7 @@ public class HttpFrontServlet {
     private ResponseEntity createResponseEntity(final HandlerResponseEntity response)
             throws IOException {
         if (response.isEmptyResource()) {
-            return ResponseEntity.of(response);
+            return ResponseEntity.from(response);
         }
 
         final String resourcePath = response.getResource();

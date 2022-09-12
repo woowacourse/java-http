@@ -11,8 +11,8 @@ import org.apache.coyote.http11.request.HttpRequestLine;
 public class InputStreamHandler {
 
     public static HttpRequest createRequest(final BufferedReader bufferedReader) throws IOException {
-        final HttpRequestLine requestLine = HttpRequestLine.of(bufferedReader.readLine());
-        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.of(readHttpRequestHeader(bufferedReader));
+        final HttpRequestLine requestLine = HttpRequestLine.from(bufferedReader.readLine());
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(readHttpRequestHeader(bufferedReader));
 
         final String requestBody = readHttpRequestBody(bufferedReader, httpRequestHeader);
 

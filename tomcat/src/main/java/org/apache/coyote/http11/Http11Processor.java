@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final HttpRequest httpRequest = InputStreamHandler.createRequest(bufferedReader);
             final ResponseEntity response = handleRequest(httpRequest);
-            final HttpResponse httpResponse = HttpResponse.of(response);
+            final HttpResponse httpResponse = HttpResponse.from(response);
 
             writeResponse(outputStream, httpResponse.createResponse());
         } catch (final IOException | UncheckedServletException | IllegalArgumentException e) {

@@ -17,7 +17,7 @@ public class ResponseEntity {
         this.body = body;
     }
 
-    public static ResponseEntity of(final HandlerResponseEntity response) {
+    public static ResponseEntity from(final HandlerResponseEntity response) {
         return new ResponseEntity(response.getHttpStatus(), response.getHttpHeader(), response.getBody());
     }
 

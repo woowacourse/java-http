@@ -14,7 +14,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(final ResponseEntity responseEntity) {
+    public static HttpResponse from(final ResponseEntity responseEntity) {
         return new HttpResponse(responseEntity.getHttpStatus(), responseEntity.getHttpHeader(), responseEntity.getBody());
     }
 

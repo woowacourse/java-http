@@ -19,7 +19,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie of(final String rawCookie) {
+    public static HttpCookie from(final String rawCookie) {
         final Map<String, String> parsedCookies = new HashMap<>();
 
         if (!rawCookie.isEmpty()) {
@@ -31,7 +31,7 @@ public class HttpCookie {
 
     public static HttpCookie createEmptyCookie() {
         return Objects.requireNonNullElseGet(emptyCookieInstance,
-                () -> emptyCookieInstance = HttpCookie.of(""));
+                () -> emptyCookieInstance = HttpCookie.from(""));
     }
 
     private static void parseRawCookie(final String rawCookie, final Map<String, String> parsedCookies) {

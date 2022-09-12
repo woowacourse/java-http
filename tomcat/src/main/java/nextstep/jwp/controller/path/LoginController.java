@@ -14,7 +14,7 @@ import web.request.RequestUri;
 import web.response.HttpResponse;
 import web.util.QueryStringParser;
 
-public class LoginController implements PathController {
+public class LoginController extends PathController {
 
     private static LoginController instance = new LoginController();
 
@@ -26,11 +26,9 @@ public class LoginController implements PathController {
     }
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         RequestLine requestLine = httpRequest.getRequestLine();
         String method = requestLine.getMethod();
-        String body = httpRequest.getBody();
-
         if (method.equals("GET")) {
             if (isAlreadyLogin(httpRequest.getHeaderValue("Cookie"))) {
                 httpResponse.set302Redirect("http://localhost:8080/index.html");
@@ -38,14 +36,20 @@ public class LoginController implements PathController {
             }
             httpResponse.setStaticResource(new RequestUri("/login.html"));
         }
-
-        if (method.equals("POST")) {
-            login(httpResponse, body);
-        }
     }
 
     private boolean isAlreadyLogin(final Optional<String> value) {
         return value.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(value.get());
+    }
+
+    @Override
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        RequestLine requestLine = httpRequest.getRequestLine();
+        String method = requestLine.getMethod();
+        String body = httpRequest.getBody();
+        if (method.equals("POST")) {
+            login(httpResponse, body);
+        }
     }
 
     private void login(final HttpResponse httpResponse, final String body) {

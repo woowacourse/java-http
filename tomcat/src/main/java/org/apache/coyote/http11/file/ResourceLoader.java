@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class ResourceLoader {
 
-    private static final String STATIC_RESOURCE_LOCATION = "static/";
+    private static final String STATIC_RESOURCE_LOCATION = "static";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String DEFAULT_URI = "/";
 

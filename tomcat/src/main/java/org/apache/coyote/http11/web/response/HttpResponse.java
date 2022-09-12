@@ -50,7 +50,7 @@ public class HttpResponse {
         final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
         final String statusCode = httpStatus.getStatusCode();
 
-        return new HttpResponse(httpStatus, httpHeaders, ResourceLoader.getContent(statusCode + ".html"));
+        return new HttpResponse(httpStatus, httpHeaders, ResourceLoader.getContent("/" + statusCode + ".html"));
     }
 
     public String format() {

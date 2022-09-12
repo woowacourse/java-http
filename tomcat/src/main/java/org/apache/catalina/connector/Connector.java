@@ -73,7 +73,7 @@ public class Connector implements Runnable {
                 connection.getPort(),
                 Thread.currentThread().getThreadGroup().activeCount());
         var processor = new Http11Processor(connection);
-        executorService.submit(processor);
+        executorService.execute(processor);
     }
 
     public void stop() {

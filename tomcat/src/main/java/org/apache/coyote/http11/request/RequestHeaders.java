@@ -34,7 +34,7 @@ public class RequestHeaders {
         if (!values.containsKey(CONTENT_LENGTH)) {
             return 0;
         }
-        return (int) values.get(CONTENT_LENGTH);
+        return Integer.parseInt((String) values.get(CONTENT_LENGTH));
     }
 
     private HttpCookie createCookie(String unparsedCookies) {

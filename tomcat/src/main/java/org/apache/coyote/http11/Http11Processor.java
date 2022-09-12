@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
     private RequestHeaders generateRequestHeaders(BufferedReader bufferedReader) throws IOException {
         ArrayList<String> headers = new ArrayList<>();
         String read = bufferedReader.readLine();
-        while (!read.isEmpty()) {
+        while (read != null && !read.isEmpty()) {
             headers.add(read);
             read = bufferedReader.readLine();
         }

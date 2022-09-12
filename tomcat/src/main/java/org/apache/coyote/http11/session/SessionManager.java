@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.session;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -31,7 +32,7 @@ public class SessionManager implements Manager {
         if (SESSIONS.containsKey(sessionId)) {
             return findSession(sessionId);
         }
-        Session session = new Session(sessionId);
+        Session session = new Session(UUID.randomUUID().toString());
         add(session);
         return session;
     }

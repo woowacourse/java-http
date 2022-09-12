@@ -16,6 +16,7 @@ import org.apache.coyote.http11.session.Session;
 public class LoginController extends AbstractController {
 
     private static final String REQUEST_URI = "/login";
+    private static final String DEFAULT_HTML = "/login.html";
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -24,7 +25,7 @@ public class LoginController extends AbstractController {
             httpResponse.send("/index.html", OK);
             return;
         }
-        httpResponse.send("/login.html", OK);
+        httpResponse.send(DEFAULT_HTML, OK);
     }
 
 
@@ -40,7 +41,7 @@ public class LoginController extends AbstractController {
                         .findByAccountAndPassword(parsedBody.get("account"), parsedBody.get("password"));
                 session.setAttribute("login", user);
             }
-            response.send("/index.html", FOUND);
+            response.send(DEFAULT_HTML, FOUND);
             return;
         }
 

@@ -28,13 +28,13 @@ public enum HandlerMapper {
 
     public static Handler findHandler(final HttpRequest request) {
         return Arrays.stream(values())
-                .filter(mapper -> mapHandler(request.getStartLine(), mapper))
+                .filter(mapper -> existHandler(request.getStartLine(), mapper))
                 .findAny()
                 .map(mapper -> mapper.handler)
                 .orElse(HANDLER_FOR_GET_REQUEST);
     }
 
-    private static boolean mapHandler(final HttpRequestStartLine startLine, final HandlerMapper mapper) {
+    private static boolean existHandler(final HttpRequestStartLine startLine, final HandlerMapper mapper) {
         return startLine.getMethod() == mapper.httpMethod &&
                 startLine.getUri().equals(mapper.uri);
     }

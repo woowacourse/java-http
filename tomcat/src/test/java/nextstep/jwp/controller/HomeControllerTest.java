@@ -27,7 +27,7 @@ class HomeControllerTest {
 
         homeController.service(HttpMessageUtils.toRequest(httpRequest), response);
 
-        final var actual =response.toMessage();
+        final var actual = response.toMessage();
         assertAll(
                 () -> assertThat(actual).startsWith("HTTP/1.1 200 OK \r\n"),
                 () -> assertThat(actual).contains("Content-Type: text/html;charset=utf-8 \r\n"),

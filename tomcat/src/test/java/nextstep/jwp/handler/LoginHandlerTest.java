@@ -5,14 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.handler.ServletResponseEntity;
+import org.apache.coyote.http11.handler.HandlerResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginHandlerTest {
 
-    private final LoginServlet loginHandler = new LoginServlet();
+    private final LoginController loginHandler = new LoginController();
 
     private HttpRequest getHttpFormDataRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);
@@ -45,7 +43,7 @@ class LoginHandlerTest {
             final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when
-            final ServletResponseEntity response = loginHandler.doPost(httpRequest, httpResponseHeader);
+            final HandlerResponseEntity response = loginHandler.doPost(httpRequest, httpResponseHeader);
 
             // then
             assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.FOUND);

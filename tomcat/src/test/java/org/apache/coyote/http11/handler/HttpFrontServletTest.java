@@ -12,12 +12,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.handler.ServletAdvice;
+import nextstep.jwp.handler.ControllerAdvice;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
+import org.apache.coyote.http11.servlet.HttpFrontServlet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import org.junit.jupiter.api.Test;
 class HttpFrontServletTest {
 
     private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(
-            new RequestServletMapping(), new ServletAdvice());
+            new RequestHandlerMapping(), new ControllerAdvice());
 
     private HttpRequest getHttpRequest(final String rawRequestLine, final String requestBody) {
         final HttpRequestLine requestLine = HttpRequestLine.of(rawRequestLine);

@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.handler.ServletResponseEntity;
+import org.apache.coyote.http11.handler.HandlerResponseEntity;
 
 public class ResponseEntity {
 
@@ -17,11 +17,11 @@ public class ResponseEntity {
         this.body = body;
     }
 
-    public static ResponseEntity of(final ServletResponseEntity response) {
+    public static ResponseEntity of(final HandlerResponseEntity response) {
         return new ResponseEntity(response.getHttpStatus(), response.getHttpHeader(), response.getBody());
     }
 
-    public static ResponseEntity createTextHtmlResponse(final ServletResponseEntity response) {
+    public static ResponseEntity createTextHtmlResponse(final HandlerResponseEntity response) {
         final HttpResponseHeader headers = response.getHttpHeader();
         headers.addHeader("Content-Type", "text/html");
 

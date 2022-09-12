@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.handler.ServletResponseEntity;
+import org.apache.coyote.http11.handler.HandlerResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
@@ -43,7 +43,7 @@ class RegisterServletTest {
             final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(new HashMap<>());
 
             // when
-            final ServletResponseEntity response = registerServlet.doPost(httpRequest, httpResponseHeader);
+            final HandlerResponseEntity response = registerServlet.doPost(httpRequest, httpResponseHeader);
 
             // then
             assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.FOUND);

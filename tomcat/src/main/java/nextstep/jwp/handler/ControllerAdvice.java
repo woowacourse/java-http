@@ -10,7 +10,7 @@ import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpStatus;
 
-public class ServletAdvice {
+public class ControllerAdvice {
 
     private static final Map<Class<? extends RuntimeException>, HttpStatus> exceptionMapping = new HashMap<>();
 

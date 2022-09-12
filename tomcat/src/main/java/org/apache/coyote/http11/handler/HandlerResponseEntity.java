@@ -4,7 +4,7 @@ import java.util.HashMap;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 
-public class ServletResponseEntity {
+public class HandlerResponseEntity {
 
     private static final String EMPTY_BODY = "";
 
@@ -13,7 +13,7 @@ public class ServletResponseEntity {
     private final String body;
     private final String resource;
 
-    public ServletResponseEntity(final HttpStatus httpStatus, final HttpResponseHeader headers, final String body,
+    public HandlerResponseEntity(final HttpStatus httpStatus, final HttpResponseHeader headers, final String body,
                                  final String resource) {
         this.httpStatus = httpStatus;
         this.httpResponseHeader = headers;
@@ -21,23 +21,23 @@ public class ServletResponseEntity {
         this.resource = resource;
     }
 
-    public static ServletResponseEntity createWithResource(final HttpResponseHeader headers, final String resource) {
-        return new ServletResponseEntity(HttpStatus.OK, headers, EMPTY_BODY, resource);
+    public static HandlerResponseEntity createWithResource(final HttpResponseHeader headers, final String resource) {
+        return new HandlerResponseEntity(HttpStatus.OK, headers, EMPTY_BODY, resource);
     }
 
-    public static ServletResponseEntity createWithResource(final String resource) {
+    public static HandlerResponseEntity createWithResource(final String resource) {
         return createWithResource(new HttpResponseHeader(new HashMap<>()), resource);
     }
 
-    public static ServletResponseEntity createRedirectResponse(final HttpStatus httpStatus,
+    public static HandlerResponseEntity createRedirectResponse(final HttpStatus httpStatus,
                                                                final HttpResponseHeader headers, final String path) {
         headers.addHeader("Location", path);
         return createResponseBody(httpStatus, headers, EMPTY_BODY);
     }
 
-    public static ServletResponseEntity createResponseBody(final HttpStatus httpStatus,
+    public static HandlerResponseEntity createResponseBody(final HttpStatus httpStatus,
                                                            final HttpResponseHeader headers, final String body) {
-        return new ServletResponseEntity(httpStatus, headers, body, EMPTY_BODY);
+        return new HandlerResponseEntity(httpStatus, headers, body, EMPTY_BODY);
     }
 
     public boolean isEmptyResource() {

@@ -2,21 +2,22 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Headers {
 
-    private final LinkedHashMap<String, String> values;
+    private final Map<String, String> values;
 
     public Headers() {
         this(new LinkedHashMap<>());
     }
 
-    private Headers(final LinkedHashMap<String, String> values) {
+    private Headers(final Map<String, String> values) {
         this.values = values;
     }
 
     public static Headers of(final List<String> inputs) {
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         for (String header : inputs.subList(1, inputs.size())) {
             if (!header.contains(": ")) {
                 continue;
@@ -39,7 +40,7 @@ public class Headers {
         return values.containsKey(key);
     }
 
-    public LinkedHashMap<String, String> getValues() {
+    public Map<String, String> getValues() {
         return new LinkedHashMap<>(values);
     }
 

@@ -8,7 +8,7 @@ public class HttpResponse {
     private final HttpResponseHeader httpResponseHeader;
     private final String responseBody;
 
-    public HttpResponse(final HttpStatus httpStatus, final HttpResponseHeader httpResponseHeader, final String responseBody) {
+    private HttpResponse(final HttpStatus httpStatus, final HttpResponseHeader httpResponseHeader, final String responseBody) {
         this.statusLine = new HttpStatusLine(httpStatus);
         this.httpResponseHeader = httpResponseHeader;
         this.responseBody = responseBody;

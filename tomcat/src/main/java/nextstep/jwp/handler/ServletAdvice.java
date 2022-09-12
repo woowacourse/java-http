@@ -4,7 +4,6 @@ import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.http11.HttpStatus.SERVER_ERROR;
 import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -13,7 +12,7 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class ServletAdvice {
 
-    private static final Map<Class<? extends Exception>, HttpStatus> exceptionMapping = new HashMap<>();
+    private static final Map<Class<? extends RuntimeException>, HttpStatus> exceptionMapping = new HashMap<>();
 
     static {
         exceptionMapping.put(IllegalArgumentException.class, NOT_FOUND);

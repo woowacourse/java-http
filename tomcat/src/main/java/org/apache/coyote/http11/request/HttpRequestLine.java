@@ -13,7 +13,7 @@ public class HttpRequestLine {
     private final String httpVersion;
     private final String queryString;
 
-    public HttpRequestLine(final HttpMethod httpMethod, final String path, final String httpVersion,
+    private HttpRequestLine(final HttpMethod httpMethod, final String path, final String httpVersion,
                            final String queryString) {
         this.httpMethod = httpMethod;
         this.path = path;

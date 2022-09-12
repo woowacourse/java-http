@@ -1,14 +1,14 @@
 package org.apache.catalina;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 
 public class Session {
 
     private final String id;
-    private final Map<String, Object> values = new ConcurrentHashMap<>();
+    private final Map<String, Object> values = new HashMap<>();
 
     public Session(final String id) {
         this.id = id;

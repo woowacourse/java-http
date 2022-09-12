@@ -29,8 +29,7 @@ public class HttpFrontServlet {
             final HandlerResponseEntity response = handleRequest(httpRequest);
             return createResponseEntity(response);
         } catch (final Exception exception) {
-            final HttpStatus errorStatus = controllerAdvice.getExceptionStatusCode(exception.getClass());
-            return ResponseEntity.createErrorRedirectResponse(HttpStatus.FOUND, errorStatus.getStatusCode() + ".html");
+            return controllerAdvice.handleException(exception.getClass());
         }
     }
 

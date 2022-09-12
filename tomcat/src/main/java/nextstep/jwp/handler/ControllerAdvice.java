@@ -9,6 +9,7 @@ import java.util.Map;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class ControllerAdvice {
 
@@ -21,11 +22,15 @@ public class ControllerAdvice {
         exceptionMapping.put(UnauthorizedException.class, UNAUTHORIZED);
     }
 
-    public <T extends Exception> HttpStatus getExceptionStatusCode(final Class<T> exception) {
+    public <T extends Exception> ResponseEntity handleException(final Class<T> exception) {
+        final HttpStatus errorStatus = getExceptionStatusCode(exception);
+        return ResponseEntity.createErrorRedirectResponse(HttpStatus.FOUND, errorStatus.getStatusCode() + ".html");
+    }
+
+    private  <T extends Exception> HttpStatus getExceptionStatusCode(final Class<T> exception) {
         if (isUnhandledError(exception)) {
             return SERVER_ERROR;
         }
-
         return exceptionMapping.get(exception);
     }
 

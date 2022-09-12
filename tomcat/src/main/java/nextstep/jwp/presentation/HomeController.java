@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.presentation;
 
 import org.apache.constant.MediaType;
 import org.apache.coyote.controller.AbstractController;

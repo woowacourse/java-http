@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.presentation;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -41,7 +41,7 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(createUser);
         log.info("Create User: {}", createUser);
 
-        response.sendRedirect("/index.html");
-        log.info("Redirect: /index.html");
+        response.sendRedirect("/index");
+        log.info("Redirect: /index");
     }
 }

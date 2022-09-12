@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.presentation;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -65,10 +65,10 @@ public class LoginController extends AbstractController {
         session.setAttribute("user", user);
         SessionManager.add(session);
 
-        response.sendRedirect("/index.html")
+        response.sendRedirect("/index")
                 .addCookie(HttpCookie.ofJSessionId(session.getId()));
 
-        log.info("Redirect: /index.html");
+        log.info("Redirect: /index");
     }
 
     private void loginFailEvent(final HttpResponse response) {

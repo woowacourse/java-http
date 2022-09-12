@@ -50,7 +50,7 @@ public enum StaticHandlerMethod {
         log.info("Static File: {}", dto);
 
         if (isLoginPage(dto) && isAlreadyLogin(request)) {
-            alreadyLoginEvent(request, response);
+            alreadyLoginEvent(response);
             return;
         }
 
@@ -63,7 +63,7 @@ public enum StaticHandlerMethod {
         return dto.fileName.contains("login");
     }
 
-    private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {
+    private void alreadyLoginEvent(final HttpResponse response) {
         response.sendRedirect("/index.html");
         log.info("Already Login, Redirect: /index.html");
     }

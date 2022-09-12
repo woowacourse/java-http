@@ -23,7 +23,10 @@ public class HttpCookie {
     public static HttpCookie of(final String input) {
         LinkedHashMap<String, String> cookies = new LinkedHashMap<>();
         for (String cookie : input.split(COOKIE_REGEX)) {
-            String[] splitCookie = cookie.split(ITEM_REGEX, 2);
+            if (!cookie.contains(ITEM_REGEX)) {
+                continue;
+            }
+            String[] splitCookie = cookie.split(ITEM_REGEX, -1);
             cookies.put(splitCookie[0], splitCookie[1]);
         }
         return new HttpCookie(cookies);

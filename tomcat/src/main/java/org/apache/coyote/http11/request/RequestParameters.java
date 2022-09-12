@@ -21,10 +21,13 @@ public class RequestParameters {
         }
 
         Map<String, String> queryParams = new HashMap<>();
-        String[] elements = input.split("&");
-        for (String element : elements) {
-            String[] split = element.split("=");
-            queryParams.put(split[0], split[1]);
+        String[] params = input.split("&");
+        for (String param : params) {
+            if (!param.contains("=")) {
+                continue;
+            }
+            String[] splitParam = param.split("=", -1);
+            queryParams.put(splitParam[0], splitParam[1]);
         }
 
         return new RequestParameters(queryParams);
@@ -32,9 +35,5 @@ public class RequestParameters {
 
     public String get(String key) {
         return values.get(key);
-    }
-
-    public boolean isEmpty() {
-        return values.isEmpty();
     }
 }

@@ -18,7 +18,10 @@ public class Headers {
     public static Headers of(final List<String> inputs) {
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         for (String header : inputs.subList(1, inputs.size())) {
-            String[] splitHeader = header.split(": ", 2);
+            if (!header.contains(": ")) {
+                continue;
+            }
+            String[] splitHeader = header.split(": ", -1);
             headers.put(splitHeader[0], splitHeader[1]);
         }
         return new Headers(headers);

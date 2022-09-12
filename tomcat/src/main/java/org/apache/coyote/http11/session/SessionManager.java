@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.session;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
@@ -20,17 +21,17 @@ public class SessionManager implements Manager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session getSession(HttpRequest httpRequest) {
-        Cookie cookie = httpRequest.getCookie();
-        if (cookie == null) {
-            return null;
+    public Optional<Session> getSession(HttpRequest httpRequest) {
+        Optional<Cookie> cookie = httpRequest.getCookie();
+        if (cookie.isEmpty()) {
+            return Optional.empty();
         }
-        String jSessionId = (String) cookie.getJSessionId();
+        Optional<String> jSessionId = cookie.get().getJSessionId();
 
-        if (jSessionId == null) {
-            return null;
+        if (jSessionId.isEmpty()) {
+            return Optional.empty();
         }
-        return findSession(jSessionId);
+        return Optional.ofNullable(findSession(jSessionId.get()));
     }
 
     @Override

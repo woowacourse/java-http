@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.unauthorized.UserAccountException;
 import nextstep.jwp.exception.unauthorized.UserPasswordException;
@@ -47,8 +48,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        Session session = SESSION_MANAGER.getSession(httpRequest);
-        if (session != null && session.getUserAttribute() != null) {
+        Optional<Session> session = SESSION_MANAGER.getSession(httpRequest);
+        if (session.isPresent() && session.get().getUserAttribute().isPresent()) {
             httpResponse.found("/index.html");
             return;
         }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Cookie {
@@ -36,8 +37,8 @@ public class Cookie {
         return new Cookie(Map.of(JSESSIONID, jSessionId));
     }
 
-    public Object getJSessionId() {
-        return cookies.get(JSESSIONID);
+    public Optional<String> getJSessionId() {
+        return Optional.ofNullable((String) cookies.get(JSESSIONID));
     }
 
     @Override

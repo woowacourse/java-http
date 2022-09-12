@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httpmessage.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.httpmessage.Headers;
 import org.apache.coyote.http11.session.Cookie;
 import org.junit.jupiter.api.Test;
@@ -81,11 +83,14 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
         // when
-        Cookie cookie = httpRequest.getCookie();
+        Optional<Cookie> cookie = httpRequest.getCookie();
 
         // then
-        assertThat(cookie).extracting("cookies")
-                .isEqualTo(Map.of("name", "park"));
+        assertAll(
+                () -> assertThat(cookie).isPresent(),
+                () -> assertThat(cookie.get()).extracting("cookies")
+                        .isEqualTo(Map.of("name", "park"))
+        );
     }
 
     @Test
@@ -105,9 +110,9 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
         // when
-        Cookie cookie = httpRequest.getCookie();
+        Optional<Cookie> cookie = httpRequest.getCookie();
 
         // then
-        assertThat(cookie).isEqualTo(null);
+        assertThat(cookie).isEmpty();
     }
 }

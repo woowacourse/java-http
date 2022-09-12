@@ -2,6 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.model.User;
 
 public class Session {
@@ -14,8 +15,8 @@ public class Session {
         this.id = id;
     }
 
-    public Object getUserAttribute() {
-        return values.get(USER);
+    public Optional<Object> getUserAttribute() {
+        return Optional.ofNullable(values.get(USER));
     }
 
     public void setUserAttribute(User user) {

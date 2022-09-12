@@ -51,13 +51,8 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public Cookie getCookie() {
-        String cookie = headers.getCookie();
-
-        if (cookie == null) {
-            return null;
-        }
-        return Cookie.of(cookie);
+    public Optional<Cookie> getCookie() {
+        return headers.getCookie();
     }
 
     public Map<String, Object> getRequestBodyParameters() {

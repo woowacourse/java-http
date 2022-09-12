@@ -43,8 +43,15 @@ public class Headers {
         headers.put("Set-Cookie", cookie);
     }
 
-    public String getCookie() {
-        return (String) headers.get("Cookie");
+    public Optional<Cookie> getCookie() {
+        Object cookie = headers.get("Cookie");
+
+        if (cookie == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(Cookie.of((String) cookie));
+
     }
 
     public Optional<Object> getHeader(String key) {

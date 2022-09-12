@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.Optional;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +19,10 @@ class SessionTest {
         session.setUserAttribute(user);
 
         // then
-        assertThat(session.getUserAttribute()).isEqualTo(user);
+        Optional<Object> userAttribute = session.getUserAttribute();
+        assertAll(
+                () -> assertThat(userAttribute).isPresent(),
+                () -> assertThat(userAttribute.get()).isEqualTo(user)
+        );
     }
 }

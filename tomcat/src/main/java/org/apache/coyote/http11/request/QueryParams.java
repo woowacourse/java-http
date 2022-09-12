@@ -41,8 +41,15 @@ class QueryParams {
             .collect(toList());
 
         for (String[] parameter : splitQuery) {
+            if (hasNoValue(parameter)) {
+                continue;
+            }
             queryParams.put(parameter[0], parameter[1]);
         }
+    }
+
+    private boolean hasNoValue(String[] parameter) {
+        return parameter.length < 2;
     }
 
     void addQuery(final String query) {

@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isSessionUserFound(Session session) {
-        Session foundSession = sessionManager.findSession(session.getId());
+        final Session foundSession = sessionManager.findSession(session.getId());
         final User user = getUser(foundSession);
         return InMemoryUserRepository.findByAccount(user.getAccount())
             .isPresent();

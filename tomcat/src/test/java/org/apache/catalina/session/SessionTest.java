@@ -36,6 +36,5 @@ class SessionTest {
         assertThatThrownBy(() -> session.getAttribute("user"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("No Such Attribute exists in this Session");
-
     }
 }

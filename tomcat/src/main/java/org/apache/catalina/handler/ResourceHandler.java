@@ -7,7 +7,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class ResourceHandler {
 
     public static HttpResponse render(final HttpRequest request) {
-        return new HttpResponse.Builder(request).ok()
+        return new HttpResponse.Builder(request)
+            .ok()
             .messageBody(getResourceFrom(request))
             .build();
     }

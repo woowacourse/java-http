@@ -20,6 +20,7 @@ public class SessionManagerTest {
 
         // then
         assertThat(actual).isTrue();
+        sessionManager.remove(session);
     }
 
     @Test
@@ -65,5 +66,6 @@ public class SessionManagerTest {
 
         // then
         assertThat(foundSession.getId()).isEqualTo(session.getId());
+        sessionManager.remove(session);
     }
 }

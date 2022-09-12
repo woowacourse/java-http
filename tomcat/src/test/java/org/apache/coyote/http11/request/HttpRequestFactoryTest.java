@@ -8,14 +8,12 @@ import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestHeaderTest {
+class HttpRequestFactoryTest {
 
-    private HttpRequestHeader httpRequestHeader;
-
-    @DisplayName("응답 헤더에서 requestUri를 얻는다.")
+    @DisplayName("받은 InputStream을 파싱해서 HttpRequest를 반환한다.")
     @Test
-    void getRequestUri() throws IOException {
-        //given
+    void parse() throws IOException {
+        // given
         final String string = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -23,11 +21,8 @@ class HttpRequestHeaderTest {
                 "",
                 "");
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
-        httpRequestHeader = HttpRequestHeaderFactory.parse(inputStream);
 
-        //when,then
-        assert httpRequestHeader != null;
-        assertThat(httpRequestHeader.getRequestUri())
-                .isEqualTo("/index.html");
+        // when, then
+        assertThat(HttpRequestFactory.parse(inputStream)).isInstanceOf(HttpRequest.class);
     }
 }

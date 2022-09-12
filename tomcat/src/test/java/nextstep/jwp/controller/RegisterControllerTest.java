@@ -37,7 +37,7 @@ public class RegisterControllerTest {
     void doPost() {
         // given
         final RegisterController controller = new RegisterController();
-        final HttpRequest request = TestRequest.generateWithUriAndRegisterInfo("/register",
+        final HttpRequest request = TestRequest.generateWithUriAndUserInfo("/register",
             "test account", "test password", "test email");
 
         // when
@@ -63,7 +63,7 @@ public class RegisterControllerTest {
     void doPostWhenUserInfoAlreadyRegistered() {
         // given
         final RegisterController controller = new RegisterController();
-        final HttpRequest request = TestRequest.generateWithUriAndRegisterInfo("/register",
+        final HttpRequest request = TestRequest.generateWithUriAndUserInfo("/register",
             "gugu", "test password", "test email");
 
         // when

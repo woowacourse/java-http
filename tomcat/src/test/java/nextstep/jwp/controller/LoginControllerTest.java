@@ -98,7 +98,7 @@ public class LoginControllerTest {
     void doPost_invalidUser() {
         // given
         final LoginController controller = new LoginController();
-        final HttpRequest request = TestRequest.generateWithUriAndRegisterInfo(
+        final HttpRequest request = TestRequest.generateWithUriAndUserInfo(
             "/login", "gugu", "invalid password", "");
 
         // when
@@ -119,7 +119,7 @@ public class LoginControllerTest {
     void doPost_redirect() {
         // given
         final LoginController controller = new LoginController();
-        final HttpRequest request = TestRequest.generateWithUriAndRegisterInfo(
+        final HttpRequest request = TestRequest.generateWithUriAndUserInfo(
             "/login", "gugu", "password", "");
 
         // when

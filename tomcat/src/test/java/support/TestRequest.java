@@ -14,7 +14,8 @@ public class TestRequest {
         return generateWithSession("GET", uri, "HTTP/1.1", "");
     }
 
-    public static HttpRequest generateWithUriAndRegisterInfo(final String uri, final String account, final String password, final String email) {
+    public static HttpRequest generateWithUriAndUserInfo(final String uri, final String account,
+        final String password, final String email) {
         return generate("GET", uri, "HTTP/1.1", "", account, password, email);
     }
 

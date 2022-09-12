@@ -24,7 +24,7 @@ public class MainController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        return null;
+        return HttpResponse.notFound().build();
     }
 
     @Override
@@ -32,6 +32,5 @@ public class MainController extends AbstractController {
         return HttpResponse.ok()
                 .addResponseBody(WELCOME_MESSAGE, ContentType.TEXT_HTML_CHARSET_UTF_8)
                 .build();
-
     }
 }

@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import web.request.HttpRequest;
 import web.request.RequestUri;
 import web.response.HttpResponse;
+import web.response.HttpResponseSetter;
 import web.util.QueryStringParser;
 
 public class RegisterController extends PathController {
@@ -23,7 +24,7 @@ public class RegisterController extends PathController {
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         String method = httpRequest.getRequestLine().getMethod();
         if (method.equals("GET")) {
-            httpResponse.setStaticResource(new RequestUri("/register.html"));
+            HttpResponseSetter.setStaticResource(httpResponse, new RequestUri("/register.html"));
         }
     }
 
@@ -35,7 +36,7 @@ public class RegisterController extends PathController {
             Map<String, String> queryString = QueryStringParser.parseQueryString(body);
             User user = new User(queryString.get("account"), queryString.get("password"), queryString.get("email"));
             InMemoryUserRepository.save(user);
-            httpResponse.set302Redirect("http://localhost:8080/index.html");
+            HttpResponseSetter.set302Redirect(httpResponse, "http://localhost:8080/index.html");
         }
     }
 

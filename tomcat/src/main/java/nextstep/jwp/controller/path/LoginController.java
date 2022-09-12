@@ -11,6 +11,7 @@ import session.SessionManager;
 import web.request.HttpRequest;
 import web.request.RequestUri;
 import web.response.HttpResponse;
+import web.response.HttpResponseSetter;
 import web.util.QueryStringParser;
 
 public class LoginController extends PathController {
@@ -30,10 +31,10 @@ public class LoginController extends PathController {
         if (method.equals("GET")) {
             Optional<String> cookieValue = httpRequest.getHeaderValue("Cookie");
             if (cookieValue.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(cookieValue.get())) {
-                httpResponse.set302Redirect("http://localhost:8080/index.html");
+                HttpResponseSetter.set302Redirect(httpResponse, "http://localhost:8080/index.html");
                 return;
             }
-            httpResponse.setStaticResource(new RequestUri("/login.html"));
+            HttpResponseSetter.setStaticResource(httpResponse, new RequestUri("/login.html"));
         }
     }
 
@@ -52,10 +53,10 @@ public class LoginController extends PathController {
         String password = queryString.get("password").trim();
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            httpResponse.set302Redirect("http://localhost:8080/index.html");
+            HttpResponseSetter.set302Redirect(httpResponse, "http://localhost:8080/index.html");
             enrollJSessionId(httpResponse, user.get());
         } else {
-            httpResponse.set302Redirect("http://localhost:8080/401.html");
+            HttpResponseSetter.set302Redirect(httpResponse, "http://localhost:8080/401.html");
         }
     }
 

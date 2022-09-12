@@ -10,6 +10,7 @@ import web.request.HttpRequest;
 import web.request.RequestLine;
 import web.request.RequestUri;
 import web.response.HttpResponse;
+import web.response.HttpResponseSetter;
 import web.util.StaticResourceFinder;
 
 public class FrontController implements Controller {
@@ -47,9 +48,9 @@ public class FrontController implements Controller {
         }
 
         if (StaticResourceFinder.isStaticResourceExist(requestLine.getRequestUri())) {
-            httpResponse.setStaticResource(requestLine.getRequestUri());
+            HttpResponseSetter.setStaticResource(httpResponse, requestLine.getRequestUri());
         } else {
-            httpResponse.setStaticResource(new RequestUri("/404.html"));
+            HttpResponseSetter.setStaticResource(httpResponse, new RequestUri("/404.html"));
         }
     }
 

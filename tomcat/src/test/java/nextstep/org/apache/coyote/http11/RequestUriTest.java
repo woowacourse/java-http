@@ -33,30 +33,6 @@ class RequestUriTest {
     }
 
     @Test
-    void queryParameter가_없으면_false를_반환한다() {
-        // given
-        final String uri = "/index.html";
-
-        // when
-        final RequestUri requestUri = RequestUri.of(uri);
-
-        // then
-        assertThat(requestUri.hasRequestParameters()).isFalse();
-    }
-
-    @Test
-    void queryParameter가_있으면_true를_반환한다() {
-        // given
-        final String uri = "/login?account=gugu&password=password";
-
-        // when
-        final RequestUri requestUri = RequestUri.of(uri);
-
-        // then
-        assertThat(requestUri.hasRequestParameters()).isTrue();
-    }
-
-    @Test
     void uri에서_리소스_파일_path를_찾는다() {
         // given
         final String uri = "/login?account=gugu&password=password";

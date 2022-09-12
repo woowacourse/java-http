@@ -20,10 +20,6 @@ public class RequestUri {
         return new RequestUri(uri, RequestParameters.empty());
     }
 
-    public boolean hasRequestParameters() {
-        return !requestParameters.isEmpty();
-    }
-
     public MediaType findMediaType() {
         return MediaType.of(resourcePath);
     }

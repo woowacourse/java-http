@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.support;
 
 import java.util.Map;
-import org.apache.catalina.Controller;
 import nextstep.jwp.controller.HomePageController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.UserService;
+import org.apache.catalina.Controller;
 
 public class RequestMapping {
     private static UserService userService = new UserService();
@@ -22,16 +22,20 @@ public class RequestMapping {
         this.controllers = Map.of(
                 "/", homePageController,
                 "/register", registerController,
-                "login", loginController
+                "/login", loginController
         );
     }
 
     public static Controller find(String requestUri) {
-        final RequestMapping controllerSupporter = new RequestMapping();
-        return controllerSupporter.findController(requestUri);
+        final RequestMapping requestMapping = new RequestMapping();
+        return requestMapping.findController(requestUri);
     }
 
     private Controller findController(String requestUri) {
-        return controllers.get(requestUri);
+        final String foundUrl = controllers.keySet().stream()
+                .filter(requestUri::contains)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("알맞은 컨트롤러가 없습니다."));
+        return controllers.get(foundUrl);
     }
 }

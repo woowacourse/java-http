@@ -17,7 +17,7 @@ public class HttpResponseBuilder {
         final ResponseBody body = ResponseBody.from(requestUri);
         final ResponseHeaders headers = ResponseHeaders.create()
                 .addHeader(CONTENT_TYPE, ContentType.find(requestUri) + TYPE_UTF_8)
-                .addHeader(CONTENT_LENGTH, body.getBody());
+                .addHeader(CONTENT_LENGTH, body.getBodyLength());
         return HttpResponse.create(HttpStatus.OK, headers, body);
     }
 

@@ -7,11 +7,11 @@ import java.nio.file.Path;
 public class ContentType {
 
     public static String find(String uri) throws IOException {
-        final Path path = Path.of(uri);
-        String contentType = Files.probeContentType(path);
-//        if(contentType == null) {
-//            contentType = "text/html";
-//        }
+        final Path path = Path.of( uri);
+        String contentType = Files.probeContentType(  path);
+        if(contentType == null) {
+            contentType = "text/html";
+        }
         return contentType;
     }
 }

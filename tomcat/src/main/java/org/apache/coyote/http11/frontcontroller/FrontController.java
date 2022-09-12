@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.frontcontroller;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +17,7 @@ public class FrontController {
     private static final List<RequestMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
     private static final ControllerAdvice CONTROLLER_ADVICE = new ControllerAdvice();
 
-    public static void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public static void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             Controller controller = getController(httpRequest);
             controller.service(httpRequest, httpResponse);

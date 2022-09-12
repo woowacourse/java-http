@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpmessage.response;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.Headers;
@@ -29,11 +28,11 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, responseBody);
     }
 
-    public HttpResponse ok(String body) throws IOException {
+    public HttpResponse ok(String body) {
         return ok(ContentType.HTML, body);
     }
 
-    public HttpResponse ok(ContentType contentType, String body) throws IOException {
+    public HttpResponse ok(ContentType contentType, String body) {
         return this.httpStatus(HttpStatus.OK)
                 .content(contentType, body.getBytes().length)
                 .responseBody(body);

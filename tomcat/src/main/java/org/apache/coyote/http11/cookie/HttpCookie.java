@@ -14,7 +14,7 @@ public class HttpCookie {
     public HttpCookie() {
     }
 
-    public HttpCookie(String unparsedCookies) {
+    public HttpCookie(final String unparsedCookies) {
         parseCookies(unparsedCookies);
     }
 
@@ -24,7 +24,7 @@ public class HttpCookie {
         return httpCookie;
     }
 
-    private void parseCookies(String unparsedCookies) {
+    private void parseCookies(final String unparsedCookies) {
         String[] cookies = unparsedCookies.split(";");
         for (String cookie : cookies) {
             String trimmedCookie = cookie.strip();

@@ -7,11 +7,11 @@ public class RequestMapping {
 
     private List<Controller> controllers;
 
-    public RequestMapping(List<Controller> controllers) {
+    public RequestMapping(final List<Controller> controllers) {
         this.controllers = controllers;
     }
 
-    public Controller getController(HttpRequest request) {
+    public Controller getController(final HttpRequest request) {
         return controllers.stream()
                 .filter(controller -> controller.canHandle(request))
                 .findAny()

@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(final HttpRequest request, final HttpResponse response) {
         if (request.getMethod().equalsIgnoreCase("GET")) {
             doGet(request, response);
         }

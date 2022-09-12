@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response);
+    void service(final HttpRequest request, final HttpResponse response);
 
-    boolean canHandle(HttpRequest request);
+    boolean canHandle(final HttpRequest request);
 }

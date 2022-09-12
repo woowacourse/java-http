@@ -27,7 +27,7 @@ public class SessionManager implements Manager {
         SESSIONS.remove(id);
     }
 
-    public Session getSession(HttpRequest httpRequest) {
+    public Session getSession(final HttpRequest httpRequest) {
         String sessionId = httpRequest.extractSessionId();
         if (SESSIONS.containsKey(sessionId)) {
             return findSession(sessionId);

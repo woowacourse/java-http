@@ -6,22 +6,10 @@ public class StatusLine {
     private String statusCode;
     private String statusMessage;
 
-    public StatusLine(String protocolVersion, String statusCode, String statusMessage) {
+    public StatusLine(final String protocolVersion, final String statusCode, final String statusMessage) {
         this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
-    }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
     }
 
     public String getValue() {

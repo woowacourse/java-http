@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
             httpResponse.send("/register.html", OK);
         } catch (Exception e) {
@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
         Map<String, String> parsedBody = requestBody.getParsedBody();
 

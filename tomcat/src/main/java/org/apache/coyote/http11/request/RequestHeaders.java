@@ -12,11 +12,11 @@ public class RequestHeaders {
 
     private Map<String, Object> values = new HashMap<>();
 
-    public RequestHeaders(List<String> unparsedHeaders) {
+    public RequestHeaders(final List<String> unparsedHeaders) {
         parseHeaders(unparsedHeaders);
     }
 
-    private void parseHeaders(List<String> unparsedHeaders) {
+    private void parseHeaders(final List<String> unparsedHeaders) {
         for (String unparsedHeader : unparsedHeaders) {
             if (COOKIE.equals(unparsedHeader.split(":")[0])) {
                 values.put(COOKIE, new HttpCookie(unparsedHeader.split(":")[1].strip()));
@@ -35,10 +35,6 @@ public class RequestHeaders {
             return 0;
         }
         return Integer.parseInt((String) values.get(CONTENT_LENGTH));
-    }
-
-    private HttpCookie createCookie(String unparsedCookies) {
-        return new HttpCookie(unparsedCookies);
     }
 
     public Object get(String key) {

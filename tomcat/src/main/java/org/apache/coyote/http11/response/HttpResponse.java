@@ -19,13 +19,7 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders, String responseBody) {
-        this.statusLine = statusLine;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
-    }
-
-    public void send(String fileLocation, StatusCode statusCode) {
+    public void send(final String fileLocation, final StatusCode statusCode) {
         statusLine = new StatusLine(DEFAULT_HTTP_VERSION, statusCode.getNumber(), statusCode.getName());
         responseBody = readFile(fileLocation);
     }
@@ -46,26 +40,10 @@ public class HttpResponse {
         return statusLine;
     }
 
-    public ResponseHeaders getResponseHeaders() {
-        return responseHeaders;
-    }
-
     public String getResponseBody() {
         if (responseBody == null) {
             return "";
         }
         return responseBody;
-    }
-
-    public void setStatusLine(StatusLine statusLine) {
-        this.statusLine = statusLine;
-    }
-
-    public void setResponseHeaders(ResponseHeaders responseHeaders) {
-        this.responseHeaders = responseHeaders;
-    }
-
-    public void setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
     }
 }

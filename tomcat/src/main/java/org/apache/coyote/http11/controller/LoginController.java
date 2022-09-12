@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     private static final String DEFAULT_HTML = "/login.html";
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         Session session = httpRequest.getSession();
         if (session.getAttribute("login") != null) {
             httpResponse.send("/index.html", OK);
@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
 
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
         Map<String, String> parsedBody = requestBody.getParsedBody();
 

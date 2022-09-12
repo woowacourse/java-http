@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(Socket connection) {
+    public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = generateRequest(new BufferedReader(new InputStreamReader(inputStream)));
@@ -76,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private RequestHeaders generateRequestHeaders(BufferedReader bufferedReader) throws IOException {
+    private RequestHeaders generateRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         ArrayList<String> headers = new ArrayList<>();
         String read = bufferedReader.readLine();
         while (read != null && !read.isEmpty()) {
@@ -86,8 +86,8 @@ public class Http11Processor implements Runnable, Processor {
         return new RequestHeaders(headers);
     }
 
-    private RequestBody generateRequestBody(BufferedReader bufferedReader,
-                                            RequestHeaders requestHeaders) throws IOException {
+    private RequestBody generateRequestBody(final BufferedReader bufferedReader,
+                                            final RequestHeaders requestHeaders) throws IOException {
         int contentLength = Integer.parseInt((String) requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

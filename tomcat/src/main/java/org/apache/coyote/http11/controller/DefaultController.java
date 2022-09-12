@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class DefaultController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.send(request.getResource(), OK);
     }
 

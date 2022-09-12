@@ -11,10 +11,6 @@ public class RequestBody {
         this.body = body;
     }
 
-    public String getBody() {
-        return body;
-    }
-
     public Map<String, String> getParsedBody() {
         String[] keyValues = body.split("&");
 

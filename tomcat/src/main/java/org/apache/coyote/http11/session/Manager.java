@@ -2,9 +2,7 @@ package org.apache.coyote.http11.session;
 
 public interface Manager {
 
-    void add(Session session);
+    void add(final Session session);
 
-    Session findSession(String session);
-
-    void remove(String id);
+    Session findSession(final String session);
 }

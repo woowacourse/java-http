@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
                         .addHeader("Content-Type", ContentType.HTML.getContentType() + ";charset=utf-8");
                 return;
             }
-            final Session session = request.getSession(!request.hasHeader("Cookie"));
+            final Session session = request.getSession(false);
             log.info("새로운 sessionId ::: " + session.getId());
             session.setAttribute("user", user);
             response.redirect("/index.html")

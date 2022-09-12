@@ -47,5 +47,3 @@ public class LoginController extends AbstractController {
         return HttpResponse.ok(request.getHttpVersion(), request.getContentType(), readFile(request.getHttpPath()));
     }
 }
-
-

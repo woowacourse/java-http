@@ -1,7 +1,8 @@
 package org.apache.coyote.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.catalina.cookie.HttpCookies;
 import org.apache.coyote.support.HttpException;
@@ -18,9 +19,10 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders of(List<String> headerLines) {
+    public static RequestHeaders of(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
-        for (String line : headerLines) {
+        String line;
+        while ((line = reader.readLine()).length() > 0) {
             addValidHeader(headers, line);
         }
         return new RequestHeaders(headers);

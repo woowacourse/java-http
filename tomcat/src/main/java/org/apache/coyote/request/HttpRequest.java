@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import org.apache.catalina.cookie.HttpCookie;
 import org.apache.catalina.session.NullSession;
 import org.apache.catalina.session.Session;
@@ -12,10 +14,27 @@ public class HttpRequest {
     private final String body;
     private Session session = new NullSession();
 
-    public HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
+    private HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+    }
+
+    public static HttpRequest of(BufferedReader reader) throws IOException {
+        final var startLine = StartLine.of(reader);
+        final var headers = RequestHeaders.of(reader);
+        final var body = readBody(reader, headers);
+        return new HttpRequest(startLine, headers, body);
+    }
+
+    private static String readBody(BufferedReader reader, RequestHeaders headers) throws IOException {
+        final var contentLength = headers.getContentLength();
+        if (contentLength == 0) {
+            return "";
+        }
+        final var buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public String getUri() {

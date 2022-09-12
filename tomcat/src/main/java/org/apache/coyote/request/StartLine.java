@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpMethod;
@@ -24,7 +26,8 @@ public class StartLine {
         this.version = version;
     }
 
-    public static StartLine of(String startLine) {
+    public static StartLine of(BufferedReader reader) throws IOException {
+        final var startLine =  reader.readLine();
         validate(startLine);
         final var elements = extract(startLine);
         final var method = HttpMethod.of(elements[METHOD_INDEX]);

@@ -19,11 +19,12 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final String DEFAULT_PATH = "/index";
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
         if (isLogin(request)) {
-            return getRedirectResponse(request, "/index");
+            return getRedirectResponse(request, DEFAULT_PATH);
         }
 
         return ResourceHandler.render(request);
@@ -32,7 +33,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
         if (isLogin(request)) {
-            return getRedirectResponse(request, "/index");
+            return getRedirectResponse(request, DEFAULT_PATH);
         }
 
         final String account = request.getQueryValue("account");
@@ -48,7 +49,7 @@ public class LoginController extends AbstractController {
         log.info("로그인 성공! 아이디: {}", user.getAccount());
 
         return new HttpResponse.Builder(request)
-            .redirect().location("/index")
+            .redirect().location(DEFAULT_PATH)
             .cookie(HttpCookie.fromJSession(session))
             .build();
     }
@@ -59,7 +60,7 @@ public class LoginController extends AbstractController {
         }
 
         final Session session = request.getSession();
-        if (!sessionManager.hasSession(session.getId())) {
+        if (!sessionManager.hasSession(session)) {
             return false;
         }
 
@@ -67,7 +68,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isSessionUserFound(Session session) {
-        final User user = getUser(sessionManager.findSession(session.getId()));
+        Session foundSession = sessionManager.findSession(session.getId());
+        final User user = getUser(foundSession);
         return InMemoryUserRepository.findByAccount(user.getAccount())
             .isPresent();
     }
@@ -84,7 +86,8 @@ public class LoginController extends AbstractController {
     }
 
     private Session addSession(User user) {
-        final Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
+        final String jSessionId = new HttpCookie().getCookieValue("JSESSIONID");
+        final Session session = new Session(jSessionId);
         session.setAttribute("user", user);
         sessionManager.add(session);
         return session;

@@ -32,6 +32,10 @@ class HttpMessage {
         }
     }
 
+    /**
+     * Read Http Headers and return Content-Length in String type to Read Message Body.
+     * @return Content-Length in String type. if the request doesn't contain Content-Length Header, return "";
+     */
     private String readHeaders() {
         String contentLength = EMPTY_VALUE;
         final StringJoiner joiner = new StringJoiner("\r\n");

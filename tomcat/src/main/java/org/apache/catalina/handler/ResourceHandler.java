@@ -8,8 +8,13 @@ public class ResourceHandler {
 
     public static HttpResponse render(final HttpRequest request) {
         return new HttpResponse.Builder(request).ok()
-            .messageBody(Resource.from(
-                addExtension(request.getPath()))).build();
+            .messageBody(getResourceFrom(request))
+            .build();
+    }
+
+    private static Resource getResourceFrom(final HttpRequest request) {
+        return Resource.from(
+            addExtension(request.getPath()));
     }
 
     private static String addExtension(final String path) {
@@ -19,5 +24,6 @@ public class ResourceHandler {
         return path + ".html";
     }
 
-    private ResourceHandler() {}
+    private ResourceHandler() {
+    }
 }

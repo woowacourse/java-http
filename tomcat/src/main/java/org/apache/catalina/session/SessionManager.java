@@ -33,9 +33,10 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
-    public boolean hasSession(final String id) {
-        return SESSIONS.containsKey(id);
+    public boolean hasSession(final Session session) {
+        return SESSIONS.containsKey(session.getId());
     }
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 }

@@ -37,7 +37,8 @@ class QueryParams {
         final String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
 
         final List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
-            .map(it -> it.split("=")).collect(toList());
+            .map(it -> it.split("="))
+            .collect(toList());
 
         for (String[] parameter : splitQuery) {
             queryParams.put(parameter[0], parameter[1]);

@@ -47,18 +47,19 @@ public class UserService {
         }
     }
 
-    public void register(Map<String, String> requestBody) {
-        String account = requestBody.getOrDefault("account", EMPTY_VALUE);
-        String email = requestBody.getOrDefault("email", EMPTY_VALUE);
-        String password = requestBody.getOrDefault("password", EMPTY_VALUE);
-        checkEmptyInput(account, email, password);
+    public void register(User user) {
+        checkEmptyInput(user);
 
-        checkDuplicateAccount(account);
-        InMemoryUserRepository.save(new User(account, password, email));
+        checkDuplicateAccount(user.getAccount());
+        InMemoryUserRepository.save(user);
     }
 
-    private void checkEmptyInput(String account, String email, String password) {
-        if (account.isBlank() || email.isBlank() || password.isBlank()) {
+    private void checkEmptyInput(User user) {
+        String account = user.getAccount();
+        String password = user.getPassword();
+        String email = user.getEmail();
+
+        if (account.isBlank() || password.isBlank() || email.isBlank()) {
             throw new RegisterFailException(EMPTY_VALUE_ERROR_MESSAGE);
         }
     }

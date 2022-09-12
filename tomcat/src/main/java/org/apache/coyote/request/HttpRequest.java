@@ -21,7 +21,7 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(BufferedReader reader) throws IOException {
-        final var startLine = StartLine.of(reader);
+        final var startLine = StartLine.of(reader.readLine());
         final var headers = RequestHeaders.of(reader);
         final var body = readBody(reader, headers);
         return new HttpRequest(startLine, headers, body);

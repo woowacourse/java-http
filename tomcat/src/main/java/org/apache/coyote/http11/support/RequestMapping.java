@@ -1,36 +1,37 @@
 package org.apache.coyote.http11.support;
 
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import nextstep.jwp.controller.AbstractController;
+import java.util.Map;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomePageController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.service.LoginService;
+import nextstep.jwp.service.UserService;
 
-public enum RequestMapping {
-    LOGIN(url -> url.contains("/login"), controller -> new LoginController()),
-    REGISTER(url -> url.contains("/register"), controller -> new RegisterController()),
-    HOME(url -> url.contains("/"), controller -> new HomePageController());
+public class RequestMapping {
+    private static UserService userService = new UserService();
+    private static LoginService loginService = new LoginService();
 
-    private final Predicate<String> findUrl;
-    private final Function<String, AbstractController> findController;
+    private static HomePageController homePageController = new HomePageController();
+    private static RegisterController registerController = new RegisterController(userService);
+    private static LoginController loginController = new LoginController(loginService);
 
-    RequestMapping(Predicate<String> findUrl, Function<String, AbstractController> findController) {
-        this.findUrl = findUrl;
-        this.findController = findController;
+    private final Map<String, Controller> controllers;
+
+    private RequestMapping() {
+        this.controllers = Map.of(
+                "/", homePageController,
+                "/register", registerController,
+                "login", loginController
+        );
     }
 
     public static Controller find(String requestUri) {
-        return findUrl(requestUri)
-                .findController.apply(requestUri);
+        final RequestMapping controllerSupporter = new RequestMapping();
+        return controllerSupporter.findController(requestUri);
     }
 
-    private static RequestMapping findUrl(String requestUri) {
-        return Arrays.stream(values())
-                .filter(controllerMapper -> controllerMapper.findUrl.test(requestUri))
-                .findAny()
-                .orElseThrow(IllegalArgumentException::new);
+    private Controller findController(String requestUri) {
+        return controllers.get(requestUri);
     }
 }

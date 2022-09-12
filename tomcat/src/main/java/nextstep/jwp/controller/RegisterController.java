@@ -10,8 +10,8 @@ public class RegisterController extends AbstractController {
 
     private final UserService userService;
 
-    public RegisterController() {
-        this.userService = new UserService();
+    public RegisterController(UserService userService) {
+        this.userService = userService;
     }
 
     @Override

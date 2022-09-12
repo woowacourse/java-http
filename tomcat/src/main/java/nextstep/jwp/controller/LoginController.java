@@ -19,8 +19,8 @@ public class LoginController extends AbstractController {
 
     private final LoginService loginService;
 
-    public LoginController() {
-        this.loginService = new LoginService();
+    public LoginController(LoginService loginService) {
+        this.loginService = loginService;
     }
 
     @Override

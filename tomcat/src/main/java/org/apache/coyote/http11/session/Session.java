@@ -3,14 +3,20 @@ package org.apache.coyote.http11.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
-        this.id = id;
+    public Session() {
+        this.id = createId();
+    }
+
+    private String createId() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
     public Optional<Object> getAttribute(String name) {

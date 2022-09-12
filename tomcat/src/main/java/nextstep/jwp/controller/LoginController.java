@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.view.View;
@@ -49,8 +48,7 @@ public class LoginController extends AbstractController {
 
     private HttpResponse getLoginResponse(User user, String password) {
         if (user.checkPassword(password)) {
-            UUID uuid = UUID.randomUUID();
-            Session session = new Session(uuid.toString());
+            Session session = new Session();
             session.setAttribute(USER_KEY, user);
             SessionManager.add(session);
 

@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.HttpMethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
@@ -19,5 +20,10 @@ public class IndexController extends AbstractController {
                 .headers(responseHeaders)
                 .body(body)
                 .build();
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        throw new HttpMethodNotAllowedException();
     }
 }

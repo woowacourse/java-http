@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.File;
 import java.net.URL;
+import nextstep.jwp.exception.HttpMethodNotAllowedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
@@ -27,6 +28,11 @@ public class StaticFileController extends AbstractController {
 
         return new ResponseBuilder().status(Status.NOT_FOUND)
                 .build();
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        throw new HttpMethodNotAllowedException();
     }
 
     private boolean hasMatchedStaticFile(final String url) {

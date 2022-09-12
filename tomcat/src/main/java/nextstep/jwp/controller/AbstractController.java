@@ -22,16 +22,12 @@ public abstract class AbstractController implements Controller {
         if (request.isPost()) {
             return doPost(request, response);
         }
-        throw new HttpMethodNotAllowedException("유효하지 않은 HTTP method 입니다.");
+        throw new HttpMethodNotAllowedException();
     }
 
-    protected HttpResponse doGet(HttpRequest request, HttpResponse response) throws Exception {
-        return null;
-    }
+    protected abstract HttpResponse doGet(HttpRequest request, HttpResponse response) throws Exception;
 
-    protected HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception {
-        return null;
-    }
+    protected abstract HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception;
 
     protected final String readResourceBody(String url) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(STATIC + url);

@@ -19,12 +19,14 @@ public class AuthService {
         final String password = httpRequest.findQueryByKey("password")
                 .orElseThrow(() -> new NoSuchElementException("비밀번호를 입력해주세요."));
 
-        final User user = userRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException("회원가입이 되어있지 않은 유저입니다."));
-
+        final User user = findUser(account);
         user.checkPassword(password);
-
         registerUserInSession(httpRequest, user);
+    }
+
+    private User findUser(String account) {
+        return userRepository.findByAccount(account)
+                        .orElseThrow(() -> new NoSuchElementException("회원가입이 되어있지 않은 유저입니다."));
     }
 
     private void registerUserInSession(HttpRequest httpRequest, User user) {

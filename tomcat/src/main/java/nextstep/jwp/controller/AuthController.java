@@ -20,10 +20,7 @@ public class AuthController {
     @RequestMapping(value = "/login", httpMethod = HttpMethod.GET)
     public HttpResponse loginPage(final HttpRequest httpRequest) {
         if (httpRequest.getSession().isLoggedInUser()) {
-            httpRequest.getSession().changeLastAccessedTime();
-            return HttpResponse.redirect("/index.html")
-                    .addCookie(httpRequest.getCookie(), httpRequest.getSession())
-                    .build();
+            return redirectToIndex(httpRequest);
         }
         return HttpResponse.ok()
                 .body(getFilePath(httpRequest.getUri()))
@@ -41,7 +38,6 @@ public class AuthController {
         return HttpResponse.redirect("/index.html")
                 .addCookie(httpRequest.getCookie(), httpRequest.getSession())
                 .build();
-
     }
 
     @RequestMapping(value = "/register", httpMethod = HttpMethod.GET)
@@ -55,6 +51,13 @@ public class AuthController {
     public HttpResponse register(final HttpRequest httpRequest) {
         final UserResponseDto result = authService.register(httpRequest);
         return HttpResponse.created(result.getId(), "/index.html")
+                .build();
+    }
+
+    private HttpResponse redirectToIndex(HttpRequest httpRequest) {
+        httpRequest.getSession().changeLastAccessedTime();
+        return HttpResponse.redirect("/index.html")
+                .addCookie(httpRequest.getCookie(), httpRequest.getSession())
                 .build();
     }
 

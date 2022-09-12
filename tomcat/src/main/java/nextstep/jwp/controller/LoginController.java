@@ -43,7 +43,6 @@ public class LoginController extends AbstractController {
         final ResponseHeaders headers = ResponseHeaders.create()
                 .addHeader(SET_COOKIE, "JSESSIONID=" + uuid);
         return HttpResponseBuilder.found("/index", headers);
-
     }
 
     private void addSession(UUID uuid, User user) {

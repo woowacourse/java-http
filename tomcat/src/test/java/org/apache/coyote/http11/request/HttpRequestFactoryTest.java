@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class HttpRequestFactoryTest {
 
-    @DisplayName("받은 InputStream을 파싱해서 HttpRequestHeader를 반환한다.")
+    @DisplayName("받은 InputStream을 파싱해서 HttpRequest를 반환한다.")
     @Test
     void parse() throws IOException {
         // given

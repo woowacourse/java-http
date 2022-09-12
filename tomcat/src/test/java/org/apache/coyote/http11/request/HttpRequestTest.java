@@ -33,6 +33,4 @@ class HttpRequestTest {
         assertThat(requestHeaders.getRequestHeaders().get("Host")).isEqualTo("localhost:8080");
         assertThat(requestHeaders.getRequestHeaders().get("Connection")).isEqualTo("keep-alive");
     }
-
-
 }

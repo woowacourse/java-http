@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.support;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.controller.HomePageController;
 import nextstep.jwp.controller.LoginController;
@@ -19,11 +20,12 @@ public class RequestMapping {
     private final Map<String, Controller> controllers;
 
     private RequestMapping() {
-        this.controllers = Map.of(
-                "/", homePageController,
-                "/register", registerController,
-                "/login", loginController
-        );
+        this.controllers = new LinkedHashMap<>() {{
+            put("/index", homePageController);
+            put("/register", registerController);
+            put("/login", loginController);
+            put("/", homePageController);
+        }};
     }
 
     public static Controller find(String requestUri) {

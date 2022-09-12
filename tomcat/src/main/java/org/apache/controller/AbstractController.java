@@ -19,20 +19,20 @@ public abstract class AbstractController implements Controller {
         if (request.matches(HttpMethod.POST)) {
            return handlePost(request);
         }
-        return notfound();
+        return notFound();
     }
 
     protected HttpResponse handleGet(HttpRequest request) {
-        return notfound();
+        return notFound();
     }
 
     protected HttpResponse handlePost(HttpRequest request) {
-        return notfound();
+        return notFound();
     }
 
     ;
 
-    protected HttpResponse notfound() {
+    protected HttpResponse notFound() {
         return HttpResponse.of(StatusCode.NOT_FOUND, ContentType.TEXT_HTML,
             FileUtils.readFile(getResource("/404.html")));
     }

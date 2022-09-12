@@ -16,7 +16,7 @@ public class StaticFileController extends AbstractController {
     protected HttpResponse handleGet(HttpRequest request) {
         URL resource = getResource(request);
         if (resource == null) {
-            return notfound();
+            return notFound();
         }
         return HttpResponse.of(StatusCode.OK, request.getFileExtension(), FileUtils.readFile(resource));
     }

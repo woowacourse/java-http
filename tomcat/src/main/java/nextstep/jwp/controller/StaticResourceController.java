@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionFactory;
 import org.apache.coyote.http11.exception.MethodNotAllowedException;
@@ -48,7 +47,6 @@ public class StaticResourceController implements Controller {
 
     private HttpResponse toHttpResponseWithCreatingSession(Path path, String responseBody) {
         final Session session = SessionFactory.create();
-
         return new HttpResponse.Builder()
                 .status(HttpStatus.OK)
                 .cookie(SESSION_KEY + session.getId())

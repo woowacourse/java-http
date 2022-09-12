@@ -68,9 +68,38 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인 성공시 302 응답과 함께 /index.html 로 리다이렉팅 한다.")
+    @DisplayName("쿠키값을 포함한 로그인 요청 성공시 302 응답과 함께 /index.html 로 리다이렉팅 한다.")
     @Test
     void login() {
+        //given
+        final String account = "gugu";
+        final String password = "password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=1234",
+                "Connection: keep-alive ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account=" + account + "&password=" + password);
+
+        final StubSocket socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        //then
+        final String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n";
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @DisplayName("쿠키값 없이 로그인 요청 성공시 302 응답과 함께 새로운 쿠키값을 헤더에 포함해 응답한다.")
+    @Test
+    void login_Without_Cookie() {
         //given
         final String account = "gugu";
         final String password = "password";
@@ -91,7 +120,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         //then
+        final String JSessionId = socket.output().split("JSESSIONID=")[1].split(" ")[0];
         final String expected = "HTTP/1.1 302 Found \r\n" +
+                "Set-Cookie: JSESSIONID=" + JSessionId + " \r\n" +
                 "Location: /index.html \r\n";
         assertThat(socket.output()).contains(expected);
     }

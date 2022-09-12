@@ -77,22 +77,42 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse doPost(HttpRequest request) {
-        login(request.getBody(), request.getSessionId());
-
-        return new HttpResponse.Builder()
-                .status(HttpStatus.FOUND)
-                .location(REDIRECT_PATH)
-                .build();
+        return login(request);
     }
 
-    private void login(Map<String, String> params, String sessionId) {
+    private HttpResponse login(HttpRequest request) {
+        final Map<String, String> params = request.getBody();
         final String account = params.get("account");
         final String password = params.get("password");
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(LoginFailedException::new);
 
         user.checkPassword(password);
+        if (request.containsSession()) {
+            return generateRedirectResponse(request, user);
+        }
+        return generateRedirectResponseWithNewSession(user);
+    }
+
+    private HttpResponse generateRedirectResponse(HttpRequest request, User user) {
+        final String sessionId = request.getSessionId();
         setUserToSession(sessionId, user);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.FOUND)
+                .location(REDIRECT_PATH)
+                .build();
+    }
+
+    private HttpResponse generateRedirectResponseWithNewSession(User user) {
+        final Session session = SessionFactory.create();
+        final SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
+        session.setAttribute("user", user);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.FOUND)
+                .cookie(KEY_SESSION + session.getId())
+                .location(REDIRECT_PATH)
+                .build();
     }
 
     private void setUserToSession(String sessionId, User user) {

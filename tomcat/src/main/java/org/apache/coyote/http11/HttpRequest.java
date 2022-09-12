@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+
 public class HttpRequest {
 
     private RequestLine requestLine;
@@ -15,12 +19,8 @@ public class HttpRequest {
         this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
 
-    public String getRequestLine() {
-        return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion().getValue();
-    }
-
-    public HttpMethod getHttpMethod() {
-        return requestLine.getHttpMethod();
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return requestLine.isSameHttpMethod(httpMethod);
     }
 
     public String getPath() {
@@ -56,5 +56,21 @@ public class HttpRequest {
 
     public String getRequestParameter(final String key) {
         return requestParameters.getParameter(key);
+    }
+
+    public Session getSession() {
+        if (headers.hasJSessionId()) {
+            String jSessionId = headers.getJSessionId();
+            return SessionManager.findSession(jSessionId);
+        }
+
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid.toString());
+        SessionManager.add(session);
+        return session;
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 }

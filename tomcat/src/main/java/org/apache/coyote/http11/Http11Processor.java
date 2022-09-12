@@ -43,12 +43,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = generateHttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            if (isResource(httpRequest)) {
-                httpResponse.addView(httpRequest.getPath());
-                write(outputStream, httpResponse);
-                return;
-            }
-
             Servlet servlet = ServletContainer.findByPath(httpRequest.getPath());
             servlet.service(httpRequest, httpResponse);
 
@@ -60,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest generateHttpRequest(final BufferedReader bufferedReader) throws IOException {
         HttpRequest request = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
-        log.info(request.getRequestLine());
+        RequestLine requestLine = request.getRequestLine();
+        log.info("{} {} {}", requestLine.getHttpMethod(), requestLine.getRequestURI().getPath(),
+                requestLine.getHttpVersion().getValue());
 
         addHeaders(bufferedReader, request);
         addBody(bufferedReader, request);
@@ -82,11 +78,6 @@ public class Http11Processor implements Runnable, Processor {
             bufferedReader.read(body, 0, contentLength);
             request.addBody(String.copyValueOf(body));
         }
-    }
-
-    private boolean isResource(final HttpRequest httpRequest) {
-        String path = httpRequest.getPath();
-        return path.contains(".");
     }
 
     private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {

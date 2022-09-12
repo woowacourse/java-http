@@ -7,7 +7,9 @@ import nextstep.jwp.controller.RegisterServlet;
 
 public class ServletContainer {
 
-    private static final List<Servlet> SERVLETS = List.of(new IndexServlet(), new LoginServlet(), new RegisterServlet());
+    private static final List<Servlet> SERVLETS = List.of(new IndexServlet(), new LoginServlet(), new RegisterServlet(),
+            new ResourceServlet());
+
     private static final Servlet NOT_FOUND_SERVLET = new NotFoundServlet();
 
     private ServletContainer() {

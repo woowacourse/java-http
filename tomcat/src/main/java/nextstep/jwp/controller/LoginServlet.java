@@ -1,8 +1,10 @@
 package nextstep.jwp.controller;
 
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
@@ -22,6 +24,14 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        Session session = httpRequest.getSession();
+
+        User user = (User) session.getAttribute("user");
+        if (Objects.nonNull(user)) {
+            httpResponse.sendRedirect("/index.html");
+            return;
+        }
+
         httpResponse.addStatusCode(StatusCode.OK);
         httpResponse.addView("login.html");
     }
@@ -31,14 +41,22 @@ public class LoginServlet extends HttpServlet {
         String password = httpRequest.getRequestParameter("password");
 
         if (InMemoryUserRepository.existsAccountAndPassword(account, password)) {
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchUserException::new);
-            log.info(user.toString());
-
-            httpResponse.sendRedirect("/index.html");
+            login(httpRequest, httpResponse, account);
             return;
         }
 
         httpResponse.addStatusCode(StatusCode.UNAUTHORIZED);
         httpResponse.addView("401.html");
+    }
+
+    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse, final String account) {
+        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchUserException::new);
+        log.info(user.toString());
+
+        Session session = httpRequest.getSession();
+        session.setAttribute("user", user);
+
+        httpResponse.addCookie(session.parseJSessionId());
+        httpResponse.sendRedirect("/index.html");
     }
 }

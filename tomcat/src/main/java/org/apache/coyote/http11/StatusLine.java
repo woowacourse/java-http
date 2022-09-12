@@ -1,7 +1,4 @@
-package org.apache.coyote;
-
-import org.apache.coyote.http11.HttpVersion;
-import org.apache.coyote.http11.StatusCode;
+package org.apache.coyote.http11;
 
 public class StatusLine {
 
@@ -11,10 +8,6 @@ public class StatusLine {
     public StatusLine() {
         this.httpVersion = HttpVersion.HTTP11;
         this.statusCode = StatusCode.OK;
-    }
-
-    public void addHttpVersion(final HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
     }
 
     public void addStatusCode(final StatusCode statusCode) {

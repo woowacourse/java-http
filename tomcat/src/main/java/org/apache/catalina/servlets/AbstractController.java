@@ -1,21 +1,13 @@
 package org.apache.catalina.servlets;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.http11.Resource;
 import org.apache.coyote.http11.ResourceLocator;
-import org.apache.coyote.http11.general.ContentType;
-import org.apache.coyote.http11.general.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
-    public static final String PARAM_DELIMITER = "&";
-    public static final String KEY_VALUE_DELIMITER = "=";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
     protected final ResourceLocator resourceLocator;
 
     protected AbstractController(ResourceLocator resourceLocator) {
@@ -66,25 +58,6 @@ public abstract class AbstractController implements Controller {
             response.addHeader("Content-Type", resource.getContentType().getValue());
             response.setBody(resource.getData());
         }
-    }
-
-    protected Map<String, String> parseFormPayload(HttpRequest request, HttpResponse response) {
-        HttpHeaders headers = request.getHeaders();
-        ContentType contentType = headers.getContentType();
-        if (contentType != ContentType.APPLICATION_FORM_URLENCODED) {
-            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-            return null;
-        }
-        String body = request.getBody();
-        Map<String, String> data = new HashMap<>();
-        String[] components = body.split(PARAM_DELIMITER);
-        for (String component : components) {
-            String[] keyVal = component.split(KEY_VALUE_DELIMITER);
-            String key = keyVal[KEY_INDEX];
-            String value = keyVal[VALUE_INDEX];
-            data.put(key, value);
-        }
-        return data;
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {

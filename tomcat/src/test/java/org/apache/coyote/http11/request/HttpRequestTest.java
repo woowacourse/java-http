@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -57,5 +58,22 @@ class HttpRequestTest {
                     }
             );
         }
+    }
+
+    @Test
+    @DisplayName("getSession 메소드는 헤더에 JSessionId 쿠키가 포함되어 있다면 해당 JSessionId 값을 ID로 갖는 Session 객체를 반환한다.")
+    void getSession() {
+        // given
+        final HttpRequestLine httpRequestLine = HttpRequestLine.from("GET /path HTTP/1.1");
+        final List<String> rawRequest = new ArrayList<>();
+        rawRequest.add("Cookie: JSESSIONID=123");
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(rawRequest);
+        final HttpRequest httpRequest = HttpRequest.of(httpRequestLine, httpRequestHeader, "");
+
+        // when
+        final Session session = httpRequest.getSession();
+
+        // then
+        assertThat(session.getId()).isEqualTo("123");
     }
 }

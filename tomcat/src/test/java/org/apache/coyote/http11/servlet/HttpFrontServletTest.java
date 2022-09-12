@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
@@ -13,12 +13,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.handler.ControllerAdvice;
+import org.apache.coyote.http11.handler.RequestHandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
-import org.apache.coyote.http11.servlet.HttpFrontServlet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,26 +28,25 @@ class HttpFrontServletTest {
     private final HttpFrontServlet httpFrontServlet = new HttpFrontServlet(
             new RequestHandlerMapping(), new ControllerAdvice());
 
-    private HttpRequest getHttpRequest(final String rawRequestLine, final String requestBody) {
+    private HttpRequest getHttpRequest(final String rawRequestLine) {
         final HttpRequestLine requestLine = HttpRequestLine.from(rawRequestLine);
         final List<String> rawRequest = new ArrayList<>();
         rawRequest.add("name: eve");
         final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(rawRequest);
 
-        return HttpRequest.of(requestLine, httpRequestHeader, requestBody);
+        return HttpRequest.of(requestLine, httpRequestHeader, "");
     }
 
     @Nested
     @DisplayName("handle 메소드는")
     class Handle {
 
-
         @Test
         @DisplayName("static file uri를 반환하는 핸들러가 실행되면 해당 파일 정보가 포함된 ResponseEntity를 반환한다.")
         void success_file() throws IOException {
             // given
             final String rawRequestLine = "GET /login HTTP/1.1";
-            final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
+            final HttpRequest httpRequest = getHttpRequest(rawRequestLine);
 
             // when
             final ResponseEntity response = httpFrontServlet.service(httpRequest);
@@ -69,7 +68,7 @@ class HttpFrontServletTest {
         void success_body() {
             // given
             final String rawRequestLine = "POST /login?account=gugu&password=password HTTP/1.1";
-            final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
+            final HttpRequest httpRequest = getHttpRequest(rawRequestLine);
 
             // when
             final ResponseEntity response = httpFrontServlet.service(httpRequest);
@@ -87,7 +86,7 @@ class HttpFrontServletTest {
         void success_notFountResponse() {
             // given
             final String rawRequestLine = "GET /wrong HTTP/1.1";
-            final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
+            final HttpRequest httpRequest = getHttpRequest(rawRequestLine);
 
             // when
             final ResponseEntity response = httpFrontServlet.service(httpRequest);
@@ -106,7 +105,7 @@ class HttpFrontServletTest {
         void success_ServerErrorResponse() {
             // given
             final String rawRequestLine = "POST /login?account=wrong&password=password HTTP/1.1";
-            final HttpRequest httpRequest = getHttpRequest(rawRequestLine, "");
+            final HttpRequest httpRequest = getHttpRequest(rawRequestLine);
 
             // when
             final ResponseEntity response = httpFrontServlet.service(httpRequest);
@@ -119,6 +118,5 @@ class HttpFrontServletTest {
                         NOT_FOUND.getStatusCode() + ".html");
             });
         }
-
     }
 }

@@ -8,7 +8,7 @@ import nextstep.jwp.handler.LoginController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestServletMappingTest {
+class RequestHandlerMappingTest {
 
     private final RequestHandlerMapping requestHandlerMapping = new RequestHandlerMapping();
 

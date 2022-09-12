@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
 import org.junit.jupiter.api.DisplayName;

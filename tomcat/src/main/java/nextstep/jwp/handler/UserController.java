@@ -8,7 +8,7 @@ import org.apache.coyote.http11.handler.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 
-public class UserServlet extends HttpRequestHandler {
+public class UserController extends HttpRequestHandler {
 
     private static final String PASSWORD_KEY = "password";
     private static final String ACCOUNT_KEY = "account";

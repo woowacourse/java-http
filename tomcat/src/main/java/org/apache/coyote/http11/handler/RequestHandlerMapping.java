@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.HomeController;
 import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.UserServlet;
+import nextstep.jwp.handler.UserController;
 
 public class RequestHandlerMapping {
 
@@ -14,7 +14,7 @@ public class RequestHandlerMapping {
     static {
         handlers.put("/", new HomeController());
         handlers.put("/login", new LoginController());
-        handlers.put("/register", new UserServlet());
+        handlers.put("/register", new UserController());
     }
 
     public RequestHandler getHandler(final String path) {
@@ -22,7 +22,7 @@ public class RequestHandlerMapping {
         return handlers.get(path);
     }
 
-    public void validateHandlerExistence(final String path) {
+    private void validateHandlerExistence(final String path) {
         if (!handlers.containsKey(path)) {
             throw new UncheckedServletException("Invalid Uri");
         }

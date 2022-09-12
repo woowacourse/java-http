@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Objects;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

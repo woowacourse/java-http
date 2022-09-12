@@ -3,13 +3,14 @@ package nextstep.jwp.controller;
 import java.util.Optional;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
 

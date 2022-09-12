@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package org.apache.coyote.http11.controller;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,5 +1,8 @@
 package nextstep.jwp.http;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.session.SessionManager;
@@ -30,6 +33,30 @@ public class HttpRequest {
         this.queryParams = queryParams;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
+    }
+
+    public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
+        String requestBody = parseRequestBody(bufferedReader, httpHeaders);
+
+        return HttpRequest.of(requestLine, httpHeaders, requestBody);
+    }
+
+    private static HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            lines.add(line);
+        }
+        return HttpHeaders.parse(lines);
+    }
+
+    private static String parseRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
+        throws IOException {
+        char[] body = new char[httpHeaders.getContentLength()];
+        bufferedReader.read(body);
+        return new String(body);
     }
 
     public static HttpRequest of(String requestLine, HttpHeaders httpHeaders,

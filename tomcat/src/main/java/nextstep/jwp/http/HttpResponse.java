@@ -1,5 +1,8 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.controller.RequestMapping;
+import org.apache.controller.Controller;
+
 public class HttpResponse {
 
     private static final String SET_COOKIE_HEADER_WITH_JSESSIONID = "Set-Cookie: JSESSIONID=";
@@ -15,6 +18,11 @@ public class HttpResponse {
         this.contentType = contentType;
         this.responseBody = responseBody;
         this.cookie = cookie;
+    }
+
+    public static HttpResponse handle(HttpRequest httpRequest) {
+        Controller controller = RequestMapping.get(httpRequest);
+        return controller.service(httpRequest);
     }
 
     public static HttpResponse of(StatusCode statusCode, ContentType contentType,

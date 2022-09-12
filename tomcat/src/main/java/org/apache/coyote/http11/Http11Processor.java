@@ -39,42 +39,13 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            HttpRequest httpRequest = extractRequest(bufferedReader);
-            HttpResponse httpResponse = handle(httpRequest);
+            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpResponse httpResponse = HttpResponse.handle(httpRequest);
 
             outputStream.write(httpResponse.writeResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest extractRequest(BufferedReader bufferedReader) throws IOException {
-        String requestLine = bufferedReader.readLine();
-        HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
-        String requestBody = parseRequestBody(bufferedReader, httpHeaders);
-
-        return HttpRequest.of(requestLine, httpHeaders, requestBody);
-    }
-
-    private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
-        List<String> lines = new ArrayList<>();
-        String line;
-        while (!(line = bufferedReader.readLine()).isEmpty()) {
-            lines.add(line);
-        }
-        return HttpHeaders.parse(lines);
-    }
-
-    private String parseRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
-        throws IOException {
-        char[] body = new char[httpHeaders.getContentLength()];
-        bufferedReader.read(body);
-        return new String(body);
-    }
-
-    private HttpResponse handle(HttpRequest httpRequest) {
-        Controller controller = RequestMapping.get(httpRequest);
-        return controller.service(httpRequest);
     }
 }

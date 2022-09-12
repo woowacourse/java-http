@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.Application;
 import nextstep.jwp.exception.NotFoundException;
@@ -32,7 +34,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final Request request = Request.of(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final Request request = Request.of(bufferedReader);
             final Response response = Response.of(outputStream);
             execute(request, response);
         } catch (Exception e) {

@@ -37,13 +37,18 @@ public class RequestFixture {
     }
     public static Request create(final HttpMethod method, final String url, final String body) throws IOException {
         final String line = createLine(method, url, body);
-        return Request.of(new ByteArrayInputStream(line.getBytes()));
+        return createRequestByLine(line);
+    }
+
+    private static Request createRequestByLine(final String line) throws IOException {
+        final InputStream inputStream = new ByteArrayInputStream(line.getBytes());
+        return Request.of(new BufferedReader(new InputStreamReader(inputStream)));
     }
 
     public static Request create(final HttpMethod method, final String url, final Map<String, String> headers, final String body)
             throws IOException {
         final String line = createLine(method, url, headers, body);
-        return Request.of(new ByteArrayInputStream(line.getBytes()));
+        return createRequestByLine(line);
     }
 
     public static RequestHeaders createHeader(final Map<String, String> headers) throws IOException {

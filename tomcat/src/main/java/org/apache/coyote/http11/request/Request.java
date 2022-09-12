@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import org.apache.coyote.http11.URL;
 
 public class Request {
@@ -20,8 +18,7 @@ public class Request {
         this.body = body;
     }
 
-    public static Request of(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static Request of(final BufferedReader bufferedReader) throws IOException {
         final String startLineString = bufferedReader.readLine();
         final StartLine startLine = StartLine.of(startLineString);
         final RequestHeaders headers = RequestHeaders.of(bufferedReader);

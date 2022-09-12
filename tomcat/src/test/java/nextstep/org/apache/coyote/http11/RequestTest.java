@@ -2,8 +2,11 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
@@ -18,7 +21,8 @@ class RequestTest {
         final String requestLine = RequestFixture.createLine(HttpMethod.GET, "/", "");
 
         // when
-        final Request request = Request.of(new ByteArrayInputStream(requestLine.getBytes()));
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final Request request = Request.of(new BufferedReader(new InputStreamReader(inputStream)));
 
         // then
         assertThat(request.hasPath("/")).isTrue();

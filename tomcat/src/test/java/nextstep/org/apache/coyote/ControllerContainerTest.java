@@ -2,8 +2,11 @@ package nextstep.org.apache.coyote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.ControllerContainer;
@@ -20,7 +23,8 @@ class ControllerContainerTest {
     void findController() throws IOException {
         // given
         final String requestLine = RequestFixture.createLine(HttpMethod.GET, "/login.html", "");
-        final Request request = Request.of(new ByteArrayInputStream(requestLine.getBytes()));
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final Request request = Request.of(new BufferedReader(new InputStreamReader(inputStream)));
 
         // when
         final Controller actual =

@@ -24,39 +24,6 @@ public class HttpResponse {
     private HttpHeaders headers = new HttpHeaders();
     private String body = "";
 
-    public HttpResponse() {
-    }
-
-    private HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus,
-                         final HttpHeaders headers, final String body) {
-        this.httpVersion = httpVersion;
-        this.httpStatus = httpStatus;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    public static HttpResponse of(final HttpVersion httpVersion,
-                                  final HttpStatus status,
-                                  final String body,
-                                  final HttpHeader... httpHeaders) {
-        final HttpHeaders headers = HttpHeaders.of(httpHeaders);
-        return new HttpResponse(httpVersion, status, headers, body);
-    }
-
-    public static HttpResponse of(final HttpVersion httpVersion,
-                                  final HttpStatus status,
-                                  final HttpHeader... httpHeaders) {
-        final HttpHeaders headers = HttpHeaders.of(httpHeaders);
-        return new HttpResponse(httpVersion, status, headers, "");
-    }
-
-    public static HttpResponse of(final HttpVersion httpVersion,
-                                  final HttpStatus status,
-                                  final String body,
-                                  final HttpHeaders headers) {
-        return new HttpResponse(httpVersion, status, headers, body);
-    }
-
     public String getBody() {
         return body;
     }

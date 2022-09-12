@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Handler {
 
-    static final Logger log = LoggerFactory.getLogger(Handler.class);
+    protected static final Logger log = LoggerFactory.getLogger(Handler.class);
 
     public Handler() {
     }

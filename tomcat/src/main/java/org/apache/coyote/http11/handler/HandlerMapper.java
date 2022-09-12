@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.handler.LoginHandler.LOGIN_HANDLER;
-import static org.apache.coyote.http11.handler.RegisterHandler.REGISTER_HANDLER;
-import static org.apache.coyote.http11.handler.get.HandlerForGetRequest.HANDLER_FOR_GET_REQUEST;
-import static org.apache.coyote.http11.handler.get.LoginPageHandler.LOGIN_PAGE_HANDLER;
+import static nextstep.jwp.handler.LoginHandler.LOGIN_HANDLER;
+import static nextstep.jwp.handler.RegisterHandler.REGISTER_HANDLER;
+import static nextstep.jwp.handler.get.HandlerForGetRequest.HANDLER_FOR_GET_REQUEST;
+import static nextstep.jwp.handler.get.LoginPageHandler.LOGIN_PAGE_HANDLER;
 
 import java.util.Arrays;
 import org.apache.coyote.http11.HttpMethod;

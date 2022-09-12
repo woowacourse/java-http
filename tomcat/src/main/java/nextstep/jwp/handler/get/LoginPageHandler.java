@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.get;
+package nextstep.jwp.handler.get;
 
 import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
 

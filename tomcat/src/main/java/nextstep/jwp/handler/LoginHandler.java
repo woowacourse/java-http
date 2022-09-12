@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
 import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
 
@@ -9,11 +9,13 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.authorization.Session;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class LoginHandler extends Handler {
 
-    static LoginHandler LOGIN_HANDLER = new LoginHandler();
+    public static LoginHandler LOGIN_HANDLER = new LoginHandler();
 
     private static String JSESSIONID = "JSESSIONID";
     private static String SUCCESS_REDIRECT_URI = "/index.html";

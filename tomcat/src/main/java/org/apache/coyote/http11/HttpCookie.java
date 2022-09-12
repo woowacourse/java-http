@@ -31,7 +31,7 @@ public class HttpCookie {
 
     public static HttpCookie createEmptyCookie() {
         return Objects.requireNonNullElseGet(emptyCookieInstance,
-                () -> HttpCookie.of(""));
+                () -> emptyCookieInstance = HttpCookie.of(""));
     }
 
     private static void parseRawCookie(final String rawCookie, final Map<String, String> parsedCookies) {

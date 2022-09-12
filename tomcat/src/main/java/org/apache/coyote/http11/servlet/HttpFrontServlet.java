@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.Objects;
 import nextstep.jwp.handler.ControllerAdvice;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.HandlerResponseEntity;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.handler.RequestHandlerMapping;
@@ -12,16 +12,19 @@ import org.apache.coyote.http11.response.file.FileHandler;
 
 public class HttpFrontServlet {
 
+    private static HttpFrontServlet instance;
+
     private final RequestHandlerMapping requestHandlerMapping;
     private final ControllerAdvice controllerAdvice;
-
-    public HttpFrontServlet() {
-        this(new RequestHandlerMapping(), new ControllerAdvice());
-    }
 
     public HttpFrontServlet(final RequestHandlerMapping requestHandlerMapping, final ControllerAdvice controllerAdvice) {
         this.requestHandlerMapping = requestHandlerMapping;
         this.controllerAdvice = controllerAdvice;
+    }
+
+    public static HttpFrontServlet getInstance() {
+        return Objects.requireNonNullElseGet(instance,
+                () -> instance = new HttpFrontServlet(new RequestHandlerMapping(), new ControllerAdvice()));
     }
 
     public ResponseEntity service(final HttpRequest httpRequest) {

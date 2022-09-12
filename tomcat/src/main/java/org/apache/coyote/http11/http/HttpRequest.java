@@ -2,7 +2,10 @@ package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.http.domain.Headers;
+import org.apache.coyote.http11.http.domain.HttpCookie;
 import org.apache.coyote.http11.http.domain.HttpMethod;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.http.domain.RequestLine;
@@ -31,6 +34,18 @@ public class HttpRequest {
         } catch (IOException e) {
             throw new IllegalArgumentException("HttpRequest creation failed.");
         }
+    }
+
+    public boolean isValidCookie() {
+        HttpCookie cookie = headers.getCookie();
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        return cookie.containsJSESSIONID() && SessionManager.contains(jsessionid);
+    }
+
+    public Session getSession() {
+        HttpCookie cookie = headers.getCookie();
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        return SessionManager.findSession(jsessionid);
     }
 
     public HttpMethod getHttpMethod() {

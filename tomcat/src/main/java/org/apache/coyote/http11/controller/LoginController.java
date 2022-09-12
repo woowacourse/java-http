@@ -8,7 +8,6 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
-import org.apache.coyote.http11.http.domain.HttpCookie;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
@@ -62,22 +61,15 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        HttpCookie cookie = httpRequest.getHeaders().getCookie();
-        String jsessionid = cookie.getCookie("JSESSIONID");
-        if (isLoggedIn(cookie, jsessionid)) {
-            redirectToHomePage(cookie, httpResponse);
+        if (httpRequest.isValidCookie()) {
+            redirectToHomePage(httpRequest, httpResponse);
             return;
         }
         getLoginPage(httpRequest, httpResponse);
     }
 
-    private boolean isLoggedIn(final HttpCookie cookie, final String jsessionid) {
-        return cookie.containsJSESSIONID() && SessionManager.contains(jsessionid);
-    }
-
-    private void redirectToHomePage(final HttpCookie cookie, final HttpResponse httpResponse) {
-        String jsessionid = cookie.getCookie("JSESSIONID");
-        Session session = SessionManager.findSession(jsessionid);
+    private void redirectToHomePage(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        Session session = httpRequest.getSession();
         User user = (User) session.getAttribute("user");
         log.info("Login User : {}", user);
         httpResponse.found()

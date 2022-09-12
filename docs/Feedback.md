@@ -22,3 +22,10 @@
 - [x] Log 사용 시 {}를 통한 문자열 출력
 - [x] 미사용 생성자 제거
     - HttpResponse
+
+## 2, 3, 4단계 - 3차 피드백
+- [ ] log에 toString() 사용 부분 제거 
+- [ ] RequestMapping 생성과 sevice 메서드 호출 분리 
+- [ ] HttpCookie 필드명 중복 수정 
+- [ ] SessionManager private 생성자 
+- [ ] SessionManager log 사용 

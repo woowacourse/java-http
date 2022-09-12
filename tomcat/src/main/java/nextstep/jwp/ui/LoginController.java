@@ -31,7 +31,8 @@ public final class LoginController extends AbstractController {
         if (request.hasNoJsessionIdCookie()) {
             return Http11Response.of(OK, LOGIN_HTML);
         }
-        return Http11Response.withLocation(FOUND, LOGIN_HTML, INDEX_HTML);
+        return Http11Response.of(FOUND, LOGIN_HTML)
+                .addHeader("Location", INDEX_HTML);
     }
 
     @Override
@@ -45,9 +46,13 @@ public final class LoginController extends AbstractController {
             final UUID uuid = UUID.randomUUID();
             startSession(user, uuid);
             final HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", uuid.toString()));
-            return Http11Response.withLocationAndSetCookie(FOUND, LOGIN_HTML, INDEX_HTML, cookie, "JSESSIONID");
+
+            return Http11Response.of(FOUND, LOGIN_HTML)
+                    .addHeader("Location", INDEX_HTML)
+                    .addHeader("Set-Cookie", cookie.cookieToString("JSESSIONID"));
         }
-        return Http11Response.withLocation(FOUND, LOGIN_HTML, "/401.html");
+        return Http11Response.of(FOUND, LOGIN_HTML)
+                .addHeader("Location", "/401.html");
     }
 
     private boolean successLogin(final Http11Request request) {

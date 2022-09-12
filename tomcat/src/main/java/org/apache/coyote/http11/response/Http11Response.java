@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.NotFoundResourcePathException;
-import org.apache.coyote.http11.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,44 +17,22 @@ public class Http11Response {
     private final ResponseHeaders responseHeaders;
     private final String responseBody;
 
-    private Http11Response(StatusCode statusCode, ResponseHeaders responseHeaders, String responseBody) {
+    public Http11Response(StatusCode statusCode, ResponseHeaders responseHeaders, String responseBody) {
         this.statusCode = statusCode;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
-    }
-
-    public static Http11Response withResponseBody(final StatusCode statusCode, final String contentType,
-                                                  final String responseBody) {
-        return new Http11Response(statusCode, ResponseHeaders.fromContentType(contentType), responseBody);
     }
 
     public static Http11Response of(final StatusCode statusCode, final String resourcePath) {
         final URL resource = getResource(resourcePath);
         validateResourcePath(resource);
 
-        final String responseBody = getResponseBody(resource);
-        return new Http11Response(statusCode, ResponseHeaders.fromResourcePath(resourcePath), responseBody);
-    }
-
-    public static Http11Response withLocation(final StatusCode statusCode, final String resourcePath, String location) {
-        final URL resource = getResource(resourcePath);
-        validateResourcePath(resource);
+        final String contentType = resourcePath.split("\\.")[1];
+        final ResponseHeaders responseHeaders = ResponseHeaders.initEmpty()
+                .addHeader("Content-Type", contentType);
 
         final String responseBody = getResponseBody(resource);
-        return new Http11Response(statusCode, ResponseHeaders.withLocation(resourcePath, location), responseBody);
-    }
-
-    public static Http11Response withLocationAndSetCookie(final StatusCode statusCode,
-                                                          final String resourcePath,
-                                                          final String location,
-                                                          final HttpCookie cookie,
-                                                          final String cookieName) {
-        final URL resource = getResource(resourcePath);
-        validateResourcePath(resource);
-
-        final String responseBody = getResponseBody(resource);
-        return new Http11Response(statusCode,
-                ResponseHeaders.withLocationAndSetCookie(resourcePath, location, cookie, cookieName), responseBody);
+        return new Http11Response(statusCode, responseHeaders, responseBody);
     }
 
     private static URL getResource(String resourcePath) {
@@ -79,6 +56,11 @@ public class Http11Response {
         }
     }
 
+    public Http11Response addHeader(String key, String value) {
+        ResponseHeaders responseHeaders = this.responseHeaders.addHeader(key, value);
+        return new Http11Response(statusCode, responseHeaders, responseBody);
+    }
+
     public void write(final OutputStream outputStream) throws IOException {
         outputStream.write(statusCode.responseToString(this).getBytes());
         outputStream.flush();
@@ -91,7 +73,7 @@ public class Http11Response {
     public String getOkResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHeaders.contentTypeToString(),
+                responseHeaders.headerToString("Content-Type"),
                 contentLengthToString(),
                 "",
                 responseBody);
@@ -100,9 +82,9 @@ public class Http11Response {
     public String getFoundResponse() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHeaders.contentTypeToString(),
+                responseHeaders.headerToString("Content-Type"),
                 contentLengthToString(),
-                responseHeaders.locationToString(),
+                responseHeaders.headerToString("Location"),
                 "",
                 responseBody);
     }
@@ -110,10 +92,10 @@ public class Http11Response {
     public String getFoundResponseWithSetCookie() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHeaders.contentTypeToString(),
+                responseHeaders.headerToString("Content-Type"),
                 contentLengthToString(),
-                responseHeaders.locationToString(),
-                responseHeaders.setCookieToString(),
+                responseHeaders.headerToString("Location"),
+                responseHeaders.headerToString("Set-Cookie"),
                 "",
                 responseBody);
     }

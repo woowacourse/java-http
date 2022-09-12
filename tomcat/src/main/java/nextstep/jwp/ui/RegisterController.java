@@ -26,13 +26,15 @@ public final class RegisterController extends AbstractController {
 
     @Override
     protected Http11Response doPost(final Http11Request request) {
-        final List<String> userInfo = List.of("account", "email", "password");
+        final List<String> userInfo = List.of("account", "password", "email");
         final Http11QueryParams queryParams = Http11QueryParams.from(request.getRequestBody());
         if (queryParams.hasQueryParams(userInfo)) {
             registerUser(queryParams);
-            return Http11Response.withLocation(FOUND, REGISTER_HTML, INDEX_HTML);
+            return Http11Response.of(FOUND, REGISTER_HTML)
+                    .addHeader("Location", INDEX_HTML);
         }
-        return Http11Response.withLocation(FOUND, REGISTER_HTML, "/404.html");
+        return Http11Response.of(FOUND, REGISTER_HTML)
+                .addHeader("Location", "/404.html");
     }
 
     private void registerUser(final Http11QueryParams queryParams) {

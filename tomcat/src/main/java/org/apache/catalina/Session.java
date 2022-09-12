@@ -24,7 +24,7 @@ public class Session {
         values.put(key, object);
     }
 
-    public boolean isLoginedUserSession() {
+    public boolean isLoggedInUserSession() {
         return values.containsKey("user");
     }
 }

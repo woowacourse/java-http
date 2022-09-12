@@ -189,7 +189,7 @@ class Http11ProcessorTest {
 
     @DisplayName("이미 로그인한 사용자가 로그인 페이지에 접근하면 302 응답과 함께 /index.html로 리다이렉팅 한다.")
     @Test
-    void get_Login_AlreadyLogined() {
+    void get_Login_AlreadyLoggedIn() {
         //given
         final String account = "east";
         final String password = "password";

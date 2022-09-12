@@ -11,6 +11,11 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(Request request, Response response) throws Exception {
+        if (request.isPostMethod()) {
+            doPost(request, response);
+            return;
+        }
+        doGet(request, response);
     }
 
     protected void doPost(Request request, Response response) throws Exception {}

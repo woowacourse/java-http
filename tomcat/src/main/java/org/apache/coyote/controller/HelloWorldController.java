@@ -8,16 +8,6 @@ import org.apache.coyote.http11.httpmessage.response.Response;
 public class HelloWorldController extends AbstractController {
 
     @Override
-    public void service(Request request, Response response) throws Exception {
-        if (request.isPostMethod()) {
-            doPost(request, response);
-            return;
-        }
-        if (request.isGetMethod()) {
-            doGet(request, response);
-        }
-    }
-
     public void doGet(Request request, Response response) throws Exception {
         final String responseBody = "Hello world!";
 

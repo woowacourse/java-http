@@ -12,17 +12,6 @@ import org.apache.coyote.http11.httpmessage.response.Response;
 public class RegisterController extends AbstractController {
 
     @Override
-    public void service(Request request, Response response) throws Exception {
-        if (request.isPostMethod()) {
-            doPost(request, response);
-            return;
-        }
-        if (request.isGetMethod()) {
-            doGet(request, response);
-        }
-    }
-
-    @Override
     protected void doPost(Request request, Response response) throws Exception {
         final RequestBodyContent userInput = RequestBodyContent.parse(request.getBody());
         UserService.save(userInput);

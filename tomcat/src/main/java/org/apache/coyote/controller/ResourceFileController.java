@@ -9,12 +9,6 @@ import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.response.Response;
 
 public class ResourceFileController extends AbstractController {
-    @Override
-    public void service(Request request, Response response) throws Exception {
-        if (request.isGetMethod()) {
-            doGet(request, response);
-        }
-    }
 
     @Override
     protected void doGet(Request request, Response response) throws Exception {

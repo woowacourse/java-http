@@ -70,9 +70,9 @@ class RequestTest {
         request.getHeaders().add("Cookie", jsessionidValue);
 
         // when
-        final String actual = request.findJsessionid();
+        final boolean hasJsessionid = request.hasJsessionid();
 
         // then
-        assertThat(actual).isEqualTo(jsessionidValue);
+        assertThat(hasJsessionid).isTrue();
     }
 }

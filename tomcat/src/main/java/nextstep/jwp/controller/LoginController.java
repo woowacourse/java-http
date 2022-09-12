@@ -47,16 +47,6 @@ public class LoginController extends AbstractController {
         response.write(HttpStatus.FOUND);
     }
 
-    private void addToSession(final Response response, final User loggedInUser)
-            throws IOException, URISyntaxException {
-        final String jsessionid = UUID.randomUUID().toString();
-        Session.add(jsessionid, "user", loggedInUser);
-        response.addHeader("Set-Cookie", "JSESSIONID="+jsessionid);
-        log.info(loggedInUser.toString());
-        response.addHeader("Location", "/index.html");
-        response.write(HttpStatus.FOUND);
-    }
-
     private boolean loginSuccess(final RequestBody body) {
         final User foundUser = findUser(body);
         final String password = body.get("password");
@@ -68,5 +58,15 @@ public class LoginController extends AbstractController {
         String account = body.get("account");
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(AccountNotFoundException::new);
+    }
+
+    private void addToSession(final Response response, final User loggedInUser)
+            throws IOException, URISyntaxException {
+        final String jsessionid = UUID.randomUUID().toString();
+        Session.add(jsessionid, "user", loggedInUser);
+        response.addHeader("Set-Cookie", "JSESSIONID="+jsessionid);
+        log.info(loggedInUser.toString());
+        response.addHeader("Location", "/index.html");
+        response.write(HttpStatus.FOUND);
     }
 }

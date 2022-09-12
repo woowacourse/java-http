@@ -2,23 +2,25 @@ package nextstep.org.apache.coyote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.ControllerContainer;
 import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Controller;
-import org.apache.coyote.http11.Protocol;
-import org.apache.coyote.http11.URL;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.junit.jupiter.api.Test;
+import support.RequestFixture;
 
 class ControllerContainerTest {
 
     @Test
-    void findController() {
+    void findController() throws IOException {
         // given
-        final Request request = new Request(HttpMethod.GET, Protocol.HTTP1_1, new URL("/login.html"), null, null, null);
+        final String requestLine = RequestFixture.create(HttpMethod.GET, "/login.html", "");
+        final Request request = Request.of(new ByteArrayInputStream(requestLine.getBytes()));
 
         // when
         final Controller actual =

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.http11.URL;
 
 public class Request {
@@ -21,19 +20,13 @@ public class Request {
     public static final int VALUE = 1;
     private static final int VERSION_INDEX = 2;
 
-    private final HttpMethod method;
-    private final Protocol version;
-    private final URL requestURL;
-    private final QueryParams params;
+    private final StartLine startLine;
     private final RequestHeaders headers;
     private final RequestBody body;
 
-    public Request(final HttpMethod method, final Protocol version, final URL requestURL, final QueryParams params, final RequestHeaders headers,
+    private Request(final StartLine startLine, final RequestHeaders headers,
                    final RequestBody body) {
-        this.method = method;
-        this.version = version;
-        this.requestURL = requestURL;
-        this.params = params;
+        this.startLine = startLine;
         this.headers = headers;
         this.body = body;
     }
@@ -41,23 +34,11 @@ public class Request {
     public static Request of(final InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final String startLine = bufferedReader.readLine();
-        final String[] splitStartLine = startLine.split(SPACE_DELIMITER);
-        final HttpMethod httpMethod = HttpMethod.of(splitStartLine[METHOD_INDEX]);
-        final URL url = URL.of(splitStartLine[URI_INDEX]);
-        final QueryParams params = parseQueryParams(splitStartLine[URI_INDEX]);
-        final Protocol protocol = Protocol.of(splitStartLine[VERSION_INDEX]);
+        final StartLine startLine1 = StartLine.of(startLine);
         final RequestHeaders headers = parseHeader(bufferedReader);
         final int contentLength = headers.getContentLength();
         final RequestBody requestBody = parseBody(bufferedReader, contentLength);
-        return new Request(httpMethod, protocol, url, params, headers, requestBody);
-    }
-
-    private static QueryParams parseQueryParams(final String parsedUrl) {
-        if (!parsedUrl.contains(QUERY_PARAM_DELIMITER)) {
-            return QueryParams.ofEmpty();
-        }
-        final String urlQueryParams = parsedUrl.split(QUERY_PARAM_DELIMITER_REGEX)[PARAM_INDEX];
-        return QueryParams.of(urlQueryParams);
+        return new Request(startLine1, headers, requestBody);
     }
 
     private static RequestHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
@@ -78,34 +59,27 @@ public class Request {
     }
 
     public boolean isForStaticFile() {
-        return requestURL.isForStaticFile();
+        return startLine.isForStaticFile();
     }
 
     public boolean isDefaultUrl() {
-        return requestURL.isDefault();
+        return startLine.isDefault();
     }
 
     public boolean hasPath(final String path) {
-        return this.requestURL.hasPath(path);
-    }
-
-    public String findJsessionid() {
-        return headers.getJsessionid();
+        return startLine.hasPath(path);
     }
 
     public boolean hasJsessionid() {
         return headers.hasJsessionid();
     }
+
     public HttpMethod getMethod() {
-        return method;
+        return startLine.getMethod();
     }
 
     public URL getURL() {
-        return requestURL;
-    }
-
-    public QueryParams getParams() {
-        return params;
+        return startLine.getURL();
     }
 
     public RequestHeaders getHeaders() {

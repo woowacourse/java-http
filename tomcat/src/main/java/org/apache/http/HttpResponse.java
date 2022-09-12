@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
 import nextstep.jwp.controller.RequestMapping;
 import org.apache.controller.Controller;

@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
 import java.net.URL;
 import nextstep.jwp.utils.FileUtils;

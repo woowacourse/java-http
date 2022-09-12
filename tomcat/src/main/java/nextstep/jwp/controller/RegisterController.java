@@ -1,16 +1,16 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.http.StatusCode.NOT_FOUND;
+import static org.apache.http.StatusCode.NOT_FOUND;
 import static nextstep.jwp.utils.FileUtils.getResource;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.Cookie;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.QueryParams;
-import nextstep.jwp.http.StatusCode;
+import org.apache.http.ContentType;
+import org.apache.http.Cookie;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.QueryParams;
+import org.apache.http.StatusCode;
 import nextstep.jwp.model.User;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.controller.AbstractController;

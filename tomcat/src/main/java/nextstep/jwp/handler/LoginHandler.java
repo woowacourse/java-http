@@ -1,7 +1,7 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.QueryParams;
+import org.apache.http.QueryParams;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

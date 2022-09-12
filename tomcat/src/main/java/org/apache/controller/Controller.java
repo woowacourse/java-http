@@ -1,7 +1,7 @@
 package org.apache.controller;
 
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 
 public interface Controller {
 

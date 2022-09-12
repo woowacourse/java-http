@@ -2,13 +2,12 @@ package nextstep.jwp.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.QueryParams;
+import org.apache.http.QueryParams;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

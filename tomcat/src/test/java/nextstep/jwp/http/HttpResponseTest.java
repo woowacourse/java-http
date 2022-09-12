@@ -1,8 +1,8 @@
 package nextstep.jwp.http;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Arrays;
+import org.apache.http.ContentType;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -2,11 +2,11 @@ package org.apache.controller;
 
 import static nextstep.jwp.utils.FileUtils.getResource;
 
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.StatusCode;
+import org.apache.http.ContentType;
+import org.apache.http.HttpMethod;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusCode;
 import nextstep.jwp.utils.FileUtils;
 
 public abstract class AbstractController implements Controller {

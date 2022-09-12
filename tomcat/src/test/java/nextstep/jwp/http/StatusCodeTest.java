@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import org.apache.http.StatusCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
 import java.util.List;
 import java.util.stream.Collectors;

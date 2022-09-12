@@ -146,10 +146,12 @@ class Http11ProcessorTest {
     void userLoginIsSuccess() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password"
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -183,10 +185,12 @@ class Http11ProcessorTest {
     void userLoginValidateSession() {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password"
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -239,10 +243,12 @@ class Http11ProcessorTest {
     void notExistUserException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gu&password=password HTTP/1.1 ",
+                "POST /login",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gu&password=password HTTP/1.1 "
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -273,10 +279,12 @@ class Http11ProcessorTest {
     void UserPasswordIsWrongException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password1 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gu&password=password HTTP/1.1 "
         );
 
         final var socket = new StubSocket(httpRequest);

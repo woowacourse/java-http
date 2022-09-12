@@ -11,7 +11,6 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.QueryParam;
 import org.apache.coyote.http11.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,9 @@ public class LoginController extends AbstractController {
                 return redirect(httpRequest, httpResponse);
             }
         }
-        return requireAuthByRequestInfo(httpRequest);
+        final String account = httpRequest.getBodyValue(ACCOUNT);
+        final String password = httpRequest.getBodyValue(PASSWORD);
+        return authentication(httpRequest, account, password);
     }
 
     private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) {
@@ -43,20 +44,6 @@ public class LoginController extends AbstractController {
         httpHeader.location(REDIRECT_URL);
 
         return httpResponse.header(httpHeader).body(new HttpBody());
-    }
-
-    private HttpResponse requireAuthByRequestInfo(final HttpRequest httpRequest)
-            throws IOException {
-        if (QueryParam.isQueryParam(httpRequest.getUrl())) {
-            final QueryParam queryParam = new QueryParam(httpRequest.getUrl());
-
-            if (queryParam.matchParameters(ACCOUNT) && queryParam.matchParameters(PASSWORD)) {
-                return authentication(httpRequest, queryParam.getValue(ACCOUNT), queryParam.getValue(PASSWORD));
-            }
-        }
-        final String account = httpRequest.getBodyValue(ACCOUNT);
-        final String password = httpRequest.getBodyValue(PASSWORD);
-        return authentication(httpRequest, account, password);
     }
 
     private HttpResponse authentication(final HttpRequest httpRequest, final String account, final String password)

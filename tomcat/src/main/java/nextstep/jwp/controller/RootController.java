@@ -1,12 +1,10 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpStatusCode.OK;
 
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpResponseBody;
 import org.apache.coyote.http11.exception.methodnotallowed.MethodNotAllowedException;
 
 public class RootController extends AbstractController {
@@ -18,11 +16,9 @@ public class RootController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final String responseBody = "Hello world!";
+        final HttpResponseBody httpResponseBody = HttpResponseBody.of("Hello world!");
         response.statusCode(OK)
-                .addHeader(CONTENT_TYPE, ContentType.of(request.getFileExtension()).getValue())
-                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length)
-                .responseBody(responseBody);
+                .responseBody(httpResponseBody);
     }
 
     @Override

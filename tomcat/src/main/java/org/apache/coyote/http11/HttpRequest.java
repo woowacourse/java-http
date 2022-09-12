@@ -4,7 +4,6 @@ public class HttpRequest {
 
     private static final String SPACE_DELIMITER = " ";
     private static final String QUERY_STRING_START = "?";
-    private static final String FILE_EXTENSION_DELIMITER = ".";
 
     private HttpMethod httpMethod;
     private String url;
@@ -33,23 +32,11 @@ public class HttpRequest {
         return uri;
     }
 
-    public boolean isFileRequest() {
-        return this.url.contains(FILE_EXTENSION_DELIMITER);
-    }
-
     public String getQueryStringValue(final String parameter) {
         if (queryStrings == null) {
             return "";
         }
         return queryStrings.getValue(parameter);
-    }
-
-    public String getFileExtension() {
-        if (isFileRequest()) {
-            final int index = url.indexOf(FILE_EXTENSION_DELIMITER);
-            return url.substring(index + 1);
-        }
-        return "html";
     }
 
     public String getUrl() {

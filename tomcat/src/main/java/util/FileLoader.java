@@ -14,12 +14,15 @@ public class FileLoader {
     private FileLoader() {
     }
 
-    public static String loadFile(final String fileLocation) throws IOException {
+    public static File loadFile(final String fileLocation) {
         final URL url = Thread.currentThread().getContextClassLoader().getResource(STATIC_DIRECTORY + fileLocation);
         if (Objects.isNull(url)) {
             throw new NotFoundUrlException();
         }
-        final File file = new File(url.getFile());
+        return new File(url.getFile());
+    }
+
+    public static String readFile(final File file) throws IOException {
         return new String(Files.readAllBytes(file.toPath()));
     }
 }

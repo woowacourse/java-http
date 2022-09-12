@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.OK;
 import static util.FileLoader.loadFile;
@@ -11,21 +9,16 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpResponseBody;
 import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 import org.apache.coyote.http11.exception.unauthorized.InvalidSessionException;
 import org.apache.coyote.http11.exception.unauthorized.LoginFailException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
-
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final SessionManager sessionManager;
 
@@ -40,11 +33,9 @@ public class LoginController extends AbstractController {
                     .redirect("/index.html");
             return;
         }
-        final String responseBody = loadFile("/login.html");
+        final HttpResponseBody httpResponseBody = HttpResponseBody.ofFile(loadFile("/login.html"));
         response.statusCode(OK)
-                .addHeader(CONTENT_TYPE, ContentType.of(request.getFileExtension()).getValue())
-                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length)
-                .responseBody(responseBody);
+                .responseBody(httpResponseBody);
     }
 
     @Override
@@ -74,17 +65,11 @@ public class LoginController extends AbstractController {
     private User login(final HttpRequestBody httpRequestBody) {
         final String account = httpRequestBody.getBodyValue("account");
         final String password = httpRequestBody.getBodyValue("password");
-        final User user = findRegisteredUser(account);
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(LoginFailException::new);
         if (!user.checkPassword(password)) {
             throw new LoginFailException();
         }
-        return user;
-    }
-
-    private User findRegisteredUser(final String account) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(LoginFailException::new);
-        log.info("already register account : {}", account);
         return user;
     }
 }

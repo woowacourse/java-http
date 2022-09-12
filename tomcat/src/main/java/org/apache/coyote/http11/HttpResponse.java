@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpHeader.LOCATION;
 
 public class HttpResponse {
@@ -35,8 +37,10 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse responseBody(final String responseBody) {
-        this.body = responseBody;
+    public HttpResponse responseBody(final HttpResponseBody httpResponseBody) {
+        httpHeaders.addHeader(CONTENT_TYPE, httpResponseBody.getContentType().getValue());
+        httpHeaders.addHeader(CONTENT_LENGTH, httpResponseBody.getContentLength());
+        body = httpResponseBody.getBody();
         return this;
     }
 

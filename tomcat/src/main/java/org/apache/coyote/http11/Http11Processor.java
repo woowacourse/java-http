@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpStatusCode.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatusCode.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.HttpStatusCode.METHOD_NOT_ALLOWED;
@@ -61,37 +59,34 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
         } catch (Exception exception) {
-            handleException(httpRequest, httpResponse, exception);
+            handleException(httpResponse, exception);
         }
     }
 
-    private void handleException(final HttpRequest httpRequest, final HttpResponse httpResponse,
-                                 final Exception exception) throws IOException {
+    private void handleException(final HttpResponse httpResponse, final Exception exception) throws IOException {
         if (exception instanceof BadRequestException) {
-            doException(httpRequest, httpResponse, BAD_REQUEST);
+            doException(httpResponse, BAD_REQUEST);
             return;
         }
         if (exception instanceof UnAuthorizedException) {
-            doException(httpRequest, httpResponse, UNAUTHORIZED);
+            doException(httpResponse, UNAUTHORIZED);
             return;
         }
         if (exception instanceof NotFoundException) {
-            doException(httpRequest, httpResponse, NOT_FOUND);
+            doException(httpResponse, NOT_FOUND);
             return;
         }
         if (exception instanceof MethodNotAllowedException) {
-            doException(httpRequest, httpResponse, METHOD_NOT_ALLOWED);
+            doException(httpResponse, METHOD_NOT_ALLOWED);
             return;
         }
-        doException(httpRequest, httpResponse, INTERNAL_SERVER_ERROR);
+        doException(httpResponse, INTERNAL_SERVER_ERROR);
     }
 
-    private void doException(final HttpRequest httpRequest, final HttpResponse httpResponse,
-                             final HttpStatusCode httpStatusCode) throws IOException {
-        final String responseBody = loadFile("/" + httpStatusCode.getCode() + ".html");
+    private void doException(final HttpResponse httpResponse, final HttpStatusCode httpStatusCode) throws IOException {
+        final HttpResponseBody httpResponseBody = HttpResponseBody.ofFile(
+                loadFile("/" + httpStatusCode.getCode() + ".html"));
         httpResponse.statusCode(httpStatusCode)
-                .addHeader(CONTENT_TYPE, ContentType.of(httpRequest.getFileExtension()).getValue())
-                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length)
-                .responseBody(responseBody);
+                .responseBody(httpResponseBody);
     }
 }

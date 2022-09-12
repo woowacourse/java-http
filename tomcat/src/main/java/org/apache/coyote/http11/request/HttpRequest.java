@@ -71,11 +71,15 @@ public class HttpRequest {
 
     public Session getSession() throws IOException {
         HttpCookie cookie = getCookie();
-        String sessionId = cookie.getJSessionId();
-        if (sessionId == null) {
-            return null;
+
+        if (cookie.isJSessionId()) {
+            String sessionId = cookie.getJSessionId();
+            return SessionManager.getInstance().findSession(sessionId);
         }
-        return SessionManager.getInstance().findSession(sessionId);
+
+        Session session = new Session();
+        SessionManager.getInstance().add(session);
+        return session;
     }
 
     public String getPath() {

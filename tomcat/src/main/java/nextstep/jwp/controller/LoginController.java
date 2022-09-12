@@ -10,7 +10,6 @@ import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
@@ -44,13 +43,9 @@ public class LoginController extends AbstractController {
         }
 
         Session session = request.getSession();
+        session.setAttribute("user", user.get());
+        response.addSessionCookie(session.getId());
 
-        if (session == null) {
-            session = new Session();
-            SessionManager.getInstance().add(session);
-            response.addSessionCookie(session.getId());
-            session.setAttribute("user", user.get());
-        }
         return response.redirect(PAGE_INDEX);
     }
 }

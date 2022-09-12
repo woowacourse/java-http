@@ -30,8 +30,16 @@ public class HttpHeaders {
         return new HttpHeaders(ParseUtils.parse(headers, REGEX_1, REGEX_2));
     }
 
+    public String getContentType() {
+        return headers.get(CONTENT_TYPE);
+    }
+
     public String getContentLength() {
         return headers.getOrDefault(CONTENT_LENGTH, DEFAULT_LENGTH);
+    }
+
+    public String getLocation() {
+        return headers.get(LOCATION);
     }
 
     public boolean hasCookies() {

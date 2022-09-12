@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;

@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Optional;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.http.HttpRequest;

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.http11.http.HttpRequest;

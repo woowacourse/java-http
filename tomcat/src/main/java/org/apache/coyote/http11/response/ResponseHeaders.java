@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.request.Request.HEADER_KEY_VALUE_DELIMITER;
 import static org.apache.coyote.http11.request.Request.SPACE_DELIMITER;
+import static org.apache.coyote.http11.request.RequestHeaders.HEADER_KEY_VALUE_DELIMITER;
 
 import java.util.Map;
 import java.util.Map.Entry;

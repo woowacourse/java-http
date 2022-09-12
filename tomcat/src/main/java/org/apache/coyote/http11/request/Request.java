@@ -4,16 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import org.apache.coyote.http11.URL;
 
 public class Request {
     public static final String SPACE_DELIMITER = " ";
-    public static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
-    public static final int PATH_INDEX = 0;
-    public static final String HEADER_KEY_VALUE_DELIMITER = ":";
-    public static final int KEY = 0;
-    public static final int VALUE = 1;
 
     private final StartLine startLine;
     private final RequestHeaders headers;
@@ -30,27 +24,10 @@ public class Request {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final String startLineString = bufferedReader.readLine();
         final StartLine startLine = StartLine.of(startLineString);
-        final RequestHeaders headers = parseHeader(bufferedReader);
+        final RequestHeaders headers = RequestHeaders.of(bufferedReader);
         final int contentLength = headers.getContentLength();
-        final RequestBody requestBody = parseBody(bufferedReader, contentLength);
+        final RequestBody requestBody = RequestBody.from(bufferedReader, contentLength);
         return new Request(startLine, headers, requestBody);
-    }
-
-    private static RequestHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
-        String headerKeyValue = bufferedReader.readLine();
-        final HashMap<String, String> headers = new HashMap<>();
-        while (!headerKeyValue.isBlank()) {
-            final String[] splitHeaderKeyValue = headerKeyValue.split(HEADER_KEY_VALUE_DELIMITER);
-            headers.put(splitHeaderKeyValue[KEY], splitHeaderKeyValue[VALUE]);
-            headerKeyValue = bufferedReader.readLine();
-        }
-        return new RequestHeaders(headers);
-    }
-
-    private static RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
-        final char[] body = new char[contentLength];
-        bufferedReader.read(body);
-        return new RequestBody(String.valueOf(body));
     }
 
     public boolean isForStaticFile() {

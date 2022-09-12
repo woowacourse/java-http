@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.request.Request.PATH_INDEX;
-import static org.apache.coyote.http11.request.Request.QUERY_PARAM_DELIMITER_REGEX;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -17,9 +14,12 @@ import nextstep.jwp.exception.StaticFileNotFoundException;
 public class URL {
     private static final String PATH_FROM_RESOURCE = "static";
     private static final String DEFAULT_URL = "/";
+    private static final int PATH_INDEX = 0;
     private static final String NEWLINE = "\n";
     private static final String DEFAULT_MEDIA_TYPE = "text/html";
     private static final String DEFAULT_CONTENT = "Hello world!";
+    private static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
+
 
 
     private final String url;

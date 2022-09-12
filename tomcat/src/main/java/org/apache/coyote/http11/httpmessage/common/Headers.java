@@ -9,13 +9,12 @@ import java.util.stream.Collectors;
 
 public class Headers {
 
-    private final static int HEADER_NAME = 0;
-    private final static int HEADER_VALUE = 1;
+    private static final int HEADER_NAME = 0;
+    private static final int HEADER_VALUE = 1;
 
-    private final static String HEADER_SPLITTER = ": ";
-    private final static String BLANK = " ";
-    private final static String DEFAULT_CONTENT_LENGTH = "0";
-
+    private static final String HEADER_SPLITTER = ": ";
+    private static final String BLANK = " ";
+    private static final String DEFAULT_CONTENT_LENGTH = "0";
 
     final Map<String, String> headers;
 

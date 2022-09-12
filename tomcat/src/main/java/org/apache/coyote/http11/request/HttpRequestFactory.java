@@ -2,11 +2,9 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class HttpRequestFactory {
 
@@ -19,10 +17,6 @@ public class HttpRequestFactory {
     private static final int REQUEST_HEADER_FIELD_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
     private static final String CONTENT_LENGTH_KEY = "Content-Length";
-    private static final String REQUEST_BODY_DELIMITER = "&";
-    private static final String REQUEST_BODY_PARAMETER_DELIMITER = "=";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
     public static HttpRequest create(BufferedReader reader) {
         try {
@@ -60,23 +54,17 @@ public class HttpRequestFactory {
             throws IOException {
         Optional<String> contentLengthValue = requestHeaders.getHeaderValue(CONTENT_LENGTH_KEY);
         if (contentLengthValue.isEmpty()) {
-            return new RequestBody(Map.of());
+            return RequestBody.ofEmptyValue();
         }
         int contentLength = Integer.parseInt(contentLengthValue.get());
         String requestBodyValue = parseToRequestBodyValue(reader, contentLength);
 
-        return new RequestBody(parseToMap(requestBodyValue));
+        return RequestBody.of(requestBodyValue);
     }
 
     private static String parseToRequestBodyValue(BufferedReader reader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    private static Map<String, String> parseToMap(String requestBodyValue) {
-        return Arrays.stream(requestBodyValue.split(REQUEST_BODY_DELIMITER))
-                .collect(Collectors.toMap(value -> value.split(REQUEST_BODY_PARAMETER_DELIMITER)[KEY_INDEX],
-                        value -> value.split(REQUEST_BODY_PARAMETER_DELIMITER)[VALUE_INDEX]));
     }
 }

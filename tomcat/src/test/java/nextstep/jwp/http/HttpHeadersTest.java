@@ -48,7 +48,7 @@ class HttpHeadersTest {
     void parseCookie() {
         HttpHeaders httpHeaders = HttpHeaders.parse(List.of("Cookies: key=value"));
 
-        Cookies actual = httpHeaders.getCookie();
+        Cookies actual = httpHeaders.getCookies();
 
         Cookies expected = Cookies.parse("key=value");
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

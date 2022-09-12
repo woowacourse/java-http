@@ -106,11 +106,8 @@ public class HttpRequest {
         return QueryParams.empty();
     }
 
-    public boolean isLoggedInUser() {
-        return httpHeaders.getCookie()
-            .findJSessionId()
-            .filter(SessionManager::contains)
-            .isPresent();
+    public Cookies getCookies() {
+        return httpHeaders.getCookies();
     }
 
     public String getUri() {

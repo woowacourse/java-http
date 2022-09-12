@@ -50,7 +50,7 @@ public class HttpHeaders {
             .orElse(ZERO_CONTENT_LENGTH);
     }
 
-    public Cookies getCookie() {
+    public Cookies getCookies() {
         return get(COOKIE_HEADER)
             .map(Cookies::parse)
             .orElseGet(Cookies::empty);

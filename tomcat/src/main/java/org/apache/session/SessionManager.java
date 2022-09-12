@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.http.Cookies;
 
 public class SessionManager {
 
@@ -19,6 +20,12 @@ public class SessionManager {
     public static Session generateNewSession() {
         UUID uuid = UUID.randomUUID();
         return new Session(uuid.toString());
+    }
+
+    public static boolean isValidSession(Cookies cookies) {
+        return cookies.findJSessionId()
+            .filter(SessionManager::contains)
+            .isPresent();
     }
 
     public static boolean contains(String id) {

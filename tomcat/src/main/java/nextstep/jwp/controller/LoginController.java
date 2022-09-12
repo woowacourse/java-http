@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import static nextstep.jwp.utils.FileUtils.getResource;
 
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.handler.LoginHandler;
@@ -27,7 +28,8 @@ public class LoginController extends AbstractController {
     }
 
     private HttpResponse handleLoginPage(HttpRequest httpRequest) {
-        if (httpRequest.isLoggedInUser()) {
+        Cookies cookies = httpRequest.getCookies();
+        if (SessionManager.isValidSession(cookies)) {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
                 FileUtils.readFile(getResource("/index.html")));
         }

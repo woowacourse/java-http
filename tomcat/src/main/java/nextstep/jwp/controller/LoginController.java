@@ -4,12 +4,14 @@ import static org.apache.coyote.http11.handler.StaticResourceHandler.readFile;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,13 +21,25 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
+        try {
+            final HttpResponse response = HttpResponse.found(request.getHttpVersion(), request.getContentType(),
+                    "/index.html");
+            login(request, response);
+            return response;
+        } catch (RuntimeException e) {
+            return HttpResponse.found(request.getHttpVersion(), request.getContentType(), "/401.html");
+        }
+    }
+
+    private void login(final HttpRequest request, final HttpResponse response) {
         final User user = InMemoryUserRepository.findByAccount(request.getRequestBodyValue("account"))
                 .orElseThrow(UserNotFoundException::new);
-        if (user.checkPassword(request.getRequestBodyValue("password"))) {
-            log.info(String.format("user : %s", user));
-            return HttpResponse.found(request.getHttpVersion(), request.getContentType(), "/index.html");
+        final boolean isCorrectPassword = user.checkPassword(request.getRequestBodyValue("password"));
+        if (!isCorrectPassword) {
+            throw new InvalidPasswordException();
         }
-        return HttpResponse.found(request.getHttpVersion(), request.getContentType(), "/401.html");
+        log.info(String.format("user : %s", user));
+        response.addCookie(SessionManager.create(user));
     }
 
     @Override

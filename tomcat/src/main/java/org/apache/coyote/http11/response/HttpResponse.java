@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.header.ContentType;
 import org.apache.coyote.http11.header.HttpVersion;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
@@ -38,6 +39,10 @@ public class HttpResponse {
         headers.add("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponse(httpVersion, HttpStatus.OK, headers, responseBody);
+    }
+
+    public void addCookie(final Session session) {
+        httpHeaders.add("Set-Cookie", String.format("JSESSIONID=%s", session.getId()));
     }
 
     public byte[] getResponseAsBytes() {

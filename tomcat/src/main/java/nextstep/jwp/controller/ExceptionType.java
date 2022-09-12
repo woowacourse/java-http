@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ExceptionType {
-    INTERNAL_SERVER_ERROR(List.of("Exception")),
-    UNAUTHORIZED(List.of("NoSuchUserException")),
-    BAD_REQUEST(List.of("IllegalArgumentException", "ExistUserException")),
-    NOT_FOUND(List.of("NotFoundException"));
+    INTERNAL_SERVER_ERROR("Exception"),
+    UNAUTHORIZED("NoSuchUserException"),
+    BAD_REQUEST("IllegalArgumentException", "ExistUserException"),
+    NOT_FOUND("NotFoundException");
 
     private final List<String> exceptionClassName;
 
-    ExceptionType(final List<String> exceptionClassName) {
-        this.exceptionClassName = exceptionClassName;
+    ExceptionType(final String... exceptionClassName) {
+        this.exceptionClassName = List.of(exceptionClassName);
     }
 
     public static ExceptionType from(String exceptionClassName) {

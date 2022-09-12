@@ -14,27 +14,38 @@ import nextstep.jwp.model.User;
 public class AuthService {
 
     public Session login(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(UserNotFoundException::new);
-
-        if (!user.checkPassword(password)) {
-            throw new LoginFailedException();
-        }
+        final User user = findUserOrThrow(account);
+        validatePasswordMatches(user, password);
 
         final Map<String, Object> sessionAttributes = Map.of("user", user);
         return SessionManager.generate(sessionAttributes);
     }
 
-    public void register(final String account, final String password, final String email) {
-        if (isUserPresent(account)) {
-            throw new AccountDuplicatedException(account);
+    private User findUserOrThrow(final String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    private void validatePasswordMatches(final User user, final String password) {
+        if (!user.checkPassword(password)) {
+            throw new LoginFailedException();
         }
+    }
+
+    public void register(final String account, final String password, final String email) {
+        validateAccountNotDuplicated(account);
 
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
     }
 
-    private boolean isUserPresent(final String account) {
+    private void validateAccountNotDuplicated(final String account) {
+        if (existAccount(account)) {
+            throw new AccountDuplicatedException(account);
+        }
+    }
+
+    private boolean existAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .isPresent();
     }

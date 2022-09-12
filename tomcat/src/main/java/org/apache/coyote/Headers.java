@@ -20,8 +20,9 @@ public class Headers {
 
     public String parse() {
         final StringBuilder builder = new StringBuilder();
-        values.forEach((key, value) ->
-                builder.append(String.format("%s: %s \r%n", key.getValue(), value)));
+        for (Map.Entry<HttpHeader, String> entry : values.entrySet()) {
+            builder.append(String.format("%s: %s \r%n", entry.getKey().getValue(), entry.getValue()));
+        }
         return builder.toString();
     }
 

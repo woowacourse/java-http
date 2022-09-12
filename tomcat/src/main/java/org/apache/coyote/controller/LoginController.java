@@ -43,7 +43,7 @@ public class LoginController extends AbstractController {
     void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Optional<User> user = InMemoryUserRepository.findByAccount(request.getBodyValue(ACCOUNT_KEY));
         if (user.isPresent()) {
-            log.info(user.get().toString());
+            log.info("User : {}", user.get());
             login(user.get(), request, response);
             return;
         }

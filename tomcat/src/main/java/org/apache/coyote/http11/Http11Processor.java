@@ -13,7 +13,7 @@ import org.apache.support.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nextstep.jwp.controller.RequestMapping;
+import nextstep.jwp.controller.ControllerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = RequestReader.readHttpRequest(bufferedReader);
-            final Controller controller = RequestMapping.from(request.getPath());
+            final Controller controller = ControllerFactory.from(request.getPath());
             final HttpResponse response = controller.service(request);
 
             outputStream.write(response.asFormat().getBytes());

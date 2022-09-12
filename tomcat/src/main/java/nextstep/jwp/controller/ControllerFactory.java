@@ -6,7 +6,7 @@ import org.apache.support.Controller;
 
 import nextstep.jwp.Container;
 
-public enum RequestMapping {
+public enum ControllerFactory {
 
     INDEX("/", Container.indexController),
     LOGIN("/login", Container.loginController),
@@ -18,7 +18,7 @@ public enum RequestMapping {
     private final String path;
     private final Controller controller;
 
-    RequestMapping(final String path, final Controller controller) {
+    ControllerFactory(final String path, final Controller controller) {
         this.path = path;
         this.controller = controller;
     }

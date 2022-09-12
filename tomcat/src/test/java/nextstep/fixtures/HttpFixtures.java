@@ -15,7 +15,7 @@ public class HttpFixtures {
                 "");
     }
 
-    public static String 요청을_생성한다(final HttpMethod httpMethod, final String uri, final HttpMime contentType, final String body) {
+    public static String 컨텐트를_포함하여_요청을_생성한다(final HttpMethod httpMethod, final String uri, final HttpMime contentType, final String body) {
         return String.join("\r\n",
                 httpMethod.name() + " " + uri + " HTTP/1.1 ",
                 "Host: localhost:8080 ",

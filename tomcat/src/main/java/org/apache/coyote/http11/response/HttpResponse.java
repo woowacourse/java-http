@@ -7,17 +7,37 @@ public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
-    private final Location location;
-    private final ContentType contentType;
+    private final HttpResponseHeaders httpHeaders;
     private final String responseBody;
 
-    public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final Location location,
-                        final ContentType contentType, final String responseBody) {
+    private HttpResponse(final HttpVersion httpVersion,
+                         final HttpStatus httpStatus,
+                         final HttpResponseHeaders httpHeaders,
+                         final String responseBody) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
-        this.location = location;
-        this.contentType = contentType;
+        this.httpHeaders = httpHeaders;
         this.responseBody = responseBody;
+    }
+
+    public static HttpResponse found(final HttpVersion httpVersion,
+                                     final ContentType contentType,
+                                     final String redirectUrl) {
+        final HttpResponseHeaders headers = new HttpResponseHeaders();
+        headers.add("Content-Type", contentType.getValue());
+        headers.add("Location", redirectUrl);
+
+        return new HttpResponse(httpVersion, HttpStatus.FOUND, headers, "");
+    }
+
+    public static HttpResponse ok(final HttpVersion httpVersion,
+                                  final ContentType contentType,
+                                  final String responseBody) {
+        final HttpResponseHeaders headers = new HttpResponseHeaders();
+        headers.add("Content-Type", contentType.getValue());
+        headers.add("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        return new HttpResponse(httpVersion, HttpStatus.OK, headers, responseBody);
     }
 
     public byte[] getResponseAsBytes() {
@@ -27,28 +47,11 @@ public class HttpResponse {
     private String createResponse() {
         return String.join("\r\n",
                 getStartLine(),
-                getContentType(),
-                getContentLength(),
-                getLocation(),
+                httpHeaders.toResponse(),
                 responseBody);
     }
 
     private String getStartLine() {
         return String.format("%s %s ", httpVersion.getValue(), httpStatus.getValue());
-    }
-
-    private String getContentType() {
-        return String.format("Content-Type: %s", contentType.getValue());
-    }
-
-    private String getContentLength() {
-        return String.format("Content-Length: %s ", responseBody.getBytes().length);
-    }
-
-    private String getLocation() {
-        if (location.isEmpty()) {
-            return "";
-        }
-        return String.format("Location: %s", location.getValue());
     }
 }

@@ -1,14 +1,14 @@
-package org.apache.coyote.http11.header;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
-public class HttpHeaders {
+public class HttpRequestHeaders {
 
     private static final String CONTENT_LENGTH_KEY = "Content-Length";
 
     private final Map<String, String> values;
 
-    public HttpHeaders(final Map<String, String> values) {
+    public HttpRequestHeaders(final Map<String, String> values) {
         this.values = values;
     }
 

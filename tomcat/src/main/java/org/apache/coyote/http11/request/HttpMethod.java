@@ -23,4 +23,8 @@ public enum HttpMethod {
     public boolean isPost() {
         return this == POST;
     }
+
+    public String getValue() {
+        return value;
+    }
 }

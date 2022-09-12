@@ -1,16 +1,15 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.header.ContentType;
-import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.header.HttpVersion;
 
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpHeaders;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeaders httpHeaders,
+    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpRequestHeaders httpHeaders,
                        HttpRequestBody httpRequestBody) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
@@ -35,5 +34,9 @@ public class HttpRequest {
 
     public HttpVersion getHttpVersion() {
         return httpRequestLine.getVersion();
+    }
+
+    public String getHttpMethod() {
+        return httpRequestLine.getMethod().getValue();
     }
 }

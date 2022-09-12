@@ -10,10 +10,10 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.handler.RequestMapping;
-import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeaders;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest createHttpRequest(final BufferedReader reader) throws IOException {
         final HttpRequestLine httpRequestLine = HttpRequestLine.from(reader.readLine());
-        final HttpHeaders httpHeaders = new HttpHeaders(parseRequestHeaders(reader));
+        final HttpRequestHeaders httpHeaders = new HttpRequestHeaders(parseRequestHeaders(reader));
         final HttpRequestBody httpRequestBody = HttpRequestBody.from(
                 parseRequestBody(httpRequestLine.getMethod(), httpHeaders.getContentLength(), reader));
         return new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);

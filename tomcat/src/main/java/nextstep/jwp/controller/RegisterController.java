@@ -8,25 +8,21 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Location;
 
 public class RegisterController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected HttpResponse doPost(final HttpRequest request) {
         final String account = request.getRequestBodyValue("account");
         final String password = request.getRequestBodyValue("password");
         final String email = request.getRequestBodyValue("email");
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return new HttpResponse(request.getHttpVersion(), HttpStatus.FOUND, new Location("/index.html"),
-                request.getContentType(), readFile(request.getHttpPath()));
+        return HttpResponse.found(request.getHttpVersion(), request.getContentType(), "/index.html");
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        return new HttpResponse(request.getHttpVersion(), HttpStatus.OK, Location.empty(), request.getContentType(),
-                readFile(request.getHttpPath()));
+        return HttpResponse.ok(request.getHttpVersion(), request.getContentType(), readFile(request.getHttpPath()));
     }
 }

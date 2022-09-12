@@ -27,7 +27,7 @@ public enum RequestMapper {
         this.controller = controller;
     }
 
-    public static Controller getHandlerFrom(final HttpRequest httpRequest) {
+    public static Controller getControllerFrom(final HttpRequest httpRequest) {
         final String url = httpRequest.getUrl();
         return Arrays.stream(RequestMapper.values())
                 .filter(it -> matchUrl(url, it))

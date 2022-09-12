@@ -6,6 +6,8 @@ import java.util.Map;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final int COOKIE_KEY = 0;
+    private static final int COOKIE_VALUE = 1;
     private final Map<String, String> cookieContents;
 
     public HttpCookie(){
@@ -24,7 +26,7 @@ public class HttpCookie {
         final HashMap<String, String> cookieMap = new HashMap<>();
         for (String cookieString : cookies.split("; ")) {
             final String[] cookie = cookieString.split("=");
-            cookieMap.put(cookie[0], cookie[1]);
+            cookieMap.put(cookie[COOKIE_KEY], cookie[COOKIE_VALUE]);
         }
         return new HttpCookie(cookieMap);
     }

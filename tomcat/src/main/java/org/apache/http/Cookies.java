@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class Cookie {
+public class Cookies {
 
     private static final String JSESSIONID_KEY = "JSESSIONID";
     private static final String COOKIES_DELIMITER_REGEX = "; ";
@@ -16,11 +16,11 @@ public class Cookie {
 
     private final Map<String, String> cookies;
 
-    public Cookie(Map<String, String> cookies) {
+    public Cookies(Map<String, String> cookies) {
         this.cookies = cookies;
     }
 
-    public static Cookie parse(String cookieLine) {
+    public static Cookies parse(String cookieLine) {
         Map<String, String> cookies = new LinkedHashMap<>();
         List<String> dividedCookies = List.of(cookieLine.split(COOKIES_DELIMITER_REGEX));
         for (String cookie : dividedCookies) {
@@ -28,15 +28,15 @@ public class Cookie {
                 cookie.split(COOKIE_DELIMITER_REGEX, COOKIE_DIVIDED_LIMIT));
             cookies.put(dividedCookie.get(COOKIE_KEY_INDEX), dividedCookie.get(COOKIE_VALUE_INDEX));
         }
-        return new Cookie(cookies);
+        return new Cookies(cookies);
     }
 
-    public static Cookie fromJSessionId(String id) {
-        return new Cookie(Map.of(JSESSIONID_KEY, id));
+    public static Cookies fromJSessionId(String id) {
+        return new Cookies(Map.of(JSESSIONID_KEY, id));
     }
 
-    public static Cookie empty() {
-        return new Cookie(Map.of());
+    public static Cookies empty() {
+        return new Cookies(Map.of());
     }
 
     public Optional<String> getJSessionId() {

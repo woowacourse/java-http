@@ -6,7 +6,7 @@ import static nextstep.jwp.utils.FileUtils.getResource;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.http.ContentType;
-import org.apache.http.Cookie;
+import org.apache.http.Cookies;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.QueryParams;
@@ -58,10 +58,10 @@ public class RegisterController extends AbstractController {
             FileUtils.readFile(getResource("404.html")));
     }
 
-    private Cookie setCookie(User user) {
+    private Cookies setCookie(User user) {
         Session session = SessionManager.generateNewSession();
         session.createAttribute("user", user);
         SessionManager.add(session);
-        return Cookie.fromJSessionId(session.getId());
+        return Cookies.fromJSessionId(session.getId());
     }
 }

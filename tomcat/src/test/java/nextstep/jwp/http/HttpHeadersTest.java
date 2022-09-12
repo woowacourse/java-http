@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.http.Cookie;
+import org.apache.http.Cookies;
 import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,13 +44,13 @@ class HttpHeadersTest {
     }
 
     @Test
-    @DisplayName("Cookie Header 정보를 반환한다.")
+    @DisplayName("Cookies Header 정보를 반환한다.")
     void parseCookie() {
-        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("Cookie: key=value"));
+        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("Cookies: key=value"));
 
-        Cookie actual = httpHeaders.getCookie();
+        Cookies actual = httpHeaders.getCookie();
 
-        Cookie expected = Cookie.parse("key=value");
+        Cookies expected = Cookies.parse("key=value");
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 }

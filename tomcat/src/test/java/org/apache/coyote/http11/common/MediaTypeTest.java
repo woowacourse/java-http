@@ -6,18 +6,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 import org.junit.jupiter.api.Test;
 
-class ContentTypeTest {
+class MediaTypeTest {
 
     @Test
-    void 확장자에_맞는_Content_Type을_반환한다() {
+    void 확장자에_맞는_Media_Type을_반환한다() {
         // given
         final var extension = "js";
 
         // when
-        final var actual = ContentType.extension(extension);
+        final var actual = MediaType.fromExtension(extension);
 
         // then
-        final var expected = ContentType.APPLICATION_JS;
+        final var expected = MediaType.APPLICATION_JS;
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -28,7 +28,7 @@ class ContentTypeTest {
         final var extension = "jss";
 
         // when & then
-        assertThatThrownBy(() -> ContentType.extension(extension))
+        assertThatThrownBy(() -> MediaType.fromExtension(extension))
                 .isInstanceOf(UnsupportedContentTypeException.class);
     }
 }

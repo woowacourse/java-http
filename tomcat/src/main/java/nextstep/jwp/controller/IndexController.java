@@ -1,22 +1,22 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.MediaType;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class IndexController implements Controller {
+public class IndexController extends AbstractController {
 
-    @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return show();
-        }
-        return HttpResponse.found("/404.html");
+    private static final IndexController INSTANCE = new IndexController();
+
+    private IndexController() {
     }
 
-    public HttpResponse show() {
-        return HttpResponse.ok(new StaticResource("Hello world!", ContentType.TEXT_HTML));
+    public static IndexController getInstance() {
+        return INSTANCE;
+    }
+
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.ok(new StaticResource("Hello world!", MediaType.TEXT_HTML));
     }
 }

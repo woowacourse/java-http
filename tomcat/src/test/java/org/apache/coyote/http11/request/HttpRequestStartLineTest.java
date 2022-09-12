@@ -3,8 +3,10 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.exception.HttpFormatException;
 import org.junit.jupiter.api.Test;
@@ -45,9 +47,10 @@ class HttpRequestStartLineTest {
                 "account=gugu&password=password&email=hkkang%40woowahan.com"
         );
         final var inputStream = new ByteArrayInputStream(message.getBytes(StandardCharsets.UTF_8));
+        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final var body = HttpRequest.from(inputStream).getBody();
+        final var body = HttpRequest.from(bufferedReader).getBody();
 
         // then
         assertThat(body).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");

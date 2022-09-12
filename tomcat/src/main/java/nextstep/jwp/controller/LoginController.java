@@ -1,51 +1,49 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
 import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.LoginService;
-import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
+
+    private static final LoginController INSTANCE = new LoginController();
 
     private final LoginService loginService;
 
-    public LoginController() {
-        loginService = new LoginService();
+    private LoginController() {
+        loginService = LoginService.getInstance();
     }
 
-    @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return show(httpRequest.getSession());
-        }
-        if (httpRequest.isSameMethod(HttpMethod.POST)) {
-            return login(httpRequest.getSession(), httpRequest.parseBodyQueryString());
-        }
-        return HttpResponse.found("/404.html");
+    public static LoginController getInstance() {
+        return INSTANCE;
     }
 
-    public HttpResponse show(final Session session) {
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var session = httpRequest.getSession();
+
         if (loginService.isAlreadyLogin(session)) {
-            return HttpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
+            return;
         }
-        return HttpResponse.ok(StaticResource.path("/login.html"));
+        httpResponse.ok(StaticResource.path("/login.html"));
     }
 
-    public HttpResponse login(final Session session, final Map<String, String> parameters) {
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var session = httpRequest.getSession();
+        final var parameters = httpRequest.parseBodyQueryString();
+
         if (loginService.isAlreadyLogin(session)) {
-            return HttpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
+            return;
         }
         try {
-            final var httResponse = HttpResponse.found("/index.html");
-            httResponse.setSessionId(loginService.login(parameters));
-            return httResponse;
-        } catch (NotFoundException | AuthenticationException e) {
-            return HttpResponse.found("/401.html");
+            final var sessionId = loginService.login(parameters);
+            httpResponse.setSessionId(sessionId);
+            httpResponse.sendRedirect("/index.html");
+        } catch (AuthenticationException e) {
+            httpResponse.sendRedirect("/401.html");
         }
     }
 }

@@ -1,42 +1,38 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
 import nextstep.jwp.exception.DuplicationException;
 import nextstep.jwp.service.RegisterService;
-import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
+
+    private static final RegisterController INSTANCE = new RegisterController();
 
     private final RegisterService registerService;
 
-    public RegisterController() {
-        registerService = new RegisterService();
+    private RegisterController() {
+        registerService = RegisterService.getInstance();
     }
 
-    @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return show();
-        }
-        if (httpRequest.isSameMethod(HttpMethod.POST)) {
-            return register(httpRequest.parseBodyQueryString());
-        }
-        return HttpResponse.found("/404.html");
+    public static RegisterController getInstance() {
+        return INSTANCE;
     }
 
-    public HttpResponse show() {
-        return HttpResponse.ok(StaticResource.path("/register.html"));
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        httpResponse.ok(StaticResource.path("/register.html"));
     }
 
-    public HttpResponse register(final Map<String, String> parameters) {
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var parameters = httpRequest.parseBodyQueryString();
+
         try {
             registerService.register(parameters);
-            return HttpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
         } catch (DuplicationException e) {
-            return HttpResponse.found("/register.html");
+            httpResponse.sendError(HttpStatus.BAD_REQUEST, StaticResource.path("/register.html"));
         }
     }
 }

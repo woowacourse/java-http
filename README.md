@@ -35,17 +35,35 @@
 - [X] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
   - [X] 로그인된 상태에서 /login 페이지에 GET으로 접근하면 이미 로그인한 상태이기 때문에 /index.html로 리다이렉트한다.
 
+### 3단계 - 리팩터링
+
+- [X] HTTP Request, HTTP Response 클래스로 나눠서 구현했다. 
+- [X] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
+  - [X] 기존의 Controller 인터페이스를 변형해 request, response를 받도록 변경한다.
+  - [X] Controller 인터페이스를 구현하는 AbstractController를 만들고 여기서 메서드에 따른 분기를 진행한다. 
+  - [X] 각 Controller 구현체에는 doGet(), doPost() 만을 구현한다. 
+
+### 4단계 - 동시성 확장하기
+
+- [X] 스레드 풀을 사용해 스레드를 재사용하도록 구현한다.
+  - [X] acceptCount(최소 100), maxThreads(최소 200)를 설정한다.
+- [X] SessionManager에서 session를 스레드 세이프하게 구현한다.
+  - [X] 동시성 컬렉션(Concurrent Collections)를 적용한다.
+
 ### 추가로 고려해볼 수 있는 부분
 
-- [X] NOT FOUND 처리 로직을 추가한다. (404.html로 리다이렉트)
-- [ ] 커스텀 예외 코드를 만든다. 
+- [X] 예외 처리를 세분화 한다. 
+  - [X] 지원하지 않는 HTTP Method인 경우 405 코드와 index.html을 응답한다.
+  - [X] NOT FOUND는 404 코드와 404.html을 응답한다.
 - [ ] 더 다양한 Content Type을 지원한다. 
   - [X] svg
 - [ ] RFC2616을 참고해 이름을 리팩토링한다.
 - [X] 비지니스 로직 상 처리하지 못한 예외가 발생하면 500.html로 리다이렉트한다.
+  - [X] 무한 리다이렉트 문제가 발생해 500 코드를 응답하도록 변경한다. 
 - [ ] DTO를 만들어 요청 데이터에 대한 검증을 한다.
+- [X] BufferedReader와 같은 자원을 명시적으로 회수한다.
+- [X] Controller, Service를 싱글톤으로 만든다.
 
 ## 요청 처리 과정
 
 ![IMG_6336](https://user-images.githubusercontent.com/45311765/188080053-6a203f41-3def-4989-a236-b9976ce0f4a7.jpg)
-

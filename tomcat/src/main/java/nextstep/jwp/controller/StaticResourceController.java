@@ -1,26 +1,29 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.NotFoundException;
-import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
-    @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return show(httpRequest.getPath());
-        }
-        return HttpResponse.found("/404.html");
+    private static final StaticResourceController INSTANCE = new StaticResourceController();
+
+    private StaticResourceController() {
     }
 
-    public HttpResponse show(final String path) {
+    public static StaticResourceController getInstance() {
+        return INSTANCE;
+    }
+
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var path = httpRequest.getPath();
+
         try {
-            return HttpResponse.ok(StaticResource.path(path));
+            httpResponse.ok(StaticResource.path(path));
         } catch (NotFoundException e) {
-            return HttpResponse.found("/404.html");
+            httpResponse.sendError(HttpStatus.NOT_FOUND, StaticResource.path("/404.html"));
         }
     }
 }

@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpCookie;
@@ -22,9 +20,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final var startLine = RequestStartLine.from(bufferedReader.readLine());
         final var header = RequestHeader.from(readHeader(bufferedReader));
         final var body = readBody(bufferedReader, header);

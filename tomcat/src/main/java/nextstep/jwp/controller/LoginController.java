@@ -20,7 +20,12 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        String url = request.getPath() + ".html";
+        Optional<User> user = request.findUserBySessionId();
+        if (user.isPresent()) {
+            return response.redirect(PAGE_INDEX);
+        }
+
+        final String url = request.getPath() + ".html";
         final String body = readResourceBody(url);
         final ResponseHeaders responseHeaders = readResourceHeader(url, body);
 

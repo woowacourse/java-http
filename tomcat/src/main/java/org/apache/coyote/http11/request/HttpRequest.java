@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -90,5 +92,16 @@ public class HttpRequest {
 
     public boolean isPost() {
         return startLine.isMethodPost();
+    }
+
+    public Optional<User> findUserBySessionId() throws IOException {
+        HttpCookie cookie = getCookie();
+        if (cookie.isJSessionId()) {
+            String sessionId = cookie.getJSessionId();
+            Session session = SessionManager.getInstance().findSession(sessionId);
+            return Optional.ofNullable((User) session.getAttribute("user"));
+        }
+
+        return Optional.empty();
     }
 }

@@ -19,17 +19,7 @@ public class LoginHandler extends AbstractRequestHandler {
     private final LoginService loginService = new LoginService();
 
     @Override
-    public ResponseEntity handle(HttpRequest httpRequest) {
-        if (httpRequest.getHttpMethod().isGet()) {
-            return doGet(httpRequest);
-        }
-        if (httpRequest.getHttpMethod().isPost()) {
-            return doPost(httpRequest);
-        }
-        return new ResponseEntity(HttpStatus.NOTFOUND, FileUtil.readAllBytes("/404.html"), ContentType.HTML);
-    }
-
-    private ResponseEntity doGet(HttpRequest httpRequest) {
+    protected ResponseEntity doGet(HttpRequest httpRequest) {
         if (SessionManager.contains(httpRequest.getJSessionId())) {
             return new ResponseEntity(HttpStatus.FOUND, ContentType.HTML,
                     new HttpHeaders(Map.of("Location", "/index.html")));
@@ -38,7 +28,8 @@ public class LoginHandler extends AbstractRequestHandler {
                 ContentType.HTML);
     }
 
-    private ResponseEntity doPost(HttpRequest httpRequest) {
+    @Override
+    protected ResponseEntity doPost(HttpRequest httpRequest) {
         final RequestBody requestBody = httpRequest.getRequestBody();
         Optional<User> foundUser = loginService.findUser(requestBody.get("account"));
 

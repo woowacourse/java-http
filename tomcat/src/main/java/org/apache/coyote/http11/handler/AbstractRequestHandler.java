@@ -18,11 +18,11 @@ public abstract class AbstractRequestHandler implements RequestHandler {
         return new ResponseEntity(HttpStatus.NOTFOUND, FileUtil.readAllBytes("/404.html"), ContentType.HTML);
     }
 
-    private ResponseEntity doPost(HttpRequest httpRequest) {
-        return null;
+    protected ResponseEntity doPost(HttpRequest httpRequest) {
+        throw new IllegalArgumentException();
     }
 
-    private ResponseEntity doGet(HttpRequest httpRequest) {
-        return null;
+    protected ResponseEntity doGet(HttpRequest httpRequest) {
+        throw new IllegalArgumentException();
     }
 }

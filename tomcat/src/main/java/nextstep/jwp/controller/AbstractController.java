@@ -14,7 +14,7 @@ public abstract class AbstractController implements Controller {
     protected SessionManager sessionManager = Http11Processor.getSessionManager();
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) {
         HttpMethod httpMethod = request.getHttpMethod();
         if (HttpMethod.GET.equals(httpMethod)) {
             doGet(request, response);
@@ -24,8 +24,7 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-    }
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-    }
+    protected abstract void doPost(HttpRequest request, HttpResponse response);
+
+    protected abstract void doGet(HttpRequest request, HttpResponse response);
 }

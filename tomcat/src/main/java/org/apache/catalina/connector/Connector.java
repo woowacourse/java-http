@@ -18,8 +18,8 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
-    private static final int CORE_POOL_SIZE = 1;
-    private static final int MAX_THREAD_SIZE = 1;
+    private static final int CORE_POOL_SIZE = 100;
+    private static final int MAX_THREAD_SIZE = 250;
     private static final int KEEP_ALIVE_TIME = 2;
 
     private final ServerSocket serverSocket;
@@ -27,10 +27,10 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_SIZE);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executor = new ThreadPoolExecutor(
@@ -85,6 +85,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            executor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

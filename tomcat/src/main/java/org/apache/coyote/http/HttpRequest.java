@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.status.HttpCookie;
 import org.apache.coyote.status.Session;
+import org.apache.coyote.status.SessionManager;
 import support.IoUtils;
 import support.StringUtils;
 
@@ -31,9 +32,9 @@ public class HttpRequest {
     }
 
     private Session getSessionOrNull() {
-        final String jSessionId = header.get(HttpCookie.HEADER_CONSTANT);
-        if (jSessionId != null) {
-            return new Session(jSessionId);
+        final String jSessionString = header.get(HttpCookie.HEADER_CONSTANT);
+        if (jSessionString != null) {
+            return new Session(jSessionString);
         }
         return null;
     }

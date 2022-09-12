@@ -24,6 +24,7 @@ public class HomeController extends AbstractController {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
+        log.info("Home Request!");
         doGet(request, response);
     }
 

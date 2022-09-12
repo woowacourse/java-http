@@ -1,11 +1,12 @@
 package support;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,17 +19,13 @@ public class IoUtils {
     }
 
     /**
-     * application/x-www-form-urlencoded
-     * -로 encoding된 문자열을 해석한다
-     * <p />
+     * application/x-www-form-urlencoded -로 encoding된 문자열을 해석한다
+     * <p/>
      * 예) %40 -> @
      */
     public static String readUrlEncoded(final BufferedReader reader, final int length) {
-        try {
-            return URLDecoder.decode(readCertainLength(reader, length), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return URLDecoder.decode(readCertainLength(reader, length), UTF_8);
+
     }
 
     public static String readCertainLength(final BufferedReader reader, final int length) {

@@ -16,6 +16,10 @@ public class SessionManager {
         return SESSIONS.get(id);
     }
 
+    public static boolean isValidSession(final Session session) {
+        return SessionManager.findSession(session.getId()) == null;
+    }
+
     public static void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }

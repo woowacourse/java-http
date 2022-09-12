@@ -41,6 +41,7 @@ public class ControllerContainer {
         for (final Class<?> clazz : classes) {
             final AbstractController controller = (AbstractController) clazz.getDeclaredConstructor().newInstance();
             controllers.add(controller);
+            log.info("Create Controller: {}", controller.getClass().getSimpleName());
         }
     }
 

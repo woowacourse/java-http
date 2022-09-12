@@ -33,12 +33,21 @@ public enum StaticHandlerMethod {
             extension = HTML_EXTENSION;
             fileName += "." + extension;
         }
+
+        @Override
+        public String toString() {
+            return "FileDto{" +
+                    "extension='" + extension + '\'' +
+                    ", fileName='" + fileName + '\'' +
+                    '}';
+        }
     }
 
     public void handle(final HttpRequest request, final HttpResponse response) {
         final FileDto dto = new FileDto(request.getUri());
         final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
+        log.info("Static File: {}", dto);
 
         if (isLoginPage(dto) && isAlreadyLogin(request)) {
             alreadyLoginEvent(request, response);
@@ -56,7 +65,7 @@ public enum StaticHandlerMethod {
 
     private void alreadyLoginEvent(final HttpRequest request, final HttpResponse response) {
         response.sendRedirect("/index.html");
-        log.info("Redirect: /index.html");
+        log.info("Already Login, Redirect: /index.html");
     }
 
     private boolean isAlreadyLogin(final HttpRequest request) {
@@ -64,7 +73,7 @@ public enum StaticHandlerMethod {
         if (foundSession == null) {
             return false;
         }
-        if (SessionManager.findSession(foundSession.getId()) == null) {
+        if (SessionManager.isValidSession(foundSession)) {
             return false;
         }
         return true;

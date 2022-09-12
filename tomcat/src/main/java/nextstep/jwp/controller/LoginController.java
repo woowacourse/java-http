@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        loginFailEvent(request, response);
+        loginFailEvent(response);
         log.info("Login Fail !");
     }
 
@@ -66,13 +66,13 @@ public class LoginController extends AbstractController {
         SessionManager.add(session);
 
         response.sendRedirect("/index.html")
-                .addCooke(HttpCookie.ofJSessionId(session.getId()));
+                .addCookie(HttpCookie.ofJSessionId(session.getId()));
 
         log.info("Redirect: /index.html");
     }
 
-    private void loginFailEvent(final HttpRequest request, final HttpResponse response) {
-        response.sendRedirect("/index.html");
+    private void loginFailEvent(final HttpResponse response) {
+        response.sendRedirect("/401.html");
 
         log.info("Redirect: /401.html");
     }

@@ -21,7 +21,7 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse addCooke(final HttpCookie cookie) {
+    public HttpResponse addCookie(final HttpCookie cookie) {
         final String value = HttpMessage.SET_COOKIE.apply(cookie);
         headers.put(HttpMessage.SET_COOKIE.type(), "JSESSIONID="+value);
         return this;

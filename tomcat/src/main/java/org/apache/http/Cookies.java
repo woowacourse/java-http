@@ -1,48 +1,47 @@
 package org.apache.http;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Cookies {
 
     private static final String JSESSIONID_KEY = "JSESSIONID";
     private static final String COOKIES_DELIMITER_REGEX = "; ";
-    private static final String COOKIE_DELIMITER_REGEX = "=";
-    private static final int COOKIE_DIVIDED_LIMIT = 2;
-    private static final int COOKIE_KEY_INDEX = 0;
-    private static final int COOKIE_VALUE_INDEX = 1;
 
-    private final Map<String, String> cookies;
+    private final List<Cookie> cookies;
 
-    public Cookies(Map<String, String> cookies) {
+    public Cookies(List<Cookie> cookies) {
         this.cookies = cookies;
     }
 
     public static Cookies parse(String cookieLine) {
-        Map<String, String> cookies = new LinkedHashMap<>();
         List<String> dividedCookies = List.of(cookieLine.split(COOKIES_DELIMITER_REGEX));
-        for (String cookie : dividedCookies) {
-            List<String> dividedCookie = List.of(
-                cookie.split(COOKIE_DELIMITER_REGEX, COOKIE_DIVIDED_LIMIT));
-            cookies.put(dividedCookie.get(COOKIE_KEY_INDEX), dividedCookie.get(COOKIE_VALUE_INDEX));
-        }
+        List<Cookie> cookies = dividedCookies.stream()
+            .map(Cookie::from)
+            .collect(Collectors.toList());
         return new Cookies(cookies);
     }
 
     public static Cookies fromJSessionId(String id) {
-        return new Cookies(Map.of(JSESSIONID_KEY, id));
+        return new Cookies(List.of(new Cookie(JSESSIONID_KEY, id)));
     }
 
     public static Cookies empty() {
-        return new Cookies(Map.of());
+        return new Cookies(List.of());
     }
 
     public Optional<String> getJSessionId() {
-        if (cookies.containsKey(JSESSIONID_KEY)) {
-            return Optional.ofNullable(cookies.get(JSESSIONID_KEY));
-        }
-        return Optional.empty();
+        return findByKey(JSESSIONID_KEY);
+    }
+
+    private Optional<String> findByKey(String key) {
+        return cookies.stream()
+            .filter(it -> it.isSame(key))
+            .findFirst()
+            .map(Cookie::getValue);
     }
 }

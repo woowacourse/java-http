@@ -2,17 +2,12 @@ package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HandlerMapping;
+import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,8 +37,8 @@ public class LoginControllerTest extends ControllerTest {
         HttpRequest request = HttpRequest.from(toBufferedReader(requestValue));
 
         // when
-        HttpResponse response = HandlerMapping.getMethodHandler(request)
-                .service();
+        HttpResponse response = RequestMapping.from(request)
+                .service(request);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
@@ -66,8 +61,8 @@ public class LoginControllerTest extends ControllerTest {
         HttpRequest request = HttpRequest.from(toBufferedReader(requestValue));
 
         // when
-        HttpResponse response = HandlerMapping.getMethodHandler(request)
-                .service();
+        HttpResponse response = RequestMapping.from(request)
+                .service(request);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);

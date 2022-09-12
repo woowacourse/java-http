@@ -6,8 +6,10 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public enum HandlerMapping {
+public enum RequestMapping {
+
     LOGIN("/login", new LoginController()),
     REGISTER("/register", new RegisterController()),
     STATIC("static", new StaticController());
@@ -15,18 +17,22 @@ public enum HandlerMapping {
     private final String path;
     private final Controller controller;
 
-    HandlerMapping(String path, Controller controller) {
+    RequestMapping(String path, Controller controller) {
         this.path = path;
         this.controller = controller;
     }
 
-    public static MethodMapping getMethodHandler(HttpRequest request) {
+    public static RequestMapping from(HttpRequest request) {
         String path = request.path();
-        Controller controller = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(requestMapping -> requestMapping.path.equals(path))
                 .findAny()
-                .orElse(STATIC)
-                .controller;
-        return MethodMapping.from(controller, request);
+                .orElse(STATIC);
+    }
+
+    public HttpResponse service(HttpRequest request) throws Exception {
+        HttpResponse response = HttpResponse.ok();
+        controller.service(request, response);
+        return response;
     }
 }

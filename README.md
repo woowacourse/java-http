@@ -5,7 +5,7 @@
 
 - processor안에 전달받은 socket에서 url 추출하기 `/index.html`  ✅
 - 추출한 url로 `static/index.html` 에 접근하기 ✅
-- `index.html` 파일의 내용을 response body 값에 담아서 반환하기 ✅
+- `index.html` 파일의 내용을 response requestBody 값에 담아서 반환하기 ✅
 
 ### 2. CSS, javscript 지원하기
 
@@ -65,6 +65,6 @@
 
 ### 3. Controller 인터페이스 추가하기
 
-- `HandlerMapping` uri에 맞는 컨트롤러를 조회한다. ✅
-- `HandlerAdapter` http method에 맞는 메서드를 호출한다. ✅
-- `Controller` request에 맞는 비즈니스 로직을 수행한다. ✅
+- `ControllerMapping`: uri에 맞는 컨트롤러를 조회한다.
+- `Controller`: `requestLine`에 맞는 메서드를 수행한다.
+- `Service`: 비즈니스 로직을 수행한다.

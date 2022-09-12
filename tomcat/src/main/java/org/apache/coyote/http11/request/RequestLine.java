@@ -55,4 +55,8 @@ public class RequestLine {
     public HttpMethod method() {
         return method;
     }
+
+    public boolean isMethod(HttpMethod method) {
+        return this.method.equals(method);
+    }
 }

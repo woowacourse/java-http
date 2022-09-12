@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
-public class LoginController extends Controller {
+public class LoginController extends AbstractController {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String INDEX_PAGE = "/index.html";
@@ -27,16 +27,6 @@ public class LoginController extends Controller {
         redirect(response, LOGIN_PAGE);
     }
 
-    private boolean isLogin(HttpRequest request) {
-        if (request.hasCookie()) {
-            String sessionId = request.getCookieValue(JSESSIONID);
-            Session session = sessionManager.findSession(sessionId);
-            return InMemoryUserRepository.findByAccount(session.getAttribute("user"))
-                    .isPresent();
-        }
-        return false;
-    }
-
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> bodyForm = request.body()
@@ -47,6 +37,16 @@ public class LoginController extends Controller {
             return;
         }
         redirect(response, "/401.html");
+    }
+
+    private boolean isLogin(HttpRequest request) {
+        if (request.hasCookie()) {
+            String sessionId = request.getCookieValue(JSESSIONID);
+            Session session = sessionManager.findSession(sessionId);
+            return InMemoryUserRepository.findByAccount(session.getAttribute("user"))
+                    .isPresent();
+        }
+        return false;
     }
 
     private void saveInSession(HttpResponse response, Map<String, String> bodyForm) {

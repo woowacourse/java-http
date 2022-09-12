@@ -14,19 +14,19 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeader header;
-    private final Body body;
+    private final RequestBody requestBody;
 
-    private HttpRequest(RequestLine requestLine, RequestHeader header, Body body) {
+    public HttpRequest(RequestLine requestLine, RequestHeader header, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.header = header;
-        this.body = body;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         Map<String, String> header = extractHeader(bufferedReader);
-        Body body = extractBody(bufferedReader, header);
-        return new HttpRequest(requestLine, RequestHeader.from(header), body);
+        RequestBody requestBody = extractBody(bufferedReader, header);
+        return new HttpRequest(requestLine, RequestHeader.from(header), requestBody);
     }
 
     private static Map<String, String> extractHeader(BufferedReader bufferedReader) throws IOException {
@@ -39,16 +39,16 @@ public class HttpRequest {
         return requestHeader;
     }
 
-    private static Body extractBody(BufferedReader bufferedReader,
-                                    Map<String, String> header) throws IOException {
+    private static RequestBody extractBody(BufferedReader bufferedReader,
+                                           Map<String, String> header) throws IOException {
         if (!header.containsKey("Content-Length")) {
-            return new Body("");
+            return RequestBody.from("");
         }
         int contentLength = Integer.parseInt(header.get("Content-Length").trim());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
-        return new Body(requestBody);
+        return RequestBody.from(requestBody);
     }
 
     public String path() {
@@ -63,8 +63,8 @@ public class HttpRequest {
         return requestLine.method();
     }
 
-    public Body body() {
-        return body;
+    public RequestBody body() {
+        return requestBody;
     }
 
     public boolean hasCookie() {
@@ -73,5 +73,9 @@ public class HttpRequest {
 
     public String getCookieValue(String key) {
         return header.getCookieValue(key);
+    }
+
+    public boolean isMethod(HttpMethod method) {
+        return requestLine.isMethod(method);
     }
 }

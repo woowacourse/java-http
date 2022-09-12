@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HandlerMapping;
+import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -36,8 +36,8 @@ public class RegisterControllerTest extends ControllerTest {
         HttpRequest request = HttpRequest.from(toBufferedReader(requestValue));
 
         // when
-        HttpResponse response = HandlerMapping.getMethodHandler(request)
-                .service();
+        HttpResponse response = RequestMapping.from(request)
+                .service(request);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
@@ -62,13 +62,12 @@ public class RegisterControllerTest extends ControllerTest {
         InMemoryUserRepository.save(new User("tonic", "password", "tonic@woowahan.com"));
 
         // when
-        HttpResponse response = HandlerMapping.getMethodHandler(request)
-                .service();
+        HttpResponse response = RequestMapping.from(request)
+                .service(request);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.FOUND);
         assertThat(response.getHeader("Location")).isEqualTo("/400.html");
         assertThat(InMemoryUserRepository.findByAccount("tonic")).isPresent();
     }
-
 }

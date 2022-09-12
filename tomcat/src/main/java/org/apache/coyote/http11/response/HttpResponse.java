@@ -61,4 +61,9 @@ public class HttpResponse {
     public String getHeader(String key) {
         return responseHeader.get(key);
     }
+
+    public void redirect(String url) {
+        status = HttpStatus.FOUND;
+        responseHeader.put("Location", url);
+    }
 }

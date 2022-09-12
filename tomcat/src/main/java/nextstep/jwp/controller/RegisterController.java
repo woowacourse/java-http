@@ -19,18 +19,12 @@ public class RegisterController extends ResourceController {
     private final UserService userService = UserService.getInstance();
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return doGet();
-        }
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet() {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         return generateResourceResponse(REGISTER_HTML.getValue());
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
 
         final Map<String, String> queryParams = Parser.parseQueryParams(body);

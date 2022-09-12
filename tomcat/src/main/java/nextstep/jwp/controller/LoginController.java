@@ -25,13 +25,6 @@ public class LoginController extends ResourceController {
     private final UserService userService = UserService.getInstance();
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return doGet(httpRequest);
-        }
-        return doPost(httpRequest);
-    }
-
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         if (authorizeService.isAuthorized(httpRequest)) {
             final HttpHeader location = HttpHeader.of(LOCATION.getValue(), INDEX_HTML.getValue());
@@ -40,12 +33,13 @@ public class LoginController extends ResourceController {
         return generateResourceResponse(LOGIN_HTML.getValue());
     }
 
+    @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
         return generateLoginResponse(body);
     }
 
-    protected HttpResponse generateLoginResponse(final String body) {
+    private HttpResponse generateLoginResponse(final String body) {
         final Map<String, String> queryParams = Parser.parseQueryParams(body);
         try {
             final UserLoginRequest userLoginRequest = getUserLoginRequest(queryParams);

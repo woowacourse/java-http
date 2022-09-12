@@ -15,7 +15,7 @@ public class Session {
     private final Map<String, Object> values = new HashMap<>();
     private final LocalDateTime expirationTime;
 
-    protected Session(String id) {
+    public Session(String id) {
         this.id = id;
         this.expirationTime = LocalDateTime.now().plusSeconds(VALIDITY_IN_SECONDS);
     }

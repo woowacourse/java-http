@@ -25,7 +25,7 @@ public class RegisterController extends AbstractController {
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final HttpRequestBody httpRequestBody = request.getHttpRequestBody();
         validateRegistrable(httpRequestBody.getBodyValue("account"));
-        registerNewUser(httpRequestBody);
+        registerUser(httpRequestBody);
         response.statusCode(FOUND)
                 .redirect("/index.html");
     }
@@ -36,7 +36,7 @@ public class RegisterController extends AbstractController {
         }
     }
 
-    private void registerNewUser(final HttpRequestBody httpRequestBody) {
+    private void registerUser(final HttpRequestBody httpRequestBody) {
         final User user = new User(
                 httpRequestBody.getBodyValue("account"),
                 httpRequestBody.getBodyValue("password"),

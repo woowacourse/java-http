@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse httpResponse = handler.service(httpRequest, new HttpResponse());
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | FileNotFoundException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }

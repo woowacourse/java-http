@@ -15,8 +15,11 @@ public class HttpBody {
     private static final String DEFAULT_EXTENSION = "html";
     private static final String EXTENSION_DELIMITER = ".";
 
-    private final String body;
-    private final Map<String, String> bodyToKeyValue;
+    private String body;
+    private Map<String, String> bodyToKeyValue;
+
+    public HttpBody() {
+    }
 
     public HttpBody(final String body) {
         this.body = body;

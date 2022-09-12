@@ -37,11 +37,12 @@ public class LoginController extends AbstractController {
         return requireAuthByRequestInfo(httpRequest);
     }
 
-    private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpBody httpBody = HttpBody.createByUrl(REDIRECT_URL);
-        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, httpRequest.getUrl());
+    private HttpResponse redirect(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final HttpHeader httpHeader = new HttpHeader().startLine(StatusCode.MOVED_TEMPORARILY)
+                .contentType(httpRequest.getUrl());
         httpHeader.location(REDIRECT_URL);
-        return httpResponse.header(httpHeader).body(httpBody);
+
+        return httpResponse.header(httpHeader).body(new HttpBody());
     }
 
     private HttpResponse requireAuthByRequestInfo(final HttpRequest httpRequest)

@@ -207,7 +207,7 @@ class Http11ProcessorTest {
 
     @DisplayName("JSESSIONID가 request header에 있는 경우, 로그인을 하지 않아도 index.html로 리다이렉트한다.")
     @Test
-    void userLoginWithJSESSIONID() throws IOException {
+    void userLoginWithJSESSIONID() {
         //given
         final String httpRequest = String.join("\r\n",
                 "POST /login?account=gugu&password=password HTTP/1.1 ",
@@ -227,16 +227,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
                 "Location: /index.html \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
 

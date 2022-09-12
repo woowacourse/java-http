@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new ConcurrentHashMap();
+    private static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager () {
     }

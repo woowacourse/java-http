@@ -14,10 +14,10 @@ public class HttpCookie implements Header {
     private static final int COOKIE_VALUE = 1;
     private static final int NOT_EXIST_COOKIE = 0;
 
-    private final Map<String, String> httpCookie;
+    private final Map<String, String> cookies;
 
-    private HttpCookie(Map<String, String> httpCookie) {
-        this.httpCookie = httpCookie;
+    private HttpCookie(Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
     public static HttpCookie from(String cookie) {
@@ -34,15 +34,15 @@ public class HttpCookie implements Header {
     }
 
     public boolean hasJSESSIONID() {
-        return httpCookie.containsKey(JSESSIONID);
+        return cookies.containsKey(JSESSIONID);
     }
 
     public String getJSESSIONID() {
-        return httpCookie.get(JSESSIONID);
+        return cookies.get(JSESSIONID);
     }
 
     public void add(Session session) {
-        httpCookie.put(JSESSIONID, session.getId());
+        cookies.put(JSESSIONID, session.getId());
     }
 
     @Override

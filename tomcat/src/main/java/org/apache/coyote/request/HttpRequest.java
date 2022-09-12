@@ -64,7 +64,7 @@ public class HttpRequest {
         if (startLine.isSameMethod(GET)) {
             return startLine.getQueryParams();
         }
-        return requestBody.getBodyWithQueryParam();
+        return requestBody.getBodyWithQueryParamForm();
     }
 
     private String makeDefaultRequestUrl(String requestUrl) {

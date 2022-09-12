@@ -30,7 +30,7 @@ public class HttpRequestBody {
         return new HttpRequestBody(new String(buffer));
     }
 
-    public QueryParams getBodyWithQueryParam() {
+    public QueryParams getBodyWithQueryParamForm() {
         return QueryParams.from(requestBody);
     }
 }

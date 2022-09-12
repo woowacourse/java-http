@@ -1,7 +1,7 @@
 package org.apache.catalina;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public class SessionManager implements Manager {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private SessionManager() {
@@ -33,7 +33,6 @@ public class SessionManager implements Manager {
     @Override
     public void remove(Session session) {
         SESSIONS.remove(session.getId());
-        System.out.println("SESSIONS = " + SESSIONS);
     }
 
     public int size() {
@@ -46,5 +45,9 @@ public class SessionManager implements Manager {
                 .filter(session -> session.getAttribute("user").equals(user))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void removeAll() {
+        SESSIONS.clear();
     }
 }

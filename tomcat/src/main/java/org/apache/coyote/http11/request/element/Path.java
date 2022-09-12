@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.request.element;
 
-import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 public class Path {
-
-    private static final String PATH_REGEX = "\\?";
 
     private final String path;
 
@@ -13,24 +11,18 @@ public class Path {
         this.path = path;
     }
 
-    public static Path of(String uri) {
-        return new Path(uri.split(PATH_REGEX)[0]);
+    public static Path of(String path) {
+        if (path == null) {
+            return new Path("");
+        }
+        if (path.endsWith("/")) {
+            return new Path(StringUtils.chop(path));
+        }
+        return new Path(path);
     }
 
     public String getPath() {
         return path;
-    }
-
-    public boolean same(String path) {
-        return this.path.equals(path);
-    }
-
-    public boolean isIn(List<String> paths) {
-        return paths.contains(path);
-    }
-
-    public boolean contains(String element) {
-        return path.contains(element);
     }
 
     @Override
@@ -50,3 +42,4 @@ public class Path {
         return Objects.hash(getPath());
     }
 }
+

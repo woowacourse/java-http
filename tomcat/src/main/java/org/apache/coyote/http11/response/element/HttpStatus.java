@@ -6,7 +6,7 @@ public enum HttpStatus {
     UNAUTHORIZED("401 Unauthorized"),
     INTERNAL_SERVER_ERROR("500 Internal Server Error"),
     FOUND("302 Found"),
-    ;
+    METHOD_NOT_ALLOWED("405 Method Not Allowed");
 
     private final String value;
 

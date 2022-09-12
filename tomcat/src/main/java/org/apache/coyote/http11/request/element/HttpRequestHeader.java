@@ -33,8 +33,8 @@ public class HttpRequestHeader {
             throw new NoSuchElementException(EMPTY_REQUEST);
         }
 
-        String[] split = request.split(CRLF);
-        String[] firstLine = split[0].split(" ");
+        List<String> split = Arrays.asList(request.split(CRLF));
+        String[] firstLine = split.get(0).split(" ");
         Map<String, String> headers = extractHeaders(split);
 
         HttpMethod method = HttpMethod.valueOf(firstLine[0]);
@@ -46,10 +46,8 @@ public class HttpRequestHeader {
         return new HttpRequestHeader(method, path, query, headers);
     }
 
-    private static Map<String, String> extractHeaders(String[] split) {
-        List<String> headers = Arrays.stream(split)
-                .collect(Collectors.toList())
-                .subList(1, split.length);
+    private static Map<String, String> extractHeaders(List<String> split) {
+        List<String> headers = split.subList(1, split.size());
         return mapHeaders(headers);
     }
 

@@ -1,18 +1,18 @@
 package nextstep.jwp.controller.exception;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import nextstep.jwp.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.response.element.HttpStatus;
 import servlet.handler.ExceptionHandler;
 import servlet.mapping.ResponseEntity;
 
-public class NotFoundHandler implements ExceptionHandler {
+public class MethodNotAllowedHandler implements ExceptionHandler {
 
-    private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(NoSuchElementException.class);
+    private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(MethodNotAllowedException.class);
 
     @Override
     public ResponseEntity service() {
-        return new ResponseEntity("/404.html", HttpStatus.NOT_FOUND);
+        return new ResponseEntity("/405.html", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @Override

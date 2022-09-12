@@ -1,25 +1,26 @@
 package nextstep.jwp.controller.exception;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.NoUserException;
 import org.apache.coyote.http11.response.element.HttpStatus;
+import servlet.handler.ExceptionHandler;
 import servlet.mapping.ResponseEntity;
 
 public class UnauthorizedHandler implements ExceptionHandler {
 
+    private static final List<Class<? extends Exception>> EXCEPTION_CLASS = List.of(
+            NoUserException.class,
+            InvalidPasswordException.class);
+
     @Override
-    public void service(Exception e, ResponseEntity entity) {
-        entity.clone(new ResponseEntity("/401.html", HttpStatus.UNAUTHORIZED));
+    public ResponseEntity service() {
+        return new ResponseEntity("/401.html", HttpStatus.UNAUTHORIZED);
     }
 
     @Override
-    public boolean isMapped(Exception e) {
-        try {
-            throw e;
-        } catch (NoUserException | InvalidPasswordException exception) {
-            return true;
-        } catch (Exception exception) {
-            return false;
-        }
+    public List<Class<? extends Exception>> getExceptionClass() {
+        return EXCEPTION_CLASS;
     }
 }

@@ -1,9 +1,9 @@
 package servlet.mapping;
 
 import java.util.List;
-import nextstep.jwp.controller.exception.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servlet.handler.ExceptionHandler;
 
 public class ExceptionMappingImpl implements ExceptionMapping {
 
@@ -22,18 +22,18 @@ public class ExceptionMappingImpl implements ExceptionMapping {
     @Override
     public ResponseEntity map(Exception exception) {
         LOG.error(String.valueOf(exception.getClass()), exception);
-
-        ExceptionHandler exceptionHandler = findHandler(exception);
-
-        ResponseEntity entity = new ResponseEntity();
-        exceptionHandler.service(exception, entity);
-        return entity;
+        return findHandler(exception).service();
     }
 
     private ExceptionHandler findHandler(Exception exception) {
         return exceptionHandlers.stream()
-                .filter(element -> element.isMapped(exception))
+                .filter(element -> isContains(exception, element))
                 .findFirst()
                 .orElse(baseHandler);
+    }
+
+    private boolean isContains(Exception exception, ExceptionHandler element) {
+        List<Class<? extends Exception>> exceptionClass = element.getExceptionClass();
+        return exceptionClass.contains(exception.getClass());
     }
 }

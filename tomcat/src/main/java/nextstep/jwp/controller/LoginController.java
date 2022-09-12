@@ -18,6 +18,7 @@ public class LoginController extends AbstractController {
 
 	private static final String LOGIN_HTML = "login.html";
 	private static final String UNAUTHORIZED_HTML = "401.html";
+	private static final String REDIRECT_URL = "/index.html";
 	private static final String LOGIN_USER = "user";
 
 	@Override
@@ -26,7 +27,7 @@ public class LoginController extends AbstractController {
 		Optional<Object> sessionAttribute = session.getAttribute(LOGIN_USER);
 
 		sessionAttribute.ifPresentOrElse(
-			user -> handleRedirect(response),
+			user -> response.sendRedirect(REDIRECT_URL),
 			() -> handleHtml(HttpStatus.OK, LOGIN_HTML, response)
 		);
 	}
@@ -38,7 +39,7 @@ public class LoginController extends AbstractController {
 
 		try {
 			User user = LoginService.login(account, password);
-			handleRedirect(response);
+			response.sendRedirect(REDIRECT_URL);
 			addLoginSession(request, response, user);
 		} catch (InvalidLoginException e) {
 			handleHtml(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_HTML, response);

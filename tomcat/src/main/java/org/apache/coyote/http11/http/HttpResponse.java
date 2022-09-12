@@ -67,6 +67,11 @@ public class HttpResponse {
 		this.httpHeaders.addHeader(httpHeader, value);
 	}
 
+	public void sendRedirect(String redirectUrl) {
+		setStatus(HttpStatus.FOUND);
+		addHeader(HttpHeader.LOCATION, redirectUrl);
+	}
+
 	@Override
 	public String toString() {
 		return "===HttpResponse===" + "\r\n" +

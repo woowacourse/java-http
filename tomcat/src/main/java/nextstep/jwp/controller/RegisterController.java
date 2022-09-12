@@ -12,6 +12,7 @@ public class RegisterController extends AbstractController {
 
 	private static final String REGISTER_HTML = "register.html";
 	private static final String BAD_REQUEST_HTML = "400.html";
+	private static final String REDIRECT_URL = "/index.html";
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) {
@@ -26,7 +27,7 @@ public class RegisterController extends AbstractController {
 
 		try {
 			UserService.register(account, password, email);
-			handleRedirect(response);
+			response.sendRedirect(REDIRECT_URL);
 		} catch (AccountDuplicateException e) {
 			handleHtml(HttpStatus.BAD_REQUEST, BAD_REQUEST_HTML, response);
 		}

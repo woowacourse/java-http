@@ -12,12 +12,11 @@ public class RequestMapping {
 
 	private static final String EXTENSION_DELIMITER = ".";
 
-	private static final Map<String, Controller> apiControllers;
+	private static final Map<String, Controller> apiControllers = new HashMap<>();
 	private static final Controller ERROR_CONTROLLER = new ErrorController();
 	private static final Controller STATIC_CONTROLLER = new StaticResourceController();
 
 	static {
-		apiControllers = new HashMap<>();
 		apiControllers.put("/", new HelloController());
 		apiControllers.put("/login", new LoginController());
 		apiControllers.put("/register", new RegisterController());

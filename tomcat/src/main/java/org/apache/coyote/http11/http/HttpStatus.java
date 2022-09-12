@@ -10,7 +10,7 @@ public enum HttpStatus {
 	UNAUTHORIZED(401, " Unauthorized "),
 	FOUND(302, " Found "),
 	BAD_REQUEST(400, " Bad Request "),
-	METHOD_NOT_ALLOWED(400, " Method Not Allowed ")
+	METHOD_NOT_ALLOWED(405, " Method Not Allowed ")
 
 	;
 

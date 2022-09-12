@@ -1,5 +1,11 @@
 package org.apache.coyote.http11.common;
 
+import static org.apache.coyote.http11.common.HeaderConstants.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HeaderConstants.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HeaderConstants.COOKIE;
+import static org.apache.coyote.http11.common.HeaderConstants.LOCATION;
+import static org.apache.coyote.http11.common.HeaderConstants.SET_COOKIE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -10,7 +16,6 @@ import org.apache.coyote.http11.session.HttpCookie;
 
 public class Headers {
 
-    private static final String COOKIE = "Cookie";
     private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
 
     private final Map<String, String> values;
@@ -59,18 +64,18 @@ public class Headers {
     }
 
     public void setContentType(final ContentType contentType) {
-        values.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+        values.put(CONTENT_TYPE, contentType.getValue() + ";charset=utf-8");
     }
 
     public void setContentLength(final String contents) {
-        values.put("Content-Length", String.valueOf(contents.getBytes().length));
+        values.put(CONTENT_LENGTH, String.valueOf(contents.getBytes().length));
     }
 
     public void setLocation(final String location) {
-        values.put("Location", location);
+        values.put(LOCATION, location);
     }
 
     public void setCookie(final String cookie) {
-        values.put("Set-Cookie", "JSESSIONID=" + cookie);
+        values.put(SET_COOKIE, "JSESSIONID=" + cookie);
     }
 }

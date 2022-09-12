@@ -13,27 +13,19 @@ public class RequestHeaders {
 
     private final Map<String, String> headers;
 
-    public RequestHeaders(final Map<String, String> headers) {
+    private RequestHeaders(final Map<String, String> headers) {
         this.headers = headers;
     }
 
     public static RequestHeaders of(final BufferedReader bufferedReader) throws IOException {
         String headerKeyValue = bufferedReader.readLine();
         final HashMap<String, String> headers = new HashMap<>();
-        while (!headerKeyValue.isBlank()) {
+        while (headerKeyValue != null && !headerKeyValue.isBlank()) {
             final String[] splitHeaderKeyValue = headerKeyValue.split(HEADER_KEY_VALUE_DELIMITER);
             headers.put(splitHeaderKeyValue[KEY], splitHeaderKeyValue[VALUE]);
             headerKeyValue = bufferedReader.readLine();
         }
         return new RequestHeaders(headers);
-    }
-
-    public void add(final String key, final String value) {
-        headers.put(key, value);
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
     }
 
     public int getContentLength() {
@@ -51,16 +43,5 @@ public class RequestHeaders {
         }
         return Arrays.stream(cookie.split("; "))
                 .anyMatch(tuple -> tuple.contains("JSESSIONID="));
-    }
-
-    public String getJsessionid() {
-        final String cookie = headers.get("Cookie");
-        if (cookie == null) {
-            return "";
-        }
-        return Arrays.stream(cookie.split("; "))
-                .filter(tuple -> tuple.contains("JSESSIONID="))
-                .findFirst()
-                .orElse("");
     }
 }

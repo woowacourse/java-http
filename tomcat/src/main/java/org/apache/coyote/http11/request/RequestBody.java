@@ -9,7 +9,7 @@ import org.apache.coyote.KeyValueTupleParser;
 public class RequestBody {
     private final Map<String, String> content;
 
-    public RequestBody(final String content) {
+    private RequestBody(final String content) {
         this.content = KeyValueTupleParser.parse(content);
     }
 

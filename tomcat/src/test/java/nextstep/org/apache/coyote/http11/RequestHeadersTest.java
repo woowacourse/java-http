@@ -2,16 +2,18 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.Map;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.junit.jupiter.api.Test;
+import support.RequestFixture;
 
 class RequestHeadersTest {
 
     @Test
-    void getContentLength() {
+    void getContentLength() throws IOException {
         // given
-        final RequestHeaders headers = new RequestHeaders(Map.of("Content-Length", "1"));
+        final RequestHeaders headers = RequestFixture.createHeader(Map.of("Content-Length", "1"));
 
         // when
         final int actual = headers.getContentLength();
@@ -21,9 +23,9 @@ class RequestHeadersTest {
     }
 
     @Test
-    void getContentLength_notExistsContentLength() {
+    void getContentLength_notExistsContentLength() throws IOException {
         // given
-        final RequestHeaders headers = new RequestHeaders(Map.of("Content-Type", "text/html"));
+        final RequestHeaders headers = RequestFixture.createHeader(Map.of("Content-Type", "text/html"));
 
         // when
         final int actual = headers.getContentLength();

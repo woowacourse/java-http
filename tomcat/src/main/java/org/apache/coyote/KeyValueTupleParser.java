@@ -20,7 +20,28 @@ public class KeyValueTupleParser {
             return new HashMap<>();
         }
         return Arrays.stream(keyValues.split(TUPLE_DELIMITER))
-                .map(keyValue -> keyValue.split(KEY_VALUE_DELIMITER))
-                .collect(toMap(keyValue -> keyValue[KEY_INDEX], keyValue -> keyValue[VALUE_INDEX]));
+                .map(Tuple::of)
+                .collect(toMap(tuple -> tuple.key, tuple -> tuple.value));
+    }
+
+    private static class Tuple {
+        private static final int VALID_LENGTH = 2;
+        private static final String EMPTY_DATA = "";
+
+        private final String key;
+        private final String value;
+
+        private Tuple(final String key, final String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public static Tuple of(final String tupleString) {
+            final String[] keyValue = tupleString.split(KEY_VALUE_DELIMITER);
+            if (keyValue.length == VALID_LENGTH) {
+                return new Tuple(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
+            }
+            return new Tuple(keyValue[KEY_INDEX], EMPTY_DATA);
+        }
     }
 }

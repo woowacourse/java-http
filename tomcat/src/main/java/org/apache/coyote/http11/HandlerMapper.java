@@ -1,26 +1,27 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import java.util.function.Function;
-import nextstep.jwp.view.LoginHandler;
-import nextstep.jwp.view.RegisterHandler;
+import nextstep.jwp.view.IndexController;
+import nextstep.jwp.view.LoginController;
+import nextstep.jwp.view.RegisterController;
+import org.apache.coyote.common.controller.Controller;
 import org.apache.coyote.common.request.Request;
-import org.apache.coyote.common.response.Response;
 
 public class HandlerMapper {
 
-    private static final Map<String, Function<Request, Response>> cache;
-    private static final StaticResourceHandler staticResourceHandler;
+    private static final Map<String, Controller> cache;
+    private static final Controller staticResourceController;
 
     static {
         cache = Map.ofEntries(
-                Map.entry("POST /login", new LoginHandler()),
-                Map.entry("POST /register", new RegisterHandler())
+                Map.entry("/", new IndexController()),
+                Map.entry("/login", new LoginController()),
+                Map.entry("/register", new RegisterController())
         );
-        staticResourceHandler = new StaticResourceHandler();
+        staticResourceController = new StaticResourceController();
     }
 
-    public static Function<Request, Response> of(final Request request) {
-        return cache.getOrDefault(request.getRequestIdentifier(), staticResourceHandler);
+    public static Controller of(final Request request) {
+        return cache.getOrDefault(request.getPath(), staticResourceController);
     }
 }

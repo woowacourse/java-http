@@ -46,8 +46,8 @@ public class Request {
         return headers.hasJsessionid();
     }
 
-    public HttpMethod getMethod() {
-        return startLine.getMethod();
+    public boolean hasMethod(final HttpMethod method) {
+        return startLine.hasMethod(method);
     }
 
     public URL getURL() {

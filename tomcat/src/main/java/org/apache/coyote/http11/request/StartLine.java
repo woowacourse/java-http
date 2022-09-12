@@ -62,4 +62,8 @@ public class StartLine {
     public URL getURL() {
         return requestURL;
     }
+
+    public boolean hasMethod(final HttpMethod method) {
+        return method.equals(this.method);
+    }
 }

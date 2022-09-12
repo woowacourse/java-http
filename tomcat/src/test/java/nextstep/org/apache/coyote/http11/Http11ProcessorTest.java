@@ -67,7 +67,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
+        final String httpRequest = RequestFixture.createLine(HttpMethod.GET, "/index.html", "");
 
         stubSocket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(stubSocket, controllerFinder);

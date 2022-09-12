@@ -21,7 +21,7 @@ public class Session {
 
     public static Optional<Object> find(final String jsessionid, final String key) {
         if (SESSIONS.containsKey(jsessionid)) {
-            return Optional.of(SESSIONS.get(jsessionid).get(key));
+            return Optional.ofNullable(SESSIONS.get(jsessionid).get(key));
         }
         return Optional.empty();
     }

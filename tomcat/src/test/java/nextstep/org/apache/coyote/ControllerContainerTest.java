@@ -19,7 +19,7 @@ class ControllerContainerTest {
     @Test
     void findController() throws IOException {
         // given
-        final String requestLine = RequestFixture.create(HttpMethod.GET, "/login.html", "");
+        final String requestLine = RequestFixture.createLine(HttpMethod.GET, "/login.html", "");
         final Request request = Request.of(new ByteArrayInputStream(requestLine.getBytes()));
 
         // when

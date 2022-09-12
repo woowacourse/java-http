@@ -33,7 +33,7 @@ class LoginControllerTest {
     @Test
     void loginSuccess() throws Exception {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=password");
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/lgoin", "account=gugu&password=password");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
         final Response response = Response.of(stubSocket.getOutputStream());
@@ -50,7 +50,7 @@ class LoginControllerTest {
 
     @Test
     void loginFailure() throws Exception {
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=wrongPassword");
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/lgoin", "account=gugu&password=wrongPassword");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
         final Response response = Response.of(stubSocket.getOutputStream());

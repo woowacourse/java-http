@@ -27,7 +27,7 @@ class ResponseTest {
     @Test
     void write() throws IOException, URISyntaxException {
         // given
-        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
+        final String httpRequest = RequestFixture.createLine(HttpMethod.GET, "/index.html", "");
         stubSocket = new StubSocket(httpRequest);
         final Response response = Response.of(stubSocket.getOutputStream());
 

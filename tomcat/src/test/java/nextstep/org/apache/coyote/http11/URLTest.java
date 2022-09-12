@@ -14,10 +14,10 @@ class URLTest {
     @Test
     void isDefault() {
         // given
-        final URL URL = new URL("/css/styles.css");
+        final URL url = URL.of("/css/styles.css");
 
         // when
-        final boolean actual = URL.isDefault();
+        final boolean actual = url.isDefault();
 
         // then
         assertThat(actual).isFalse();
@@ -38,10 +38,10 @@ class URLTest {
     @Test
     void getMediaType() throws IOException {
         // given
-        final URL URL = new URL("/css/styles.css");
+        final URL url = URL.of("/css/styles.css");
 
         // when
-        final String actual = URL.getMIMEType();
+        final String actual = url.getMIMEType();
 
         // then
         assertThat(actual).isEqualTo("text/css");
@@ -51,10 +51,10 @@ class URLTest {
     @Test
     void getMediaType_default() throws IOException {
         // given
-        final URL URL = new URL("/");
+        final URL url = URL.of("/");
 
         // when
-        final String actual = URL.getMIMEType();
+        final String actual = url.getMIMEType();
 
         // then
         assertThat(actual).isEqualTo("text/html");
@@ -63,10 +63,10 @@ class URLTest {
     @Test
     void getMediaType_notStaticFile() throws IOException {
         // given
-        final URL URL = new URL("/login");
+        final URL url = URL.of("/login");
 
         // when
-        final String actual = URL.getMIMEType();
+        final String actual = url.getMIMEType();
 
         // then
         assertThat(actual).isEqualTo("text/html");
@@ -75,10 +75,10 @@ class URLTest {
     @Test
     void read() throws IOException, URISyntaxException {
         // given
-        final URL URL = new URL("/staticFile.txt");
+        final URL url = URL.of("/staticFile.txt");
 
         // when
-        final String actual = URL.read();
+        final String actual = url.read();
 
         // then
         assertThat(actual).contains("This is static file.");

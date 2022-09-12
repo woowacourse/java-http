@@ -36,7 +36,7 @@ class RegisterControllerTest {
     @Test
     void registerSuccess() throws Exception {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/register", "account=accountName&password=password&email=gugu@naver.com");
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/register", "account=accountName&password=password&email=gugu@naver.com");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
         final Response response = Response.of(stubSocket.getOutputStream());
@@ -53,7 +53,7 @@ class RegisterControllerTest {
 
     @Test
     void registerFailure() throws IOException, URISyntaxException {
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/register", "account=gugu&password=wrongPassword");
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/register", "account=gugu&password=wrongPassword");
         stubSocket = new StubSocket(requestString);
         final Request request = Request.of(stubSocket.getInputStream());
         final Response response = Response.of(stubSocket.getOutputStream());

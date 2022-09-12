@@ -77,10 +77,6 @@ public class Request {
         return startLine.getURL();
     }
 
-    public RequestHeaders getHeaders() {
-        return headers;
-    }
-
     public RequestBody getBody() {
         return body;
     }

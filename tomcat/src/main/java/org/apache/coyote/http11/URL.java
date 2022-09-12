@@ -24,7 +24,7 @@ public class URL {
 
     private final String url;
 
-    public URL(final String url) {
+    private URL(final String url) {
         this.url = url;
     }
 

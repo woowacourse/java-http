@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Map;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpResponse {
 
@@ -8,14 +9,14 @@ public class HttpResponse {
     private static final String JSESSIONID = "JSESSIONID";
 
     private Status status;
-    private ResponseHeaders responseHeaders;
+    private HttpHeaders responseHeaders;
     private String body;
 
     public HttpResponse() {
-        this.responseHeaders = new ResponseHeaders();
+        this.responseHeaders = new HttpHeaders();
     }
 
-    private HttpResponse(final Status status, final ResponseHeaders responseHeaders, final String body) {
+    private HttpResponse(final Status status, final HttpHeaders responseHeaders, final String body) {
         this.status = status;
         this.responseHeaders = responseHeaders;
         this.body = body;
@@ -35,7 +36,7 @@ public class HttpResponse {
     }
 
     public void setHeaders(final Map<String, String> headers) {
-        this.responseHeaders = new ResponseHeaders();
+        this.responseHeaders = new HttpHeaders();
     }
 
     public void setBody(final String body) {
@@ -46,7 +47,7 @@ public class HttpResponse {
         return status;
     }
 
-    public ResponseHeaders getHeaders() {
+    public HttpHeaders getHeaders() {
         return responseHeaders;
     }
 
@@ -62,7 +63,7 @@ public class HttpResponse {
 
     public static class ResponseBuilder {
         private Status status;
-        private ResponseHeaders responseHeaders = new ResponseHeaders();
+        private HttpHeaders responseHeaders = new HttpHeaders();
         private String body = "";
 
         public ResponseBuilder status(final Status status) {
@@ -70,7 +71,7 @@ public class HttpResponse {
             return this;
         }
 
-        public ResponseBuilder headers(final ResponseHeaders responseHeaders) {
+        public ResponseBuilder headers(final HttpHeaders responseHeaders) {
             this.responseHeaders = responseHeaders;
             return this;
         }

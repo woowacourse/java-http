@@ -3,11 +3,11 @@ package nextstep.jwp.controller;
 import java.io.File;
 import java.net.URL;
 import nextstep.jwp.exception.HttpMethodNotAllowedException;
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
-import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 
 public class StaticFileController extends AbstractController {
@@ -19,7 +19,7 @@ public class StaticFileController extends AbstractController {
         String url = request.getPath();
         if (hasMatchedStaticFile(url)) {
             final String body = readResourceBody(url);
-            final ResponseHeaders responseHeaders = readResourceHeader(url, body);
+            final HttpHeaders responseHeaders = readResourceHeader(url, body);
 
             return new ResponseBuilder().status(Status.OK)
                     .headers(responseHeaders)

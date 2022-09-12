@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -18,10 +19,10 @@ public class HttpRequest {
     private static final int MIN_OFF = 0;
 
     private final RequestLine startLine;
-    private final RequestHeaders headers;
+    private final HttpHeaders headers;
     private final String body;
 
-    public HttpRequest(final RequestLine startLine, final RequestHeaders headers, final String body) {
+    public HttpRequest(final RequestLine startLine, final HttpHeaders headers, final String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -41,7 +42,7 @@ public class HttpRequest {
         return RequestLine.from(startLine);
     }
 
-    private static RequestHeaders readHeaders(final BufferedReader bufferedReader) throws IOException {
+    private static HttpHeaders readHeaders(final BufferedReader bufferedReader) throws IOException {
         StringBuilder headers = new StringBuilder();
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
@@ -49,7 +50,7 @@ public class HttpRequest {
                     .append(LINE_SEPARATOR);
         }
 
-        return RequestHeaders.from(headers.toString());
+        return HttpHeaders.from(headers.toString());
     }
 
     private static String readBody(final BufferedReader reader, final String contentLength) throws IOException {

@@ -11,40 +11,31 @@ public class HttpRequestHeader {
     private static final int VALUE_INDEX = 1;
     private static final String FORM_DATA_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-    private final Map<String, String> headers;
-    private final HttpCookie cookies;
+    private final Map<String, Object> headers;
 
-    private HttpRequestHeader(final Map<String, String> headers, final HttpCookie cookies) {
+    private HttpRequestHeader(final Map<String, Object> headers) {
         this.headers = headers;
-        this.cookies = cookies;
     }
 
     public static HttpRequestHeader of(final List<String> rawHeader) {
-        final HttpCookie httpCookie = getCookies(rawHeader);
-
-        final Map<String, String> parsedHeaders = new HashMap<>();
+        final Map<String, Object> parsedHeaders = new HashMap<>();
         for (final String header : rawHeader) {
             parseRawHeader(parsedHeaders, header);
         }
 
-        return new HttpRequestHeader(parsedHeaders, httpCookie);
+        return new HttpRequestHeader(parsedHeaders);
     }
 
-    private static HttpCookie getCookies(final List<String> rawHeader) {
-        return HttpCookie.of(rawHeader.stream()
-                .filter(it -> it.contains("Cookie: "))
-                .findFirst()
-                .orElseGet(String::new));
-    }
-
-    private static void parseRawHeader(final Map<String, String> parsedHeaders, final String header) {
+    private static void parseRawHeader(final Map<String, Object> parsedHeaders, final String header) {
         final String[] parsedHeader = header.split(": ");
         final String headerName = parsedHeader[NAME_INDEX];
         final String headerValue = parsedHeader[VALUE_INDEX].trim();
 
-        if (!headerName.equals("Cookie")) {
-            parsedHeaders.put(headerName, headerValue);
+        if (headerName.equals("Cookie")) {
+            parsedHeaders.put(headerName, HttpCookie.of(headerValue));
+            return;
         }
+        parsedHeaders.put(headerName, headerValue);
     }
 
     public boolean isFormDataType() {
@@ -56,10 +47,13 @@ public class HttpRequestHeader {
     }
 
     public String getHeader(final String headerName) {
-        return headers.get(headerName);
+        return (String) headers.get(headerName);
     }
 
     public HttpCookie getCookies() {
-        return cookies;
+        if (headers.containsKey("Cookie")) {
+            return (HttpCookie) headers.get("Cookie");
+        }
+        return HttpCookie.createEmptyCookie();
     }
 }

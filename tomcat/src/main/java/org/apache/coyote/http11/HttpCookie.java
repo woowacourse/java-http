@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 public class HttpCookie {
 
     private static final int NAME_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static HttpCookie emptyCookieInstance;
 
     private final Map<String, String> cookies;
 
@@ -25,6 +27,11 @@ public class HttpCookie {
         }
 
         return new HttpCookie(parsedCookies);
+    }
+
+    public static HttpCookie createEmptyCookie() {
+        return Objects.requireNonNullElseGet(emptyCookieInstance,
+                () -> HttpCookie.of(""));
     }
 
     private static void parseRawCookie(final String rawCookie, final Map<String, String> parsedCookies) {

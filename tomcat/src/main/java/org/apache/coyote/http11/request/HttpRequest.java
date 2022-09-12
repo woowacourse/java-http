@@ -33,18 +33,17 @@ public class HttpRequest {
     }
 
     private Map<String, String> parseParameters(String body) {
-        if (headers.getContentType() != ContentType.APPLICATION_FORM_URLENCODED) {
-            return new HashMap<>();
+        if (headers.containsKey("ContentType") && headers.getContentType() == ContentType.APPLICATION_FORM_URLENCODED) {
+            Map<String, String> params = new HashMap<>();
+            String[] components = body.split(PARAM_DELIMITER);
+            for (String component : components) {
+                String[] keyVal = component.split(KEY_VALUE_DELIMITER);
+                String key = keyVal[KEY_INDEX];
+                String value = keyVal[VALUE_INDEX];
+                params.put(key, value);
+            }
         }
-        Map<String, String> params = new HashMap<>();
-        String[] components = body.split(PARAM_DELIMITER);
-        for (String component : components) {
-            String[] keyVal = component.split(KEY_VALUE_DELIMITER);
-            String key = keyVal[KEY_INDEX];
-            String value = keyVal[VALUE_INDEX];
-            params.put(key, value);
-        }
-        return params;
+        return new HashMap<>();
     }
 
     @Nullable

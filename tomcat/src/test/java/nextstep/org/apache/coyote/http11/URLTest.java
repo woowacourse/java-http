@@ -29,7 +29,7 @@ class URLTest {
         final URL url = URL.of("/login?account=account&password=password");
 
         // when
-        final boolean actual = url.hasPath("/login");
+        final boolean actual = url.hasSameWith("/login");
 
         // then
         assertThat(actual).isTrue();

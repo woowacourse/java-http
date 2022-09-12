@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
     protected void doPost(final Request request, final Response response) throws Exception {
         register(request.getBody());
         response.addHeader("Location", "/index.html");
-        response.write(HttpStatus.FOUND);
+        response.writeWithEmptyBody(HttpStatus.FOUND);
     }
 
     @Override

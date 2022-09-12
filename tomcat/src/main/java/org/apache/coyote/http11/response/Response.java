@@ -29,7 +29,7 @@ public class Response {
         this.headers.add(key, value);
     }
 
-    public void write(final HttpStatus status) throws IOException, URISyntaxException {
+    public void writeWithEmptyBody(final HttpStatus status) throws IOException, URISyntaxException {
         write(status, EMPTY_STRING);
     }
 

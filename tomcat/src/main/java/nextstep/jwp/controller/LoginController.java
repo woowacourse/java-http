@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.addHeader("Location", "/index.html");
-        response.write(HttpStatus.FOUND);
+        response.writeWithEmptyBody(HttpStatus.FOUND);
     }
 
     private void runLogin(final Request request, final Response response)
@@ -44,7 +44,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.addHeader("Location", "/401.html");
-        response.write(HttpStatus.FOUND);
+        response.writeWithEmptyBody(HttpStatus.FOUND);
     }
 
     private boolean loginSuccess(final RequestBody body) {
@@ -67,6 +67,6 @@ public class LoginController extends AbstractController {
         response.addHeader("Set-Cookie", "JSESSIONID="+jsessionid);
         log.info(loggedInUser.toString());
         response.addHeader("Location", "/index.html");
-        response.write(HttpStatus.FOUND);
+        response.writeWithEmptyBody(HttpStatus.FOUND);
     }
 }

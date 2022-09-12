@@ -20,8 +20,6 @@ public class URL {
     private static final String DEFAULT_CONTENT = "Hello world!";
     private static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
 
-
-
     private final String url;
 
     private URL(final String url) {
@@ -69,7 +67,7 @@ public class URL {
         return fileUrl.toURI();
     }
 
-    public boolean hasPath(final String path) {
+    public boolean hasSameWith(final String path) {
         return this.url.equals(path);
     }
 

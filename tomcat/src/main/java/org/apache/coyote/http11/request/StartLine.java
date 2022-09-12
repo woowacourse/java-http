@@ -52,7 +52,7 @@ public class StartLine {
     }
 
     public boolean hasPath(final String path) {
-        return requestURL.hasPath(path);
+        return requestURL.hasSameWith(path);
     }
 
     public HttpMethod getMethod() {

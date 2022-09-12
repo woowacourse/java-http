@@ -16,6 +16,6 @@ public class InternalServerExceptionController implements org.apache.coyote.Exce
     public void handle(Exception exception, Response response) throws IOException, URISyntaxException {
         log.error(exception.getMessage(), exception);
         response.addHeader("Location", "/500.html");
-        response.write(HttpStatus.FOUND);
+        response.writeWithEmptyBody(HttpStatus.FOUND);
     }
 }

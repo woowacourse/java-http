@@ -67,7 +67,7 @@ public class LoginController extends AbstractController {
         return isSessionUserFound(session);
     }
 
-    private boolean isSessionUserFound(Session session) {
+    private boolean isSessionUserFound(final Session session) {
         final Session foundSession = sessionManager.findSession(session.getId());
         final User user = getUser(foundSession);
         return InMemoryUserRepository.findByAccount(user.getAccount())
@@ -85,7 +85,7 @@ public class LoginController extends AbstractController {
             .build();
     }
 
-    private Session addSession(User user) {
+    private Session addSession(final User user) {
         final String jSessionId = new HttpCookie().getCookieValue("JSESSIONID");
         final Session session = new Session(jSessionId);
         session.setAttribute("user", user);

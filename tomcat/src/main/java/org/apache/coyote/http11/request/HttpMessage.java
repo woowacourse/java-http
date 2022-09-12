@@ -24,7 +24,6 @@ class HttpMessage {
 
     private void readHttpRequest() {
         this.requestLine = readLine();
-
         final String contentLength = readHeaders();
 
         if (!contentLength.isEmpty()) {

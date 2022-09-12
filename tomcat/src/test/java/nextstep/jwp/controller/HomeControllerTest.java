@@ -18,7 +18,7 @@ class HomeControllerTest extends ControllerTest {
     void doGet() throws IOException {
         // given
         final String responseBody = "Hello world!";
-        final HttpResponse expectedResponse = HttpResponse.init(OK)
+        final HttpResponse expectedResponse = HttpResponse.init("HTTP/1.1", OK)
                 .setBody(responseBody);
         final String expected = new String(expectedResponse.toResponseBytes());
 
@@ -38,7 +38,7 @@ class HomeControllerTest extends ControllerTest {
     @DisplayName("POST / 요청은 405를 응답한다.")
     void doPost() throws IOException {
         // given
-        final HttpResponse expectedResponse = HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+        final HttpResponse expectedResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.METHOD_NOT_ALLOWED)
                 .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
         final String expected = new String(expectedResponse.toResponseBytes());
 

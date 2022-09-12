@@ -19,7 +19,7 @@ public abstract class AbstractController implements Controller {
             return doPost(httpRequest);
         }
 
-        return HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.METHOD_NOT_ALLOWED)
                 .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
     }
 

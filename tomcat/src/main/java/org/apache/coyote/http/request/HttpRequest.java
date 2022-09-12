@@ -15,15 +15,19 @@ public class HttpRequest {
     private static final String QUERY_STRING_KEY_VALUE_DELIMITER = "=";
     private static final int METHOD = 0;
     private static final int PATH = 1;
+    private static final int VERSION = 2;
 
+    private final String version;
     private final HttpMethod httpMethod;
     private final String path;
     private final Map<String, String> queryParams;
     private final RequestHeader header;
     private final RequestBody requestBody;
 
-    private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryParams,
-                        final RequestHeader header, final RequestBody requestBody) {
+    private HttpRequest(final String version, final HttpMethod httpMethod, final String path,
+                        final Map<String, String> queryParams, final RequestHeader header,
+                        final RequestBody requestBody) {
+        this.version = version;
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
@@ -39,8 +43,8 @@ public class HttpRequest {
         final RequestHeader header = RequestHeader.from(reader);
         final RequestBody requestBody = RequestBody.of(reader, header.getContentLength());
 
-        return new HttpRequest(HttpMethod.from(startLine[METHOD]), toPath(uri), toQueryParams(uri), header,
-                requestBody);
+        return new HttpRequest(startLine[VERSION], HttpMethod.from(startLine[METHOD]), toPath(uri), toQueryParams(uri),
+                header, requestBody);
     }
 
     private static String toPath(final String uri) {
@@ -63,6 +67,10 @@ public class HttpRequest {
 
     private static boolean hasQueryString(final String uri) {
         return uri.contains(QUERY_STRING_PREFIX);
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public RequestHeader getHeader() {

@@ -17,7 +17,7 @@ class ResourceControllerTest extends ControllerTest {
     @DisplayName("GET /css/styles.css 요청을 처리한다.")
     void doGet() throws IOException {
         // given
-        final HttpResponse expectedResponse = HttpResponse.init(OK)
+        final HttpResponse expectedResponse = HttpResponse.init("HTTP/1.1", OK)
                 .setBodyByPath("/css/styles.css");
         final String expected = new String(expectedResponse.toResponseBytes());
 
@@ -37,7 +37,7 @@ class ResourceControllerTest extends ControllerTest {
     @DisplayName("POST /css/styles.css 요청은 405를 응답한다.")
     void doPost() throws IOException {
         // given
-        final HttpResponse expectedResponse = HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+        final HttpResponse expectedResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.METHOD_NOT_ALLOWED)
                 .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
         final String expected = new String(expectedResponse.toResponseBytes());
 

@@ -27,10 +27,10 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         if (alreadyLogin(httpRequest.getHeader())) {
-            return HttpResponse.init(HttpStatusCode.FOUND)
+            return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.FOUND)
                     .setLocationAsHome();
         }
-        return HttpResponse.init(HttpStatusCode.OK)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.OK)
                 .setBodyByPath("/login.html");
     }
 
@@ -48,14 +48,14 @@ public class LoginController extends AbstractController {
 
         try {
             final String sessionId = authService.login(requestDto);
-            return HttpResponse.init(HttpStatusCode.FOUND)
+            return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.FOUND)
                     .setLocationAsHome()
                     .addCookie("JSESSIONID", sessionId);
         } catch (final UserNotFoundException e) {
-            return HttpResponse.init(HttpStatusCode.NOT_FOUND)
+            return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.NOT_FOUND)
                     .setBodyByPath("/404.html");
         } catch (final WrongPasswordException e) {
-            return HttpResponse.init(HttpStatusCode.UNAUTHORIZED)
+            return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.UNAUTHORIZED)
                     .setBodyByPath("/401.html");
         }
     }

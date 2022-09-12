@@ -15,20 +15,23 @@ public class HttpResponse {
     private static final String TEXT_HTML = "text/html";
     private static final String NEW_LINE = "\r\n";
 
+    private final String version;
     private final ResponseHeader header;
     private final ResponseCookie cookie;
     private HttpStatusCode statusCode;
     private String responseBody;
 
-    private HttpResponse(final HttpStatusCode statusCode, final ResponseHeader header, final ResponseCookie cookie) {
+    private HttpResponse(final String version, final HttpStatusCode statusCode, final ResponseHeader header,
+                         final ResponseCookie cookie) {
+        this.version = version;
         this.statusCode = statusCode;
         this.header = header;
         this.cookie = cookie;
         this.responseBody = "";
     }
 
-    public static HttpResponse init(final HttpStatusCode statusCode) {
-        return new HttpResponse(statusCode, new ResponseHeader(), new ResponseCookie());
+    public static HttpResponse init(final String version, final HttpStatusCode statusCode) {
+        return new HttpResponse(version, statusCode, new ResponseHeader(), new ResponseCookie());
     }
 
     public HttpResponse setBody(final String responseBody) {
@@ -103,7 +106,7 @@ public class HttpResponse {
     }
 
     private String toStartLineString() {
-        return statusCode.getResponseStartLine() + " " + NEW_LINE;
+        return version + " " + statusCode.getResponseStartLine() + " " + NEW_LINE;
     }
 
     private String toHeaderString() {

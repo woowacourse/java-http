@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.HttpStatusCode;
+import org.apache.coyote.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ class HttpResponseTest {
     @DisplayName("정적 팩토리 메서드 init은 객체를 생성한다.")
     void init() {
         // when & then
-        assertThatCode(() -> HttpResponse.init(HttpStatusCode.OK))
+        assertThatCode(() -> HttpResponse.init("HTTP/1.1", HttpStatusCode.OK))
                 .doesNotThrowAnyException();
     }
 
@@ -28,7 +28,7 @@ class HttpResponseTest {
     void setBdy() {
         // given
         final String responseBody = "Hello Wooteco";
-        final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
+        final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK);
 
         // when
         httpResponse.setBody(responseBody);
@@ -44,7 +44,7 @@ class HttpResponseTest {
     @DisplayName("setLocationAsHome 메서드는 http 응답에 Location이 /index.html인 헤더를 추가한다.")
     void setLocationAsHome() {
         // given
-        final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
+        final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK);
 
         // when
         httpResponse.setLocationAsHome();
@@ -61,7 +61,7 @@ class HttpResponseTest {
     void addCookie() {
         // given
         final String sessionId = "1q2w3e4r";
-        final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
+        final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK);
 
         // when
         httpResponse.addCookie("JSESSIONID", sessionId);
@@ -85,7 +85,7 @@ class HttpResponseTest {
                 "",
                 responseBody);
 
-        final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK)
+        final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK)
                 .setBody(responseBody);
 
         // when
@@ -104,7 +104,7 @@ class HttpResponseTest {
         @DisplayName("path에 해당하는 리소스가 존재하면 response body에 해당 리소스를 읽어와서 저장한다.")
         void setBodyByPath_existResource_saveResponseBody() throws IOException {
             // given
-            final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
+            final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK);
 
             // when
             httpResponse.setBodyByPath("/index.html");
@@ -122,7 +122,7 @@ class HttpResponseTest {
         @DisplayName("path에 해당하는 리소스가 존재하지 않으면 response body에 404.html 파일을 읽어와서 저장한다.")
         void setBodyByPath_notExistResource_save404() throws IOException {
             // given
-            final HttpResponse httpResponse = HttpResponse.init(HttpStatusCode.OK);
+            final HttpResponse httpResponse = HttpResponse.init("HTTP/1.1", HttpStatusCode.OK);
 
             // when
             httpResponse.setBodyByPath("/not-exist-resource");
@@ -139,7 +139,7 @@ class HttpResponseTest {
         private String readFile(final HttpStatusCode statusCode, final String resourceFile) throws IOException {
             final URL resource = getClass().getClassLoader().getResource("static/" + resourceFile);
             final String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            return statusCode.getResponseStartLine() + " \r\n" +
+            return "HTTP/1.1 " + statusCode.getResponseStartLine() + " \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: " + expectedResponseBody.getBytes().length + " \r\n" +
                     "\r\n" +

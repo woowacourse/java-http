@@ -18,13 +18,13 @@ public class IndexController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.init(HttpStatusCode.OK)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.OK)
                 .setBodyByPath("/index.html");
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) {
-        return HttpResponse.init(HttpStatusCode.METHOD_NOT_ALLOWED)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.METHOD_NOT_ALLOWED)
                 .setBody(HttpStatusCode.METHOD_NOT_ALLOWED.getMessage());
     }
 }

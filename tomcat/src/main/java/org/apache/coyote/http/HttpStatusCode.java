@@ -18,7 +18,7 @@ public enum HttpStatusCode {
     }
 
     public String getResponseStartLine() {
-        return "HTTP/1.1 " + statusCode + " " + message;
+        return statusCode + " " + message;
     }
 
     public String getMessage() {

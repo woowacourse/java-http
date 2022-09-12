@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.init(HttpStatusCode.OK)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.OK)
                 .setBodyByPath("/register.html");
     }
 
@@ -34,7 +34,7 @@ public class RegisterController extends AbstractController {
                 requestBody.get("email"));
 
         final String sessionId = authService.register(requestDto);
-        return HttpResponse.init(HttpStatusCode.FOUND)
+        return HttpResponse.init(httpRequest.getVersion(), HttpStatusCode.FOUND)
                 .setLocationAsHome()
                 .addCookie("JSESSIONID", sessionId);
     }

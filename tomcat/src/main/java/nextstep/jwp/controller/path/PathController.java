@@ -14,13 +14,13 @@ public abstract class PathController implements Controller {
 
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.getRequestLine().getMethod().equals("GET")) {
-            throw new UnsupportedOperationException("[ERROR] 지원하지 않는 Http Method 입니다.");
+            throw new UnsupportedOperationException("[ERROR] 현재 Path 에서 GET Method 를 지원하지 않습니다.");
         }
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.getRequestLine().getMethod().equals("POST")) {
-            throw new UnsupportedOperationException("[ERROR] 지원하지 않는 Http Method 입니다.");
+            throw new UnsupportedOperationException("[ERROR] 현재 Path 에서 POST Method 를 지원하지 않습니다.");
         }
     }
 

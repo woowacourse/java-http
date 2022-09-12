@@ -8,14 +8,15 @@ public class QueryStringParser {
 
     private static final String QUERY_STRING_ELEMENT_DELIMITER = "&";
     private static final String QUERY_STRING_KEY_VALUE_DELIMITER = "=";
+    public static final int ELEMENT_KEY_INDEX = 0;
+    public static final int ELEMENT_VALUE_INDEX = 1;
 
     public static Map<String, String> parseQueryString(final String value) {
-        Map<String, String> queryString = Arrays.stream(
+        return Arrays.stream(
                 value.split(QUERY_STRING_ELEMENT_DELIMITER)
         ).collect(Collectors.toMap(
-                i -> i.split(QUERY_STRING_KEY_VALUE_DELIMITER)[0],
-                i -> i.split(QUERY_STRING_KEY_VALUE_DELIMITER)[1]
+                i -> i.split(QUERY_STRING_KEY_VALUE_DELIMITER)[ELEMENT_KEY_INDEX],
+                i -> i.split(QUERY_STRING_KEY_VALUE_DELIMITER)[ELEMENT_VALUE_INDEX]
         ));
-        return queryString;
     }
 }

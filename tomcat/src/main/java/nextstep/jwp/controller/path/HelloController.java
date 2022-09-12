@@ -1,7 +1,6 @@
 package nextstep.jwp.controller.path;
 
 import web.request.HttpRequest;
-import web.request.RequestLine;
 import web.response.HttpResponse;
 import web.response.StatusLine;
 
@@ -18,8 +17,7 @@ public class HelloController extends PathController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-        String method = requestLine.getMethod();
+        String method = httpRequest.getRequestLine().getMethod();
         if (method.equals("GET")) {
             String body = "Hello World!";
             httpResponse.setBody(body);

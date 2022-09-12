@@ -9,7 +9,6 @@ import session.CookieParser;
 import session.Session;
 import session.SessionManager;
 import web.request.HttpRequest;
-import web.request.RequestLine;
 import web.request.RequestUri;
 import web.response.HttpResponse;
 import web.util.QueryStringParser;
@@ -27,10 +26,10 @@ public class LoginController extends PathController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-        String method = requestLine.getMethod();
+        String method = httpRequest.getRequestLine().getMethod();
         if (method.equals("GET")) {
-            if (isAlreadyLogin(httpRequest.getHeaderValue("Cookie"))) {
+            Optional<String> cookieValue = httpRequest.getHeaderValue("Cookie");
+            if (cookieValue.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(cookieValue.get())) {
                 httpResponse.set302Redirect("http://localhost:8080/index.html");
                 return;
             }
@@ -38,14 +37,9 @@ public class LoginController extends PathController {
         }
     }
 
-    private boolean isAlreadyLogin(final Optional<String> value) {
-        return value.isPresent() && CookieParser.checkJSessionIdIsExistInCookieHeader(value.get());
-    }
-
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-        String method = requestLine.getMethod();
+        String method = httpRequest.getRequestLine().getMethod();
         String body = httpRequest.getBody();
         if (method.equals("POST")) {
             login(httpResponse, body);
@@ -57,7 +51,7 @@ public class LoginController extends PathController {
         String account = queryString.get("account").trim();
         String password = queryString.get("password").trim();
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (isPasswordMatched(password, user)) {
+        if (user.isPresent() && user.get().checkPassword(password)) {
             httpResponse.set302Redirect("http://localhost:8080/index.html");
             enrollJSessionId(httpResponse, user.get());
         } else {
@@ -65,13 +59,12 @@ public class LoginController extends PathController {
         }
     }
 
-    private boolean isPasswordMatched(final String password, final Optional<User> user) {
-        return user.isPresent() && user.get().checkPassword(password);
-    }
-
     private void enrollJSessionId(final HttpResponse httpResponse, final User user) {
         Session session = new Session();
         session.addCookie("JSESSIONID", UUID.randomUUID().toString());
+        if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
+            throw new RuntimeException("[ERROR] 존재하지 않는 User 입니다.");
+        }
         SessionManager.addSession(user, session);
         httpResponse.putHeader("Set-Cookie", CookieParser.joinAllCookiesToString(session.getCookies()));
     }

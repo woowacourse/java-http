@@ -10,10 +10,31 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateAccount(account);
+        validatePassword(password);
+        validateEmail(email);
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    private void validateAccount(final String account) {
+        if (account == null) {
+            throw new IllegalArgumentException("[ERROR] Account 가 Null 입니다.");
+        }
+    }
+
+    private void validatePassword(final String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("[ERROR] Password 가 Null 입니다.");
+        }
+    }
+
+    private void validateEmail(final String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("[ERROR] Email 이 Null 입니다.");
+        }
     }
 
     public User(String account, String password, String email) {

@@ -1,11 +1,12 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.request.Request.SPACE_DELIMITER;
+
 import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.http11.URL;
 
 public class StartLine {
 
-    private static final String SPACE_DELIMITER = " ";
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
     private static final String QUERY_PARAM_DELIMITER = "?";

@@ -9,16 +9,11 @@ import org.apache.coyote.http11.URL;
 
 public class Request {
     public static final String SPACE_DELIMITER = " ";
-    public static final int METHOD_INDEX = 0;
-    public static final int URI_INDEX = 1;
-    public static final String QUERY_PARAM_DELIMITER = "?";
     public static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
-    public static final int PARAM_INDEX = 1;
     public static final int PATH_INDEX = 0;
     public static final String HEADER_KEY_VALUE_DELIMITER = ":";
     public static final int KEY = 0;
     public static final int VALUE = 1;
-    private static final int VERSION_INDEX = 2;
 
     private final StartLine startLine;
     private final RequestHeaders headers;
@@ -33,12 +28,12 @@ public class Request {
 
     public static Request of(final InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final String startLine = bufferedReader.readLine();
-        final StartLine startLine1 = StartLine.of(startLine);
+        final String startLineString = bufferedReader.readLine();
+        final StartLine startLine = StartLine.of(startLineString);
         final RequestHeaders headers = parseHeader(bufferedReader);
         final int contentLength = headers.getContentLength();
         final RequestBody requestBody = parseBody(bufferedReader, contentLength);
-        return new Request(startLine1, headers, requestBody);
+        return new Request(startLine, headers, requestBody);
     }
 
     private static RequestHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {

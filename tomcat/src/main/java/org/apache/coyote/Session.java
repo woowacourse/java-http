@@ -12,10 +12,11 @@ public class Session {
     }
 
     public static void add(final String jsessionid, final String key, final Object value) {
-        if(SESSIONS.get(jsessionid) != null) {
-            SESSIONS.get(jsessionid).put(key, value);
+        if(SESSIONS.get(jsessionid) == null) {
+            SESSIONS.put(jsessionid, Map.of(key, value));
+            return;
         }
-        SESSIONS.computeIfAbsent(jsessionid, k -> Map.of(key, value));
+        SESSIONS.get(jsessionid).put(key, value);
     }
 
     public static Optional<Object> find(final String jsessionid, final String key) {

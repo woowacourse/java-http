@@ -51,4 +51,8 @@ public class HttpRequest {
     public String getSessionId() {
         return httpCookie.getSessionId();
     }
+
+    public String getHttpPathWithOutExtension() {
+        return httpRequestLine.getPathWithOutExtension();
+    }
 }

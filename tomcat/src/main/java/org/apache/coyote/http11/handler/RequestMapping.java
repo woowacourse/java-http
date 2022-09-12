@@ -19,10 +19,9 @@ public class RequestMapping {
     }
 
     public Controller getController(final HttpRequest request) {
-        final String path = request.getHttpPath();
-        final String pathWithOutExtension = path.substring(0, path.indexOf("."));
-        if (values.containsKey(pathWithOutExtension)) {
-            return values.get(pathWithOutExtension);
+        final String path = request.getHttpPathWithOutExtension();
+        if (values.containsKey(path)) {
+            return values.get(path);
         }
         return new StaticResourceController();
     }

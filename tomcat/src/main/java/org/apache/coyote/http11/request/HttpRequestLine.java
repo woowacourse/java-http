@@ -38,6 +38,10 @@ public class HttpRequestLine {
         return path.getPath();
     }
 
+    public String getPathWithOutExtension() {
+        return path.getPathWithOutExtension();
+    }
+
     public HttpVersion getVersion() {
         return version;
     }

@@ -67,4 +67,11 @@ public class HttpPath {
     public String getPath() {
         return path;
     }
+
+    public String getPathWithOutExtension() {
+        if (path.contains(EXTENSION_DELIMITER)) {
+            return path.substring(0, path.indexOf(EXTENSION_DELIMITER));
+        }
+        return path;
+    }
 }

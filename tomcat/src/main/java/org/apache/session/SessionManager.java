@@ -16,17 +16,6 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Optional<Session> find(String id) {
-        if (SESSIONS.containsKey(id)) {
-            return Optional.of(SESSIONS.get(id));
-        }
-        return Optional.empty();
-    }
-
-    public static void remove(String id) {
-        SESSIONS.remove(id);
-    }
-
     public static Session generateNewSession() {
         UUID uuid = UUID.randomUUID();
         return new Session(uuid.toString());

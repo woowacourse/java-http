@@ -6,7 +6,7 @@ import java.net.Socket;
 import nextstep.Application;
 import nextstep.jwp.exception.NotFoundException;
 import org.apache.catalina.exception.InternalServerException;
-import org.apache.coyote.ControllerFinder;
+import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -18,11 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Socket connection;
-    private final ControllerFinder controllerFinder;
+    private final Container container;
 
-    public Http11Processor(final Socket connection, final ControllerFinder controllerFinder) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
-        this.controllerFinder = controllerFinder;
+        this.container = container;
     }
 
     @Override
@@ -45,10 +45,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void execute(final Request request, final Response response) throws Exception {
         try {
-            controllerFinder.findController(request)
+            container.findController(request)
                     .service(request, response);
         } catch (InternalServerException | NotFoundException e) {
-            controllerFinder.findExceptionHandler(e)
+            container.findExceptionHandler(e)
                     .handle(e, response);
         }
     }

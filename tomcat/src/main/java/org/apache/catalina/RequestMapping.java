@@ -15,7 +15,7 @@ public class RequestMapping {
     private static final Controller STATIC_CONTROLLER = new StaticFileController();
 
     static {
-        REQUEST_MAP.put(URL.of("/login"), new LoginController());
+        REQUEST_MAP.put(URL.of("/login"), new LoginController(SessionManager.getInstance()));
         REQUEST_MAP.put(URL.of("/register"), new RegisterController());
     }
 

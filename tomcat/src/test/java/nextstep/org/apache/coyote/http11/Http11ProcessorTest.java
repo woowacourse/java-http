@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import org.apache.catalina.ControllerContainer;
 import org.apache.catalina.ControllerFactory;
 import org.apache.catalina.RequestMapping;
-import org.apache.coyote.ControllerFinder;
+import org.apache.coyote.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -29,7 +29,7 @@ class Http11ProcessorTest {
 
     private StubSocket stubSocket;
     private MemoryAppender memoryAppender;
-    private ControllerFinder controllerFinder = new ControllerContainer(
+    private Container container = new ControllerContainer(
             new RequestMapping(), ControllerFactory.createExceptionControllers()
     );
 
@@ -53,7 +53,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         stubSocket = new StubSocket();
-        final var processor = new Http11Processor(stubSocket, controllerFinder);
+        final var processor = new Http11Processor(stubSocket, container);
 
         // when
         processor.process(stubSocket);
@@ -70,7 +70,7 @@ class Http11ProcessorTest {
         final String httpRequest = RequestFixture.createLine(HttpMethod.GET, "/index.html", "");
 
         stubSocket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(stubSocket, controllerFinder);
+        final Http11Processor processor = new Http11Processor(stubSocket, container);
 
         // when
         processor.process(stubSocket);

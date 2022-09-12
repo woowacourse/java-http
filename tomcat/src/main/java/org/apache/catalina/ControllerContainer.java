@@ -3,11 +3,11 @@ package org.apache.catalina;
 import java.util.List;
 import org.apache.catalina.exception.ControllerNotFoundException;
 import org.apache.coyote.Controller;
-import org.apache.coyote.ControllerFinder;
+import org.apache.coyote.Container;
 import org.apache.coyote.ExceptionController;
 import org.apache.coyote.http11.request.Request;
 
-public class ControllerContainer implements ControllerFinder {
+public class ControllerContainer implements Container {
     private final RequestMapping requestMapping;
     private final List<ExceptionController> exceptionControllers;
 

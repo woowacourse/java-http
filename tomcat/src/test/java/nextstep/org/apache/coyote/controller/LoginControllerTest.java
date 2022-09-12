@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 import nextstep.jwp.controller.LoginController;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,7 @@ class LoginControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new LoginController();
+        controller = new LoginController(SessionManager.getInstance());
     }
 
     @AfterEach

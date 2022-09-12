@@ -71,7 +71,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public boolean handle(HttpRequest httpRequest) {
-        return URL.equals(httpRequest.getUri());
+    public boolean handle(String uri) {
+        return URL.equals(uri);
     }
 }

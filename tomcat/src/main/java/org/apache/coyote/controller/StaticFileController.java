@@ -29,7 +29,7 @@ public class StaticFileController extends AbstractController {
     }
 
     @Override
-    public boolean handle(HttpRequest httpRequest) {
+    public boolean handle(String uri) {
         return false;
     }
 }

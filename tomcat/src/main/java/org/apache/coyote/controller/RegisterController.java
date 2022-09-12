@@ -41,8 +41,8 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public boolean handle(HttpRequest httpRequest) {
-        return URL.equals(httpRequest.getRequestLine().getPath().getUri());
+    public boolean handle(String uri) {
+        return URL.equals(uri);
     }
 
     private static String register(HttpRequest httpRequest) {

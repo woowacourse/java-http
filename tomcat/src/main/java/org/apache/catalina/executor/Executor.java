@@ -8,24 +8,26 @@ import org.slf4j.LoggerFactory;
 
 public class Executor implements java.util.concurrent.Executor {
 
-    private static final int DEFAULT_MIN_SPARE_THREADS = 10;
-    private static final int DEFAULT_MAX_THREADS = 250;
-    private static final int DEFAULT_MAX_QUEUE_SIZE = 1000;
-    private static final long DEFAULT_KEEP_ALIVE_TIME = 10L;
+    private static final int DEFAULT_CORE_POOL_SIZE = 10;
+    private static final int DEFAULT_MAX_THREADS = 1000;
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 20;
+    private static final int DEFAULT_KEEP_ALIVE_TIME = 60000;
 
     private static final Logger log = LoggerFactory.getLogger(Executor.class);
 
     private final ThreadPoolExecutor threadPool;
 
     public Executor() {
-        this(DEFAULT_MIN_SPARE_THREADS, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE);
+        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREADS, DEFAULT_MAX_QUEUE_SIZE, DEFAULT_KEEP_ALIVE_TIME);
     }
 
-    public Executor(final int minSpareThreads,
+    public Executor(final int corePoolSize,
                     final int maxThreads,
-                    final int maxQueueSize) {
-        this.threadPool = new ThreadPoolExecutor(minSpareThreads, maxThreads,
-                DEFAULT_KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(maxQueueSize));
+                    final int maxQueueSize,
+                    final int keepAliveTime) {
+        final var workQueue = new LinkedBlockingQueue<Runnable>(maxQueueSize);
+        this.threadPool = new ThreadPoolExecutor(corePoolSize, maxThreads, keepAliveTime, TimeUnit.MILLISECONDS,
+                workQueue);
     }
 
     @Override

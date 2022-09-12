@@ -27,13 +27,11 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "Content-Length";
 
     private final StartLine startLine;
-    private final HttpHeader headers;
     private final Cookies cookies;
     private final HttpRequestBody requestBody;
 
-    private HttpRequest(StartLine startLine, HttpHeader headers, Cookies cookies, HttpRequestBody requestBody) {
+    private HttpRequest(StartLine startLine, Cookies cookies, HttpRequestBody requestBody) {
         this.startLine = startLine;
-        this.headers = headers;
         this.cookies = cookies;
         this.requestBody = requestBody;
     }
@@ -41,8 +39,7 @@ public class HttpRequest {
     public static HttpRequest of(final String startLine, final Map<String, String> headers, final String requestBody) {
         final String cookie = headers.get(COOKIE_HEADER);
 
-        return new HttpRequest(StartLine.from(startLine), HttpHeader.from(headers), Cookies.from(cookie),
-                HttpRequestBody.from(requestBody));
+        return new HttpRequest(StartLine.from(startLine), Cookies.from(cookie), HttpRequestBody.from(requestBody));
     }
 
     public static HttpRequest readRequest(final BufferedReader bufferedReader) throws IOException {

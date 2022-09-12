@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.support.JwpRequestMapping;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -16,7 +17,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -38,7 +39,7 @@ class Http11ProcessorTest {
         final String httpRequest = getHttp11RequestContent("GET", "/index.html");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);

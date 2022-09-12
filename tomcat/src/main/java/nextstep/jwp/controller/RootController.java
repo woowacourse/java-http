@@ -5,7 +5,7 @@ import static org.apache.coyote.http11.common.ContentType.HTML;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class RootController implements Handler {
+public class RootController extends AbstractController {
 
     private static final RootController INSTANCE = new RootController();
 
@@ -13,10 +13,10 @@ public class RootController implements Handler {
     }
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.setResponseBodyContent("Hello world!");
-        httpResponse.setOkHttpStatusLine();
-        httpResponse.setOKHeader(HTML);
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setResponseBodyContent("Hello world!");
+        response.setOkHttpStatusLine();
+        response.setOKHeader(HTML);
     }
 
     public static RootController getINSTANCE() {

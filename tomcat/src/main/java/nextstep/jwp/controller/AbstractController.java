@@ -1,12 +1,9 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Handler {
-    public AbstractController() {
-    }
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
@@ -19,9 +16,9 @@ public abstract class AbstractController implements Handler {
         }
     }
 
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
     }
 
-    protected void doGet(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
     }
 }

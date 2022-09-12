@@ -4,7 +4,7 @@ import nextstep.jwp.util.Parser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResourceController implements Handler {
+public class ResourceController extends AbstractController {
 
     private static final ResourceController INSTANCE = new ResourceController();
 
@@ -12,10 +12,10 @@ public class ResourceController implements Handler {
     }
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final String path = httpRequest.getUrl();
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        final String path = request.getUrl();
         final String fileName = Parser.convertResourceFileName(path);
-        httpResponse.setOkResponse(fileName);
+        response.setOkResponse(fileName);
     }
 
     public static ResourceController getINSTANCE() {

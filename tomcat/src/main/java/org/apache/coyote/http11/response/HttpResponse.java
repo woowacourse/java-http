@@ -42,7 +42,7 @@ public class HttpResponse {
         responseBody = IOUtils.readResourceFile(fileName);
     }
 
-    public void setRedirectUrl(String url) {
+    public void setRedirectUrlResponse(String url) {
         try {
             setResponseBody(url);
             this.httpStatusLine = HttpStatusLine.of(HTTP_1_1, FOUND);
@@ -88,13 +88,10 @@ public class HttpResponse {
         }
     }
 
-    public void setSessionAndCookieWithOkResponse(User user, String url) throws IOException {
+    public void setSessionAndCookieWithOkResponse(User user, String url) {
         final Session session = setSession(user);
-        setFoundHttpStatusLine();
-        setResponseBody(url);
-        setRedirectUrl(url);
-        setOKHeader(ContentType.from(url));
         setCookie(session.getId());
+        setRedirectUrlResponse(url);
     }
 
     public void setFoundResponse(String fileName) {
@@ -115,5 +112,4 @@ public class HttpResponse {
         SessionManager.add(session);
         return session;
     }
-
 }

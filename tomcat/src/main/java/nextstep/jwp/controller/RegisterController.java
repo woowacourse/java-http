@@ -1,15 +1,11 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.exception.ExceptionType.SERVER_EXCEPTION;
-
-import com.sun.jdi.InternalException;
-import java.io.IOException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class RegisterController implements Handler {
+public class RegisterController extends AbstractController {
 
     private static final RegisterController INSTANCE = new RegisterController();
 
@@ -20,18 +16,14 @@ public class RegisterController implements Handler {
     }
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        try {
-            if (httpRequest.isPost() && !httpRequest.getRequestBody().isEmpty()) {
-                final User user = UserService.getInstance().register(httpRequest.getRequestBody());
-                httpResponse.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
-                return;
-            }
-            httpResponse.setOkResponse(REGISTER_PAGE_URL);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalException(SERVER_EXCEPTION.getMessage());
-        }
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setOkResponse(REGISTER_PAGE_URL);
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        final User user = UserService.getInstance().register(request.getRequestBody());
+        response.setSessionAndCookieWithOkResponse(user, SUCCEED_REDIRECT_URL);
     }
 
     public static RegisterController getINSTANCE() {

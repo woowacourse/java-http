@@ -36,6 +36,10 @@ public class HttpRequest {
         return this.httpMethod.equals(HttpMethod.GET);
     }
 
+    public boolean isPostMethod() {
+        return this.httpMethod.equals(HttpMethod.POST);
+    }
+
     public String getUrl() {
         return StringUtils.substringBeforeLast(path, QUERY_STRING_STANDARD);
     }

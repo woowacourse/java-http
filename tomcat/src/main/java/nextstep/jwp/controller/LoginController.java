@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import java.util.Optional;
 import nextstep.Application;
@@ -6,8 +6,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
@@ -17,50 +17,46 @@ import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private final Manager manager;
+    private static final Controller INSTANCE = new LoginController();
 
-    public LoginController(final Manager manager) {
-        this.manager = manager;
+    public static Controller getInstance() {
+        return INSTANCE;
+    }
+
+    private LoginController() {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
-            return doGet(httpRequest);
-        }
-
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         Optional<String> jSessionId = httpRequest.getHeaders()
                 .findJSessionId();
 
         if (jSessionId.isEmpty()) {
-            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+            return HttpResponse.of(HttpStatusCode.OK, "/login.html");
         }
 
-        return generateSuccessResponse(httpRequest);
+        return generateSuccessResponse();
     }
 
-    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
+    private HttpResponse generateSuccessResponse() {
+        final HttpResponse response = HttpResponse.of(HttpStatusCode.FOUND, "/login.html");
         response.addLocation("/index.html");
         return response;
     }
 
-    private HttpResponse doPost(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         try {
             return login(httpRequest);
         } catch (UserNotFoundException | UnAuthorizedException e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
+            return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
     }
 
@@ -75,7 +71,9 @@ public class LoginController implements Controller {
 
         setUpSession(user, httpRequest.getHeaders());
 
-        return generateSuccessResponse(httpRequest);
+        final HttpResponse response = generateSuccessResponse();
+        response.addJSessionId(UuidUtil.randomUuidString());
+        return response;
     }
 
     private void validatePassword(final User user, final HttpRequestBody requestBody) {
@@ -98,6 +96,6 @@ public class LoginController implements Controller {
     private void addSession(final User user, final String jSessionId) {
         Session session = new Session(jSessionId);
         session.addUser(user);
-        manager.add(session);
+        SessionManager.getInstance().add(session);
     }
 }

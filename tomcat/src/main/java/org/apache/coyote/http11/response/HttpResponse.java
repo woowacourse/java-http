@@ -1,11 +1,8 @@
 package org.apache.coyote.http11.response;
 
 import java.io.File;
-import java.util.Optional;
 import org.apache.coyote.http11.enums.HttpStatusCode;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.utils.FileUtil;
-import org.apache.coyote.http11.utils.UuidUtil;
 
 public class HttpResponse {
 
@@ -13,36 +10,28 @@ public class HttpResponse {
     private final HttpHeaders headers;
     private final String body;
 
-    public static HttpResponse of(final HttpRequest httpRequest, final HttpStatusCode statusCode, final String url) {
+    public static HttpResponse of(final HttpStatusCode statusCode, final String url) {
         final File file = FileUtil.findFile(url);
         final String contentType = FileUtil.findContentType(file);
         final String responseBody = FileUtil.generateFile(file);
-        return new HttpResponse(httpRequest, statusCode, contentType, responseBody);
+        return new HttpResponse(statusCode, contentType, responseBody);
     }
 
-    public HttpResponse(final HttpRequest httpRequest, final HttpStatusCode statusCode, final String contentType,
-                        final String body) {
+    public HttpResponse(final HttpStatusCode statusCode, final String contentType, final String body) {
         this.statusCode = statusCode;
         this.body = body;
-        this.headers = initHeaders(httpRequest, contentType, body);
+        this.headers = initHeaders(contentType, body);
     }
 
-    private HttpHeaders initHeaders(final HttpRequest httpRequest, final String contentType, final String body) {
+    private HttpHeaders initHeaders(final String contentType, final String body) {
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.addValue("Content-Type", contentType + ";charset=utf-8");
         httpHeaders.addValue("Content-Length", body.getBytes().length);
-
-        addCookie(httpRequest, httpHeaders);
         return httpHeaders;
     }
 
-    private void addCookie(final HttpRequest httpRequest, final HttpHeaders httpHeaders) {
-        Optional<String> jSessionId = httpRequest.getHeaders()
-                .findJSessionId();
-
-        if (jSessionId.isEmpty()) {
-            httpHeaders.addValue("Set-Cookie", "JSESSIONID=" + UuidUtil.randomUuidString());
-        }
+    public void addJSessionId(final String jSessionId) {
+        headers.addValue("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 
     public void addLocation(final String location) {

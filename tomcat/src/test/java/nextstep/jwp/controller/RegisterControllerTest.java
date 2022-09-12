@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ class RegisterControllerTest {
         // given
         final HttpRequest request = new HttpRequest("GET /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody(""));
-        final RegisterController registerController = new RegisterController();
+        final Controller registerController = RegisterController.getInstance();
 
         final String expectedStatusLine = "HTTP/1.1 200 OK ";
         final String expectedMessageBody = "<title>회원가입</title>";
@@ -40,7 +40,7 @@ class RegisterControllerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody("account=gugu&password=password&email=hkkang%40woowahan.com"));
-        final RegisterController registerController = new RegisterController();
+        final Controller registerController = RegisterController.getInstance();
 
         final String expectedStatusLine = "HTTP/1.1 302";
         final String expectedMessageBody = "Location: /login.html ";

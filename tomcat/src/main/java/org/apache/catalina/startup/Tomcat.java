@@ -12,13 +12,10 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final List<Controller> controllers;
-
-    public Tomcat(final List<Controller> controllers) {
-        this.controllers = controllers;
+    public Tomcat() {
     }
 
-    public void start() {
+    public void start(final List<Controller> controllers) {
         var connector = new Connector(controllers);
         connector.start();
 

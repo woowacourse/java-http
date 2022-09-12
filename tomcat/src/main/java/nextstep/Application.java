@@ -14,7 +14,7 @@ public class Application {
 
     public static void main(String[] args) {
         log.info("web server start.");
-        final var tomcat = new Tomcat(List.of(new HomeController(), new LoginController(), new RegisterController()));
-        tomcat.start();
+        final var tomcat = new Tomcat();
+        tomcat.start(List.of(new HomeController(), new LoginController(), new RegisterController()));
     }
 }

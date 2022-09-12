@@ -34,7 +34,7 @@ public class RequestHeaders {
             throw HttpException.ofBadRequest();
         }
         final var key = elements[0];
-        final var value = elements[1];
+        final var value = elements[1].trim();
         headers.put(key, value);
     }
 

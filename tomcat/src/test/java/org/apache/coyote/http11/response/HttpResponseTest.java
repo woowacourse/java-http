@@ -20,10 +20,12 @@ public class HttpResponseTest {
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         // when
-        HttpResponse response = HttpResponse.status(HttpStatus.OK)
+        HttpResponse response = HttpResponseBuilder.builder()
+                .status(HttpStatus.OK)
                 .setHeader("Content-Type", ContentType.HTML.value())
-                .setHeader("Content-Length", body.length())
-                .body(body);
+                .setHeader("Content-Length", String.valueOf(body.length()))
+                .body(body)
+                .build();
         byte[] actual = response.getBytes();
         byte[] expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -34,6 +36,5 @@ public class HttpResponseTest {
 
         // then
         assertThat(actual).isEqualTo(expected);
-
     }
 }

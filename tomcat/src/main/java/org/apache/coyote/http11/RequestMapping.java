@@ -7,6 +7,7 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseBuilder;
 
 public enum RequestMapping {
 
@@ -31,8 +32,7 @@ public enum RequestMapping {
     }
 
     public HttpResponse service(HttpRequest request) throws Exception {
-        HttpResponse response = HttpResponse.ok();
-        controller.service(request, response);
-        return response;
+        HttpResponseBuilder responseBuilder = HttpResponseBuilder.builder();
+        return controller.service(request, responseBuilder);
     }
 }

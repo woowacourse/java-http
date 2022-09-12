@@ -16,25 +16,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse status(HttpStatus status) {
-        return new HttpResponse(status, ResponseHeader.empty(), new StringBuilder());
-    }
-
-    public static HttpResponse ok() {
-        return new HttpResponse(HttpStatus.OK, ResponseHeader.empty(), new StringBuilder());
-    }
-
-    public HttpResponse body(String body) {
-        this.body
-                .append(body);
-        return this;
-    }
-
-    public HttpResponse setHeader(String key, Object value) {
-        responseHeader.put(key, value.toString());
-        return this;
-    }
-
     public byte[] getBytes() {
         return String.join(CRLF,
                 statusLine(),
@@ -50,20 +31,7 @@ public class HttpResponse {
         return status;
     }
 
-    public String getBody() {
-        return body.toString();
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
     public String getHeader(String key) {
         return responseHeader.get(key);
-    }
-
-    public void redirect(String url) {
-        status = HttpStatus.FOUND;
-        responseHeader.put("Location", url);
     }
 }

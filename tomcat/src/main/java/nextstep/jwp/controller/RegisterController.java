@@ -6,25 +6,23 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponseBuilder;
 
 public class RegisterController extends AbstractController {
 
-    public void doGet(HttpRequest request, HttpResponse response) {
-        response.redirect("register.html");
-        response.setStatus(HttpStatus.FOUND);
-        response.setHeader("Location", "register.html");
+    @Override
+    protected HttpResponse doGet(HttpRequest request, HttpResponseBuilder responseBuilder) {
+        return responseBuilder.redirect("register.html");
     }
 
-    public void doPost(HttpRequest request, HttpResponse response) {
+    @Override
+    protected HttpResponse doPost(HttpRequest request, HttpResponseBuilder responseBuilder) {
         try {
             User user = toUser(request.body());
             InMemoryUserRepository.save(user);
-            response.setStatus(HttpStatus.FOUND);
-            response.setHeader("Location", "/index.html");
+            return responseBuilder.redirect("/index.html");
         } catch (IllegalArgumentException error) {
-            response.setStatus(HttpStatus.FOUND);
-            response.setHeader("Location", "/400.html");
+            return responseBuilder.redirect("/400.html");
         }
     }
 

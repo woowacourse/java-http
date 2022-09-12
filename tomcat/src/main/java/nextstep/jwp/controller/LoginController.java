@@ -6,7 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponseBuilder;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
@@ -19,24 +19,22 @@ public class LoginController extends AbstractController {
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
-    public void doGet(HttpRequest request, HttpResponse response) {
+    public HttpResponse doGet(HttpRequest request, HttpResponseBuilder responseBuilder) {
         if (isLogin(request)) {
-            redirect(response, INDEX_PAGE);
-            return;
+            return responseBuilder.redirect(INDEX_PAGE);
         }
-        redirect(response, LOGIN_PAGE);
+        return responseBuilder.redirect(LOGIN_PAGE);
     }
 
     @Override
-    public void doPost(HttpRequest request, HttpResponse response) {
+    public HttpResponse doPost(HttpRequest request, HttpResponseBuilder responseBuilder) {
         Map<String, String> bodyForm = request.body()
                 .toApplicationForm();
         if (isUser(bodyForm)) {
-            saveInSession(response, bodyForm);
-            redirect(response, INDEX_PAGE);
-            return;
+            saveInSession(responseBuilder, bodyForm);
+            return responseBuilder.redirect(INDEX_PAGE);
         }
-        redirect(response, "/401.html");
+        return responseBuilder.redirect("/401.html");
     }
 
     private boolean isLogin(HttpRequest request) {
@@ -49,11 +47,11 @@ public class LoginController extends AbstractController {
         return false;
     }
 
-    private void saveInSession(HttpResponse response, Map<String, String> bodyForm) {
+    private void saveInSession(HttpResponseBuilder responseBuilder, Map<String, String> bodyForm) {
         Session session = new Session();
         session.setAttribute("user", bodyForm.get("account"));
         sessionManager.add(session);
-        response.setHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
+        responseBuilder.setHeader("Set-Cookie", JSESSIONID + "=" + session.getId());
     }
 
     private boolean isUser(Map<String, String> bodyForm) {
@@ -64,10 +62,5 @@ public class LoginController extends AbstractController {
         return userOptional.isPresent() &&
                 userOptional.get()
                         .checkPassword(bodyForm.get("password"));
-    }
-
-    private void redirect(HttpResponse response, String value) {
-        response.setStatus(HttpStatus.FOUND);
-        response.setHeader("Location", value);
     }
 }

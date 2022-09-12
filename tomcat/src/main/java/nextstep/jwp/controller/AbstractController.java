@@ -1,30 +1,29 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponseBuilder;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public HttpResponse service(HttpRequest request, HttpResponseBuilder responseBuilder) throws Exception {
         if (request.isMethod(HttpMethod.GET)) {
-            doGet(request, response);
-            return;
+            return doGet(request, responseBuilder);
         }
         if (request.isMethod(HttpMethod.POST)) {
-            doPost(request, response);
-            return;
+            return doPost(request, responseBuilder);
         }
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        return responseBuilder.methodNotAllowed();
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) {
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+    protected HttpResponse doPost(HttpRequest request, HttpResponseBuilder responseBuilder) {
+        return responseBuilder.methodNotAllowed();
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+    protected HttpResponse doGet(HttpRequest request, HttpResponseBuilder responseBuilder) throws IOException {
+        return responseBuilder.methodNotAllowed();
     }
 }

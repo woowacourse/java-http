@@ -70,7 +70,7 @@ public class HttpRequest {
     }
 
     public QueryParams getQueryParams() {
-        if (startLine.getMethod().equals(GET)) {
+        if (startLine.isSameMethod(GET)) {
             return startLine.getQueryParams();
         }
         return requestBody.getBodyWithQueryParam();

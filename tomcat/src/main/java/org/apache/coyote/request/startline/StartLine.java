@@ -58,6 +58,10 @@ public class StartLine {
         return requestPath.getUri();
     }
 
+    public boolean isSameMethod(HttpMethod httpMethod) {
+        return this.method.equals(httpMethod);
+    }
+
     private static String[] splitStartLine(String startLine) {
         final String[] startLineElements = startLine.split(START_LINE_DELIMITER);
 

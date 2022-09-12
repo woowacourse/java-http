@@ -11,7 +11,9 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        if (session.isLoggedIn()) {
+            SESSIONS.put(session.getId(), session);
+        }
     }
 
     @Override

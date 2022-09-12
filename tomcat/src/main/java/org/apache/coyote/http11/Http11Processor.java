@@ -11,12 +11,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.badrequest.BadRequestException;
+import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 import org.apache.coyote.http11.exception.methodnotallowed.MethodNotAllowedException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
+import org.apache.coyote.http11.exception.unauthorized.InvalidSessionException;
 import org.apache.coyote.http11.exception.unauthorized.UnAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +32,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final RequestMapping requestMapping;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping,
+                           final SessionManager sessionManager) {
         this.connection = connection;
         this.requestMapping = requestMapping;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -44,13 +52,25 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpReader httpReader = new HttpReader(bufferedReader);
-            final HttpRequest httpRequest = new HttpRequest(httpReader);
+            final Session session = getSession(httpReader);
+            final HttpRequest httpRequest = new HttpRequest(httpReader, session);
             final HttpResponse httpResponse = new HttpResponse();
             handleRequest(httpRequest, httpResponse);
+            sessionManager.add(session);
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private Session getSession(final HttpReader httpReader) {
+        try {
+            final String sessionId = httpReader.getSessionId();
+            return sessionManager.findSession(sessionId);
+        } catch (NotExistHeaderException | InvalidSessionException exception) {
+            final UUID uuid = UUID.randomUUID();
+            return new Session(uuid.toString());
         }
     }
 

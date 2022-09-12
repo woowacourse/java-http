@@ -59,6 +59,10 @@ public class HttpReader {
         return httpHeaders;
     }
 
+    public String getSessionId() {
+        return this.httpHeaders.getHttpCookie().getCookieValue("JSESSIONID");
+    }
+
     public String getBody() {
         return this.body;
     }

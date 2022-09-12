@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +29,7 @@ class HttpRequestTest {
         final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final HttpReader httpReader = new HttpReader(bufferedReader);
-        final HttpRequest httpRequest = new HttpRequest(httpReader);
+        final HttpRequest httpRequest = new HttpRequest(httpReader, new Session("session"));
 
         // when
         final String account = httpRequest.getQueryStringValue("account");

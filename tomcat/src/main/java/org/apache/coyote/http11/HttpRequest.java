@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+
 public class HttpRequest {
 
     private static final String SPACE_DELIMITER = " ";
@@ -9,11 +11,13 @@ public class HttpRequest {
     private String url;
     private QueryStrings queryStrings;
     private final HttpHeaders httpHeaders;
+    private final Session session;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final HttpReader httpReader) {
+    public HttpRequest(final HttpReader httpReader, final Session session) {
         parseStartLine(httpReader.getStartLine());
         this.httpHeaders = httpReader.getHttpHeaders();
+        this.session = session;
         this.httpRequestBody = new HttpRequestBody(httpReader.getBody());
     }
 
@@ -43,12 +47,12 @@ public class HttpRequest {
         return url;
     }
 
-    public HttpCookie getHttpCookie() {
-        return this.httpHeaders.getHttpCookie();
-    }
-
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     public HttpRequestBody getHttpRequestBody() {

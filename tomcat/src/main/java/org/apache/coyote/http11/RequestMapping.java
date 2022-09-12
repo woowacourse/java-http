@@ -7,7 +7,6 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.RootController;
 import nextstep.jwp.controller.StaticFileController;
-import org.apache.catalina.session.SessionManager;
 
 public class RequestMapping {
 
@@ -18,7 +17,7 @@ public class RequestMapping {
 
     static {
         CONTROLLERS.put("/", new RootController());
-        CONTROLLERS.put("/login", new LoginController(new SessionManager()));
+        CONTROLLERS.put("/login", new LoginController());
         CONTROLLERS.put("/register", new RegisterController());
         CONTROLLERS.put("static", new StaticFileController());
     }

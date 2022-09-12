@@ -6,6 +6,7 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
 
 import nextstep.jwp.exception.AccountDuplicateException;
+import nextstep.jwp.exception.InputEmptyException;
 import nextstep.jwp.service.UserService;
 
 public class RegisterController extends AbstractController {
@@ -28,7 +29,7 @@ public class RegisterController extends AbstractController {
 		try {
 			UserService.register(account, password, email);
 			response.sendRedirect(REDIRECT_URL);
-		} catch (AccountDuplicateException e) {
+		} catch (AccountDuplicateException | InputEmptyException e) {
 			handleHtml(HttpStatus.BAD_REQUEST, BAD_REQUEST_HTML, response);
 		}
 	}

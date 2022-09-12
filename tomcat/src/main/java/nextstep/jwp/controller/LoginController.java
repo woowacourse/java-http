@@ -10,6 +10,7 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.http.session.Session;
 
+import nextstep.jwp.exception.InputEmptyException;
 import nextstep.jwp.exception.InvalidLoginException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
@@ -18,6 +19,7 @@ public class LoginController extends AbstractController {
 
 	private static final String LOGIN_HTML = "login.html";
 	private static final String UNAUTHORIZED_HTML = "401.html";
+	private static final String BAD_REQUEST_HTML = "400.html";
 	private static final String REDIRECT_URL = "/index.html";
 	private static final String LOGIN_USER = "user";
 
@@ -43,6 +45,8 @@ public class LoginController extends AbstractController {
 			addLoginSession(request, response, user);
 		} catch (InvalidLoginException e) {
 			handleHtml(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_HTML, response);
+		} catch (InputEmptyException e) {
+			handleHtml(HttpStatus.BAD_REQUEST, BAD_REQUEST_HTML, response);
 		}
 	}
 

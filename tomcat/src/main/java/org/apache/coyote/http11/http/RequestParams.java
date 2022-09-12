@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.coyote.http11.http.header.ContentType;
 
@@ -47,6 +48,7 @@ public class RequestParams {
 	private Map<String, String> convertToMap(List<String> requestParams) {
 		return requestParams.stream()
 			.filter(param -> param.contains(PARAM_KEY_VALUE_DELIMITER))
+			.filter(param -> param.split(PARAM_KEY_VALUE_DELIMITER).length == 2)
 			.collect(Collectors.toMap(
 				line -> line.split(PARAM_KEY_VALUE_DELIMITER)[PARAM_KEY_INDEX],
 				line -> line.split(PARAM_KEY_VALUE_DELIMITER)[PARAM_VALUE_INDEX]

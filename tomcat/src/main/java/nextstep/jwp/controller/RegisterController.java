@@ -27,7 +27,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         RequestUri requestUri = httpRequest.getRequestUri();
         httpResponse.httpStatus(HttpStatus.OK)
-                .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
+                .body(FileReader.read(requestUri.parseStaticFilePath()), requestUri.findMediaType());
     }
 
     @Override

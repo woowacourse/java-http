@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
         }
         RequestUri requestUri = httpRequest.getRequestUri();
         httpResponse.httpStatus(HttpStatus.OK)
-                .body(FileReader.read(requestUri.parseFullPath()), requestUri.findMediaType());
+                .body(FileReader.read(requestUri.parseStaticFilePath()), requestUri.findMediaType());
     }
 
     private boolean isLogin(HttpRequest httpRequest) {

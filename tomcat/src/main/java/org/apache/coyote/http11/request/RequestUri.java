@@ -28,7 +28,7 @@ public class RequestUri {
         return MediaType.of(resourcePath);
     }
 
-    public String parseFullPath() {
+    public String parseStaticFilePath() {
         if (resourcePath.endsWith(findMediaType().getExtension())) {
             return resourcePath;
         }

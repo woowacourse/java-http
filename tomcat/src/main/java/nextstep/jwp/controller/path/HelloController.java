@@ -7,10 +7,13 @@ import web.response.StatusLine;
 
 public class HelloController implements PathController {
 
-    private static final HelloController helloController = new HelloController();
+    private static HelloController instance = new HelloController();
 
     public static HelloController getInstance() {
-        return helloController;
+        if (instance == null) {
+            instance = new HelloController();
+        }
+        return instance;
     }
 
     @Override

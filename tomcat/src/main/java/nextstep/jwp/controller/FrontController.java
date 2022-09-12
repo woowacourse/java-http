@@ -14,7 +14,7 @@ import web.util.StaticResourceFinder;
 
 public class FrontController implements Controller {
 
-    private static final FrontController instance = new FrontController();
+    private static FrontController instance;
 
     private final Map<String, PathController> pathControllers;
 
@@ -25,11 +25,14 @@ public class FrontController implements Controller {
         enrollPathController(RegisterController.getInstance());
     }
 
-    private void enrollPathController(PathController pathController) {
+    private void enrollPathController(final PathController pathController) {
         pathControllers.put(pathController.getPath(), pathController);
     }
 
     public static FrontController getInstance() {
+        if (instance == null) {
+            instance = new FrontController();
+        }
         return instance;
     }
 

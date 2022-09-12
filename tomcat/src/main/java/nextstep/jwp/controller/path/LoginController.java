@@ -16,10 +16,13 @@ import web.util.QueryStringParser;
 
 public class LoginController implements PathController {
 
-    private static final LoginController loginController = new LoginController();
+    private static LoginController instance = new LoginController();
 
     public static LoginController getInstance() {
-        return loginController;
+        if (instance == null) {
+            instance = new LoginController();
+        }
+        return instance;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller.path;
 
 import java.util.Map;
+import nextstep.jwp.controller.FrontController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import web.request.HttpRequest;
@@ -11,10 +12,13 @@ import web.util.QueryStringParser;
 
 public class RegisterController implements PathController {
 
-    private static final RegisterController registerController = new RegisterController();
+    private static RegisterController instance = new RegisterController();
 
     public static RegisterController getInstance() {
-        return registerController;
+        if (instance == null) {
+            instance = new RegisterController();
+        }
+        return instance;
     }
 
     @Override

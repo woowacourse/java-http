@@ -187,8 +187,8 @@ class IOStreamTest {
     class InputStreamReader_학습_테스트 {
 
         /**
-         * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다.
-         * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
+         * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다. 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩
+         * 읽어올 수 있다.
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
@@ -201,7 +201,7 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))){
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 int c;
 
                 while ((c = reader.read()) != -1) {

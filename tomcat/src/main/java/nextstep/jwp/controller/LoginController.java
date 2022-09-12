@@ -37,10 +37,18 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final Optional<String> jSessionId = request.findCookie("JSESSIONID");
-        if (jSessionId.isPresent() && SessionManager.findSession(jSessionId.get()).isPresent()) {
+        if (validateSessionExistence(jSessionId)) {
             response.redirect("/index.html");
             return;
         }
         response.ok("/login.html");
+    }
+
+    private boolean validateSessionExistence(final Optional<String> jSessionId) {
+        if (jSessionId.isEmpty()) {
+            return false;
+        }
+        final String jSessionIdValue = jSessionId.get();
+        return SessionManager.findSession(jSessionIdValue).isPresent();
     }
 }

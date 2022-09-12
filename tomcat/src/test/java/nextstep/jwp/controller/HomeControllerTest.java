@@ -3,16 +3,14 @@ package nextstep.jwp.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import org.apache.catalina.servlet.Controller;
 import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.HttpMessageUtils;
 
-@DisplayName("/ & /index 경로에 대한 요청에 대해")
+@DisplayName("/ & /index 경로에 대해")
 class HomeControllerTest {
 
     private final Controller homeController = new HomeController();
@@ -30,12 +28,11 @@ class HomeControllerTest {
         homeController.service(HttpMessageUtils.toRequest(httpRequest), response);
 
         final var actual =response.toMessage();
-        final var resource = getClass().getClassLoader().getResource("static/index.html");
         assertAll(
                 () -> assertThat(actual).startsWith("HTTP/1.1 200 OK \r\n"),
                 () -> assertThat(actual).contains("Content-Type: text/html;charset=utf-8 \r\n"),
                 () -> assertThat(actual).contains("Content-Length: 5564 \r\n"),
-                () -> assertThat(actual).endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+                () -> assertThat(actual).endsWith(HttpMessageUtils.getResponseBody("index.html"))
         );
     }
 
@@ -52,12 +49,11 @@ class HomeControllerTest {
         homeController.service(HttpMessageUtils.toRequest(httpRequest), response);
 
         final var actual = response.toMessage();
-        final var resource = getClass().getClassLoader().getResource("static/404.html");
         assertAll(
                 () -> assertThat(actual).startsWith("HTTP/1.1 404 Not Found \r\n"),
                 () -> assertThat(actual).contains("Content-Type: text/html;charset=utf-8 \r\n"),
                 () -> assertThat(actual).contains("Content-Length: 2426 \r\n"),
-                () -> assertThat(actual).endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+                () -> assertThat(actual).endsWith(HttpMessageUtils.getResponseBody("404.html"))
         );
     }
 }

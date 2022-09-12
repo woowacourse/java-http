@@ -3,8 +3,6 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.ResourceController;
@@ -19,7 +17,8 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private final RequestMapping requestMapping = RequestMapping.of(List.of(new HomeController(), new ResourceController()));
+    private final RequestMapping requestMapping = RequestMapping.of(
+            List.of(new HomeController(), new ResourceController()));
 
     @DisplayName("GET /index 요청은 index.html 파일을 응답한다")
     @Test
@@ -36,12 +35,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         final var actual = socket.output();
-        final var resource = getClass().getClassLoader().getResource("static/index.html");
         assertAll(
                 () -> assertThat(actual).startsWith("HTTP/1.1 200 OK \r\n"),
                 () -> assertThat(actual).contains("Content-Type: text/html;charset=utf-8 \r\n"),
                 () -> assertThat(actual).contains("Content-Length: 5564 \r\n"),
-                () -> assertThat(actual).endsWith(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+                () -> assertThat(actual).endsWith(HttpMessageUtils.getResponseBody("index.html"))
         );
     }
 
@@ -89,12 +87,11 @@ class Http11ProcessorTest {
     }
 
     private String getIndexRequest() {
-        final var httpRequest = String.join("\r\n",
+        return String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
-        return httpRequest;
     }
 }

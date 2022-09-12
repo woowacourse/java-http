@@ -47,10 +47,6 @@ public class HttpRequestLine {
         return uri.contains("?");
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     public String getPath() {
         return path;
     }
@@ -61,5 +57,9 @@ public class HttpRequestLine {
 
     public String getQueryString() {
         return queryString;
+    }
+
+    public boolean isGet() {
+        return httpMethod.isGet();
     }
 }

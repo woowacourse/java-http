@@ -8,7 +8,7 @@ public enum HttpMethod {
         return valueOf(name);
     }
 
-    public boolean isSame(final HttpMethod httpMethod) {
-        return this == httpMethod;
+    public boolean isGet() {
+        return this == GET;
     }
 }

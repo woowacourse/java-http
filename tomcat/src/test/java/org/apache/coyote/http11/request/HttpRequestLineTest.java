@@ -20,7 +20,7 @@ class HttpRequestLineTest {
 
         // then
         assertAll(() -> {
-            assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
+            assertThat(requestLine.isGet()).isTrue();
             assertThat(requestLine.getPath()).isEqualTo("/path");
             assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
             assertThat(requestLine.getQueryString()).isEqualTo("name=eve");

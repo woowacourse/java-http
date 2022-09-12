@@ -25,7 +25,7 @@ public class HttpFrontServlet {
         this.servletAdvice = servletAdvice;
     }
 
-    public ResponseEntity service(final HttpRequest httpRequest) throws IOException {
+    public ResponseEntity service(final HttpRequest httpRequest) {
         try {
             final ServletResponseEntity response = handleRequest(httpRequest);
             return createResponseEntity(response);
@@ -39,7 +39,7 @@ public class HttpFrontServlet {
         final RequestServlet handler = requestHandlerMapping.getHandler(httpRequest.getPath());
 
         final HttpResponseHeader responseHeader = new HttpResponseHeader(new HashMap<>());
-        if (httpRequest.getHttpStatus().isSame(GET)) {
+        if (httpRequest.isGet()) {
             return handler.doGet(httpRequest, responseHeader);
         }
         return handler.doPost(httpRequest, responseHeader);

@@ -52,10 +52,6 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpMethod getHttpStatus() {
-        return requestLine.getHttpMethod();
-    }
-
     public String getHeader(final String headerName) {
         return headers.getHeader(headerName);
     }
@@ -70,5 +66,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
     }
 }

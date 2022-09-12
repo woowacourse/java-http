@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import java.util.Objects;
+
 public class User {
 
     private final Long id;
@@ -22,8 +24,38 @@ public class User {
         return this.password.equals(password);
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(getAccount(), user.getAccount()) && Objects.equals(password,
+                user.password) && Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAccount(), password, email);
     }
 
     @Override

@@ -5,6 +5,9 @@ public class ViewResolver {
     private static final String HTML_EXTENSION = ".html";
 
     public static String convert(String url) {
+        if (url.equals("/")) {
+            return "/index.html";
+        }
         if (!url.contains(".")) {
             return url + HTML_EXTENSION;
         }

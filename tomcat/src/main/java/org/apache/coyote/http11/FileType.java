@@ -3,9 +3,10 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum FileType {
-    HTML("html", "text/html"),
+    HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
-    JAVASCRIPT("js", "application/javascript");
+    JAVASCRIPT("js", "application/javascript"),
+    ICON("ico", "image/ico");
 
     private final String extension;
     private final String mimeType;

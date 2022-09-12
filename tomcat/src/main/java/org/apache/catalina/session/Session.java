@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Session {
 
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private final String id;
     private final Map<String, Object> attributes;

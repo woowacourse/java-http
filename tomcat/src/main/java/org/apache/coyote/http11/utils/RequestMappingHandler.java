@@ -12,7 +12,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMappingHandler {
 
-    STRING(RequestMappingHandler::isStringUrl, new HelloController()),
+    STRING(RequestMappingHandler::isHelloUrl, new HelloController()),
     FILE(RequestMappingHandler::isFileUrl, new FileController()),
     LOGIN_GET(RequestMappingHandler::isLoginUrl, new LoginController()),
     REGISTER_GET(RequestMappingHandler::isRegisterUrl, new RegisterController());
@@ -40,7 +40,7 @@ public enum RequestMappingHandler {
         return FILE_REGEX.matcher(requestUrl).matches();
     }
 
-    public static boolean isStringUrl(final String requestUrl) {
+    public static boolean isHelloUrl(final String requestUrl) {
         return requestUrl.equals("/");
     }
 

@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import nextstep.jwp.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.utils.PathFinder;
 import org.apache.coyote.http11.utils.RequestMappingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +48,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse makeResponse(final HttpRequest httpRequest) throws Exception {
-        final Controller controller = RequestMappingHandler.findResponseMaker(httpRequest);
-        return controller.service(httpRequest);
+        try {
+            final Controller controller = RequestMappingHandler.findResponseMaker(httpRequest);
+            return controller.service(httpRequest);
+        } catch (final IllegalArgumentException e) {
+            final Path path = PathFinder.findPath("/400.html");
+            final String responseBody = new String(Files.readAllBytes(path));
+            return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/400.html");
+        }
     }
 }

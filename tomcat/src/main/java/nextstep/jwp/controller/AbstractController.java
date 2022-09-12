@@ -30,7 +30,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private HttpResponse defaultInternalServerErrorPage() throws URISyntaxException, IOException {
-        final Path path = PathFinder.findPath("/404.html");
+        final Path path = PathFinder.findPath("/500.html");
         final String responseBody = new String(Files.readAllBytes(path));
         return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, responseBody, ContentType.HTML);
     }

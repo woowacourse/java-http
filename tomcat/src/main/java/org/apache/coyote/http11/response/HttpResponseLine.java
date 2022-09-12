@@ -2,6 +2,8 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponseLine {
 
+    private static final String VERSION = "HTTP/1.1";
+
     private final String version;
     private final int code;
     private final String message;
@@ -13,7 +15,7 @@ public class HttpResponseLine {
     }
 
     public HttpResponseLine(final HttpStatus httpStatus) {
-        this("HTTP/1.1", httpStatus.getCode(), httpStatus.getMessage());
+        this(VERSION, httpStatus.getCode(), httpStatus.getMessage());
     }
 
     @Override

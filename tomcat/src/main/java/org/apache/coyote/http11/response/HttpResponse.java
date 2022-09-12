@@ -24,7 +24,7 @@ public class HttpResponse {
     }
 
     private String statusLine() {
-        return HTTP_VERSION + SPACE + status.code() + SPACE + status + SPACE;
+        return HTTP_VERSION + SPACE + status.code() + SPACE + status.value() + SPACE;
     }
 
     public HttpStatus getStatus() {

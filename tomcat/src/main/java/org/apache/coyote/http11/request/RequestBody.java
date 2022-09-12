@@ -16,7 +16,7 @@ public class RequestBody {
     }
 
     public Map<String, String> toApplicationForm() {
-        HashMap<String, String> applicationForm = new HashMap<>();
+        Map<String, String> applicationForm = new HashMap<>();
         for (String form : value.split("&")) {
             String[] keyValue = form.split("=");
             applicationForm.put(keyValue[0], keyValue[1]);

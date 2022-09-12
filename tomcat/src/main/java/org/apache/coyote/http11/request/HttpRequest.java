@@ -44,7 +44,7 @@ public class HttpRequest {
         if (!header.containsKey("Content-Length")) {
             return RequestBody.from("");
         }
-        int contentLength = Integer.parseInt(header.get("Content-Length").trim());
+        int contentLength = Integer.parseInt(header.get("Content-Length").strip());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);

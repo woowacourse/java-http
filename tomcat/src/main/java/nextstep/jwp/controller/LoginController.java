@@ -26,6 +26,20 @@ public class LoginController extends AbstractController {
         return responseBuilder.redirect(LOGIN_PAGE);
     }
 
+    private boolean isLogin(HttpRequest request) {
+        if (request.hasCookie()) {
+            String sessionId = request.getCookieValue(JSESSIONID);
+            Session session = sessionManager.findSession(sessionId);
+            return session != null && isLogin(session);
+        }
+        return false;
+    }
+
+    private boolean isLogin(Session session) {
+        return InMemoryUserRepository.findByAccount(session.getAttribute("user"))
+                .isPresent();
+    }
+
     @Override
     public HttpResponse doPost(HttpRequest request, HttpResponseBuilder responseBuilder) {
         Map<String, String> bodyForm = request.body()
@@ -35,16 +49,6 @@ public class LoginController extends AbstractController {
             return responseBuilder.redirect(INDEX_PAGE);
         }
         return responseBuilder.redirect("/401.html");
-    }
-
-    private boolean isLogin(HttpRequest request) {
-        if (request.hasCookie()) {
-            String sessionId = request.getCookieValue(JSESSIONID);
-            Session session = sessionManager.findSession(sessionId);
-            return InMemoryUserRepository.findByAccount(session.getAttribute("user"))
-                    .isPresent();
-        }
-        return false;
     }
 
     private void saveInSession(HttpResponseBuilder responseBuilder, Map<String, String> bodyForm) {

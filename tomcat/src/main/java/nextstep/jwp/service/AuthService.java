@@ -23,7 +23,7 @@ public class AuthService {
 
     private User findUserOrThrow(final String account) {
         return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new UserNotFoundException(account));
     }
 
     private void validatePasswordMatches(final User user, final String password) {

@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import nextstep.jwp.handler.RequestHandlerMapping;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;

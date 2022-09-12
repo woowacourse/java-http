@@ -1,8 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;

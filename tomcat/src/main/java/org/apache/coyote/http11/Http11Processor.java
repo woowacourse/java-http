@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.FileNotFoundException;
-import org.apache.coyote.http11.handler.RequestHandlerMapping;
+import nextstep.jwp.handler.RequestHandlerMapping;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.domain.response;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,5 +35,11 @@ public class ResponseBody {
 
     public String getValue() {
         return value;
+    }
+
+    public String getResponse() {
+        return "Content-Length: " + getValue().getBytes().length + " " + "\r\n"
+                + "\r\n"
+                + getValue();
     }
 }

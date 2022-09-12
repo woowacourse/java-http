@@ -7,14 +7,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.domain.FilePath;
-import org.apache.coyote.domain.HttpRequest;
-import org.apache.coyote.domain.MyHttpResponse;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.domain.request.HttpRequest;
+import org.apache.coyote.domain.response.HttpResponse;
+import org.apache.coyote.handler.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,22 +35,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String firstLine = inputBufferedReader.readLine();
-            final HttpRequest httpRequest = HttpRequest.from(firstLine);
-            final FilePath filePath = FilePath.from(httpRequest.getUri());
+            final HttpRequest httpRequest = HttpRequest.from(inputBufferedReader);
+            final Controller controller = RequestMapping.getController(httpRequest.getUri());
 
-            if (httpRequest.getUri().contains("login?")) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam().get("account"));
-                user.ifPresent(value -> log.info(value.toString()));
-            }
+            HttpResponse httpResponse = new HttpResponse();
+            controller.service(httpRequest, httpResponse);
 
-            final MyHttpResponse httpResponse = MyHttpResponse.from(filePath);
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

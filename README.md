@@ -63,7 +63,7 @@
 리팩터링
 
 - [ ] 테스트 코드 추가하기
-- [ ] apache 패키지에서 nextstep 패키지를 참조하지 않도록 수정
+- [x] apache 패키지에서 nextstep 패키지를 참조하지 않도록 수정
 - [ ] response header를 map 형태로 수정
 
 </details>

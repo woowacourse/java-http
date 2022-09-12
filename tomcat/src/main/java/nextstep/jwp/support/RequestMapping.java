@@ -1,4 +1,4 @@
-package org.apache.coyote.support;
+package nextstep.jwp.support;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -10,19 +10,20 @@ import nextstep.jwp.ui.IndexController;
 import nextstep.jwp.ui.LoginController;
 import nextstep.jwp.ui.RegisterController;
 import nextstep.jwp.ui.ResourceController;
+import org.apache.coyote.support.Controller;
 
-public enum ControllerMapper {
+public enum RequestMapping {
 
     DEFAULT("/"::equals, new DefaultController()),
     INDEX("/index.html"::equals, new IndexController()),
     LOGIN("/login"::equals, new LoginController()),
     REGISTER("/register"::equals, new RegisterController()),
-    RESOURCE(ControllerMapper::isStaticResource, new ResourceController());
+    RESOURCE(RequestMapping::isStaticResource, new ResourceController());
 
     private final Predicate<String> condition;
     private final Controller controller;
 
-    ControllerMapper(final Predicate<String> condition, final Controller controller) {
+    RequestMapping(final Predicate<String> condition, final Controller controller) {
         this.condition = condition;
         this.controller = controller;
     }

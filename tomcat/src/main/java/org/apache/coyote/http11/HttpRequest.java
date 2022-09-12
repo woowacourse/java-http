@@ -21,10 +21,6 @@ public class HttpRequest {
         return requestLineMethod.equals(method);
     }
 
-    public boolean matchUrl(final String url) {
-        return getUrl().equals(url);
-    }
-
     public String getUrl() {
         return requestLine.split(" ")[1];
     }

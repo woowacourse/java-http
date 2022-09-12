@@ -8,7 +8,6 @@ public class StartLine {
     private static final String ROOT = "/";
     private static final int URI_INDEX = 1;
     private static final int METHOD_INDEX = 0;
-    private static final int HTTP_VERSION_INDEX = 2;
     private static final int PATH_INDEX = 0;
     private static final int QUERY_INDEX = 1;
     private static final String START_LINE_DELIMITER = " ";
@@ -16,16 +15,13 @@ public class StartLine {
     private static final int NO_QUERY_LENGTH = 1;
 
     private final HttpMethod method;
-    private final HttpRequestPath requestPath;
+    private final String requestPath;
     private final QueryParams queryParams;
-    private final HttpVersion httpVersion;
 
-    private StartLine(final HttpMethod method, final HttpRequestPath requestPath, final QueryParams queryParams,
-                     final HttpVersion httpVersion) {
+    private StartLine(final HttpMethod method, final String requestPath, final QueryParams queryParams) {
         this.method = method;
         this.requestPath = requestPath;
         this.queryParams = queryParams;
-        this.httpVersion = httpVersion;
     }
 
     public static StartLine from(String startLine) {
@@ -36,11 +32,10 @@ public class StartLine {
         final String requestUri = startLineElements[URI_INDEX];
         final String[] requestUriElements = requestUri.split(QUERY_DELIMITER);
 
-        final HttpRequestPath requestPath = HttpRequestPath.from(requestUriElements[PATH_INDEX]);
+        final String requestPath = requestUriElements[PATH_INDEX];
         final QueryParams queryParams = extractQueryParams(requestUriElements);
-        final HttpVersion httpVersion = HttpVersion.from(startLineElements[HTTP_VERSION_INDEX]);
 
-        return new StartLine(httpMethod, requestPath, queryParams, httpVersion);
+        return new StartLine(httpMethod, requestPath, queryParams);
     }
 
     private static QueryParams extractQueryParams(final String[] requestUriElements) {
@@ -55,7 +50,7 @@ public class StartLine {
     }
 
     public String getRequestPath() {
-        return requestPath.getUri();
+        return requestPath;
     }
 
     public boolean isSameMethod(HttpMethod httpMethod) {

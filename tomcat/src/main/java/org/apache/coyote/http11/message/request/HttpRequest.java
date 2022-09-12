@@ -52,11 +52,8 @@ public class HttpRequest {
         return message.substring(bodyStartIndex);
     }
 
-    public boolean matches(final HttpMethod method, final String uri) {
-        boolean methodMatches = requestLine.getMethod().equals(method);
-        boolean uriMatches = requestLine.getUri().matches(uri);
-
-        return methodMatches && uriMatches;
+    public boolean matchesMethod(final HttpMethod method) {
+        return requestLine.getMethod().equals(method);
     }
 
     public RequestUri getRequestUri() {

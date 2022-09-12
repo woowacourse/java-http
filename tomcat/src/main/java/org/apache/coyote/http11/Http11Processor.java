@@ -1,37 +1,20 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.message.common.ContentType.HTML;
 import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.message.common.HttpHeader.COOKIE;
-import static org.apache.coyote.http11.message.common.HttpHeader.LOCATION;
-import static org.apache.coyote.http11.message.common.HttpMethod.GET;
-import static org.apache.coyote.http11.message.common.HttpMethod.POST;
-import static org.apache.coyote.http11.message.response.HttpStatus.FOUND;
-import static org.apache.coyote.http11.message.response.HttpStatus.NOT_FOUND;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Objects;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.InvalidRequestException;
-import org.apache.coyote.http11.exception.StaticFileNotFoundException;
-import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
-import org.apache.coyote.http11.message.request.QueryString;
 import org.apache.coyote.http11.message.request.RequestLine;
-import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,131 +38,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var is = connection.getInputStream();
              final var os = connection.getOutputStream();
              final var bs = new BufferedReader(new InputStreamReader(is))) {
-
             HttpRequest request = generateHttpRequest(bs);
 
-            HttpResponse response = null;
-            if (request.matches(GET, "/")) {
-                response = helloWorldResponse();
-            }
-
-            if (request.matches(GET, "/login")) {
-                response = loginHtmlResponse(request);
-            }
-
-            if (request.matches(POST, "/login")) {
-                response = loginUserResponse(request);
-            }
-
-            if (request.matches(GET, "/register")) {
-                response = registerHtmlResponse();
-            }
-
-            if (request.matches(POST, "/register")) {
-                registerUser(request);
-                response = redirectionResponse("/index.html");
-            }
-
-            if (Objects.isNull(response)) {
-                response = staticFileResponse(request);
-            }
+            Controller controller = RequestMapping.getController(request);
+            HttpResponse response = controller.service(request);
 
             writeHttpResponse(os, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpResponse helloWorldResponse() {
-        return new HttpResponse.Builder()
-                .contentType(HTML)
-                .body("Hello world!")
-                .build();
-    }
-
-    private HttpResponse loginHtmlResponse(final HttpRequest request) {
-        Optional<String> cookie = request.getHttpHeaders().getHeader(COOKIE);
-
-        if (cookie.isPresent()) {
-            return new HttpResponse.Builder()
-                    .contentType(HTML)
-                    .body(StaticFileUtil.readFile("/index.html"))
-                    .build();
-        }
-
-        return new HttpResponse.Builder()
-                .contentType(HTML)
-                .body(StaticFileUtil.readFile("/login.html"))
-                .build();
-    }
-
-    private HttpResponse loginUserResponse(final HttpRequest request) {
-        QueryString queryString = QueryString.parse(request.getRequestBody());
-        Optional<User> user = getUser(queryString);
-
-        if (user.isEmpty()) {
-            return redirectionResponse("/401.html");
-        }
-
-        Session session = SessionManager.create();
-        session.setAttribute("user", user.get());
-        HttpResponse.Builder builder = new HttpResponse.Builder()
-                .status(FOUND)
-                .header(LOCATION, "/index.html");
-
-        if (!request.getHttpHeaders().hasHeader(COOKIE)) {
-            builder.setCookie(HttpCookie.sessionId(session.getId()));
-        }
-
-        return builder.build();
-    }
-
-    private Optional<User> getUser(final QueryString queryString) {
-        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
-        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
-
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(it -> it.checkPassword(password));
-    }
-
-    private HttpResponse registerHtmlResponse() {
-        return new HttpResponse.Builder()
-                .contentType(HTML)
-                .body(StaticFileUtil.readFile("/register.html"))
-                .build();
-    }
-
-    private void registerUser(final HttpRequest request) {
-        QueryString queryString = QueryString.parse(request.getRequestBody());
-        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
-        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
-        String email = queryString.getValues("email").orElseThrow(InvalidRequestException::new);
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-    }
-
-    private HttpResponse redirectionResponse(final String path) {
-        return new HttpResponse.Builder()
-                .status(FOUND)
-                .header(LOCATION, path)
-                .build();
-    }
-
-    private HttpResponse staticFileResponse(final HttpRequest httpRequest) {
-        RequestUri requestUri = httpRequest.getRequestUri();
-
-        try {
-            String file = StaticFileUtil.readFile(requestUri.getPath());
-            return new HttpResponse.Builder()
-                    .contentType(requestUri.getExtension())
-                    .body(file)
-                    .build();
-
-        } catch (StaticFileNotFoundException e) {
-            return new HttpResponse.Builder()
-                    .status(NOT_FOUND)
-                    .build();
         }
     }
 

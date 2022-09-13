@@ -3,7 +3,7 @@ package nextstep.jwp.presentation;
 import java.util.Map;
 import nextstep.jwp.model.user.UserService;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.http11response.StatusCode;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11request.QueryStringUtil;
 import org.apache.coyote.http11.http11response.Http11Response;

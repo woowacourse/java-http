@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HeaderElement;
-import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class Http11Response {

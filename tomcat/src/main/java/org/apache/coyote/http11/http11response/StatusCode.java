@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http11response;
 
 public enum StatusCode {
     OK(200),

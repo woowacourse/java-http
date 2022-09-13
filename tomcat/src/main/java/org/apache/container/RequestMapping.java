@@ -2,7 +2,6 @@ package org.apache.container;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.DefaultPageController;
 import nextstep.jwp.presentation.IndexController;
 import nextstep.jwp.presentation.LoginController;

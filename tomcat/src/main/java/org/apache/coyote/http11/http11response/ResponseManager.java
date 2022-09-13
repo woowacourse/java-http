@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 import org.apache.coyote.http11.ExtensionContentType;
-import org.apache.coyote.http11.StatusCode;
 
 public class ResponseManager {
 

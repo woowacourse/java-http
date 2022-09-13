@@ -1,8 +1,7 @@
 package org.apache.container;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.presentation.Controller;
-import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.http11response.StatusCode;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11response.Http11Response;
 import org.apache.coyote.http11.http11response.ResponseManager;

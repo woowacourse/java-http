@@ -1,7 +1,8 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.exception.NotSupportHttpMethodException;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.container.Controller;
+import org.apache.coyote.http11.http11request.HttpMethod;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11response.Http11Response;
 

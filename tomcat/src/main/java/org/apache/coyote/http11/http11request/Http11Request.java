@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HeaderElement;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class Http11Request {

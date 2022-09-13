@@ -1,7 +1,7 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.exception.NotSupportHttpMethodException;
-import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.http11response.StatusCode;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11response.Http11Response;
 import org.apache.coyote.http11.http11response.ResponseManager;

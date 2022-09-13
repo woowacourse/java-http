@@ -23,9 +23,7 @@ import org.apache.coyote.http11.common.SessionManager;
 
 public class HttpResponse {
 
-//    private static final String CRLF = " " + System.lineSeparator();
-
-    private static final String CRLF = System.lineSeparator();
+    private static final String OS_LINE = System.lineSeparator();
 
     private HttpStatusLine httpStatusLine;
     private ResponseHeaders headers;
@@ -94,7 +92,7 @@ public class HttpResponse {
     }
 
     public String generateHttpResponse() {
-        return String.join(CRLF, httpStatusLine.toString(),
+        return String.join(OS_LINE, httpStatusLine.toString(),
                 headers.toString(),
                 responseBody);
     }

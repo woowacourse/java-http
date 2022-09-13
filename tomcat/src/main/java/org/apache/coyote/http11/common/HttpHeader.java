@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpHeader {
 
-    private static final String CRLF = " " + System.lineSeparator();
+    private static final String OS_LINE = " " + System.lineSeparator();
 
     private final Map<HttpHeaderType, List<String>> header;
 
@@ -22,7 +22,7 @@ public class HttpHeader {
 
         for (Map.Entry<HttpHeaderType, List<String>> header : header.entrySet()) {
             final String value = joinValues(header.getValue());
-            sb.append(String.join(": ", header.getKey().getValue(), value)).append(CRLF);
+            sb.append(String.join(": ", header.getKey().getValue(), value)).append(OS_LINE);
         }
         return sb.toString();
     }

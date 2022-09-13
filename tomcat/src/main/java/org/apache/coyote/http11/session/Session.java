@@ -2,6 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.exception.SessionKeyNotFoundException;
 
 public class Session {
 
@@ -17,6 +18,9 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
+        if (!values.containsKey(name)) {
+            throw new SessionKeyNotFoundException(name);
+        }
         return values.get(name);
     }
 

@@ -19,13 +19,4 @@ class UriTest {
 
         assertThat(actual.getPath()).isEqualTo(expected);
     }
-
-    @DisplayName("Uri로부터 파라미터를 파싱한다")
-    @ParameterizedTest
-    @CsvSource(value = {"/api/login?account=gugu, account, gugu"})
-    void parseParams(final String uri, final String name, final String expected) throws URISyntaxException {
-        final Uri actual = Uri.parse(new URI(uri));
-
-        assertThat(actual.findParam(name)).isEqualTo(expected);
-    }
 }

@@ -9,6 +9,7 @@ public class HttpCookie {
     private static final String COOKIE_VALUE_DELIMITER = "=";
     private static final int COOKIE_NAME_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
+    private static final String DEFAULT_SESSION_KEY = "JSESSIONID";
 
     private final Map<String, String> values;
 
@@ -37,6 +38,6 @@ public class HttpCookie {
     }
 
     public String getSessionId() {
-        return values.get("JSESSIONID");
+        return values.get(DEFAULT_SESSION_KEY);
     }
 }

@@ -1,17 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        requestMapping = new RequestMapping();
     }
 
     @Override
@@ -36,67 +35,16 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestHeader = readRequestHeader(bufferedReader);
+            final var httpRequest = HttpRequest.from(bufferedReader);
+            final var controller = requestMapping.getController(httpRequest);
+            final var response = controller.service(httpRequest, new HttpResponse());
 
-            final HttpRequest httpRequest = HttpRequest.from(requestHeader);
-            final var response = getResponse(httpRequest);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder header = new StringBuilder();
-
-        while (bufferedReader.ready()) {
-            header.append(bufferedReader.readLine())
-                    .append("\r\n");
-        }
-
-        return header.toString();
-    }
-
-    private String getResponse(final HttpRequest httpRequest) throws IOException {
-        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
-    }
-
-    private String getResponse(final String url, final Map<String, String> requestParam) throws IOException {
-        if ("/".equals(url)) {
-            final var responseBody = "Hello world!";
-
-            return createResponse("text/html", responseBody);
-        }
-
-        if (url.contains(".")) {
-            return createStaticFileResponse(url);
-        }
-
-        if ("/login".equals(url)) {
-            LoginHandler.handle(requestParam);
-
-            return createStaticFileResponse(url + ".html");
-        }
-
-        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
-    }
-
-    private String createStaticFileResponse(final String url) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + url);
-        final Path path = new File(resource.getFile()).toPath();
-        final String responseBody = new String(Files.readAllBytes(path));
-
-        return createResponse(Files.probeContentType(path), responseBody);
-    }
-
-    private String createResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

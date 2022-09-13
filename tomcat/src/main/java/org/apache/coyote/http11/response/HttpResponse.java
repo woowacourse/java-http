@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.Collections;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.web.Cookie;
@@ -14,7 +13,7 @@ public class HttpResponse {
 
     public HttpResponse() {
         statusLine = new StatusLine(HttpStatus.OK);
-        httpHeaders = new HttpHeaders(Collections.emptyMap());
+        httpHeaders = HttpHeaders.makeEmptyHeader();
         body = "";
         viewName = null;
     }

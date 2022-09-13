@@ -29,7 +29,7 @@ public class HttpRequest {
     public static HttpRequest from(final String startLine, final List<String> headerLines, final BufferedReader reader)
             throws IOException {
         final RequestLine requestLine = RequestLine.of(startLine);
-        final HttpHeaders httpHeaders = toHttpHeaders(headerLines);
+        final HttpHeaders httpHeaders = HttpHeaders.of(headerLines);
 
         final Map<String, String> body = new HashMap<>(Collections.EMPTY_MAP);
         if (httpHeaders.hasContentLength()) {
@@ -41,16 +41,6 @@ public class HttpRequest {
         }
 
         return new HttpRequest(requestLine, httpHeaders, body);
-    }
-
-    private static HttpHeaders toHttpHeaders(final List<String> values) {
-        final Map<String, String> headers = new HashMap<>();
-        for (String value : values) {
-            final String[] header = value.split(": ");
-            headers.put(header[0], header[1]);
-        }
-        final HttpHeaders httpHeaders = new HttpHeaders(headers);
-        return httpHeaders;
     }
 
     public boolean isGet() {

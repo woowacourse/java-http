@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
 
+    private static final String PROTOCOL_VERSION = "HTTP/1.1";
+    private static final String INDENT = " ";
+
     private final HttpStatusCode statusCode;
     private final Map<String, String> responseHeader;
     private final String responseBody;
@@ -17,20 +20,22 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        final List<String> headers = responseHeader.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.toList());
-
-        String result = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getValue() + " ";
-
-        for (String header : headers) {
-            result = String.join("\r\n", result, header);
-        }
+        final String startLine =
+                PROTOCOL_VERSION + INDENT + statusCode.getCode() + INDENT + statusCode.getValue() + INDENT;
 
         return String.join("\r\n",
-                result,
+                startLine,
+                convertHeaderToResponseText(),
                 "",
                 responseBody);
+    }
+
+    private String convertHeaderToResponseText() {
+        final List<String> headers = responseHeader.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + INDENT)
+                .collect(Collectors.toList());
+
+        return String.join("\r\n", headers);
     }
 }

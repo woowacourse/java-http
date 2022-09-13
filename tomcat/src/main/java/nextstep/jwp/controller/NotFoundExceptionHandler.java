@@ -3,11 +3,12 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import nextstep.jwp.exception.NotFoundException;
-import org.apache.coyote.ExceptionController;
+import org.apache.coyote.ExceptionHandler;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 
-public class NotFoundExceptionController implements ExceptionController {
+public class NotFoundExceptionHandler implements ExceptionHandler {
+
     @Override
     public boolean isResolvable(final Exception exception) {
         return exception instanceof NotFoundException;

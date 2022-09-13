@@ -1,4 +1,4 @@
-package nextstep.jwp.controller.requestmapping;
+package nextstep.jwp.controller.handlermapping;
 
 import java.util.HashMap;
 import java.util.Map;

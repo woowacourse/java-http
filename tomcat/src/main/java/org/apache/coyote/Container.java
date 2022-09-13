@@ -6,5 +6,5 @@ public interface Container {
 
     Controller findController(final Request request);
 
-    ExceptionController findExceptionHandler(final Exception exception);
+    ExceptionHandler findExceptionHandler(final Exception exception);
 }

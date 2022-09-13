@@ -1,19 +1,17 @@
 package org.apache.catalina;
 
-import java.util.List;
-import org.apache.catalina.exception.ControllerNotFoundException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Controller;
-import org.apache.coyote.ExceptionController;
+import org.apache.coyote.ExceptionHandler;
 import org.apache.coyote.http11.request.Request;
 
 public class ControllerContainer implements Container {
     private final RequestMapping requestMapping;
-    private final List<ExceptionController> exceptionControllers;
+    private final ExceptionHandlers exceptionHandlers;
 
-    public ControllerContainer(final RequestMapping requestMapping, final List<ExceptionController> exceptionControllers) {
+    public ControllerContainer(final RequestMapping requestMapping, final ExceptionHandlers exceptionHandlers) {
         this.requestMapping = requestMapping;
-        this.exceptionControllers = exceptionControllers;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     @Override
@@ -22,10 +20,7 @@ public class ControllerContainer implements Container {
     }
 
     @Override
-    public ExceptionController findExceptionHandler(final Exception exception) {
-        return exceptionControllers.stream()
-                .filter(exceptionController -> exceptionController.isResolvable(exception))
-                .findFirst()
-                .orElseThrow(ControllerNotFoundException::new);
+    public ExceptionHandler findExceptionHandler(final Exception exception) {
+        return exceptionHandlers.find(exception);
     }
 }

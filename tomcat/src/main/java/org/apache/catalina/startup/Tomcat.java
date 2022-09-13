@@ -1,11 +1,10 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import java.util.List;
 import org.apache.catalina.ControllerContainer;
+import org.apache.catalina.ExceptionHandlers;
 import org.apache.catalina.RequestMapping;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.ExceptionController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +14,8 @@ public class Tomcat {
 
     private final ControllerContainer container;
 
-    public Tomcat(final RequestMapping requestMapping, final List<ExceptionController> exceptionControllers) {
-        this.container = new ControllerContainer(requestMapping, exceptionControllers);
+    public Tomcat(final RequestMapping requestMapping, final ExceptionHandlers exceptionHandlers) {
+        this.container = new ControllerContainer(requestMapping, exceptionHandlers);
     }
 
     public void start() {

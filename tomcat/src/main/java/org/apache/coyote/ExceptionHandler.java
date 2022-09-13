@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public interface ExceptionController {
+public interface ExceptionHandler {
     Logger log = LoggerFactory.getLogger(Application.class);
 
     boolean isResolvable(Exception exception);

@@ -7,10 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import nextstep.jwp.controller.StaticFileController;
+import nextstep.jwp.controller.handlermapping.JwpExceptionHandlers;
+import nextstep.jwp.controller.handlermapping.JwpRequestMapping;
 import org.apache.catalina.ControllerContainer;
-import nextstep.jwp.controller.requestmapping.JwpRequestMapping;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
@@ -28,7 +28,7 @@ class ControllerContainerTest {
 
         // when
         final Controller actual =
-                new ControllerContainer(JwpRequestMapping.getInstance(), List.of())
+                new ControllerContainer(JwpRequestMapping.getInstance(), JwpExceptionHandlers.getInstance())
                         .findController(request);
 
         // then

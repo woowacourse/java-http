@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.authorization.Session;
 import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RegisterHandler extends Handler {
 
@@ -26,7 +26,7 @@ public class RegisterHandler extends Handler {
     }
 
     @Override
-    public HandlerResult handle(HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         try {
             if (request.getCookieValue(JSESSIONID) != null) {
                 throw new IllegalArgumentException("이미 로그인이 되어있습니다.");
@@ -55,17 +55,17 @@ public class RegisterHandler extends Handler {
         SESSION_MANAGER.add(session);
     }
 
-    private HandlerResult createHandlerResult(final HttpStatusCode statusCode, final String redirectUri,
-                                              final String jSessionId) {
+    private HttpResponse createHandlerResult(final HttpStatusCode statusCode, final String redirectUri,
+                                             final String jSessionId) {
         final Map<String, String> responseHeader = new LinkedHashMap<>();
         responseHeader.put("Location", redirectUri);
         responseHeader.put("Set-Cookie", JSESSIONID + "=" + jSessionId);
-        return new HandlerResult(statusCode, responseHeader, "");
+        return new HttpResponse(statusCode, responseHeader, "");
     }
 
-    private HandlerResult createHandlerResult(final HttpStatusCode statusCode, final String redirectUri) {
+    private HttpResponse createHandlerResult(final HttpStatusCode statusCode, final String redirectUri) {
         final Map<String, String> responseHeader = new LinkedHashMap<>();
         responseHeader.put("Location", redirectUri);
-        return new HandlerResult(statusCode, responseHeader, "");
+        return new HttpResponse(statusCode, responseHeader, "");
     }
 }

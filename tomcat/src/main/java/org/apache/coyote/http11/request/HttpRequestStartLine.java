@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequestStartLine {
 
@@ -10,14 +9,11 @@ public class HttpRequestStartLine {
 
     private final HttpMethod method;
     private final String uri;
-    private final String protocol;
     private final Map<String, String> queryParams;
 
-    public HttpRequestStartLine(final HttpMethod method, final String uri, final String protocol,
-                                final Map<String, String> queryParams) {
+    public HttpRequestStartLine(final HttpMethod method, final String uri, final Map<String, String> queryParams) {
         this.method = method;
         this.uri = uri;
-        this.protocol = protocol;
         this.queryParams = queryParams;
     }
 
@@ -26,7 +22,6 @@ public class HttpRequestStartLine {
 
         return new HttpRequestStartLine(HttpMethod.valueOf(startLineContents[0]),
                 takeUri(startLineContents[1]),
-                startLineContents[2],
                 takeQueryParams(startLineContents[1]));
     }
 
@@ -68,9 +63,5 @@ public class HttpRequestStartLine {
 
     public String getUri() {
         return uri;
-    }
-
-    public String getProtocol() {
-        return protocol;
     }
 }

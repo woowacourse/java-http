@@ -7,10 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class HandlerForGetRequest extends Handler {
 
@@ -20,9 +20,9 @@ public class HandlerForGetRequest extends Handler {
     }
 
     @Override
-    public HandlerResult handle(HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         final String uri = request.getUri();
-        return new HandlerResult(HttpStatusCode.OK, createResponseHeader(uri),
+        return new HttpResponse(HttpStatusCode.OK, createResponseHeader(uri),
                 getResponseBody(uri));
     }
 

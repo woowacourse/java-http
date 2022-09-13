@@ -6,7 +6,7 @@ import static nextstep.jwp.handler.get.HandlerForGetRequest.HANDLER_FOR_GET_REQU
 import static nextstep.jwp.handler.get.LoginPageHandler.LOGIN_PAGE_HANDLER;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 

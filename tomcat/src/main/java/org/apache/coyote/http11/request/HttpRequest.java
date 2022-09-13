@@ -75,11 +75,7 @@ public class HttpRequest {
     public String getUri() {
         return startLine.getUri();
     }
-
-    public String getProtocol() {
-        return startLine.getProtocol();
-    }
-
+    
     public String getBodyValue(final String key) {
         return body.getInfo(key);
     }

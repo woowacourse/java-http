@@ -5,9 +5,9 @@ import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANA
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.handler.HandlerResult;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class LoginPageHandler extends HandlerForGetRequest {
 
@@ -18,15 +18,15 @@ public class LoginPageHandler extends HandlerForGetRequest {
     }
 
     @Override
-    public HandlerResult handle(HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         String sessionId;
         if ((sessionId = request.getCookieValue(JSESSIONID)) != null &&
                 SESSION_MANAGER.findSession(sessionId).isPresent()) {
-            return new HandlerResult(HttpStatusCode.FOUND, createRedirectResponse("/index.html"), "");
+            return new HttpResponse(HttpStatusCode.FOUND, createRedirectResponse("/index.html"), "");
         }
 
         final String uri = request.getUri();
-        return new HandlerResult(HttpStatusCode.OK, createResponseHeader(uri),
+        return new HttpResponse(HttpStatusCode.OK, createResponseHeader(uri),
                 getResponseBody(uri));
     }
 

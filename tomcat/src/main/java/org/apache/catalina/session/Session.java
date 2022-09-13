@@ -8,7 +8,7 @@ public class Session {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(String id) {
+    public Session(final String id) {
         this.id = id;
     }
 
@@ -16,18 +16,18 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         validateContainsAttribute(name);
         return values.get(name);
     }
 
-    private void validateContainsAttribute(String name) {
+    private void validateContainsAttribute(final String name) {
         if (!values.containsKey(name)) {
             throw new IllegalArgumentException("No Such Attribute exists in this Session");
         }
     }
 
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }
 }

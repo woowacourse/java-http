@@ -1,15 +1,16 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
-public enum StatusCode {
+enum StatusCode {
+
     OK(200), FOUND(302), BAD_REQUEST(400), UNAUTHORIZED(401), INTERNAL_SERVER_ERROR(500);
 
     private final int code;
 
-    StatusCode(int code) {
+    StatusCode(final int code) {
         this.code = code;
     }
 
-    public int getCode() {
+    int getCode() {
         return code;
     }
 }

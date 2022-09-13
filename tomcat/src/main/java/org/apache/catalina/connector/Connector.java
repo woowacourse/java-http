@@ -76,12 +76,13 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        threadPool.submit(() -> processor.process(connection));
+        threadPool.submit(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            threadPool.shutdown();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

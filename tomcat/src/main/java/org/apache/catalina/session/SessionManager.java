@@ -1,19 +1,24 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final SessionManager INSTANCE = new SessionManager();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
 
     @Override
-    public void add(Session session) {
+    public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public Session findSession(String id) {
+    public Session findSession(final String id) {
         if (!SESSIONS.containsKey(id)) {
             throw new IllegalArgumentException("No Such Session exists");
         }
@@ -21,14 +26,17 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(Session session) {
+    public void remove(final Session session) {
         if (!SESSIONS.containsKey(session.getId())) {
             throw new IllegalArgumentException("No Such Session exists");
         }
         SESSIONS.remove(session.getId());
     }
 
-    public boolean hasSession(String id) {
-        return SESSIONS.containsKey(id);
+    public boolean hasSession(final Session session) {
+        return SESSIONS.containsKey(session.getId());
+    }
+
+    private SessionManager() {
     }
 }

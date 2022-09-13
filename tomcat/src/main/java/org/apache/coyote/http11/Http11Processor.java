@@ -1,16 +1,14 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
 
 import org.apache.catalina.handler.Controller;
 import org.apache.catalina.handler.HandlerMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.handlerMapping = new HandlerMapping();
+        this.handlerMapping = HandlerMapping.getInstance();
     }
 
     @Override
@@ -48,8 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getResponse(HttpRequest request) throws IOException {
-        Controller controller = handlerMapping.getController(request);
+    private HttpResponse getResponse(final HttpRequest request) throws IOException {
+        final Controller controller = handlerMapping.getController(request);
         if (isHandlerFound(controller)) {
             return controller.service(request);
         }
@@ -59,15 +57,15 @@ public class Http11Processor implements Runnable, Processor {
             .messageBody(getStaticResource(request)).build();
     }
 
-    private boolean isHandlerFound(Controller controller) {
+    private boolean isHandlerFound(final Controller controller) {
         return controller != null;
     }
 
-    private String getStaticResource(HttpRequest request) throws IOException {
-        final URL requestUrl = request.getUrl();
-        if (requestUrl.getPath().equals("/")) {
-            return "Hello world!";
+    private Resource getStaticResource(final HttpRequest request) {
+        if (request.isRootPath()) {
+            return new Resource("Hello world!");
         }
-        return Files.readString(new File(Objects.requireNonNull(requestUrl).getFile()).toPath());
+
+        return Resource.from(request);
     }
 }

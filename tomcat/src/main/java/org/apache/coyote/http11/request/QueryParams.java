@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static java.util.stream.Collectors.*;
 
@@ -15,12 +15,12 @@ class QueryParams {
 
     private final Map<String, String> queryParams = new HashMap<>();
 
-    QueryParams(URI requestUri, String messageBody) {
+    QueryParams(final URI requestUri, final HttpMessage message) {
         parseQueryParams(requestUri);
-        addQuery(messageBody);
+        addQuery(message.getMessageBody());
     }
 
-    private void parseQueryParams(URI requestUri) {
+    private void parseQueryParams(final URI requestUri) {
         if (Objects.isNull(requestUri)) {
             return;
         }
@@ -33,18 +33,26 @@ class QueryParams {
         splitQueryParameters(query);
     }
 
-    private void splitQueryParameters(String query) {
+    private void splitQueryParameters(final String query) {
         final String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
 
         final List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
-            .map(it -> it.split("=")).collect(toList());
+            .map(it -> it.split("="))
+            .collect(toList());
 
         for (String[] parameter : splitQuery) {
+            if (hasNoValue(parameter)) {
+                continue;
+            }
             queryParams.put(parameter[0], parameter[1]);
         }
     }
 
-    void addQuery(String query) {
+    private boolean hasNoValue(String[] parameter) {
+        return parameter.length < 2;
+    }
+
+    void addQuery(final String query) {
         if (query.isEmpty()) {
             return;
         }
@@ -52,11 +60,7 @@ class QueryParams {
         splitQueryParameters(query);
     }
 
-    boolean hasQuery() {
-        return !queryParams.isEmpty();
-    }
-
-    String getQueryValue(String queryKey) {
+    String getQueryValue(final String queryKey) {
         return queryParams.get(queryKey);
     }
 }

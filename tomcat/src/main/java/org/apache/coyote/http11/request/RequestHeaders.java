@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RequestHeaders {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHeaders.class);
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 
@@ -20,7 +17,7 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders of(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-public class RequestStartLine {
+public class RequestLine {
 
     private static final int REQUEST_METHOD_INDEX = 0;
     private static final int REQUEST_URL_INDEX = 1;
@@ -8,19 +8,19 @@ public class RequestStartLine {
     private final RequestMethod method;
     private final String path;
 
-    private RequestStartLine(String method, String path) {
+    private RequestLine(String method, String path) {
         this(RequestMethod.find(method), path);
     }
 
-    private RequestStartLine(RequestMethod method, String path) {
+    private RequestLine(RequestMethod method, String path) {
         this.method = method;
         this.path = path;
     }
 
-    public static RequestStartLine from(final String startLine) {
+    public static RequestLine from(final String startLine) {
         final String[] startLineParts = startLine.split(" ");
         validateUrl(startLineParts);
-        return new RequestStartLine(startLineParts[REQUEST_METHOD_INDEX], startLineParts[REQUEST_URL_INDEX]);
+        return new RequestLine(startLineParts[REQUEST_METHOD_INDEX], startLineParts[REQUEST_URL_INDEX]);
     }
 
     private static void validateUrl(final String[] startLineParts) {

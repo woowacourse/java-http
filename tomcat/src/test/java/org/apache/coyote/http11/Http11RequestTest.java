@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.exception.MethodNotAllowedException;
+import org.apache.coyote.http11.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.Http11Request;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class Http11RequestTest {
         final String httpRequest = getHttp11RequestContent("ABC", "/index.html");
         final StubSocket socket = new StubSocket(httpRequest);
 
-        assertThatThrownBy(() -> Http11Request.of(socket.getInputStream()))
+        assertThatThrownBy(() -> Http11Request.from(socket.getInputStream()))
                 .isInstanceOf(MethodNotAllowedException.class);
     }
 

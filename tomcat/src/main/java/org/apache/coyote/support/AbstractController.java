@@ -1,6 +1,6 @@
 package org.apache.coyote.support;
 
-import nextstep.jwp.exception.MethodNotAllowedException;
+import org.apache.coyote.http11.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 
@@ -17,11 +17,7 @@ public abstract class AbstractController implements Controller {
         throw new MethodNotAllowedException();
     }
 
-    protected Http11Response doGet(final Http11Request request) {
-        throw new MethodNotAllowedException();
-    }
+    protected abstract Http11Response doGet(final Http11Request request);
 
-    protected Http11Response doPost(final Http11Request request) {
-        throw new MethodNotAllowedException();
-    }
+    protected abstract Http11Response doPost(final Http11Request request);
 }

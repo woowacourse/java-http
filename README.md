@@ -63,5 +63,23 @@
 리팩터링
 
 - [ ] 테스트 코드 추가하기
+- [x] apache 패키지에서 nextstep 패키지를 참조하지 않도록 수정
+- [x] response header를 map 형태로 수정
+
+</details>
+
+<details>
+<summary>4단계 - 동시성 확장하기</summary>
+
+구현 기능 목록
+
+- [x] Executors로 Thread Pool 적용
+- [x] 동시성 컬렉션 사용하기
+
+리팩터링
+
+- [ ] getOrDefault() 사용하기
+- [ ] 예외 상황에 대한 리다이렉트를 예외를 발생시킨 뒤 예외에 해당하는 페이지로 이동하도록 수정
+- [ ] 어떨 때 log를 남기면 좋을지 고민해보고 logger 추가하기
 
 </details>

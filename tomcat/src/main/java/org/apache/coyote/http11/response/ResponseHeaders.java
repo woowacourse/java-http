@@ -1,52 +1,36 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpCookie;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
-    private final String contentType;
-    private final String locationHeader;
-    private final String setCookieHeader;
+    private final Map<String, String> headers;
 
-    private ResponseHeaders(String contentType, String locationHeader, String setCookieHeader) {
-        this.contentType = contentType;
-        this.locationHeader = locationHeader;
-        this.setCookieHeader = setCookieHeader;
+    private ResponseHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
-    public static ResponseHeaders fromContentType(final String contentType) {
-        return new ResponseHeaders(contentType, null, null);
+    public static ResponseHeaders initEmpty() {
+        return new ResponseHeaders(new HashMap<>());
     }
 
-    public static ResponseHeaders fromResourcePath(final String resourcePath) {
-        final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHeaders(contentType, null, null);
+    public ResponseHeaders addHeader(String key, String value) {
+        headers.put(key, value);
+        return new ResponseHeaders(headers);
     }
 
-    public static ResponseHeaders withLocation(final String resourcePath, final String location) {
-        final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHeaders(contentType, location, null);
+    public String headersToString() {
+        return headers.keySet().stream()
+                .map(this::headerToString)
+                .collect(Collectors.joining("\r\n"));
     }
 
-    public static ResponseHeaders withLocationAndSetCookie(final String resourcePath, final String location,
-                                                           final HttpCookie cookie, final String cookieName) {
-        final String contentType = resourcePath.split("\\.")[1];
-        return new ResponseHeaders(contentType, location, cookie.cookieToString(cookieName));
-    }
-
-    public String contentTypeToString() {
-        return String.format("Content-Type: text/%s;charset=utf-8 ", contentType);
-    }
-
-    public String locationToString() {
-        return String.format("Location: %s ", locationHeader);
-    }
-
-    public String setCookieToString() {
-        return String.format("Set-Cookie: %s ", setCookieHeader);
-    }
-
-    public boolean hasSetCookieHeader() {
-        return setCookieHeader != null;
+    private String headerToString(String key) {
+        if ("Content-Type".equals(key)) {
+            return String.format("Content-Type: text/%s;charset=utf-8 ", headers.get(key));
+        }
+        return String.format("%s: %s ", key, headers.get(key));
     }
 }

@@ -3,8 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.coyote.http11.exception.ParameterNotFoundException;
+import java.util.Optional;
 
 import utils.StringSplitter;
 
@@ -32,15 +31,8 @@ public class Params {
         return new Params(Collections.emptyMap());
     }
 
-    public String find(final String name) {
-        validateParameterNameExist(name);
-        return params.get(name);
-    }
-
-    private void validateParameterNameExist(final String name) {
-        if (!params.containsKey(name)) {
-            throw new ParameterNotFoundException(name);
-        }
+    public Optional<String> find(final String name) {
+        return Optional.ofNullable(params.get(name));
     }
 
     public Map<String, String> getParams() {

@@ -1,10 +1,9 @@
 package nextstep.jwp.controller;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.request.RequestCookie;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -23,10 +22,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected final HttpResponse doPost(final HttpRequest request) {
-        return ifSessionNotExist(request, params -> {
+        return ifSessionNotExist(request, () -> {
             try {
-                final String account = params.find("account");
-                final String password = params.find("password");
+                final String account = request.findParamFromBody("account");
+                final String password = request.findParamFromBody("password");
 
                 final Session session = authService.login(account, password);
 
@@ -42,17 +41,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected final HttpResponse doGet(final HttpRequest request) {
-        return ifSessionNotExist(request, params ->
+        return ifSessionNotExist(request, () ->
                 success(HttpStatus.OK, Page.LOGIN)
         );
     }
 
     private HttpResponse ifSessionNotExist(final HttpRequest request,
-                                           final Function<Params, HttpResponse> function) {
+                                           final Supplier<HttpResponse> supplier) {
         final RequestCookie cookie = RequestCookie.parse(request.getHeader());
         if (cookie.existSession()) {
             return redirectToIndex();
         }
-        return function.apply(request.getParams());
+        return supplier.get();
     }
 }

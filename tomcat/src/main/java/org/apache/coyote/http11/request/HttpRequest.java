@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.exception.ParameterNotFoundException;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
@@ -12,16 +14,17 @@ public class HttpRequest {
         this.body = body;
     }
 
+    public String findParamFromBody(final String name) {
+        return body.findParam(name)
+                .orElseThrow(() ->new ParameterNotFoundException(name));
+    }
+
     public RequestMethod getMethod() {
         return requestLine.getMethod();
     }
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public Params getParams() {
-        return body.getParams();
     }
 
     public RequestHeader getHeader() {

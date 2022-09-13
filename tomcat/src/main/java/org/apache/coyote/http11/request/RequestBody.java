@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Optional;
+
 public class RequestBody {
 
     private final Params params;
@@ -12,7 +14,7 @@ public class RequestBody {
         return new RequestBody(Params.parse(body));
     }
 
-    public Params getParams() {
-        return params;
+    public Optional<String> findParam(final String name) {
+        return params.find(name);
     }
 }

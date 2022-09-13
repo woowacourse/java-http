@@ -73,7 +73,7 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection, requestMapping);
-        executorService.execute(processor);
+        executorService.submit(processor);
     }
 
     public void stop() {

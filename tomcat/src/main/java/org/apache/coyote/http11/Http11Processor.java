@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
 
             route(request, response);
             writeAndFlush(bufferedWriter, response.toStringData());
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | RuntimeException e) {
             log.error(e.getMessage(), e);
         }
     }

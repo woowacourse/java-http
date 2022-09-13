@@ -20,17 +20,15 @@ public class SingletonContainer {
     private static final Logger log = LoggerFactory.getLogger(SingletonContainer.class);
     private static final String CONTROLLER_PATH = "nextstep.jwp.presentation";
     private static final String SERVICE_PATH = "nextstep.jwp.application";
-
-    private static Set<AbstractController> controllers = new HashSet<>();
-    private static Map<Class<?>, Object> singletons = new HashMap<>();
+    private static final Map<Class<?>, Object> singletons = new HashMap<>();
 
     private SingletonContainer() {
     }
 
     public static void registerSingletons() {
         try {
-            registerControllers();
             registerServices();
+            registerControllers();
             registerFrameworkObjects();
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -24,10 +24,7 @@ public class LoginPageHandler extends HandlerForResource {
                 SESSION_MANAGER.findSession(sessionId).isPresent()) {
             return new HttpResponse(HttpStatusCode.FOUND, createRedirectResponse("/index.html"), "");
         }
-
-        final String uri = request.getUri();
-        return new HttpResponse(HttpStatusCode.OK, createResponseHeader(uri),
-                getResponseBody(uri));
+        return super.handle(request);
     }
 
     private Map<String, String> createRedirectResponse(final String redirectUri) {

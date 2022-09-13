@@ -1,19 +1,20 @@
 package org.apache.catalina.startup;
 
-import org.apache.catalina.connector.Connector;
-import org.apache.coyote.servlet.CustomServlet;
+import java.io.IOException;
+import java.util.List;
+import org.apache.catalina.Container;
+import org.apache.catalina.servlet.Controller;
+import org.apache.catalina.servlet.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start() {
-        final var connector = new Connector(new CustomServlet());
-        connector.start();
+    public void start(List<Controller> controllers) {
+        final var container = new Container(RequestMapping.of(controllers));
+        container.start();
 
         try {
             // make the application wait until we press any key.
@@ -22,7 +23,7 @@ public class Tomcat {
             log.error(e.getMessage(), e);
         } finally {
             log.info("web server stop.");
-            connector.stop();
+            container.stop();
         }
     }
 }

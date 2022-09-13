@@ -1,6 +1,4 @@
-package org.apache.coyote.exception;
-
-import org.apache.coyote.support.HttpStatus;
+package org.apache.coyote.support;
 
 public class HttpException extends RuntimeException {
 
@@ -13,6 +11,14 @@ public class HttpException extends RuntimeException {
     public HttpException(Exception e, HttpStatus status) {
         super(e);
         this.status = status;
+    }
+
+    public static HttpException ofBadRequest() {
+        return new HttpException(HttpStatus.BAD_REQUEST);
+    }
+
+    public static HttpException ofUnauthenticated() {
+        return new HttpException(HttpStatus.UNAUTHORIZED);
     }
 
     public static HttpException ofNotFound(Exception e) {

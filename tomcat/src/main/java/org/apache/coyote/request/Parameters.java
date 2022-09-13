@@ -2,7 +2,6 @@ package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.exception.HttpException;
 
 public class Parameters {
 
@@ -16,33 +15,28 @@ public class Parameters {
         this.value = value;
     }
 
-    public static Parameters ofQueryString(String queryString) {
+    public static Parameters of(String line) {
         Map<String, String> parameters = new HashMap<>();
-        for (String param : queryString.split(PARAMETER_DELIMITER)) {
-            addValidParameter(parameters, param);
+        for (String parameter : line.split(PARAMETER_DELIMITER)) {
+            addValidParameter(parameters, parameter);
         }
         return new Parameters(parameters);
     }
 
-    private static void addValidParameter(Map<String, String> parameters, String param) {
-        final var delimiterIndex = param.indexOf(KEY_VALUE_DELIMITER);
+    private static void addValidParameter(Map<String, String> parameters, String parameter) {
+        final var delimiterIndex = parameter.indexOf(KEY_VALUE_DELIMITER);
         if (delimiterIndex == DELIMITER_NOT_FOUND_INDEX) {
             return;
         }
-        final var key = param.substring(0, delimiterIndex);
-        final var value = param.substring(delimiterIndex + 1);
+        final var key = parameter.substring(0, delimiterIndex);
+        final var value = parameter.substring(delimiterIndex + 1);
         parameters.put(key, value);
     }
 
-    public boolean contains(String parameterKey) {
-        return value.containsKey(parameterKey);
-    }
-
     public String get(String parameterKey) {
-        try {
+        if (value.containsKey(parameterKey)) {
             return value.get(parameterKey);
-        } catch (NullPointerException e) {
-            throw HttpException.ofInternalServerError(e);
         }
+        return "";
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package nextstep.jwp.view;
 
 import java.util.Arrays;
 import org.apache.coyote.support.HttpStatus;
@@ -6,9 +6,9 @@ import org.apache.coyote.support.HttpStatus;
 public enum ExceptionPage {
 
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "/400.html"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "/401.html"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "/404.html"),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html")
-    ;
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
 
     private final HttpStatus status;
     private final String uri;
@@ -24,5 +24,9 @@ public enum ExceptionPage {
                 .map(it -> it.uri)
                 .findAny()
                 .orElse(INTERNAL_SERVER_ERROR.uri);
+    }
+
+    public String getUri() {
+        return uri;
     }
 }

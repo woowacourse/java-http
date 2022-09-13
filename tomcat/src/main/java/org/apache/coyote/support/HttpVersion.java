@@ -1,12 +1,11 @@
 package org.apache.coyote.support;
 
 import java.util.Arrays;
-import org.apache.coyote.exception.HttpException;
 
 public enum HttpVersion {
 
     HTTP1("HTTP/1.0"),
-    HTTP11("HTTP/1.1"),
+    HTTP1_1("HTTP/1.1"),
     HTTP2("HTTP/2.0"),
     HTTP3("HTTP/3.0"),
     ;
@@ -21,7 +20,7 @@ public enum HttpVersion {
        return Arrays.stream(values())
                 .filter(it -> it.value.equals(value))
                 .findAny()
-                .orElseThrow(() -> new HttpException(HttpStatus.BAD_REQUEST));
+                .orElseThrow(HttpException::ofBadRequest);
     }
 
     public String getValue() {

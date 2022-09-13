@@ -1,43 +1,67 @@
 package org.apache.coyote.request;
 
-import java.util.List;
-import org.apache.coyote.exception.HttpException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import org.apache.catalina.cookie.HttpCookie;
+import org.apache.catalina.session.NullSession;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.support.HttpMethod;
-import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.support.HttpVersion;
 
 public class HttpRequest {
 
-    private static final int START_LINE_INDEX = 0;
+    private final StartLine startLine;
+    private final RequestHeaders headers;
+    private final String body;
+    private Session session = new NullSession();
 
-    private final HttpMethod method;
-    private final String uri;
-    private final HttpVersion version;
-    private final Parameters parameters;
-
-    private HttpRequest(StartLine startLine) {
-        this.method = startLine.getMethod();
-        this.uri = startLine.getUri();
-        this.version = startLine.getVersion();
-        this.parameters = startLine.getParameters();
+    private HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
+        this.startLine = startLine;
+        this.headers = headers;
+        this.body = body;
     }
 
-    public static HttpRequest of(List<String> request) {
-        if (request == null || request.size() == 0) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+    public static HttpRequest of(BufferedReader reader) throws IOException {
+        final var startLine = StartLine.of(reader.readLine());
+        final var headers = RequestHeaders.of(reader);
+        final var body = readBody(reader, headers);
+        return new HttpRequest(startLine, headers, body);
+    }
+
+    private static String readBody(BufferedReader reader, RequestHeaders headers) throws IOException {
+        final var contentLength = headers.getContentLength();
+        if (contentLength == 0) {
+            return "";
         }
-        return new HttpRequest(StartLine.of(request.get(START_LINE_INDEX)));
-    }
-
-    public boolean isGet() {
-        return this.method.equals(HttpMethod.GET);
+        final var buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public String getUri() {
-        return uri;
+        return startLine.getUri();
+    }
+
+    public boolean isMethodOf(HttpMethod method) {
+        return startLine.getMethod().equals(method);
     }
 
     public Parameters getParameters() {
-        return parameters;
+        if (headers.hasParametersAsBody()) {
+            return Parameters.of(body);
+        }
+        return startLine.getParameters();
+    }
+
+    public HttpCookie findCookie(String name) {
+        final var cookies = headers.getCookies();
+        return cookies.getCookie(name);
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

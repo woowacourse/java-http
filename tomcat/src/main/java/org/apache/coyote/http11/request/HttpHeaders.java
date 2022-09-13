@@ -13,7 +13,7 @@ public class HttpHeaders {
     }
 
     public String toTextHeader() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (String s : values.keySet()) {
             sb.append(s).append(": ").append(values.get(s)).append(" \r\n");
         }

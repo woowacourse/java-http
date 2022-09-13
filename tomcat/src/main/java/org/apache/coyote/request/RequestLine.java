@@ -25,7 +25,7 @@ public class RequestLine {
         verifyRequestLineFormat(requestLine);
 
         return new RequestLine(
-                HttpMethod.valueOf(requestLine.get(METHOD_INDEX)),
+                HttpMethod.from(requestLine.get(METHOD_INDEX)),
                 requestLine.get(PATH_INDEX),
                 requestLine.get(PROTOCOL_VERSION_INDEX)
         );

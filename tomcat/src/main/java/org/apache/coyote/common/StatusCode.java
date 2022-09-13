@@ -3,8 +3,8 @@ package org.apache.coyote.common;
 public enum StatusCode {
 
     OK("200", "OK"),
-    FOUND("302", "FOUND"),
-    UNAUTHORIZED("401", "UNAUTHORIZED"),
+    FOUND("302", "Found"),
+    UNAUTHORIZED("401", "Unauthorized"),
     ;
 
     private final String code;

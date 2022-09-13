@@ -19,7 +19,7 @@ public class LoginHandler {
         final String password = params.get("password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow();
+                .orElseThrow(UserNotFoundException::new);
 
         if (!user.checkPassword(password)) {
             throw new UserNotFoundException();

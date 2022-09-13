@@ -15,11 +15,11 @@ public enum RequestMapping {
     REGISTER("/register", new RegisterController()),
     ;
 
-    private final String key;
+    private final String uri;
     private final Controller controller;
 
-    RequestMapping(final String key, final Controller controller) {
-        this.key = key;
+    RequestMapping(final String uri, final Controller controller) {
+        this.uri = uri;
         this.controller = controller;
     }
 
@@ -30,7 +30,7 @@ public enum RequestMapping {
 
     private static Controller getController(final String key) {
         return Arrays.stream(RequestMapping.values())
-                .filter(requestMapping -> requestMapping.key.equals(key))
+                .filter(requestMapping -> requestMapping.uri.equals(key))
                 .map(requestMapping -> requestMapping.controller)
                 .findAny()
                 .orElse(new CommonController());

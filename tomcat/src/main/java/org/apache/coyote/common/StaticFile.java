@@ -10,6 +10,11 @@ public class StaticFile {
 
     public static String load(final String path) throws IOException {
         URL resource = Thread.currentThread().getContextClassLoader().getResource("static" + path);
+
+        if (resource == null) {
+            throw new IllegalArgumentException();
+        }
+
         return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }
 

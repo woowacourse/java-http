@@ -1,8 +1,10 @@
-package org.apache.catalina;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +16,6 @@ class SessionManagerTest {
         final String jsessionid = HttpCookie.makeJSESSIONID();
         final Session session = SessionManager.add(jsessionid);
 
-        assertThat(SessionManager.findSession(jsessionid)).isEqualTo(session);
+        assertThat(SessionManager.findSession(jsessionid).get()).isEqualTo(session);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.utils;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PairConverter {
@@ -16,10 +17,10 @@ public class PairConverter {
         if (target.isBlank()) {
             return Map.of("", "");
         }
-        Map<String, String> parameters = new HashMap<>();
+        Map<String, String> parameters = new LinkedHashMap<>();
         for (String keyValue : target.split(pairDelimiter)) {
-            String key = keyValue.split(keyValueDelimiter)[KEY];
-            String value = keyValue.split(keyValueDelimiter)[VALUE];
+            String key = keyValue.split(keyValueDelimiter)[KEY].trim();
+            String value = keyValue.split(keyValueDelimiter)[VALUE].trim();
             parameters.put(key, value);
         }
         return parameters;

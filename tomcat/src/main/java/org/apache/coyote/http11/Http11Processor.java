@@ -1,11 +1,8 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.FileNotFoundException;
-import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.handler.RequestHandlerMapping;
+import nextstep.jwp.handler.RequestHandlerMapping;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -35,26 +32,27 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final String startLine = reader.readLine();
-            final Controller handler = RequestHandlerMapping.getHandler(startLine);
-
-            final HttpHeader httpHeader = getHeaders(reader, startLine);
+            final String requestLine = reader.readLine();
+            final HttpHeader httpHeader = getHeaders(reader);
             final HttpBody httpBody = getBody(reader);
-            final ResponseEntity responseEntity = RequestHandler.handle(handler, httpHeader, httpBody);
-            outputStream.write(responseEntity.getResponse(httpHeader).getBytes());
+            final HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, httpBody);
+
+            final Controller handler = RequestHandlerMapping.getHandler(httpRequest);
+            final HttpResponse httpResponse = handler.service(httpRequest, new HttpResponse());
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | FileNotFoundException e) {
+        } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
 
-    private HttpHeader getHeaders(final BufferedReader reader, final String startLine) throws IOException {
+    private HttpHeader getHeaders(final BufferedReader reader) throws IOException {
         StringBuilder headers = new StringBuilder();
         String header;
         while ((header = reader.readLine()) != null && header.length() != 0) {
             headers.append(header).append("\n");
         }
-        return new HttpHeader(startLine, headers.toString());
+        return new HttpHeader(headers.toString());
     }
 
     private HttpBody getBody(final BufferedReader reader) throws IOException {

@@ -12,7 +12,7 @@ class ContentTypeTest {
     @DisplayName("html에 맞는 content-type을 찾는다.")
     @Test
     void findHtmlType() {
-        final ContentType type = ContentType.matchMIMEType("html");
+        final ContentType type = ContentType.getContentType("index.html");
 
         assertThat(type).isEqualTo(ContentType.HTML);
     }
@@ -20,7 +20,7 @@ class ContentTypeTest {
     @DisplayName("css에 맞는 content-type을 찾는다.")
     @Test
     void findCssType() {
-        final ContentType type = ContentType.matchMIMEType("css");
+        final ContentType type = ContentType.getContentType("style.css");
 
         assertThat(type).isEqualTo(ContentType.CSS);
     }
@@ -28,7 +28,7 @@ class ContentTypeTest {
     @DisplayName("매칭이 되는 content-type이 없는 경우 예외가 발생한다.")
     @Test
     void notFoundContentType() {
-        assertThatThrownBy(() -> ContentType.matchMIMEType(""))
+        assertThatThrownBy(() -> ContentType.getContentType("style.ccs"))
                 .hasMessageContaining("지원하지 않는 Content-Type 입니다.")
                 .isInstanceOf(ContentNotFoundException.class);
     }

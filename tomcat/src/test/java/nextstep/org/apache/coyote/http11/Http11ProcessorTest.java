@@ -1,8 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
@@ -93,7 +93,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/css/styles.css");
         final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         var expected = String.join("\r\n",
@@ -105,6 +107,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
 
     @DisplayName("회원가입을 완료하면 index.html 페이지로 리다이렉트한다.")
     @Test
@@ -143,10 +146,12 @@ class Http11ProcessorTest {
     void userLoginIsSuccess() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password"
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -180,10 +185,12 @@ class Http11ProcessorTest {
     void userLoginValidateSession() {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gugu&password=password"
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -195,16 +202,16 @@ class Http11ProcessorTest {
         // then
         final String output = socket.output();
         final String cookie = output.split("\r\n")[1];
-        final String sessionId = cookie.split("JSESSIONID=")[1];
+        final String sessionId = cookie.split("JSESSIONID=")[1].trim();
 
-        final Session session = SessionManager.findSession(sessionId);
+        final Session session = SessionManager.findSession(sessionId).get();
         assertThat(session.hasAttribute("user")).isTrue();
         assertThat(session.getId()).isEqualTo(sessionId);
     }
 
     @DisplayName("JSESSIONID가 request header에 있는 경우, 로그인을 하지 않아도 index.html로 리다이렉트한다.")
     @Test
-    void userLoginWithJSESSIONID() throws IOException {
+    void userLoginWithJSESSIONID() {
         //given
         final String httpRequest = String.join("\r\n",
                 "POST /login?account=gugu&password=password HTTP/1.1 ",
@@ -224,16 +231,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
                 "Location: /index.html \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -242,10 +243,12 @@ class Http11ProcessorTest {
     void notExistUserException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gu&password=password HTTP/1.1 ",
+                "POST /login",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gu&password=password HTTP/1.1 "
         );
 
         final var socket = new StubSocket(httpRequest);
@@ -276,10 +279,12 @@ class Http11ProcessorTest {
     void UserPasswordIsWrongException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password1 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
+                "Connection: keep-alive ",
+                "",
+                "account=gu&password=password HTTP/1.1 "
         );
 
         final var socket = new StubSocket(httpRequest);

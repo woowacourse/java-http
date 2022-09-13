@@ -3,13 +3,26 @@ package nextstep.jwp.presentation;
 import java.io.IOException;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.ResponseEntity;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
     @Override
-    public ResponseEntity run(final HttpHeader httpHeader, final HttpBody httpBody) {
-        return new ResponseEntity(StatusCode.OK, httpHeader.getUrl());
+    protected HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl(NOT_FOUND_URL);
+        final HttpHeader httpHeader = defaultHeader(StatusCode.MOVED_TEMPORARILY, httpBody, NOT_FOUND_URL);
+        httpHeader.location(NOT_FOUND_URL);
+
+        return httpResponse.header(httpHeader).body(httpBody);
+    }
+
+    @Override
+    protected HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final HttpBody httpBody = HttpBody.createByUrl(httpRequest.getUrl());
+        final HttpHeader httpHeader = defaultHeader(StatusCode.OK, httpBody, httpRequest.getUrl());
+
+        return httpResponse.header(httpHeader).body(httpBody);
     }
 }

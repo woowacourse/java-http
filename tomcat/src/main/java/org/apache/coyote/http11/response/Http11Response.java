@@ -62,40 +62,15 @@ public class Http11Response {
     }
 
     public void write(final OutputStream outputStream) throws IOException {
-        outputStream.write(statusCode.responseToString(this).getBytes());
+        outputStream.write(responseToString().getBytes());
         outputStream.flush();
     }
 
-    public boolean hasSetCookieHeader() {
-        return responseHeaders.hasSetCookieHeader();
-    }
-
-    public String getOkResponse() {
+    private String responseToString() {
         return String.join("\r\n",
                 startLineToString(),
-                responseHeaders.headerToString("Content-Type"),
+                responseHeaders.headersToString(),
                 contentLengthToString(),
-                "",
-                responseBody);
-    }
-
-    public String getFoundResponse() {
-        return String.join("\r\n",
-                startLineToString(),
-                responseHeaders.headerToString("Content-Type"),
-                contentLengthToString(),
-                responseHeaders.headerToString("Location"),
-                "",
-                responseBody);
-    }
-
-    public String getFoundResponseWithSetCookie() {
-        return String.join("\r\n",
-                startLineToString(),
-                responseHeaders.headerToString("Content-Type"),
-                contentLengthToString(),
-                responseHeaders.headerToString("Location"),
-                responseHeaders.headerToString("Set-Cookie"),
                 "",
                 responseBody);
     }

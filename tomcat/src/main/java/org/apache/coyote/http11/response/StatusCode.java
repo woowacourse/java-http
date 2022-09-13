@@ -1,30 +1,23 @@
 package org.apache.coyote.http11.response;
 
-import java.util.function.Function;
-
 public enum StatusCode {
 
-    OK("200", Http11Response::getOkResponse),
-    FOUND("302", response -> {
-        if (response.hasSetCookieHeader()) {
-            return response.getFoundResponseWithSetCookie();
-        }
-        return response.getFoundResponse();
-    });
+    OK("200", "OK"),
+    FOUND("302", "FOUND"),
+    BAD_REQUEST("400", "BAD REQUEST"),
+    UNAUTHORIZED("401", "UNAUTHORIZED"),
+    NOT_FOUND("404", "NOT FOUND"),
+    INTERNAL_SERVER_ERROR("500", "INTERNAL SERVER ERROR");
 
-    private final String statusMessage;
-    private final Function<Http11Response, String> responseContentExtractor;
+    private final String statusNumber;
+    private final String statusName;
 
-    StatusCode(String statusMessage, Function<Http11Response, String> responseContentExtractor) {
-        this.statusMessage = statusMessage;
-        this.responseContentExtractor = responseContentExtractor;
-    }
-
-    public String responseToString(final Http11Response response) {
-        return this.responseContentExtractor.apply(response);
+    StatusCode(final String statusNumber, final String statusName) {
+        this.statusNumber = statusNumber;
+        this.statusName = statusName;
     }
 
     public CharSequence statusCodeToString() {
-        return String.format("%s %s", statusMessage, name());
+        return String.format("%s %s", statusNumber, statusName);
     }
 }

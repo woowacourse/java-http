@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
@@ -20,14 +21,16 @@ public class ResponseHeaders {
         return new ResponseHeaders(headers);
     }
 
-    public String headerToString(String key) {
+    public String headersToString() {
+        return headers.keySet().stream()
+                .map(this::headerToString)
+                .collect(Collectors.joining("\r\n"));
+    }
+
+    private String headerToString(String key) {
         if ("Content-Type".equals(key)) {
             return String.format("Content-Type: text/%s;charset=utf-8 ", headers.get(key));
         }
         return String.format("%s: %s ", key, headers.get(key));
-    }
-
-    public boolean hasSetCookieHeader() {
-        return headers.get("Set-Cookie") != null;
     }
 }

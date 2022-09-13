@@ -19,6 +19,6 @@ public class RequestMapping {
 
     public static Controller mapController(final HttpRequest request) {
         final String uri = request.getPathUri();
-        return CONTROLLER_MAPPER.getOrDefault(uri, new DefaultController());
+        return CONTROLLER_MAPPER.getOrDefault(uri, DefaultController.getInstance());
     }
 }

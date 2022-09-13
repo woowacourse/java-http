@@ -8,33 +8,23 @@ public class Parameters {
 
     private final Map<String, String> parameters;
 
-    public Parameters() {
-        parameters = new HashMap<>();
-    }
-
     public Parameters(final Map<String, String> parameters) {
         this.parameters = parameters;
     }
 
-    public static Parameters fromUri(final String uri) {
-        final int beginIndex = uri.indexOf("?");
-        if (beginIndex < 0) {
-            return new Parameters(new HashMap<>());
-        }
-
-        final String queryString = uri.substring(beginIndex + 1);
-        return parseParameters(queryString);
-    }
-
-    private static Parameters parseParameters(final String queryString) {
+    public static Parameters parseParameters(final String values, final String delimiter) {
         final Map<String, String> parameters = new HashMap<>();
-        Arrays.stream(queryString.split("&"))
+        Arrays.stream(values.split(delimiter))
                 .forEach(query -> {
-                    final String[] entry = query.split("=");
-                    parameters.put(entry[0], entry[1]);
+                    final String[] entry = query.trim().split("=");
+                    parameters.put(entry[0].trim(), entry[1].trim());
                 });
 
         return new Parameters(parameters);
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
     public String get(final String key) {

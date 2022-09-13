@@ -75,7 +75,9 @@ public class HttpRequest {
         final String[] params = bodyLine.split("&");
         for (String param : params) {
             final String[] keyValue = param.split("=");
-            body.put(keyValue[0], keyValue[1]);
+            final String key = keyValue[0];
+            final String value = keyValue[1];
+            body.put(key, value);
         }
         return body;
     }
@@ -98,7 +100,7 @@ public class HttpRequest {
         if (cookie == null) {
             return null;
         }
-        
+
         return cookie.getCookieValue(key);
     }
 }

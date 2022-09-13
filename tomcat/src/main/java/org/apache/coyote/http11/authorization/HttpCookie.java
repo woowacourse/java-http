@@ -25,7 +25,9 @@ public class HttpCookie {
 
         for (String cookie : cookies) {
             final String[] keyValue = cookie.split("=");
-            httpCookie.put(keyValue[0], keyValue[1]);
+            final String key = keyValue[0];
+            final String value = keyValue[1];
+            httpCookie.put(key, value);
         }
 
         return new HttpCookie(httpCookie);

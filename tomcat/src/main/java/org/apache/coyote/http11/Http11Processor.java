@@ -47,6 +47,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             log.info(http11Request.getUri());
+            if (http11Request.getBody() != null) {
+                System.out.println("@@@body@@@");
+                System.out.println(http11Request.getBody());
+            }
             servletContainer.process(http11Request, http11Response);
 
             final var response = http11Response.toResponseFormat();

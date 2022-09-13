@@ -24,4 +24,8 @@ public class StringUtils {
     public static boolean isBlank(final String string) {
         return EMPTY_STRING.equals(string.replaceAll("\\s+", ""));
     }
+
+    public static String removeAllEmptyString(final String string) {
+        return string.replaceAll("\\s+", "");
+    }
 }

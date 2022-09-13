@@ -1,6 +1,7 @@
 package nextstep.jwp.application;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.MemberAlreadyExistException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.mark.Service;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ public class UserService {
 
     public void saveUser(final User user) {
         if (isExistUser(user)) {
-            throw new IllegalArgumentException("이미 존재하는 회원입니다 !");
+            throw new MemberAlreadyExistException("이미 존재하는 회원입니다 !");
         }
         InMemoryUserRepository.save(user);
         log.info("Create User: {}", user);

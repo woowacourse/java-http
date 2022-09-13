@@ -7,6 +7,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,6 +90,19 @@ public class IoUtils {
         }
     }
 
+    public static String readFileByClassLoader(final String fileName) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        try (
+                InputStream inputStream = loader.getResourceAsStream(fileName)
+        ) {
+            final byte[] contentByte;
+            contentByte = inputStream.readAllBytes();
+            return new String(contentByte);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void writeAndFlush(final BufferedWriter bufferedWriter, final String data) {
         try {
             bufferedWriter.write(data);
@@ -93,6 +111,18 @@ public class IoUtils {
             throw new RuntimeException(e);
         }
     }
+
+/*
+    public static void writeAndFlush(final Socket connection, final String data) {
+        try (final OutputStream outputStream = connection.getOutputStream();
+             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, UTF_8))){
+            bufferedWriter.write(data);
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+*/
 
     private static Path getPath(final String fileName) {
         return Paths

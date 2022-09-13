@@ -72,8 +72,8 @@ public class LoginController extends AbstractController {
     }
 
     private void loginFailEvent(final HttpResponse response) {
-        response.sendRedirect("/401.html");
+        response.sendRedirect("/401");
 
-        log.info("Redirect: /401.html");
+        log.info("Redirect: /401");
     }
 }

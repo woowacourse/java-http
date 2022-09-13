@@ -52,7 +52,7 @@ public class HttpResponse {
 
     public String toStringData() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(format("%s \r\n", responseFirstLine));
+        stringBuffer.append(format("%s\r\n", responseFirstLine));
         appendHeader(stringBuffer);
         appendBody(stringBuffer);
         return stringBuffer.toString();

@@ -19,8 +19,6 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
 
-    private static final Connector connector = new Connector();
-
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
@@ -35,10 +33,6 @@ public class Connector implements Runnable {
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-    }
-
-    public static Connector getInstance() {
-        return connector;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

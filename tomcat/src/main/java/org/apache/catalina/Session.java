@@ -11,6 +11,10 @@ public class Session {
         this.id = id;
     }
 
+    public boolean hasAttribute(String name) {
+        return this.values.containsKey(name);
+    }
+
     public String getId() {
         return this.id;
     }

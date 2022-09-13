@@ -5,15 +5,15 @@ import org.apache.coyote.http11.utils.Files;
 
 public enum Path {
 
-    LOGIN("/login", "/login.html"),
-    REGISTER("/register", "/register.html");
+    LOGIN("/login", View.INDEX),
+    REGISTER("/register", View.REGISTER);
 
     private final String path;
-    private final String fileName;
+    private final View fileView;
 
-    Path(final String path, final String fileName) {
+    Path(final String path, final View fileView) {
         this.path = path;
-        this.fileName = fileName;
+        this.fileView = fileView;
     }
 
     public static String from(final String path) {
@@ -24,7 +24,7 @@ public enum Path {
         return Arrays.stream(Path.values())
                 .filter(it -> it.path.equals(path))
                 .findFirst()
-                .map(it -> it.fileName)
+                .map(it -> it.fileView.getPath())
                 .orElseThrow(() -> new IllegalArgumentException("path가 잘못되었습니다. [path : " + path + "]"));
     }
 }

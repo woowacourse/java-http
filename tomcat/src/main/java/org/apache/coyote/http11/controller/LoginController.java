@@ -10,6 +10,7 @@ import org.apache.coyote.http11.model.Headers;
 import org.apache.coyote.http11.model.HttpCookie;
 import org.apache.coyote.http11.model.Parameters;
 import org.apache.coyote.http11.model.Path;
+import org.apache.coyote.http11.model.View;
 import org.apache.coyote.http11.service.UserService;
 import org.apache.coyote.http11.utils.Files;
 
@@ -28,14 +29,14 @@ public final class LoginController extends AbstractController {
                 final Session session = Session.create();
                 session.setAttribute("user", user);
 
-                return HttpResponse.found("/index.html")
+                return HttpResponse.found(View.INDEX.getPath())
                         .cookie(HttpCookie.JSESSIONID + "=" + session.getId());
             }
         } catch (NoSuchElementException | IllegalArgumentException e) {
             log.info(e.getMessage());
         }
 
-        return HttpResponse.found("/401.html");
+        return HttpResponse.found(View.UNAUTHORIZED.getPath());
     }
 
     @Override
@@ -45,7 +46,7 @@ public final class LoginController extends AbstractController {
         final Session session = getSession(request);
         if (session != null) {
             final User user = UserService.findUser(session);
-            return HttpResponse.found("/index.html");
+            return HttpResponse.found(View.INDEX.getPath());
         }
 
         final String body = Files.readFile(Path.from(request.getPath()));

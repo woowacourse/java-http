@@ -7,6 +7,7 @@ import org.apache.coyote.http11.Request.HttpRequest;
 import org.apache.coyote.http11.Response.HttpResponse;
 import org.apache.coyote.http11.model.Parameters;
 import org.apache.coyote.http11.model.Path;
+import org.apache.coyote.http11.model.View;
 import org.apache.coyote.http11.utils.Files;
 
 public final class RegisterController extends AbstractController {
@@ -24,7 +25,7 @@ public final class RegisterController extends AbstractController {
 
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return HttpResponse.found("/index.html");
+        return HttpResponse.found(View.INDEX.getPath());
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.utils.Files;
 
 public class FileController extends AbstractController {
+
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
         return HttpResponse.methodNotAllowed();

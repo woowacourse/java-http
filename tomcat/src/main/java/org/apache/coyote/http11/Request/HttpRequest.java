@@ -11,12 +11,9 @@ public class HttpRequest {
     private static final String END_OF_HEADER = "";
     private static final String HEADER_DELIMITER = ":";
 
-    private RequestLine requestLine;
-    private RequestHeader requestHeader;
-    private String requestBody;
-
-    private HttpRequest() {
-    }
+    private final RequestLine requestLine;
+    private final RequestHeader requestHeader;
+    private final String requestBody;
 
     private HttpRequest(final RequestLine requestLine, final RequestHeader requestHeader,
                         final String requestBody) {

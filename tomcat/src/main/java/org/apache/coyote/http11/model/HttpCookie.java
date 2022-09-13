@@ -16,14 +16,6 @@ public class HttpCookie {
         return new HttpCookie(parameters.getParameters());
     }
 
-    public void setCookie(final String key, final String value) {
-        cookies.put(key, value);
-    }
-
-    public String getCookie(final String key) {
-        return cookies.get(key);
-    }
-
     public String getJSessionId() {
         return cookies.get(JSESSIONID);
     }

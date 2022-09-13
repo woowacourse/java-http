@@ -4,12 +4,9 @@ public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
 
-    private String method;
-    private String uri;
-    private String version;
-
-    private RequestLine() {
-    }
+    private final String method;
+    private final String uri;
+    private final String version;
 
     public RequestLine(final String requestLine) {
         final String[] values = requestLine.split(REQUEST_LINE_DELIMITER);

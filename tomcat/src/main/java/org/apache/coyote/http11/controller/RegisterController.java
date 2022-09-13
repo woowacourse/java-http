@@ -10,6 +10,7 @@ import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.utils.Files;
 
 public final class RegisterController extends AbstractController {
+
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
         final Parameters loginParameters = Parameters.parseParameters(request.getRequestBody(), "&");

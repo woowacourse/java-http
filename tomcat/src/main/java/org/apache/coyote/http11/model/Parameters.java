@@ -8,22 +8,8 @@ public class Parameters {
 
     private final Map<String, String> parameters;
 
-    public Parameters() {
-        parameters = new HashMap<>();
-    }
-
     public Parameters(final Map<String, String> parameters) {
         this.parameters = parameters;
-    }
-
-    public static Parameters fromUri(final String uri) {
-        final int beginIndex = uri.indexOf("?");
-        if (beginIndex < 0) {
-            return new Parameters(new HashMap<>());
-        }
-
-        final String queryString = uri.substring(beginIndex + 1);
-        return parseParameters(queryString, "&");
     }
 
     public static Parameters parseParameters(final String values, final String delimiter) {

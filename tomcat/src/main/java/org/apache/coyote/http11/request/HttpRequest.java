@@ -65,8 +65,8 @@ public class HttpRequest {
         this.requestHeaders = requestHeaders;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
+    public void setSession() {
+        this.session = SessionManager.getSession(requestHeaders.getJSessionId());
     }
 
     public void setRequestBody(RequestBody requestBody) {

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -13,7 +15,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
-import org.apache.coyote.http11.request.SessionManager;
 import org.apache.coyote.http11.request.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest();
             HttpResponse httpResponse = new HttpResponse();
 
-            setRequest(bufferedReader, httpRequest, httpResponse);
+            processRequest(bufferedReader, httpRequest, httpResponse);
             Controller controller = requestMapping.findController(httpRequest.getPath());
             controller.service(httpRequest, httpResponse);
 
@@ -56,11 +57,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void setRequest(BufferedReader bufferedReader, HttpRequest httpRequest, HttpResponse httpResponse)
+    private void processRequest(BufferedReader bufferedReader, HttpRequest httpRequest, HttpResponse httpResponse)
             throws IOException {
         setStartLine(httpRequest, bufferedReader);
         setRequestHeaders(httpRequest, httpResponse, bufferedReader);
+        setSession(httpRequest, httpResponse);
         setRequestBody(httpRequest, bufferedReader);
+    }
+
+    private void setSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpRequest.setSession();
+        RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
+        if (requestHeaders.doesNeedToSetJSessionIdCookie()) {
+            httpResponse.setJSessionCookie(requestHeaders.getJSessionId());
+        }
     }
 
     private void setStartLine(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
@@ -72,10 +82,6 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         RequestHeaders requestHeaders = RequestHeaders.of(readRequestHeaders(bufferedReader));
         httpRequest.setRequestHeaders(requestHeaders);
-        httpRequest.setSession(SessionManager.getSession(requestHeaders.getJSessionId()));
-        if (requestHeaders.doesNeedToSetJSessionIdCookie()) {
-            httpResponse.setJSessionCookie(requestHeaders.getJSessionId());
-        }
     }
 
 
@@ -99,6 +105,7 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = requestHeaders.getContentLength();
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        String readRequestBody = new String(buffer);
+        return URLDecoder.decode(readRequestBody, Charset.defaultCharset());
     }
 }

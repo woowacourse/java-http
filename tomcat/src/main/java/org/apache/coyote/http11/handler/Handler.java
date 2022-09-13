@@ -10,8 +10,5 @@ public abstract class Handler {
 
     protected static final Logger log = LoggerFactory.getLogger(Handler.class);
 
-    public Handler() {
-    }
-
     public abstract HttpResponse handle(final HttpRequest request) throws IOException;
 }

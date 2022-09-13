@@ -16,7 +16,7 @@ public class HandlerForGetRequest extends Handler {
 
     public static final HandlerForGetRequest HANDLER_FOR_GET_REQUEST = new HandlerForGetRequest();
 
-    HandlerForGetRequest() {
+    protected HandlerForGetRequest() {
     }
 
     @Override

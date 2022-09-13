@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.controller.Controller;
+import org.apache.coyote.controller.Controller;
 import nextstep.jwp.controller.ControllerAdvice;
 import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.exception.UncheckedServletException;

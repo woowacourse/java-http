@@ -1,6 +1,7 @@
-package nextstep.jwp.controller;
+package org.apache.coyote.controller;
 
-import static org.apache.coyote.request.startline.HttpMethod.*;
+import static org.apache.coyote.request.startline.HttpMethod.GET;
+import static org.apache.coyote.request.startline.HttpMethod.POST;
 
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.startline.HttpMethod;

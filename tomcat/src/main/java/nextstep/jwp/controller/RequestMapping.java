@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 
 public class RequestMapping {

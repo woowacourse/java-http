@@ -9,7 +9,7 @@ public class StaticFileController extends AbstractController {
 
     @Override
     protected void doPost(final Request request, final Response response) throws Exception {
-        response.write(HttpStatus.OK, request.getURL());
+        response.redirect(HttpStatus.FOUND, "/404.html");
     }
 
     @Override

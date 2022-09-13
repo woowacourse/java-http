@@ -35,13 +35,6 @@ public class HttpHeaders {
         return HttpCookie.empty();
     }
 
-    public String getHeaderValue(String header) {
-        if (!values.containsKey(header)) {
-            return "0";
-        }
-        return values.get(header);
-    }
-
     public Map<String, String> getValues() {
         return values;
     }
@@ -52,5 +45,12 @@ public class HttpHeaders {
 
     public String getSessionId() {
         return cookie.getSessionId();
+    }
+
+    public int getContentLength() {
+        if (!values.containsKey("Content-Length")) {
+            return 0;
+        }
+        return Integer.parseInt(values.get("Content-Length").trim());
     }
 }

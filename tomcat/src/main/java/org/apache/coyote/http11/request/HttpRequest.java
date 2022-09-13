@@ -45,7 +45,7 @@ public class HttpRequest {
 
     private static RequestBody extractRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
             throws IOException {
-        final int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length").trim());
+        final int contentLength = httpHeaders.getContentLength();
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return RequestBody.from(new String(buffer));

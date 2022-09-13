@@ -14,7 +14,7 @@ public enum HandlerMapping {
     HOME("/", new HomeController()),
     LOGIN("/login", new LoginController()),
     REGISTER("/register", new RegisterController()),
-    STATIC_RESOURCE("null", new StaticResourceController()),
+    STATIC_RESOURCE("", new StaticResourceController()),
     ;
 
     private final String path;

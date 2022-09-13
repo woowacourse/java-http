@@ -1,24 +1,24 @@
 package org.apache.coyote.http11;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.request.RequestBody;
 
-public class QueryMapper {
+public class QueryParameters {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final String query;
+    private final Map<String, String> value;
 
-    public QueryMapper(URI uri) {
-        this.query = uri.getQuery();
+    public QueryParameters(RequestBody body) {
+        this.value = getMappedQuery(body.getValue());
     }
 
-    public Map<String, String> getParameters() {
+    private Map<String, String> getMappedQuery(String query) {
         Map<String, String> result = new HashMap<>();
-        List<String> parameterPairs = List.of(this.query.split("&"));
+        List<String> parameterPairs = List.of(query.split("&"));
 
         for (String parameterPair : parameterPairs) {
             insertParameter(result, parameterPair);
@@ -35,5 +35,9 @@ public class QueryMapper {
             return;
         }
         result.put(pair.get(KEY_INDEX), pair.get(VALUE_INDEX));
+    }
+
+    public String find(String key) {
+        return value.get(key);
     }
 }

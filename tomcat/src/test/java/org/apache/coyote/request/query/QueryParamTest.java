@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.coyote.request.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

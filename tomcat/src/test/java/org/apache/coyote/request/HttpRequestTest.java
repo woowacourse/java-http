@@ -15,27 +15,27 @@ class HttpRequestTest {
     void getRequestUrlWithoutQuery() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of()), HttpRequestBody.from(""));
 
         // when
-        final String url = sut.getRequestUrlWithoutQuery();
+        final String url = sut.getRequestPath();
 
         // then
         assertThat(url).isEqualTo("/login.html");
     }
 
-    @DisplayName("확장자를 추가하고, 쿼리스트링을 포함한 URI 를 가져올 수 있다.")
+    @DisplayName("확장자를 추가하고, 쿼리스트링을 제외한 URI 를 가져올 수 있다.")
     @Test
     void getRequestUrl() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(), "");
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of()), HttpRequestBody.from(""));
 
         // when
-        final String url = sut.getRequestUrl();
+        final String requestPath = sut.getRequestPath();
 
         // then
-        assertThat(url).isEqualTo("/login.html?account=dwoo&password=123");
+        assertThat(requestPath).isEqualTo("/login.html");
     }
 
     @DisplayName("헤더에서 쿠키 정보를 조회할 수 있다.")
@@ -43,12 +43,12 @@ class HttpRequestTest {
     void getCookies() {
         // given
         String startLine = "GET /index.html HTTP/1.1 ";
-        final HttpRequest sut = HttpRequest.of(startLine, Map.of(
+        final HttpRequest sut = HttpRequest.of(startLine, HttpHeader.from(Map.of(
                 "Host", "localhost:8080",
                 "Connection", "keep-alive",
                 "Accept", "*/*",
                 "Cookie", "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
-        ), "");
+        )), HttpRequestBody.from(""));
 
         // when
         final Cookies cookies = sut.getCookies();

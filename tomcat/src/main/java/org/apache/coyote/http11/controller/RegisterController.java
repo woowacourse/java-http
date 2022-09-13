@@ -20,7 +20,8 @@ public final class RegisterController extends AbstractController {
         final String email = loginParameters.get("email");
 
         if (InMemoryUserRepository.existsByAccount(account)) {
-            throw new IllegalArgumentException("이미 등록된 Account입니다. [account : " + account + "]");
+            log.info("이미 등록된 Account입니다. [account : " + account + "]");
+            return HttpResponse.found(View.BAD_REQUEST.getPath());
         }
 
         final User user = new User(account, password, email);

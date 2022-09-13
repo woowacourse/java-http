@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.common;
 
+import static nextstep.jwp.exception.ExceptionType.INVALID_RESPONSE_HEADER_EXCEPTION;
+
 import java.util.List;
 import java.util.Map;
+import nextstep.jwp.exception.InvalidHttpResponseException;
 
 public class HttpHeader {
 
@@ -14,6 +17,9 @@ public class HttpHeader {
     }
 
     public static HttpHeader of(HttpHeaderType key, String... value) {
+        if (value == null) {
+            throw new InvalidHttpResponseException(INVALID_RESPONSE_HEADER_EXCEPTION);
+        }
         return new HttpHeader(Map.of(key, List.of(value)));
     }
 

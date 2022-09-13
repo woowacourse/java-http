@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.constant;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
 public enum HttpContent {
     CSS("css", "text/css"),
     JAVASCRIPT("js", "application/javascript"),
-    HTML("html", "text/html;charset=utf-8");
+    HTML("html", "text/html");
 
     private final String extension;
     private final String contentType;

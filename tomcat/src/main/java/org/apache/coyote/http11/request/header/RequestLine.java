@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request.header;
 
-import java.util.Map;
-
 import org.apache.coyote.http11.common.HttpMessageDelimiter;
 
 public class RequestLine {
@@ -30,12 +28,12 @@ public class RequestLine {
         );
     }
 
-    public String getUrl() {
-        return resource.getUrl();
+    public Method getMethod() {
+        return method;
     }
 
-    public Map<String, String> getQueries() {
-        return resource.getQueries();
+    public String getUrl() {
+        return resource.getUrl();
     }
 
     public String getHttpVersion() {

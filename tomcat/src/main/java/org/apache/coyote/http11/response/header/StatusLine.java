@@ -5,10 +5,14 @@ import org.apache.coyote.http11.common.HttpMessageDelimiter;
 public class StatusLine {
 
     private final String httpVersion;
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
 
     public StatusLine(final String httpVersion, final StatusCode statusCode) {
         this.httpVersion = httpVersion;
+        this.statusCode = statusCode;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
         this.statusCode = statusCode;
     }
 

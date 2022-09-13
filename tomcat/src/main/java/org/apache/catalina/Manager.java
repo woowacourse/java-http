@@ -1,8 +1,8 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
+import nextstep.jwp.model.User;
 
-import java.io.IOException;
+import org.apache.coyote.http11.response.HttpResponse;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -27,30 +27,15 @@ public interface Manager {
     /**
      * Add this Session to the set of active Sessions for this Manager.
      *
-     * @param session Session to be added
+     * @param user Users who accessed the site
+     * @param httpResponse HTTP response that has Session to be added
      */
-    void add(HttpSession session);
-
-    /**
-     * Return the active Session, associated with this Manager, with the
-     * specified session id (if any); otherwise return <code>null</code>.
-     *
-     * @param id The session id for the session to be returned
-     *
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
-     * @exception IOException if an input/output error occurs while
-     *  processing this request
-     *
-     * @return the request session or {@code null} if a session with the
-     *         requested ID could not be found
-     */
-    HttpSession findSession(String id) throws IOException;
+    void add(final User user, final HttpResponse httpResponse);
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
-     * @param session Session to be removed
+     * @param sessionId Session ID to be removed
      */
-    void remove(HttpSession session);
+    void remove(final String sessionId);
 }

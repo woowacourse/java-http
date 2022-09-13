@@ -1,30 +1,37 @@
 package org.apache.coyote.http11.handler;
 
-import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.handler.LoginHandler;
+import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.HomeController;
+import nextstep.jwp.handler.LoginController;
+import nextstep.jwp.handler.UserController;
 
 public class RequestHandlerMapping {
 
-    private final Map<String, RequestHandler> handlers;
+    private static final RequestHandlerMapping instance = new RequestHandlerMapping();
+    private static final Map<String, RequestHandler> handlers = new ConcurrentHashMap<>();
 
-    private RequestHandlerMapping(final Map<String, RequestHandler> handlers) {
-        this.handlers = handlers;
+    static {
+        handlers.put("/", HomeController.getInstance());
+        handlers.put("/login", LoginController.getInstance());
+        handlers.put("/register", UserController.getInstance());
     }
 
-    public static RequestHandlerMapping init() {
-        final Map<String, RequestHandler> handlers = new HashMap<>();
+    private RequestHandlerMapping() {}
 
-        handlers.put("/login", new LoginHandler());
-
-        return new RequestHandlerMapping(handlers);
-    }
-
-    public boolean hasMappingHandler(final String path) {
-        return handlers.containsKey(path);
+    public static RequestHandlerMapping getInstance() {
+        return instance;
     }
 
     public RequestHandler getHandler(final String path) {
+        validateHandlerExistence(path);
         return handlers.get(path);
+    }
+
+    private void validateHandlerExistence(final String path) {
+        if (!handlers.containsKey(path)) {
+            throw new UncheckedServletException("Invalid Uri");
+        }
     }
 }

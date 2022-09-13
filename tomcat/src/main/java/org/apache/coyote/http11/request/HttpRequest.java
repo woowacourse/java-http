@@ -1,34 +1,66 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Map;
-import java.util.Queue;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
     private final HttpRequestLine requestLine;
-    private final HttpHeader header;
+    private final HttpRequestHeader headers;
+    private final QueryParameter queryParameter;
+    private final String body;
 
-    private HttpRequest(final HttpRequestLine requestLine, final HttpHeader httpHeader) {
+    private HttpRequest(final HttpRequestLine requestLine, final HttpRequestHeader httpRequestHeader,
+                        final QueryParameter queryParameter, final String body) {
         this.requestLine = requestLine;
-        this.header = httpHeader;
+        this.headers = httpRequestHeader;
+        this.queryParameter = queryParameter;
+        this.body = body;
     }
 
-    public static HttpRequest of(final Queue<String> rawRequest) {
-        final HttpRequestLine requestLine = HttpRequestLine.of(rawRequest.remove());
-        final HttpHeader httpHeader = HttpHeader.of(rawRequest);
+    public static HttpRequest of(final HttpRequestLine requestLine, final HttpRequestHeader httpRequestHeader,
+                                 final String requestBody) {
+        if (httpRequestHeader.isFormDataType()) {
+            return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.from(requestBody), "");
+        }
+        return new HttpRequest(requestLine, httpRequestHeader, QueryParameter.from(requestLine.getQueryString()),
+                requestBody);
+    }
 
-        return new HttpRequest(requestLine, httpHeader);
+    public Session getSession() {
+        final HttpCookie cookies = getCookies();
+        if (cookies.contains("JSESSIONID")) {
+            return new Session(cookies.getCookie("JSESSIONID"));
+        }
+        return new Session(UUID.randomUUID().toString());
+    }
+
+    public boolean containsParameter(final String parameterName) {
+        return queryParameter.contains(parameterName);
+    }
+
+    public String getParameter(final String parameterName) {
+        return queryParameter.getParameter(parameterName);
     }
 
     public String getPath() {
         return requestLine.getPath();
     }
 
-    public Map<String, String> getQueryParams() {
-        return requestLine.getQueryParams();
+    public String getHeader(final String headerName) {
+        return headers.getHeader(headerName);
     }
 
-    public String getHeader(final String header) {
-        return this.header.getHeader(header);
+    public HttpCookie getCookies() {
+        return headers.getCookies();
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
     }
 }

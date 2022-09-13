@@ -11,9 +11,10 @@ public class InMemoryUserRepository {
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        initData();
     }
+
+    private InMemoryUserRepository() {}
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
@@ -23,5 +24,15 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static Optional<User> findByEmail(String email) {
+        return database.values()
+                .stream()
+                .filter(user -> user.getEmail().equals(email))
+                .findAny();
+    }
+
+    public static void initData() {
+        final User user = new User(1L, "philz", "1234", "philz@hello.com");
+        database.put(user.getAccount(), user);
+    }
 }

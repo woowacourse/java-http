@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "Content-Type: application/json"
         );
-        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        final HttpRequest request = HttpRequest.from(firstLine, headerPart, requestBody);
+        final HttpRequest request = HttpRequest.from(firstLine, headerPart, "");
         final QueryParams queryParams = request.getQueryParams();
         final HttpHeaders headers = request.getHeaders();
         assertAll(
@@ -29,9 +28,10 @@ class HttpRequestTest {
                 () -> assertThat(request.getUriPath()).isEqualTo("/register"),
                 () -> assertThat(queryParams.getValue("name").get()).isEqualTo("alex"),
                 () -> assertThat(queryParams.getValue("age").get()).isEqualTo("7"),
-                () -> assertThat(headers.getValue("Host").get()).isEqualTo("localhost:8080"),
-                () -> assertThat(headers.getValue("Connection").get()).isEqualTo("keep-alive"),
-                () -> assertThat(headers.getValue("Content-Type").get()).isEqualTo("application/json")
+                () -> assertThat(headers.findHeadersByKey("Host").get(0).getValue()).isEqualTo("localhost:8080"),
+                () -> assertThat(headers.findHeadersByKey("Connection").get(0).getValue()).isEqualTo("keep-alive"),
+                () -> assertThat(headers.findHeadersByKey("Content-Type").get(0).getValue()).isEqualTo(
+                        "application/json")
         );
     }
 
@@ -44,8 +44,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "Content-Type: application/json"
         );
-        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        final HttpRequest request = HttpRequest.from(firstLine, headerPart, requestBody);
+        final HttpRequest request = HttpRequest.from(firstLine, headerPart, "");
         final QueryParams queryParams = request.getQueryParams();
         final HttpHeaders headers = request.getHeaders();
         assertAll(
@@ -53,9 +52,10 @@ class HttpRequestTest {
                 () -> assertThat(request.getUriPath()).isEqualTo("/register"),
                 () -> assertThat(queryParams.getValue("name")).isEmpty(),
                 () -> assertThat(queryParams.getValue("age")).isEmpty(),
-                () -> assertThat(headers.getValue("Host").get()).isEqualTo("localhost:8080"),
-                () -> assertThat(headers.getValue("Connection").get()).isEqualTo("keep-alive"),
-                () -> assertThat(headers.getValue("Content-Type").get()).isEqualTo("application/json")
+                () -> assertThat(headers.findHeadersByKey("Host").get(0).getValue()).isEqualTo("localhost:8080"),
+                () -> assertThat(headers.findHeadersByKey("Connection").get(0).getValue()).isEqualTo("keep-alive"),
+                () -> assertThat(headers.findHeadersByKey("Content-Type").get(0).getValue()).isEqualTo(
+                        "application/json")
         );
     }
 }

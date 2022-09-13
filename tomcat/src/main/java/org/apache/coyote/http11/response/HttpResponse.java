@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeaders;
 
 public class HttpResponse {
 
@@ -23,13 +23,13 @@ public class HttpResponse {
 
     public String toHttpMessage() {
         final String headerMessage = unnecessaryHeaders.toHttpMessageHeader();
-        if (headerMessage.equals("")) {
+        if (headerMessage.isEmpty()) {
             return toNoContainUnnecessaryHeaderHttpMessage();
         }
         return String.join("\r\n",
                 String.format("HTTP/1.1 %d %s ", status.getStatusCode(), status.getStatusName()),
-                String.format("Content-Type: %s;charset=utf-8 ", contentType.getValue()),
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                String.format("%s: %s;charset=utf-8 ", HttpHeaders.CONTENT_TYPE, contentType.getValue()),
+                String.format("%s: %d ", HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length),
                 headerMessage,
                 "",
                 responseBody);
@@ -38,9 +38,13 @@ public class HttpResponse {
     private String toNoContainUnnecessaryHeaderHttpMessage() {
         return String.join("\r\n",
                 String.format("HTTP/1.1 %d %s ", status.getStatusCode(), status.getStatusName()),
-                String.format("Content-Type: %s;charset=utf-8 ", contentType.getValue()),
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                String.format("%s: %s;charset=utf-8 ", HttpHeaders.CONTENT_TYPE, contentType.getValue()),
+                String.format("%s: %d ", HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length),
                 "",
                 responseBody);
+    }
+
+    public void addSession(final String sessionId, final int maxAgeSecond) {
+        unnecessaryHeaders.setSession(sessionId, maxAgeSecond);
     }
 }

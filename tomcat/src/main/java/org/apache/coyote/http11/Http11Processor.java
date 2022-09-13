@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.mapping.MappingKey;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
@@ -76,20 +77,24 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readRequestBody(final List<String> headers, final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        if (headers.contains("Content-Length")) {
-            addRequestBodyLine(bufferedReader, stringBuilder);
+        final int contentLength = getContentLength(headers);
+        if (contentLength != 0) {
+            final char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
         }
-        return stringBuilder.toString();
+        return "";
     }
 
-    private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody)
-            throws IOException {
-        for (String requestBodyLine = bufferedReader.readLine();
-             requestBodyLine != null && !requestBodyLine.equals("");
-             requestBodyLine = bufferedReader.readLine()) {
-            requestBody.append(requestBodyLine);
-        }
+    private int getContentLength(final List<String> headers) {
+        return headers.stream()
+                .filter(header -> header.startsWith(HttpHeaders.CONTENT_LENGTH))
+                .findAny()
+                .map(contentLengthHeader -> {
+                    final int keyValueSeparatorIndex = contentLengthHeader.indexOf(":");
+                    return Integer.parseInt(contentLengthHeader.substring(keyValueSeparatorIndex + 2).trim());
+                })
+                .orElse(0);
     }
 
     private String getResponseMessage(final HttpRequest httpRequest) {

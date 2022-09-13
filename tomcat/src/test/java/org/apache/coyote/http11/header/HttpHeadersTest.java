@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -20,9 +20,12 @@ class HttpHeadersTest {
         final HttpHeaders headers = HttpHeaders.from(rawHeaders);
 
         assertAll(
-                () -> assertThat(headers.getValue("Host").get()).isEqualTo("localhost:8080"),
-                () -> assertThat(headers.getValue("Connection").get()).isEqualTo("keep-alive"),
-                () -> assertThat(headers.getValue("Content-Type").get()).isEqualTo("application/json")
+                () -> assertThat(headers.findHeadersByKey("Host").get(0).getValue())
+                        .isEqualTo("localhost:8080"),
+                () -> assertThat(headers.findHeadersByKey("Connection").get(0).getValue())
+                        .isEqualTo("keep-alive"),
+                () -> assertThat(headers.findHeadersByKey("Content-Type").get(0).getValue())
+                        .isEqualTo("application/json")
         );
     }
 }

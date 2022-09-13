@@ -13,7 +13,9 @@ public enum ContentType {
     IMAGE_GIF("image/gif"),
     IMAGE_PNG("image/png"),
     IMAGE_JPEG("image/jpeg"),
-    IMAGE_SVG("image/svg+xml");
+    IMAGE_SVG("image/svg+xml"),
+    APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded"),
+    ;
 
     private final String value;
 

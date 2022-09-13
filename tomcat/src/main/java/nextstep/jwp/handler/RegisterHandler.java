@@ -1,14 +1,11 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANAGER;
+import static nextstep.jwp.service.UserService.USER_SERVICE;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
-import org.apache.coyote.http11.authorization.Session;
+import nextstep.jwp.dto.RegisterRequest;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -32,27 +29,14 @@ public class RegisterHandler extends Handler {
                 throw new IllegalArgumentException("이미 로그인이 되어있습니다.");
             }
 
-            final String account = request.getBodyValue("account");
-            final String password = request.getBodyValue("password");
-            final String email = request.getBodyValue("email");
+            final RegisterRequest registerRequest = new RegisterRequest(request.getBodyValue("account"),
+                    request.getBodyValue("password"), request.getBodyValue("email"));
 
-            InMemoryUserRepository.save(new User(account, password, email));
-            final User savedUser = InMemoryUserRepository.findByAccount(account).get();
-            log.info("user : " + savedUser);
-
-            final String jSessionId = String.valueOf(UUID.randomUUID());
-            createSession(jSessionId, savedUser);
-
+            final String jSessionId = USER_SERVICE.signUp(registerRequest);
             return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, jSessionId);
         } catch (IllegalArgumentException e) {
             return createHandlerResult(HttpStatusCode.FOUND, FAIL_REDIRECT_URI);
         }
-    }
-
-    private void createSession(final String jSessionId, final User user) {
-        final Session session = new Session(jSessionId);
-        session.setAttribute("user", user);
-        SESSION_MANAGER.add(session);
     }
 
     private HttpResponse createHandlerResult(final HttpStatusCode statusCode, final String redirectUri,

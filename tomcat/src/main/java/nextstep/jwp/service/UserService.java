@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.authorization.SessionManager.SESSION_MANA
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.dto.LoginRequest;
+import nextstep.jwp.dto.RegisterRequest;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.authorization.Session;
 import org.slf4j.Logger;
@@ -30,6 +31,21 @@ public class UserService {
         createSession(jSessionId, loginUser);
         log.info("user : " + loginUser);
 
+        return jSessionId;
+    }
+
+    public String signUp(final RegisterRequest request) {
+        final String account = request.getAccount();
+        final String password = request.getPassword();
+        final String email = request.getEmail();
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        final User savedUser = InMemoryUserRepository.findByAccount(account).get();
+
+        final String jSessionId = String.valueOf(UUID.randomUUID());
+        createSession(jSessionId, savedUser);
+        log.info("user : " + savedUser);
+        
         return jSessionId;
     }
 

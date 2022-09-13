@@ -29,7 +29,7 @@ public final class LoginController extends AbstractController {
                 session.setAttribute("user", user);
 
                 return HttpResponse.found("/index.html")
-                        .cookie("JSESSIONID=" + session.getId());
+                        .cookie(HttpCookie.JSESSIONID + "=" + session.getId());
             }
         } catch (NoSuchElementException | IllegalArgumentException e) {
             log.info(e.getMessage());

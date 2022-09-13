@@ -37,6 +37,10 @@ public class HttpResponse {
         httpHeaders.setCookie(cookie);
     }
 
+    public void removeCookie() {
+        httpHeaders.deleteCookie();
+    }
+
     public Optional<String> getViewName() {
         return Optional.ofNullable(viewName);
     }

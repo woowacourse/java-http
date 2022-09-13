@@ -37,10 +37,16 @@ public class LoginController extends Controller {
             httpResponse.setView("login");
             return;
         }
+
         final Cookie cookie = httpRequest.getCookie();
         final Optional<Session> session = SessionManager.findSession(cookie.getValue());
-        if (session.isPresent()) {
-            httpResponse.sendRedirect("/index.html");
+
+        if (session.isEmpty()) {
+            httpResponse.removeCookie();
+            httpResponse.setStatus(HttpStatus.OK);
+            httpResponse.setView("login");
+            return;
         }
+        httpResponse.sendRedirect("/index.html");
     }
 }

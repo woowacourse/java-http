@@ -12,7 +12,7 @@ import org.apache.coyote.http11.response.Status;
 
 public class StaticFileController extends AbstractController {
 
-    private static final String STATIC = "static";
+    private static final String STATIC_PATH = "static";
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -37,7 +37,7 @@ public class StaticFileController extends AbstractController {
     }
 
     private boolean hasMatchedStaticFile(final String url) {
-        final URL resource = getClass().getClassLoader().getResource(STATIC + url);
+        final URL resource = getClass().getClassLoader().getResource(STATIC_PATH + url);
         return resource != null && new File(resource.getFile()).isFile();
     }
 }

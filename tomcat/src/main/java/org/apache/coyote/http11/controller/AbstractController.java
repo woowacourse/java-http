@@ -12,7 +12,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String STATIC = "static";
+    private static final String STATIC_PATH = "static";
 
     @Override
     public HttpResponse service(HttpRequest request, HttpResponse response) throws Exception {
@@ -30,13 +30,13 @@ public abstract class AbstractController implements Controller {
     protected abstract HttpResponse doPost(HttpRequest request, HttpResponse response) throws Exception;
 
     protected final String readResourceBody(String url) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(STATIC + url);
+        final URL resource = getClass().getClassLoader().getResource(STATIC_PATH + url);
         final Path path = new File(resource.getFile()).toPath();
         return new String(Files.readAllBytes(path));
     }
 
     protected final HttpHeaders readResourceHeader(final String url, final String body) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(STATIC + url);
+        final URL resource = getClass().getClassLoader().getResource(STATIC_PATH + url);
         final Path path = new File(resource.getFile()).toPath();
 
         HttpHeaders responseHeaders = new HttpHeaders();

@@ -70,6 +70,7 @@ class LoginControllerTest {
         );
     }
 
+
     @DisplayName("userService login에 실패할 경우 401 페이지로 리다이렉트됨을 확인한다.")
     @ParameterizedTest
     @ValueSource(strings = {"account=invalid_gugu&password=password",

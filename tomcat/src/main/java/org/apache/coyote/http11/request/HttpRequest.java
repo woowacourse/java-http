@@ -16,7 +16,7 @@ public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String LINE_SEPARATOR = "\r\n";
-    private static final int MIN_OFF = 0;
+    private static final int OFFSET = 0;
 
     private final RequestLine startLine;
     private final HttpHeaders headers;
@@ -56,7 +56,7 @@ public class HttpRequest {
     private static String readBody(final BufferedReader reader, final String contentLength) throws IOException {
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
-        reader.read(buffer, MIN_OFF, length);
+        reader.read(buffer, OFFSET, length);
 
         return new String(buffer);
     }

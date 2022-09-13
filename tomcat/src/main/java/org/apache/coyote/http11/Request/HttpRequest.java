@@ -50,7 +50,7 @@ public class HttpRequest {
 
     private static String getRequestBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
             throws IOException {
-        final String input = requestHeader.get(Headers.CONTENT_LENGTH);
+        final String input = requestHeader.get(Headers.CONTENT_LENGTH.getName());
         if (input == null) {
             return "";
         }

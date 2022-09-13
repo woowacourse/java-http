@@ -23,18 +23,18 @@ public class ResponseHeader {
     }
 
     public void addContentType(final String contentType) {
-        if (headers.containsKey(Headers.CONTENT_TYPE)) {
-            headers.put(Headers.CONTENT_TYPE, headers.get(Headers.CONTENT_TYPE) + ";" + contentType);
+        if (headers.containsKey(Headers.CONTENT_TYPE.getName())) {
+            headers.put(Headers.CONTENT_TYPE.getName(), headers.get(Headers.CONTENT_TYPE.getName()) + ";" + contentType);
             return;
         }
-        headers.put(Headers.CONTENT_TYPE, contentType);
+        headers.put(Headers.CONTENT_TYPE.getName(), contentType);
     }
 
     public void setCookie(final String cookie) {
-        headers.put(Headers.SET_COOKIE, cookie);
+        headers.put(Headers.SET_COOKIE.getName(), cookie);
     }
 
     public void setLocation(final String location) {
-        headers.put(Headers.LOCATION, location);
+        headers.put(Headers.LOCATION.getName(), location);
     }
 }

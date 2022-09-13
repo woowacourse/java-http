@@ -18,7 +18,7 @@ public class HttpResponse {
         final HttpResponse response = new HttpResponse();
         response.statusLine = createStatusLine(Status.OK);
         response.responseBody = body;
-        response.header.addHeader(Headers.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        response.header.addHeader(Headers.CONTENT_LENGTH.getName(), String.valueOf(body.getBytes().length));
 
         return response;
     }

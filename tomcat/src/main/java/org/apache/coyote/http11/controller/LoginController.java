@@ -64,7 +64,7 @@ public final class LoginController extends AbstractController {
     }
 
     private String getJSessionId(final HttpRequest request) {
-        final String cookieHeader = request.getRequestHeader().get(Headers.COOKIE);
+        final String cookieHeader = request.getRequestHeader().get(Headers.COOKIE.getName());
         if (cookieHeader == null) {
             return null;
         }

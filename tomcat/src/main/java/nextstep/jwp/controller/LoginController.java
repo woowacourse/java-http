@@ -27,7 +27,7 @@ public class LoginController extends Controller {
             httpResponse.sendRedirect("/index.html");
             return;
         }
-        httpResponse.sendRedirect("/404.html");
+        httpResponse.sendRedirect("/401.html");
     }
 
     @Override

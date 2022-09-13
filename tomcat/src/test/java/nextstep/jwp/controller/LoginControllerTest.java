@@ -40,7 +40,7 @@ public class LoginControllerTest {
         );
     }
 
-    @DisplayName("로그인 기능을 실패하는 경우에 상태코드 302와 404.html 경로를 헤더로 보낸다.")
+    @DisplayName("로그인 기능을 실패하는 경우에 상태코드 302와 401.html 경로를 헤더로 보낸다.")
     @Test
     void processPost_fail_login() throws IOException {
         // given
@@ -59,7 +59,7 @@ public class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/404.html")
+                () -> assertThat(httpResponse.getHttpHeaders().getLocation()).isEqualTo("/401.html")
         );
     }
 

@@ -32,16 +32,22 @@ public class LoginController implements Controller {
         try {
             final String accountValue = account.orElseThrow(LoginFailException::new);
             final String passwordValue = password.orElseThrow(LoginFailException::new);
-            final UserDto loginUser = authService.login(accountValue, passwordValue);
-
-            final RedirectResponse response = RedirectResponse.of("/index.html");
-            if (!httpRequest.hasSession()) {
-                setSessionUserId(loginUser.getId(), response);
-            }
-            return response;
+            return loginAndRedirectIndexPage(httpRequest, accountValue, passwordValue);
         } catch (final LoginFailException e) {
             return HtmlResponse.of(HttpStatus.UNAUTHORIZED, HttpHeaders.empty(), "401");
         }
+    }
+
+    private RedirectResponse loginAndRedirectIndexPage(final HttpRequest httpRequest,
+                                                       final String account,
+                                                       final String password) {
+        final UserDto loginUser = authService.login(account, password);
+
+        final RedirectResponse response = RedirectResponse.of("/index.html");
+        if (!httpRequest.hasSession()) {
+            setSessionUserId(loginUser.getId(), response);
+        }
+        return response;
     }
 
     private void setSessionUserId(final Long userId, final RedirectResponse response) {

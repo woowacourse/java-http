@@ -1,7 +1,8 @@
-package nextstep.jwp.model;
+package nextstep.jwp.application;
 
 import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_LOGIN_EXCEPTION;
 import static nextstep.jwp.exception.ExceptionType.INVALID_HTTP_REGISTER_EXCEPTION;
+import static nextstep.jwp.exception.ExceptionType.INVALID_SESSION_EXCEPTION;
 import static nextstep.jwp.exception.ExceptionType.MISS_MATCH_USER_PASSWORD_EXCEPTION;
 import static nextstep.jwp.exception.ExceptionType.NOT_FOUND_USER_EXCEPTION;
 
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidHttpRequestException;
+import nextstep.jwp.model.User;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -30,7 +33,10 @@ public class UserService {
     }
 
     public void validateUserBySession(HttpRequest request) {
-        SessionManager.findSession(request.getCookie());
+        final Session session = SessionManager.findSession(request.getCookie());
+        if (session == null) {
+            throw new InvalidHttpRequestException(INVALID_SESSION_EXCEPTION);
+        }
     }
 
     public void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {

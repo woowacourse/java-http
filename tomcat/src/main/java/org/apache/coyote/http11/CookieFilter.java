@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.model.UserService;
+import nextstep.jwp.application.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

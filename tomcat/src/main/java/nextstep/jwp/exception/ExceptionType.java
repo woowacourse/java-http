@@ -13,6 +13,7 @@ public enum ExceptionType {
     INVALID_RESPONSE_HEADER_EXCEPTION("잘못된 RESPONSE HEADER 형식입니다."),
     INVALID_REQUEST_BODY_EXCEPTION("잘못된 REQUEST BODY 형식입니다."),
     INVALID_URL_EXCEPTION("잘못된 URL 형식입니다."),
+    INVALID_SESSION_EXCEPTION("세션이 유효하지 않습니다."),
     NOT_FOUND_COOKIE_EXCEPTION("쿠키가 존재하지 않습니다."),
     INVALID_HANDLER_EXCEPTION("일치하는 Handler 를 찾을 수 없습니다."),
     INVALID_STATUS_CODE_EXCEPTION("잘못된 StatusCode 형식입니다."),

@@ -27,13 +27,18 @@ public class HttpRequest {
             final RequestHeaders requestHeaders = RequestHeaders.from(reader);
             final int contentLength = requestHeaders.getContentLength();
 
-            if (contentLength > 0) {
-                return new HttpRequest(requestLine, requestHeaders, RequestBody.of(reader, contentLength));
-            }
-            return new HttpRequest(requestLine, requestHeaders, RequestBody.from(new HashMap<>()));
+            return getRequest(reader, requestLine, requestHeaders, contentLength);
         } catch (IOException e) {
             throw new InvalidHttpRequestException(ExceptionType.INVALID_REQUEST_LINE_EXCEPTION);
         }
+    }
+
+    private static HttpRequest getRequest(final BufferedReader reader, final RequestLine requestLine,
+                                          final RequestHeaders requestHeaders, final int contentLength) {
+        if (contentLength > 0) {
+            return new HttpRequest(requestLine, requestHeaders, RequestBody.of(reader, contentLength));
+        }
+        return new HttpRequest(requestLine, requestHeaders, RequestBody.from(new HashMap<>()));
     }
 
     public String getUrl() {

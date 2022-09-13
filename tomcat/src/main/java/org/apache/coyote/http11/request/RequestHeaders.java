@@ -68,10 +68,14 @@ public class RequestHeaders {
     }
 
     public String findCookie() {
+        validateCookie();
+        return headers.get(COOKIE.getValue());
+    }
+
+    private void validateCookie() {
         if (!hasCookie()) {
             throw new InvalidHttpRequestException(NOT_FOUND_COOKIE_EXCEPTION);
         }
-        return headers.get(COOKIE.getValue());
     }
 
     public boolean hasCookie() {

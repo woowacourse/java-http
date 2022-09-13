@@ -21,7 +21,7 @@ public class FrontServletTest {
         // given
         final String firstLine = "GET / HTTP/1.1 ";
         final List<String> lines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
-        final FrontServlet frontServlet = new FrontServlet();
+        final FrontServlet frontServlet = FrontServlet.getInstance();
         final HttpRequest httpRequest = HttpRequest.from(firstLine, lines, null);
         final HttpResponse httpResponse = new HttpResponse();
 
@@ -34,20 +34,20 @@ public class FrontServletTest {
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK)
         );
     }
-    
+
     @DisplayName("프론트 컨트롤러에서의 /login 경로 맵핑을 확인한다.")
     @Test
     void service_login_request() throws IOException, URISyntaxException {
         // given
         final String firstLine = "GET /login HTTP/1.1 ";
         final List<String> lines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
-        final FrontServlet frontServlet = new FrontServlet();
+        final FrontServlet frontServlet = FrontServlet.getInstance();
         final HttpRequest httpRequest = HttpRequest.from(firstLine, lines, null);
         final HttpResponse httpResponse = new HttpResponse();
-        
+
         // when
         frontServlet.service(httpRequest, httpResponse);
-        
+
         // then
         assertAll(
                 () -> assertThat(httpResponse.getViewName().get()).isEqualTo("login"),
@@ -61,13 +61,12 @@ public class FrontServletTest {
         // given
         final String firstLine = "GET /register HTTP/1.1 ";
         final List<String> lines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
-        final FrontServlet frontServlet = new FrontServlet();
+        final FrontServlet frontServlet = FrontServlet.getInstance();
         final HttpRequest httpRequest = HttpRequest.from(firstLine, lines, null);
         final HttpResponse httpResponse = new HttpResponse();
 
         // when
         frontServlet.service(httpRequest, httpResponse);
-
 
         // then
         assertAll(

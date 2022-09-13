@@ -14,12 +14,17 @@ import org.apache.coyote.http11.response.HttpStatus;
 
 public class FrontServlet {
 
+    private static final FrontServlet frontServlet = new FrontServlet();
     private final Map<String, Controller> controllers;
 
-    public FrontServlet() {
+    private FrontServlet() {
         controllers = new HashMap<>();
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
+    }
+
+    public static FrontServlet getInstance() {
+        return frontServlet;
     }
 
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse)

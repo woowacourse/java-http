@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
-            final FrontServlet servlet = new FrontServlet();
+            final FrontServlet servlet = FrontServlet.getInstance();
             servlet.service(httpRequest, httpResponse);
             writeHttpResponse(httpResponse, outputStream);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

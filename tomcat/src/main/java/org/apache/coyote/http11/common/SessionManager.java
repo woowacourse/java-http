@@ -26,11 +26,4 @@ public class SessionManager {
         SESSIONS.remove(id);
     }
 
-    public static String get() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Session> s : SESSIONS.entrySet()) {
-            sb.append(String.join(":", s.getKey(), s.getValue().toString()));
-        }
-        return sb.toString();
-    }
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.request.mapping.MappingKey;
-import org.apache.coyote.http11.request.mapping.RequestHandler;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.support.PureJavaApiReflectionLoader;
@@ -20,7 +19,7 @@ public class ControllerScanner {
 
         final Set<Class<?>> allClasses = reflectionLoader.getClassesFromBasePackage(basePackage);
         final List<Class<?>> controllers = allClasses.stream()
-                .filter(clazz -> clazz.isAnnotationPresent(Controller.class))
+                .filter(clazz -> clazz.isAnnotationPresent(ControllerScan.class))
                 .collect(Collectors.toList());
 
         controllers.forEach(ControllerScanner::registerMappingController);
@@ -46,7 +45,8 @@ public class ControllerScanner {
                 );
     }
 
-    private static RequestHandler makeRequestHandler(final Class<?> controller, final Method handler) {
+    private static org.apache.coyote.http11.request.mapping.controller.Controller makeRequestHandler(
+            final Class<?> controller, final Method handler) {
         return httpRequest -> {
             try {
                 final Object controllerInstance = controller.getConstructor()

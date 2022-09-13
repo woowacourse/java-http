@@ -1,4 +1,4 @@
-package nextstep.jwp.infrastructure;
+package application.jwp.infrastructure;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import nextstep.jwp.domain.model.User;
 import nextstep.jwp.domain.model.UserRepository;
+import nextstep.jwp.infrastructure.InMemoryUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

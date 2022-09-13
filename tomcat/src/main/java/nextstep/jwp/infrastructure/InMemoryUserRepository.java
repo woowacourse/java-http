@@ -6,14 +6,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import nextstep.jwp.domain.model.User;
 import nextstep.jwp.domain.model.UserRepository;
 
 public class InMemoryUserRepository implements UserRepository {
 
     private static final Map<Long, User> database = new ConcurrentHashMap<>();
-    private static AtomicLong seq = new AtomicLong(1L);
+    private static final AtomicLong seq = new AtomicLong(1L);
 
     private static final InMemoryUserRepository instance = new InMemoryUserRepository();
 

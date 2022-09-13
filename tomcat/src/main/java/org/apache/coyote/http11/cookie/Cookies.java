@@ -41,25 +41,11 @@ public class Cookies {
         return new Cookies(new ArrayList<>());
     }
 
-    public String toHeaderValueString() {
-        return cookies.stream()
-                .map(cookie -> cookie.getKey() + KEY_VALUE_SEPARATOR + cookie.getValue())
-                .collect(Collectors.joining(COOKIE_SEPARATOR));
-    }
-
     public Optional<String> getValue(final String cookieKey) {
         return cookies.stream()
                 .filter(cookie -> cookie.getKey().equals(cookieKey))
                 .findAny()
                 .map(Cookie::getValue);
-    }
-
-    public void addCookie(final String key, final String value) {
-        cookies.add(new Cookie(key, value));
-    }
-
-    public void addSession(final String sessionId) {
-        cookies.add(new Cookie(SESSION_KEY, sessionId));
     }
 
     public Optional<String> getSessionId() {

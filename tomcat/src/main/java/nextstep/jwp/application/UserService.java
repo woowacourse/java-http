@@ -1,10 +1,8 @@
 package nextstep.jwp.application;
 
-import nextstep.jwp.application.dto.UserDto;
 import nextstep.jwp.domain.model.User;
 import nextstep.jwp.domain.model.UserRepository;
 import nextstep.jwp.infrastructure.InMemoryUserRepository;
-import org.apache.coyote.http11.exception.NotFoundException;
 
 public class UserService {
 

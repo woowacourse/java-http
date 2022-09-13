@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.mapping;
+package org.apache.coyote.http11.request.mapping.controller;
 
 import java.util.ArrayList;
 import org.apache.coyote.http11.ContentType;
@@ -8,7 +8,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.support.FileUtils;
 
-public class NotFoundRequestHandler implements RequestHandler {
+public class NotFoundController implements Controller {
 
     private static final String NOT_FOUND_HTML = "/404.html";
 

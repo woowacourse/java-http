@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.mapping;
+package org.apache.coyote.http11.request.mapping.controller;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,21 +9,22 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.mapping.MappingKey;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.support.FileUtils;
 
-public class FileRequestHandler implements RequestHandler {
+public class FileController implements Controller {
 
     private final String filePath;
 
-    public FileRequestHandler(final String filePath) {
+    public FileController(final String filePath) {
         this.filePath = filePath;
     }
 
-    public static FileRequestHandler from(final MappingKey mappingKey) {
+    public static FileController from(final MappingKey mappingKey) {
         final String filePath = FileUtils.getStaticFilePathFromUri(mappingKey.getUri());
 
-        return new FileRequestHandler(filePath);
+        return new FileController(filePath);
     }
 
     @Override

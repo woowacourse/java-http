@@ -2,6 +2,10 @@ package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
+import static org.apache.coyote.http11.response.HttpResponseHeader.SET_COOKIE;
+
+import org.apache.catalina.session.Session;
 
 public class HttpResponse {
 
@@ -17,20 +21,30 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse(final StringBuilder headers) {
+    private HttpResponse(final StringBuilder headers) {
         this(headers, EMPTY);
     }
 
-    public HttpResponse() {
+    private HttpResponse() {
         this(new StringBuilder(), EMPTY);
     }
 
-    public HttpResponse status(final HttpStatus status) {
-        final String statusLine = asStatusLine(status);
+    public static HttpResponse status(final HttpStatus status) {
+        final HttpResponse response = new HttpResponse();
 
-        appendLineWithCRLF(statusLine);
+        final String statusLine = response.asStatusLine(status);
 
-        return new HttpResponse(headers);
+        response.appendLineWithCRLF(statusLine);
+
+        return new HttpResponse(response.headers);
+    }
+
+    public static HttpResponse ok() {
+        return HttpResponse.status(HttpStatus.OK);
+    }
+
+    public static HttpResponse found() {
+        return HttpResponse.status(HttpStatus.FOUND);
     }
 
     private String asStatusLine(final HttpStatus status) {
@@ -41,6 +55,24 @@ public class HttpResponse {
         return String.join(statusDelimiter, HTTP_VERSION, String.valueOf(statusCode), reasonPhrase);
     }
 
+    public HttpResponse setCookie(final Session session) {
+        final String line = session.asLine();
+
+        appendLineWithCRLF(SET_COOKIE.asLine(line));
+
+        return new HttpResponse(headers);
+    }
+
+    public HttpResponse location(final String location) {
+        appendLineWithCRLF(LOCATION.asLine(location));
+
+        return new HttpResponse(headers);
+    }
+
+    public HttpResponse body(final String newBody) {
+        return body(ContentType.HTML, newBody);
+    }
+
     public HttpResponse body(final Resource resource) {
         final String fileName = resource.getName();
         final ContentType contentType = ContentType.from(fileName);
@@ -48,10 +80,6 @@ public class HttpResponse {
         final String newBody = resource.read();
 
         return body(contentType, newBody);
-    }
-
-    public HttpResponse body(final String newBody) {
-        return body(ContentType.HTML, newBody);
     }
 
     private HttpResponse body(final ContentType contentType, final String newBody) {
@@ -87,7 +115,7 @@ public class HttpResponse {
     }
 
     private void appendLineWithCRLF(final String line) {
-        String endOfLine = " ";
+        final String endOfLine = " ";
         headers.append(line);
         headers.append(endOfLine);
         headers.append(CRLF);

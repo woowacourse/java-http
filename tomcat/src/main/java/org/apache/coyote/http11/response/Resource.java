@@ -6,6 +6,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
 
+import org.apache.coyote.http11.exception.ResourceNotFoundException;
+
 import utils.StringSplitter;
 
 public class Resource {
@@ -28,7 +30,7 @@ public class Resource {
 
     private String asFullPath(final String filePath) {
         final URL resource = Optional.ofNullable(asURL(filePath))
-                .orElseThrow(() -> new IllegalArgumentException("리소스를 찾을 수 없습니다 : " + filePath));
+                .orElseThrow(() -> new ResourceNotFoundException(filePath));
         return resource.getPath();
     }
 

@@ -18,10 +18,6 @@ public class Uri {
         return new Uri(path, params);
     }
 
-    public String findParam(final String name) {
-        return params.find(name);
-    }
-
     public String getPath() {
         return path;
     }

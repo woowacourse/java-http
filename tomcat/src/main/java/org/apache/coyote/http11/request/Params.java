@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import utils.StringSplitter;
 
@@ -16,7 +16,7 @@ public class Params {
     }
 
     public static Params parse(final String query) {
-        if (query == null) {
+        if (query == null || query.isBlank()) {
             return new Params(Collections.emptyMap());
         }
 
@@ -27,15 +27,12 @@ public class Params {
         return new Params(StringSplitter.getPairs(paramDelimiter, params));
     }
 
-    public String find(final String name) {
-        validateParameterNameExist(name);
-        return params.get(name);
+    public static Params empty() {
+        return new Params(Collections.emptyMap());
     }
 
-    private void validateParameterNameExist(final String name) {
-        if (!params.containsKey(name)) {
-            throw new NoSuchElementException("파라미터를 찾을 수 없습니다 : " + name);
-        }
+    public Optional<String> find(final String name) {
+        return Optional.ofNullable(params.get(name));
     }
 
     public Map<String, String> getParams() {

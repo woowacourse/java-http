@@ -1,44 +1,24 @@
 package org.apache.coyote.http11.request;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import utils.StringSplitter;
 
 public class RequestHeader {
 
-    private final URI uri;
     private final Map<String, String> headers;
 
-    public RequestHeader(final URI uri, final Map<String, String> headers) {
-        this.uri = uri;
+    public RequestHeader(final Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static RequestHeader parse(final String startLine, final List<String> headerLines) {
-        final URI uri = parseUri(startLine);
+    public static RequestHeader parse(final List<String> headerLines) {
         final Map<String, String> headers = parseHeaders(headerLines);
 
-        return new RequestHeader(uri, headers);
-    }
-
-    private static URI parseUri(final String startLine) {
-        final String trimmedStartLine = trim(startLine);
-
-        final String startLineDelimiter = " ";
-        final int firstIndex = trimmedStartLine.indexOf(startLineDelimiter);
-        final int lastIndex = trimmedStartLine.lastIndexOf(startLineDelimiter);
-
-        final String uri = startLine.substring(firstIndex, lastIndex);
-
-        try {
-            return new URI(trim(uri));
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("URI 형식이 잘못되었습니다.");
-        }
+        return new RequestHeader(headers);
     }
 
     private static Map<String, String> parseHeaders(final List<String> lines) {
@@ -56,7 +36,7 @@ public class RequestHeader {
         return text.trim();
     }
 
-    public URI getUri() {
-        return uri;
+    public Optional<String> find(final String name) {
+        return Optional.ofNullable(headers.get(name));
     }
 }

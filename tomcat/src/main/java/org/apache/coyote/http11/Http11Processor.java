@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.RequestHeaderException;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -41,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | RequestHeaderException e) {
             log.error(e.getMessage(), e);
         }
     }

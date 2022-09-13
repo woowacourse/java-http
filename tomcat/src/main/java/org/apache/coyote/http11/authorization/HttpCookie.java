@@ -2,6 +2,7 @@ package org.apache.coyote.http11.authorization;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.exception.RequestHeaderException;
 
 public class HttpCookie {
 
@@ -18,6 +19,8 @@ public class HttpCookie {
             return new HttpCookie(httpCookie);
         }
 
+        checkAvailableValue(cookieStr);
+
         final String[] cookies = cookieStr.split("; ");
 
         for (String cookie : cookies) {
@@ -26,6 +29,12 @@ public class HttpCookie {
         }
 
         return new HttpCookie(httpCookie);
+    }
+
+    private static void checkAvailableValue(String cookieStr) {
+        if ("".equals(cookieStr.trim())) {
+            throw new RequestHeaderException();
+        }
     }
 
     public String getCookieValue(final String key) {

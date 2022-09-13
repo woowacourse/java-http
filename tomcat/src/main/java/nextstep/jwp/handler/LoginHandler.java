@@ -44,6 +44,7 @@ public class LoginHandler extends Handler {
             log.info("user : " + loginUser);
             return createHandlerResult(HttpStatusCode.FOUND, SUCCESS_REDIRECT_URI, jSessionId);
         } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
             return createHandlerResult(HttpStatusCode.FOUND, FAIL_REDIRECT_URI);
         }
     }

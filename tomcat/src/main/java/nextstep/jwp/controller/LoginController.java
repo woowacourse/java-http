@@ -35,8 +35,8 @@ public class LoginController extends AbstractController {
     private void login(final HttpRequest request, final HttpResponse response) {
         final User user = InMemoryUserRepository.findByAccount(request.getRequestBodyValue("account"))
                 .orElseThrow(UserNotFoundException::new);
-        final boolean isCorrectPassword = user.checkPassword(request.getRequestBodyValue("password"));
-        if (!isCorrectPassword) {
+        final String password = request.getRequestBodyValue("password");
+        if (!user.checkPassword(password)) {
             throw new InvalidPasswordException();
         }
         log.info(String.format("user : %s", user));

@@ -8,6 +8,7 @@ public class RequestURL {
 
     private static final String PARAM_REGEX = "&";
     private static final String KEY_AND_VALUE_REGEX = "=";
+    private static final String QUERY_PARAM_REGEX = "?";
 
     private final String path;
     private final Map<String, String> queryParams;
@@ -18,8 +19,8 @@ public class RequestURL {
     }
 
     public static RequestURL from(final String requestURL) {
-        if (requestURL.contains("?")) {
-            final int index = requestURL.indexOf("?");
+        if (requestURL.contains(QUERY_PARAM_REGEX)) {
+            final int index = requestURL.indexOf(QUERY_PARAM_REGEX);
             final String path = requestURL.substring(0, index);
             final String queryString = requestURL.substring(index + 1);
             final Map<String, String> params = parsingQueryString(queryString);

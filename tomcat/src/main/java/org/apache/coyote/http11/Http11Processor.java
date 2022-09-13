@@ -50,10 +50,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getHttpResponse(
-            final HttpRequest httpRequest,
-            final Controller controller
-    ) throws IOException {
+    private HttpResponse getHttpResponse(final HttpRequest httpRequest, final Controller controller)
+            throws IOException {
         try {
             return controller.service(httpRequest);
         } catch (RuntimeException e) {

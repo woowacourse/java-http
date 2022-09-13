@@ -15,12 +15,11 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         if (httpRequest.containsSession()) {
-            final Session session = sessionManager.findSession(httpRequest.getSession());
+            final Session session = SessionManager.findSession(httpRequest.getSession());
             final User user = (User) session.getAttribute("user");
             log.info("session-user: {}", user.toString());
             return HttpResponse.found("/index.html", FileReader.read("/index.html"));
@@ -58,6 +57,6 @@ public class LoginController extends AbstractController {
     private void createAndSaveSession(final User user, final String jSessionId) {
         final Session session = new Session(jSessionId);
         session.setAttribute("user", user);
-        sessionManager.add(session);
+        SessionManager.add(session);
     }
 }

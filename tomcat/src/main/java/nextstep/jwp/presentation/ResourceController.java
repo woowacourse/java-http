@@ -6,7 +6,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResourceController extends AbstractController {
 
-
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
         String resource = httpRequest.getRequestURL().getPath();

@@ -7,13 +7,15 @@ import java.nio.file.Paths;
 
 public class FileReader {
 
+    private static final String STATIC_PATH = "static";
+
     private FileReader() {
     }
 
     public static String read(final String resource) {
         try {
             final Path path = Paths.get(ClassLoader
-                    .getSystemResource("static" + resource)
+                    .getSystemResource(STATIC_PATH + resource)
                     .getFile()
             );
 

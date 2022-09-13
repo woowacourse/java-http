@@ -8,6 +8,7 @@ public class SessionManager implements CustomManager {
 
     private final static Map<String, Map<String, Object>> SESSIONS = new ConcurrentHashMap<>();
     private final static SessionManager INSTANCE = new SessionManager();
+
     private SessionManager() {
     }
 
@@ -17,11 +18,12 @@ public class SessionManager implements CustomManager {
 
     @Override
     public void add(final String jsessionid, final String key, final Object value) {
-        if(SESSIONS.get(jsessionid) == null) {
+        final Map<String, Object> jsessionValue = SESSIONS.get(jsessionid);
+        if(jsessionValue == null) {
             SESSIONS.put(jsessionid, Map.of(key, value));
             return;
         }
-        SESSIONS.get(jsessionid).put(key, value);
+        jsessionValue.put(key, value);
     }
 
     @Override

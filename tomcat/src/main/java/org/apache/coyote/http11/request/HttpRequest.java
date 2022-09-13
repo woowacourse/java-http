@@ -33,7 +33,7 @@ public class HttpRequest {
     }
 
     public boolean hasCookie() {
-        return httpCookie.hasCookie();
+        return httpCookie.isExist();
     }
 
     public String getHttpPath() {

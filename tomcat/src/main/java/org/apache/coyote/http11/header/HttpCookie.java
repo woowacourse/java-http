@@ -32,7 +32,7 @@ public class HttpCookie {
         return new HttpCookie(values);
     }
 
-    public boolean hasCookie() {
+    public boolean isExist() {
         return !values.isEmpty();
     }
 

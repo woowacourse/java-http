@@ -19,10 +19,6 @@ public class RequestMapping {
         REQUEST_MAP.put(URL.of("/register"), new RegisterController());
     }
 
-    public Controller map(final String urlValue) {
-        return map(URL.of(urlValue));
-    }
-
     public Controller map(final URL url) {
         final Controller controller = REQUEST_MAP.get(url);
         if (controller == null) {

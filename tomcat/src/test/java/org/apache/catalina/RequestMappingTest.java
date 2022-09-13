@@ -2,12 +2,12 @@ package org.apache.catalina;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.exception.ControllerNotFoundException;
 import org.apache.coyote.Controller;
+import org.apache.coyote.http11.URL;
 import org.junit.jupiter.api.Test;
 
 class RequestMappingTest {
@@ -17,7 +17,7 @@ class RequestMappingTest {
     @Test
     void map() {
         // given
-        final String url = "/login";
+        final URL url = URL.of("/login");
 
         // when
         final Controller actual = requestMapping.map(url);
@@ -29,7 +29,7 @@ class RequestMappingTest {
     @Test
     void mapStatic() {
         // given
-        final String url = "/login.html";
+        final URL url = URL.of("/login.html");
 
         // when
         final Controller actual = requestMapping.map(url);
@@ -41,7 +41,7 @@ class RequestMappingTest {
     @Test
     void controllerNotFound() {
         // given
-        final String url = "/not-found";
+        final URL url = URL.of("/not-found");
 
         // when
         assertThatThrownBy(() -> requestMapping.map(url))

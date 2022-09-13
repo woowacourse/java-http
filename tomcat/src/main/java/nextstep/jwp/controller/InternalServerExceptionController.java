@@ -7,6 +7,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 
 public class InternalServerExceptionController implements org.apache.coyote.ExceptionController {
+
     @Override
     public boolean isResolvable(final Exception exception) {
         return exception instanceof InternalServerException;

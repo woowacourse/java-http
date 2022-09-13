@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class Cookies {
 
     private static final String COOKIE_SEPARATOR = "; ";
+    private static final String SET_COOKIE = "Set-Cookie: ";
 
     private final Map<String, Cookie> cookies;
 
@@ -21,7 +22,7 @@ public class Cookies {
         return new Cookies(new HashMap<>());
     }
 
-    public static Cookies of(final String request) {
+    public static Cookies from(final String request) {
         return new Cookies(Arrays.stream(request.split(COOKIE_SEPARATOR))
                 .map(Cookie::from)
                 .collect(Collectors.toMap(Cookie::getName, Function.identity())));
@@ -40,9 +41,9 @@ public class Cookies {
     }
 
     public String toHeaders() {
-        StringJoiner stringJoiner = new StringJoiner(COOKIE_SEPARATOR);
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
         for (Cookie value : cookies.values()) {
-            stringJoiner.add(value.toHeader());
+            stringJoiner.add(SET_COOKIE + value.toHeader());
         }
         return stringJoiner.toString();
     }

@@ -30,7 +30,7 @@ public class HttpHeaders {
         if (!value.containsKey(COOKIE)) {
             return Cookies.init();
         }
-        return Cookies.of(value.get(COOKIE));
+        return Cookies.from(value.get(COOKIE));
     }
 
     public Map<String, String> getValue() {

@@ -7,9 +7,10 @@ import org.apache.coyote.cookie.Cookies;
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
+    private static final String TEXT_HTML = "text/html";
 
     private HttpStatus httpStatus = HttpStatus.OK;
-    private String contentType;
+    private String contentType = TEXT_HTML;
     private String location;
     private Cookies cookies = Cookies.init();
     private String responseBody;
@@ -42,7 +43,7 @@ public class HttpResponse {
             joiner.add(String.format("Location: %s", location));
         }
         if (!cookies.isEmpty()) {
-            joiner.add(String.format("Set-Cookie: %s", cookies.toHeaders()));
+            joiner.add(cookies.toHeaders());
         }
     }
 

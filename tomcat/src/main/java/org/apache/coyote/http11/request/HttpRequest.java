@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.web.Cookie;
 import org.apache.coyote.http11.web.Session;
@@ -64,6 +65,15 @@ public class HttpRequest {
     }
 
     public Session getSession() {
+        if (!hasCookie()) {
+            return createSession();
+        }
+        final Cookie cookie = getCookie();
+        final Optional<Session> session = SessionManager.findSession(cookie.getValue());
+        return session.orElseGet(this::createSession);
+    }
+
+    private Session createSession() {
         final String id = String.valueOf(UUID.randomUUID());
         final Session session = new Session(id);
         SessionManager.add(session);

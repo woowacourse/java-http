@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import nextstep.jwp.exception.NotFoundException;
+import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.ExceptionHandler;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;

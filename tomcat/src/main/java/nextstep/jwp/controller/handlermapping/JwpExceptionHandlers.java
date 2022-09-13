@@ -5,7 +5,7 @@ import java.util.List;
 import nextstep.jwp.controller.InternalServerExceptionHandler;
 import nextstep.jwp.controller.NotFoundExceptionHandler;
 import org.apache.catalina.ExceptionHandlers;
-import org.apache.catalina.exception.ControllerNotFoundException;
+import nextstep.jwp.exception.ControllerNotFoundException;
 import org.apache.coyote.ExceptionHandler;
 
 public class JwpExceptionHandlers implements ExceptionHandlers {

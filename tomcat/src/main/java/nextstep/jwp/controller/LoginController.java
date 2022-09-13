@@ -7,7 +7,7 @@ import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.CustomManager;
-import org.apache.catalina.exception.AccountNotFoundException;
+import nextstep.jwp.exception.AccountNotFoundException;
 import org.apache.coyote.AbstractController;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.Request;

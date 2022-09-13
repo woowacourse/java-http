@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import nextstep.jwp.controller.handlermapping.JwpRequestMapping;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.StaticFileController;
-import org.apache.catalina.exception.ControllerNotFoundException;
+import nextstep.jwp.exception.ControllerNotFoundException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.URL;
 import org.junit.jupiter.api.Test;

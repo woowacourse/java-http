@@ -1,4 +1,4 @@
-package org.apache.catalina.exception;
+package org.apache.coyote.exception;
 
 public class InvalidHttpMethodException extends InternalServerException {
     public InvalidHttpMethodException() {

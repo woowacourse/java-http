@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
-import org.apache.catalina.exception.RequestBodyValueNotExists;
+import org.apache.coyote.exception.RequestBodyValueNotExists;
 import org.apache.coyote.KeyValueTupleParser;
 
 public class RequestBody {

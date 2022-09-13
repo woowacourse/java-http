@@ -1,6 +1,4 @@
-package org.apache.catalina.exception;
-
-import nextstep.jwp.exception.NotFoundException;
+package org.apache.coyote.exception;
 
 public class RequestBodyValueNotExists extends NotFoundException {
 

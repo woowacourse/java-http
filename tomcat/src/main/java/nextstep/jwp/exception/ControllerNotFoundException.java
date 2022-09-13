@@ -1,6 +1,6 @@
-package org.apache.catalina.exception;
+package nextstep.jwp.exception;
 
-import nextstep.jwp.exception.NotFoundException;
+import org.apache.coyote.exception.NotFoundException;
 
 public class ControllerNotFoundException extends NotFoundException {
 

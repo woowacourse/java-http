@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import nextstep.jwp.controller.RegisterController;
-import org.apache.catalina.exception.DuplicateAccountRegisterException;
+import nextstep.jwp.exception.DuplicateAccountRegisterException;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

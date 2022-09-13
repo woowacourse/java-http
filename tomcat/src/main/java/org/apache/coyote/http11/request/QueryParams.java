@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.exception.InvalidQueryParamKeyException;
+import org.apache.coyote.exception.InvalidQueryParamKeyException;
 import org.apache.coyote.KeyValueTupleParser;
 
 public class QueryParams {

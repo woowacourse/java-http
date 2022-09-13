@@ -1,4 +1,6 @@
-package org.apache.catalina.exception;
+package nextstep.jwp.exception;
+
+import org.apache.coyote.exception.InternalServerException;
 
 public class DuplicateAccountRegisterException extends InternalServerException {
 

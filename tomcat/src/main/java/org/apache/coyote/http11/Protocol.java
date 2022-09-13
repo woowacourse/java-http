@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import org.apache.catalina.exception.VersionNotFoundException;
+import org.apache.coyote.exception.VersionNotFoundException;
 
 public enum Protocol {
     HTTP1("HTTP/1.0"),

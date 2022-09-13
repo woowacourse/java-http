@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestHeaders {
+
     public static final String HEADER_KEY_VALUE_DELIMITER = ":";
     private static final int KEY = 0;
     private static final int VALUE = 1;

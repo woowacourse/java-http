@@ -7,7 +7,7 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.RequestMapping;
 import org.apache.catalina.SessionManager;
-import org.apache.catalina.exception.ControllerNotFoundException;
+import nextstep.jwp.exception.ControllerNotFoundException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.URL;
 

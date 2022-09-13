@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KeyValueTupleParser {
+
     private static final String TUPLE_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
@@ -25,6 +26,7 @@ public class KeyValueTupleParser {
     }
 
     private static class Tuple {
+
         private static final int VALID_LENGTH = 2;
         private static final String EMPTY_DATA = "";
 

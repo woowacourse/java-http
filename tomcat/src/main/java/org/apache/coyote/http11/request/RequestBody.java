@@ -10,13 +10,14 @@ public class RequestBody {
     private static final String REQUEST_BODY_PARAMETER_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> bodies;
 
     private RequestBody(Map<String, String> bodies) {
         this.bodies = bodies;
     }
 
-    public static RequestBody ofEmptyValue() {
+    public static RequestBody ofEmpty() {
         return new RequestBody(Map.of());
     }
 

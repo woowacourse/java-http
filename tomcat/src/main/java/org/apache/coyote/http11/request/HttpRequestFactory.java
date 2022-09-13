@@ -54,7 +54,7 @@ public class HttpRequestFactory {
             throws IOException {
         Optional<String> contentLengthValue = requestHeaders.getHeaderValue(CONTENT_LENGTH_KEY);
         if (contentLengthValue.isEmpty()) {
-            return RequestBody.ofEmptyValue();
+            return RequestBody.ofEmpty();
         }
         int contentLength = Integer.parseInt(contentLengthValue.get());
         String requestBodyValue = parseToRequestBodyValue(reader, contentLength);

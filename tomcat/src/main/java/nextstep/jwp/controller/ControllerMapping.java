@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ControllerMapping {
 
-    private final static Map<String, Controller> controllers = new HashMap<>();
+    private static final Map<String, Controller> controllers = new HashMap<>();
 
     static {
         controllers.put("/", new MainController());

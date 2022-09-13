@@ -100,8 +100,8 @@ public class HttpResponse {
             sb.append("Set-Cookie: ").append(cookie.parseToString()).append("\r\n");
         }
         if (responseBody != null) {
-            sb.append("Content-Type: ").append(contentType.getType()).append(" ").append("\r\n");
-            sb.append("Content-Length: ").append(responseBody.getBytes().length).append(" ").append("\r\n");
+            sb.append("Content-Type: ").append(contentType.getType()).append(" \r\n");
+            sb.append("Content-Length: ").append(responseBody.getBytes().length).append(" \r\n");
             sb.append("\r\n");
             sb.append(responseBody);
         }

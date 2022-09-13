@@ -26,7 +26,7 @@ public class Connector implements Runnable {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(int port, int acceptCount) {
         this(port, acceptCount, DEFAULT_MAX_THREADS);
     }
 

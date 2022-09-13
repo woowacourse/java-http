@@ -10,18 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.DefaultController;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.DefaultController;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(Socket connection) {
+    public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = generateRequest(new BufferedReader(new InputStreamReader(inputStream)));
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         RequestHeaders requestHeaders = generateRequestHeaders(bufferedReader);
         RequestBody requestBody = null;
-        if (requestLine.getMethod().equalsIgnoreCase("POST")) {
+        if (requestHeaders.hasContentLength()) {
             requestBody = generateRequestBody(bufferedReader, requestHeaders);
         }
 
@@ -76,18 +76,18 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private RequestHeaders generateRequestHeaders(BufferedReader bufferedReader) throws IOException {
+    private RequestHeaders generateRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         ArrayList<String> headers = new ArrayList<>();
         String read = bufferedReader.readLine();
-        while (!read.isEmpty()) {
+        while (read != null && !read.isEmpty()) {
             headers.add(read);
             read = bufferedReader.readLine();
         }
         return new RequestHeaders(headers);
     }
 
-    private RequestBody generateRequestBody(BufferedReader bufferedReader,
-                                            RequestHeaders requestHeaders) throws IOException {
+    private RequestBody generateRequestBody(final BufferedReader bufferedReader,
+                                            final RequestHeaders requestHeaders) throws IOException {
         int contentLength = Integer.parseInt((String) requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

@@ -1,12 +1,15 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    protected static final String DEFAULT_FILE = "index.html";
+    protected static final String DEFAULT_FILE_EXTENSION = ".html";
+
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(final HttpRequest request, final HttpResponse response) {
         if (request.getMethod().equalsIgnoreCase("GET")) {
             doGet(request, response);
         }

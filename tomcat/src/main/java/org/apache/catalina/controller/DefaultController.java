@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import static org.apache.coyote.http11.http.StatusCode.OK;
 
@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class DefaultController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.send(request.getResource(), OK);
     }
 

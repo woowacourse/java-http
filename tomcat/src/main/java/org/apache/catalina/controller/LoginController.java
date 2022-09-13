@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 
 import static org.apache.coyote.http11.http.StatusCode.FOUND;
@@ -11,25 +11,26 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 public class LoginController extends AbstractController {
 
     private static final String REQUEST_URI = "/login";
+    private static final String DEFAULT_HTML = "/login.html";
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         Session session = httpRequest.getSession();
         if (session.getAttribute("login") != null) {
-            httpResponse.send("/index.html", OK);
+            httpResponse.send("/index" + DEFAULT_FILE_EXTENSION, OK);
             return;
         }
-        httpResponse.send("/login.html", OK);
+        httpResponse.send(DEFAULT_HTML, OK);
     }
 
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
         Map<String, String> parsedBody = requestBody.getParsedBody();
 
@@ -40,11 +41,11 @@ public class LoginController extends AbstractController {
                         .findByAccountAndPassword(parsedBody.get("account"), parsedBody.get("password"));
                 session.setAttribute("login", user);
             }
-            response.send("/index.html", FOUND);
+            response.send(DEFAULT_HTML, FOUND);
             return;
         }
 
-        response.send("/401.html", UNAUTHORIZED);
+        response.send("/401" + DEFAULT_FILE_EXTENSION, UNAUTHORIZED);
     }
 
     @Override

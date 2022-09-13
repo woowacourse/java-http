@@ -1,12 +1,13 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public SessionManager() {
     }
@@ -21,17 +22,12 @@ public class SessionManager implements Manager {
         return SESSIONS.get(id);
     }
 
-    @Override
-    public void remove(final String id) {
-        SESSIONS.remove(id);
-    }
-
-    public Session getSession(HttpRequest httpRequest) {
+    public Session getSession(final HttpRequest httpRequest) {
         String sessionId = httpRequest.extractSessionId();
         if (SESSIONS.containsKey(sessionId)) {
             return findSession(sessionId);
         }
-        Session session = new Session(sessionId);
+        Session session = new Session(UUID.randomUUID().toString());
         add(session);
         return session;
     }

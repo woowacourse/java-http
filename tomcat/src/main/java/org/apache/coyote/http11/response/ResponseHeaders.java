@@ -6,11 +6,7 @@ public class ResponseHeaders {
 
     private List<String> values;
 
-    public ResponseHeaders(List<String> values) {
+    public ResponseHeaders(final List<String> values) {
         this.values = values;
-    }
-
-    public List<String> getValues() {
-        return values;
     }
 }

@@ -7,6 +7,11 @@ public class RequestLine {
 
     private static final String CONTENT_TYPE = "Content-Type: ";
     private static final String CHARSET_UTF_8 = "charset=utf-8 ";
+    private static final String CSS_EXTENSION = ".css";
+    private static final String JS_EXTENSION = ".js";
+    private static final String CSS_TYPE = "text/css;";
+    private static final String JS_TYPE = "text/js;";
+    private static final String HTML_TYPE = "text/html;";
 
     private String method;
     private String path;
@@ -43,13 +48,13 @@ public class RequestLine {
     }
 
     public String getContentType() {
-        if (path.contains(".css")) {
-            return CONTENT_TYPE + "text/css;" + CHARSET_UTF_8;
+        if (path.contains(CSS_EXTENSION)) {
+            return CONTENT_TYPE + CSS_TYPE + CHARSET_UTF_8;
         }
-        if (path.contains(".js")) {
-            return CONTENT_TYPE + "text/js;" + CHARSET_UTF_8;
+        if (path.contains(JS_EXTENSION)) {
+            return CONTENT_TYPE + JS_TYPE + CHARSET_UTF_8;
         }
-        return CONTENT_TYPE + "text/html;" + CHARSET_UTF_8;
+        return CONTENT_TYPE + HTML_TYPE + CHARSET_UTF_8;
     }
 
     public Map<String, String> getQueries() {

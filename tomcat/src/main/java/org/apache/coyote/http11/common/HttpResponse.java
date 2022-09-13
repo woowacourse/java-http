@@ -60,13 +60,12 @@ public class HttpResponse {
     }
 
     public byte[] toBytes() {
-        final String response = toString();
+        final String response = toResponseMessage();
 
         return response.getBytes();
     }
 
-    @Override
-    public String toString() {
+    public String toResponseMessage() {
         if (headers.hasCookie()) {
             addHeader(SET_COOKIE, headers.getAllCookie());
         }

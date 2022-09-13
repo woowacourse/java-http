@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.common.HttpRequest;
 import org.apache.coyote.http11.common.HttpResponse;
-import org.apache.coyote.http11.util.RequestMapping;
 import org.apache.coyote.http11.util.RequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Controller controller = RequestMapping.findController(request);
+        final Controller controller = requestMapping.findController(request);
         controller.service(request, response);
     }
 

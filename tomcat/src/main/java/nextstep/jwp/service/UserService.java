@@ -30,8 +30,7 @@ public class UserService {
         final String account = request.getBodyParam(ACCOUNT_PARAM);
         final String password = request.getBodyParam(PASSWORD_PARAM);
 
-        Objects.requireNonNull(account, "account는 null이면 안됩니다.");
-        Objects.requireNonNull(password, "password는 null이면 안됩니다.");
+        checkNull(account, password);
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UserNotFoundException::new);
@@ -63,10 +62,10 @@ public class UserService {
         LOG.info(msg);
     }
 
-    private void checkNull(final String account, final String email, final String password) {
-        Objects.requireNonNull(account, "account는 null이면 안됩니다.");
-        Objects.requireNonNull(email, "email은 null이면 안됩니다.");
-        Objects.requireNonNull(password, "password는 null이면 안됩니다.");
+    private void checkNull(final String... params) {
+        for (final String param : params) {
+            Objects.requireNonNull(param);
+        }
     }
 
     private void checkAccountDuplication(final String account) {

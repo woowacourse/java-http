@@ -1,11 +1,11 @@
 package nextstep.jwp.presentation;
 
-import static org.apache.catalina.Session.JSESSIONID;
+import static org.apache.catalina.session.Session.JSESSIONID;
 import static org.apache.coyote.http11.util.StaticResource.INDEX_PATH;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
-import org.apache.catalina.Session;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpRequest;
 import org.apache.coyote.http11.common.HttpResponse;
 import org.apache.coyote.http11.constant.HttpStatus;
@@ -36,13 +36,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        try {
-            final User user = userService.register(request);
-            setLoginSession(request, response, user);
-            redirectIndex(response);
-        } catch (final RuntimeException runtimeException) {
-            LOG.error(runtimeException.getMessage());
-        }
+        final User user = userService.register(request);
+        setLoginSession(request, response, user);
+        redirectIndex(response);
 
         response.setBody(StaticResource.ofRequest(request));
     }

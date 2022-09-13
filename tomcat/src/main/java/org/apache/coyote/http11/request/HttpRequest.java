@@ -6,10 +6,6 @@ import org.apache.coyote.http11.response.Cookie;
 public class HttpRequest {
 
     private static final String COOKIE_HEADER_KEY = "Cookie";
-    private static final String COOKIE_PARAMETER_DELIMITER = "=";
-    private static final String COOKIE_CONNECTOR = "; ";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;

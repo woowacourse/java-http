@@ -4,12 +4,12 @@ public class HttpResponse {
 
     private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
 
-    private String protocol;
-    private HttpStatus status;
-    private String location;
-    private Cookie cookie;
-    private ContentType contentType;
-    private String responseBody;
+    private final String protocol;
+    private final HttpStatus status;
+    private final String location;
+    private final Cookie cookie;
+    private final ContentType contentType;
+    private final String responseBody;
 
     private HttpResponse(String protocol,
                          HttpStatus status,

@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import org.apache.coyote.http11.Request.HttpRequest;
 import org.apache.coyote.http11.Response.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
 
 public final class NotFoundController extends AbstractController {
 

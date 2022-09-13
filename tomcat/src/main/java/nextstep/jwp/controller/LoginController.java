@@ -1,20 +1,24 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session.Session;
+import org.apache.catalina.Session.SessionManager;
 import org.apache.coyote.http11.Request.HttpRequest;
 import org.apache.coyote.http11.Response.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.model.Headers;
 import org.apache.coyote.http11.model.HttpCookie;
 import org.apache.coyote.http11.model.Parameters;
 import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.model.View;
-import org.apache.coyote.http11.service.UserService;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.utils.Files;
 
 public final class LoginController extends AbstractController {
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
@@ -32,7 +36,7 @@ public final class LoginController extends AbstractController {
                 return HttpResponse.found(View.INDEX.getPath())
                         .cookie(HttpCookie.JSESSIONID + "=" + session.getId());
             }
-        } catch (NoSuchElementException | IllegalArgumentException e) {
+        } catch (final NoSuchElementException | IllegalArgumentException e) {
             log.info(e.getMessage());
         }
 

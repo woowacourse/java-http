@@ -24,7 +24,8 @@ public class ResponseHeader {
 
     public void addContentType(final String contentType) {
         if (headers.containsKey(Headers.CONTENT_TYPE.getName())) {
-            headers.put(Headers.CONTENT_TYPE.getName(), headers.get(Headers.CONTENT_TYPE.getName()) + ";" + contentType);
+            headers.put(Headers.CONTENT_TYPE.getName(),
+                    headers.get(Headers.CONTENT_TYPE.getName()) + ";" + contentType);
             return;
         }
         headers.put(Headers.CONTENT_TYPE.getName(), contentType);

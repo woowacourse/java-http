@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Request.HttpRequest;
 import org.apache.coyote.http11.Response.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.model.Parameters;
 import org.apache.coyote.http11.model.Path;
 import org.apache.coyote.http11.model.View;

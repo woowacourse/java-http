@@ -1,6 +1,7 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.utils.Files;
 
 public enum RequestMapping {

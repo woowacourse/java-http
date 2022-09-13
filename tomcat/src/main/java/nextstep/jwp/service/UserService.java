@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.service;
+package nextstep.jwp.service;
 
 import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;

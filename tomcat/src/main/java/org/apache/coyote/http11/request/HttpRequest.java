@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
@@ -97,13 +100,7 @@ public class HttpRequest {
         if (hasSession()) {
             return session;
         }
-
-        if (hasExistentSessionIdInCookies()) {
-            session = SessionManager.getSession(cookies.getSessionId());
-            return session;
-        }
-
-        session = SessionManager.createSession();
+        session = SessionManager.getSession(this);
         return session;
     }
 
@@ -111,7 +108,7 @@ public class HttpRequest {
         return session != null;
     }
 
-    private boolean hasExistentSessionIdInCookies() {
-        return cookies.hasSessionId() && SessionManager.hasSession(cookies.getSessionId());
+    public Cookies getCookies() {
+        return cookies;
     }
 }

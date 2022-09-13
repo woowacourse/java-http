@@ -2,11 +2,11 @@ package nextstep.jwp.controller;
 
 import java.io.File;
 import java.net.URL;
-import org.apache.coyote.http11.Controller;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.controller.AbstractController;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticResourceController extends Controller {
+public class StaticResourceController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {

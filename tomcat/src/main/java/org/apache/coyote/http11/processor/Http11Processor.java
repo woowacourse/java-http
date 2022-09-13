@@ -1,9 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.processor;
 
 import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestConvertor;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpRequestConvertor httpRequestConvertor = new HttpRequestConvertor();
-    private final RequestMapping requestMapping = new RequestMapping();
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -29,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = httpRequestConvertor.convert(inputStream);
+            final HttpRequest request = HttpRequestConvertor.convert(inputStream);
             final HttpResponse response = createResponse(request);
             outputStream.write(response.writeValueAsBytes());
             outputStream.flush();
@@ -39,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest request) {
-        final Controller controller = requestMapping.findController(request);
+        final Controller controller = requestMapping.getController(request);
         final HttpResponse response = controller.doService(request);
 
         addContentTypeToResponse(request, response);

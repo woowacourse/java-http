@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,11 +7,15 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-class HttpRequestConvertor {
+public class HttpRequestConvertor {
 
     public static final String HEADER_DELIMITER = ":";
 
-    public HttpRequest convert(final InputStream inputStream) throws IOException {
+    private HttpRequestConvertor() {
+        throw new UnsupportedOperationException("HttpRequestConverter 객체를 생성할 수 없습니다.");
+    }
+
+    public static HttpRequest convert(final InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         final String requestLine = reader.readLine();
@@ -21,7 +25,7 @@ class HttpRequestConvertor {
         return new HttpRequest(requestLine, headers, body);
     }
 
-    private Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
+    private static Map<String, String> parseHeaders(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
 
         String headerLine = reader.readLine();
@@ -41,7 +45,7 @@ class HttpRequestConvertor {
         return headerLine.split(HEADER_DELIMITER)[1].trim();
     }
 
-    private String parseBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
+    private static String parseBody(final BufferedReader reader, final Map<String, String> headers) throws IOException {
         if (headers.containsKey("Content-Length")) {
             final int contentLength = Integer.parseInt(headers.get("Content-Length"));
             final char[] body = new char[contentLength];

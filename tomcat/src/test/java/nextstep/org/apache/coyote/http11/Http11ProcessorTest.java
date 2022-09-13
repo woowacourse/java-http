@@ -11,7 +11,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.db.InMemoryUserRepository;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.processor.Http11Processor;
+import nextstep.jwp.controller.JwpRequestMapping;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -24,7 +25,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -48,7 +49,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -76,7 +77,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -104,7 +105,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -125,7 +126,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -152,7 +153,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -177,7 +178,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -201,7 +202,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -230,7 +231,7 @@ class Http11ProcessorTest {
                 "account=wilgur513&password=password&email=wilgur513@woowahan.com");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -261,7 +262,7 @@ class Http11ProcessorTest {
                 "",
                 "account=wilgur513&password=password&email=wilgur513@woowahan.com");
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -285,7 +286,7 @@ class Http11ProcessorTest {
                 ""
         );
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         processor.process(socket);
 

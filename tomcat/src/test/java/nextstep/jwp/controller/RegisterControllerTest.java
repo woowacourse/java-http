@@ -3,8 +3,8 @@ package nextstep.jwp.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {

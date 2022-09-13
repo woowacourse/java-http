@@ -45,11 +45,7 @@ public class HttpResponse {
         httpHeaders.add("Set-Cookie", String.format("JSESSIONID=%s", session.getId()));
     }
 
-    public byte[] getResponseAsBytes() {
-        return createResponse().getBytes();
-    }
-
-    private String createResponse() {
+    public String createResponse() {
         return String.join("\r\n",
                 getStartLine(),
                 httpHeaders.toResponse(),

@@ -13,27 +13,21 @@ import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(Connector.class);
+    public static final int DEFAULT_PORT = 8080;
+    public static final int DEFAULT_ACCEPT_COUNT = 100;
 
-    private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_POOL_SIZE = 250;
-    private static final int DEFAULT_CORE_SIZE = 50;
-    private static final long DEFAULT_KEEP_ALIVE_TIME = 120L;
+    private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private final ServerSocket serverSocket;
     private boolean stopped;
     private final ThreadPoolExecutor threadPoolExecutor;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_POOL_SIZE, DEFAULT_CORE_SIZE, DEFAULT_KEEP_ALIVE_TIME);
-    }
-
     public Connector(final int port,
                      final int acceptCount,
                      final int maxThreadSize,
                      final int coreThreadSize,
-                     final long keepAliveTimeSecond) {
+                     final long keepAliveTimeSecond,
+                     final int threadPoolQueueSize) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.threadPoolExecutor = new ThreadPoolExecutor(
@@ -41,15 +35,15 @@ public class Connector implements Runnable {
                 maxThreadSize,
                 keepAliveTimeSecond,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT)
+                new LinkedBlockingQueue<>(threadPoolQueueSize)
         );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
             final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            final int checkAcceptCount = checkAcceptCount(acceptCount);
+            return new ServerSocket(checkedPort, checkAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

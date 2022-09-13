@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 public class Cookies {
 
     public static final String SESSION_KEY = "JSESSIONID";
-
-    private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String COOKIE_SEPARATOR = "; ";
 
     private final List<Cookie> cookies;
@@ -27,12 +25,7 @@ public class Cookies {
     public static Cookies from(final String cookieHeaderValue) {
         final String[] rawCookies = cookieHeaderValue.split(COOKIE_SEPARATOR);
         final List<Cookie> cookies = Arrays.stream(rawCookies)
-                .map(rawCookie -> {
-                    final int keyValueSeparatorIndex = rawCookie.indexOf(KEY_VALUE_SEPARATOR);
-                    final String cookieKey = rawCookie.substring(0, keyValueSeparatorIndex);
-                    final String cookieValue = rawCookie.substring(keyValueSeparatorIndex + 1);
-                    return new Cookie(cookieKey, cookieValue);
-                })
+                .map(Cookie::from)
                 .collect(Collectors.toList());
         return new Cookies(cookies);
     }

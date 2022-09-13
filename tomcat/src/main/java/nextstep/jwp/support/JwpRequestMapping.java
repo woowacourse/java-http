@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.NotFoundControllerException;
 import nextstep.jwp.ui.DefaultController;
 import nextstep.jwp.ui.IndexController;
 import nextstep.jwp.ui.LoginController;
@@ -37,6 +37,6 @@ public class JwpRequestMapping implements RequestMapping {
                 .filter(entry -> entry.getKey().test(request.getRequestUrl()))
                 .findAny()
                 .map(Entry::getValue)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 API 입니다."));
+                .orElseThrow(NotFoundControllerException::new);
     }
 }

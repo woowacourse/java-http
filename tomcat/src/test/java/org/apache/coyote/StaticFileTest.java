@@ -19,7 +19,7 @@ public class StaticFileTest {
     })
     void findByUrl(String url, String expected) {
         // when
-        File file = StaticFile.findByUrl(url);
+        File file = StaticFile.findByPath(url);
 
         // then
         assertThat(file.getName()).isEqualTo(expected);

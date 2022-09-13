@@ -15,6 +15,9 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        if (database.containsKey(user.getAccount())) {
+            throw new IllegalArgumentException(user.getAccount() + " 이미 존재하는 계정입니다.");
+        }
         database.put(user.getAccount(), user);
     }
 
@@ -22,5 +25,10 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
+
+    public static void clear() {
+        database.clear();
+    }
 }

@@ -28,7 +28,7 @@ class ControllerContainerTest {
 
         // when
         final Controller actual =
-                new ControllerContainer(new JwpRequestMapping(), List.of())
+                new ControllerContainer(JwpRequestMapping.getInstance(), List.of())
                         .findController(request);
 
         // then

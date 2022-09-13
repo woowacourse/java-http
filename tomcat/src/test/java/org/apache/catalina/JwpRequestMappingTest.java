@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class JwpRequestMappingTest {
 
-    private JwpRequestMapping requestMapping = new JwpRequestMapping();
+    private RequestMapping requestMapping = JwpRequestMapping.getInstance();
 
     @Test
     void map() {

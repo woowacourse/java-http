@@ -12,10 +12,18 @@ public class JwpRequestMapping implements RequestMapping {
 
     private static final Map<URL, Controller> REQUEST_MAP = new HashMap<>();
     private static final Controller STATIC_CONTROLLER = new StaticFileController();
+    private static final RequestMapping INSTANCE = new JwpRequestMapping();
 
     static {
         REQUEST_MAP.put(URL.of("/login"), new LoginController(SessionManager.getInstance()));
         REQUEST_MAP.put(URL.of("/register"), new RegisterController());
+    }
+
+    private JwpRequestMapping() {
+    }
+
+    public static RequestMapping getInstance() {
+        return INSTANCE;
     }
 
     public Controller map(final URL url) {

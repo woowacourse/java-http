@@ -1,6 +1,7 @@
 package nextstep.jwp.support;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,10 +24,10 @@ public class JwpRequestMapping implements RequestMapping {
             "/register"::equals, new RegisterController(),
             JwpRequestMapping::isStaticResource, new ResourceController()
     );
+    private static final Pattern STATIC_RESOURCE_PATTERN = Pattern.compile(".*\\..*");
 
     private static boolean isStaticResource(final String url) {
-        final Pattern pattern = Pattern.compile(".*\\..*");
-        final Matcher matcher = pattern.matcher(url);
+        final Matcher matcher = STATIC_RESOURCE_PATTERN.matcher(url);
         return matcher.find();
     }
 
@@ -35,7 +36,7 @@ public class JwpRequestMapping implements RequestMapping {
         return CONTROLLER.entrySet().stream()
                 .filter(entry -> entry.getKey().test(request.getRequestUrl()))
                 .findAny()
-                .map(entry -> entry.getValue())
+                .map(Entry::getValue)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 API 입니다."));
     }
 }

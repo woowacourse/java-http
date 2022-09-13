@@ -5,7 +5,7 @@ import org.apache.coyote.http11.utils.Files;
 
 public enum Path {
 
-    LOGIN("/login", View.INDEX),
+    LOGIN("/login", View.LOGIN),
     REGISTER("/register", View.REGISTER);
 
     private final String path;

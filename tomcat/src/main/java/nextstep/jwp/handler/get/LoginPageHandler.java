@@ -9,7 +9,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class LoginPageHandler extends HandlerForGetRequest {
+public class LoginPageHandler extends HandlerForResource {
 
     public static final LoginPageHandler LOGIN_PAGE_HANDLER = new LoginPageHandler();
     private static String JSESSIONID = "JSESSIONID";

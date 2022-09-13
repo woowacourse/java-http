@@ -2,7 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import static nextstep.jwp.handler.LoginHandler.LOGIN_HANDLER;
 import static nextstep.jwp.handler.RegisterHandler.REGISTER_HANDLER;
-import static nextstep.jwp.handler.get.HandlerForGetRequest.HANDLER_FOR_GET_REQUEST;
+import static nextstep.jwp.handler.get.HandlerForResource.HANDLER_FOR_GET_REQUEST;
 import static nextstep.jwp.handler.get.LoginPageHandler.LOGIN_PAGE_HANDLER;
 
 import java.util.Arrays;

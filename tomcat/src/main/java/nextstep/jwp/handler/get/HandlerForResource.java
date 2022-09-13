@@ -12,11 +12,11 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class HandlerForGetRequest extends Handler {
+public class HandlerForResource extends Handler {
 
-    public static final HandlerForGetRequest HANDLER_FOR_GET_REQUEST = new HandlerForGetRequest();
+    public static final HandlerForResource HANDLER_FOR_GET_REQUEST = new HandlerForResource();
 
-    protected HandlerForGetRequest() {
+    protected HandlerForResource() {
     }
 
     @Override
@@ -57,7 +57,7 @@ public class HandlerForGetRequest extends Handler {
             requestUri += ".html";
         }
 
-        final URL resourceUrl = HandlerForGetRequest.class.getClassLoader().getResource("static" + requestUri);
+        final URL resourceUrl = HandlerForResource.class.getClassLoader().getResource("static" + requestUri);
         return readContext(resourceUrl);
     }
 

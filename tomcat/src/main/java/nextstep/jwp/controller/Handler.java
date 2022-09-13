@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Handler {
-	HttpResponse handle(final HttpRequest httpRequest);
+    void service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 }

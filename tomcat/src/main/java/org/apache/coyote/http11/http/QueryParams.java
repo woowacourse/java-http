@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class QueryStrings {
+public class QueryParams {
 
     private static final String QUERY_PARAMETER = "?";
     private static final String VALUE_DELIMITER = "&";
@@ -14,13 +14,13 @@ public class QueryStrings {
 
     private final Map<String, String> values;
 
-    private QueryStrings(final Map<String, String> values) {
+    private QueryParams(final Map<String, String> values) {
         this.values = Map.copyOf(values);
     }
 
-    public static QueryStrings of(final String uri) {
+    public static QueryParams of(final String uri) {
         String queryString = uri.substring(uri.indexOf(QUERY_PARAMETER) + 1);
-        return new QueryStrings(toMap(queryString.split(VALUE_DELIMITER)));
+        return new QueryParams(toMap(queryString.split(VALUE_DELIMITER)));
     }
 
     private static Map<String, String> toMap(final String[] queries) {

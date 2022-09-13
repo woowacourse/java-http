@@ -1,13 +1,19 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequestHandler;
-import org.apache.coyote.http11.request.model.HttpRequest;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.support.Controller;
+import org.apache.coyote.support.RequestMapping;
+import org.apache.coyote.util.HttpRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +34,22 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            String line = bufferedReader.readLine();
-            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(line);
-
-            WebClient webClient = new WebClient();
-            HttpResponse response = webClient.request(httpRequest);
-
-            outputStream.write(response.getValue().getBytes());
-            outputStream.flush();
+        try (InputStream inputStream = connection.getInputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+            service(bufferedReader, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private void service(final BufferedReader bufferedReader, final BufferedWriter outputStream) throws Exception {
+        HttpRequest request = HttpRequestUtils.newHttpRequest(bufferedReader);
+        log.debug(request.toString());
+        HttpResponse response = new HttpResponse(outputStream);
+        Controller controller = RequestMapping.getController(request.getPath());
+        controller.service(request, response);
     }
 }

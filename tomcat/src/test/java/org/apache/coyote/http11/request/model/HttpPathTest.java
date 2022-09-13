@@ -4,18 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.coyote.exception.UnSupportedMediaType;
-import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.http.ContentType;
+import org.apache.coyote.http11.http.HttpPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestUriTest {
+class HttpPathTest {
 
     @Test
     @DisplayName("html파일의 contentType을 가져온다.")
     void getHtmlContentType() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("index.html");
+        HttpPath httpPath = new HttpPath("index.html");
 
-        ContentType contentType = httpRequestUri.getContentType();
+        ContentType contentType = httpPath.getContentType();
 
         assertThat(contentType).isEqualTo(ContentType.TEXT_HTML_CHARSET_UTF_8);
     }
@@ -23,9 +24,9 @@ class HttpRequestUriTest {
     @Test
     @DisplayName("html파일의 contentType을 가져온다.")
     void getCssContentType() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("styles.css");
+        HttpPath httpPath = new HttpPath("styles.css");
 
-        ContentType contentType = httpRequestUri.getContentType();
+        ContentType contentType = httpPath.getContentType();
 
         assertThat(contentType).isEqualTo(ContentType.TEXT_CSS_CHARSET_UTF_8);
     }
@@ -33,9 +34,9 @@ class HttpRequestUriTest {
     @Test
     @DisplayName("html파일의 contentType을 가져온다.")
     void getJsContentType() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("scripts.js");
+        HttpPath httpPath = new HttpPath("scripts.js");
 
-        ContentType contentType = httpRequestUri.getContentType();
+        ContentType contentType = httpPath.getContentType();
 
         assertThat(contentType).isEqualTo(ContentType.TEXT_JS_CHARSET_UTF_8);
     }
@@ -43,9 +44,9 @@ class HttpRequestUriTest {
     @Test
     @DisplayName("존재하지 않는 형식의 ContentType을 요청할 경우 예외를 발생한다.")
     void unsupportedMediaType() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("noooo");
+        HttpPath httpPath = new HttpPath("noooo");
 
-        assertThatThrownBy(httpRequestUri::getContentType)
+        assertThatThrownBy(httpPath::getContentType)
                 .hasMessage("not found type : noooo")
                 .isInstanceOf(UnSupportedMediaType.class);
     }
@@ -53,8 +54,24 @@ class HttpRequestUriTest {
     @Test
     @DisplayName("해당요청이 쿼리 스트링 요청인지 확인한다.")
     void isQueryString() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("/login?account=gugu&password=password");
+        HttpPath httpPath = new HttpPath("/login?account=gugu&password=password");
 
-        assertThat(httpRequestUri.isQuery()).isTrue();
+        assertThat(httpPath.isQuery()).isTrue();
+    }
+
+    @Test
+    @DisplayName("기본 경로일 경우 true를 반환한다.")
+    void isDefaultPath() {
+        HttpPath path = new HttpPath("/");
+
+        assertThat(path.isDefault()).isTrue();
+    }
+
+    @Test
+    @DisplayName("도메인 경로를 반환한다.")
+    void getDomainPath() {
+        HttpPath path = new HttpPath("/index.html");
+
+        assertThat(path.getDomainPath()).isEqualTo("/index");
     }
 }

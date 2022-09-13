@@ -2,15 +2,17 @@ package org.apache.coyote.http11.request.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.http.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class HttpRequestTest {
+public class HttpRequestStartLineTest {
 
     @Test
     @DisplayName("같은 http method인지 확인한다.")
     void isEqualToMethod() {
-        HttpRequest request = new HttpRequest("GET", "/index.html", "HTTP/1.1");
+        HttpRequestLine request = new HttpRequestLine("GET", "/index.html", "HTTP/1.1");
 
         assertThat(request.isEqualToMethod(HttpMethod.GET)).isTrue();
     }
@@ -18,15 +20,15 @@ public class HttpRequestTest {
     @Test
     @DisplayName("같은 url request인지 확인한다.")
     void isEqualToUri() {
-        HttpRequest request = new HttpRequest("GET", "/", "HTTP/1.1");
+        HttpRequestLine request = new HttpRequestLine("GET", "/", "HTTP/1.1");
 
-        assertThat(request.isEqualToUri("/")).isTrue();
+        assertThat(request.isEqualToPath("/")).isTrue();
     }
 
     @Test
     @DisplayName("쿼리요청인지 확인한다.")
     void isQuery() {
-        HttpRequest request = new HttpRequest("GET", "/login?account=gugu&password=1234", "HTTP/1.1");
+        HttpRequestLine request = new HttpRequestLine("GET", "/login?account=gugu&password=1234", "HTTP/1.1");
 
         assertThat(request.isQueryString()).isTrue();
     }

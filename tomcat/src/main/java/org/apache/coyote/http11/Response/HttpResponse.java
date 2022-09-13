@@ -2,6 +2,7 @@ package org.apache.coyote.http11.Response;
 
 import org.apache.coyote.http11.model.Headers;
 import org.apache.coyote.http11.model.Status;
+import org.apache.coyote.http11.model.View;
 
 public class HttpResponse {
 
@@ -33,8 +34,8 @@ public class HttpResponse {
 
     public static HttpResponse notFound() {
         final HttpResponse response = new HttpResponse();
-        response.statusLine = createStatusLine(Status.NOT_FOUND);
-        response.header.setLocation("/404.html");
+        response.statusLine = createStatusLine(Status.FOUND);
+        response.header.setLocation(View.NOT_FOUND.getPath());
 
         return response;
     }

@@ -42,7 +42,6 @@ public class LoginController extends Controller {
         final Optional<Session> session = SessionManager.findSession(cookie.getValue());
 
         if (session.isEmpty()) {
-            httpResponse.removeCookie();
             httpResponse.setStatus(HttpStatus.OK);
             httpResponse.setView("login");
             return;

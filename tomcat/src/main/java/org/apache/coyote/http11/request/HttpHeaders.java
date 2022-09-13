@@ -74,8 +74,4 @@ public class HttpHeaders {
     public String getCookieValue() {
         return values.get("Cookie");
     }
-
-    public void deleteCookie() {
-        values.remove("Set-Cookie");
-    }
 }

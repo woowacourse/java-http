@@ -26,7 +26,7 @@ class HeadersTest {
 
     @Test
     void getHeaders() {
-        Headers headers = Headers.builder()
+        Headers headers = Headers.emptyHeaders()
                 .contentType(ContentType.TEXT_HTML)
                 .contentLength(100);
 

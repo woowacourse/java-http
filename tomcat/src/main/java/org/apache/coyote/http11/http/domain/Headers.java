@@ -16,20 +16,29 @@ public class Headers {
 
     private final Map<String, String> value;
 
-    public Headers(final Map<String, String> value) {
+    private Headers(final Map<String, String> value) {
         this.value = value;
     }
 
     public static Headers from(final BufferedReader bufferedReader) {
         return new Headers(bufferedReader.lines()
                 .takeWhile(line -> !line.equals(BLANK))
-                .map(line -> line.substring(0, line.length())
-                        .split(HEADER_DELIMITER))
+                .map(line -> line.split(HEADER_DELIMITER))
                 .collect(Collectors.toMap(line -> line[HEADER_KEY], line -> line[HEADER_VALUE])));
     }
 
-    public static Headers builder() {
+    public static Headers emptyHeaders() {
         return new Headers(new LinkedHashMap<>());
+    }
+
+    public Headers setCookie(final String sessionId) {
+        value.put("Set-Cookie", "JSESSIONID=" + sessionId);
+        return this;
+    }
+
+    public Headers contentLength(final int length) {
+        value.put("Content-Length", String.valueOf(length));
+        return this;
     }
 
     public Headers contentType(final ContentType contentType) {
@@ -37,9 +46,13 @@ public class Headers {
         return this;
     }
 
-    public Headers contentLength(final int length) {
-        value.put("Content-Length", String.valueOf(length));
+    public Headers location(final String location) {
+        value.put("Location", location);
         return this;
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(value.get("Cookie"));
     }
 
     public String getHeaders() {

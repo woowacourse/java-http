@@ -43,4 +43,9 @@ public class RequestLine {
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
+
+    @Override
+    public String toString() {
+        return httpMethod + " " + requestTarget.toString() + " " + httpVersion;
+    }
 }

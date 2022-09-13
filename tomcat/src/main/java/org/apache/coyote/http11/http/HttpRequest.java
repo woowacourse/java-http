@@ -2,7 +2,11 @@ package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.http.domain.Headers;
+import org.apache.coyote.http11.http.domain.HttpCookie;
+import org.apache.coyote.http11.http.domain.HttpMethod;
 import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.http.domain.RequestLine;
 
@@ -20,13 +24,36 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader bufferedReader) {
         try {
+            RequestLine requestLine = RequestLine.from(bufferedReader);
+            Headers headers = Headers.from(bufferedReader);
+            MessageBody messageBody = MessageBody.from(bufferedReader, headers);
             return new HttpRequest(
-                    RequestLine.from(bufferedReader),
-                    Headers.from(bufferedReader),
-                    MessageBody.from(bufferedReader));
+                    requestLine,
+                    headers,
+                    messageBody);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("HttpRequest creation failed.");
         }
+    }
+
+    public boolean isValidCookie() {
+        HttpCookie cookie = headers.getCookie();
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        return cookie.containsJSESSIONID() && SessionManager.contains(jsessionid);
+    }
+
+    public Session getSession() {
+        HttpCookie cookie = headers.getCookie();
+        String jsessionid = cookie.getCookie("JSESSIONID");
+        return SessionManager.findSession(jsessionid);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public String getUri() {
+        return requestLine.getRequestTarget().getUri();
     }
 
     public RequestLine getRequestLine() {

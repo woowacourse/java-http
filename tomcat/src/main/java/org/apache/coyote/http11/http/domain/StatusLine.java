@@ -10,6 +10,10 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
+    public static StatusLine http11(final StatusCode statusCode) {
+        return new StatusLine(HttpVersion.HTTP_1_1, statusCode);
+    }
+
     public String getStatusLine() {
         return httpVersion.getValue() + " " + statusCode.getStatusCode() + " ";
     }

@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         Session session = httpRequest.getSession();
         if (session.getAttribute("login") != null) {
-            httpResponse.send("/index.html", OK);
+            httpResponse.send("/index" + DEFAULT_FILE_EXTENSION, OK);
             return;
         }
         httpResponse.send(DEFAULT_HTML, OK);
@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.send("/401.html", UNAUTHORIZED);
+        response.send("/401" + DEFAULT_FILE_EXTENSION, UNAUTHORIZED);
     }
 
     @Override

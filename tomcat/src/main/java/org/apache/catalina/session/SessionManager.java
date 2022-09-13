@@ -22,11 +22,6 @@ public class SessionManager implements Manager {
         return SESSIONS.get(id);
     }
 
-    @Override
-    public void remove(final String id) {
-        SESSIONS.remove(id);
-    }
-
     public Session getSession(final HttpRequest httpRequest) {
         String sessionId = httpRequest.extractSessionId();
         if (SESSIONS.containsKey(sessionId)) {

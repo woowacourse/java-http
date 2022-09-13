@@ -5,6 +5,9 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    protected static final String DEFAULT_FILE = "index.html";
+    protected static final String DEFAULT_FILE_EXTENSION = ".html";
+
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
         if (request.getMethod().equalsIgnoreCase("GET")) {

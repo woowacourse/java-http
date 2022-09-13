@@ -22,9 +22,9 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
-            httpResponse.send("/register.html", OK);
+            httpResponse.send(REQUEST_URI + DEFAULT_FILE_EXTENSION, OK);
         } catch (Exception e) {
-            httpResponse.send("/401.html", UNAUTHORIZED);
+            httpResponse.send("/401" + DEFAULT_FILE_EXTENSION, UNAUTHORIZED);
         }
     }
 
@@ -36,6 +36,6 @@ public class RegisterController extends AbstractController {
         User user = new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        response.send("/index.html", OK);
+        response.send(DEFAULT_FILE, OK);
     }
 }

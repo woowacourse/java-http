@@ -21,8 +21,8 @@ public class UserController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         HttpPath httpPath = request.getPath();
-        if (httpPath.isEqualToPath("/login")) {
-            httpPath = new HttpPath("/login.html");
+        if (httpPath.isEqualToPath("/register")) {
+            httpPath = new HttpPath("/register.html");
         }
         String body = FileUtils.readAllBytes(httpPath.getValue());
         response.forward(httpPath);

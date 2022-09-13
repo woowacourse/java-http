@@ -26,11 +26,10 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final String firstLine, final List<String> values, final BufferedReader reader)
+    public static HttpRequest from(final String startLine, final List<String> headerLines, final BufferedReader reader)
             throws IOException {
-        final RequestLine requestLine = RequestLine.of(firstLine);
-
-        final HttpHeaders httpHeaders = toHttpHeaders(values);
+        final RequestLine requestLine = RequestLine.of(startLine);
+        final HttpHeaders httpHeaders = toHttpHeaders(headerLines);
 
         final Map<String, String> body = new HashMap<>(Collections.EMPTY_MAP);
         if (httpHeaders.hasContentLength()) {

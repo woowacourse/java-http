@@ -51,17 +51,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final String line = bufferedReader.readLine();
-
-        final List<String> values = new ArrayList<>();
+        final String startLine = bufferedReader.readLine();
+        final List<String> headerLines = new ArrayList<>();
 
         String value = bufferedReader.readLine();
         while (value != null && !"".equals(value)) {
-            values.add(value);
+            headerLines.add(value);
             value = bufferedReader.readLine();
         }
 
-        return HttpRequest.from(line, values, bufferedReader);
+        return HttpRequest.from(startLine, headerLines, bufferedReader);
     }
 
     private void writeHttpResponse(final HttpResponse httpResponse, final OutputStream outputStream) {

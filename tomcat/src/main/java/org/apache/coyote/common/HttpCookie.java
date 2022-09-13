@@ -14,6 +14,10 @@ public class HttpCookie {
 
     public static HttpCookie parse(final String lines) {
         final Map<String, String> values = new HashMap<>();
+        if (lines == null) {
+            return new HttpCookie(values);
+        }
+
         final List<String> cookies = List.of(lines.split("; "));
 
         for (final String cookie : cookies) {

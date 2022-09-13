@@ -4,7 +4,10 @@ public enum HttpStatusCode {
 
     OK(200, "OK"),
     FOUND(302, "Found"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    ;
 
     private final int statusCode;
     private final String message;
@@ -15,6 +18,10 @@ public enum HttpStatusCode {
     }
 
     public String getResponseStartLine() {
-        return "HTTP/1.1 " + statusCode + " " + message + " ";
+        return statusCode + " " + message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

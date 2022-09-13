@@ -4,16 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpHeader;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestBody;
-import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpStatusCode;
+import org.apache.coyote.controller.RequestMapping;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -39,56 +36,16 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), HttpHeader.from(bufferedReader));
-            final HttpRequestBody requestBody = HttpRequestBody.from(bufferedReader, httpRequest.getContentLength());
+            log.info("{} work", Thread.currentThread().getName());
 
-            HttpResponse httpResponse = HttpResponse.from(httpRequest);
-
-            if (httpRequest.isRegister()) {
-                httpResponse = register(requestBody, httpResponse);
-            }
-
-            if (httpRequest.isLogin()) {
-                httpResponse = login(requestBody, httpResponse);
-            }
-
-            if (httpRequest.isLoginPage() && httpRequest.alreadyLogin()) {
-                httpResponse = httpResponse.changeStatusCode(HttpStatusCode.FOUND)
-                        .setLocationAsHome();
-            }
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final HttpResponse httpResponse = requestMapping.find(httpRequest)
+                    .doService(httpRequest);
 
             outputStream.write(httpResponse.toResponseBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpResponse login(final HttpRequestBody requestBody, final HttpResponse httpResponse) {
-        final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
-        if (possibleUser.isEmpty()) {
-            return httpResponse;
-        }
-
-        final Session session = Session.generate();
-        session.setAttribute("user", possibleUser.get());
-        SessionManager.add(session);
-
-        return httpResponse.changeStatusCode(HttpStatusCode.FOUND)
-                .setLocationAsHome()
-                .setSessionId(session.getId());
-    }
-
-    private HttpResponse register(final HttpRequestBody requestBody, final HttpResponse httpResponse) {
-        final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
-        InMemoryUserRepository.save(user);
-
-        final Session session = Session.generate();
-        session.setAttribute("user", user);
-        SessionManager.add(session);
-
-        return httpResponse.changeStatusCode(HttpStatusCode.FOUND)
-                .setLocationAsHome()
-                .setSessionId(session.getId());
     }
 }

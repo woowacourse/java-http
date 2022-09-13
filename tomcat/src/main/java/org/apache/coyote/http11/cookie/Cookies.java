@@ -34,16 +34,13 @@ public class Cookies {
         return new Cookies(new ArrayList<>());
     }
 
+    public Optional<String> getSessionId() {
+        return getValue(SESSION_KEY);
+    }
+
     public Optional<String> getValue(final String cookieKey) {
         return cookies.stream()
                 .filter(cookie -> cookie.getKey().equals(cookieKey))
-                .findAny()
-                .map(Cookie::getValue);
-    }
-
-    public Optional<String> getSessionId() {
-        return cookies.stream()
-                .filter(cookie -> cookie.getKey().equals(SESSION_KEY))
                 .findAny()
                 .map(Cookie::getValue);
     }

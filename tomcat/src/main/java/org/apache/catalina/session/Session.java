@@ -1,8 +1,7 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 

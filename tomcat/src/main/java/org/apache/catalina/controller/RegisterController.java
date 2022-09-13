@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import static org.apache.coyote.http11.http.StatusCode.OK;
 import static org.apache.coyote.http11.http.StatusCode.UNAUTHORIZED;

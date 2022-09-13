@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.cookie;
+package org.apache.catalina.cookie;
 
 import java.util.HashMap;
 import java.util.Map;

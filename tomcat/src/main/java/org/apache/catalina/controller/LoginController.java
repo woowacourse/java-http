@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 
 import static org.apache.coyote.http11.http.StatusCode.FOUND;
@@ -11,7 +11,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 public class LoginController extends AbstractController {
 

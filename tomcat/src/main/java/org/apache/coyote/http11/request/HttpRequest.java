@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
 

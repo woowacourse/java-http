@@ -1,31 +1,21 @@
 package org.apache.coyote.response;
 
-import static org.apache.coyote.response.HttpStatus.OK;
-
-import java.util.Map;
-import org.apache.coyote.request.HttpRequest;
+import java.util.StringJoiner;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.cookie.Cookies;
 
 public class HttpResponse {
 
-    public static final String ACCEPT = "Accept";
+    private static final String CRLF = "\r\n";
+    private static final String TEXT_HTML = "text/html";
 
-    private final HttpStatus httpStatus;
-    private final String contentType;
+    private HttpStatus httpStatus = HttpStatus.OK;
+    private String contentType = TEXT_HTML;
+    private String location;
+    private Cookies cookies = Cookies.init();
     private String responseBody;
 
-    public HttpResponse(final HttpStatus httpStatus, final String contentType, final String responseBody) {
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
-    }
-
-    public static HttpResponse of(final HttpRequest httpRequest, final String responseBody) {
-        Map<String, String> headers = httpRequest.getHttpHeaders();
-        return new HttpResponse(OK, headers.get(ACCEPT), responseBody);
-    }
-
-    public void setResponseBody(final String responseBody) {
-        this.responseBody = responseBody;
+    public HttpResponse() {
     }
 
     public byte[] getResponse() {
@@ -33,11 +23,52 @@ public class HttpResponse {
     }
 
     private String createResponse() {
-        return String.join("\r\n",
-                String.format("HTTP/1.1 %d %s", httpStatus.getCode(), httpStatus.getMessage()) +
-                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        StringJoiner joiner = new StringJoiner(CRLF);
+        joiner.add(httpStatus.createStatusLine());
+        joiner.add(String.format("Content-Type: %s;charset=utf-8 ", contentType));
+
+        addHeaders(joiner);
+        joiner.add("");
+        if (responseBody != null) {
+            joiner.add(responseBody);
+        }
+        return joiner.toString();
+    }
+
+    private void addHeaders(final StringJoiner joiner) {
+        if (responseBody != null) {
+            joiner.add(String.format("Content-Length: " + responseBody.getBytes().length + " "));
+        }
+        if (location != null) {
+            joiner.add(String.format("Location: %s", location));
+        }
+        if (!cookies.isEmpty()) {
+            joiner.add(cookies.toHeaders());
+        }
+    }
+
+    public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+        return this;
+    }
+
+    public HttpResponse setContentType(final String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public HttpResponse setLocation(final String location) {
+        this.location = location;
+        return this;
+    }
+
+    public HttpResponse setCookie(final Cookie cookie) {
+        cookies.add(cookie);
+        return this;
+    }
+
+    public HttpResponse setResponseBody(final String responseBody) {
+        this.responseBody = responseBody;
+        return this;
     }
 }

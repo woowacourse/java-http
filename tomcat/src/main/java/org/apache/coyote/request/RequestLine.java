@@ -4,11 +4,11 @@ import java.util.Map;
 
 public class RequestLine {
 
-    public static final String REQUEST_LINE_SEPARATOR = " ";
-    public static final String QUERY_PARAM_SEPARATOR = "?";
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int PATH_INDEX = 1;
-    public static final int NOT_EXIST = -1;
+    private static final String REQUEST_LINE_SEPARATOR = " ";
+    private static final String QUERY_PARAM_SEPARATOR = "?";
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final int NOT_EXIST = -1;
 
     private final HttpMethod httpMethod;
     private final String requestUri;
@@ -25,11 +25,11 @@ public class RequestLine {
         String path = tokens[PATH_INDEX];
         int index = path.indexOf(QUERY_PARAM_SEPARATOR);
         if (index == NOT_EXIST) {
-            return new RequestLine(HttpMethod.of(tokens[HTTP_METHOD_INDEX]), path, QueryParams.from(null));
+            return new RequestLine(HttpMethod.from(tokens[HTTP_METHOD_INDEX]), path, QueryParams.from(null));
         }
         String requestUri = path.substring(0, index);
         String parameter = path.substring(index + 1);
-        return new RequestLine(HttpMethod.of(tokens[HTTP_METHOD_INDEX]), requestUri, QueryParams.from(parameter));
+        return new RequestLine(HttpMethod.from(tokens[HTTP_METHOD_INDEX]), requestUri, QueryParams.from(parameter));
     }
 
     public boolean isGet() {

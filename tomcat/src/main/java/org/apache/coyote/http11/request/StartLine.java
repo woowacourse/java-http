@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class StartLine {
 
@@ -7,19 +7,21 @@ public class StartLine {
     private static final int REQUEST_URL_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
     private static final int START_LINE_SIZE = 3;
+    private static final String HTTP_GET_METHOD = "GET";
+    private static final String HTTP_POST_METHOD = "POST";
 
     private final String httpMethod;
     private final RequestURL requestURL;
-    private final String httpVersion;
+    private final String protocol;
 
-    private StartLine(String httpMethod, String requestURL, String httpVersion) {
+    private StartLine(final String httpMethod, final String requestURL, final String protocol) {
         this.httpMethod = httpMethod;
         this.requestURL = RequestURL.from(requestURL);
-        this.httpVersion = httpVersion;
+        this.protocol = protocol;
     }
 
-    public static StartLine from(String line) {
-        String[] values = line.split(LINE_REGEX);
+    public static StartLine from(final String line) {
+        final String[] values = line.split(LINE_REGEX);
         validateStartLine(values);
         return new StartLine(
                 values[HTTP_METHOD_INDEX],
@@ -28,22 +30,18 @@ public class StartLine {
         );
     }
 
-    private static void validateStartLine(String[] values) {
+    private static void validateStartLine(final String[] values) {
         if (values.length < START_LINE_SIZE) {
-            throw new IllegalArgumentException("비어있는 값이 있습니다.");
+            throw new IllegalArgumentException("요청 첫 줄에 비어있는 값이 있습니다.");
         }
     }
 
-    public boolean isMainRequest() {
-        return requestURL.isMainRequest();
+    public boolean isGet() {
+        return HTTP_GET_METHOD.equals(httpMethod);
     }
 
-    public boolean isLoginRequest() {
-        return requestURL.isLoginRequest();
-    }
-
-    public void changeRequestURL() {
-        requestURL.changeRequestURL();
+    public boolean isPost() {
+        return HTTP_POST_METHOD.equals(httpMethod);
     }
 
     public RequestURL getRequestURL() {

@@ -61,7 +61,7 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getMethod() {
+    public Method getMethod() {
         return requestLine.getMethod();
     }
 

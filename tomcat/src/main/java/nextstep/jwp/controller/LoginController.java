@@ -38,8 +38,7 @@ public class LoginController extends AbstractController {
             response.write(HttpStatus.OK, "/login.html");
             return;
         }
-        response.addHeader("Location", "/index.html");
-        response.writeWithEmptyBody(HttpStatus.FOUND);
+        response.redirect(HttpStatus.FOUND, "/index.html");
     }
 
     private void runLogin(final Request request, final Response response)
@@ -50,8 +49,7 @@ public class LoginController extends AbstractController {
             addToSession(response, loggedInUser);
             return;
         }
-        response.addHeader("Location", "/401.html");
-        response.writeWithEmptyBody(HttpStatus.FOUND);
+        response.redirect(HttpStatus.FOUND, "/401.html");
     }
 
     private boolean loginSuccess(final RequestBody body) {
@@ -74,7 +72,6 @@ public class LoginController extends AbstractController {
                 .add(jsessionid, "user", loggedInUser);
         response.addHeader("Set-Cookie", "JSESSIONID="+jsessionid);
         log.info(loggedInUser.toString());
-        response.addHeader("Location", "/index.html");
-        response.writeWithEmptyBody(HttpStatus.FOUND);
+        response.redirect(HttpStatus.FOUND, "/index.html");
     }
 }

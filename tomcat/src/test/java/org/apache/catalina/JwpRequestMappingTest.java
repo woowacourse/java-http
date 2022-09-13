@@ -3,7 +3,7 @@ package org.apache.catalina;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.controller.JwpRequestMapping;
+import nextstep.jwp.controller.requestmapping.JwpRequestMapping;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.exception.ControllerNotFoundException;

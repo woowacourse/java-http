@@ -16,7 +16,6 @@ public class NotFoundExceptionController implements ExceptionController {
     @Override
     public void handle(final Exception exception, final Response response) throws IOException, URISyntaxException {
         log.error(exception.getMessage(), exception);
-        response.addHeader("Location", "/404.html");
-        response.writeWithEmptyBody(HttpStatus.FOUND);
+        response.redirect(HttpStatus.FOUND, "/404.html");
     }
 }

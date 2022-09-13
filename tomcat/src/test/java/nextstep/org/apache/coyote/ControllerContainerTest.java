@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.ControllerContainer;
-import nextstep.jwp.controller.JwpRequestMapping;
+import nextstep.jwp.controller.requestmapping.JwpRequestMapping;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;

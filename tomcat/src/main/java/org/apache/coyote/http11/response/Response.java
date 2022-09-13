@@ -29,8 +29,10 @@ public class Response {
         this.headers.add(key, value);
     }
 
-    public void writeWithEmptyBody(final HttpStatus status) throws IOException, URISyntaxException {
+    public void redirect(final HttpStatus status, final String redirectUri) throws IOException, URISyntaxException {
+        headers.add("Location", redirectUri);
         write(status, EMPTY_STRING);
+
     }
 
     public void write(final HttpStatus status, final String path) throws IOException, URISyntaxException {

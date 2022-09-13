@@ -1,7 +1,10 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.controller.requestmapping;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.RequestMapping;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.exception.ControllerNotFoundException;

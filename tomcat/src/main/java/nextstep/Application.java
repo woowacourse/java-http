@@ -1,7 +1,7 @@
 package nextstep;
 
-import nextstep.jwp.controller.ExceptionControllerFactory;
-import nextstep.jwp.controller.JwpRequestMapping;
+import nextstep.jwp.controller.requestmapping.ExceptionControllerFactory;
+import nextstep.jwp.controller.requestmapping.JwpRequestMapping;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

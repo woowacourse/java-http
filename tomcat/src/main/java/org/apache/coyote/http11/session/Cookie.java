@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;

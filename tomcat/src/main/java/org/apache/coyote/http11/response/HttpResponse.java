@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.session.Cookie;
+
 public class HttpResponse {
 
     private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
@@ -106,6 +108,30 @@ public class HttpResponse {
             sb.append(responseBody);
         }
         return sb.toString();
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Cookie getCookie() {
+        return cookie;
+    }
+
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
     }
 
     @Override

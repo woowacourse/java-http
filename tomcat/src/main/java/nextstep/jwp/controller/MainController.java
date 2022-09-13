@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class MainController extends AbstractController {
 
-    private static final String WELCOME_MESSAGE = "Hello world!";
+    private static final String WELCOME_MESSAGE = "Hello World!";
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {

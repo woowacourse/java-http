@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Optional;
-import org.apache.coyote.http11.response.Cookie;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpRequest {
 

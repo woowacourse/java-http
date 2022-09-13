@@ -6,8 +6,8 @@ import nextstep.jwp.view.View;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ContentType;
-import org.apache.coyote.http11.response.Cookie;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.Cookie;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 

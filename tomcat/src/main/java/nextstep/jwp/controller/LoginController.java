@@ -53,6 +53,6 @@ public class LoginController extends AbstractController {
         if (cookie.existSession()) {
             return redirectToIndex();
         }
-        return function.apply(request.getParamsFromBody());
+        return function.apply(request.getParams());
     }
 }

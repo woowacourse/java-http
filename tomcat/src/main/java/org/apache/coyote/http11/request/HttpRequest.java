@@ -20,7 +20,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public Params getParamsFromBody() {
+    public Params getParams() {
         return body.getParams();
     }
 

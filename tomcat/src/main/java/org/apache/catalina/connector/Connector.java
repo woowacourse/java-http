@@ -1,13 +1,16 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.apache.coyote.Container;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -15,16 +18,22 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREAD_SIZE = 100;
+    private static final int AWAIT_TIME = 800;
 
     private final ServerSocket serverSocket;
+    private final Container container;
+    private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_SIZE);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final Container container, final int port, final int acceptCount, final int maxThreads) {
+        this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -39,6 +48,7 @@ public class Connector implements Runnable {
     }
 
     public void start() {
+        executorService.submit(this);
         var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
@@ -65,16 +75,26 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, container);
         new Thread(processor).start();
     }
 
     public void stop() {
         stopped = true;
+        executorService.shutdown();
         try {
             serverSocket.close();
+            shutDownExecutorAwait(AWAIT_TIME);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
+    }
+
+    private void shutDownExecutorAwait(final int millis) throws InterruptedException {
+        if (!executorService.awaitTermination(millis, TimeUnit.MILLISECONDS)) {
+            executorService.shutdownNow();
         }
     }
 

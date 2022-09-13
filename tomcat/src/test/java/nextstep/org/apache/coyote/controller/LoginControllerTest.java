@@ -4,26 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.LoginController;
+import nextstep.jwp.controller.LoginController;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
-import support.StubSocket;
 
-class LoginControllerTest {
-
-    private StubSocket stubSocket;
-    private Controller loginController;
+class LoginControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-        loginController = new LoginController();
+        controller = new LoginController(SessionManager.getInstance());
     }
 
     @AfterEach
@@ -32,29 +25,13 @@ class LoginControllerTest {
     }
 
     @Test
-    void isRunnable() throws IOException {
+    void loginSuccess() throws Exception {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/login", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/lgoin", "account=gugu&password=password");
+        setRequestAndResponse(requestString);
 
         // when
-        final boolean actual = loginController.isRunnable(request);
-
-        // then
-        assertThat(actual).isTrue();
-    }
-
-    @Test
-    void loginSuccess() throws IOException, URISyntaxException {
-        // given
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=password");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
-        final Response response = Response.of(stubSocket.getOutputStream());
-
-        // when
-        loginController.run(request, response);
+        controller.service(request, response);
 
         // then
         assertAll(
@@ -64,14 +41,12 @@ class LoginControllerTest {
     }
 
     @Test
-    void loginFailure() throws IOException, URISyntaxException {
-        final String requestString = RequestFixture.create(HttpMethod.POST, "/lgoin", "account=gugu&password=wrongPassword");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
-        final Response response = Response.of(stubSocket.getOutputStream());
+    void loginFailure() throws Exception {
+        final String requestString = RequestFixture.createLine(HttpMethod.POST, "/lgoin", "account=gugu&password=wrongPassword");
+        setRequestAndResponse(requestString);
 
         // when
-        loginController.run(request, response);
+        controller.service(request, response);
 
         // then
         assertAll(

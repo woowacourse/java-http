@@ -1,16 +1,14 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import nextstep.Application;
-import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.controller.Controller;
-import org.apache.coyote.controller.ControllerContainer;
+import org.apache.coyote.Container;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.ExceptionHandler;
 import org.apache.coyote.exception.InternalServerException;
+import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -21,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Socket connection;
+    private final Container container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -35,20 +35,22 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final Request request = Request.of(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final Request request = Request.of(bufferedReader);
             final Response response = Response.of(outputStream);
             execute(request, response);
-        } catch (IOException | UncheckedServletException | IllegalArgumentException | URISyntaxException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void execute(final Request request, final Response response) throws IOException, URISyntaxException {
+    private void execute(final Request request, final Response response) throws Exception {
         try {
-            final Controller controller = ControllerContainer.findController(request);
-            controller.run(request, response);
+            final Controller controller = container.findController(request);
+            controller.service(request, response);
         } catch (InternalServerException | NotFoundException e) {
-            ExceptionHandler.handle(e, response);
+            container.findExceptionHandler(e)
+                    .handle(e, response);
         }
     }
 }

@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.request.Request.PATH_INDEX;
-import static org.apache.coyote.http11.request.Request.QUERY_PARAM_DELIMITER_REGEX;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -11,19 +8,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import nextstep.jwp.exception.StaticFileNotFoundException;
 
 public class URL {
     private static final String PATH_FROM_RESOURCE = "static";
     private static final String DEFAULT_URL = "/";
+    private static final int PATH_INDEX = 0;
     private static final String NEWLINE = "\n";
     private static final String DEFAULT_MEDIA_TYPE = "text/html";
     private static final String DEFAULT_CONTENT = "Hello world!";
-
+    private static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
 
     private final String url;
 
-    public URL(final String url) {
+    private URL(final String url) {
         this.url = url;
     }
 
@@ -68,11 +67,28 @@ public class URL {
         return fileUrl.toURI();
     }
 
-    public boolean hasPath(final String path) {
+    public boolean hasSameWith(final String path) {
         return this.url.equals(path);
     }
 
     public boolean isForStaticFile() {
         return url.contains(".");
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final URL url1 = (URL) o;
+        return Objects.equals(url, url1.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(url);
     }
 }

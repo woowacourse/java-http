@@ -2,14 +2,14 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.exception.InvalidQueryParamKeyException;
+import org.apache.coyote.exception.InvalidQueryParamKeyException;
 import org.apache.coyote.KeyValueTupleParser;
 
 public class QueryParams {
 
     private final Map<String, String> params;
 
-    public QueryParams(final Map<String,String> params) {
+    private QueryParams(final Map<String,String> params) {
         this.params = params;
     }
 
@@ -28,9 +28,5 @@ public class QueryParams {
             throw new InvalidQueryParamKeyException();
         }
         return value;
-    }
-
-    public boolean isEmpty() {
-        return this.params.isEmpty();
     }
 }

@@ -9,6 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.ControllerContainer;
+import nextstep.jwp.controller.handlermapping.JwpExceptionHandlers;
+import nextstep.jwp.controller.handlermapping.JwpRequestMapping;
+import org.apache.coyote.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -25,6 +29,9 @@ class Http11ProcessorTest {
 
     private StubSocket stubSocket;
     private MemoryAppender memoryAppender;
+    private Container container = new ControllerContainer(
+            JwpRequestMapping.getInstance(), JwpExceptionHandlers.getInstance()
+    );
 
     @BeforeEach
     void setUp() {
@@ -46,7 +53,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         stubSocket = new StubSocket();
-        final var processor = new Http11Processor(stubSocket);
+        final var processor = new Http11Processor(stubSocket, container);
 
         // when
         processor.process(stubSocket);
@@ -60,10 +67,10 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
+        final String httpRequest = RequestFixture.createLine(HttpMethod.GET, "/index.html", "");
 
         stubSocket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(stubSocket);
+        final Http11Processor processor = new Http11Processor(stubSocket, container);
 
         // when
         processor.process(stubSocket);

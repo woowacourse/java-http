@@ -2,31 +2,27 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
-import support.StubSocket;
 
 class RequestTest {
-
-    private StubSocket stubSocket;
-
-    @AfterEach
-    void tearDown() throws IOException {
-        stubSocket.close();
-    }
 
     @Test
     void of() throws IOException {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
-        stubSocket = new StubSocket(requestString);
+        final String requestLine = RequestFixture.createLine(HttpMethod.GET, "/", "");
 
         // when
-        final Request request = Request.of(stubSocket.getInputStream());
+        final InputStream inputStream = new ByteArrayInputStream(requestLine.getBytes());
+        final Request request = Request.of(new BufferedReader(new InputStreamReader(inputStream)));
 
         // then
         assertThat(request.hasPath("/")).isTrue();
@@ -35,9 +31,7 @@ class RequestTest {
     @Test
     void isForStaticFile() throws IOException {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/index.html", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
+        final Request request = RequestFixture.create(HttpMethod.GET, "/index.html", "");
 
         // when
         final boolean actual = request.isForStaticFile();
@@ -49,9 +43,7 @@ class RequestTest {
     @Test
     void isDefaultUrl() throws IOException {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
+        final Request request = RequestFixture.create(HttpMethod.GET, "/", "");
 
         // when
         final boolean actual = request.isDefaultUrl();
@@ -63,16 +55,13 @@ class RequestTest {
     @Test
     void findJsessionid() throws IOException {
         // given
-        final String requestString = RequestFixture.create(HttpMethod.GET, "/", "");
-        stubSocket = new StubSocket(requestString);
-        final Request request = Request.of(stubSocket.getInputStream());
         final String jsessionidValue = "JSESSIONID=some-jsessionid-exists";
-        request.getHeaders().add("Cookie", jsessionidValue);
+        final Request request = RequestFixture.create(HttpMethod.GET, "/", Map.of("Cookie", jsessionidValue), "");
 
         // when
-        final String actual = request.findJsessionid();
+        final boolean hasJsessionid = request.hasJsessionid();
 
         // then
-        assertThat(actual).isEqualTo(jsessionidValue);
+        assertThat(hasJsessionid).isTrue();
     }
 }

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import nextstep.jwp.exception.InvalidQueryParamKeyException;
+import org.apache.coyote.exception.InvalidQueryParamKeyException;
 import org.apache.coyote.http11.request.QueryParams;
 import org.junit.jupiter.api.Test;
 

@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.Application;
-import org.apache.coyote.exception.NotFoundException;
-import org.apache.coyote.exception.InternalServerException;
 import org.apache.coyote.Container;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.exception.InternalServerException;
+import org.apache.coyote.exception.NotFoundException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -45,8 +46,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private void execute(final Request request, final Response response) throws Exception {
         try {
-            container.findController(request)
-                    .service(request, response);
+            final Controller controller = container.findController(request);
+            controller.service(request, response);
         } catch (InternalServerException | NotFoundException e) {
             container.findExceptionHandler(e)
                     .handle(e, response);

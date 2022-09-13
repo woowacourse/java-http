@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -11,7 +12,7 @@ import nextstep.jwp.exception.ResourceNotFoundException;
 
 public class ResponseBody {
 
-    private static final String STATIC_PATH = "static/";
+    public static final String STATIC_PATH = "static/";
 
     private final String value;
 
@@ -19,12 +20,11 @@ public class ResponseBody {
         this.value = value;
     }
 
-    public static ResponseBody of(ResponseEntity responseEntity, ResponseHeaders responseHeaders) {
+    public static ResponseBody of(ResponseEntity responseEntity) {
         if (responseEntity.getHttpStatus().isRedirect()) {
             return new ResponseBody("");
         }
         String processResponseBody = processResponseBody(responseEntity.getResponseBody());
-        responseHeaders.setContentLength(processResponseBody.getBytes().length);
         return new ResponseBody(processResponseBody);
     }
 
@@ -58,5 +58,9 @@ public class ResponseBody {
 
     public String value() {
         return value;
+    }
+
+    public int getContentLength() {
+        return value.getBytes().length;
     }
 }

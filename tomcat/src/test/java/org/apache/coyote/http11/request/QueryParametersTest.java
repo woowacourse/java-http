@@ -36,8 +36,20 @@ class QueryParametersTest {
 
         // when & then
         Assertions.assertAll(
-                () -> assertThat(queryParameters.getAccount()).isEqualTo("eden"),
-                () -> assertThat(queryParameters.getPassword()).isEqualTo("eden123")
+                () -> assertThat(queryParameters.get("account")).isEqualTo("eden"),
+                () -> assertThat(queryParameters.get("password")).isEqualTo("eden123")
         );
+    }
+
+    @Test
+    void query_parameter로_value가_없는_값이_들어오면_null을_넣는다() {
+        // given
+        String uri = "/test?account=";
+
+        // when
+        QueryParameters queryParameters = QueryParameters.of(uri);
+
+        // then
+        assertThat(queryParameters.get("account")).isNull();
     }
 }

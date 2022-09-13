@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> values;
     private final boolean doesNeedToJSessionCookie;
 
@@ -21,7 +23,7 @@ public class HttpCookie {
             String[] cookieKeyValue = splitCookie.split("=");
             cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
         }
-        if (cookies.containsKey("JSESSIONID")) {
+        if (cookies.containsKey(JSESSIONID)) {
             return new HttpCookie(cookies, false);
         }
         return setJSessionIdCookie(cookies);
@@ -34,7 +36,7 @@ public class HttpCookie {
 
     private static HttpCookie setJSessionIdCookie(Map<String, String> cookies) {
         String jSessionId = String.valueOf(UUID.randomUUID());
-        cookies.put("JSESSIONID", jSessionId);
+        cookies.put(JSESSIONID, jSessionId);
         SessionManager.addSession(new Session(jSessionId));
         return new HttpCookie(cookies, true);
     }

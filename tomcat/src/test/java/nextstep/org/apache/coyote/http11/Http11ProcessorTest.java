@@ -2,15 +2,18 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import nextstep.jwp.ui.FileController;
+import org.apache.coyote.http11.RequestMapping;
+import nextstep.jwp.ui.HomeController;
+import nextstep.jwp.ui.LoginController;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -21,7 +24,9 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.registerController("/", new HomeController());
+        final var processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -49,7 +54,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.setFileController(new FileController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.process(socket);
@@ -77,7 +84,9 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.setFileController(new FileController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.run();
@@ -103,11 +112,13 @@ class Http11ProcessorTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=eden ",
+                "Content-Length: " + "a=b&b=a@w".getBytes().length,
                 "",
-                "");
-
+                "a=b&b=a@w");
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        RequestMapping requestMapping = new RequestMapping();
+        requestMapping.registerController("/login", new LoginController());
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         // when
         processor.run();

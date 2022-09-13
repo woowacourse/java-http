@@ -24,7 +24,7 @@ public class HttpRequestStartLine {
     public static HttpRequestStartLine from(final String startLine) {
         final String[] startLineContents = startLine.split(" ");
 
-        return new HttpRequestStartLine(HttpMethod.findMethod(startLineContents[0]),
+        return new HttpRequestStartLine(HttpMethod.valueOf(startLineContents[0]),
                 takeUri(startLineContents[1]),
                 startLineContents[2],
                 takeQueryParams(startLineContents[1]));

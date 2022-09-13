@@ -7,6 +7,7 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.model.UserRequest;
 import org.apache.coyote.http11.http.HttpCookie;
 import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpPath;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
@@ -42,9 +43,13 @@ public class LoginController extends AbstractController {
     }
 
     private void write(final HttpRequest request, final HttpResponse response) throws IOException {
-        String body = FileUtils.readAllBytes(request.getPath().getValue());
+        HttpPath httpPath = request.getPath();
+        if (httpPath.isEqualToPath("/login")) {
+            httpPath = new HttpPath("/login.html");
+        }
+        String body = FileUtils.readAllBytes(httpPath.getValue());
         response.setBody(body);
-        response.forward(request.getPath());
+        response.forward(httpPath);
         response.write();
     }
 

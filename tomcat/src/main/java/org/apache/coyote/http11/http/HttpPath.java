@@ -19,6 +19,10 @@ public class HttpPath {
         return new HttpPath(uri);
     }
 
+    public boolean isEqualToPath(final String path) {
+        return value.equals(path);
+    }
+
     public boolean isQuery() {
         return value.contains(QUERY_PARAMETER);
     }

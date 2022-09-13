@@ -6,6 +6,7 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpPath;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
@@ -19,8 +20,12 @@ public class UserController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        String body = FileUtils.readAllBytes(request.getPath().getValue());
-        response.forward(request.getPath());
+        HttpPath httpPath = request.getPath();
+        if (httpPath.isEqualToPath("/login")) {
+            httpPath = new HttpPath("/login.html");
+        }
+        String body = FileUtils.readAllBytes(httpPath.getValue());
+        response.forward(httpPath);
         response.setBody(body);
         response.write();
     }

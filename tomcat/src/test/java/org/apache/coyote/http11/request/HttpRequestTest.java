@@ -3,12 +3,12 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,11 +33,11 @@ class HttpRequestTest {
 
         // then
         assertAll(
-                () -> assertTrue(httpRequest.getRequestLine().isGet()),
+                () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getPath()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getRequestLine().getRequestUri().getParams()).isEmpty(),
-                () -> assertThat(httpRequest.getRequestLine().getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpRequest.getRequestHeaders().getValues()).contains(
+                () -> assertThat(httpRequest.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpRequest.getRequestHeaders().getHeaders()).contains(
                         entry("Host", "localhost:8080"),
                         entry("Connection", "keep-alive")
                 )

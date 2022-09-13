@@ -8,11 +8,11 @@ import org.apache.coyote.http11.authorization.HttpCookie;
 import org.apache.coyote.http11.exception.RequestHeaderException;
 
 public class HttpRequest {
-    private final HttpRequestStartLine startLine;
+    private final HttpRequestLine startLine;
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
 
-    private HttpRequest(HttpRequestStartLine startLine, HttpRequestHeader header,
+    private HttpRequest(HttpRequestLine startLine, HttpRequestHeader header,
                         HttpRequestBody body) {
         this.startLine = startLine;
         this.header = header;
@@ -30,7 +30,7 @@ public class HttpRequest {
         final String bodyLine = getRequestBody(reader,
                 (String) httpRequestHeader.getHeader("Content-Length"));
 
-        return new HttpRequest(HttpRequestStartLine.from(startLine),
+        return new HttpRequest(HttpRequestLine.from(startLine),
                 httpRequestHeader,
                 new HttpRequestBody(getRequestBodyParams(bodyLine)));
     }
@@ -82,7 +82,7 @@ public class HttpRequest {
         return body;
     }
 
-    public HttpRequestStartLine getStartLine() {
+    public HttpRequestLine getStartLine() {
         return startLine;
     }
 

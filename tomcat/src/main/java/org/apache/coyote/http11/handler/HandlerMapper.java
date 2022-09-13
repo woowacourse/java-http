@@ -8,7 +8,7 @@ import static nextstep.jwp.handler.get.LoginPageHandler.LOGIN_PAGE_HANDLER;
 import java.util.Arrays;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.request.HttpRequestLine;
 
 public enum HandlerMapper {
 
@@ -34,7 +34,7 @@ public enum HandlerMapper {
                 .orElse(HANDLER_FOR_GET_REQUEST);
     }
 
-    private static boolean existHandler(final HttpRequestStartLine startLine, final HandlerMapper mapper) {
+    private static boolean existHandler(final HttpRequestLine startLine, final HandlerMapper mapper) {
         return startLine.getMethod() == mapper.httpMethod &&
                 startLine.getUri().equals(mapper.uri);
     }

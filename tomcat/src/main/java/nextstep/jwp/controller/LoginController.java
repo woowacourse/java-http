@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
@@ -10,6 +11,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
 import org.apache.coyote.http11.response.Status;
 import org.apache.coyote.http11.session.Session;
+import utils.ParseUtils;
 
 public class LoginController extends AbstractController {
 
@@ -36,7 +38,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Optional<User> user = userService.login(request.getBody());
+        Map<String, String> body = ParseUtils.parse(request.getBody(), "&", "=");
+        final Optional<User> user = userService.login(body);
 
         if (user.isEmpty()) {
             return response.redirect(PAGE_401);

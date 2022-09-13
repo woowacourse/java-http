@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.util.Map;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.controller.AbstractController;
@@ -7,6 +8,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponse.ResponseBuilder;
 import org.apache.coyote.http11.response.Status;
+import utils.ParseUtils;
 
 public class RegisterController extends AbstractController {
 
@@ -28,7 +30,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (userService.register(request.getBody())) {
+        Map<String, String> body = ParseUtils.parse(request.getBody(), "&", "=");
+        if (userService.register(body)) {
             return response.redirect(PAGE_INDEX);
         }
         return response.redirect(PAGE_401);

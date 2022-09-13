@@ -4,6 +4,14 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.apache.coyote.http.Session;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,18 +21,32 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_ACCEPT_COUNT = 350;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 250;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ExecutorService executorService;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_POOL_SIZE, DEFAULT_THREAD_POOL_SIZE, 60, TimeUnit.SECONDS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port,
+                     final int acceptCount,
+                     final int corePoolSize,
+                     final int maxThreads,
+                     final int keepAliveTime,
+                     final TimeUnit timeUnit) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(
+                corePoolSize,
+                maxThreads,
+                keepAliveTime,
+                timeUnit,
+                new LinkedBlockingQueue<>(acceptCount)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -65,12 +87,13 @@ public class Connector implements Runnable {
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            executorService.shutdown();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

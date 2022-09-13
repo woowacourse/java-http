@@ -29,7 +29,7 @@ public class Registry {
         }
     }
 
-    public static HttpResponse handle(final HttpRequest httpRequest){
+    public static HttpResponse handle(final HttpRequest httpRequest) {
         return findHandler(httpRequest).handle(httpRequest);
     }
 
@@ -46,7 +46,7 @@ public class Registry {
     }
 
     private static Handler findHandler(final HttpRequest httpRequest) {
-        final String url = httpRequest.getUrl();
+        final String url = httpRequest.getUri();
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final Handler handler = requestMap.get(new Mapping(url, httpMethod));
 
@@ -59,6 +59,10 @@ public class Registry {
         }
 
         return new NotFoundRequestHandler();
+    }
+
+    public static void clear() {
+        requestMap = new HashMap<>();
     }
 
     private static boolean isMethodRequest(Handler handler) {

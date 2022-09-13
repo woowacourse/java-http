@@ -1,78 +1,94 @@
 package org.apache.coyote.http;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import javassist.NotFoundException;
 
 public class HttpRequest {
 
     private static final String QUERY_DELIMETER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String INDEX_DELIMITER = "?";
-    private final HttpMethod httpMethod;
-    private final String url;
+    private static final String URL_DELIMITER = "?";
 
-    private final Map<String, String> query;
+    private final HttpRequestLine httpRequestLine;
+    private final Header header;
+    private final String body;
+    private final Session session;
 
 
-    public HttpRequest(final String request) {
-        final String[] parseRequest = request.split(" ");
-        this.httpMethod = HttpMethod.from(parseRequest[0]);
-        final Integer index = parseRequest[1].indexOf(INDEX_DELIMITER);
-        this.url = parseUrl(parseRequest[1], index);
-        this.query = parseQuery(parseRequest[1], index);
+    public HttpRequest(final HttpRequestLine httpRequestLine, Header header, String body) {
+        this.httpRequestLine = httpRequestLine;
+        this.header = header;
+        this.body = body;
+        this.session = SessionManager.add()
+                .orElseThrow(() -> new NoSuchElementException("세션이 정상적으로 저장되지 않았습니다."));
     }
 
-    private String parseUrl(final String uri, final Integer index) {
-        if (hasQuery(index)) {
-            return uri.substring(0, index);
+    public Optional<String> findQueryByKey(String queryKey){
+        if(hasQueryInUri(getFullUri())){
+            return findValue(queryKey, getFullUri());
         }
-        return uri;
-    }
 
-    private Map<String, String> parseQuery(final String uri, final Integer index) {
-        if (hasQuery(index)) {
-            String queryString = uri.substring(index + 1);
-            final String[] s = queryString.split(QUERY_DELIMETER);
-            return Arrays.stream(s)
-                    .map(q -> q.split(KEY_VALUE_DELIMITER))
-                    .collect(Collectors.toMap(key -> key[0], value -> value[1]));
+        if(isFormUrlEncoded()){
+            return findValue(queryKey, body);
         }
-        return new HashMap<>();
+
+        throw new NoSuchElementException("요청내에 QueryString이 존재하지 않습니다.");
     }
 
-    private boolean hasQuery(final int index) {
-        return index >= 0;
+    private boolean isFormUrlEncoded() {
+        final String contentType = header.getHeaderContent().get("Content-Type");
+        return contentType!= null && contentType.equals("application/x-www-form-urlencoded");
     }
 
-    public boolean hasQuery() {
-        return query.size() != 0;
+
+    private boolean hasQueryInUri(final String uri) {
+        return uri.contains(URL_DELIMITER);
     }
 
-    public String getQueryByValue(final String key) {
-        final String value = query.get(key);
-        validateNull(key, value);
-        return value;
+    private Optional<String> findValue(String queryKey, String target){
+        final Map<String, String> queryMap = makeQueryMap(target);
+
+        final String queryValue = queryMap.get(queryKey);
+        return Optional.ofNullable(queryValue);
     }
 
-    private void validateNull(String key, String value){
-        if(value == null){
-            throw new NoSuchElementException(String.format("%s의 값을 찾을 수 없습니다.", key));
-        }
+    private Map<String, String> makeQueryMap(final String target) {
+        final Integer index = target.indexOf(URL_DELIMITER);
+        final String queryString = target.substring(index + 1);
+        final String[] s = queryString.split(QUERY_DELIMETER);
+        return Arrays.stream(s)
+                .map(q -> q.split(KEY_VALUE_DELIMITER))
+                .collect(Collectors.toMap(key -> key[0], value -> value[1]));
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return httpRequestLine.getHttpMethod();
     }
 
-    public String getUrl() {
-        return url;
+    public String getFullUri(){
+        return httpRequestLine.getUri();
     }
 
-    public Map<String, String> getQuery() {
-        return query;
+    public String getUri() {
+        Integer index = getFullUri().indexOf(URL_DELIMITER);
+        if (hasQueryInUri(getFullUri())) {
+            return getFullUri().substring(0, index);
+        }
+        return getFullUri();
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public HttpCookie getCookie(){
+        return header.getCookie();
     }
 }

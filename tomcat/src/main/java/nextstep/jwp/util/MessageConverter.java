@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.util;
 
 import java.util.Arrays;
 import java.util.Map;

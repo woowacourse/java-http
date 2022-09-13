@@ -31,8 +31,12 @@ public class QueryParams {
         return new QueryParams(queryParams);
     }
 
-    public String getValue(final String name) {
+    public String findValue(final String name) {
         return Optional.ofNullable(value.get(name))
                 .orElseThrow(InvalidRequestException::new);
+    }
+
+    public Map<String, String> getValue() {
+        return value;
     }
 }

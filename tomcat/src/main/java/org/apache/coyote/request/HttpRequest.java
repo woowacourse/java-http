@@ -51,7 +51,7 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public QueryParams getQueryParams() {
+    public Map<String, String> getQueryParams() {
         return requestLine.getQueryParams();
     }
 

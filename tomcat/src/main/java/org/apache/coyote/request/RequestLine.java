@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import java.util.Map;
+
 public class RequestLine {
 
     private static final String REQUEST_LINE_SEPARATOR = " ";
@@ -46,7 +48,7 @@ public class RequestLine {
         return requestUri;
     }
 
-    public QueryParams getQueryParams() {
-        return queryParams;
+    public Map<String, String> getQueryParams() {
+        return queryParams.getValue();
     }
 }

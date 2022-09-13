@@ -34,9 +34,10 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        return String.format("%s\r\n%s\r\n\r\n%s",
+        return String.join("\r\n",
                         new StatusLine(status).toHttpResponse(),
                         this.headers.toHttpResponse(),
+                        "",
                         body)
                 .getBytes(StandardCharsets.UTF_8);
     }

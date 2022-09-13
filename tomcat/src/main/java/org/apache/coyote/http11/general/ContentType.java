@@ -7,7 +7,9 @@ public enum ContentType {
     HTML("text/html"),
     CSS("text/css"),
     JS("text/javascript"),
-    SVG("image/svg+xml");
+    SVG("image/svg+xml"),
+    APPLICATION_FORM_URLENCODED("application/x-www-form-urlencoded"),
+    APPLICATION_JSON("application/json");
 
     private final String value;
 
@@ -21,7 +23,7 @@ public enum ContentType {
 
     public static ContentType of(String type) {
         return Arrays.stream(values())
-                .filter(contentType -> contentType.name().equalsIgnoreCase(type))
+                .filter(contentType -> contentType.value.equalsIgnoreCase(type))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 mime type = " + type));
     }

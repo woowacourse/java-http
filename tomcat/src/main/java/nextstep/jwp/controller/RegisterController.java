@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
 import nextstep.jwp.service.LoginService;
 import org.apache.catalina.servlets.AbstractController;
 import org.apache.coyote.http11.ResourceLocator;
+import org.apache.coyote.http11.general.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
@@ -27,14 +27,14 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> data = parseFormPayload(request, response);
-        if (data == null) {
+        if (request.getContentType() != ContentType.APPLICATION_FORM_URLENCODED) {
+            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             return;
         }
 
-        String account = data.get("account");
-        String password = data.get("password");
-        String email = data.get("email");
+        String account = request.getParameter("account");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
 
         LoginService loginService = new LoginService();
         loginService.register(account, password, email);

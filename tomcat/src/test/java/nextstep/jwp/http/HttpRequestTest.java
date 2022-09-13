@@ -3,6 +3,10 @@ package nextstep.jwp.http;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpMethod;
+import org.apache.http.HttpRequest;
+import org.apache.http.QueryParams;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

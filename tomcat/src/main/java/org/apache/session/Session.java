@@ -16,18 +16,6 @@ public class Session {
         values.put(name, value);
     }
 
-    public Object readAttribute(final String name) {
-        return values.get(name);
-    }
-
-    public void updateAttribute(final String name, final Object value) {
-        values.replace(name, value);
-    }
-
-    public void deleteAttribute(final String name) {
-        values.remove(name);
-    }
-
     public String getId() {
         return id;
     }

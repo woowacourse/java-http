@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.http.QueryParam;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

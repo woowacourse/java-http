@@ -1,5 +1,8 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.session.SessionManager;
@@ -9,7 +12,7 @@ public class HttpRequest {
     private static final String REQUEST_LINE_SEPARATOR = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
-    private static final String URI_PATH_SEPARATOR = "\\?";
+    private static final String QUERY_SEPARATOR = "\\?";
     private static final int PATH_INDEX = 0;
     private static final int QUERY_PARAM_INDEX = 1;
     private static final int ONLY_PATH_SIZE = 1;
@@ -32,13 +35,37 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
+        String requestBody = parseRequestBody(bufferedReader, httpHeaders);
+
+        return HttpRequest.of(requestLine, httpHeaders, requestBody);
+    }
+
+    private static HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            lines.add(line);
+        }
+        return HttpHeaders.parse(lines);
+    }
+
+    private static String parseRequestBody(BufferedReader bufferedReader, HttpHeaders httpHeaders)
+        throws IOException {
+        char[] body = new char[httpHeaders.getContentLength()];
+        bufferedReader.read(body);
+        return new String(body);
+    }
+
     public static HttpRequest of(String requestLine, HttpHeaders httpHeaders,
                                  String requestBody) {
         List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
         HttpMethod httpMethod = HttpMethod.from(request.get(HTTP_METHOD_INDEX));
         String uri = request.get(URI_INDEX);
-        List<String> separatedUri = List.of(uri.split(URI_PATH_SEPARATOR));
-        return handleHavingQueryParams(httpMethod, uri, separatedUri, httpHeaders, requestBody);
+        List<String> queryParams = List.of(uri.split(QUERY_SEPARATOR));
+        return handleHavingQueryParams(httpMethod, uri, queryParams, httpHeaders, requestBody);
     }
 
     private static HttpRequest handleHavingQueryParams(HttpMethod httpMethod, String uri,
@@ -54,6 +81,10 @@ public class HttpRequest {
 
     private static boolean hasQueryParam(List<String> separatedUri) {
         return separatedUri.size() != ONLY_PATH_SIZE;
+    }
+
+    public boolean matches(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
     }
 
     public boolean matches(String path, HttpMethod httpMethod) {
@@ -75,11 +106,12 @@ public class HttpRequest {
         return QueryParams.empty();
     }
 
-    public boolean isLoggedInUser(SessionManager sessionManager) {
-        return httpHeaders.getCookie()
-            .getJSessionId()
-            .filter(sessionManager::contains)
-            .isPresent();
+    public Cookies getCookies() {
+        return httpHeaders.getCookies();
+    }
+
+    public String getUri() {
+        return uri;
     }
 
     public String getPath() {

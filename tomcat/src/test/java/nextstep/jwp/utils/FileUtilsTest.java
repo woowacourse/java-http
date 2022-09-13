@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.util.Objects;
-import nextstep.jwp.http.ContentType;
+import org.apache.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

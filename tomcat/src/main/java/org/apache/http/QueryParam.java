@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package org.apache.http;
 
 public class QueryParam {
 

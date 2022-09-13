@@ -26,7 +26,7 @@ public class HandlerForGetRequest extends Handler {
                 getResponseBody(uri));
     }
 
-    public Map<String, String> createResponseHeader(final String requestUri) throws IOException {
+    protected Map<String, String> createResponseHeader(final String requestUri) throws IOException {
         final Map<String, String> header = new LinkedHashMap<>();
         header.put("Content-Type", getContentType(requestUri) + ";charset=utf-8");
 
@@ -36,7 +36,7 @@ public class HandlerForGetRequest extends Handler {
         return header;
     }
 
-    String getContentType(final String uri) {
+    protected String getContentType(final String uri) {
         if (uri.contains(".css")) {
             return "text/css";
         }
@@ -48,7 +48,7 @@ public class HandlerForGetRequest extends Handler {
         return "text/html";
     }
 
-    String getResponseBody(String requestUri) throws IOException {
+    protected String getResponseBody(String requestUri) throws IOException {
         if (requestUri.equals("/")) {
             return "Hello world!";
         }

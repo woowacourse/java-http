@@ -42,16 +42,15 @@ public class Parser {
 
     public static Map<String, String> parseQueryString(String queryString) {
         String[] values = queryString.split(QUERY_CONNECT_DELIMITER);
-        Map<String, String> params = new HashMap<>();
-        for (String param : values) {
-            final String[] data = param.split(QUERY_VALUE_DELIMITER);
-            params.put(data[NAME_INDEX], data[VALUE_INDEX]);
-        }
-        return params;
+        return toMap(values);
     }
 
     public static Map<String, String> parseCookieString(String queryString) {
         String[] values = queryString.split(COOKIE_CONNECT_DELIMITER);
+        return toMap(values);
+    }
+
+    private static Map<String, String> toMap(final String[] values) {
         Map<String, String> params = new HashMap<>();
         for (String param : values) {
             final String[] data = param.split(QUERY_VALUE_DELIMITER);

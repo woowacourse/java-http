@@ -1,7 +1,6 @@
-package org.apache.coyote.http11.http11handler.user;
+package nextstep.jwp.model.user;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.user.User;
 
 public class UserService {
 

@@ -87,4 +87,14 @@ public class Http11Request {
         }
         return null;
     }
+
+    public void setSessionId(String sessionId) {
+        String rawCookie = header.get(HeaderElement.COOKIE.getValue());
+        if (rawCookie == null) {
+            rawCookie = "";
+        }
+        HttpCookie httpCookie = HttpCookie.of(rawCookie);
+        httpCookie.setJsessionId(sessionId);
+        header.put(HeaderElement.COOKIE.getValue(), httpCookie.toStringFormat());
+    }
 }

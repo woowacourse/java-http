@@ -93,7 +93,12 @@ public class HttpRequest {
     }
 
     public String getCookieValue(final String key) {
-        final HttpCookie cookie = (HttpCookie) header.getHeader("Cookie");
+        HttpCookie cookie = (HttpCookie) header.getHeader("Cookie");
+
+        if (cookie == null) {
+            return null;
+        }
+        
         return cookie.getCookieValue(key);
     }
 }

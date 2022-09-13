@@ -46,23 +46,27 @@ public class LoginController extends AbstractController {
                 .orElse(getUnauthorizedResponse());
     }
 
+    private HttpResponse getUnauthorizedResponse() {
+        return HttpResponse.redirect()
+                .addLocation(View.UNAUTHORIZED.getViewFileName())
+                .build();
+    }
+
     private HttpResponse getLoginResponse(User user, String password) {
         if (user.checkPassword(password)) {
             Session session = new Session();
             session.setAttribute(USER_KEY, user);
             SessionManager.add(session);
 
-            return HttpResponse.redirect()
-                    .addLocation(View.INDEX.getViewFileName())
-                    .addCookie(Cookie.ofJSessionId(session.getId()))
-                    .build();
+            return getLoginRedirectResponse(session);
         }
         return getUnauthorizedResponse();
     }
 
-    private HttpResponse getUnauthorizedResponse() {
+    private HttpResponse getLoginRedirectResponse(Session session) {
         return HttpResponse.redirect()
-                .addLocation(View.UNAUTHORIZED.getViewFileName())
+                .addLocation(View.INDEX.getViewFileName())
+                .addCookie(Cookie.ofJSessionId(session.getId()))
                 .build();
     }
 

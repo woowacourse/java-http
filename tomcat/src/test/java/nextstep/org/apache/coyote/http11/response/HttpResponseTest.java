@@ -15,7 +15,7 @@ public class HttpResponseTest {
         // given
         final HttpResponse httpResponse = new HttpResponse();
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setBody("Hello world!");
+        httpResponse.addBody("Hello world!");
 
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",

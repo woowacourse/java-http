@@ -33,7 +33,7 @@ public class FrontServlet {
 
         if ("/".equals(url)) {
             httpResponse.setStatus(HttpStatus.OK);
-            httpResponse.setBody("Hello world!");
+            httpResponse.addBody("Hello world!");
             return;
         }
 
@@ -54,13 +54,13 @@ public class FrontServlet {
 
         final ViewResolver viewResolver = new ViewResolver(viewName.get() + ".html");
         final ViewInfo viewInfo = viewResolver.render();
-        httpResponse.setBody(viewInfo.getViewContent(), viewInfo.getContentType(), viewInfo.getContentLength());
+        httpResponse.addBody(viewInfo.getViewContent(), viewInfo.getContentType(), viewInfo.getContentLength());
     }
 
     private void renderView(final String url, final HttpResponse httpResponse) throws IOException, URISyntaxException {
         final ViewResolver viewResolver = new ViewResolver(url);
         final ViewInfo viewInfo = viewResolver.render();
 
-        httpResponse.setBody(viewInfo.getViewContent(), viewInfo.getContentType(), viewInfo.getContentLength());
+        httpResponse.addBody(viewInfo.getViewContent(), viewInfo.getContentType(), viewInfo.getContentLength());
     }
 }

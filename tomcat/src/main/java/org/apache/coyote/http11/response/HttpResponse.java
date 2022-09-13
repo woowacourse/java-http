@@ -20,7 +20,7 @@ public class HttpResponse {
     }
 
     public String makeResponse() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
         sb.append(statusLine.getStatusLine()).append(" \r\n")
                 .append(httpHeaders.toTextHeader()).append("\r\n")
@@ -54,13 +54,13 @@ public class HttpResponse {
         this.statusLine = new StatusLine(httpStatus);
     }
 
-    public void setBody(final String value) {
+    public void addBody(final String value) {
         body += value;
         httpHeaders.setContentType("text/html");
         httpHeaders.setContentLength(body.length());
     }
 
-    public void setBody(final String value, final String contentType, final int contentLength) {
+    public void addBody(final String value, final String contentType, final int contentLength) {
         body += value;
         httpHeaders.setContentType(contentType);
         httpHeaders.setContentLength(contentLength);

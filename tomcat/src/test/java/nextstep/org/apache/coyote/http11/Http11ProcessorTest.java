@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.ControllerContainer;
 import org.apache.catalina.ControllerFactory;
-import org.apache.catalina.RequestMapping;
+import nextstep.jwp.controller.JwpRequestMapping;
 import org.apache.coyote.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -30,7 +30,7 @@ class Http11ProcessorTest {
     private StubSocket stubSocket;
     private MemoryAppender memoryAppender;
     private Container container = new ControllerContainer(
-            new RequestMapping(), ControllerFactory.createExceptionControllers()
+            new JwpRequestMapping(), ControllerFactory.createExceptionControllers()
     );
 
     @BeforeEach

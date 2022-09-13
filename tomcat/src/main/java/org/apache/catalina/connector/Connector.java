@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.catalina.ControllerContainer;
 import org.apache.catalina.ControllerFactory;
-import org.apache.catalina.RequestMapping;
+import nextstep.jwp.controller.JwpRequestMapping;
 import org.apache.coyote.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector() {
-        this(new ControllerContainer(new RequestMapping(), ControllerFactory.createExceptionControllers()),
+        this(new ControllerContainer(new JwpRequestMapping(), ControllerFactory.createExceptionControllers()),
                 DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_SIZE);
     }
 

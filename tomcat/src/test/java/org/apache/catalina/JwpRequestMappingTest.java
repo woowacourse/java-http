@@ -3,6 +3,7 @@ package org.apache.catalina;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.controller.JwpRequestMapping;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.StaticFileController;
 import org.apache.catalina.exception.ControllerNotFoundException;
@@ -10,9 +11,9 @@ import org.apache.coyote.Controller;
 import org.apache.coyote.http11.URL;
 import org.junit.jupiter.api.Test;
 
-class RequestMappingTest {
+class JwpRequestMappingTest {
 
-    private RequestMapping requestMapping = new RequestMapping();
+    private JwpRequestMapping requestMapping = new JwpRequestMapping();
 
     @Test
     void map() {

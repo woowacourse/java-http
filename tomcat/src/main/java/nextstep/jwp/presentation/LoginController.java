@@ -1,7 +1,7 @@
 package nextstep.jwp.presentation;
 
 import java.util.Map;
-import nextstep.jwp.model.user.LoginService;
+import nextstep.jwp.model.user.UserService;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.http11request.Http11Request;
@@ -18,14 +18,14 @@ public class LoginController extends AbstractController {
     private static final String URI_WITH_EXTENSION = "/login.html";
     private static final String REDIRECT_URI_ALREADY_LOGIN = "/index.html";
 
-    private final LoginService loginService = new LoginService();
+    private final UserService userService = new UserService();
     private final SessionManager sessionManager = SessionManager.connect();
 
     @Override
     protected void doPost(Http11Request request, Http11Response response) throws Exception {
         Map<String, String> queryStringDatas = QueryStringUtil.extractQueryStringDatas(request.getBody());
-        if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
-            sessionManager.addUserInSession(request.getSessionId(), loginService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
+        if (userService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
+            sessionManager.addUserInSession(request.getSessionId(), userService.findUser(queryStringDatas.get(ACCOUNT_KEY)));
             ResponseManager.redirectResponseComponent(response, REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);
             return;
         }

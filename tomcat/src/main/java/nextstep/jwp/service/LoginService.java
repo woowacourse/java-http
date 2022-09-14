@@ -1,9 +1,9 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.Response;
 import nextstep.jwp.model.User;
 import nextstep.jwp.vo.LoginResult;
-import nextstep.jwp.vo.Response;
 import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -11,34 +11,33 @@ import org.apache.catalina.SessionManager;
 import java.util.Optional;
 import java.util.UUID;
 
+import static nextstep.jwp.vo.HeaderKey.*;
+
 public class LoginService {
 
     private static final String SUCCESS_URL = "/index.html";
     private static final String FAIL_URL = "/401.html";
 
     private static final LoginService loginService = new LoginService();
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String LOCATION = "Location";
-    private static final String JSESSIONID = "JSESSIONID=";
+    private static final String USER = "user";
 
     private LoginService() {
     }
 
-    public static String signIn(String account, String password) {
+    public static Response signIn(String account, String password) {
         return loginService.signInInternal(account, password);
     }
 
-    private String signInInternal(String account, String password) {
+    private Response signInInternal(String account, String password) {
         LoginResult loginResult = generateResult(account, password);
         Response response = Response.from(ResponseStatus.FOUND);
         if (loginResult.getSession() != null) {
-            response.addHeader(SET_COOKIE, JSESSIONID + loginResult.getSession().getId());
+            response.addHeader(SET_COOKIE.getName(),
+                    JSESSION_ID.getName() + "=" + loginResult.getSession().getId());
 
         }
-        return response.addHeader(LOCATION, loginResult.getRedirectUrl())
-                .addBlankLine()
-                .getResponse();
-
+        return response.addHeader(LOCATION.getName(), loginResult.getRedirectUrl())
+                .addBlankLine();
     }
 
     private LoginResult generateResult(String account, String password) {
@@ -59,7 +58,7 @@ public class LoginService {
     private LoginResult saveSession(User user) {
         SessionManager sessionManager = new SessionManager();
         Session session = new Session(UUID.randomUUID().toString());
-        session.setAttribute(session.getId(), user);
+        session.setAttribute(USER, user);
         sessionManager.add(session);
         return new LoginResult(SUCCESS_URL, session);
     }

@@ -1,4 +1,6 @@
-package nextstep.jwp.vo;
+package nextstep.jwp.model;
+
+import nextstep.jwp.vo.ResponseStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ public class Response {
     private static final String DELIMITER = "\r\n";
     private static final String EMPTY = "";
     private static final String HEADER_DELIMITER = ": ";
+    
     private final List<String> headers;
 
     private Response(ResponseStatus responseStatus) {

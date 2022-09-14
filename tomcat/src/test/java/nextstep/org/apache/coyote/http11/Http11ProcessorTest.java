@@ -1,6 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
-import nextstep.jwp.vo.Response;
+import nextstep.jwp.model.Response;
 import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -43,7 +43,7 @@ class Http11ProcessorTest {
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1",
+                "GET /index HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
                 "",
@@ -125,10 +125,6 @@ class Http11ProcessorTest {
     }
 
     private boolean isContains(String actual, List<String> result) {
-        System.out.println(actual);
-        System.out.println(result.stream()
-                .filter(actual::contains)
-                .count());
         return result.size() == result.stream()
                 .filter(actual::contains)
                 .count();
@@ -219,7 +215,9 @@ class Http11ProcessorTest {
     void loginWithCookie() throws IOException {
         // given
         SessionManager sessionManager = new SessionManager();
-        sessionManager.add(new Session("123"));
+        Session session = new Session("123");
+        session.setAttribute("user", "fake");
+        sessionManager.add(session);
         final String httpRequest= String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",

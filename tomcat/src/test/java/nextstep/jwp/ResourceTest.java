@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
-import nextstep.jwp.exception.CustomNotFoundException;
-import nextstep.jwp.support.Resource;
+import org.apache.catalina.exception.NotFoundException;
+import org.apache.catalina.support.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -25,7 +25,7 @@ class ResourceTest {
         // given, when. then
         final Resource resource = new Resource("/notfound.html");
         assertThatThrownBy(resource::read)
-                .isInstanceOf(CustomNotFoundException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @ParameterizedTest

@@ -1,14 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.HttpMime;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
+import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMime;
 
-public class GreetingController implements Controller {
+public class GreetingController extends AbstractController {
 
     @Override
-    public ResponseEntity execute(final RequestEntity request) {
-        return new ResponseEntity().contentType(HttpMime.TEXT_HTML)
+    public void doGet(final Request request, final Response response) {
+        response.header(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue())
                 .content("Hello world!");
     }
 }

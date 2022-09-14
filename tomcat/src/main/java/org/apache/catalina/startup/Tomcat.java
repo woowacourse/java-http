@@ -1,6 +1,8 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.Servlet;
+import org.apache.catalina.core.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +12,11 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    public void start() {
-        var connector = new Connector();
-        connector.start();
+    private final ServletContainer servletContainer = new ServletContainer();
 
+    public void start() {
+        var connector = new Connector(servletContainer);
+        connector.start();
         try {
             // make the application wait until we press any key.
             System.in.read();
@@ -23,5 +26,9 @@ public class Tomcat {
             log.info("web server stop.");
             connector.stop();
         }
+    }
+
+    public void registerServlet(final String uri, final Servlet servlet) {
+        servletContainer.registerServlet(uri, servlet);
     }
 }

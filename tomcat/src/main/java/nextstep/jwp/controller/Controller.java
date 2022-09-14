@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
 
 public interface Controller {
 
-    ResponseEntity execute(RequestEntity requestEntity);
+    void service(Request request, Response response);
 }

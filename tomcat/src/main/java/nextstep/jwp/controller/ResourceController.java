@@ -1,15 +1,16 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.support.Resource;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import org.apache.coyote.support.Request;
+import org.apache.coyote.support.Response;
+import org.apache.catalina.support.Resource;
+import org.apache.coyote.HttpHeader;
 
-public class ResourceController implements Controller {
+public class ResourceController extends AbstractController {
 
     @Override
-    public ResponseEntity execute(final RequestEntity request) {
+    protected void doGet(final Request request, final Response response) {
         final Resource resource = new Resource(request.getUri());
-        return new ResponseEntity().contentType(resource.getContentType())
+        response.header(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue())
                 .content(resource.read());
     }
 }

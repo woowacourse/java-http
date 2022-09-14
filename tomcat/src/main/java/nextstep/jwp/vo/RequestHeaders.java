@@ -30,7 +30,7 @@ public class RequestHeaders {
         boolean headerCondition = rawRequest.subList(1, rawRequest.size())
                 .stream()
                 .anyMatch(each -> each.split(HEADER_DELIMITER).length != HEADER_SPLIT_SIZE);
-        if (!headerCondition) {
+        if (headerCondition) {
             throw new IllegalArgumentException("Request의 두번째 줄부터 마지막 줄 중 헤더의 형식이 아닌 줄이 있습니다.");
         }
     }

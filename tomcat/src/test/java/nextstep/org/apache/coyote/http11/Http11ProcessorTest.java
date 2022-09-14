@@ -215,7 +215,9 @@ class Http11ProcessorTest {
     void loginWithCookie() throws IOException {
         // given
         SessionManager sessionManager = new SessionManager();
-        sessionManager.add(new Session("123"));
+        Session session = new Session("123");
+        session.setAttribute("user", "fake");
+        sessionManager.add(session);
         final String httpRequest= String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",

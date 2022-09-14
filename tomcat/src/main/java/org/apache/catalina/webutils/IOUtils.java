@@ -1,4 +1,4 @@
-package org.apache.catalina.utils;
+package org.apache.catalina.webutils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

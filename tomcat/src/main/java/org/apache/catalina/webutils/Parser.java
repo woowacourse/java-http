@@ -1,4 +1,4 @@
-package org.apache.catalina.utils;
+package org.apache.catalina.webutils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +10,6 @@ public class Parser {
     private static final String EMPTY_LETTER = "";
     private static final String DOT_REGEX = "\\.";
     private static final String DOT_LETTER = ".";
-    private static final String QUESTION_MARK_LETTER = "?";
     private static final String AMPERSAND_LETTER = "&";
     private static final String EQUAL_LETTER = "=";
 
@@ -38,18 +37,13 @@ public class Parser {
         }
     }
 
-    public static Map<String, String> parseQueryParams(final String path) {
+    public static Map<String, String> parseQueryParams(final String query) {
         final Map<String, String> queryParams = new LinkedHashMap<>();
-        final String query = path.substring(getQueryParameterBeginIndex(path));
         final List<String> params = List.of(query.split(AMPERSAND_LETTER));
         for (String param : params) {
             final List<String> element = List.of(param.split(EQUAL_LETTER));
             queryParams.put(element.get(0), element.get(1));
         }
         return queryParams;
-    }
-
-    private static int getQueryParameterBeginIndex(final String path) {
-        return path.indexOf(QUESTION_MARK_LETTER) + 1;
     }
 }

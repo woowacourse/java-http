@@ -11,8 +11,14 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
+    private InMemoryUserRepository() {}
+
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        database.put(user.getAccount(), user);
+    }
+
+    public static void save(final User user) {
         database.put(user.getAccount(), user);
     }
 
@@ -25,5 +31,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static Boolean existByAccount(String account) {
+        return database.containsKey(account);
+    }
 }

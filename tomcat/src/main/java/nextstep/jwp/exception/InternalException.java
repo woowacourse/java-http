@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception;
+package nextstep.jwp.exception;
 
 public class InternalException extends RuntimeException {
     public InternalException(final String message) {

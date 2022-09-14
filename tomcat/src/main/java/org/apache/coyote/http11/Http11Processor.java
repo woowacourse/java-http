@@ -8,8 +8,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.http.HandlerMapper;
+import nextstep.jwp.controller.Controller;
+import org.apache.coyote.http11.http.RequestMapper;
 import org.apache.coyote.http11.http.request.HttpRequest;
 import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void run() {
         try {
+            log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
             process(connection);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -43,9 +44,10 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            final Handler handler = HandlerMapper.getHandlerFrom(httpRequest.getStartLine().getPath());
-            final HttpResponse httpResponse = handler.handle(httpRequest);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final Controller controller = RequestMapper.getControllerFrom(httpRequest);
+            final HttpResponse httpResponse = new HttpResponse();
+            controller.service(httpRequest, httpResponse);
             final String response = httpResponse.generateResponse();
 
             outputStream.write(response.getBytes());

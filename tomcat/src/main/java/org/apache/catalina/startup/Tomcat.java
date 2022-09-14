@@ -11,7 +11,7 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector();
+        final Connector connector = new Connector(1, 10);
         connector.start();
 
         try {

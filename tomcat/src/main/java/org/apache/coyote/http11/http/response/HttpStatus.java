@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.http.response;
 
 public enum HttpStatus {
-    OK(200, "OK");
+    OK(200, "OK"),
+    REDIRECT(302, "Found");
 
     private final int code;
     private final String message;

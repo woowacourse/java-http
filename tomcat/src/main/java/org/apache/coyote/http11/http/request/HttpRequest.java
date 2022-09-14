@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.http.request;
 
-import static org.apache.catalina.utils.IOUtils.readData;
+import static org.apache.catalina.webutils.IOUtils.readData;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
 
 import java.io.BufferedReader;
@@ -14,20 +14,20 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String body;
 
-    public HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
+    private HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest of(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
         if (startLine == null) {
             throw new IllegalArgumentException("request가 비어있습니다.");
         }
 
-        final HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.of(startLine);
-        final HttpHeaders headers = HttpHeaders.of(bufferedReader);
+        final HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(startLine);
+        final HttpHeaders headers = HttpHeaders.from(bufferedReader);
         final String body = readBody(bufferedReader, headers);
 
         return new HttpRequest(httpRequestStartLine, headers, body);
@@ -36,11 +36,11 @@ public class HttpRequest {
     private static String readBody(final BufferedReader bufferedReader,
                                    final HttpHeaders headers) throws IOException {
 
-        if (!headers.contains(CONTENT_LENGTH)) {
+        if (!headers.contains(CONTENT_LENGTH.getValue())) {
             return "";
         }
 
-        final int contentLength = convertIntFromContentLength(headers.get(CONTENT_LENGTH));
+        final int contentLength = convertIntFromContentLength(headers.get(CONTENT_LENGTH.getValue()));
         return readData(bufferedReader, contentLength);
     }
 
@@ -52,7 +52,19 @@ public class HttpRequest {
         return startLine;
     }
 
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
     public String getBody() {
         return body;
+    }
+
+    public String getUrl() {
+        return startLine.getPath();
+    }
+
+    public boolean isGetMethod() {
+        return startLine.getHttpMethod().isGet();
     }
 }

@@ -1,5 +1,6 @@
 package nextstep.jwp.application;
 
+import http.request.QueryParams;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.exception.InvalidLoginFormatException;
@@ -7,7 +8,6 @@ import nextstep.jwp.exception.InvalidPasswordException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.QueryParams;
 
 public class AuthService {
 

@@ -29,11 +29,11 @@ public class RequestLine {
         return method.isGet();
     }
 
-    public RequestUri getRequestUri() {
-        return requestUri;
+    public boolean isPostMethod() {
+        return method.isPost();
     }
 
-    public boolean isMatchUri(final String requestUri) {
-        return this.requestUri.isMatchUri(requestUri);
+    public RequestUri getRequestUri() {
+        return requestUri;
     }
 }

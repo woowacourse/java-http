@@ -32,16 +32,8 @@ public class RequestUri {
         return resourcePath;
     }
 
-    public QueryStrings getQueryStrings() {
-        return queryStrings;
-    }
-
     public boolean isFileRequest() {
         return uriType == UriType.FILE_REQUEST;
-    }
-
-    public boolean hasQueryStrings() {
-        return uriType == UriType.HAS_QUERYSTRING;
     }
 
     public boolean isMatchUri(final String requestUri) {

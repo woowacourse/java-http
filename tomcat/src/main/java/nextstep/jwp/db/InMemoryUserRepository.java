@@ -23,7 +23,11 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {
+    private InMemoryUserRepository() {}
+
+    public static boolean exists(String account) {
+        final User user = database.get(account);
+        return user != null;
     }
 
     public static boolean exist(String account, String password) {

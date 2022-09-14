@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpmessage.response;
 
-import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.common.Headers;
 import org.apache.coyote.http11.httpmessage.common.HttpVersion;
 import org.apache.coyote.http11.httpmessage.response.statusline.HttpStatus;
@@ -12,38 +11,28 @@ public class Response {
     private Headers headers;
     private String body;
 
-    public Response(StatusLine statusLine, Headers headers, String body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    public Response(StatusLine statusLine, Headers headers) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-    }
-
     public Response() {
     }
 
-    public static Response okWithResponseBody(final ContentType contentType, final String responseBody) {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.OK);
-
-        final Headers headers = new Headers()
-                .add("Content-Type", contentType.getContentType() + ";charset=utf-8")
-                .add("Content-Length", String.valueOf(responseBody.getBytes().length));
-
-        return new Response(statusLine, headers, responseBody);
+    public Response ok(final String body) {
+        this.statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.OK);
+        this.body = body;
+        return this;
     }
 
-    public static Response redirect(final ContentType contentType, final String location) {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.REDIRECT);
+    public Response redirect(final String location) {
+        this.statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.REDIRECT);
+        this.headers = new Headers().add("Location", location);
+        return this;
+    }
 
-        final Headers headers = new Headers()
-                .add("Location", location)
-                .add("Content-Type", contentType.getContentType() + ";charset=utf-8");
-
-        return new Response(statusLine, headers);
+    public Response addHeader(final String headerName, final String value) {
+        if (headers == null) {
+            headers = new Headers().add(headerName, value);
+            return this;
+        }
+        this.headers = headers.add(headerName, value);
+        return this;
     }
 
     public byte[] getBytes() {

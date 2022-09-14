@@ -21,33 +21,45 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse ok(String resource, String body) {
-        StatusCode statusCode = StatusCode.OK;
-        ContentType contentType = ContentType.from(resource);
-        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
+    public HttpResponse(final StatusCode statusCode, final HttpResponseHeader responseHeader) {
+        this(statusCode, responseHeader, "");
+    }
+
+    public static HttpResponse ok(final String resource, final String body) {
+        final StatusCode statusCode = StatusCode.OK;
+        final ContentType contentType = ContentType.from(resource);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
         return new HttpResponse(statusCode, responseHeader, body);
     }
 
-    public static HttpResponse found(String resource, String body) {
-        StatusCode statusCode = StatusCode.FOUND;
-        ContentType contentType = ContentType.from(resource);
-        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
+    public static HttpResponse found(final String resource, final String body) {
+        final StatusCode statusCode = StatusCode.FOUND;
+        final ContentType contentType = ContentType.from(resource);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
         return new HttpResponse(statusCode, responseHeader, body);
     }
 
     public static HttpResponse unauthorized() {
-        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
         return new HttpResponse(StatusCode.UNAUTHORIZED, responseHeader, FileReader.read("/401.html"));
     }
 
     public static HttpResponse notFound() {
-        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
         return new HttpResponse(StatusCode.NOT_FOUND, responseHeader, FileReader.read("/404.html"));
     }
 
     public static HttpResponse internalServerError() {
-        HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(ContentType.HTML);
         return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, responseHeader, FileReader.read("/500.html"));
+    }
+
+    public static HttpResponse redirect(final StatusCode statusCode, final String resource) {
+        final ContentType contentType = ContentType.from(resource);
+        final HttpResponseHeader responseHeader = HttpResponseHeader.fromContentType(contentType);
+        final HttpResponse httpResponse = new HttpResponse(statusCode, responseHeader);
+        responseHeader.addLocation(resource);
+        return httpResponse;
     }
 
     public void setCookie(String key, String value) {

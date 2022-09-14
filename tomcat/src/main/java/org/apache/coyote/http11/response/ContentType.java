@@ -6,7 +6,9 @@ public enum ContentType {
 
     HTML("text/html"),
     CSS("text/css"),
-    JS("text/css");
+    JS("text/css"),
+    APPLICATION_FORM_UNRECORDED("application/x-www-form-urlencoded");
+
 
     private final String value;
 

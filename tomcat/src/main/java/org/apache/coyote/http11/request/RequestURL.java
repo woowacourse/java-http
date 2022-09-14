@@ -1,13 +1,10 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestURL {
 
-    private static final String PARAM_REGEX = "&";
-    private static final String KEY_AND_VALUE_REGEX = "=";
     private static final String QUERY_PARAM_REGEX = "?";
 
     private final String path;
@@ -23,20 +20,10 @@ public class RequestURL {
             final int index = requestURL.indexOf(QUERY_PARAM_REGEX);
             final String path = requestURL.substring(0, index);
             final String queryString = requestURL.substring(index + 1);
-            final Map<String, String> params = parsingQueryString(queryString);
+            final Map<String, String> params = QueryParser.parsingQueryString(queryString);
             return new RequestURL(path, params);
         }
         return new RequestURL(requestURL, Collections.emptyMap());
-    }
-
-    public static Map<String, String> parsingQueryString(final String queryString) {
-        final Map<String, String> params = new HashMap<>();
-        final String[] paramsLine = queryString.split(PARAM_REGEX);
-        for (int i = 0; i < paramsLine.length; i++) {
-            final String[] paramsKeyAndValue = paramsLine[i].split(KEY_AND_VALUE_REGEX);
-            params.put(paramsKeyAndValue[0], paramsKeyAndValue[1]);
-        }
-        return params;
     }
 
     public String getPath() {

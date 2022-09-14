@@ -6,6 +6,7 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class RegisterController extends AbstractController {
             final String email = httpRequest.getHttpBody("email");
             final String password = httpRequest.getHttpBody("password");
             checkUser(account, email, password);
-            return HttpResponse.found("/index.html", FileReader.read("/index.html"));
+            return HttpResponse.redirect(StatusCode.FOUND, "/index.html");
         } catch (RuntimeException e) {
             return HttpResponse.internalServerError();
         }

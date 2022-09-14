@@ -21,7 +21,11 @@ public class HttpResponseHeader {
         return new HttpResponseHeader(value);
     }
 
-    public void setCookie(String value) {
+    public void addLocation(final String location) {
+        value.put("Location", location);
+    }
+
+    public void setCookie(final String value) {
         this.value.put(SET_COOKIE, value);
     }
 

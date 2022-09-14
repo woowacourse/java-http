@@ -1,42 +1,53 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Optional;
+import org.apache.coyote.http11.session.Cookie;
 
 public class HttpRequest {
 
-    private static final String REQUEST_LINE_SPLITTER = " ";
-    private static final String FILE_EXTENSION_SIGN = ".";
-    private static final int METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
-    private static final int PROTOCOL_INDEX = 2;
+    private static final String COOKIE_HEADER_KEY = "Cookie";
 
-    private final String method;
-    private final URI uri;
-    private final String protocol;
+    private final RequestLine requestLine;
+    private final RequestHeaders requestHeaders;
+    private final RequestBody requestBody;
 
-    public HttpRequest(String requestLine) {
-        String[] str = requestLine.split(REQUEST_LINE_SPLITTER);
-        this.method = str[METHOD_INDEX];
-        this.uri = new URI(str[URI_INDEX]);
-        this.protocol = str[PROTOCOL_INDEX];
+    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
+        this.requestLine = requestLine;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = requestBody;
     }
 
     public boolean isStaticFileRequest() {
-        String path = uri.getPath();
-        return path.contains(FILE_EXTENSION_SIGN);
+        return requestLine.isStaticFileRequest();
     }
 
     public Optional<String> getExtension() {
-        String path = uri.getPath();
-        int index = path.indexOf(FILE_EXTENSION_SIGN);
-        return Optional.of(path.substring(index + 1));
+        return requestLine.getExtension();
     }
 
-    public String getProtocol() {
-        return protocol;
+    public Optional<String> getSession() {
+        Optional<String> cookieValue = requestHeaders.getHeaderValue(COOKIE_HEADER_KEY);
+        if (cookieValue.isEmpty()) {
+            return Optional.empty();
+        }
+        return extractSessionValue(cookieValue.get());
     }
 
-    public URI getUri() {
-        return uri;
+    private Optional<String> extractSessionValue(String cookieValue) {
+        Cookie cookie = Cookie.of(cookieValue);
+        return cookie.getJSessionValue();
+    }
+
+    public String getPath() {
+        URI uri = requestLine.getUri();
+        return uri.getPath();
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

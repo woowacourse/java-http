@@ -28,7 +28,10 @@ public class QueryParams {
         }
     }
 
-    public String findValue(String parameter) {
-        return queryParams.get(parameter);
+    @Override
+    public String toString() {
+        return "QueryParams{" +
+                "queryParams=" + queryParams +
+                '}';
     }
 }

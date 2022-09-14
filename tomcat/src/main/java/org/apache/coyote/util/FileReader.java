@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class FileReader {
 
-    private static final String STATIC_PATH_NAME = "/static";
+    private static final String STATIC_PATH_NAME = "/static/";
 
     private FileReader() {
     }
@@ -17,7 +17,7 @@ public class FileReader {
             URL resourceURL = classes.getResource(STATIC_PATH_NAME + resourcePath);
             return Files.readString(Paths.get(resourceURL.toURI()), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
+            throw new IllegalArgumentException(resourcePath + " 파일을 읽을 수 없습니다.");
         }
     }
 }

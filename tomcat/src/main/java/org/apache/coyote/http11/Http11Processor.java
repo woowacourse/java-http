@@ -9,16 +9,15 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerMapping;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.view.View;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParams;
-import org.apache.coyote.http11.request.URI;
+import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String WELCOME_MESSAGE = "Hello world!";
 
     private final Socket connection;
 
@@ -45,8 +43,8 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            HttpRequest httpRequest = new HttpRequest(reader.readLine());
-            HttpResponse httpResponse = getResponse(httpRequest);
+
+            HttpResponse httpResponse = getResponse(HttpRequestFactory.create(reader));
             String response = httpResponse.parseToString();
 
             outputStream.write(response.getBytes());
@@ -56,47 +54,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
+    private HttpResponse getResponse(HttpRequest request) throws IOException {
         try {
-            if (httpRequest.isStaticFileRequest()) {
-                return getStaticResourceResponse(httpRequest);
+            if (request.isStaticFileRequest()) {
+                return getStaticResourceResponse(request);
             }
-            return getDynamicResourceResponse(httpRequest);
-        } catch (RuntimeException e) {
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND,
-                    ContentType.TEXT_HTML_CHARSET_UTF_8, "페이지를 찾을 수 없습니다.");
+            return getDynamicResourceResponse(request);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return getNotFoundResponse();
         }
     }
 
-    private HttpResponse getStaticResourceResponse(HttpRequest httpRequest) {
-        Optional<String> extension = httpRequest.getExtension();
+    private HttpResponse getStaticResourceResponse(HttpRequest request) {
+        Optional<String> extension = request.getExtension();
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, contentType,
-                    getStaticResourceResponse(httpRequest.getUri().getPath()));
+            return HttpResponse.ok()
+                    .addResponseBody(getStaticResourceResponse(request.getPath()), contentType)
+                    .build();
         }
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND,
-                ContentType.TEXT_HTML_CHARSET_UTF_8, "페이지를 찾을 수 없습니다.");
+        return getNotFoundResponse();
     }
 
     private String getStaticResourceResponse(String resourcePath) {
         return FileReader.readStaticFile(resourcePath, this.getClass());
     }
 
-    private HttpResponse getDynamicResourceResponse(HttpRequest httpRequest) {
-        URI uri = httpRequest.getUri();
-        String path = uri.getPath();
-        if (path.equals("/")) {
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
-                    WELCOME_MESSAGE);
-        }
-        if (path.equals("/login")) {
-            QueryParams queryParams = uri.getQueryParams();
-            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.findValue("account"));
-            user.ifPresent(value -> log.debug(value.toString()));
-        }
-        String responseBody = getStaticResourceResponse(path + ".html");
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
-                responseBody);
+    private HttpResponse getDynamicResourceResponse(HttpRequest request) throws Exception {
+        Controller controller = ControllerMapping.findController(request.getPath());
+        return controller.service(request);
+    }
+
+    private HttpResponse getNotFoundResponse() {
+        return HttpResponse.notFound()
+                .addResponseBody(View.NOT_FOUND.getContents(), ContentType.TEXT_HTML_CHARSET_UTF_8)
+                .build();
     }
 }

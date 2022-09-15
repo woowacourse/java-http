@@ -1,13 +1,12 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UserLoginException;
-import nextstep.jwp.exception.UserNotFoundException;
 import jakarta.http.HttpCookie;
 import jakarta.http.reqeust.HttpRequest;
 import jakarta.http.reqeust.QueryParams;
 import jakarta.http.response.HttpResponse;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UserLoginException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -42,9 +41,8 @@ public class LoginController extends AbstractController {
 
     private void Login(final HttpRequest request, final HttpResponse response) {
         QueryParams queryParams = new QueryParams(request.getBody());
-        Map<String, String> queries = queryParams.getValues();
-        String account = queries.get("account");
-        String password = queries.get("password");
+        String account = queryParams.find("account");
+        String password = queryParams.find("password");
 
         User user = findUser(account);
         if (!user.checkPassword(password)) {

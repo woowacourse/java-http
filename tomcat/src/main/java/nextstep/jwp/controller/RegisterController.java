@@ -1,13 +1,12 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
+import jakarta.http.reqeust.HttpRequest;
+import jakarta.http.reqeust.QueryParams;
+import jakarta.http.response.HttpResponse;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateUserException;
 import nextstep.jwp.exception.InvalidSignUpFormatException;
-import jakarta.http.reqeust.HttpRequest;
-import jakarta.http.reqeust.QueryParams;
-import jakarta.http.response.HttpResponse;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
@@ -21,10 +20,9 @@ public class RegisterController extends AbstractController {
 
     private void registerUser(final HttpRequest request) {
         QueryParams queryParams = new QueryParams(request.getBody());
-        Map<String, String> queries = queryParams.getValues();
-        String account = queries.get("account");
-        String password = queries.get("password");
-        String email = queries.get("email");
+        String account = queryParams.find("account");
+        String password = queryParams.find("password");
+        String email = queryParams.find("email");
 
         validateUserInformation(account, password, email);
         validateExistAccount(account);

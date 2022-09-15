@@ -39,6 +39,10 @@ public class QueryParams {
         }
     }
 
+    public String find(final String key) {
+        return values.get(key);
+    }
+
     public Map<String, String> getValues() {
         return values;
     }

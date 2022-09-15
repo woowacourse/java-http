@@ -46,7 +46,7 @@ public class HttpHeader {
 
     public boolean hasContentLength() {
         String contentLength = values.get("Content-Length");
-        return contentLength != null && !contentLength.equals("0");
+        return contentLength != null;
     }
 
     public String getCookie() {

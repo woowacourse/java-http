@@ -13,6 +13,10 @@ public class Session {
         this.values = new HashMap<>();
     }
 
+    public boolean isLoggedIn() {
+        return values.containsKey("user");
+    }
+
     public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }

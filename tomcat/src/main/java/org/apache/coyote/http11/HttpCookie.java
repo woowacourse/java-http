@@ -11,6 +11,7 @@ public class HttpCookie {
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_DELIMITER = "; ";
     private static final String COOKIE_EQUAL = "=";
+    
     private final Map<String, String> values;
 
     public HttpCookie(final String cookie) {

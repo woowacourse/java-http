@@ -1,20 +1,23 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+
 public class HttpRequest {
 
     private static final String SPACE_DELIMITER = " ";
     private static final String QUERY_STRING_START = "?";
-    private static final String FILE_EXTENSION_DELIMITER = ".";
 
     private HttpMethod httpMethod;
     private String url;
     private QueryStrings queryStrings;
     private final HttpHeaders httpHeaders;
+    private final Session session;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final HttpReader httpReader) {
+    public HttpRequest(final HttpReader httpReader, final Session session) {
         parseStartLine(httpReader.getStartLine());
         this.httpHeaders = httpReader.getHttpHeaders();
+        this.session = session;
         this.httpRequestBody = new HttpRequestBody(httpReader.getBody());
     }
 
@@ -33,10 +36,6 @@ public class HttpRequest {
         return uri;
     }
 
-    public boolean isFileRequest() {
-        return this.url.contains(FILE_EXTENSION_DELIMITER);
-    }
-
     public String getQueryStringValue(final String parameter) {
         if (queryStrings == null) {
             return "";
@@ -44,24 +43,16 @@ public class HttpRequest {
         return queryStrings.getValue(parameter);
     }
 
-    public String getFileExtension() {
-        if (isFileRequest()) {
-            final int index = url.indexOf(FILE_EXTENSION_DELIMITER);
-            return url.substring(index + 1);
-        }
-        return "html";
-    }
-
     public String getUrl() {
         return url;
     }
 
-    public HttpCookie getHttpCookie() {
-        return this.httpHeaders.getHttpCookie();
-    }
-
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     public HttpRequestBody getHttpRequestBody() {

@@ -1,17 +1,19 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
+import org.apache.coyote.http11.exception.unauthorized.InvalidSessionException;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        if (session.isLoggedIn()) {
+            SESSIONS.put(session.getId(), session);
+        }
     }
 
     @Override

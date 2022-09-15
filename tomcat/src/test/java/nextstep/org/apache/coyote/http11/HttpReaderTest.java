@@ -103,8 +103,7 @@ class HttpReaderTest {
         final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final HttpReader httpReader = new HttpReader(bufferedReader);
-
-        System.out.println("account=gugu&password=password&email=hkkang%40woowahan.com".getBytes().length);
+        
         // when
         final String body = httpReader.getBody();
 

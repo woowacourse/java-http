@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.HttpReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +29,7 @@ class HttpRequestTest {
         final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final HttpReader httpReader = new HttpReader(bufferedReader);
-        final HttpRequest httpRequest = new HttpRequest(httpReader);
+        final HttpRequest httpRequest = new HttpRequest(httpReader, new Session("session"));
 
         // when
         final String account = httpRequest.getQueryStringValue("account");
@@ -39,27 +40,5 @@ class HttpRequestTest {
                 () -> assertThat(account).isEqualTo("gugu"),
                 () -> assertThat(password).isEqualTo("password")
         );
-    }
-
-    @Test
-    @DisplayName("해당 요청이 확장자를 가진 파일에 대한 요청인지 확인한다.")
-    void isFileRequest() throws IOException {
-        // given
-        final String request = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive",
-                "");
-        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final HttpReader httpReader = new HttpReader(bufferedReader);
-        final HttpRequest httpRequest = new HttpRequest(httpReader);
-
-        // when
-        final boolean fileRequest = httpRequest.isFileRequest();
-
-        // then
-        assertThat(fileRequest).isTrue();
     }
 }

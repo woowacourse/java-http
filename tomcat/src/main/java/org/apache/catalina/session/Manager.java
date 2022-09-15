@@ -1,5 +1,6 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
+import jakarta.http.session.Session;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(HttpSession session);
+    void add(Session session);
 
     /**
      * Return the active Session, associated with this Manager, with the

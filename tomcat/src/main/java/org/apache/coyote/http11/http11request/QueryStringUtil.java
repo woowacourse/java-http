@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http11handler.support;
+package org.apache.coyote.http11.http11request;
 
 import java.util.List;
 import java.util.Map;
@@ -12,10 +12,6 @@ public class QueryStringUtil {
     private static final String KEY_VALUE_DELIMITER = "=";
 
     private QueryStringUtil() {}
-
-    public static String removeQueryString(String uri) {
-        return uri.split(QUERY_STRING_IDENTIFIER_FOR_SPLIT)[RESOURCE_INDEX];
-    }
 
     public static Map<String, String> extractQueryStringDatas(String queryString) {
         List<String> queryStringElements = List.of(queryString.split(QUERY_STRING_ELEMENT_DELIMITER));

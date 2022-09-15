@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HeaderElement;
-import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class Http11Response {
@@ -15,17 +14,18 @@ public class Http11Response {
     private static final String LINE_POSTFIX = " ";
 
     private StatusCode statusCode;
-    private Map<HeaderElement, String> headerElements;
+    private Map<HeaderElement, String> headerElements = new HashMap<>();
     private String body;
 
-    public Http11Response(StatusCode statusCode, String body) {
-        this.statusCode = statusCode;
-        headerElements = new HashMap<>();
-        this.body = body;
+    public Http11Response() {
     }
 
-    public Http11Response(StatusCode statusCode) {
-        this(statusCode, null);
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public void setContentType(String value) {

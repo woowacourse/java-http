@@ -1,12 +1,12 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.user.User;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
     private static final SessionManager sessionManager = new SessionManager();
     private static final String USER_KEY = "user";
 

@@ -1,14 +1,13 @@
-package org.apache.coyote.http11.http11handler.login;
+package nextstep.jwp.model.user;
 
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.user.User;
 import nextstep.jwp.model.user.exception.UserNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginService {
+public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -24,5 +23,13 @@ public class LoginService {
     public User findUser(String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    public boolean addNewUser(String account, String email, String password) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return false;
+        }
+        InMemoryUserRepository.save(new User(account, password, email));
+        return true;
     }
 }

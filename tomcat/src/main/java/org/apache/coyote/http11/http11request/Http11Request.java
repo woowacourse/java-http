@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HeaderElement;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class Http11Request {
@@ -86,5 +85,15 @@ public class Http11Request {
             return httpCookie.getJsessionId();
         }
         return null;
+    }
+
+    public void setSessionId(String sessionId) {
+        String rawCookie = header.get(HeaderElement.COOKIE.getValue());
+        if (rawCookie == null) {
+            rawCookie = "";
+        }
+        HttpCookie httpCookie = HttpCookie.of(rawCookie);
+        httpCookie.setJsessionId(sessionId);
+        header.put(HeaderElement.COOKIE.getValue(), httpCookie.toStringFormat());
     }
 }

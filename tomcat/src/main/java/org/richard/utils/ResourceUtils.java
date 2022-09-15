@@ -30,6 +30,6 @@ public class ResourceUtils {
             return resource;
         }
 
-        throw new IllegalArgumentException("resource does not exists");
+        throw new IllegalArgumentException(String.format("resource does not exists : %s", resourcePath));
     }
 }

@@ -1,10 +1,5 @@
 package org.springframework.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,19 +40,6 @@ public class DispatcherServlet implements Servlet {
                 .filter(this::hasAnyMethodWithRequestMappingAnnotation)
                 .flatMap(this::createRequestMapping)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-    }
-
-    private String parseBasePackage() {
-        final var objectMapper = new ObjectMapper(new YAMLFactory());
-        final var resource = getClass().getClassLoader().getResource(DEFAULT_SPRING_CONFIG_FILE_NAME);
-        try {
-            final var uri = resource.toURI();
-            final var applicationConfig = objectMapper.readValue(new File(uri), ApplicationConfig.class);
-
-            return applicationConfig.getBasePackage();
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private boolean hasAnyMethodWithRequestMappingAnnotation(final Class<?> controller) {
@@ -104,7 +86,7 @@ public class DispatcherServlet implements Servlet {
                 contentType = accept.split(",")[0];
             }
             final var resourceAsBody = ResourceUtils.createResourceAsString(
-                    String.format("static/%s", httpRequest.getRequestURIWithoutQueryParams()));
+                    String.format("static%s", httpRequest.getRequestURIWithoutQueryParams()));
 
             return BasicHttpResponse.builder()
                     .httpVersion(HttpVersion.HTTP_1_1)

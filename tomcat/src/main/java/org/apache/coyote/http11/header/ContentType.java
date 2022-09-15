@@ -1,12 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import java.util.stream.Stream;
 
 public enum ContentType {
-    HTML("html", "text/html;charset=utf-8 "),
-    CSS("css", "text/css "),
-    JAVASCRIPT("js", "text/javascript "),
-    FAVICON("ico", "image/x-icon ");
+    HTML("html", "text/html;charset=utf-8"),
+    CSS("css", "text/css"),
+    JAVASCRIPT("js", "text/javascript"),
+    FAVICON("ico", "image/x-icon");
 
     private final String extension;
     private final String value;

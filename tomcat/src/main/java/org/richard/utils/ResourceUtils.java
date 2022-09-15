@@ -8,9 +8,6 @@ import java.util.Objects;
 
 public class ResourceUtils {
 
-    private ResourceUtils() {
-    }
-
     public static String createResourceAsString(final String resourcePath) {
         final var resource = findResource(resourcePath);
         final var path = new File(resource.getFile()).toPath();
@@ -31,5 +28,8 @@ public class ResourceUtils {
         }
 
         throw new IllegalArgumentException(String.format("resource does not exists : %s", resourcePath));
+    }
+
+    private ResourceUtils() {
     }
 }

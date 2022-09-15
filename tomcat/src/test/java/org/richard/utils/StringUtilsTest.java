@@ -11,7 +11,7 @@ class StringUtilsTest {
 
     @DisplayName("StringUtils의 isNullOrBlank 메서드는")
     @Nested
-    class isNullOrBlankTest {
+    class IsNullOrBlankTest {
         @DisplayName("매개변수 하나 전달시, null 또는 빈 문자열은 true를 반환한다")
         @Test
         void return_true_on_null_or_empty_string() {

@@ -14,7 +14,7 @@ class ResourceUtilsTest {
 
     @DisplayName("createResourceAsString 메서드는")
     @Nested
-    class createResourceAsString {
+    class CreateResourceAsString {
 
         @DisplayName("resource 이하 경로에서 명시된 정적 자료를 String 형태로 반환한다")
         @Test

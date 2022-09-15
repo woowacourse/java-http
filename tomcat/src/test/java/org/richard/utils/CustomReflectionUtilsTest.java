@@ -17,7 +17,7 @@ class CustomReflectionUtilsTest {
 
     @DisplayName("newInstance 메서드는")
     @Nested
-    class newInstance {
+    class NewInstance {
 
         @DisplayName("전달받은 class의 기본 생성자를 이용해 인스턴스를 생성한다")
         @Test
@@ -38,7 +38,7 @@ class CustomReflectionUtilsTest {
 
     @DisplayName("runnableByMethod 메서드는")
     @Nested
-    class runnableByMethod {
+    class RunnableByMethod {
 
         @DisplayName("전달받은 인스턴스와 메서드 정보를 이용해 Function을 반환한다")
         @Test

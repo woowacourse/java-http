@@ -13,7 +13,7 @@ class YamlUtilsTest {
 
     @DisplayName("readPropertyAsObject 메서드는")
     @Nested
-    class readPropertyAsObject {
+    class ReadPropertyAsObject {
 
         @DisplayName("application.yml 파일 내 basePackage 설정을 읽어들일 수 있다")
         @Test

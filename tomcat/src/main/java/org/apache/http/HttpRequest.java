@@ -7,23 +7,17 @@ public interface HttpRequest {
 
     HttpMethod getHttpMethod();
 
-    String getProtocol();
-
     String getRequestURI();
 
     String getRequestURIWithoutQueryParams();
 
-    String getHost();
-
-    String getConnection();
-
-    Map<String, String> getHeaders();
-
-    String getBody();
-
-    String getContentType();
+    Map<String, String> getParameters();
 
     Object getParameter(String key);
 
-    Map<String, Object> getParameters();
+    Map<String, String> getHeaders();
+
+    String getHeader(String headerName);
+
+    Map<String, String> getBody();
 }

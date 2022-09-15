@@ -10,6 +10,10 @@ public enum HttpHeaderName {
     PROTOCOL("Protocol"),
     HOST("Host"),
     CONNECTION("Connection"),
+    CONTENT_TYPE("Content-Type"),
+    SET_COOKIE("Set-Cookie"),
+    CACHE_CONTROL("Cache-Control"),
+    CONTENT_LENGTH("Content-Length"),
     ;
 
     private final String headerName;

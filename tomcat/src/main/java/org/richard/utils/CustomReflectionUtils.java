@@ -6,9 +6,6 @@ import java.util.function.Function;
 
 public class CustomReflectionUtils {
 
-    private CustomReflectionUtils() {
-    }
-
     public static <T> T newInstance(final Class<? extends T> clazz) {
         try {
             return clazz.getDeclaredConstructor().newInstance();
@@ -29,5 +26,8 @@ public class CustomReflectionUtils {
                 }
             }
         };
+    }
+
+    private CustomReflectionUtils() {
     }
 }

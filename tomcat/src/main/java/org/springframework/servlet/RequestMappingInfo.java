@@ -1,4 +1,4 @@
-package org.springframework;
+package org.springframework.servlet;
 
 import java.util.Objects;
 import org.apache.http.HttpRequest;
@@ -12,7 +12,7 @@ public class RequestMappingInfo {
     private final HttpMethod httpMethod;
     private final String uri;
 
-    public RequestMappingInfo(final HttpMethod httpMethod, final String uri) {
+    private RequestMappingInfo(final HttpMethod httpMethod, final String uri) {
         this.httpMethod = httpMethod;
         this.uri = uri;
     }

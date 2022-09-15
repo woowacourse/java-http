@@ -1,32 +1,152 @@
 package org.apache.http;
 
-import org.apache.http.info.ContentType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.apache.http.info.HttpHeaderName;
+import org.apache.http.info.HttpVersion;
+import org.apache.http.info.StatusCode;
+import org.richard.utils.StringUtils;
+import org.springframework.http.Cookie;
 
 public class BasicHttpResponse implements HttpResponse {
 
-    private final String response;
-    private final String contentType;
+    private static final String CRLF = "\r\n";
 
-    public BasicHttpResponse(final String response, final String contentType) {
-        this.response = response;
-        this.contentType = contentType;
+    private final HttpVersion httpVersion;
+    private final StatusCode statusCode;
+    private final Map<String, String> headers;
+    private final String body;
+
+    public BasicHttpResponse(final HttpVersion httpVersion, final StatusCode statusCode,
+                             final Map<String, String> headers, final String body) {
+        this.httpVersion = httpVersion;
+        this.statusCode = statusCode;
+        this.headers = headers;
+        this.body = body;
     }
 
-    public static BasicHttpResponse from(final String response) {
-        return new BasicHttpResponse(response, ContentType.TEXT_HTML.getName());
-    }
-
-    public static BasicHttpResponse from(final String response, final String contentType) {
-        return new BasicHttpResponse(response, contentType);
+    public static BasicHttpResponse of(final HttpVersion httpVersion, final StatusCode statusCode,
+                                       final Map<String, String> headers, final String body) {
+        return new BasicHttpResponse(httpVersion, statusCode, headers, body);
     }
 
     @Override
     public String getResponseHttpMessage() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s ", contentType),
-                "Content-Length: " + this.response.getBytes().length + " ",
+        if (StringUtils.isNullOrBlank(this.body)) {
+            return createResponseWithoutBody();
+        }
+
+        return createResponseWithBody();
+    }
+
+    private String createResponseWithoutBody() {
+        return String.join(
+                CRLF,
+                createStartLine(),
+                createHeaders(),
+                "");
+    }
+
+    private String createResponseWithBody() {
+        return String.join(
+                CRLF,
+                createStartLine(),
+                createHeaders(),
+                createContentLength(),
                 "",
-                this.response);
+                this.body);
+    }
+
+    private String createStartLine() {
+        return String.format("%s %s ", this.httpVersion.getName(), this.statusCode.getName());
+    }
+
+    private String createHeaders() {
+        return headers.entrySet()
+                .stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(CRLF));
+    }
+
+    private String createContentLength() {
+        if (StringUtils.isNullOrBlank(this.body)) {
+            return "0";
+        }
+
+        return String.format("%s: %s ", HttpHeaderName.CONTENT_LENGTH.getName(), this.body.getBytes().length);
+    }
+
+    public static BasicHttpResponseBuilder builder() {
+        return new BasicHttpResponseBuilder();
+    }
+
+    public static class BasicHttpResponseBuilder {
+
+        private HttpVersion httpVersion;
+        private StatusCode statusCode;
+        private Map<String, String> headers;
+        private String body;
+
+        public BasicHttpResponseBuilder() {
+            headers = new HashMap<>();
+        }
+
+        public BasicHttpResponse build() {
+            checkEssentialValues();
+
+            return BasicHttpResponse.of(this.httpVersion, this.statusCode, this.headers, this.body);
+        }
+
+        private void checkEssentialValues() {
+            if (Objects.isNull(this.httpVersion)) {
+                this.httpVersion = HttpVersion.HTTP_1_1;
+            }
+
+            if (Objects.isNull(this.statusCode)) {
+                this.statusCode = StatusCode.OK_200;
+            }
+        }
+
+        public BasicHttpResponseBuilder httpVersion(final HttpVersion httpVersion) {
+            this.httpVersion = httpVersion;
+            return this;
+        }
+
+        public BasicHttpResponseBuilder statusCode(final StatusCode statusCode) {
+            this.statusCode = statusCode;
+            return this;
+        }
+
+        public BasicHttpResponseBuilder setCookie(final Cookie cookie) {
+            headers.put(HttpHeaderName.SET_COOKIE.getName(), cookie.getCookieString());
+            return this;
+        }
+
+        public BasicHttpResponseBuilder cacheControl(final String cacheControl) {
+            headers.put(HttpHeaderName.CACHE_CONTROL.getName(), cacheControl);
+            return this;
+        }
+
+        public BasicHttpResponseBuilder contentType(final String contentType) {
+            headers.put(HttpHeaderName.CONTENT_TYPE.getName(), contentType);
+            return this;
+        }
+
+        public BasicHttpResponseBuilder addHeader(final String headerName, final String headerValue) {
+            headers.put(headerName, headerValue);
+            return this;
+        }
+
+        public BasicHttpResponseBuilder body(final String body) {
+            this.body = body;
+            return this;
+        }
+
+        public BasicHttpResponseBuilder redirect(final String location) {
+            headers.put("Location", location);
+            return this;
+        }
     }
 }

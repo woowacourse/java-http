@@ -8,8 +8,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserLoginException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
+import jakarta.http.session.Session;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -26,8 +24,7 @@ public class LoginController extends AbstractController {
     }
 
     private void checkAlreadyLoginUser(final HttpRequest request, final HttpResponse response) {
-        HttpCookie cookie = new HttpCookie(request.getCookie());
-        Session session = SESSION_MANAGER.findSession(cookie.getSessionId());
+        Session session = request.getSession();
         if (session != null) {
             response.sendRedirect(INDEX_PAGE_URL);
         }
@@ -49,19 +46,13 @@ public class LoginController extends AbstractController {
             throw new UserLoginException("비밀번호가 일치하지 않습니다.");
         }
 
-        Session session = createSession(user);
+        Session session = request.setSession();
+        session.setAttribute("user", user);
         response.setCookie(HttpCookie.fromJSessionId(session.getId()));
     }
 
     private User findUser(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UserNotFoundException::new);
-    }
-
-    private Session createSession(final User user) {
-        Session session = new Session();
-        session.setAttribute("user", user);
-        SESSION_MANAGER.add(session);
-        return session;
     }
 }

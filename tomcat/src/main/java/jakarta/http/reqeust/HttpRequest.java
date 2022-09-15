@@ -1,14 +1,18 @@
 package jakarta.http.reqeust;
 
 import jakarta.http.ContentType;
+import jakarta.http.HttpCookie;
+import jakarta.http.HttpHeader;
+import jakarta.http.session.Session;
+import jakarta.http.session.SessionManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.http.HttpHeader;
 
 public class HttpRequest {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String EMPTY_REQUEST_BODY = " ";
 
     private final HttpRequestLine httpRequestLine;
@@ -56,12 +60,24 @@ public class HttpRequest {
         return httpRequestLine.hasGetMethod();
     }
 
-    public String getPath() {
-        return httpRequestLine.getPath();
+    public Session setSession() {
+        HttpCookie cookie = new HttpCookie(httpHeader.getCookie());
+        Session session = SESSION_MANAGER.findSession(cookie.getSessionId());
+        if (session == null) {
+            session = new Session();
+            SESSION_MANAGER.add(session);
+        }
+        return session;
     }
 
-    public String getCookie() {
-        return httpHeader.getCookie();
+    public Session getSession() {
+        HttpCookie cookie = new HttpCookie(httpHeader.getCookie());
+        Session session = SESSION_MANAGER.findSession(cookie.getSessionId());
+        return session;
+    }
+
+    public String getPath() {
+        return httpRequestLine.getPath();
     }
 
     public String getBody() {

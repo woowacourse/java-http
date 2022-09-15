@@ -1,4 +1,4 @@
-package org.apache.catalina.session;
+package jakarta.http.session;
 
 import java.util.HashMap;
 import java.util.Map;

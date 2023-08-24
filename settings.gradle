@@ -1,2 +1,3 @@
 rootProject.name = 'jwp-dashboard-http'
 include 'tomcat'
+include 'study'

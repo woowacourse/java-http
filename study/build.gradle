@@ -1,0 +1,36 @@
+plugins {
+    id "java"
+    id "org.springframework.boot" version "2.7.14"
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+}
+
+group "nextstep"
+version "1.0-SNAPSHOT"
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "ch.qos.logback:logback-classic:1.2.12"
+    implementation "org.apache.commons:commons-lang3:3.13.0"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    implementation "pl.allegro.tech.boot:handlebars-spring-boot-starter:0.3.4"
+    implementation "org.springframework.boot:spring-boot-starter-web:2.7.14"
+    implementation "org.springframework.boot:spring-boot-starter-webflux:2.7.14"
+
+    testImplementation "org.assertj:assertj-core:3.24.2"
+    testImplementation "org.mockito:mockito-core:5.4.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:5.7.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.2"
+    testImplementation "org.junit.platform:junit-platform-suite:5.7.2"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:2.7.2"
+}
+
+test {
+    maxParallelForks 3
+    useJUnitPlatform()
+}

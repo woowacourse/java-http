@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
- * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
+ * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
  *
  * InputStream은 데이터를 읽고, OutputStream은 데이터를 쓴다.
  * FilterStream은 InputStream이나 OutputStream에 연결될 수 있다.
@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 class IOStreamTest {
 
     /**
+     * OutputStream 학습하기
+     *
      * 자바의 기본 출력 클래스는 java.io.OutputStream이다.
      * OutputStream의 write(int b) 메서드는 기반 메서드이다.
      * <code>public abstract void write(int b) throws IOException;</code>
@@ -36,7 +38,7 @@ class IOStreamTest {
          * OutputStream은 다른 매체에 바이트로 데이터를 쓸 때 사용한다.
          * OutputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 쓰기 위해 write(int b) 메서드를 사용한다.
          * 예를 들어, FilterOutputStream은 파일로 데이터를 쓸 때,
-         * DataOutputStream은 자바의 primitive type data를 다른 매체로 데이터를 쓸 때 사용한다.
+         * 또는 DataOutputStream은 자바의 primitive type data를 다른 매체로 데이터를 쓸 때 사용한다.
          * 
          * write 메서드는 데이터를 바이트로 출력하기 때문에 비효율적이다.
          * <code>write(byte[] data)</code>와 <code>write(byte b[], int off, int len)</code> 메서드는
@@ -64,7 +66,8 @@ class IOStreamTest {
          * 
          * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
          * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
-         * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면 데드락(deadlock) 상태가 되기 때문에 flush로 해제한다.
+         * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
+         * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
          */
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
@@ -99,6 +102,8 @@ class IOStreamTest {
     }
 
     /**
+     * InputStream 학습하기
+     *
      * 자바의 기본 입력 클래스는 java.io.InputStream이다.
      * InputStream은 다른 매체로부터 바이트로 데이터를 읽을 때 사용한다.
      * InputStream의 read() 메서드는 기반 메서드이다.
@@ -149,6 +154,8 @@ class IOStreamTest {
     }
 
     /**
+     * FilterStream 학습하기
+     *
      * 필터는 필터 스트림, reader, writer로 나뉜다.
      * 필터는 바이트를 다른 데이터 형식으로 변환 할 때 사용한다.
      * reader, writer는 UTF-8, ISO 8859-1 같은 형식으로 인코딩된 텍스트를 처리하는 데 사용된다.
@@ -176,15 +183,17 @@ class IOStreamTest {
 
     /**
      * 자바의 기본 문자열은 UTF-16 유니코드 인코딩을 사용한다.
-     * 바이트를 문자(char)로 처리하려면 인코딩을 신경 써야 한다.
-     * InputStreamReader를 사용하면 지정된 인코딩에 따라 유니코드 문자로 변환할 수 있다.
+     * 문자열이 아닌 바이트 단위로 처리하려니 불편하다.
+     * 그리고 바이트를 문자(char)로 처리하려면 인코딩을 신경 써야 한다.
      * reader, writer를 사용하면 입출력 스트림을 바이트가 아닌 문자 단위로 데이터를 처리하게 된다.
+     * 그리고 InputStreamReader를 사용하면 지정된 인코딩에 따라 유니코드 문자로 변환할 수 있다.
      */
     @Nested
     class InputStreamReader_학습_테스트 {
 
         /**
          * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다.
+         * 읽어온 문자(char)를 문자열(String)로 처리하자.
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test

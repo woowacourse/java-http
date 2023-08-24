@@ -43,10 +43,12 @@ public class Connector implements Runnable {
         thread.setDaemon(true);
         thread.start();
         stopped = false;
+        log.info("Web Application Server started {} port.", serverSocket.getLocalPort());
     }
 
     @Override
     public void run() {
+        // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
             connect();
         }
@@ -64,7 +66,6 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         var processor = new Http11Processor(connection);
         new Thread(processor).start();
     }

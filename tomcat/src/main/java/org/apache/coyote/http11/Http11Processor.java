@@ -20,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
+        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 

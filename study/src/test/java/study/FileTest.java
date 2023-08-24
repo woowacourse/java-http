@@ -17,8 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FileTest {
 
     /**
+     * resource 디렉터리 경로 찾기
+     *
      * File 객체를 생성하려면 파일의 경로를 알아야 한다.
-     * 자바 애플리케이션은 resource 디렉터리에 정적 파일을 저장한다.
+     * 자바 애플리케이션은 resource 디렉터리에 HTML, CSS 같은 정적 파일을 저장한다.
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
@@ -32,6 +34,8 @@ class FileTest {
     }
 
     /**
+     * 파일 내용 읽기
+     *
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */

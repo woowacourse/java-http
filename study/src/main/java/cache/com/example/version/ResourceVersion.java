@@ -1,4 +1,4 @@
-package com.example.version;
+package cache.com.example.version;
 
 import org.springframework.stereotype.Component;
 

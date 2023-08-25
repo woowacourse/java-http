@@ -1,4 +1,4 @@
-package com.example.etag;
+package cache.com.example.etag;
 
 import org.springframework.context.annotation.Configuration;
 

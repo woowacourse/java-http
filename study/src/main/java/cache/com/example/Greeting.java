@@ -1,4 +1,4 @@
-package com.example;
+package cache.com.example;
 
 public class Greeting {
 

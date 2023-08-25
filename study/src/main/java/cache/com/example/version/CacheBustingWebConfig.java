@@ -1,4 +1,4 @@
-package com.example.version;
+package cache.com.example.version;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.example;
+package cache.com.example;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;

@@ -1,4 +1,4 @@
-package com.example.version;
+package cache.com.example.version;
 
 import com.github.jknack.handlebars.Options;
 import org.slf4j.Logger;

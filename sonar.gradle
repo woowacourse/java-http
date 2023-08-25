@@ -1,0 +1,9 @@
+apply plugin: "org.sonarqube"
+
+sonar {
+    properties {
+        property "sonar.projectKey", "woowacourse_jwp-dashboard-http"
+        property "sonar.organization", "woowacourse"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}

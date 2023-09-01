@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,11 +38,12 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             final var uri = bufferedReader.readLine().split(" ")[1];
-            final String responseBody = buildResponseBody(uri);
-
+            final File file = getFile(uri);
+            final String responseBody = buildResponseBody(file);
+            final String contentType = getContentType(file);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    contentType,
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -52,12 +55,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponseBody(final String uri) throws IOException {
-        if (uri.equals("/")) {
+    private String getContentType(final File file) throws IOException {
+        if (file == null) {
+            return "Content-Type: text/plain;charset=utf-8 ";
+        }
+        final var urlConnection = file.toURI().toURL().openConnection();
+        final var mimeType = urlConnection.getContentType();
+        return "Content-Type: " + mimeType + ";charset=utf-8 ";
+
+
+    }
+
+    private String buildResponseBody(final File file) throws IOException {
+        if (file == null) {
             return "Hello world!";
         }
+        return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    @Nullable
+    private File getFile(final String uri) {
+        if (uri.equals("/")) {
+            return null;
+        }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return Optional.ofNullable(resource.getFile()).map(File::new).get();
     }
 
 }

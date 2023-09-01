@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.UserNotFoundException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
     private static final String SPACE = " ";
+    private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LINE_FEED = "\r\n";
     private static final int PATH_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
@@ -42,7 +46,6 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[2048];
             inputStream.read(bytes);
             final String request = new String(bytes);
-            System.out.println(request);
 
             final String response = createResponse(request);
 
@@ -55,6 +58,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(String request) throws IOException {
         String path = getPath(request);
+        if (isLoginRequest(path)) {
+            String queryString = splitQueryString(path)[1];
+            String[] splitQueryString = queryString.split("&");
+            String account = splitQueryString[0].split("=")[1];
+
+            path = "/login.html";
+
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
+            log.info(user.toString());
+        }
         String protocol = getRequestElement(request, PROTOCOL_INDEX);
         String status = "200 OK";
         String contentType = getContentType(path);
@@ -69,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                 content;
     }
 
-    private static String getContentType(String path) {
+    private String getContentType(String path) {
         String contentType = "Content-Type: ";
         for (String staticPath : STATIC_PATH) {
             if (path.startsWith(staticPath)) {
@@ -89,6 +102,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPath(String request) {
         return getRequestElement(request, PATH_INDEX);
+    }
+
+    private boolean isLoginRequest(String path) {
+        return splitQueryString(path)[0].equals("/login");
+    }
+
+    private String[] splitQueryString(String path) {
+        return path.split("\\?");
     }
 
     private String getRequestElement(String request, int index) {

@@ -18,4 +18,12 @@ public class HttpRequest {
                 HttpRequestHeaders.from(headers)
         );
     }
+
+    public HttpStartLine getHttpStartLine() {
+        return httpStartLine;
+    }
+
+    public HttpRequestHeaders getHttpRequestHeaders() {
+        return httpRequestHeaders;
+    }
 }

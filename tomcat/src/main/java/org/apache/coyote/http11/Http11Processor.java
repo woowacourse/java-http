@@ -50,10 +50,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateResponseWithPath(String path) throws IOException {
         String resource = findResourceWithPath(path);
+        String contentType = ContentTypeParser.parse(path);
         int contentLength = resource.getBytes().length;
 
         return String.join("\r\n", "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: "  + contentLength + " ",
                 "",
                 resource);

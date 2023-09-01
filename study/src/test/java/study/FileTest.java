@@ -1,5 +1,6 @@
 package study;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,7 +50,7 @@ class FileTest {
 
         // todo
         final String pathValue= getClass().getClassLoader().getResource(fileName).getPath();
-        final Path path = Paths.get(pathValue);
+        final Path path = new File(pathValue).toPath();
 
         // todo
         final List<String> actual = Files.readAllLines(path);

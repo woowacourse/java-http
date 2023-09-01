@@ -3,11 +3,12 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,10 +54,8 @@ class FileTest {
         assertThat(actual).containsOnly("nextstep");
     }
 
-    private static File getFile(final String fileName) {
-        final Path absolutePath = Path.of("").toAbsolutePath();
-        final String uri = absolutePath + "/src/test/resources/";
-
-        return new File(uri + fileName);
+    private File getFile(final String fileName) {
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        return new File(resource.getFile());
     }
 }

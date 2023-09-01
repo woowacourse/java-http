@@ -1,17 +1,23 @@
 package cache.com.example;
 
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.servlet.http.HttpServletResponse;
-
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(final HttpServletResponse response) {
+        final String cacheControl = CacheControl
+                .noCache()
+                .cachePrivate()
+                .getHeaderValue();
+        final String transferEncoding = "chunked";
+        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
+        response.addHeader(HttpHeaders.TRANSFER_ENCODING, transferEncoding);
         return "index";
     }
 
@@ -29,7 +35,9 @@ public class GreetingController {
     }
 
     @GetMapping("/etag")
-    public String etag() {
+    public String etag(final HttpServletResponse response) {
+        final String etag = "W/\"123456789\"";
+        response.addHeader(HttpHeaders.ETAG, etag);
         return "index";
     }
 

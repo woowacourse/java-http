@@ -6,8 +6,8 @@ public class StartLine {
     private final String requestURI;
     private final String httpVersion;
 
-    public static StartLine from(String rawStartLine) {
-        String[] split = rawStartLine.split(" ");
+    public static StartLine from(String startLine) {
+        String[] split = startLine.split(" ");
         return new StartLine(split[0], split[1], split[2]);
     }
 
@@ -17,22 +17,19 @@ public class StartLine {
         this.httpVersion = httpVersion;
     }
 
-    public String absolutePath() {
+    public AbsolutePath absolutePath() {
         if (requestURI.contains("?")) {
-            return requestURI.substring(0, requestURI.indexOf("?"));
+            return AbsolutePath.from(requestURI.substring(0, requestURI.indexOf("?")));
         }
-        return requestURI;
+        return AbsolutePath.from(requestURI);
     }
 
-    public String getMethod() {
-        return method;
+    public String[] queryParameters() {
+        return requestURI.substring(requestURI.indexOf("?") + 1)
+                .split("&");
     }
 
-    public String getRequestURI() {
-        return requestURI;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
+    public boolean hasQueryParameters() {
+        return requestURI.contains("?");
     }
 }

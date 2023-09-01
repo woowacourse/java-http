@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -29,19 +31,39 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String path = extractPath(inputStream);
+            String response = generateResponseWithPath(path);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractPath(InputStream inputStream) throws IOException {
+        final var reader = new BufferedReader(new InputStreamReader(inputStream));
+        String startLine = reader.readLine();
+        String[] split = startLine.split(" ");
+        return split[1];
+    }
+
+    private String generateResponseWithPath(String path) throws IOException {
+        String resource = findResourceWithPath(path);
+        int contentLength = resource.getBytes().length;
+
+        return String.join("\r\n", "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: "  + contentLength + " ",
+                "",
+                resource);
+    }
+
+    private String findResourceWithPath(String path) throws IOException {
+        if (path.equals("/")) {
+            return "Hello world!";
+        }
+        URL resourceUrl = getClass().getClassLoader().getResource("static" + path);
+        return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
     }
 }

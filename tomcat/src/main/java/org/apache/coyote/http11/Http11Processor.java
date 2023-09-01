@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -19,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LINE_FEED = "\r\n";
     private static final int PATH_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
+    private static List<String> STATIC_PATH = List.of("/css", "/js", "/assets");
 
     private final Socket connection;
 
@@ -40,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[2048];
             inputStream.read(bytes);
             final String request = new String(bytes);
+            System.out.println(request);
 
             final String response = createResponse(request);
 
@@ -54,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = getPath(request);
         String protocol = getRequestElement(request, PROTOCOL_INDEX);
         String status = "200 OK";
-        String contentType = "Content-Type: text/html;charset=utf-8";
+        String contentType = getContentType(path);
 
         String content = getContent(path);
         String contentLength = "Content-Length: " + content.getBytes().length;
@@ -64,6 +67,16 @@ public class Http11Processor implements Runnable, Processor {
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
                 content;
+    }
+
+    private static String getContentType(String path) {
+        String contentType = "Content-Type: ";
+        for (String staticPath : STATIC_PATH) {
+            if (path.startsWith(staticPath)) {
+                return contentType + "text/css;charset=utf-8";
+            }
+        }
+        return contentType + "text/html;charset=utf-8";
     }
 
     private String getContent(String path) throws IOException {

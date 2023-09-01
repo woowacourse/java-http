@@ -37,9 +37,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            String responseBody = "Hello world!";
-
             String[] headers = getHeader(inputStream).split(HEADER_DELIMETER);
+            for (String header : headers) {
+                System.out.println(header);
+            }
+            System.out.println("-----------------");
 
             if (headers[0].contains("/index.html")) {
                 URL fileUrl = this.getClass()
@@ -47,19 +49,38 @@ public class Http11Processor implements Runnable, Processor {
                         .getResource("static" + "/index.html");
 
                 Path path = new File(Objects.requireNonNull(fileUrl).getFile()).toPath();
-                responseBody = new String(Files.readAllBytes(path));
+                String responseBody = new String(Files.readAllBytes(path));
+
+                String response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+
+            } else if (headers[0].contains("css")) {
+                URL fileUrl = this.getClass()
+                        .getClassLoader()
+                        .getResource("static/css" + "/styles.css");
+
+                if (Objects.isNull(fileUrl)) {
+                    return;
+                }
+
+                Path path = new File(Objects.requireNonNull(fileUrl).getFile()).toPath();
+                String responseBody = new String(Files.readAllBytes(path));
+
+                String response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css ",
+                        "Content-Length: " + responseBody.length() + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
             }
-
-
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

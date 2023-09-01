@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public class HttpStartLine {
+public class HttpRequestStartLine {
 
     private static final String DELIMITER = " ";
     private static final int HTTP_METHOD_INDEX = 0;
@@ -12,7 +12,7 @@ public class HttpStartLine {
     private final String requestURI;
     private final String httpVersion;
 
-    private HttpStartLine(
+    private HttpRequestStartLine(
             final HttpRequestMethod httpRequestMethod,
             final String requestURI,
             final String httpVersion
@@ -22,13 +22,13 @@ public class HttpStartLine {
         this.httpVersion = httpVersion;
     }
 
-    public static HttpStartLine from(final String requestLine) {
+    public static HttpRequestStartLine from(final String requestLine) {
         final String[] startLineTokens = requestLine.split(DELIMITER);
         validateStartLineTokenSize(startLineTokens);
         final HttpRequestMethod httpRequestMethod = HttpRequestMethod.valueOf(startLineTokens[HTTP_METHOD_INDEX]);
         final String requestURI = startLineTokens[REQUEST_URI_INDEX];
         final String httpVersion = startLineTokens[HTTP_VERSION_INDEX];
-        return new HttpStartLine(httpRequestMethod, requestURI, httpVersion);
+        return new HttpRequestStartLine(httpRequestMethod, requestURI, httpVersion);
     }
 
     private static void validateStartLineTokenSize(final String[] lines) {

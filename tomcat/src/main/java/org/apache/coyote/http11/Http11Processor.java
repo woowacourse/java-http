@@ -38,18 +38,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var inputStreamReader = new InputStreamReader(inputStream);
-             final var bufferedReader = new BufferedReader(inputStreamReader);
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            List<String> request = new ArrayList<>();
-            String line = null;
-            while (!"".equals(line)) {
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    break;
-                }
-                request.add(line);
-            }
+            List<String> request = readRequest(bufferedReader);
 
             var contentType = "html";
             for (String text : request) {
@@ -104,6 +95,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> readRequest(BufferedReader bufferedReader) throws IOException {
+        List<String> request = new ArrayList<>();
+        String line;
+        while (!(line = bufferedReader.readLine()).isBlank()) {
+            request.add(line);
+        }
+        return request;
     }
 
 }

@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +82,30 @@ public class Http11Processor implements Runnable, Processor {
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "",
                         responseBody);
-            }
+            } else if (path.startsWith("/login")) {
+                final URL resource = getClass().getClassLoader().getResource("static/login.html");
+                String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                int index = path.indexOf("?");
+                String params = path.substring(index + 1);
+                String[] elements = params.split("&");
+                String[] accountPair = elements[0].split("=");
+                String[] passwordPair = elements[1].split("=");
+                String account = accountPair[1];
+                String password = passwordPair[1];
+
+                User user = InMemoryUserRepository.findByAccount(account).get();
+                if (user.checkPassword(password)) {
+                    log.info("user : {}", user);
+                }
+            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

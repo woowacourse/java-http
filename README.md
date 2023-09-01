@@ -8,4 +8,4 @@
   - [x] Response Content-Type : text/css로 응답
   - [x] Response Content-Type : text/javascript로 응답
 
-- [ ] Query String을 파싱한다.
+- [x] Query String을 파싱한다.

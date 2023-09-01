@@ -44,8 +44,12 @@ public class Http11Processor implements Runnable, Processor {
     private String extractPath(InputStream inputStream) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(inputStream));
         String startLine = reader.readLine();
-        String[] split = startLine.split(" ");
-        return split[1];
+        String requestURI = startLine.split(" ")[1];
+
+        if (requestURI.contains("?")) {
+            return requestURI.substring(0, requestURI.indexOf("?"));
+        }
+        return requestURI;
     }
 
     private String generateResponseWithPath(String path) throws IOException {
@@ -64,7 +68,16 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/")) {
             return "Hello world!";
         }
+
+        if (doesNotHaveExtension(path)) {
+            path = path + ".html";
+        }
+
         URL resourceUrl = getClass().getClassLoader().getResource("static" + path);
         return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
+    }
+
+    private boolean doesNotHaveExtension(String path) {
+        return !path.contains(".");
     }
 }

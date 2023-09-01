@@ -31,8 +31,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String path = extractPath(inputStream);
-            String response = generateResponseWithPath(path);
+            StartLine startLine = extractStartLine(inputStream);
+            String response = generateResponseWithPath(startLine.absolutePath());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -41,15 +41,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractPath(InputStream inputStream) throws IOException {
+    private StartLine extractStartLine(InputStream inputStream) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(inputStream));
-        String startLine = reader.readLine();
-        String requestURI = startLine.split(" ")[1];
-
-        if (requestURI.contains("?")) {
-            return requestURI.substring(0, requestURI.indexOf("?"));
-        }
-        return requestURI;
+        return StartLine.from(reader.readLine());
     }
 
     private String generateResponseWithPath(String path) throws IOException {

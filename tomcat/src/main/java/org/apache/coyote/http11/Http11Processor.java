@@ -49,6 +49,18 @@ public class Http11Processor implements Runnable, Processor {
                 request.add(line);
             }
 
+            var contentType = "html";
+            for (String text : request) {
+                if (text.startsWith("Accept:")) {
+                    if (text.contains("css")) {
+                        contentType = "css";
+                    }
+                    if (text.contains("js")) {
+                        contentType = "javascript";
+                    }
+                }
+            }
+
             final var requestURI = request.get(0).split(" ")[1];
             var responseBody = "Hello world!";
             if (!"/".equals(requestURI)) {
@@ -62,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

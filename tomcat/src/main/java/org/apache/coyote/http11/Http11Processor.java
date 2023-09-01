@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +63,32 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var requestURI = request.get(0).split(" ")[1];
+            var requestURI = request.get(0).split(" ")[1];
+            if (requestURI.startsWith("/login") && requestURI.contains("?")) {
+                final int index = requestURI.indexOf("?");
+                final var queryString = requestURI.substring(index + 1);
+                final String[] queryStrings = queryString.split("&");
+                for (String querystring : queryStrings) {
+                    final int equalSignIndex = querystring.indexOf("=");
+                    final var key = querystring.substring(0, equalSignIndex);
+                    final var value = querystring.substring(equalSignIndex+1);
+                    if ("account".equals(key)) {
+                        User user = InMemoryUserRepository.findByAccount(value).get();
+                        log.info(user.toString());
+                    }
+                }
+            }
+            if (requestURI.contains("?")) {
+                final int index = requestURI.indexOf("?");
+                requestURI = requestURI.substring(0, index) + ".html";
+            }
+
             var responseBody = "Hello world!";
             if (!"/".equals(requestURI)) {
                 final Path path =
                         new File(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestURI))
                                 .getFile()
                         ).toPath();
-
                 responseBody = new String(Files.readAllBytes(path));
             }
 

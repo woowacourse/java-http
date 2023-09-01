@@ -43,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final String url = request.split(" ")[URI_INDEX];
+            log.info("request url:{}", url);
 
             if (url.equals("/")) {
                 final String responseBody = "Hello world!";
@@ -61,16 +62,25 @@ public class Http11Processor implements Runnable, Processor {
             final URL resource = classLoader.getResource("static" + url);
             final File file = new File(resource.getFile());
             final String responseBody = new String(Files.readAllBytes(file.toPath()));
-            final var response = String.join("\r\n",
+            final String response = String.join(
+                    "\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + getContentType(url) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    responseBody);
+                    responseBody
+            );
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String url) {
+        if (url.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

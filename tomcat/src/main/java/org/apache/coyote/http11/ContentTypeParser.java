@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum ContentTypeParser {
 
-    HTML("text/html"),
+    HTML("text/html;charset=utf-8"),
     CSS("text/css"),
     JS("text/javascript"),
     ICO("image/x-icon")

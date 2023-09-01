@@ -1,15 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -25,7 +24,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: */* ",
             "Content-Length: 12 ",
             "",
             "Hello world!");
@@ -58,5 +57,51 @@ class Http11ProcessorTest {
             "") + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /css/styles.css HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/css ",
+            "Content-Length: 211991 ");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @Test
+    void js() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /js/scripts.js HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/javascript ",
+            "Content-Length: 976 ");
+
+        assertThat(socket.output()).startsWith(expected);
     }
 }

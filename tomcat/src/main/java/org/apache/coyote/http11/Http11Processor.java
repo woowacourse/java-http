@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -34,7 +35,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream()) {
-            RequestUri requestUri = getRequestUri(inputStream);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            RequestUri requestUri = getRequestUri(bufferedReader);
             String response = getResponse(requestUri);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -43,9 +46,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestUri getRequestUri(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    private RequestUri getRequestUri(BufferedReader bufferedReader) throws IOException {
         String requestUri = bufferedReader.readLine();
         log.info("requestUri: {}", requestUri);
         return RequestUri.from(requestUri);
@@ -53,18 +54,24 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponse(RequestUri requestUri) throws IOException {
         String responseBody = getResponseBody(requestUri);
+        String contentType = resolveContentType(requestUri);
         return String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: " + contentType + " ",
             "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+            System.lineSeparator()) + responseBody;
     }
 
     private String getResponseBody(RequestUri requestUri) throws IOException {
         String path = requestUri.getPath();
         HttpMethod httpMethod = requestUri.getHttpMethod();
-        if ("/index.html".equals(path) && httpMethod == HttpMethod.GET) {
+        if (path.endsWith(".html") && httpMethod == HttpMethod.GET) {
+            return resolveContents(path);
+        }
+        if (path.endsWith(".css") && httpMethod == HttpMethod.GET) {
+            return resolveContents(path);
+        }
+        if (path.endsWith(".js") && httpMethod == HttpMethod.GET) {
             return resolveContents(path);
         }
         return "Hello world!";
@@ -72,7 +79,25 @@ public class Http11Processor implements Runnable, Processor {
 
     private String resolveContents(String path) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(STATIC_PATH + path).getFile());
+        URL resource = classLoader.getResource(STATIC_PATH + path);
+        if (resource == null) {
+            throw new IllegalArgumentException("해당 경로의 파일을 찾을 수 없습니다.");
+        }
+        File file = new File(resource.getFile());
         return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    private String resolveContentType(RequestUri requestUri) {
+        String path = requestUri.getPath();
+        if (path.endsWith(".html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (path.endsWith(".css")) {
+            return "text/css";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "*/*";
     }
 }

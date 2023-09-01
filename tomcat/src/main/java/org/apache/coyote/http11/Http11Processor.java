@@ -32,14 +32,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             StartLine startLine = extractStartLine(inputStream);
-            AbsolutePath absolutePath = startLine.absolutePath();
+            RequestURI requestURI = startLine.getRequestURI();
 
-            if (startLine.hasQueryParameters()) {
-                String[] queryParameters = startLine.queryParameters();
+            if (requestURI.hasQueryParameters()) {
+                String[] queryParameters = requestURI.queryParameters();
                 log.info(queryParameters[0]);
                 log.info(queryParameters[1]);
             }
-            String response = generateResponseWithPath(absolutePath);
+
+            String response = generateResponseWithPath(requestURI.absolutePath());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,9 +54,9 @@ public class Http11Processor implements Runnable, Processor {
         return StartLine.from(reader.readLine());
     }
 
-    private String generateResponseWithPath(AbsolutePath absolutePath) throws IOException {
+    private String generateResponseWithPath(String absolutePath) throws IOException {
         String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath.value());
+        String contentType = ContentTypeParser.parse(absolutePath);
         int contentLength = resource.getBytes().length;
 
         return String.join("\r\n", "HTTP/1.1 200 OK ",
@@ -65,11 +66,20 @@ public class Http11Processor implements Runnable, Processor {
                 resource);
     }
 
-    private String findResourceWithPath(AbsolutePath absolutePath) throws IOException {
-        if (absolutePath.isRootDirectory()) {
+    private String findResourceWithPath(String absolutePath) throws IOException {
+        if (absolutePath.equals("/")) {
             return "Hello world!";
         }
-        URL resourceUrl = getClass().getClassLoader().getResource("static" + absolutePath.value());
+
+        if (hasNoExtension(absolutePath)) {
+            absolutePath += ".html";
+        }
+
+        URL resourceUrl = getClass().getClassLoader().getResource("static" + absolutePath);
         return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
+    }
+
+    private boolean hasNoExtension(String absolutePath) {
+        return !absolutePath.contains(".");
     }
 }

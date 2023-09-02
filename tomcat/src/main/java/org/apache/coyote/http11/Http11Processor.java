@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRECTORY = "static";
     private static final String SPACE = " ";
     private static final String QUERY_STRING_SEPARATOR = "\\?";
+    private static final String MULTIPLE_QUERY_STRING_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LINE_FEED = "\r\n";
     private static final String HTML_SUFFIX = ".html";
@@ -63,8 +64,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(String request) throws IOException {
         String path = getPath(request);
+        String method = getMethod(request);
         String prevPath = path;
-        path = processOnlyRequest(path);
+        if (method.equals("GET")) {
+            path = processGetRequest(path);
+        } else if (method.equals("POST")) {
+            if (path.equals("/login")) {
+                path = processLogin(request);
+            } else if (path.equals("/register")) {
+                path = processRegister(request);
+            }
+        }
         String status = getStatus(prevPath, path);
 
         String protocol = getRequestElement(request, PROTOCOL_INDEX);
@@ -73,11 +83,57 @@ public class Http11Processor implements Runnable, Processor {
         String content = getContent(path);
         String contentLength = "Content-Length: " + content.getBytes().length;
 
-        return protocol + SPACE + status + SPACE + LINE_FEED +
+        String response = protocol + SPACE + status + SPACE + LINE_FEED +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
+                getLocationIfRedirect(status, path) +
                 LINE_FEED +
                 content;
+        return response;
+    }
+
+    private String processLogin(String request) {
+        String path;
+        String[] splitRequestBody = getRequestBody(request);
+        String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
+        String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
+        try {
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
+            path = getRedirectPath(password, user);
+            log.info(user.toString());
+        } catch (UserNotFoundException e) {
+            path =  "/401.html";
+        }
+        return path;
+    }
+
+    private static String[] getRequestBody(String request) {
+        String[] splitRequest = request.split(LINE_FEED);
+        String requestBody = splitRequest[splitRequest.length - 1].trim();
+        String[] splitRequestBody = requestBody.split(MULTIPLE_QUERY_STRING_SEPARATOR);
+        return splitRequestBody;
+    }
+
+    private static String processRegister(String request) {
+        String[] splitRequestBody = getRequestBody(request);
+        String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
+        String email = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
+        email = email.replace("%40", "@");
+        String password = splitRequestBody[2].split(KEY_VALUE_SEPARATOR)[1];
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        return "/index.html";
+    }
+
+    private String getLocationIfRedirect(String status, String path) {
+        if (status.startsWith("302")) {
+            return "Location: " + path + SPACE + LINE_FEED;
+        }
+        return "";
+    }
+
+    private String getMethod(String request) {
+        return getRequestElement(request, 0);
     }
 
     private String getStatus(String prevPath, String path) {
@@ -91,26 +147,32 @@ public class Http11Processor implements Runnable, Processor {
         return (prevPath + HTML_SUFFIX).equals(path);
     }
 
-    private String processOnlyRequest(String path) {
-        if (isLoginRequest(path)) {
-            if (haveQueryString(path)) {
-                String queryString = splitQueryString(path)[1];
-                String[] splitQueryString = queryString.split("&");
-                String account = splitQueryString[0].split(KEY_VALUE_SEPARATOR)[1];
-                String password = splitQueryString[1].split(KEY_VALUE_SEPARATOR)[1];
-                try {
-                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-                    path = getRedirectPath(password, user);
-                    log.info(user.toString());
-                    return path;
-                } catch (UserNotFoundException e) {
-                    return "/401.html";
-                }
-            }
-            return "/login.html";
+    private String processGetRequest(String path) {
+        if (isRequest(path)) {
+//            if (haveQueryString(path)) {
+//                path = processLogin(path);
+//                return path;
+//            }
+            return path + HTML_SUFFIX;
         }
         return path;
     }
+
+//    QueryString으로 login logic
+//    private String processLogin(String path) {
+//        String queryString = splitQueryString(path)[1];
+//        String[] splitQueryString = queryString.split("&");
+//        String account = splitQueryString[0].split(KEY_VALUE_SEPARATOR)[1];
+//        String password = splitQueryString[1].split(KEY_VALUE_SEPARATOR)[1];
+//        try {
+//            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
+//            path = getRedirectPath(password, user);
+//            log.info(user.toString());
+//            return path;
+//        } catch (UserNotFoundException e) {
+//            return "/401.html";
+//        }
+//    }
 
     private String getRedirectPath(String password, User user) {
         String path;
@@ -118,7 +180,8 @@ public class Http11Processor implements Runnable, Processor {
             path = "/index.html";
         } else {
             path = "/401.html";
-        }        return path;
+        }
+        return path;
     }
 
     private boolean haveQueryString(String path) {
@@ -128,12 +191,20 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(String path) {
         String contentType = "Content-Type: ";
-        for (String staticPath : STATIC_PATH) {
-            if (path.endsWith(staticPath)) {
-                return contentType + "text/css;charset=utf-8";
-            }
+
+        if (isStaticPath(path)) {
+            return contentType + "text/css;charset=utf-8";
         }
         return contentType + "text/html;charset=utf-8";
+    }
+
+    private boolean isStaticPath(String path) {
+        for (String staticPath : STATIC_PATH) {
+            if (path.endsWith(staticPath)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getContent(String path) throws IOException {
@@ -148,8 +219,8 @@ public class Http11Processor implements Runnable, Processor {
         return getRequestElement(request, PATH_INDEX);
     }
 
-    private boolean isLoginRequest(String path) {
-        return splitQueryString(path)[0].equals("/login");
+    private boolean isRequest(String path) {
+        return !isStaticPath(path) && !path.endsWith(HTML_SUFFIX);
     }
 
     private String[] splitQueryString(String path) {

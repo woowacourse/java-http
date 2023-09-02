@@ -18,7 +18,7 @@ public class Filter {
         Cookie cookie = requestHeaders.getCookie();
 
         if (cookie.hasKey("JSESSIONID")) {
-            log.info("session {} is logged in.", cookie.getKey("JSESSIONID"));
+            log.info("session {} is logged in.", cookie.getValue("JSESSIONID"));
         }
     }
 }

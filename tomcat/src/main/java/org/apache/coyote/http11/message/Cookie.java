@@ -14,7 +14,7 @@ public class Cookie {
         return cookie.containsKey(key);
     }
 
-    public String getKey(String key) {
+    public String getValue(String key) {
         return cookie.get(key);
     }
 }

@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +15,20 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
     private static final String SPACE = " ";
+    private static final String QUERY_STRING_SEPARATOR = "\\?";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LINE_FEED = "\r\n";
+    private static final String HTML_SUFFIX = ".html";
     private static final int PATH_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
-    private static List<String> STATIC_PATH = List.of("/css", "/js", "/assets");
+    private static List<String> STATIC_PATH = List.of(".css", ".js");
 
     private final Socket connection;
 
@@ -46,6 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[2048];
             inputStream.read(bytes);
             final String request = new String(bytes);
+            System.out.println(request);
 
             final String response = createResponse(request);
 
@@ -58,18 +63,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(String request) throws IOException {
         String path = getPath(request);
-        if (isLoginRequest(path)) {
-            String queryString = splitQueryString(path)[1];
-            String[] splitQueryString = queryString.split("&");
-            String account = splitQueryString[0].split("=")[1];
+        String prevPath = path;
+        path = processOnlyRequest(path);
+        String status = getStatus(prevPath, path);
 
-            path = "/login.html";
-
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-            log.info(user.toString());
-        }
         String protocol = getRequestElement(request, PROTOCOL_INDEX);
-        String status = "200 OK";
         String contentType = getContentType(path);
 
         String content = getContent(path);
@@ -82,10 +80,56 @@ public class Http11Processor implements Runnable, Processor {
                 content;
     }
 
+    private String getStatus(String prevPath, String path) {
+        if (!isSamePage(prevPath, path) && !prevPath.equals(path)) {
+            return HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
+        }
+        return HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
+    }
+
+    private static boolean isSamePage(String prevPath, String path) {
+        return (prevPath + HTML_SUFFIX).equals(path);
+    }
+
+    private String processOnlyRequest(String path) {
+        if (isLoginRequest(path)) {
+            if (haveQueryString(path)) {
+                String queryString = splitQueryString(path)[1];
+                String[] splitQueryString = queryString.split("&");
+                String account = splitQueryString[0].split(KEY_VALUE_SEPARATOR)[1];
+                String password = splitQueryString[1].split(KEY_VALUE_SEPARATOR)[1];
+                try {
+                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
+                    path = getRedirectPath(password, user);
+                    log.info(user.toString());
+                    return path;
+                } catch (UserNotFoundException e) {
+                    return "/401.html";
+                }
+            }
+            return "/login.html";
+        }
+        return path;
+    }
+
+    private String getRedirectPath(String password, User user) {
+        String path;
+        if (user.checkPassword(password)) {
+            path = "/index.html";
+        } else {
+            path = "/401.html";
+        }        return path;
+    }
+
+    private boolean haveQueryString(String path) {
+        Pattern pattern = Pattern.compile(QUERY_STRING_SEPARATOR);
+        return pattern.matcher(path).find();
+    }
+
     private String getContentType(String path) {
         String contentType = "Content-Type: ";
         for (String staticPath : STATIC_PATH) {
-            if (path.startsWith(staticPath)) {
+            if (path.endsWith(staticPath)) {
                 return contentType + "text/css;charset=utf-8";
             }
         }
@@ -109,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String[] splitQueryString(String path) {
-        return path.split("\\?");
+        return path.split(QUERY_STRING_SEPARATOR);
     }
 
     private String getRequestElement(String request, int index) {

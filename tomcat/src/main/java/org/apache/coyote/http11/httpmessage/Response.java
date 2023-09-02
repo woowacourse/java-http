@@ -8,7 +8,7 @@ public class Response {
         this.message = message;
     }
 
-    public static Response from(String httpVersion, String httpStatus, String contentType,
+    public static Response from(HttpVersion httpVersion, HttpStatus httpStatus, String contentType,
                                 int contentLength, String resource) {
         String message = String.join("\r\n",
                 httpVersion + " " + httpStatus + " ",

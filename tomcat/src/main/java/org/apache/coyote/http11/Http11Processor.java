@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -82,9 +86,7 @@ public class Http11Processor implements Runnable, Processor {
     private String readStaticFile(String path) throws IOException {
         // 경로를 기반으로 정적 파일을 읽고 그 내용을 반환하는 로직을 작성해야 합니다.
         // 이 예제에서는 간단하게 파일을 읽어오는 방법을 보여줍니다.
-        if (path.equals("/")) {
-            path = "/index.html";
-        }
+        path = parsePath(path);
 
         // 클래스 패스에서 정적 파일을 읽을 수 있도록 리소스 로더를 사용
         ClassLoader classLoader = getClass().getClassLoader();
@@ -103,5 +105,45 @@ public class Http11Processor implements Runnable, Processor {
 
         // content-type header 추가한 http 응답 변환
         return content.toString();
+    }
+
+    private void printLogIfValidUser(String path) {
+        final StringTokenizer st = new StringTokenizer(path, "&");
+        String parsedAccount = "";
+        String parsedPassword = "";
+
+        while (st.hasMoreTokens()) {
+            final String token = st.nextToken();
+
+            if (token.startsWith("/login?account=")) {
+                parsedAccount = token.substring("/login?account=".length());
+            } else if (token.startsWith("password=")) {
+                parsedPassword = token.substring("password=".length());
+            }
+        }
+
+        final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(parsedAccount);
+        if (maybeUser.isPresent()) {
+            final User foundUser = maybeUser.get();
+            if (foundUser.checkPassword(parsedPassword)) {
+                log.info("user : " + foundUser);
+            }
+        }
+    }
+
+    private String parsePath(String path) {
+        if (path.equals("/")) {
+            path = "/index.html";
+        }
+//
+//        if(path.equals("/login")) {
+//
+//        }
+
+        if (path.contains("/login")) {
+            printLogIfValidUser(path);
+            path = "/login.html";
+        }
+        return path;
     }
 }

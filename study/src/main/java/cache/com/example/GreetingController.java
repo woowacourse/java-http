@@ -1,18 +1,12 @@
 package cache.com.example;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 @Controller
 public class GreetingController {
@@ -28,8 +22,13 @@ public class GreetingController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(@RequestParam String account, @RequestParam String password) {
         return "login";
+    }
+
+    @GetMapping("/login")
+    public String loginWithNoParams() {
+        return "401";
     }
 
     /**

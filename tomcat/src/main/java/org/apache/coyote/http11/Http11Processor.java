@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpHeaders httpHeaders = new HttpHeaders();
         while (true) {
             String line = bufferedReader.readLine();
-            if (line == null || line.isEmpty()) {
+            if (line == null || line.isBlank()) {
                 break;
             }
             String[] header = line.split(":");

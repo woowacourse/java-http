@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -36,6 +37,35 @@ class RequestLineTest {
                 () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(requestLine.getUri()).isEqualTo("/index.html"),
                 () -> assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1")
+        );
+    }
+
+    @Test
+    void queryString을_제외한_uri을_반환한다() {
+        // given
+        final String line = "GET /login?account=gugu&password=password HTTP/1.1";
+        final RequestLine requestLine = RequestLine.from(line);
+
+        // when
+        final String result = requestLine.parseUriWithOutQueryString();
+
+        // then
+        assertThat(result).isEqualTo("/login");
+    }
+
+    @Test
+    void queryString을_파싱하여_반환한다() {
+        // given
+        final String line = "GET /login?account=gugu&password=password HTTP/1.1";
+        final RequestLine requestLine = RequestLine.from(line);
+
+        // when
+        final QueryString queryString = requestLine.parseQueryString();
+
+        // then
+        assertThat(queryString.getItems()).contains(
+                entry("account", "gugu"),
+                entry("password", "password")
         );
     }
 }

@@ -53,10 +53,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(final RequestLine requestLine) throws IOException {
-        final String uri = requestLine.getUri();
-        final String path = getPath(uri);
-        final QueryString queryString = QueryString.from(uri);
-        log.info("request url: {}, queryStrings: {}", uri, queryString.getItems());
+        final String path = requestLine.parseUriWithOutQueryString();
+        final QueryString queryString = requestLine.parseQueryString();
+        log.info("request uri: {}, queryStrings: {}", requestLine.getUri(), queryString.getItems());
 
         if (path.equals("/")) {
             final String responseBody = "Hello world!";
@@ -75,13 +74,5 @@ public class Http11Processor implements Runnable, Processor {
         final File file = new File(resource.getFile());
         final String responseBody = new String(Files.readAllBytes(file.toPath()));
         return HttpResponseUtil.generate(path, responseBody);
-    }
-
-    private String getPath(final String uri) {
-        int queryStringIndex = uri.indexOf("?");
-        if (queryStringIndex == -1) {
-            return uri;
-        }
-        return uri.substring(0, queryStringIndex);
     }
 }

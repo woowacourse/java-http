@@ -11,8 +11,10 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -52,6 +54,7 @@ public class Http11Processor implements Runnable, Processor {
                 String[] value = line.split(": ");
                 requestHeaders.put(value[0], value[1]);
             }
+            final HttpCookie httpCookie = HttpCookie.make(requestHeaders.get("Cookie"));
             log.info("requestHeaders = {}", requestHeaders);
 
             final Map<String, String> requestBody = new HashMap<>();
@@ -98,8 +101,28 @@ public class Http11Processor implements Runnable, Processor {
 
                     Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
                     if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
+                        var response = "";
                         location = "/index.html";
                         log.info("user: {}", user.get());
+                        var sessionId = httpCookie.getCookie("JSESSIONID");
+                        if (sessionId == null) {
+                            sessionId = String.valueOf(UUID.randomUUID());
+                            response = String.join("\r\n",
+                                    "HTTP/1.1 " + statusCode + " ",
+                                    "Content-Type: " + contentType + " ",
+                                    "Set-Cookie: JSESSIONID=" + sessionId + " ",
+                                    "Location: " + location + " ",
+                                    "");
+                        } else {
+                            response = String.join("\r\n",
+                                    "HTTP/1.1 " + statusCode + " ",
+                                    "Content-Type: " + contentType + " ",
+                                    "Location: " + location + " ",
+                                    "");
+                        }
+                        outputStream.write(response.getBytes());
+                        outputStream.flush();
+                        return;
                     } else {
                         location = "/401.html";
                     }
@@ -121,7 +144,8 @@ public class Http11Processor implements Runnable, Processor {
                     requestUri = "register.html";
                 }
                 if (requestMethod.equals("POST")) {
-                    final User newUser = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+                    final User newUser = new User(requestBody.get("account"), requestBody.get("password"),
+                            requestBody.get("email"));
                     InMemoryUserRepository.save(newUser);
 
                     statusCode = "302";

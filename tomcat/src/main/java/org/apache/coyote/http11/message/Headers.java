@@ -27,10 +27,11 @@ public class Headers {
         Map<String, String> cookie = new HashMap<>();
         String cookies = headers.get("Cookie");
 
-        Arrays.stream(cookies.split("; "))
-                .map(each -> each.split("="))
-                .forEach(each -> cookie.put(each[0], each[1]));
-
+        if (Objects.nonNull(cookies)) {
+            Arrays.stream(cookies.split("; "))
+                    .map(each -> each.split("="))
+                    .forEach(each -> cookie.put(each[0], each[1]));
+        }
         return new Cookie(cookie);
     }
 

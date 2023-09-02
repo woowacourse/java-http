@@ -18,6 +18,7 @@ import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
 import org.apache.coyote.http11.handler.IndexHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         handlerMap.put("/", new IndexHandler());
+        handlerMap.put("/login", new LoginHandler());
     }
 
     @Override

@@ -130,4 +130,28 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).startsWith(expected);
     }
+
+    @Test
+    void login() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 3796 ");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
 }

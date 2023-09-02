@@ -4,10 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,9 +14,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ResourceProvider resourceProvider;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.resourceProvider = new ResourceProvider();
     }
 
     @Override
@@ -35,17 +33,18 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
 
             String requestLine = inputReader.readLine();
-            String requestUri = requestUriOf(requestLine);
+            String requestURI = requestURIOf(requestLine);
 
-            var responseBody = "Hello world!";
+            var responseBody = "Hello world";
+            var contentType = "Content-Type: text/html;charset=utf-8 ";
 
-            if ("/index.html".equals(requestUri)) {
-                responseBody = getIndexPage();
+            if (resourceProvider.haveResource(requestURI)) {
+                responseBody = resourceProvider.resourceBodyOf(requestURI);
+                contentType = resourceProvider.contentTypeOf(requestURI);
             }
-
             final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -54,18 +53,11 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private String requestUriOf(String requestLine) {
+    private String requestURIOf(String requestLine) {
         String[] split = requestLine.split(" ");
         return split[1];
-    }
-
-    private String getIndexPage() throws URISyntaxException, IOException {
-        URI indexURI = getClass().getClassLoader().getResource("static/index.html").toURI();
-        return new String(Files.readAllBytes(Path.of(indexURI)));
     }
 }

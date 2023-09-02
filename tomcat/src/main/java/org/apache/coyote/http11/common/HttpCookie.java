@@ -23,8 +23,11 @@ public class HttpCookie {
         this.items.putAll(items);
     }
 
-    public static HttpCookie from(final String headers) {
-        return Arrays.stream(headers.split(SEPARATOR))
+    public static HttpCookie from(final String cookie) {
+        if (cookie.isEmpty()) {
+            return new HttpCookie();
+        }
+        return Arrays.stream(cookie.split(SEPARATOR))
                 .map(header -> header.split(DELIMITER))
                 .collect(collectingAndThen(
                         toMap(header -> header[KEY_INDEX], header -> header[VALUE_INDEX]),

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -87,8 +88,8 @@ public class Http11Processor implements Runnable, Processor {
             final RequestHeader requestHeader,
             final RequestBody requestBody
     ) {
-        final String path = requestLine.parseUriWithOutQueryString();
         LOG.info("request uri: {}", requestLine.getUri());
+        final String path = requestLine.parseUriWithOutQueryString();
         if (path.equals("/login")) {
             return login(requestLine, requestBody);
         }
@@ -106,7 +107,11 @@ public class Http11Processor implements Runnable, Processor {
         final String password = requestBody.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> new ResponseEntity(HttpStatus.FOUND, "/index.html"))
+                .map(user -> {
+                    final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, "/index.html");
+                    responseEntity.setCookie("JSESSIONID", UUID.randomUUID().toString());
+                    return responseEntity;
+                })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html"));
     }
 

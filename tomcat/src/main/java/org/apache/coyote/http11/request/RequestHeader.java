@@ -7,12 +7,14 @@ import static org.apache.coyote.http11.common.Constants.CRLF;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.common.HttpCookie;
 
 public class RequestHeader {
 
     private static final String DELIMITER = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, String> items = new HashMap<>();
 
@@ -27,6 +29,11 @@ public class RequestHeader {
                         toMap(header -> header[KEY_INDEX], header -> header[VALUE_INDEX]),
                         RequestHeader::new
                 ));
+    }
+
+    public HttpCookie parseCookie() {
+        final String cookie = items.getOrDefault(COOKIE_HEADER, "");
+        return HttpCookie.from(cookie);
     }
 
     public String get(final String key) {

@@ -63,7 +63,16 @@ public class HttpResponseGenerator {
         return String.join(
                 CRLF,
                 firstLine,
-                "Location: " + responseEntity.getUri()
+                "Location: " + responseEntity.getUri(),
+                generateSetCookieLine(responseEntity)
         );
+    }
+
+    private String generateSetCookieLine(final ResponseEntity responseEntity) {
+        final String jsessionid = responseEntity.getHttpCookie().get("JSESSIONID");
+        if (jsessionid == null) {
+            return "";
+        }
+        return "Set-Cookie: JSESSIONID=" + jsessionid + " ";
     }
 }

@@ -121,6 +121,9 @@ public class Http11Processor implements Runnable, Processor {
                     requestUri = "register.html";
                 }
                 if (requestMethod.equals("POST")) {
+                    final User newUser = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+                    InMemoryUserRepository.save(newUser);
+
                     statusCode = "302";
                     var location = "/index.html";
                     final var response = String.join("\r\n",

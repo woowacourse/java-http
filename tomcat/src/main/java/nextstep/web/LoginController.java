@@ -1,5 +1,6 @@
 package nextstep.web;
 
+import java.util.UUID;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -27,6 +28,7 @@ public class LoginController extends AbstractController {
         if (userService.validateLogin(account, password)) {
             User user = userService.getUserByAccount(account);
             log.info("login success: {}", user);
+            response.setCookie("JSESSIONID", UUID.randomUUID().toString());
             return redirect("/index.html", response);
         }
 

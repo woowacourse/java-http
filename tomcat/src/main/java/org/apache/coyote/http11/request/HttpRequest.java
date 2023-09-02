@@ -8,23 +8,24 @@ public class HttpRequest {
     private final Map<String, String> httpRequestHeaders;
     private final Map<String, String> queryParams;
     private final Map<String, String> payload;
+    private final HttpRequestCookie cookie;
 
     public HttpRequest(
             final HttpRequestStartLine httpRequestStartLine,
             final Map<String, String> httpRequestHeaders,
-            final Map<String, String> queryParams,
-            final Map<String, String> payload) {
+            final Map<String, String> payload
+    ) {
         this.httpRequestStartLine = httpRequestStartLine;
         this.httpRequestHeaders = httpRequestHeaders;
-        this.queryParams = queryParams;
+        this.queryParams = httpRequestStartLine.getQueryParams();
         this.payload = payload;
+        this.cookie = HttpRequestCookie.from(httpRequestHeaders.get("Cookie"));
     }
 
     public static HttpRequest of(final HttpRequestStartLine httpRequestStartLine, final Map<String, String> headers) {
         return new HttpRequest(
                 httpRequestStartLine,
                 headers,
-                httpRequestStartLine.getQueryParams(),
                 Map.of()
         );
     }
@@ -37,7 +38,6 @@ public class HttpRequest {
         return new HttpRequest(
                 httpRequestStartLine,
                 headers,
-                httpRequestStartLine.getQueryParams(),
                 payload
         );
     }
@@ -56,5 +56,9 @@ public class HttpRequest {
 
     public String getPayloadValue(final String key) {
         return payload.get(key);
+    }
+
+    public String getCookie(final String cookieKey) {
+        return cookie.getCookieValue(cookieKey);
     }
 }

@@ -34,4 +34,8 @@ public class HttpResponse {
     public void setHeader(final String header, final String value) {
         httpResponseHeaders.add(header, value);
     }
+
+    public void setCookie(final String cookieKey, final String cookieValue) {
+        httpResponseHeaders.add("Set-Cookie", cookieKey + "=" + cookieValue);
+    }
 }

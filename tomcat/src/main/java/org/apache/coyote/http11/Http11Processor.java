@@ -38,16 +38,31 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var inputStreamReader = new InputStreamReader(inputStream);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
+            String fileContent;
+            HttpStatus httpStatus;
+            String response;
 
             final Request request = Request.from(bufferedReader);
+
             if (request.getPath().startsWith("/login") && !request.getQueryParams().isEmpty()) {
                 final Map<String, String> queryParams = request.getQueryParams();
-                final User findUser = InMemoryUserRepository.findByAccount(queryParams.get("account")).orElseThrow();
-                log.info("user = {}", findUser);
-            }
+                final User user = InMemoryUserRepository.findByAccount(queryParams.get("account")).orElseThrow();
+                httpStatus = HttpStatus.FOUND;
+                String redirectPath;
+                if (user.checkPassword(queryParams.get("password"))) {
+                    redirectPath = "/index.html";
+                } else {
+                    redirectPath = "/401.html";
+                }
+                response = new ResponseBuilder(request.getAccessType(), getFileContent(redirectPath), httpStatus)
+                        .location(redirectPath)
+                        .build();
 
-            final String fileContent = getFileContent(request.getPath());
-            final String response = getResponse(request.getAccessType(), fileContent);
+            } else {
+                httpStatus = HttpStatus.OK;
+                fileContent = getFileContent(request.getPath());
+                response = new ResponseBuilder(request.getAccessType(), fileContent, httpStatus).build();
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,18 +80,5 @@ public class Http11Processor implements Runnable, Processor {
             log.error("error fileName = {}", fileName, e);
             return "";
         }
-    }
-
-    private String getResponse(final String acceptType, final String fileContent) {
-        String contentType = "text/html";
-        if (acceptType.startsWith("text/css")) {
-            contentType = "text/css";
-        }
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + fileContent.getBytes().length + " ",
-                "",
-                fileContent);
     }
 }

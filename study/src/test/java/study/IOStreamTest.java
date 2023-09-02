@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -53,6 +55,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -78,6 +81,7 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -96,6 +100,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (outputStream) {
+
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -128,7 +135,15 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            InputStreamReader reader = new InputStreamReader(inputStream, UTF_8);
+
+            final StringBuilder stringBuilder = new StringBuilder();
+            int charValue;
+            while ((charValue = reader.read()) != -1) {
+                stringBuilder.append((char) charValue);
+            }
+
+            final String actual = stringBuilder.toString();
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -148,6 +163,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+
+            try (inputStream) {
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -169,12 +187,12 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -205,9 +223,24 @@ class IOStreamTest {
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
-            final StringBuilder actual = new StringBuilder();
+            try (
+                    InputStreamReader reader = new InputStreamReader(inputStream, UTF_8);
+                    BufferedReader bufferedReader = new BufferedReader(reader);
+            ) {
+                final StringBuilder actual = new StringBuilder();
 
-            assertThat(actual).hasToString(emoji);
+                while (true) {
+                    String s = bufferedReader.readLine();
+                    if (s == null) {
+                        break;
+                    }
+                    actual.append(s).append("\r\n");
+                }
+
+                assertThat(actual).hasToString(emoji);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

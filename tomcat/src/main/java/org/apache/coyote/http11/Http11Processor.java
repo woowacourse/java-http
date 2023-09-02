@@ -9,7 +9,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.StartLine;
@@ -49,6 +51,13 @@ public class Http11Processor implements Runnable, Processor {
             URI uri = startLine.uri();
             if (uri.path().equals("/")) {
                 responseBody = "Hello world!";
+            } else if (uri.path().equals("/login")) {
+                final URL resource = classLoader.getResource("static" + uri.path() + ".html");
+                final File file = new File(resource.getFile());
+                responseBody = new String(Files.readAllBytes(file.toPath()));
+                User user = InMemoryUserRepository.findByAccount(uri.queryStrings().get("account"))
+                        .orElse(null);
+                log.info("User={}", user);
             } else {
                 final URL resource = classLoader.getResource("static" + uri.path());
                 final File file = new File(resource.getFile());

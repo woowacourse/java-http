@@ -5,7 +5,7 @@
 ## 학습 테스트
 
 - [x] IOStream 테스트
-- [ ] File 테스트
+- [x] File 테스트
 
 ## 1단계 - HTTP 구현하기
 

@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
     OK("200"),
     FOUND("302"),
-    UNAUTHORIZED("401");
+    UNAUTHORIZED("401"),
+    CONFLICT("409");
 
     private final String code;
 

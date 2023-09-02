@@ -15,6 +15,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
@@ -29,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;

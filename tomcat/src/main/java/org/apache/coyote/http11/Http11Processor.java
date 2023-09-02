@@ -4,13 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.RequestUri;
-import org.apache.coyote.http11.response.ResponseGenerator;
+import org.apache.coyote.http11.handler.HandlerAdapter;
+import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,26 +36,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            String startLine = br.readLine();
-            String[] startLineElements = startLine.split(" ");
-            String requestUri = startLineElements[REQUEST_URI_MESSAGE_INDEX];
-            RequestUri requestUriVo = new RequestUri(requestUri);
+            HttpRequest httpRequest = HttpRequest.from(br);
 
-            String response = "";
-            if (!requestUri.endsWith(".ico")) {
-                ResponseGenerator responseGenerator = new ResponseGenerator(requestUriVo);
-                response = responseGenerator.generateSuccessResponse();
-                if (requestUri.startsWith("/login")) {
-                    Map<String, String> loginQueryParams = requestUriVo.parseQueryParams();
+            RequestHandler handler = HandlerAdapter.findRequestHandler(httpRequest.getRequestUri());
+            HttpResponse response = handler.handle(httpRequest);
 
-                    User findUser = InMemoryUserRepository.findByAccount(loginQueryParams.get("account")).get();
-                    log.info("user : {}", findUser);
-                }
-            }
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.convertToBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

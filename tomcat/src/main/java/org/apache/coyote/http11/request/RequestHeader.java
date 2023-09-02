@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.coyote.http11.Constants.CRLF;
+import static org.apache.coyote.http11.common.Constants.CRLF;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -1,12 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.Constants.BLANK;
-import static org.apache.coyote.http11.Constants.CRLF;
+import static org.apache.coyote.http11.common.Constants.BLANK;
+import static org.apache.coyote.http11.common.Constants.CRLF;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.common.HttpStatus;
 
 public class HttpResponseGenerator {
 

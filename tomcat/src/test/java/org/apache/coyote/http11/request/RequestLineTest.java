@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.exception.InvalidRequestLineException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

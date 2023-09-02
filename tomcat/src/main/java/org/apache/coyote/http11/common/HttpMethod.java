@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.exception.InvalidHttpMethodException;
 
 public enum HttpMethod {
     GET,

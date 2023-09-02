@@ -80,11 +80,16 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> responseHeaderMapping = new HashMap<>();
 
         final String headerAcceptValue = httpRequestHeaders.getHeaderValue(ACCEPT.source());
-        if (Objects.nonNull(headerAcceptValue)) {
-            responseHeaderMapping.put(CONTENT_TYPE.source(), headerAcceptValue);
-        }
         if (Objects.isNull(headerAcceptValue)) {
-            responseHeaderMapping.put(CONTENT_TYPE.source(), MediaType.TEXT_HTML.source() + ";" + UTF_8.source());
+            responseHeaderMapping.put(CONTENT_TYPE.source(), TEXT_HTML.source() + ";" + UTF_8.source());
+        }
+        if (Objects.nonNull(headerAcceptValue)) {
+            if (headerAcceptValue.contains(TEXT_HTML.source())) {
+                responseHeaderMapping.put(CONTENT_TYPE.source(), TEXT_HTML.source() + ";charset=utf-8");
+            }
+            if (headerAcceptValue.contains(TEXT_CSS.source())) {
+                responseHeaderMapping.put(CONTENT_TYPE.source(), TEXT_CSS.source());
+            }
         }
         responseHeaderMapping.put(CONTENT_LENGTH.source(), String.valueOf(responseBody.length()));
 

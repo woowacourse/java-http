@@ -17,6 +17,9 @@ public class HttpResponseGenerator {
         if (uri.equals("/")) {
             return generateResponse(responseEntity, "Hello world!");
         }
+        if (responseEntity.getHttpStatus() == HttpStatus.FOUND) {
+            return generateRedirectResponse(responseEntity);
+        }
         final String responseBody = readStaticFile(uri);
         return generateResponse(responseEntity, responseBody);
     }
@@ -51,5 +54,15 @@ public class HttpResponseGenerator {
         final URL resource = classLoader.getResource("static" + uri);
         final File file = new File(resource.getFile());
         return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    private String generateRedirectResponse(final ResponseEntity responseEntity) {
+        final HttpStatus httpStatus = responseEntity.getHttpStatus();
+        final String firstLine = String.join(BLANK, "HTTP/1.1", httpStatus.getCode(), httpStatus.name(), "");
+        return String.join(
+                CRLF,
+                firstLine,
+                "Location: " + responseEntity.getUri()
+        );
     }
 }

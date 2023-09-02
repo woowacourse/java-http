@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public enum HttpStatus {
     OK("200"),
-    REDIRECT("302"),
+    FOUND("302"),
     UNAUTHORIZED("401");
 
     private final String code;

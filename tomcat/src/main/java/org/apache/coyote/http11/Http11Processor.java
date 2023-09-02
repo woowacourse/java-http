@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Constants.CRLF;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +41,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final RequestLine requestLine = RequestLine.from(firstLine);
-            final ResponseEntity responseEntity = handleRequest(requestLine);
+            final RequestHeader requestHeader = readHeader(bufferedReader);
+            final RequestBody requestBody = readBody(bufferedReader, requestHeader);
+
+            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);
+
             final String response = httpResponseGenerator.generate(responseEntity);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -48,26 +54,52 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseEntity handleRequest(final RequestLine requestLine) {
+    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
+            stringBuilder.append(line).append(CRLF);
+        }
+        return RequestHeader.from(stringBuilder.toString());
+    }
+
+    private RequestBody readBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
+            throws IOException {
+        final String contentLength = requestHeader.get("Content-Length");
+        if (contentLength == null) {
+            return RequestBody.empty();
+        }
+        final int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        return RequestBody.from(new String(buffer));
+    }
+
+    private ResponseEntity handleRequest(
+            final RequestLine requestLine,
+            final RequestHeader requestHeader,
+            final RequestBody requestBody
+    ) {
         final String path = requestLine.parseUriWithOutQueryString();
-        final QueryString queryString = requestLine.parseQueryString();
-        LOG.info("request uri: {}, queryStrings: {}", requestLine.getUri(), requestLine.parseQueryString().getItems());
+        LOG.info("request uri: {}", requestLine.getUri());
         if (path.equals("/login")) {
-            return login(requestLine, queryString);
+            return login(requestLine, requestBody);
         }
         return new ResponseEntity(HttpStatus.OK, path);
     }
 
-    private static ResponseEntity login(final RequestLine requestLine, final QueryString queryString) {
+    private ResponseEntity login(
+            final RequestLine requestLine,
+            final RequestBody requestBody
+    ) {
         final HttpMethod httpMethod = requestLine.getHttpMethod();
         if (httpMethod == HttpMethod.GET) {
             return new ResponseEntity(HttpStatus.OK, "/login.html");
         }
-        final String account = queryString.get("account");
-        final String password = queryString.get("password");
+        final String account = requestBody.get("account");
+        final String password = requestBody.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> new ResponseEntity(HttpStatus.REDIRECT, "/index.html"))
+                .map(user -> new ResponseEntity(HttpStatus.FOUND, "/index.html"))
                 .orElseGet(() -> new ResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html"));
     }
 }

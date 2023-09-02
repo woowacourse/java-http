@@ -23,6 +23,7 @@ import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.handler.IndexHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
+import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
         handlerMap.put("/", new IndexHandler());
         handlerMap.put("/login", new LoginHandler());
+        handlerMap.put("/register", new RegisterHandler());
     }
 
     @Override

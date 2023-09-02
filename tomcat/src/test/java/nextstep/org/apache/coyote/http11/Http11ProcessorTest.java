@@ -228,4 +228,54 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).startsWith(expected);
     }
+
+    @Test
+    void register_with_get() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 200 OK ",
+            "Content-Length: 4319 ",
+            "Content-Type: text/html;charset=utf-8 ");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @Test
+    void register_with_post() {
+        // given
+        String requestBody = "account=gugu&password=password&email=gugu@naver.com";
+        final String httpRequest = String.join(System.lineSeparator(),
+            "POST /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: " + requestBody.length() + " ",
+            "",
+            requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 302 FOUND ",
+            "Location: /index.html");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
 }

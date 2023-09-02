@@ -15,12 +15,8 @@ import org.apache.coyote.common.QueryString;
 import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.util.QueryParser;
 import org.apache.coyote.util.ResourceResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
-
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+public class RegisterHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
@@ -36,7 +32,7 @@ public class LoginHandler implements Handler {
 
     private HttpResponse doGet() throws IOException {
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
-        response.setContentBody(ResourceResolver.resolve("/login.html"));
+        response.setContentBody(ResourceResolver.resolve("/register.html"));
         response.setContentType(HttpContentType.TEXT_HTML);
         return response;
     }
@@ -44,24 +40,17 @@ public class LoginHandler implements Handler {
     private HttpResponse doPost(HttpRequest request) {
         String requestBody = request.getRequestBody();
         QueryString query = QueryParser.parse(requestBody);
-        String account = query.get("account");
-        String password = query.get("password");
-        return InMemoryUserRepository.findByAccount(account)
-            .filter(user -> user.checkPassword(password))
-            .map(this::loginSuccess)
-            .orElseGet(this::loginFail);
-    }
-
-    private HttpResponse loginSuccess(User user) {
-        log.info("로그인 성공! 아이디 : {}", user.getAccount());
+        User user = getUser(query);
+        InMemoryUserRepository.save(user);
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
         response.addHeader("Location", "/index.html");
         return response;
     }
 
-    private HttpResponse loginFail() {
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
-        response.addHeader("Location", "/401.html");
-        return response;
+    private User getUser(QueryString query) {
+        String account = query.get("account");
+        String password = query.get("password");
+        String email = query.get("email");
+        return new User(account, password, email);
     }
 }

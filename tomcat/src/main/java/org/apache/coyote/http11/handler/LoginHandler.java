@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
 import org.apache.coyote.http11.message.Cookie;
 import org.apache.coyote.http11.message.Headers;
@@ -33,12 +32,28 @@ public class LoginHandler extends Handler {
     private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
         Headers requestHeaders = request.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
-        String absolutePath = "login.html";
 
         if (cookie.hasKey("JSESSIONID")) {
-            absolutePath = "index.html";
+            return responseForLoggedIn(request);
         }
+        return responseForNotLoggedIn(request);
+    }
 
+    private Response responseForLoggedIn(Request request) throws IOException {
+        String absolutePath = "index.html";
+        String resource = findResourceWithPath(absolutePath);
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
+
+        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+                headers, responseBody);
+    }
+
+    private Response responseForNotLoggedIn(Request request) throws IOException {
+        String absolutePath = "login.html";
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
                 "Content-Type", ContentTypeParser.parse(absolutePath),
@@ -55,28 +70,10 @@ public class LoginHandler extends Handler {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 
-        // TODO: 없는 계정으로 로그인 했을 때에도 responseWhenLoginFail로 이동
-        User user = InMemoryUserRepository.findByAccountAndPassword(account, password)
-                .orElseThrow();
-
-        if (user.hasSameCredential(account, password)) {
+        if (InMemoryUserRepository.hasSameCredential(account, password)) {
             return responseWhenLoginSuccess(request);
         }
         return responseWhenLoginFail(request);
-    }
-
-    private Response responseWhenLoginFail(Request request) throws IOException {
-        String absolutePath = "401.html";
-
-        String resource = findResourceWithPath(absolutePath);
-        Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
-        ));
-        ResponseBody responseBody = new ResponseBody(resource);
-
-        return Response.from(request.getHttpVersion(), HttpStatus.UNAUTHORIZED,
-                headers, responseBody);
     }
 
     private Response responseWhenLoginSuccess(Request request) throws IOException {
@@ -92,6 +89,20 @@ public class LoginHandler extends Handler {
         ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+                headers, responseBody);
+    }
+
+    private Response responseWhenLoginFail(Request request) throws IOException {
+        String absolutePath = "401.html";
+
+        String resource = findResourceWithPath(absolutePath);
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
+
+        return Response.from(request.getHttpVersion(), HttpStatus.UNAUTHORIZED,
                 headers, responseBody);
     }
 

@@ -51,6 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             log.info("request = {}", request);
 
             var responseBody = "Hello world!";
+            var statusCode = "200 OK";
+            var location = "/index.html";
             var contentType = "text/html;charset=utf-8";
 
             if (!requestUri.equals("/")) {
@@ -64,8 +66,19 @@ public class Http11Processor implements Runnable, Processor {
                     for (String query : queryString.split("&")) {
                         queries.put(query.split("=")[0], query.split("=")[1]);
                         Optional<User> user = InMemoryUserRepository.findByAccount(queries.get("account"));
-                        user.ifPresent(value -> log.info("user: {}", value));
+
+                        if (user.isPresent() && user.get().checkPassword(queries.get("password"))) {
+                            statusCode = "302";
+                            location = "/index.html";
+                            log.info("user: {}", user.get());
+                        } else {
+                            statusCode = "302";
+                            location = "/401.html";
+                        }
                     }
+                }
+
+                if (requestUri.equals("/login")) {
                     requestUri = "login.html";
                 }
 
@@ -74,12 +87,15 @@ public class Http11Processor implements Runnable, Processor {
                 if (request.get("Accept") != null) {
                     contentType = request.get("Accept").split(",")[0];
                 }
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                if (resource != null) {
+                    responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                }
             }
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + statusCode + " ",
                     "Content-Type: " + contentType + " ",
+                    "Location: " + location + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

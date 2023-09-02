@@ -39,8 +39,12 @@ public class HttpResponse {
 
     private String getHeader() {
         return httpHeaders.getHeaders().entrySet().stream()
-            .map(entry -> entry.getKey() + ": " + String.join(", ", entry.getValue()) + " ")
+            .map(entry -> entry.getKey() + ": " + entry.getValue().getValues() + " ")
             .collect(joining(System.lineSeparator()));
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        httpHeaders.setCookie(cookie);
     }
 
     public void addHeader(String key, String value) {

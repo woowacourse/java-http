@@ -20,7 +20,7 @@ class HttpHeadersTest {
         httpHeaders.addHeader("key", "bar");
 
         // then
-        assertThat(httpHeaders.getHeader("key")).isEqualTo("foo,bar");
+        assertThat(httpHeaders.getHeader("key")).isEqualTo("foo, bar");
     }
 
     @Test
@@ -47,5 +47,22 @@ class HttpHeadersTest {
 
         // then
         assertThat(header).isBlank();
+    }
+
+    @Test
+    void 쿠키_추가() {
+        // given
+        HttpHeaders httpHeaders = new HttpHeaders();
+        HttpCookie httpCookie = new HttpCookie("foo", "bar");
+        httpCookie.setMaxAge(100);
+        httpCookie.setHttpOnly();
+        httpCookie.setSecure();
+
+        // when
+        httpHeaders.setCookie(httpCookie);
+
+        // then
+        String cookie = httpHeaders.getHeader("Set-Cookie");
+        assertThat(cookie).isEqualTo("foo=bar; HttpOnly; Secure; Max-Age=100");
     }
 }

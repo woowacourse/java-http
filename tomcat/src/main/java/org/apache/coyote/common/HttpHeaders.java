@@ -1,6 +1,5 @@
 package org.apache.coyote.common;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,26 +7,26 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private final Map<String, List<String>> headers;
+    private final Map<String, Header> headers;
 
     public HttpHeaders() {
         this.headers = new LinkedHashMap<>();
     }
 
     public void addHeader(String key, String value) {
-        List<String> header = headers.computeIfAbsent(key, ignore -> new ArrayList<>());
+        Header header = headers.computeIfAbsent(key, ignore -> new CommaSeparateHeader());
         header.add(value);
     }
 
     public void addHeader(String key, List<String> values) {
-        List<String> header = headers.computeIfAbsent(key, ignore -> new ArrayList<>());
+        Header header = headers.computeIfAbsent(key, ignore -> new CommaSeparateHeader());
         header.addAll(values);
     }
 
     public void setHeader(String key, String value) {
-        ArrayList<String> values = new ArrayList<>();
-        values.add(value);
-        headers.put(key, values);
+        Header header = new CommaSeparateHeader();
+        header.add(value);
+        headers.put(key, header);
     }
 
     public void setContentType(HttpContentType contentType) {
@@ -35,15 +34,32 @@ public class HttpHeaders {
     }
 
     public void setHeader(String key, List<String> values) {
-        headers.put(key, values);
+        Header header = new CommaSeparateHeader();
+        header.addAll(values);
+        headers.put(key, header);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        Header header = new SemicolonSeparateHeader();
+        header.add(cookie.getName() + "=" + cookie.getValue());
+        if (cookie.isHttpOnly()) {
+            header.add("HttpOnly");
+        }
+        if (cookie.isSecure()) {
+            header.add("Secure");
+        }
+        if (!cookie.getMaxAge().isNegative()) {
+            header.add("Max-Age=" + cookie.getMaxAge().getSeconds());
+        }
+        headers.put("Set-Cookie", header);
     }
 
     public String getHeader(String key) {
-        List<String> values = headers.getOrDefault(key, Collections.emptyList());
-        return String.join(",", values);
+        Header header = headers.getOrDefault(key, CommaSeparateHeader.EMPTY);
+        return header.getValues();
     }
 
-    public Map<String, List<String>> getHeaders() {
+    public Map<String, Header> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
 }

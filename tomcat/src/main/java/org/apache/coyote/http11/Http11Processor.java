@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(final HttpRequest httpRequest) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/"+httpRequest.getRequestURL().getExtension()+";charset=utf-8 ",
                 "Content-Length: " + httpRequest.getRequestResource().getBytes().length + " ",
                 "",
                 httpRequest.getRequestResource());

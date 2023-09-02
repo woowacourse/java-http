@@ -46,6 +46,10 @@ public class HttpRequest {
         return requestHeaders;
     }
 
+    public RequestURL getRequestURL() {
+        return requestURL;
+    }
+
     public String getRequestBody() {
         return requestBody;
     }

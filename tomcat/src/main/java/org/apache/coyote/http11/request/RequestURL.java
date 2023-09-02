@@ -17,18 +17,21 @@ public class RequestURL {
     private final HttpMethod method;
     private final String url;
     private final String version;
+    private final String extension;
 
-    private RequestURL(final HttpMethod method, final String url, final String version) {
+    private RequestURL(final HttpMethod method, final String url, final String version, final String extension) {
         this.method = method;
         this.url = url;
         this.version = version;
+        this.extension = extension;
     }
 
     public static RequestURL from(String line) {
         validate(line);
 
         final String[] splitedLine = line.split(" ");
-        return new RequestURL(getMethod(splitedLine[METHOD_INDEX]), splitedLine[URL_INDEX], splitedLine[VERSION_INDEX]);
+        return new RequestURL(getMethod(splitedLine[METHOD_INDEX]), splitedLine[URL_INDEX],
+                splitedLine[VERSION_INDEX], getExtension(splitedLine[URL_INDEX]));
     }
 
     private static void validate(final String line) {
@@ -49,6 +52,14 @@ public class RequestURL {
         return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }
 
+    private static String getExtension(final String url) {
+        final String[] splitedUrl = url.split("\\.");
+        if(splitedUrl.length>1) {
+            return splitedUrl[splitedUrl.length - 1];
+        }
+        return "html";
+    }
+
     private static HttpMethod getMethod(final String method) {
         return HttpMethod.valueOf(method);
     }
@@ -63,5 +74,9 @@ public class RequestURL {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 }

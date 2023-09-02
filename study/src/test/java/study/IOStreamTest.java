@@ -361,7 +361,7 @@ class IOStreamTest {
          * readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
+        void BufferedReader를_사용하여_문자열을_읽을_때_Stream_API를_사용한다() {
             // given
             String emoji = String.join(System.lineSeparator(),
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
@@ -377,6 +377,36 @@ class IOStreamTest {
                 // when
                 String actual = reader.lines()
                         .collect(Collectors.joining(System.lineSeparator(), "", System.lineSeparator()));
+
+                // then
+                assertThat(actual).isEqualTo(emoji);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Test
+        void BufferedReader를_사용하여_문자열을_읽을_때_while문을_사용한다() {
+            // given
+            String emoji = String.join(System.lineSeparator(),
+                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
+                    "");
+
+            try (
+                    InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+                    )
+            ) {
+                // when
+                String line;
+                StringBuilder builder = new StringBuilder();
+                while ((line = reader.readLine()) != null & !"".equals(line)) {
+                    builder.append(line).append(System.lineSeparator());
+                }
+                String actual = builder.toString();
 
                 // then
                 assertThat(actual).hasToString(emoji);

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.message.request;
 
 
-import java.util.List;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpVersion;
@@ -23,14 +22,14 @@ public class Request {
         this.requestBody = requestBody;
     }
 
-    public static Request from(String startLine, List<String> headers, List<String> body) {
+    public static Request from(String startLine, Headers headers, RequestBody body) {
         String[] splitStartLine = startLine.split(" ");
-        String method = splitStartLine[0];
+        String httpMethod = splitStartLine[0];
         String requestURI = splitStartLine[1];
         String httpVersion = splitStartLine[2];
 
-        return new Request(HttpMethod.from(method), HttpVersion.from(httpVersion),
-                RequestURI.from(requestURI), Headers.from(headers), RequestBody.from(body));
+        return new Request(HttpMethod.from(httpMethod), HttpVersion.from(httpVersion),
+                RequestURI.from(requestURI), headers, body);
     }
 
     public HttpMethod getMethod() {

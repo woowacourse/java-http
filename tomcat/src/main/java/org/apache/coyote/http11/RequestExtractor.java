@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.RequestBody;
 
 public class RequestExtractor {
 
@@ -21,7 +23,7 @@ public class RequestExtractor {
         List<String> headers = extractHeaders(reader);
         List<String> body = extractBody(reader);
 
-        return Request.from(startLine, headers, body);
+        return Request.from(startLine, Headers.from(headers), RequestBody.from(body));
     }
 
     private static List<String> extractBody(BufferedReader reader) throws IOException {

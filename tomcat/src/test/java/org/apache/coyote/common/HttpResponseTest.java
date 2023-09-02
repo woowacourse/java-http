@@ -14,8 +14,7 @@ class HttpResponseTest {
     @Test
     void setContentBody_호출시_header의_content_length가_설정된다() {
         // given
-        HttpHeaders httpHeaders = new HttpHeaders();
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, httpHeaders);
+        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
 
         // when
         response.setContentBody("Hello world!");
@@ -28,13 +27,11 @@ class HttpResponseTest {
     @Test
     void toBytes_성공() {
         // given
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.addHeader("Content-Type", "text/html");
-        httpHeaders.addHeader("Cache-Control", "no-cache");
-        httpHeaders.addHeader("Cache-Control", "max-age=0");
-        httpHeaders.addHeader("Cache-Control", "must-revalidate");
-
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, httpHeaders);
+        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
+        response.addHeader("Content-Type", "text/html");
+        response.addHeader("Cache-Control", "no-cache");
+        response.addHeader("Cache-Control", "max-age=0");
+        response.addHeader("Cache-Control", "must-revalidate");
         response.setContentBody("Hello world!");
 
         // when

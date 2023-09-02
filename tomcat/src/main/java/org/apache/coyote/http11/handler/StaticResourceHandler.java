@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
-import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
@@ -21,9 +20,8 @@ public class StaticResourceHandler implements Handler {
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         String path = request.getPath();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(getContentType(path));
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
+        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
+        response.setContentType(getContentType(path));
         try {
             String contentBody = ResourceResolver.resolve(path);
             response.setContentBody(contentBody);

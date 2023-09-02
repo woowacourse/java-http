@@ -12,10 +12,10 @@ public class HttpResponse {
     private final HttpHeaders httpHeaders;
     private String contentBody = "";
 
-    public HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus, HttpHeaders httpHeaders) {
+    public HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus) {
         this.httpProtocol = httpProtocol;
         this.httpStatus = httpStatus;
-        this.httpHeaders = httpHeaders;
+        this.httpHeaders = new HttpHeaders();
     }
 
     public void setContentBody(String body) {
@@ -57,6 +57,10 @@ public class HttpResponse {
 
     public void setHeader(String key, List<String> values) {
         httpHeaders.setHeader(key, values);
+    }
+
+    public void setContentType(HttpContentType contentType) {
+        httpHeaders.setContentType(contentType);
     }
 
     public HttpProtocol getHttpProtocol() {

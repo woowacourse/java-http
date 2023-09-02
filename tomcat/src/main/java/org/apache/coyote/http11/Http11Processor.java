@@ -9,7 +9,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String requestUri = reader.readLine().split(" ")[1];
+            log.info("requestUri = {}", requestUri);
 
             final Map<String, String> request = new HashMap<>();
             String line;
@@ -44,10 +48,27 @@ public class Http11Processor implements Runnable, Processor {
                 String[] value = line.split(": ");
                 request.put(value[0], value[1]);
             }
+            log.info("request = {}", request);
 
             var responseBody = "Hello world!";
             var contentType = "text/html;charset=utf-8";
+
             if (!requestUri.equals("/")) {
+
+                if (requestUri.contains("/login?")) {
+                    int index = requestUri.indexOf("?");
+                    String path = requestUri.substring(0, index);
+                    String queryString = requestUri.substring(index + 1);
+
+                    Map<String, String> queries = new HashMap<>();
+                    for (String query : queryString.split("&")) {
+                        queries.put(query.split("=")[0], query.split("=")[1]);
+                        Optional<User> user = InMemoryUserRepository.findByAccount(queries.get("account"));
+                        user.ifPresent(value -> log.info("user: {}", value));
+                    }
+                    requestUri = "login.html";
+                }
+
                 final String fileName = "static/" + requestUri;
                 final URL resource = getClass().getClassLoader().getResource(fileName);
                 if (request.get("Accept") != null) {

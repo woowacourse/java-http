@@ -46,29 +46,37 @@ public class Http11Processor implements Runnable, Processor {
             String fileName = httpUrl.substring(httpUrl.lastIndexOf('/') + 1);
             String response = null;
 
-            if (httpUrl.equals("/login?account=gugu&password=password")) {
+            if (httpUrl.startsWith("/login?")) {
                 int index = httpUrl.indexOf("?");
                 String path = httpUrl.substring(0, index);
                 String queryString = httpUrl.substring(index + 1);
-                response = createResponse("text/html", readFile("static", "login.html"));
 
                 Map<String, String> queryParms = parseToQueryParms(queryString);
 
-                User user = InMemoryUserRepository.findByAccount(queryParms.get("account"))
-                        .orElseThrow(() -> new IllegalArgumentException("해당 사용자 없음"));
+                try {
+                    User user = InMemoryUserRepository.findByAccount(queryParms.get("account"))
+                            .orElseThrow(() -> new IllegalArgumentException("해당 사용자 없음"));
 
-                if (!user.checkPassword(queryParms.get("password"))) {
-                    throw new IllegalArgumentException("비밀번호 불일치");
+                    if (!user.checkPassword(queryParms.get("password"))) {
+                        throw new IllegalArgumentException("비밀번호 불일치");
+                    }
+                    log.info("user: {}", user);
+                    response = createRedirectResponse("/index.html");
+                } catch (IllegalArgumentException e) {
+                    response = createRedirectResponse("/401.html");
                 }
 
-                log.info("user: {}", user);
+            }
+
+            if (httpMethod.equals("GET") && httpUrl.equals("/login")) {
+                response = createResponse("text/html", readFile("static", "login.html"));
             }
 
             if (httpMethod.equals("GET") && httpUrl.equals("/")) {
                 response = createResponse("text/plain;", "Hello world!");
             }
 
-            if (httpMethod.equals("GET") && fileName.equals("index.html")) {
+            if (httpMethod.equals("GET") && fileName.endsWith(".html")) {
                 response = createResponse("text/html", readFile("static", fileName));
             }
 
@@ -113,6 +121,13 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
     }
+
+    private String createRedirectResponse(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + redirectUrl);
+    }
+
 
     private String readFile(String directory, String fileName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(directory + "/" + fileName);

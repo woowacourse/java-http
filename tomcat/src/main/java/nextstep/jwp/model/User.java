@@ -18,8 +18,8 @@ public class User {
         this(null, account, password, email);
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public boolean hasSameCredential(String account, String password) {
+        return this.account.equals(account) && this.password.equals(password);
     }
 
     public String getAccount() {

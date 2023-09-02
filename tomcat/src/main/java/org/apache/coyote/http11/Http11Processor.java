@@ -13,6 +13,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -29,7 +30,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             Request request = RequestExtractor.extract(inputStream);
-            Response response = Handler.handle(request);
+            Response response = Handlers.handle(request);
 
             Filter.logUserInfoIfExists(request);
 

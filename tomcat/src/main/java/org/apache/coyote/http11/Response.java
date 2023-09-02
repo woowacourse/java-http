@@ -13,7 +13,6 @@ public class Response {
                 "",
                 resource);
 
-        System.out.println(message);
         return new Response(message);
     }
 

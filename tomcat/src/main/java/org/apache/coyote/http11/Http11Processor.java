@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -27,9 +29,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final InputMapper inputMapper = InputMapper.of(bufferedReader);
+            final String responseBody = inputMapper.getResponseBody();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

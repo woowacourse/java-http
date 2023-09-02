@@ -31,23 +31,13 @@ public class Http11Processor implements Runnable, Processor {
             Request request = RequestExtractor.extract(inputStream);
             Response response = Handler.handle(request);
 
-            logUserInfoIfExists(request);
+            Filter.logUserInfoIfExists(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void logUserInfoIfExists(Request request) {
-        RequestURI requestURI = request.getRequestURI();
-
-        if (requestURI.hasQueryParameters()) {
-            String[] queryParameters = requestURI.queryParameters();
-            log.info(queryParameters[0]);
-            log.info(queryParameters[1]);
         }
     }
 }

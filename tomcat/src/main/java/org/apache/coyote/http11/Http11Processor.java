@@ -107,7 +107,29 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private void printLogIfValidUser(String path) {
+    private String parsePath(String path) {
+        if (path.equals("/")) {
+            return "/index.html";
+        }
+
+        if (path.equals("/login")) {
+            path = "/login.html";
+        }
+
+        if (path.startsWith("/login?")) {
+            isValidUser(path);
+            System.out.println(isValidUser(path));
+            if (isValidUser(path)) {
+                path = "/index.html";
+            } else {
+                path = "/401.html";
+            }
+        }
+
+        return path;
+    }
+
+    private boolean isValidUser(final String path) {
         final StringTokenizer st = new StringTokenizer(path, "&");
         String parsedAccount = "";
         String parsedPassword = "";
@@ -127,23 +149,10 @@ public class Http11Processor implements Runnable, Processor {
             final User foundUser = maybeUser.get();
             if (foundUser.checkPassword(parsedPassword)) {
                 log.info("user : " + foundUser);
+                return true;
             }
         }
-    }
 
-    private String parsePath(String path) {
-        if (path.equals("/")) {
-            path = "/index.html";
-        }
-//
-//        if(path.equals("/login")) {
-//
-//        }
-
-        if (path.contains("/login")) {
-            printLogIfValidUser(path);
-            path = "/login.html";
-        }
-        return path;
+        return false;
     }
 }

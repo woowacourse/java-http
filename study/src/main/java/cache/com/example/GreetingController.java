@@ -4,9 +4,13 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 
 @Controller
 public class GreetingController {
@@ -28,7 +32,7 @@ public class GreetingController {
 
     @GetMapping("/login")
     public String loginWithNoParams() {
-        return "401";
+        return "login";
     }
 
     /**

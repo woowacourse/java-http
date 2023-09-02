@@ -202,6 +202,7 @@ class Http11ProcessorTest {
             "Location: /index.html");
 
         assertThat(socket.output()).startsWith(expected);
+        assertThat(socket.output()).contains("JSESSIONID");
     }
 
     @Test

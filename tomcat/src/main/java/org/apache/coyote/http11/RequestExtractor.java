@@ -26,6 +26,15 @@ public class RequestExtractor {
         return Request.from(startLine, Headers.from(headers), RequestBody.from(body));
     }
 
+    private static List<String> extractHeaders(BufferedReader reader) throws IOException {
+        List<String> headers = new ArrayList<>();
+        String line;
+        while (!(line = reader.readLine()).isBlank()) {
+            headers.add(line);
+        }
+        return headers;
+    }
+
     private static List<String> extractBody(BufferedReader reader) throws IOException {
         List<String> body = new ArrayList<>();
         if (reader.ready()) {
@@ -35,14 +44,5 @@ public class RequestExtractor {
                     .split("&")));
         }
         return body;
-    }
-
-    private static List<String> extractHeaders(BufferedReader reader) throws IOException {
-        List<String> headers = new ArrayList<>();
-        String line;
-        while (!(line = reader.readLine()).isBlank()) {
-            headers.add(line);
-        }
-        return headers;
     }
 }

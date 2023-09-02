@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
             final HttpResponse httpResponse = new HttpResponse();
 
-            FrontController frontController = new FrontController(new HandlerMapping());
+            FrontController frontController = new FrontController(new HandlerMapping()); //FIXME DI
             frontController.handleHttpRequest(httpRequest, httpResponse);
 
             HttpResponseMessageWriter.writeHttpResponse(httpResponse, outputStream);

@@ -27,11 +27,7 @@ public class HttpRequestMessageReader {
         final HttpRequestStartLine startLine = readStartLine(br.readLine());
         final Map<String, String> headers = readHeaders(br);
         if (startLine.getHttpRequestMethod() == HttpRequestMethod.POST) {
-            final SupportContentType supportContentType = SupportContentType.from(headers.get("Content-Type"));
-            final String body = readBody(br, Integer.parseInt(headers.get("Content-Length")));
-            final PayloadParser payloadParser = supportContentType.getPayloadParser();
-            Map<String, String> payload = payloadParser.parse(body);
-            return HttpRequest.of(startLine, headers, payload);
+            return httpRequestWithBody(headers, br, startLine);
         }
         return HttpRequest.of(startLine, headers);
     }
@@ -100,6 +96,17 @@ public class HttpRequestMessageReader {
         throw new IllegalStateException("헤더는 key: value 형태여야 합니다.");
     }
 
+    private static HttpRequest httpRequestWithBody(
+            final Map<String, String> headers,
+            final BufferedReader br,
+            final HttpRequestStartLine startLine
+    ) throws IOException {
+        final SupportContentType supportContentType = SupportContentType.from(headers.get("Content-Type"));
+        final String body = readBody(br, Integer.parseInt(headers.get("Content-Length")));
+        final PayloadParser payloadParser = supportContentType.getPayloadParser();
+        Map<String, String> payload = payloadParser.parse(body);
+        return HttpRequest.of(startLine, headers, payload);
+    }
 
     private static String readBody(final BufferedReader br, final int contentLength) throws IOException {
         char[] body = new char[contentLength];

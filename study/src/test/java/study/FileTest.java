@@ -61,19 +61,18 @@ class FileTest {
 
     /**
      * 파일 내용 읽기
-
+     * <p>
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final URL resource = FileTest.class.getClassLoader().getResource(fileName);
+        final File file = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8));
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
 
         assertThat(actual).containsOnly("nextstep");
     }

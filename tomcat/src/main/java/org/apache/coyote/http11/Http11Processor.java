@@ -6,6 +6,10 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseMessageWriter;
+import org.apache.coyote.http11.web.FrontController;
+import org.apache.coyote.http11.web.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,19 +34,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = HttpRequestReader.readHttpRequest(inputStream);
+            final HttpRequest httpRequest = HttpRequestReader.readHttpRequest(inputStream);
+            final HttpResponse httpResponse = new HttpResponse();
 
-            final var responseBody = "Hello world!";
+            FrontController frontController = new FrontController(new HandlerMapping());
+            frontController.handleHttpRequest(httpRequest, httpResponse);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            HttpResponseMessageWriter.writeHttpResponse(httpResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

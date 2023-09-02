@@ -13,4 +13,12 @@ public class HttpResponseStatusLine {
     public static HttpResponseStatusLine of(final String httpVersion, final HttpResponseStatus httpResponseStatus) {
         return new HttpResponseStatusLine(httpVersion, httpResponseStatus);
     }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    public HttpResponseStatus getHttpResponseStatus() {
+        return httpResponseStatus;
+    }
 }

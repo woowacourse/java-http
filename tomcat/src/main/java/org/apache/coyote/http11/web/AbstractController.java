@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -19,12 +20,14 @@ public abstract class AbstractController implements Controller {
         final HttpRequestMethod httpRequestMethod = request.getHttpStartLine().getHttpRequestMethod();
         return supportedMethods.get(httpRequestMethod).apply(request, response);
     }
-    
+
     protected View handleGetRequest(final HttpRequest request, final HttpResponse response) {
+        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.METHOD_NOT_ALLOWED);
         return new View("404.html");
     }
 
     protected View handlePostRequest(final HttpRequest request, final HttpResponse response) {
+        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.METHOD_NOT_ALLOWED);
         return new View("404.html");
     }
 }

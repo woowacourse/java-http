@@ -4,9 +4,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.Collections;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,7 +24,7 @@ class FileTest {
 
     /**
      * resource 디렉터리 경로 찾기
-     *
+     * <p>
      * File 객체를 생성하려면 파일의 경로를 알아야 한다.
      * 자바 애플리케이션은 resource 디렉터리에 HTML, CSS 같은 정적 파일을 저장한다.
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
@@ -30,7 +33,6 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
         final URL resource = FileTest.class.getClassLoader().getResource(fileName);
         final String actual = Objects.requireNonNull(resource).getPath();
 
@@ -41,9 +43,18 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다_방법2() {
         final String fileName = "nextstep.txt";
 
-        // todo
         final String actual = ResourceUtils.CLASSPATH_URL_PREFIX + fileName;
-        System.out.println(actual);
+
+        assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void resource_디렉터리에_있는_파일의_경로를_찾는다_방법3() {
+        final String fileName = "nextstep.txt";
+
+        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        final URL resources = classLoader.getResource(fileName);
+        final String actual = resources.getPath();
 
         assertThat(actual).endsWith(fileName);
     }

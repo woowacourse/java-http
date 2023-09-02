@@ -2,7 +2,6 @@ package org.apache.coyote.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ class HttpHeadersTest {
         httpHeaders.addHeader("key", "bar");
 
         // then
-        assertThat(httpHeaders.getHeader("key")).containsExactly("foo", "bar");
+        assertThat(httpHeaders.getHeader("key")).isEqualTo("foo,bar");
     }
 
     @Test
@@ -34,19 +33,19 @@ class HttpHeadersTest {
         httpHeaders.setHeader("key", "bar");
 
         // then
-        assertThat(httpHeaders.getHeader("key")).containsExactly("bar");
+        assertThat(httpHeaders.getHeader("key")).isEqualTo("bar");
     }
 
     @Test
-    void getHeader_호출시_헤더가_없으면_emptyList() {
+    void getHeader_호출시_헤더가_없으면_blank() {
         // given
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setHeader("key", "foo");
 
         // when
-        List<String> header = httpHeaders.getHeader("bar");
+        String header = httpHeaders.getHeader("bar");
 
         // then
-        assertThat(header).isEmpty();
+        assertThat(header).isBlank();
     }
 }

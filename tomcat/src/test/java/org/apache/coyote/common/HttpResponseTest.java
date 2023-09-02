@@ -20,7 +20,7 @@ class HttpResponseTest {
         response.setContentBody("Hello world!");
 
         // then
-        String actual = response.getHttpHeaders().getHeader("Content-Length").get(0);
+        String actual = response.getHttpHeaders().getHeader("Content-Length");
         assertThat(actual).isEqualTo("12");
     }
 

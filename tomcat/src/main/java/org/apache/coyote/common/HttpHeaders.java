@@ -38,8 +38,9 @@ public class HttpHeaders {
         headers.put(key, values);
     }
 
-    public List<String> getHeader(String key) {
-        return headers.getOrDefault(key, Collections.emptyList());
+    public String getHeader(String key) {
+        List<String> values = headers.getOrDefault(key, Collections.emptyList());
+        return String.join(",", values);
     }
 
     public Map<String, List<String>> getHeaders() {

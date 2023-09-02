@@ -22,10 +22,10 @@ class HttpPathTest {
 
         // then
         String path = httpPath.getPath();
-        Map<String, List<String>> pathVariables = httpPath.getQueryStrings();
+        QueryString queryString = httpPath.getQueryStrings();
 
         assertThat(path).isEqualTo("/login");
-        assertThat(pathVariables).containsAllEntriesOf(Map.of(
+        assertThat(queryString.getQueries()).containsAllEntriesOf(Map.of(
             "account", List.of("gugu"),
             "password", List.of("password")
         ));
@@ -40,9 +40,9 @@ class HttpPathTest {
         HttpPath httpPath = HttpPath.from(uri);
 
         // then
-        Map<String, List<String>> pathVariables = httpPath.getQueryStrings();
+        QueryString queryString = httpPath.getQueryStrings();
 
-        assertThat(pathVariables).containsAllEntriesOf(Map.of(
+        assertThat(queryString.getQueries()).containsAllEntriesOf(Map.of(
             "key", List.of("foo", "bar")
         ));
     }
@@ -57,9 +57,9 @@ class HttpPathTest {
 
         // then
         String path = httpPath.getPath();
-        Map<String, List<String>> pathVariables = httpPath.getQueryStrings();
+        QueryString queryString = httpPath.getQueryStrings();
 
         assertThat(path).isEqualTo("/login");
-        assertThat(pathVariables).isEmpty();
+        assertThat(queryString.getQueries()).isEmpty();
     }
 }

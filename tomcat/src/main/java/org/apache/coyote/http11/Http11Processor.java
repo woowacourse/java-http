@@ -50,12 +50,16 @@ public class Http11Processor implements Runnable, Processor {
             }
             log.info("request = {}", request);
 
-            var responseBody = "Hello world!";
-            var statusCode = "200 OK";
-            var location = "/index.html";
+            var statusCode = "404";
             var contentType = "text/html;charset=utf-8";
+            final URL resource404 = getClass().getClassLoader().getResource("static/404.html");
+            var responseBody = new String(Files.readAllBytes(new File(resource404.getFile()).toPath()));
 
             if (requestUri.equals("/")) {
+                statusCode = "200 OK";
+                contentType = "text/html;charset=utf-8";
+                responseBody = "Hello world!";
+
                 final var response = String.join("\r\n",
                         "HTTP/1.1 " + statusCode + " ",
                         "Content-Type: " + contentType + " ",
@@ -68,6 +72,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestUri.contains("/login?")) {
+                statusCode = "302";
+                contentType = "text/html;charset=utf-8";
+                var location = "";
+
                 int index = requestUri.indexOf("?");
                 String queryString = requestUri.substring(index + 1);
 
@@ -77,11 +85,9 @@ public class Http11Processor implements Runnable, Processor {
                     Optional<User> user = InMemoryUserRepository.findByAccount(queries.get("account"));
 
                     if (user.isPresent() && user.get().checkPassword(queries.get("password"))) {
-                        statusCode = "302";
                         location = "/index.html";
                         log.info("user: {}", user.get());
                     } else {
-                        statusCode = "302";
                         location = "/401.html";
                     }
                 }
@@ -89,9 +95,7 @@ public class Http11Processor implements Runnable, Processor {
                         "HTTP/1.1 " + statusCode + " ",
                         "Content-Type: " + contentType + " ",
                         "Location: " + location + " ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
+                        "");
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -108,6 +112,7 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = request.get("Accept").split(",")[0];
             }
             if (resource != null) {
+                statusCode = "200 OK";
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
 

@@ -21,4 +21,11 @@ public class ResponseBody {
     public String source() {
         return source;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseBody.Length{" +
+               "source='" + source.length() + '\'' +
+               '}';
+    }
 }

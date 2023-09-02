@@ -19,4 +19,12 @@ public enum HttpStatus {
     public int statusCode() {
         return statusCode;
     }
+
+    @Override
+    public String toString() {
+        return "HttpStatus{" +
+               "statusName='" + statusName + '\'' +
+               ", statusCode=" + statusCode +
+               '}';
+    }
 }

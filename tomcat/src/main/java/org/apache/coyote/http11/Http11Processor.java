@@ -6,8 +6,8 @@ import org.apache.coyote.common.Headers;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
-import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.ResponseBody;
+import org.apache.coyote.exception.CoyoteHttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +32,8 @@ import static org.apache.coyote.common.HttpHeader.CONNECTION;
 import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.common.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.common.HttpHeader.HOST;
+import static org.apache.coyote.common.MediaType.TEXT_CSS;
+import static org.apache.coyote.common.MediaType.TEXT_HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -56,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));) {
 
             final HttpRequest request = HttpRequest.from(br);
+            log.info("=============> HTTP Request : \n {}", request);
             final URI requestUri = request.requestUri();
             final Headers requestHeaders = request.headers();
 
@@ -68,6 +71,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseHeaders,
                     responseBody
             );
+            log.info("=============> HTTP Response : \n {}", response);
 
             outputStream.write(response.bytes());
             outputStream.flush();
@@ -105,12 +109,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private ResponseBody parseToResponseBody(final URI httpRequestUri) throws IOException {
-        ResponseBody responseBody = new ResponseBody("Hello world!");
-        if (!httpRequestUri.getPath().equals("/")) {
-            final URL resourceURL = getClass().getClassLoader().getResource("static" + httpRequestUri.getPath());
-            final Path resourcePath = new File(resourceURL.getFile()).toPath();
-            responseBody = new ResponseBody(Files.readString(resourcePath));
+        try {
+            ResponseBody responseBody = new ResponseBody("Hello world!");
+            String requestUri = httpRequestUri.getPath();
+            if (!requestUri.equals("/")) {
+                if (requestUri.endsWith(".html") || requestUri.endsWith(".css") || requestUri.endsWith(".js") || requestUri.endsWith("ico")) {
+
+                } else {
+                    requestUri += ".html";
+                }
+                final URL resourceURL = getClass().getClassLoader().getResource("static" + requestUri);
+                final Path resourcePath = new File(resourceURL.getFile()).toPath();
+                responseBody = new ResponseBody(Files.readString(resourcePath));
+            }
+
+            return responseBody;
+        } catch (NullPointerException | IOException e) {
+            log.warn("[ERROR] RequestURI = {}", httpRequestUri);
+            log.warn("[ERROR] ErrorMessage = {} ", e.getMessage(), e);
+            throw new CoyoteHttpException("응답 바디를 파싱하던 도중에 예외가 발생하였습니다.");
         }
-        return responseBody;
     }
 }

@@ -31,7 +31,7 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader br) {
-        try (br) {
+        try {
             final String[] requestInformation = br.readLine().split(REQUEST_DELIMITER);
             if (requestInformation.length != REQUEST_FIRST_LINE_LENGTH) {
                 throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 HttpMethod, URI, HttpVersion가 존재해야 합니다.");
@@ -69,5 +69,15 @@ public class HttpRequest {
 
     public Headers headers() {
         return headers;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" + System.lineSeparator() +
+               "    httpMethod = " + httpMethod + ", " + System.lineSeparator() +
+               "    requestUri = " + requestUri + ", " + System.lineSeparator() +
+               "    httpVersion = " + httpVersion + ", " + System.lineSeparator() +
+               "    headers = " + headers + System.lineSeparator() +
+               '}';
     }
 }

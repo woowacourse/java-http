@@ -25,6 +25,8 @@ public enum HttpVersion {
 
     @Override
     public String toString() {
-        return version();
+        return "HttpVersion{" +
+               "source='" + source + '\'' +
+               '}';
     }
 }

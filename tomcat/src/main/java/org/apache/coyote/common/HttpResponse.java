@@ -61,4 +61,14 @@ public class HttpResponse {
     public ResponseBody responseBody() {
         return responseBody;
     }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" + System.lineSeparator() +
+               "    httpVersion = " + httpVersion + ", " + System.lineSeparator() +
+               "    httpStatus = " + httpStatus + ", " + System.lineSeparator() +
+               "    httpHeaders = " + httpHeaders + ", " + System.lineSeparator() +
+               "    responseBody = " + responseBody + ", " + System.lineSeparator() +
+               '}';
+    }
 }

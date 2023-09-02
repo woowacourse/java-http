@@ -20,6 +20,15 @@ class PathTest {
         }
 
         @Test
+        void 쿼리스트링이_같이_요청되어도_생성된다() {
+            // given
+            final String path = "/woowacourse/level4/tomcat?name=베베";
+
+            // when, then
+            assertDoesNotThrow(() -> Path.from(path));
+        }
+
+        @Test
         void URI가_유효하지_않으면_예외가_발생한다() {
             // given
             final String path = "/woowacourse/level4/tomcat/**";

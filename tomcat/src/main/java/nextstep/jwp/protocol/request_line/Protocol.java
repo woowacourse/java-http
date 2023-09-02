@@ -26,7 +26,7 @@ public class Protocol {
         }
     }
 
-    public String getProtocol() {
+    public String protocol() {
         return protocol;
     }
 

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class Path {
 
-    private static String PATH_PATTERN = "^/([\\w/.-]*)$";
+    private static String PATH_PATTERN = "^/([\\w/.-]*)(\\?[^\\s]*)?$";
 
     private final String path;
 

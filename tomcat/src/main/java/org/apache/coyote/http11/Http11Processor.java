@@ -7,7 +7,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +46,24 @@ public class Http11Processor implements Runnable, Processor {
             String fileName = httpUrl.substring(httpUrl.lastIndexOf('/') + 1);
             String response = null;
 
+            if (httpUrl.equals("/login?account=gugu&password=password")) {
+                int index = httpUrl.indexOf("?");
+                String path = httpUrl.substring(0, index);
+                String queryString = httpUrl.substring(index + 1);
+                response = createResponse("text/html", readFile("static", "login.html"));
+
+                Map<String, String> queryParms = parseToQueryParms(queryString);
+
+                User user = InMemoryUserRepository.findByAccount(queryParms.get("account"))
+                        .orElseThrow(() -> new IllegalArgumentException("해당 사용자 없음"));
+
+                if (!user.checkPassword(queryParms.get("password"))) {
+                    throw new IllegalArgumentException("비밀번호 불일치");
+                }
+
+                log.info("user: {}", user);
+            }
+
             if (httpMethod.equals("GET") && httpUrl.equals("/")) {
                 response = createResponse("text/plain;", "Hello world!");
             }
@@ -67,6 +89,20 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseToQueryParms(String queryString) {
+        String[] keyValues = queryString.split("&");
+
+        Map<String, String> queryParms = new HashMap<>();
+
+        for (String keyValue : keyValues) {
+            String[] queryParm = keyValue.split("=");
+            String key = queryParm[0];
+            String value = queryParm[1];
+            queryParms.put(key, value);
+        }
+        return queryParms;
     }
 
     private String createResponse(String contentType, String responseBody) {

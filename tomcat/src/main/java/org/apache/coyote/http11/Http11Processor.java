@@ -49,16 +49,16 @@ public class Http11Processor implements Runnable, Processor {
             ContentType contentType = readContentType(request);
 
             var requestURI = request.get(0).split(" ")[1];
-            QueryStrings queryStrings = QueryStrings.from(requestURI);
-
-            String account = queryStrings.getValues().get("account");
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(IllegalArgumentException::new);
-            log.info(user.toString());
 
             if (requestURI.contains("?")) {
                 final int index = requestURI.indexOf("?");
                 requestURI = requestURI.substring(0, index) + ".html";
+                QueryStrings queryStrings = QueryStrings.from(requestURI);
+
+                String account = queryStrings.getValues().get("account");
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(IllegalArgumentException::new);
+                log.info(user.toString());
             }
 
             String response = makeResponse(requestURI, contentType);
@@ -98,6 +98,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponseBody(String requestURI) throws IOException {
+        System.out.println(requestURI);
         if ("/".equals(requestURI)) {
             return DEFAULT_RESPONSE_BODY_MESSAGE;
         }

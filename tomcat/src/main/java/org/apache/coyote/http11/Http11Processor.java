@@ -44,7 +44,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final RequestLine requestLine = RequestLine.from(firstLine);
-            final String response = getResponse(requestLine);
+            final String responsePath = handleRequest(requestLine);
+            final String response = toResponse(responsePath);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -52,27 +53,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(final RequestLine requestLine) throws IOException {
+    private String handleRequest(final RequestLine requestLine) {
         final String path = requestLine.parseUriWithOutQueryString();
         final QueryString queryString = requestLine.parseQueryString();
-        log.info("request uri: {}, queryStrings: {}", requestLine.getUri(), queryString.getItems());
-
-        if (path.equals("/")) {
-            final String responseBody = "Hello world!";
-            return HttpResponseUtil.generate(path, responseBody);
-        }
+        log.info("request uri: {}, queryStrings: {}", requestLine.getUri(), requestLine.parseQueryString().getItems());
         if (path.equals("/login")) {
             final User account = InMemoryUserRepository.findByAccount(queryString.get("account"))
                     .orElseThrow();
             log.info("login: {}", account);
-            final URL resource = classLoader.getResource("static" + path + ".html");
-            final File file = new File(resource.getFile());
-            final String responseBody = new String(Files.readAllBytes(file.toPath()));
-            return HttpResponseUtil.generate(path, responseBody);
+            return "/login.html";
         }
-        final URL resource = classLoader.getResource("static" + path);
+        return path;
+    }
+
+    private String toResponse(final String responsePath) throws IOException {
+        if (responsePath.equals("/")) {
+            return HttpResponseUtil.generate(responsePath, "Hello world!");
+        }
+        final URL resource = classLoader.getResource("static" + responsePath);
         final File file = new File(resource.getFile());
         final String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponseUtil.generate(path, responseBody);
+        return HttpResponseUtil.generate(responsePath, responseBody);
     }
 }

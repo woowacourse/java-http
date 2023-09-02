@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.httpmessage;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class RequestURI {
 
     private final String value;
@@ -19,9 +24,16 @@ public class RequestURI {
         return value;
     }
 
-    public String[] queryParameters() {
-        return value.substring(value.indexOf("?") + 1)
+    public Map<String, String> queryParameters() {
+        String[] split = value.substring(value.indexOf("?") + 1)
                 .split("&");
+
+        Map<String, String> queryParameters = new HashMap<>();
+        Arrays.stream(split)
+                .map(each -> each.split("="))
+                .forEach(each -> queryParameters.put(each[0], each[1]));
+
+        return Collections.unmodifiableMap(queryParameters);
     }
 
     public boolean hasQueryParameters() {

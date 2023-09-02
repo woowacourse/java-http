@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
@@ -17,10 +18,10 @@ public class LoginHandler extends Handler {
             return responseWhenNotLogin(request);
         }
 
-        String[] queryParameters = requestURI.queryParameters();
+        Map<String, String> queryParameters = requestURI.queryParameters();
 
-        String account = queryParameters[0];
-        String password = queryParameters[1];
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();

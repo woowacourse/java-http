@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
 import org.apache.coyote.http11.httpmessage.Request;
 import org.apache.coyote.http11.httpmessage.RequestURI;
 import org.slf4j.Logger;
@@ -16,9 +17,10 @@ public class Filter {
         RequestURI requestURI = request.getRequestURI();
 
         if (requestURI.hasQueryParameters()) {
-            String[] queryParameters = requestURI.queryParameters();
-            log.info(queryParameters[0]);
-            log.info(queryParameters[1]);
+            Map<String, String> queryParameters = requestURI.queryParameters();
+            log.info("account = {}, password = {}",
+                    queryParameters.get("account"),
+                    queryParameters.get("password"));
         }
     }
 }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -33,18 +36,16 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final String line = bufferedReader.readLine();
+            if (line == null) {
+                return;
+            }
 
-            final var responseBody = getResponseBody(bufferedReader);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest httpRequest = HttpRequest.from(line);
+            final var response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,27 +54,44 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder httpRequest = new StringBuilder();
+    private String getResponse(final HttpRequest httpRequest) {
+        final HttpPath httpPath = httpRequest.getHttpPath();
 
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            if (line == null) {
-                break;
-            }
-            httpRequest.append(line);
-            line = bufferedReader.readLine();
+        if (httpPath.isDefaultResource()) {
+            final HttpResponse httpResponse = new HttpResponse(httpPath.getContentType(), "Hello world!");
+            return httpResponse.extractResponse();
+        }
+        final HttpResponse httpResponse = new HttpResponse(httpPath.getContentType(), getResponseBody(httpPath));
+        return httpResponse.extractResponse();
+    }
+
+    private String getResponseBody(final HttpPath httpPath) {
+        Map<String, String> params = httpPath.getQueryParameter();
+        if (!params.isEmpty() && httpPath.getResource().contains("login")) {
+            executeLogin(params);
         }
 
-        final String requestUri = new String(httpRequest).split(" ")[1];
+        URL url = getClass().getClassLoader().getResource("static" + httpPath.getResource() + httpPath.getExtension());
+        final Path path = new File(url.getPath()).toPath();
 
-        if (requestUri.equals("/")) {
-            return "Hello world!";
+        try {
+            return new String(Files.readAllBytes(path));
+        } catch (IOException exception) {
+            log.error(exception.getMessage());
+            throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
         }
+    }
 
-        final var fileName = "static" + requestUri;
-        final URL resource = getClass().getClassLoader().getResource(fileName);
-        final Path path = new File(resource.getFile()).toPath();
-        return new String(Files.readAllBytes(path));
+    private void executeLogin(Map<String, String> params) {
+        final String userName = params.get("account");
+        final String password = params.get("password");
+
+        final User user = InMemoryUserRepository.findByAccount(userName)
+                .orElseThrow(() -> new UncheckedServletException("존재하지 않는 userName입니다."));
+
+        if (!user.checkPassword(password)) {
+            throw new UncheckedServletException("비밀번호가 일치하지 않습니다.");
+        }
+        log.info(user.toString());
     }
 }

@@ -40,14 +40,14 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final Request request = Request.from(bufferedReader);
-            if (request.getUri().startsWith("/login") && !request.getQueryParams().isEmpty()) {
+            if (request.getPath().startsWith("/login") && !request.getQueryParams().isEmpty()) {
                 final Map<String, String> queryParams = request.getQueryParams();
                 final User findUser = InMemoryUserRepository.findByAccount(queryParams.get("account")).orElseThrow();
                 log.info("user = {}", findUser);
             }
 
-            final String fileContent = getFileContent(request.getUri());
-            final String response = getResponse(request.getAcceptType(), fileContent);
+            final String fileContent = getFileContent(request.getPath());
+            final String response = getResponse(request.getAccessType(), fileContent);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

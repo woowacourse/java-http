@@ -2,11 +2,36 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.Headers;
+import org.apache.coyote.common.HttpRequest;
+import org.apache.coyote.common.HttpResponse;
+import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.common.MediaType;
+import org.apache.coyote.common.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import static org.apache.coyote.common.CharacterSet.UTF_8;
+import static org.apache.coyote.common.HttpHeader.ACCEPT;
+import static org.apache.coyote.common.HttpHeader.CONNECTION;
+import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.common.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.common.HttpHeader.HOST;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +51,61 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest request = HttpRequest.from(br);
+            final URI requestUri = request.requestUri();
+            final Headers requestHeaders = request.headers();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final ResponseBody responseBody = parseToResponseBody(requestUri);
+            final Headers responseHeaders = parseToResponseHeaders(requestHeaders, responseBody);
 
-            outputStream.write(response.getBytes());
+            final HttpResponse response = new HttpResponse(
+                    request.httpVersion(),
+                    HttpStatus.OK,
+                    responseHeaders,
+                    responseBody
+            );
+
+            outputStream.write(response.bytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Headers parseToResponseHeaders(final Headers httpRequestHeaders, final ResponseBody responseBody) {
+        final Map<String, String> responseHeaderMapping = new HashMap<>();
+
+        final String headerAcceptValue = httpRequestHeaders.getHeaderValue(ACCEPT.source());
+        if (Objects.nonNull(headerAcceptValue)) {
+            responseHeaderMapping.put(CONTENT_TYPE.source(), headerAcceptValue);
+        }
+        if (Objects.isNull(headerAcceptValue)) {
+            responseHeaderMapping.put(CONTENT_TYPE.source(), MediaType.TEXT_HTML.source() + ";" + UTF_8.source());
+        }
+        responseHeaderMapping.put(CONTENT_LENGTH.source(), String.valueOf(responseBody.length()));
+
+        httpRequestHeaders.headerNames()
+                .stream()
+                .filter(headerName -> !headerName.equals(ACCEPT.source()))
+                .filter(headerName -> !headerName.equals(CONNECTION.source()))
+                .filter(headerName -> !headerName.equals(HOST.source()))
+                .forEach(headerName -> responseHeaderMapping.put(headerName, httpRequestHeaders.getHeaderValue(headerName)));
+
+        final Headers responseHeaders = new Headers(responseHeaderMapping);
+        return responseHeaders;
+    }
+
+    private ResponseBody parseToResponseBody(final URI httpRequestUri) throws IOException {
+        ResponseBody responseBody = new ResponseBody("Hello world!");
+        if (!httpRequestUri.getPath().equals("/")) {
+            final URL resourceURL = getClass().getClassLoader().getResource("static" + httpRequestUri.getPath());
+            final Path resourcePath = new File(resourceURL.getFile()).toPath();
+            responseBody = new ResponseBody(Files.readString(resourcePath));
+        }
+        return responseBody;
     }
 }

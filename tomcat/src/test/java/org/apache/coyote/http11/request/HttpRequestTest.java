@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,7 @@ class HttpRequestTest {
 	void createHttpRequest() {
 		//given
 		final String httpRequest = String.join("\r\n",
-			"GET /index.html HTTP/1.1 ",
+			"GET /index.html?user=hong HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"",
@@ -24,6 +25,9 @@ class HttpRequestTest {
 		final HttpHeaders expectedHeader = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
+		));
+		final QueryParam queryParam = new QueryParam(Map.of(
+			"user", Set.of("hong")
 		));
 
 		//when
@@ -37,7 +41,10 @@ class HttpRequestTest {
 				.isEqualTo("/index.html"),
 			() -> assertThat(actual.getHeaders())
 				.usingRecursiveComparison()
-				.isEqualTo(expectedHeader)
+				.isEqualTo(expectedHeader),
+			() -> assertThat(actual.getQueryParam())
+				.usingRecursiveComparison()
+				.isEqualTo(queryParam)
 		);
 	}
 }

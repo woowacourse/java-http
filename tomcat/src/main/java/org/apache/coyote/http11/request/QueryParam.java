@@ -20,9 +20,9 @@ public class QueryParam {
 		this.multiMap = multiMap;
 	}
 
-	public static QueryParam from(final String endPoint) {
-		final int queryStartIndex = endPoint.indexOf(QUERY_START_CHAR);
-		final String queryString = endPoint.substring(queryStartIndex + VALUE_INDEX);
+	public static QueryParam from(final String uri) {
+		final int queryStartIndex = uri.indexOf(QUERY_START_CHAR);
+		final String queryString = uri.substring(queryStartIndex + VALUE_INDEX);
 
 		if (queryString.isBlank()) {
 			return new QueryParam(Map.of());

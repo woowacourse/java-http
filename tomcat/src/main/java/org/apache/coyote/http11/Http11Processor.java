@@ -25,8 +25,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     public static final int URL_INDEX = 1;
-    public static final int HEADER_NAME_INDEX = 0;
-    public static final int HEADER_VALUE_INDEX = 1;
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
     public static final String EMPTY_LINE = "";
     public static final String RESOURCES_PREFIX = "static";
     public static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
@@ -53,8 +53,21 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             List<String> startLine = Arrays.asList(bufferedReader.readLine().split(" "));
             Map<String, String> requestHeaders = extractHeaders(bufferedReader);
+            Map<String, String> queryParams = new HashMap<>();
 
             String requestedUrl = startLine.get(URL_INDEX);
+            int queryParamIndex = requestedUrl.indexOf('?');
+
+            if (0 < queryParamIndex) {
+                String queryParamValues = requestedUrl.substring(queryParamIndex);
+                Arrays.asList(queryParamValues.split("&"))
+                        .forEach(queryParam -> {
+                            String[] splited = queryParam.split("=");
+                            queryParams.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
+                        });
+                requestedUrl = requestedUrl.substring(0, queryParamIndex);
+            }
+
             String responseBody = createResponseBody(requestedUrl);
             String contentType = negotiateContent(requestHeaders.get("Accept"));
 
@@ -86,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while (!EMPTY_LINE.equals(line = bufferedReader.readLine())) {
             String[] splited = line.split(": ");
-            requestHeaders.put(splited[HEADER_NAME_INDEX], splited[HEADER_VALUE_INDEX]);
+            requestHeaders.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
         }
         return requestHeaders;
     }
@@ -97,6 +110,9 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String resourceName = RESOURCES_PREFIX + requestURL;
+        if (!resourceName.contains(".")) {
+            resourceName += ".html";
+        }
         URL resource = getClass().getClassLoader().getResource(resourceName);
         Path path = Paths.get(resource.getPath().substring(1));
 

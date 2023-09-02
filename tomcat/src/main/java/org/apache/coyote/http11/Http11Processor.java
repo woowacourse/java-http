@@ -7,6 +7,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Cookie;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Sessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +66,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(String request) throws IOException {
+
         String path = getPath(request);
         String method = getMethod(request);
         String prevPath = path;
+        Cookie cookie = new Cookie();
+        Map<String, String> cookies = cookie.getCookies(request);
+        String jsessionid = cookies.get("JSESSIONID");
         if (method.equals("GET")) {
-            path = processGetRequest(path);
+            path = processGetRequest(path, jsessionid);
         } else if (method.equals("POST")) {
             if (path.equals("/login")) {
                 path = processLogin(request);
@@ -111,12 +116,21 @@ public class Http11Processor implements Runnable, Processor {
         String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
+            addSession(request, user);
             path = getRedirectPath(password, user);
             log.info(user.toString());
         } catch (UserNotFoundException e) {
             path =  "/401.html";
         }
         return path;
+    }
+
+    private void addSession(String request, User user) {
+        Cookie cookie = new Cookie();
+        Sessions sessions = new Sessions();
+        Map<String, String> cookies = cookie.getCookies(request);
+        String jsessionid = cookies.get("JSESSIONID");
+        sessions.add(jsessionid, user);
     }
 
     private static String[] getRequestBody(String request) {
@@ -159,12 +173,18 @@ public class Http11Processor implements Runnable, Processor {
         return (prevPath + HTML_SUFFIX).equals(path);
     }
 
-    private String processGetRequest(String path) {
+    private String processGetRequest(String path, String jSessionId) {
         if (isRequest(path)) {
 //            if (haveQueryString(path)) {
 //                path = processLogin(path);
 //                return path;
 //            }
+            if (path.equals("/login")) {
+                Sessions sessions = new Sessions();
+                if (sessions.isAlreadyLogin(jSessionId)) {
+                    return "/index.html";
+                }
+            }
             return path + HTML_SUFFIX;
         }
         return path;

@@ -9,24 +9,22 @@ import org.slf4j.LoggerFactory;
 public class HttpRequest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
-    private static final String INDEX_HTML_FILE_PATH = "index.html";
-    private static final String INDEX_PATH = "/";
 
     private final HttpHeaders headers;
     private final String method;
-    private final String path;
+    private final HttpRequestURI requestURI;
     private final String protocol;
 
-    private HttpRequest(
+    public HttpRequest(
+        final HttpHeaders headers,
         final String method,
-        final String path,
-        final String protocol,
-        final HttpHeaders headers
+        final HttpRequestURI requestURI,
+        final String protocol
     ) {
-        this.method = method;
-        this.path = path;
-        this.protocol = protocol;
         this.headers = headers;
+        this.method = method;
+        this.requestURI = requestURI;
+        this.protocol = protocol;
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) {
@@ -34,13 +32,13 @@ public class HttpRequest {
             final String requestLine = bufferedReader.readLine();
             final var requestLineTokens = requestLine.split(" ");
             final String method = requestLineTokens[0];
-            final String path = requestLineTokens[1];
+            final String uri = requestLineTokens[1];
             final String protocol = requestLineTokens[2];
             final HttpHeaders headers = HttpHeaders.from(bufferedReader);
 
-            LOGGER.info("method: {}, path: {}, protocol: {}", method, path, protocol);
+            LOGGER.info("method: {}, uri: {}, protocol: {}", method, uri, protocol);
 
-            return new HttpRequest(method, path, protocol, headers);
+            return new HttpRequest(headers, method, HttpRequestURI.from(uri), protocol);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -51,10 +49,11 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        if (INDEX_PATH.equals(path)) {
-            return INDEX_HTML_FILE_PATH;
-        }
-        return path;
+        return requestURI.getPath();
+    }
+
+    public QueryStrings getQueryStrings() {
+        return requestURI.getQueryStrings();
     }
 
     public HttpHeaders getHeaders() {
@@ -67,5 +66,9 @@ public class HttpRequest {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public boolean hasQueryString() {
+        return requestURI.hasQueryString();
     }
 }

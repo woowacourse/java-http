@@ -27,7 +27,6 @@ public class HttpResponseFactory {
     private String readFile(final String fileName) throws IOException {
         final String resourcePath = getClass().getClassLoader().getResource(RESOURCE_PATH).getPath();
         final Path absolutePath = findAbsolutePath(fileName, resourcePath);
-        System.out.println("absolutePath = " + absolutePath);
 
         try (final var inputStream = Files.newInputStream(absolutePath)) {
             final byte[] indexContentBytes = inputStream.readAllBytes();
@@ -39,11 +38,11 @@ public class HttpResponseFactory {
 
     private Path findAbsolutePath(final String filePath, final String rootPath) throws IOException {
         final String fileName = filePath.substring(filePath.lastIndexOf(PATH_DELIMITER) + 1);
-        System.out.println(filePath + " " + fileName);
+
         return Files.find(
                 Path.of(rootPath),
                 MAX_DEPTH,
-                (path, fileAttr) -> fileAttr.isRegularFile() && path.endsWith(fileName)
+                (path, fileAttr) -> fileAttr.isRegularFile() && path.toString().contains(fileName)
             ).findFirst()
             .orElseThrow(() -> new NoSuchElementException("파일을 찾을 수 없습니다."));
     }

@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.Cookie;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -15,6 +16,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class Http11Processor implements Runnable, Processor {
@@ -51,7 +54,6 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[2048];
             inputStream.read(bytes);
             final String request = new String(bytes);
-            System.out.println(request);
 
             final String response = createResponse(request);
 
@@ -83,13 +85,23 @@ public class Http11Processor implements Runnable, Processor {
         String content = getContent(path);
         String contentLength = "Content-Length: " + content.getBytes().length;
 
-        String response = protocol + SPACE + status + SPACE + LINE_FEED +
+        String response = protocol +  SPACE + status + SPACE + LINE_FEED +
+                getJSessionId(request) + SPACE + LINE_FEED +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 getLocationIfRedirect(status, path) +
                 LINE_FEED +
                 content;
         return response;
+    }
+
+    private String getJSessionId(String request) {
+        Cookie cookie = new Cookie();
+        Map<String, String> cookies = cookie.getCookies(request);
+        if (!cookies.containsKey("JSESSIONID")) {
+            return cookie.createCookie();
+        }
+        return "";
     }
 
     private String processLogin(String request) {

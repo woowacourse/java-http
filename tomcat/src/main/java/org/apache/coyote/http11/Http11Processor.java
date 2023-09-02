@@ -42,32 +42,29 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final String requestHeader = getRequestHeader(bufferedReader);
-            String acceptType = getAcceptType(requestHeader);
-            String requestUri = getRequestUri(requestHeader);
+            final String acceptType = getAcceptType(requestHeader);
+            final String requestUri = getRequestUri(requestHeader);
             final String fileContent = getFileContent(requestUri);
-            String response;
-
-            if (acceptType.startsWith("text/css")) {
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + fileContent.getBytes().length + " ",
-                        "",
-                        fileContent);
-            } else {
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + fileContent.getBytes().length + " ",
-                        "",
-                        fileContent);
-            }
+            final String response = getResponse(acceptType, fileContent);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(final String acceptType, final String fileContent) {
+        String contentType = "text/html";
+        if (acceptType.startsWith("text/css")) {
+            contentType = "text/css";
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + fileContent.getBytes().length + " ",
+                "",
+                fileContent);
     }
 
     private String getRequestHeader(final BufferedReader bufferedReader) throws IOException {

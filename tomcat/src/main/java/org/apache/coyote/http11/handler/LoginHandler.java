@@ -2,6 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
+import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
@@ -26,7 +28,13 @@ public class LoginHandler extends Handler {
     }
 
     private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
+        Headers requestHeaders = request.getHeaders();
+        Cookie cookie = requestHeaders.getCookie();
         String absolutePath = "login.html";
+
+        if (cookie.hasKey("JSESSIONID")) {
+            absolutePath = "index.html";
+        }
 
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
@@ -45,7 +53,7 @@ public class LoginHandler extends Handler {
         String password = requestBody.get("password");
 
         // TODO: 없는 계정으로 로그인 했을 때에도 responseWhenLoginFail로 이동
-        User user = InMemoryUserRepository.findByAccount(account)
+        User user = InMemoryUserRepository.findByAccountAndPassword(account, password)
                 .orElseThrow();
 
         if (user.hasSameCredential(account, password)) {
@@ -69,17 +77,28 @@ public class LoginHandler extends Handler {
     }
 
     private Response responseWhenLoginSuccess(Request request) throws IOException {
-        String absolutePath = "index.html";
+        UUID sessionId = saveSession(request);
 
+        String absolutePath = "index.html";
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
                 "Content-Type", ContentTypeParser.parse(absolutePath),
                 "Content-Length", String.valueOf(resource.getBytes().length),
-                "Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+                "Set-Cookie", "JSESSIONID=" + sessionId
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
                 headers, responseBody);
+    }
+
+    private UUID saveSession(Request request) {
+        RequestBody body = request.getBody();
+        String account = body.get("account");
+        String password = body.get("password");
+
+        Long userId = InMemoryUserRepository.getIdByCredentials(account, password);
+
+        return InMemorySessionRepository.save(userId);
     }
 }

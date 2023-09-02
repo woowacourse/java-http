@@ -1,21 +1,17 @@
 package nextstep.jwp.model;
 
+import java.util.Objects;
+
 public class User {
 
-    private final Long id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(Long id, String account, String password, String email) {
-        this.id = id;
+    public User(String account, String password, String email) {
         this.account = account;
         this.password = password;
         this.email = email;
-    }
-
-    public User(String account, String password, String email) {
-        this(null, account, password, email);
     }
 
     public boolean hasSameCredential(String account, String password) {
@@ -27,12 +23,17 @@ public class User {
     }
 
     @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(account, user.account) &&
+                Objects.equals(password, user.password) &&
+                Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(account, password, email);
     }
 }

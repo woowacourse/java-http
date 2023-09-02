@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.message;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class Headers {
 
@@ -20,6 +17,21 @@ public class Headers {
                 .forEach(each -> headers.put(each[0], each[1]));
 
         return new Headers(headers);
+    }
+
+    public String get(String key) {
+        return headers.get(key);
+    }
+
+    public Cookie getCookie() {
+        Map<String, String> cookie = new HashMap<>();
+        String cookies = headers.get("Cookie");
+
+        Arrays.stream(cookies.split("; "))
+                .map(each -> each.split("="))
+                .forEach(each -> cookie.put(each[0], each[1]));
+
+        return new Cookie(cookie);
     }
 
     @Override

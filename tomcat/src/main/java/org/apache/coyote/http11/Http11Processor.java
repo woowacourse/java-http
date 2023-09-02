@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -45,14 +46,23 @@ public class Http11Processor implements Runnable, Processor {
             List<String> split = List.of(requestLine.split(" "));
             String requestTarget = split.get(1);
 
-            final String responseBody = getResponseBody(requestTarget);
+            Path path = getPath(requestTarget);
+            File file = path.toFile();
+            String fileName = file.getName();
+            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String responseBody = getResponseBody(path);
+
+            String statusLine = "HTTP/1.1 200 OK ";
+            String contentType = String.format("Content-Type: text/%s;charset=utf-8 ", fileExtension);
+            String contentLength = "Content-Length: " + responseBody.getBytes().length + " ";
+
+            final var response = new StringBuilder()
+                    .append(statusLine).append("\r\n")
+                    .append(contentType).append("\r\n")
+                    .append(contentLength).append("\r\n\r\n")
+                    .append(responseBody)
+                    .toString();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,15 +71,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String requestTarget) throws URISyntaxException, IOException {
-        if (requestTarget.equals("/")) {
+    private String getResponseBody(Path path) {
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
             return "Hello world!";
         }
+    }
+
+    private Path getPath(String requestTarget) throws URISyntaxException {
         String uri = requestTarget.substring(1);
         URL resource = getClass().getClassLoader()
-                .getResource("static/" + uri);
-        Path path = Paths.get(Objects.requireNonNull(resource).toURI());
+                .getResource(String.format("static/%s", uri));
 
-        return Files.readString(path);
+        return Paths.get(Objects.requireNonNull(resource).toURI());
     }
+
 }
+

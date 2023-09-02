@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -38,23 +38,27 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String requestUri = reader.readLine().split(" ")[1];
 
-            final List<String> request = new ArrayList<>();
+            final Map<String, String> request = new HashMap<>();
             String line;
             while (!"".equals(line = reader.readLine())) {
-                request.add(line);
+                String[] value = line.split(": ");
+                request.put(value[0], value[1]);
             }
 
             var responseBody = "Hello world!";
+            var contentType = "text/html;charset=utf-8";
             if (!requestUri.equals("/")) {
                 final String fileName = "static/" + requestUri;
                 final URL resource = getClass().getClassLoader().getResource(fileName);
-                System.out.println("resource.getFile() = " + resource.getFile());
+                if (request.get("Accept") != null) {
+                    contentType = request.get("Accept").split(",")[0];
+                }
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

@@ -1,9 +1,12 @@
 package nextstep.jwp.protocol.http;
 
 import nextstep.jwp.protocol.request_line.Path;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PathTest {
@@ -20,12 +23,35 @@ class PathTest {
         }
 
         @Test
-        void 쿼리스트링이_같이_요청되어도_생성된다() {
+        void 쿼리스트링이_요청되지_않으면_기본_Path만_생성된다() {
             // given
-            final String path = "/woowacourse/level4/tomcat?name=베베";
+            final String request = "/woowacourse/level4/tomcat";
+
+            Path path = Path.from(request);
 
             // when, then
-            assertDoesNotThrow(() -> Path.from(path));
+            assertAll(
+                    () -> assertThat(path.queryString())
+                            .isEqualTo(null),
+                    () -> assertThat(path.defaultPath())
+                            .isEqualTo("/woowacourse/level4/tomcat")
+            );
+        }
+
+        @Test
+        void 쿼리스트링이_요청되면_쿼리스트링과_같이_생성된다() {
+            // given
+            final String request = "/woowacourse/level4/tomcat?name=베베";
+
+            Path path = Path.from(request);
+
+            // when, then
+            assertAll(
+                    () -> assertThat(path.queryString().get("name"))
+                            .isEqualTo("베베"),
+                    () -> assertThat(path.defaultPath())
+                            .isEqualTo("/woowacourse/level4/tomcat")
+            );
         }
 
         @Test
@@ -39,6 +65,7 @@ class PathTest {
                     () -> Path.from(path)
             );
         }
+
     }
 
 }

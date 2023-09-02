@@ -118,7 +118,6 @@ public class Http11Processor implements Runnable, Processor {
 
         if (path.startsWith("/login?")) {
             isValidUser(path);
-            System.out.println(isValidUser(path));
             if (isValidUser(path)) {
                 path = "/index.html";
             } else {

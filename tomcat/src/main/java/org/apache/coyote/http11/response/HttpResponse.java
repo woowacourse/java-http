@@ -21,12 +21,4 @@ public class HttpResponse {
 			body
 		);
 	}
-
-	public HttpStatusCode getStatusCode() {
-		return statusCode;
-	}
-
-	public String getBody() {
-		return body;
-	}
 }

@@ -21,8 +21,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
 	private static final List<HttpHandler> handlers = List.of(
-		new StaticResourceHandler(),
-		new RootHandler()
+		new RootHandler(),
+		new StaticResourceHandler()
 	);
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -51,11 +51,10 @@ public class Http11Processor implements Runnable, Processor {
 
 			final HttpRequest request = HttpRequest.from(builder.toString());
 
-			final HttpHandler findHandler = handlers.stream()
+			final HttpResponse response = handlers.stream()
 				.filter(handler -> handler.isSupported(request))
 				.findAny()
-				.orElseGet(NotFoundHandler::new);
-			final HttpResponse response = findHandler
+				.orElseGet(NotFoundHandler::new)
 				.handleTo(request);
 
 			outputStream.write(response.buildResponse().getBytes());

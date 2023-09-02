@@ -37,9 +37,9 @@ class HttpRequestReaderTest {
                     assertThat(httpRequest.getHttpStartLine().getHttpRequestMethod()).isEqualTo(HttpRequestMethod.GET);
                     assertThat(httpRequest.getHttpStartLine().getRequestURI()).isEqualTo("/index.html");
                     assertThat(httpRequest.getHttpStartLine().getHttpVersion()).isEqualTo("HTTP/1.1");
-                    assertThat(httpRequest.getHttpRequestHeaders().get("Connection")).isEqualTo("keep-alive");
-                    assertThat(httpRequest.getHttpRequestHeaders().get("Host")).isEqualTo("localhost:8080");
-                    assertThat(httpRequest.getHttpRequestHeaders().get("Cache-Control")).isEqualTo("max-age=0");
+                    assertThat(httpRequest.getHeader("Connection")).isEqualTo("keep-alive");
+                    assertThat(httpRequest.getHeader("Host")).isEqualTo("localhost:8080");
+                    assertThat(httpRequest.getHeader("Cache-Control")).isEqualTo("max-age=0");
                 }
         );
     }

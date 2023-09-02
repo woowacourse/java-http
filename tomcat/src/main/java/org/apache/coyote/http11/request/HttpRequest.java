@@ -23,7 +23,7 @@ public class HttpRequest {
         return httpRequestStartLine;
     }
 
-    public HttpRequestHeaders getHttpRequestHeaders() {
-        return httpRequestHeaders;
+    public String getHeader(final String header) {
+        return httpRequestHeaders.get(header);
     }
 }

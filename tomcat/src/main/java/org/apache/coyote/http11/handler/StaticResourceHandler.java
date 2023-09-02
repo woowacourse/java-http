@@ -1,20 +1,18 @@
 package org.apache.coyote.http11.handler;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.util.ResourceResolver;
 
 public class StaticResourceHandler implements Handler {
 
     public static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
-    private static final String STATIC_PATH = "static";
 
     private StaticResourceHandler() {
     }
@@ -22,21 +20,16 @@ public class StaticResourceHandler implements Handler {
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         String path = request.getPath();
-        URL resource = resolveResource(path);
-        if (resource == null) {
-            return NotFoundHandler.INSTANCE.handle(request);
-        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(getContentType(path));
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
-        String contentBody = getContentBody(resource);
-        response.setContentBody(contentBody);
-        return response;
-    }
-
-    private URL resolveResource(String path) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        return classLoader.getResource(STATIC_PATH + path);
+        try {
+            String contentBody = ResourceResolver.resolve(path);
+            response.setContentBody(contentBody);
+            return response;
+        } catch (NoSuchFileException e) {
+            return NotFoundHandler.INSTANCE.handle(request);
+        }
     }
 
     private String getContentType(String path) {
@@ -53,10 +46,5 @@ public class StaticResourceHandler implements Handler {
             return "image/svg+xml";
         }
         return "*/*";
-    }
-
-    private String getContentBody(URL resource) throws IOException {
-        File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()));
     }
 }

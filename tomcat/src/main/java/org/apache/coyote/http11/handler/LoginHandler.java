@@ -7,10 +7,12 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpHeaders;
+import org.apache.coyote.common.HttpMethod;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.util.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +23,27 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
+        HttpMethod httpMethod = request.getHttpMethod();
+        if (httpMethod == HttpMethod.GET) {
+            return doGet();
+        }
+        if (httpMethod == HttpMethod.POST) {
+            return doPost(request);
+        }
+        throw new MethodNotAllowedException(List.of(HttpMethod.GET, HttpMethod.POST));
+    }
+
+    private HttpResponse doGet() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(HttpContentType.TEXT_HTML);
+        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
+        response.setContentBody(ResourceResolver.resolve("/login.html"));
+        return response;
+    }
+
+    private HttpResponse doPost(HttpRequest request) {
         String account = getQueryString(request, "account");
         String password = getQueryString(request, "password");
-        if (account.isBlank() || password.isBlank()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(HttpContentType.TEXT_HTML);
-            HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
-            response.setContentBody(ResourceResolver.resolve("/login.html"));
-            return response;
-        }
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
             .map(this::loginSuccess)

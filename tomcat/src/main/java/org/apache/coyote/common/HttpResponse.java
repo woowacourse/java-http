@@ -3,6 +3,7 @@ package org.apache.coyote.common;
 import static java.util.stream.Collectors.joining;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class HttpResponse {
 
@@ -40,6 +41,22 @@ public class HttpResponse {
         return httpHeaders.getHeaders().entrySet().stream()
             .map(entry -> entry.getKey() + ": " + String.join(", ", entry.getValue()) + " ")
             .collect(joining(System.lineSeparator()));
+    }
+
+    public void addHeader(String key, String value) {
+        httpHeaders.addHeader(key, value);
+    }
+
+    public void addHeader(String key, List<String> values) {
+        httpHeaders.addHeader(key, values);
+    }
+
+    public void setHeader(String key, String value) {
+        httpHeaders.setHeader(key, value);
+    }
+
+    public void setHeader(String key, List<String> values) {
+        httpHeaders.setHeader(key, values);
     }
 
     public HttpProtocol getHttpProtocol() {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,14 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
 import org.apache.coyote.Handler;
+import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
+import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.handler.IndexHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +90,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handle(HttpRequest request) throws IOException {
         Handler handler = handlerMap.getOrDefault(request.getPath(), StaticResourceHandler.INSTANCE);
-        return handler.handle(request);
+        try {
+            return handler.handle(request);
+        } catch (MethodNotAllowedException e) {
+            HttpResponse response = MethodNotAllowedHandler.INSTANCE.handle(request);
+            List<String> allowedMethods = e.getAllowedMethods().stream()
+                .map(Enum::name)
+                .collect(toList());
+            response.setHeader("Allow", allowedMethods);
+            return response;
+        }
     }
 }

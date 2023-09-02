@@ -3,6 +3,7 @@ package org.apache.coyote.common;
 public enum HttpMethod {
     GET,
     POST,
+    PATCH
     ;
 
     public static HttpMethod from(String httpMethod) {

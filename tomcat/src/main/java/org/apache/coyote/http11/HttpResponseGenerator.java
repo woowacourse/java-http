@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Constants.BLANK;
+import static org.apache.coyote.http11.Constants.CRLF;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
 public class HttpResponseGenerator {
-
-    private static final String CRLF = "\r\n";
-    private static final String BLANK = " ";
 
     private final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
@@ -44,7 +44,7 @@ public class HttpResponseGenerator {
     }
 
     private static CharSequence generateContentLengthLine(final String responseBody) {
-        return "Content-Length: " + responseBody.getBytes().length + " ";
+        return "Content-Length: " + responseBody.getBytes().length + BLANK;
     }
 
     private String readStaticFile(final String uri) throws IOException {

@@ -24,6 +24,10 @@ public class QueryParam {
 		final int queryStartIndex = endPoint.indexOf(QUERY_START_CHAR);
 		final String queryString = endPoint.substring(queryStartIndex + VALUE_INDEX);
 
+		if (queryString.isBlank()) {
+			return new QueryParam(Map.of());
+		}
+
 		final Map<String, Set<String>> result = Arrays.stream(queryString.split(QUERY_DELIMITER))
 			.map(str -> str.split(KEY_VALUE_DELIMITER))
 			.collect(groupingBy(

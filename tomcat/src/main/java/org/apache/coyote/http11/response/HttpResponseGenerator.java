@@ -36,18 +36,18 @@ public class HttpResponseGenerator {
         );
     }
 
-    private static String generateHttpStatusLine(final HttpStatus httpStatus) {
+    private String generateHttpStatusLine(final HttpStatus httpStatus) {
         return String.join(BLANK, "HTTP/1.1", httpStatus.getCode(), httpStatus.name(), "");
     }
 
-    private static String generateContentTypeLine(final String url) {
+    private String generateContentTypeLine(final String url) {
         if (url.endsWith(".css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private static CharSequence generateContentLengthLine(final String responseBody) {
+    private CharSequence generateContentLengthLine(final String responseBody) {
         return "Content-Length: " + responseBody.getBytes().length + BLANK;
     }
 

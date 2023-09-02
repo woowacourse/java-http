@@ -2,7 +2,10 @@ package org.apache.coyote.http11.handler;
 
 import java.util.Map;
 import org.apache.coyote.http11.ContentTypeParser;
-import org.apache.coyote.http11.httpmessage.*;
+import org.apache.coyote.http11.message.*;
+import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class DefaultHandler extends Handler {
 

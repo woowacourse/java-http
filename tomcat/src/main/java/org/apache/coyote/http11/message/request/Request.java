@@ -1,8 +1,10 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.message.request;
 
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import org.apache.coyote.http11.message.Headers;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.HttpVersion;
 
 public class Request {
 

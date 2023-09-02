@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import org.apache.coyote.http11.httpmessage.Request;
-import org.apache.coyote.http11.httpmessage.RequestURI;
+import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.RequestURI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

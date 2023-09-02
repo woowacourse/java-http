@@ -1,4 +1,8 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.message.response;
+
+import org.apache.coyote.http11.message.Headers;
+import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.HttpVersion;
 
 public class Response {
 

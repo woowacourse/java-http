@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.httpmessage.Request;
-import org.apache.coyote.http11.httpmessage.Response;
+import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.response.Response;
 
 public abstract class Handler {
 

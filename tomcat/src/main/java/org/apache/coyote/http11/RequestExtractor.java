@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.coyote.http11.httpmessage.Request;
+import org.apache.coyote.http11.message.request.Request;
 
 public class RequestExtractor {
 

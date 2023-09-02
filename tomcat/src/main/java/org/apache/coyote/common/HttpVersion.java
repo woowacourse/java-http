@@ -2,32 +2,25 @@ package org.apache.coyote.common;
 
 import java.util.Arrays;
 
-import static java.util.Locale.ENGLISH;
-
 public enum HttpVersion {
 
     HTTP_1_1("HTTP/1.1");
 
-    private final String version;
+    private final String source;
 
-    HttpVersion(final String version) {
-        this.version = version;
+    HttpVersion(final String source) {
+        this.source = source;
     }
 
-    public static HttpVersion find(final String source) {
+    public static HttpVersion from(final String source) {
         return Arrays.stream(HttpVersion.values())
-                .filter(httpVersion -> httpVersion.contains(source))
+                .filter(httpVersion -> httpVersion.source.equals(source))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException());
     }
 
-    private boolean contains(final String source) {
-        return source.toUpperCase(ENGLISH)
-                .contains(this.version);
-    }
-
     public String version() {
-        return version;
+        return source;
     }
 
     @Override

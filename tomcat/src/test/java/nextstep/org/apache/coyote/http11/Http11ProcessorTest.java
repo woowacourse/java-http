@@ -1,15 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -23,12 +22,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        var expected = String.join(
+                System.lineSeparator(),
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
-                "Hello world!");
+                "Hello world!"
+        );
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -36,7 +37,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -51,10 +52,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
+        var expected = "HTTP/1.1 200 OK " + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
+                "Content-Length: 5564 " + System.lineSeparator() +
+                System.lineSeparator() +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);

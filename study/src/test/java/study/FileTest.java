@@ -3,14 +3,16 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,7 +35,7 @@ class FileTest {
 
         // todo: path from repository root
         final String actual = this.getClass().
-                getClassLoader().getResource(fileName).toString();
+                getClassLoader().getResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -49,11 +51,15 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        URI uri = this.getClass().
-                getClassLoader().getResource(fileName).toURI();
-        Path path = Path.of(uri);
+        Path path = Path.of(this.getClass().getClassLoader().getResource(fileName).getPath());
 
-        List<String> actual = Files.readAllLines(path, UTF_8);
-        assertThat(actual).containsOnly("nextstep");
+        File file = new File(path.toString());
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+//        List<String> actual = Files.readAllLines(path, UTF_8);
+//        List<String> actual2 = Files.lines(path).collect(Collectors.toList());
+        List<String> actual3 = br.lines().collect(Collectors.toList());
+
+        assertThat(actual3).containsOnly("nextstep");
     }
 }

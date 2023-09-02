@@ -26,4 +26,8 @@ public class HttpRequest {
     public String getHeader(final String header) {
         return httpRequestHeaders.get(header);
     }
+
+    public String getParam(final String parameter) {
+        return httpRequestStartLine.getParam(parameter);
+    }
 }

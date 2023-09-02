@@ -37,4 +37,19 @@ class HttpRequestStartLineTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("시작 라인의 토큰은 3개여야 합니다.");
     }
+
+    @Test
+    void 쿼리파라미터와_URI를_분리하여_저장한다() {
+        // given
+        final String startLine = "GET /index.html?name=royce&password=p1234 HTTP/1.1";
+
+        // when
+        final HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(startLine);
+
+        // then
+        assertSoftly(softAssertions -> {
+            assertThat(httpRequestStartLine.getParam("name")).isEqualTo("royce");
+            assertThat(httpRequestStartLine.getParam("password")).isEqualTo("p1234");
+        });
+    }
 }

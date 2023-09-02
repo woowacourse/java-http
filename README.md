@@ -2,8 +2,8 @@
 
 ## 기능 요구 사항
 
-### GET /index.html 응답하기
+### GET /index.html 응답하기 ✅
 
-### CSS 지원하기
+### CSS 지원하기 ✅
 
-### Query String 파싱
+### Query String 파싱 ✅

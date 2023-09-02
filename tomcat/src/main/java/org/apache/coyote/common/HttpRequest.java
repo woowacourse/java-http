@@ -17,7 +17,11 @@ public class HttpRequest {
         return requestUri.getHttpPath().getPath();
     }
 
-    public Map<String, List<String>> getQueryString() {
+    public List<String> getQueryString(String key) {
+        return requestUri.getHttpPath().getQueryString(key);
+    }
+
+    public Map<String, List<String>> getQueryStrings() {
         return requestUri.getHttpPath().getQueryStrings();
     }
 

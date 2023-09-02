@@ -46,6 +46,10 @@ public class HttpPath {
             .collect(groupingBy(arr -> arr[KEY_INDEX], mapping(arr -> arr[VALUE_INDEX], toList())));
     }
 
+    public List<String> getQueryString(String key) {
+        return queryStrings.getOrDefault(key, Collections.emptyList());
+    }
+
     public String getPath() {
         return path;
     }

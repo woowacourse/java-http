@@ -19,10 +19,13 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.lang.String.join;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CONTENT_TYPE_PREFIX = "Accept: ";
+    private static final String DEFAULT_RESPONSE_BODY_MESSAGE = "Hello world!";
 
     private final Socket connection;
 
@@ -47,32 +50,18 @@ public class Http11Processor implements Runnable, Processor {
 
             var requestURI = request.get(0).split(" ")[1];
             QueryStrings queryStrings = QueryStrings.from(requestURI);
-            if (queryStrings.getValues().containsKey("account")) {
-                String account = queryStrings.getValues().get("account");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(IllegalArgumentException::new);
-                log.info(user.toString());
-            }
+
+            String account = queryStrings.getValues().get("account");
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(IllegalArgumentException::new);
+            log.info(user.toString());
 
             if (requestURI.contains("?")) {
                 final int index = requestURI.indexOf("?");
                 requestURI = requestURI.substring(0, index) + ".html";
             }
 
-            var responseBody = "Hello world!";
-            if (!"/".equals(requestURI)) {
-                final Path path = new File(Objects.requireNonNull(
-                        getClass().getClassLoader().getResource("static" + requestURI)).getFile()
-                ).toPath();
-                responseBody = new String(Files.readAllBytes(path));
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = makeResponse(requestURI, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -96,6 +85,26 @@ public class Http11Processor implements Runnable, Processor {
                 .findFirst()
                 .orElse("html");
         return ContentType.from(extension);
+    }
+
+    private String makeResponse(String requestURI, ContentType contentType) throws IOException {
+        String responseBody = makeResponseBody(requestURI);
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String makeResponseBody(String requestURI) throws IOException {
+        if ("/".equals(requestURI)) {
+            return DEFAULT_RESPONSE_BODY_MESSAGE;
+        }
+        Path path = new File(Objects.requireNonNull(
+                getClass().getClassLoader().getResource("static" + requestURI)).getFile()
+        ).toPath();
+        return new String(Files.readAllBytes(path));
     }
 
 }

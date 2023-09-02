@@ -59,4 +59,25 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("Content-Type: text/css");
+    }
 }

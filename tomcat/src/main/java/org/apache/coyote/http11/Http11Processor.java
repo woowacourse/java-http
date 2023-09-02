@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -35,27 +36,47 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String responseBody = "Hello world!";
+            String request = getRequest(inputStream);
+            String[] split = request.split(" ");
+            String requestUri = split[1];
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String s = bufferedReader.readLine();
-            String[] split = s.split(" ");
-            if (!split[1].equals("/")) {
-                URL resource = getClass().getClassLoader().getResource("static" + split[1]);
+            if (!requestUri.equals("/")) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
 
-            final var response = String.join("\r\n",
+            String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
 
+            if (request.contains("Accept: text/css")) {
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getRequest(InputStream inputStream) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        String line = bufferedReader.readLine();
+        StringBuilder stringBuilder = new StringBuilder();
+        while (!"".equals(line)) {
+            stringBuilder.append(line);
+            line = bufferedReader.readLine();
+        }
+        return stringBuilder.toString();
     }
 }

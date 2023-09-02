@@ -70,7 +70,8 @@ public class LoginHandler extends Handler {
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
                 "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                "Content-Length", String.valueOf(resource.getBytes().length),
+                "Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 

@@ -1,8 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.httpmessage.Request;
+import org.apache.coyote.http11.httpmessage.RequestURI;
+import org.apache.coyote.http11.httpmessage.Response;
 
 public class Handlers {
 

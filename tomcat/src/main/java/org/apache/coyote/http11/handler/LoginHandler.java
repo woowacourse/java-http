@@ -1,8 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.ContentTypeParser;
+import org.apache.coyote.http11.httpmessage.Request;
+import org.apache.coyote.http11.httpmessage.RequestURI;
+import org.apache.coyote.http11.httpmessage.Response;
 
 public class LoginHandler extends Handler {
 

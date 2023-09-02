@@ -1,16 +1,26 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.joining;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.StartLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpRequestParser parser = new HttpRequestParser();
+    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     private final Socket connection;
 
@@ -26,10 +36,25 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest request = parser.parse(bufferedReader);
+            StartLine startLine = request.startLine();
+            if (startLine.isEmpty()) {
+                return;
+            }
+            String responseBody = "";
+            String uri = startLine.uri();
+            if (uri.equals("/")) {
+                responseBody = "Hello world!";
+            } else {
+                InputStream resourceAsStream = classLoader.getResourceAsStream("static" + uri);
+                InputStreamReader inputStreamReader = new InputStreamReader(resourceAsStream);
+                BufferedReader fileReader = new BufferedReader(inputStreamReader);
+                responseBody = fileReader.lines()
+                        .collect(joining("\n", "", "\n"));
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -38,8 +63,8 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            bufferedWriter.write(response);
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

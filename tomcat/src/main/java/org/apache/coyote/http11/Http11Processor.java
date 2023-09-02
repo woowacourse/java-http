@@ -95,7 +95,6 @@ public class Http11Processor implements Runnable, Processor {
             final RequestHeader requestHeader,
             final RequestBody requestBody
     ) {
-        LOG.info("request uri: {}", requestLine.getUri());
         final String path = requestLine.parseUriWithOutQueryString();
         if (path.equals("/login")) {
             return login(requestLine, requestHeader, requestBody);

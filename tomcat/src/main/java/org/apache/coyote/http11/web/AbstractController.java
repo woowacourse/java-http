@@ -30,4 +30,9 @@ public abstract class AbstractController implements Controller {
         response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.METHOD_NOT_ALLOWED);
         return new View("404.html");
     }
+
+    protected View redirect(final String path, final HttpResponse response) {
+        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.MOVED_PERMANENTLY);
+        return new View(path);
+    }
 }

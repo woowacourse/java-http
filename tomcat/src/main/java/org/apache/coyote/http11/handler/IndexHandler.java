@@ -1,22 +1,24 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.Map;
 import org.apache.coyote.http11.ContentTypeParser;
-import org.apache.coyote.http11.httpmessage.HttpStatus;
-import org.apache.coyote.http11.httpmessage.Request;
-import org.apache.coyote.http11.httpmessage.Response;
+import org.apache.coyote.http11.httpmessage.*;
 
 public class IndexHandler extends Handler {
 
     @Override
     public Response handle(Request request) throws IOException {
-        String target = "index.html";
+        String absolutePath = "index.html";
 
-        String resource = findResourceWithPath(target);
-        String contentType = ContentTypeParser.parse(target);
-        int contentLength = resource.getBytes().length;
+        String resource = findResourceWithPath(absolutePath);
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.OK,
-                contentType, contentLength, resource);
+                headers,responseBody);
     }
 }

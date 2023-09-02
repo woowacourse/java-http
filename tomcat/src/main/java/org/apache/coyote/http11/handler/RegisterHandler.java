@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
@@ -21,33 +22,39 @@ public class RegisterHandler extends Handler {
     }
 
     private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
-        String target = "register.html";
+        String absolutePath = "register.html";
 
-        String resource = findResourceWithPath(target);
-        String contentType = ContentTypeParser.parse(target);
-        int contentLength = resource.getBytes().length;
+        String resource = findResourceWithPath(absolutePath);
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.OK,
-                contentType, contentLength, resource);
+                headers, responseBody);
     }
 
     private Response responseWhenHttpMethodIsPost(Request request) throws IOException {
         saveUser(request);
-
         String absolutePath = "index.html";
+
         String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath);
-        int contentLength = resource.getBytes().length;
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
-                contentType, contentLength, resource);
+                headers, responseBody);
     }
 
     private void saveUser(Request request) {
-        Body body = request.getBody();
-        String account = body.get("account");
-        String password = body.get("password");
-        String email = body.get("email");
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        String email = requestBody.get("email");
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);

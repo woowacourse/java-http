@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
@@ -24,17 +25,20 @@ public class LoginHandler extends Handler {
         String absolutePath = "login.html";
 
         String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath);
-        int contentLength = resource.getBytes().length;
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.OK,
-                contentType, contentLength, resource);
+                headers, responseBody);
     }
 
     private Response responseWhenHttpMethodIsPost(Request request) throws IOException {
-        Body body = request.getBody();
-        String account = body.get("account");
-        String password = body.get("password");
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
 
         // TODO: 없는 계정으로 로그인 했을 때에도 responseWhenLoginFail로 이동
         User user = InMemoryUserRepository.findByAccount(account)
@@ -50,21 +54,27 @@ public class LoginHandler extends Handler {
         String absolutePath = "401.html";
 
         String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath);
-        int contentLength = resource.getBytes().length;
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.UNAUTHORIZED,
-                contentType, contentLength, resource);
+                headers, responseBody);
     }
 
     private Response responseWhenLoginSuccess(Request request) throws IOException {
         String absolutePath = "index.html";
 
         String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath);
-        int contentLength = resource.getBytes().length;
+        Headers headers = new Headers(Map.of(
+                "Content-Type", ContentTypeParser.parse(absolutePath),
+                "Content-Length", String.valueOf(resource.getBytes().length)
+        ));
+        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
-                contentType, contentLength, resource);
+                headers, responseBody);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpmessage;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public class Request {
@@ -9,15 +10,15 @@ public class Request {
     private final HttpVersion httpVersion;
     private final RequestURI requestURI;
     private final Headers headers;
-    private final Body body;
+    private final RequestBody requestBody;
 
     private Request(HttpMethod method, HttpVersion httpVersion,
-                    RequestURI requestURI, Headers headers, Body body) {
+                    RequestURI requestURI, Headers headers, RequestBody requestBody) {
         this.method = method;
         this.httpVersion = httpVersion;
         this.requestURI = requestURI;
         this.headers = headers;
-        this.body = body;
+        this.requestBody = requestBody;
     }
 
     public static Request from(String startLine, List<String> headers, List<String> body) {
@@ -27,7 +28,7 @@ public class Request {
         String httpVersion = splitStartLine[2];
 
         return new Request(HttpMethod.from(method), HttpVersion.from(httpVersion),
-                RequestURI.from(requestURI), Headers.from(headers), Body.from(body));
+                RequestURI.from(requestURI), Headers.from(headers), RequestBody.from(body));
     }
 
     public HttpMethod getMethod() {
@@ -46,7 +47,7 @@ public class Request {
         return headers;
     }
 
-    public Body getBody() {
-        return body;
+    public RequestBody getBody() {
+        return requestBody;
     }
 }

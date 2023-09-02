@@ -1,5 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -23,14 +26,18 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        String output = socket.output();
+
+        List<String> lines = Arrays.stream(output.split("\r\n"))
+                .collect(Collectors.toList());
+
+        assertThat(lines).containsExactlyInAnyOrder(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+                "Hello world!"
+        );
     }
 
     @Test
@@ -51,12 +58,18 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String output = socket.output();
+
+        List<String> lines = Arrays.stream(output.split("\r\n"))
+                .collect(Collectors.toList());
+
+        assertThat(lines).containsExactlyInAnyOrder(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5564 ",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
     }
 }

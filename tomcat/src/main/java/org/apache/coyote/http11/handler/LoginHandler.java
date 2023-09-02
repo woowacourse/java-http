@@ -45,7 +45,7 @@ public class LoginHandler implements Handler {
         String requestBody = request.getRequestBody();
         QueryString query = QueryParser.parse(requestBody);
         String account = query.get("account");
-        String password = query.get( "password");
+        String password = query.get("password");
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
             .map(this::loginSuccess)

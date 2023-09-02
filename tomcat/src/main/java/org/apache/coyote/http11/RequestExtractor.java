@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.coyote.http11.httpmessage.Request;
 
@@ -15,16 +16,31 @@ public class RequestExtractor {
 
     public static Request extract(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> requestLines = extractRequestLines(reader);
-        return Request.from(requestLines);
+
+        String startLine = reader.readLine();
+        List<String> headers = extractHeaders(reader);
+        List<String> body = extractBody(reader);
+
+        return Request.from(startLine, headers, body);
     }
 
-    private static List<String> extractRequestLines(BufferedReader reader) throws IOException {
-        List<String> requestLines = new ArrayList<>();
+    private static List<String> extractBody(BufferedReader reader) throws IOException {
+        List<String> body = new ArrayList<>();
+        if (reader.ready()) {
+            char[] buffer = new char[1024];
+            reader.read(buffer);
+            body.addAll(Arrays.asList(new String(buffer).trim()
+                    .split("&")));
+        }
+        return body;
+    }
+
+    private static List<String> extractHeaders(BufferedReader reader) throws IOException {
+        List<String> headers = new ArrayList<>();
         String line;
         while (!(line = reader.readLine()).isBlank()) {
-            requestLines.add(line);
+            headers.add(line);
         }
-        return requestLines;
+        return headers;
     }
 }

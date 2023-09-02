@@ -1,38 +1,28 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
+import org.apache.coyote.http11.httpmessage.Body;
 import org.apache.coyote.http11.httpmessage.Request;
-import org.apache.coyote.http11.httpmessage.RequestURI;
 import org.apache.coyote.http11.httpmessage.Response;
 
 public class LoginHandler extends Handler {
 
     public Response handle(Request request) throws IOException {
-        RequestURI requestURI = request.getRequestURI();
-
-        if (!requestURI.hasQueryParameters()) {
-            return responseWhenNotLogin(request);
+        String httpMethod = request.getMethod();
+        if (httpMethod.equals("GET")) {
+            return responseWhenHttpMethodIsGet(request);
+        }
+        if (httpMethod.equals("POST")) {
+            return responseWhenHttpMethodIsPost(request);
         }
 
-        Map<String, String> queryParameters = requestURI.queryParameters();
-
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
-
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow();
-
-        if (user.hasSameCredential(account, password)) {
-            return responseWhenLoginSuccess(request);
-        }
-        return responseWhenLoginFail(request);
+        throw new IllegalArgumentException();
     }
 
-    private Response responseWhenNotLogin(Request request) throws IOException {
+    private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
         String absolutePath = "login.html";
 
         String resource = findResourceWithPath(absolutePath);
@@ -41,6 +31,21 @@ public class LoginHandler extends Handler {
 
         return Response.from(request.getHttpVersion(), "200 UNAUTHORIZED",
                 contentType, contentLength, resource);
+    }
+
+    private Response responseWhenHttpMethodIsPost(Request request) throws IOException {
+        Body body = request.getBody();
+        String account = body.get("account");
+        String password = body.get("password");
+
+        // TODO: 없는 계정으로 로그인 했을 때에도 responseWhenLoginFail로 이동
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow();
+
+        if (user.hasSameCredential(account, password)) {
+            return responseWhenLoginSuccess(request);
+        }
+        return responseWhenLoginFail(request);
     }
 
     private Response responseWhenLoginFail(Request request) throws IOException {

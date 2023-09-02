@@ -1,5 +1,9 @@
 package study;
 
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,10 +31,10 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL actual = classLoader.getResource(fileName);
 
-        assertThat(actual).endsWith(fileName);
+        assertThat(actual.getFile()).endsWith(fileName);
     }
 
     /**
@@ -40,15 +44,21 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL url = classLoader.getResource(fileName);
+        File file = new File(url.getPath());
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        BufferedReader reader = new BufferedReader(new FileReader(file));
 
+        final List<String> actual = new ArrayList<>();
+
+        String line;
+        while (Objects.nonNull(line = reader.readLine())) {
+            actual.add(line);
+        }
         assertThat(actual).containsOnly("nextstep");
     }
 }

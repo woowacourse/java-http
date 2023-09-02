@@ -6,11 +6,11 @@ import org.apache.coyote.http11.message.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Filter {
+public class LoggingFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(Filter.class);
+    private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
 
-    private Filter() {
+    private LoggingFilter() {
     }
 
     public static void logUserInfoIfExists(Request request) {
@@ -18,7 +18,8 @@ public class Filter {
         Cookie cookie = requestHeaders.getCookie();
 
         if (cookie.hasKey("JSESSIONID")) {
-            log.info("session {} is logged in.", cookie.getValue("JSESSIONID"));
+            String sessionId = cookie.getValue("JSESSIONID");
+            log.info("session {} is logged in.", sessionId);
         }
     }
 }

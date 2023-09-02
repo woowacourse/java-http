@@ -4,17 +4,17 @@ import java.util.Map;
 
 public class Cookie {
 
-    private final Map<String, String> cookie;
+    private final Map<String, String> mappings;
 
-    public Cookie(Map<String, String> cookie) {
-        this.cookie = cookie;
+    public Cookie(Map<String, String> mappings) {
+        this.mappings = mappings;
     }
 
     public boolean hasKey(String key) {
-        return cookie.containsKey(key);
+        return mappings.containsKey(key);
     }
 
     public String getValue(String key) {
-        return cookie.get(key);
+        return mappings.get(key);
     }
 }

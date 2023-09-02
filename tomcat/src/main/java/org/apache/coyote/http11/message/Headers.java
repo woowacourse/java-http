@@ -4,10 +4,10 @@ import java.util.*;
 
 public class Headers {
 
-    private final Map<String, String> headers;
+    private final Map<String, String> mappings;
 
-    public Headers(Map<String, String> headers) {
-        this.headers = headers;
+    public Headers(Map<String, String> mappings) {
+        this.mappings = mappings;
     }
 
     public static Headers from(List<String> lines) {
@@ -20,12 +20,12 @@ public class Headers {
     }
 
     public String get(String key) {
-        return headers.get(key);
+        return mappings.get(key);
     }
 
     public Cookie getCookie() {
         Map<String, String> cookie = new HashMap<>();
-        String cookies = headers.get("Cookie");
+        String cookies = mappings.get("Cookie");
 
         if (Objects.nonNull(cookies)) {
             Arrays.stream(cookies.split("; "))
@@ -38,7 +38,7 @@ public class Headers {
     @Override
     public String toString() {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
-        headers.forEach((key, value) -> stringJoiner.add(key + ": " + value + " "));
+        mappings.forEach((key, value) -> stringJoiner.add(key + ": " + value + " "));
         return stringJoiner.toString();
     }
 }

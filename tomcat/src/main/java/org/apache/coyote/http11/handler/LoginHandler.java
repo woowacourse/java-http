@@ -17,6 +17,10 @@ import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class LoginHandler extends Handler {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+
     public Response handle(Request request) throws IOException {
         HttpMethod httpMethod = request.getMethod();
         if (httpMethod.isEqualTo(HttpMethod.GET)) {
@@ -43,8 +47,8 @@ public class LoginHandler extends Handler {
         String absolutePath = "index.html";
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
@@ -56,8 +60,8 @@ public class LoginHandler extends Handler {
         String absolutePath = "login.html";
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
@@ -82,9 +86,9 @@ public class LoginHandler extends Handler {
         String absolutePath = "index.html";
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length),
-                "Set-Cookie", "JSESSIONID=" + sessionId
+                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_LENGTH, String.valueOf(resource.getBytes().length),
+                SET_COOKIE, "JSESSIONID=" + sessionId
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
@@ -97,8 +101,8 @@ public class LoginHandler extends Handler {
 
         String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 

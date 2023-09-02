@@ -9,21 +9,24 @@ import org.apache.coyote.http11.message.response.Response;
 
 public class Handlers {
 
-    private static final Map<String, Handler> handlers;
+    private static final Map<String, Handler> mappings;
 
     static {
-        handlers = new HashMap<>();
-        handlers.put("/", new DefaultHandler());
-        handlers.put("/index", new IndexHandler());
-        handlers.put("/login", new LoginHandler());
-        handlers.put("/register", new RegisterHandler());
+        mappings = new HashMap<>();
+        mappings.put("/", new DefaultHandler());
+        mappings.put("/index", new IndexHandler());
+        mappings.put("/login", new LoginHandler());
+        mappings.put("/register", new RegisterHandler());
+    }
+
+    private Handlers() {
     }
 
     public static Response handle(Request request) throws IOException {
         RequestURI requestURI = request.getRequestURI();
         String absolutePathWithoutExtension = removeExtension(requestURI.absolutePath());
 
-        Handler handler = handlers.entrySet().stream()
+        Handler handler = mappings.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(absolutePathWithoutExtension))
                 .findFirst()
                 .map(Map.Entry::getValue)

@@ -48,11 +48,11 @@ class IOStreamTest {
         void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
-
             /**
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -73,6 +73,7 @@ class IOStreamTest {
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
+            outputStream.flush();
             /**
              * todo
              * flush를 사용해서 테스트를 통과시킨다.

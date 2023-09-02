@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 public enum HttpResponseStatus {
     OK(200),
     MOVED_PERMANENTLY(301),
+    FOUND(302),
     UNAUTHORIZED(401),
     NOT_FOUND(404),
     METHOD_NOT_ALLOWED(405),

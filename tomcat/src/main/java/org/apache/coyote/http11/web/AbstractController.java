@@ -30,7 +30,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected View redirect(final String path, final HttpResponse response) {
-        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.MOVED_PERMANENTLY);
+        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.FOUND);
         response.setHeader("Location", path);
         return new View(path);
     }

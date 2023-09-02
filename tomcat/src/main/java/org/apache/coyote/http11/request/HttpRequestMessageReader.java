@@ -26,7 +26,13 @@ public class HttpRequestMessageReader {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         final HttpRequestStartLine startLine = readStartLine(br.readLine());
         final Map<String, String> headers = readHeaders(br);
-
+        if (startLine.getHttpRequestMethod() == HttpRequestMethod.POST) {
+            final SupportContentType supportContentType = SupportContentType.from(headers.get("Content-Type"));
+            final String body = readBody(br, Integer.parseInt(headers.get("Content-Length")));
+            final PayloadParser payloadParser = supportContentType.getPayloadParser();
+            Map<String, String> payload = payloadParser.parse(body);
+            return HttpRequest.of(startLine, headers, payload);
+        }
         return HttpRequest.of(startLine, headers);
     }
 
@@ -70,6 +76,7 @@ public class HttpRequestMessageReader {
         Map<String, String> headers = new LinkedHashMap<>();
         String readLine = br.readLine();
         while (readLine != null && !readLine.isEmpty()) {
+            System.out.println(readLine);
             addHeaderByReadLine(readLine, headers);
             readLine = br.readLine();
         }
@@ -91,5 +98,12 @@ public class HttpRequestMessageReader {
         }
 
         throw new IllegalStateException("헤더는 key: value 형태여야 합니다.");
+    }
+
+
+    private static String readBody(final BufferedReader br, final int contentLength) throws IOException {
+        char[] body = new char[contentLength];
+        br.read(body, 0, contentLength);
+        return String.copyValueOf(body);
     }
 }

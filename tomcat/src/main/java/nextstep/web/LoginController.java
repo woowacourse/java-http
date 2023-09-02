@@ -1,6 +1,5 @@
 package nextstep.web;
 
-import java.util.Objects;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -18,16 +17,13 @@ public class LoginController extends AbstractController {
 
     @Override
     public View handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        final String account = request.getParam("account");
-        final String password = request.getParam("password");
-        if (Objects.nonNull(account) && Objects.nonNull(password)) {
-            return login(response, account, password);
-        }
-
         return new View("login.html");
     }
 
-    private View login(final HttpResponse response, final String account, final String password) {
+    @Override
+    public View handlePostRequest(final HttpRequest request, final HttpResponse response) {
+        final String account = request.getPayloadValue("account");
+        final String password = request.getPayloadValue("password");
         if (userService.validateLogin(account, password)) {
             User user = userService.getUserByAccount(account);
             log.info("login success: {}", user);
@@ -35,10 +31,5 @@ public class LoginController extends AbstractController {
         }
 
         return new View("401.html");
-    }
-
-    @Override
-    public View handlePostRequest(final HttpRequest request, final HttpResponse response) {
-        return new View("login.html");
     }
 }

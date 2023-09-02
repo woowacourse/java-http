@@ -13,8 +13,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
@@ -27,6 +29,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String REGISTER_PAGE = "/register.html";
+    private static final String LOGIN_PAGE = "/login.html";
 
     private final Socket connection;
     private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
@@ -93,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         LOG.info("request uri: {}", requestLine.getUri());
         final String path = requestLine.parseUriWithOutQueryString();
         if (path.equals("/login")) {
-            return login(requestLine, requestBody);
+            return login(requestLine, requestHeader, requestBody);
         }
         if (path.equals("/register")) {
             return register(requestLine, requestBody);
@@ -101,25 +106,40 @@ public class Http11Processor implements Runnable, Processor {
         return new ResponseEntity(HttpStatus.OK, path);
     }
 
-    private ResponseEntity login(final RequestLine requestLine, final RequestBody requestBody) {
+    private ResponseEntity login(
+            final RequestLine requestLine,
+            final RequestHeader requestHeader,
+            final RequestBody requestBody
+    ) {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
-            return new ResponseEntity(HttpStatus.OK, "/login.html");
+            final HttpCookie httpCookie = requestHeader.parseCookie();
+            final Session session = sessionManager.findSession(httpCookie.get("JSESSIONID"));
+            if (session != null) {
+                return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+            }
+            return new ResponseEntity(HttpStatus.OK, LOGIN_PAGE);
         }
         final String account = requestBody.get("account");
         final String password = requestBody.get("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> {
-                    final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, "/index.html");
-                    responseEntity.setCookie("JSESSIONID", UUID.randomUUID().toString());
-                    return responseEntity;
-                })
+                .map(this::loginSuccess)
                 .orElseGet(() -> new ResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html"));
+    }
+
+    private ResponseEntity loginSuccess(final User user) {
+        final String uuid = UUID.randomUUID().toString();
+        final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+        responseEntity.setCookie("JSESSIONID", uuid);
+        final Session session = new Session(uuid);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return responseEntity;
     }
 
     private ResponseEntity register(final RequestLine requestLine, final RequestBody requestBody) {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
-            return new ResponseEntity(HttpStatus.OK, "/register.html");
+            return new ResponseEntity(HttpStatus.OK, REGISTER_PAGE);
         }
         final String account = requestBody.get("account");
 
@@ -130,6 +150,6 @@ public class Http11Processor implements Runnable, Processor {
         final String password = requestBody.get("password");
         final String email = requestBody.get("email");
         InMemoryUserRepository.save(new User(account, password, email));
-        return new ResponseEntity(HttpStatus.FOUND, "/index.html");
+        return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
     }
 }

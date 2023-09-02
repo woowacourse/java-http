@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.headers.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,15 +20,16 @@ class HttpHeadersTest {
 			"Connection: keep-alive ",
 			"",
 			"");
-		final Map<String, String> expected = Map.of(
+		final HttpHeaders expected = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
-		);
+		));
 		//when
 		final HttpHeaders actual = HttpHeaders.from(httpRequest);
 
 		//then
-		assertThat(actual.getHeaders())
-			.containsExactlyInAnyOrderEntriesOf(expected);
+		assertThat(actual)
+			.usingRecursiveComparison()
+			.isEqualTo(expected);
 	}
 }

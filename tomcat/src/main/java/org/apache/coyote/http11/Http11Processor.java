@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +99,21 @@ public class Http11Processor implements Runnable, Processor {
             requestUri = requestUriMatcher.group(1);
             log.info("requestUri = {}", requestUri);
         }
+
+        if (requestUri.startsWith("/login")) {
+            int index = requestUri.indexOf("?");
+            final String path = requestUri.substring(0, index);
+            final String queryString = requestUri.substring(index + 1);
+            final StringTokenizer queryParam = new StringTokenizer(queryString, "&");
+            while (queryParam.hasMoreTokens()) {
+                final String param = queryParam.nextToken();
+                if (param.startsWith("account")) {
+                    final User findUser = InMemoryUserRepository.findByAccount(param.split("=")[1]).orElseThrow();
+                    log.info("user = {}", findUser);
+                }
+            }
+
+        }
         return requestUri;
     }
 
@@ -103,6 +121,9 @@ public class Http11Processor implements Runnable, Processor {
         try {
             if (fileName.equals("/")) {
                 fileName = "/index.html";
+            }
+            if (fileName.startsWith("/login")) {
+                fileName = "/login.html";
             }
             final URL resource = getClass().getClassLoader().getResource("static" + fileName);
             final Path path = Paths.get(resource.getPath());

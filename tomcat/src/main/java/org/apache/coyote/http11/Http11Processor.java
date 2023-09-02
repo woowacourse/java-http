@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -31,39 +31,26 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            StartLine startLine = extractStartLine(inputStream);
-            RequestURI requestURI = startLine.getRequestURI();
-
-            if (requestURI.hasQueryParameters()) {
-                String[] queryParameters = requestURI.queryParameters();
-                log.info(queryParameters[0]);
-                log.info(queryParameters[1]);
-            }
-
-            String response = generateResponseWithPath(requestURI.absolutePath());
+            Request request = RequestExtractor.extract(inputStream);
+            Response response = generateResponse(request);
+            logUserInfoIfExists(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private StartLine extractStartLine(InputStream inputStream) throws IOException {
-        final var reader = new BufferedReader(new InputStreamReader(inputStream));
-        return StartLine.from(reader.readLine());
-    }
-
-    private String generateResponseWithPath(String absolutePath) throws IOException {
-        String resource = findResourceWithPath(absolutePath);
-        String contentType = ContentTypeParser.parse(absolutePath);
+    private Response generateResponse(Request request) throws IOException {
+        RequestURI requestURI = request.getRequestURI();
+        String resource = findResourceWithPath(requestURI.absolutePath());
+        String contentType = ContentTypeParser.parse(requestURI.absolutePath());
         int contentLength = resource.getBytes().length;
 
-        return String.join("\r\n", "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: "  + contentLength + " ",
-                "",
-                resource);
+        return Response.from(request.getHttpVersion(), "200 OK",
+                contentType, contentLength, resource);
     }
 
     private String findResourceWithPath(String absolutePath) throws IOException {
@@ -81,5 +68,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean hasNoExtension(String absolutePath) {
         return !absolutePath.contains(".");
+    }
+
+    private void logUserInfoIfExists(Request request) {
+        RequestURI requestURI = request.getRequestURI();
+
+        if (requestURI.hasQueryParameters()) {
+            String[] queryParameters = requestURI.queryParameters();
+            log.info(queryParameters[0]);
+            log.info(queryParameters[1]);
+        }
     }
 }

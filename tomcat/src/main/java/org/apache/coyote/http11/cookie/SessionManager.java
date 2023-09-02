@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.cookie;
 
+import org.apache.coyote.http11.exception.NotFoundSessionException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +17,10 @@ public class SessionManager {
     }
 
     public static Session findSession(String id) {
-        return SESSIONS.get(id);
+        if (SESSIONS.containsKey(id)) {
+            return SESSIONS.get(id);
+        }
+        throw new NotFoundSessionException();
     }
 
     public static void remove(String id) {

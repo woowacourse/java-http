@@ -10,6 +10,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

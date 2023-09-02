@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class StaticResource {
-    
+
     private final byte[] bytes;
     private final String fileExtension;
 

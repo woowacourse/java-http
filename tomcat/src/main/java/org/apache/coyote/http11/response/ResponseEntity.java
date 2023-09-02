@@ -34,6 +34,6 @@ public class ResponseEntity {
     public String toString() {
         return statusLine + "\r\n" +
                 responseHeaders + "\r\n" +
-                responseBody.getBody();
+                responseBody.getContent();
     }
 }

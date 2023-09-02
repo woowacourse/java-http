@@ -6,11 +6,11 @@ public class ResponseBody {
 
     public static final ResponseBody EMPTY = new ResponseBody("", ContentType.HTML);
 
-    private final String body;
+    private final String content;
     private final ContentType contentType;
 
-    public ResponseBody(String body, ContentType contentType) {
-        this.body = body;
+    private ResponseBody(String content, ContentType contentType) {
+        this.content = content;
         this.contentType = contentType;
     }
 
@@ -18,12 +18,12 @@ public class ResponseBody {
         return new ResponseBody(body, ContentType.parseContentType(fileExtension));
     }
 
-    public String getBody() {
-        return body;
+    public String getContent() {
+        return content;
     }
 
     public int getLength() {
-        return body.getBytes().length;
+        return content.getBytes().length;
     }
 
     public ContentType getContentType() {

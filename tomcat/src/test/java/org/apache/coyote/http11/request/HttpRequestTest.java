@@ -108,4 +108,84 @@ class HttpRequestTest {
             softly.assertThat(requestHeaders.getHeader("User-Agent")).isEqualTo("curl/7.64.1");
         });
     }
+
+    @Test
+    void 입력받은_정보로_요청_바디를_반환한다() throws IOException {
+        // given
+        String request = "POST /register HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Content-Length: 33\r\n" +
+                "Content-Type: application/x-www-form-urlencoded\r\n" +
+                "\r\n" +
+                "account=gugu&password=password";
+        InputStream mockInputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest parsedRequest = HttpRequest.parse(mockInputStream);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(parsedRequest.getBody("account")).isEqualTo("gugu");
+            softly.assertThat(parsedRequest.getBody("password")).isEqualTo("password\u0000\u0000\u0000");
+        });
+    }
+
+    @Test
+    void 세션이_있으면_true를_반환한다() throws IOException {
+        // given
+        String request = "GET /index.html HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Cookie: JSESSIONID=1234\r\n" +
+                "Accept: */*\r\n" +
+                "User-Agent: curl/7.64.1\r\n" +
+                "\r\n";
+        InputStream mockInputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest parsedRequest = HttpRequest.parse(mockInputStream);
+        boolean hasSession = parsedRequest.existsSession();
+
+        // then
+        assertThat(hasSession).isTrue();
+    }
+
+    @Test
+    void 메서드가_일치하면_true를_반환한다() throws IOException {
+        // given
+        String request = "GET /index.html HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Cookie: JSESSIONID=1234\r\n" +
+                "Accept: */*\r\n" +
+                "User-Agent: curl/7.64.1\r\n" +
+                "\r\n";
+        InputStream mockInputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest parsedRequest = HttpRequest.parse(mockInputStream);
+
+        // then
+        assertThat(parsedRequest.isMatchMethod(HttpMethod.GET)).isTrue();
+    }
+
+    @Test
+    void 시작하는_uri가_같으면_true를_반환한다() throws IOException {
+        // given
+        String request = "GET /index.html HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Cookie: JSESSIONID=1234\r\n" +
+                "Accept: */*\r\n" +
+                "User-Agent: curl/7.64.1\r\n" +
+                "\r\n";
+        InputStream mockInputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest parsedRequest = HttpRequest.parse(mockInputStream);
+
+        // then
+        assertThat(parsedRequest.isStartsWith("/index")).isTrue();
+    }
 }

@@ -7,10 +7,12 @@ public class HttpRequest {
 
     private final RequestUri requestUri;
     private final HttpHeaders headers;
+    private final String requestBody;
 
-    public HttpRequest(RequestUri requestUri, HttpHeaders headers) {
+    public HttpRequest(RequestUri requestUri, HttpHeaders headers, String requestBody) {
         this.requestUri = requestUri;
         this.headers = headers;
+        this.requestBody = requestBody;
     }
 
     public String getPath() {
@@ -35,5 +37,9 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

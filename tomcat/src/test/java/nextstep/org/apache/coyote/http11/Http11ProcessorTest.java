@@ -181,11 +181,14 @@ class Http11ProcessorTest {
     @Test
     void login_with_login_success() {
         // given
+        String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join(System.lineSeparator(),
-            "POST /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "");
+            "Content-Length: " + requestBody.length() + " ",
+            "",
+            requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -205,7 +208,7 @@ class Http11ProcessorTest {
     void login_with_not_allowed_method() {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
-            "PATCH /login?account=gugu&password=password HTTP/1.1 ",
+            "PATCH /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "");

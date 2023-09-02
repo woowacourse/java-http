@@ -11,7 +11,9 @@ import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.common.QueryString;
 import org.apache.coyote.exception.MethodNotAllowedException;
+import org.apache.coyote.util.QueryParser;
 import org.apache.coyote.util.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +42,10 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse doPost(HttpRequest request) {
-        String account = getQueryString(request, "account");
-        String password = getQueryString(request, "password");
+        String requestBody = request.getRequestBody();
+        QueryString query = QueryParser.parse(requestBody);
+        String account = query.get("account");
+        String password = query.get( "password");
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
             .map(this::loginSuccess)
@@ -59,13 +63,5 @@ public class LoginHandler implements Handler {
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
         response.addHeader("Location", "/401.html");
         return response;
-    }
-
-    private String getQueryString(HttpRequest request, String key) {
-        List<String> queryString = request.getQueryString(key);
-        if (queryString.isEmpty()) {
-            return "";
-        }
-        return queryString.get(0);
     }
 }

@@ -21,17 +21,16 @@ public class InMemoryUserRepository {
         database.put(counter.getAndIncrement(), user);
     }
 
-    public static Optional<User> findByAccountAndPassword(String account, String password) {
-        return database.values().stream()
-                .filter(user -> user.hasSameCredential(account, password))
-                .findFirst();
-    }
-
     public static Long getIdByCredentials(String account, String password) {
         return database.entrySet().stream()
                 .filter(entry -> entry.getValue().hasSameCredential(account, password))
                 .findFirst()
                 .orElseThrow()
                 .getKey();
+    }
+
+    public static boolean hasSameCredential(String account, String password) {
+        return database.values().stream()
+                .anyMatch(user -> user.hasSameCredential(account, password));
     }
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 import nextstep.web.HelloController;
 import nextstep.web.IndexController;
 import nextstep.web.LoginController;
+import nextstep.web.RegisterController;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 
 public class HandlerMapping {
@@ -13,7 +14,8 @@ public class HandlerMapping {
     private final Map<String, Controller> controllerMap = Map.of(
             "/", new HelloController(),
             "/index", new IndexController(),
-            "/login", new LoginController()
+            "/login", new LoginController(),
+            "/register", new RegisterController()
     );
 
     public Optional<Controller> findController(final HttpRequestStartLine requestStartLine) {

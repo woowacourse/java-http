@@ -4,8 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 public class UserService {
-
-
+    
     public boolean validateLogin(final String account, final String password) {
         return getUserByAccount(account).checkPassword(password);
     }

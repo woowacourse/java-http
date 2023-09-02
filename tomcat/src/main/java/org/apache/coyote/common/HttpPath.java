@@ -32,7 +32,7 @@ public class HttpPath {
         if (index <= 0) {
             return new HttpPath(uri);
         }
-        String path =uri.substring(0, index);
+        String path = uri.substring(0, index);
         String queryString = uri.substring(index + 1);
         return new HttpPath(path, parseQuery(queryString));
     }
@@ -42,8 +42,15 @@ public class HttpPath {
             return Collections.emptyMap();
         }
         return Arrays.stream(query.split("&"))
-            .map(pair -> pair.split("="))
-            .collect(groupingBy(arr -> arr[KEY_INDEX], mapping(arr -> arr[VALUE_INDEX], toList())));
+            .map(queries -> queries.split("="))
+            .collect(groupingBy(queries -> queries[KEY_INDEX], mapping(HttpPath::parseQueries, toList())));
+    }
+
+    private static String parseQueries(String[] queries) {
+        if (queries.length > 1) {
+            return queries[VALUE_INDEX];
+        }
+        return "";
     }
 
     public List<String> getQueryString(String key) {

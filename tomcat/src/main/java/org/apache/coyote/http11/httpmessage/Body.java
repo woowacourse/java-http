@@ -8,6 +8,10 @@ public class Body {
 
     private final Map<String, String> body;
 
+    private Body(Map<String, String> body) {
+        this.body = body;
+    }
+
     public static Body from(List<String> lines) {
         Map<String, String> body = new HashMap<>();
 
@@ -16,10 +20,6 @@ public class Body {
                 .forEach(each -> body.put(each[0], each[1]));
 
         return new Body(body);
-    }
-
-    private Body(Map<String, String> body) {
-        this.body = body;
     }
 
     public String get(String key) {

@@ -4,6 +4,10 @@ public class Response {
 
     private final String message;
 
+    private Response(String message) {
+        this.message = message;
+    }
+
     public static Response from(String httpVersion, String httpStatus, String contentType,
                                 int contentLength, String resource) {
         String message = String.join("\r\n",
@@ -14,10 +18,6 @@ public class Response {
                 resource);
 
         return new Response(message);
-    }
-
-    private Response(String message) {
-        this.message = message;
     }
 
     public byte[] getBytes() {

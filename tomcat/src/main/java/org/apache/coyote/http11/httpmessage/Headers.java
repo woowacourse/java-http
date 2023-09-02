@@ -8,6 +8,10 @@ public class Headers {
 
     private final Map<String, String> headers;
 
+    private Headers(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
     public static Headers from(List<String> lines) {
         Map<String, String> headers = new HashMap<>();
         lines.stream()
@@ -15,9 +19,5 @@ public class Headers {
                 .forEach(each -> headers.put(each[0], each[1]));
 
         return new Headers(headers);
-    }
-
-    private Headers(Map<String, String> headers) {
-        this.headers = headers;
     }
 }

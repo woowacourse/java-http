@@ -9,12 +9,12 @@ public class RequestURI {
 
     private final String value;
 
-    public static RequestURI from(String value) {
-        return new RequestURI(value);
-    }
-
     private RequestURI(String value) {
         this.value = value;
+    }
+
+    public static RequestURI from(String value) {
+        return new RequestURI(value);
     }
 
     public String absolutePath() {

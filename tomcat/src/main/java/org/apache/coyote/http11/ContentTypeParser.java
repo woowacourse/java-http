@@ -7,8 +7,7 @@ public enum ContentTypeParser {
     HTML("text/html;charset=utf-8"),
     CSS("text/css"),
     JS("text/javascript"),
-    ICO("image/x-icon")
-    ;
+    ICO("image/x-icon");
 
     private final String contentType;
 

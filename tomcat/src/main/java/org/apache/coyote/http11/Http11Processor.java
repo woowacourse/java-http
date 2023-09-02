@@ -15,15 +15,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Pattern ACCEPT_TYPE = Pattern.compile("Accept: (.+?)\r\n");
-    private static final Pattern REQUEST_URI = Pattern.compile("GET (.+?) ");
 
     private final Socket connection;
 
@@ -44,16 +39,31 @@ public class Http11Processor implements Runnable, Processor {
              final var inputStreamReader = new InputStreamReader(inputStream);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final String requestHeader = getRequestHeader(bufferedReader);
-            final String acceptType = getAcceptType(requestHeader);
-            final String requestUri = getRequestUri(requestHeader);
-            final String fileContent = getFileContent(requestUri);
-            final String response = getResponse(acceptType, fileContent);
+            final Request request = Request.from(bufferedReader);
+            if (request.getUri().startsWith("/login") && !request.getQueryParams().isEmpty()) {
+                final Map<String, String> queryParams = request.getQueryParams();
+                final User findUser = InMemoryUserRepository.findByAccount(queryParams.get("account")).orElseThrow();
+                log.info("user = {}", findUser);
+            }
+
+            final String fileContent = getFileContent(request.getUri());
+            final String response = getResponse(request.getAcceptType(), fileContent);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private String getFileContent(final String fileName) throws IOException {
+        try {
+            final URL resource = getClass().getClassLoader().getResource("static" + fileName);
+            final Path path = Paths.get(resource.getPath());
+            return Files.readString(path);
+        } catch (final NullPointerException e) {
+            log.error("error fileName = {}", fileName, e);
+            return "";
         }
     }
 
@@ -68,69 +78,5 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + fileContent.getBytes().length + " ",
                 "",
                 fileContent);
-    }
-
-    private String getRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder requestHeader = new StringBuilder();
-        while (true) {
-            final String line = bufferedReader.readLine();
-            if (line == null || "".equals(line)) {
-                break;
-            }
-            requestHeader.append(line).append("\r\n");
-        }
-        return requestHeader.toString();
-    }
-
-    private String getAcceptType(final String requestHeader) {
-        final Matcher acceptTypeMatcher = ACCEPT_TYPE.matcher(requestHeader);
-        String acceptType = "";
-        if (acceptTypeMatcher.find()) {
-            acceptType = acceptTypeMatcher.group(1);
-            log.info("acceptType = {}", acceptType);
-        }
-        return acceptType;
-    }
-
-    private String getRequestUri(final String requestHeader) {
-        final Matcher requestUriMatcher = REQUEST_URI.matcher(requestHeader);
-        String requestUri = "";
-        if (requestUriMatcher.find()) {
-            requestUri = requestUriMatcher.group(1);
-            log.info("requestUri = {}", requestUri);
-        }
-
-        if (requestUri.startsWith("/login")) {
-            int index = requestUri.indexOf("?");
-            final String path = requestUri.substring(0, index);
-            final String queryString = requestUri.substring(index + 1);
-            final StringTokenizer queryParam = new StringTokenizer(queryString, "&");
-            while (queryParam.hasMoreTokens()) {
-                final String param = queryParam.nextToken();
-                if (param.startsWith("account")) {
-                    final User findUser = InMemoryUserRepository.findByAccount(param.split("=")[1]).orElseThrow();
-                    log.info("user = {}", findUser);
-                }
-            }
-
-        }
-        return requestUri;
-    }
-
-    private String getFileContent(String fileName) throws IOException {
-        try {
-            if (fileName.equals("/")) {
-                fileName = "/index.html";
-            }
-            if (fileName.startsWith("/login")) {
-                fileName = "/login.html";
-            }
-            final URL resource = getClass().getClassLoader().getResource("static" + fileName);
-            final Path path = Paths.get(resource.getPath());
-            log.info("filePath = {}", path);
-            return Files.readString(path);
-        } catch (final NullPointerException e) {
-            return "";
-        }
     }
 }

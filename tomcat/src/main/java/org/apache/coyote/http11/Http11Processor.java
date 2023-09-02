@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +31,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
+            HttpRequestParser requestParser = new HttpRequestParser();
+            HttpRequest httpRequest = requestParser.parse(inputStream);
+            String responseBody = FileUtil.readStaticFile(httpRequest.getPath());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

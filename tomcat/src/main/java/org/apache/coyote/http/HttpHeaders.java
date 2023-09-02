@@ -3,6 +3,8 @@ package org.apache.coyote.http;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
+
 public class HttpHeaders {
 
     private static final String CRLF = "\r\n";
@@ -15,12 +17,14 @@ public class HttpHeaders {
     private static final String MULTIPLE_VALUES_DELIMITER = ",";
 
     private final String method;
-    private final String requestUri;
+    private final String path;
+    private final Map<String, String> queryParameters;
     private final Map<String, List<String>> headerValues;
 
-    private HttpHeaders(String method, String requestUri, Map<String, List<String>> headerValues) {
+    private HttpHeaders(String method, String path, Map<String, String> queryParameters, Map<String, List<String>> headerValues) {
         this.method = method;
-        this.requestUri = requestUri;
+        this.path = path;
+        this.queryParameters = queryParameters;
         this.headerValues = headerValues;
     }
 
@@ -28,9 +32,11 @@ public class HttpHeaders {
         validateHeader(header);
         String[] requestLineAndHeaderValues = header.split(CRLF, 2);
         String[] requestLineTokens = parseRequestLine(requestLineAndHeaderValues[0]);
+        String path = parsePath(requestLineTokens[REQUEST_URI_INDEX]);
+        Map<String, String> queryParameters = parseQueryParameters(requestLineTokens[REQUEST_URI_INDEX]);
         Map<String, List<String>> headerValues = parseHeaderValues(requestLineAndHeaderValues[1]);
 
-        return new HttpHeaders(requestLineTokens[METHOD_INDEX], requestLineTokens[REQUEST_URI_INDEX], headerValues);
+        return new HttpHeaders(requestLineTokens[METHOD_INDEX], path, queryParameters, headerValues);
     }
 
     private static void validateHeader(String header) {
@@ -50,6 +56,24 @@ public class HttpHeaders {
             throw new IllegalArgumentException();
         }
         if (!requestLineTokens[PROTOCOL_INDEX].equals(PROTOCOL_VERSION)) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private static String parsePath(String requestUri) {
+        return requestUri.split("\\?")[0];
+    }
+
+    private static Map<String, String> parseQueryParameters(String requestUri) {
+        String[] split = requestUri.split("\\?");
+        try {
+            if (1 < split.length) {
+                return Arrays.stream(split[1].split("&"))
+                        .map(queryParam -> queryParam.split("="))
+                        .collect(toMap(keyAndValue -> keyAndValue[0], keyAndValue -> keyAndValue[1]));
+            }
+            return Collections.emptyMap();
+        } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException();
         }
     }
@@ -87,6 +111,14 @@ public class HttpHeaders {
             return null;
         }
         return contentType.get(0);
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public enum HEADER_KEY {

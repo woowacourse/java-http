@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,16 +40,31 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestUri = reader.readLine().split(" ")[1];
+            final String request = reader.readLine();
+            String requestMethod = request.split(" ")[0];
+            String requestUri = request.split(" ")[1];
+            log.info("requestMethod = {}", requestMethod);
             log.info("requestUri = {}", requestUri);
 
-            final Map<String, String> request = new HashMap<>();
+            final Map<String, String> requestHeaders = new HashMap<>();
             String line;
             while (!"".equals(line = reader.readLine())) {
                 String[] value = line.split(": ");
-                request.put(value[0], value[1]);
+                requestHeaders.put(value[0], value[1]);
             }
-            log.info("request = {}", request);
+            log.info("requestHeaders = {}", requestHeaders);
+
+            final Map<String, String> requestBody = new HashMap<>();
+            if (requestHeaders.get("Content-Length") != null) {
+                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                for (String body : new String(buffer).split("&")) {
+                    String[] value = body.split("=");
+                    requestBody.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
+                }
+                log.info("requestBody = {}", requestBody);
+            }
 
             var statusCode = "404";
             var contentType = "text/html;charset=utf-8";
@@ -106,10 +122,28 @@ public class Http11Processor implements Runnable, Processor {
                 requestUri = "login.html";
             }
 
+            if (requestUri.equals("/register")) {
+                if (requestMethod.equals("GET")) {
+                    requestUri = "register.html";
+                }
+                if (requestMethod.equals("POST")) {
+                    statusCode = "302";
+                    var location = "/index.html";
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 " + statusCode + " ",
+                            "Content-Type: " + contentType + " ",
+                            "Location: " + location + " ",
+                            "");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+            }
+
             final String fileName = "static/" + requestUri;
             final URL resource = getClass().getClassLoader().getResource(fileName);
-            if (request.get("Accept") != null) {
-                contentType = request.get("Accept").split(",")[0];
+            if (requestHeaders.get("Accept") != null) {
+                contentType = requestHeaders.get("Accept").split(",")[0];
             }
             if (resource != null) {
                 statusCode = "200 OK";

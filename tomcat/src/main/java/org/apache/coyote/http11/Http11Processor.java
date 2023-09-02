@@ -87,39 +87,33 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (requestUri.contains("/login?")) {
-                statusCode = "302";
-                contentType = "text/html;charset=utf-8";
-                var location = "";
+            if (requestUri.equals("/login")) {
+                if (requestMethod.equals("GET")) {
+                    requestUri = "login.html";
+                }
+                if (requestMethod.equals("POST")) {
+                    statusCode = "302";
+                    contentType = "text/html;charset=utf-8";
+                    var location = "";
 
-                int index = requestUri.indexOf("?");
-                String queryString = requestUri.substring(index + 1);
-
-                Map<String, String> queries = new HashMap<>();
-                for (String query : queryString.split("&")) {
-                    queries.put(query.split("=")[0], query.split("=")[1]);
-                    Optional<User> user = InMemoryUserRepository.findByAccount(queries.get("account"));
-
-                    if (user.isPresent() && user.get().checkPassword(queries.get("password"))) {
+                    Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+                    if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
                         location = "/index.html";
                         log.info("user: {}", user.get());
                     } else {
                         location = "/401.html";
                     }
+
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 " + statusCode + " ",
+                            "Content-Type: " + contentType + " ",
+                            "Location: " + location + " ",
+                            "");
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
                 }
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 " + statusCode + " ",
-                        "Content-Type: " + contentType + " ",
-                        "Location: " + location + " ",
-                        "");
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return ;
-            }
-
-            if (requestUri.equals("/login")) {
-                requestUri = "login.html";
             }
 
             if (requestUri.equals("/register")) {

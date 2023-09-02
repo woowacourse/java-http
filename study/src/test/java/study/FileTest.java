@@ -3,8 +3,7 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -53,6 +52,15 @@ class FileTest {
         final Path path = Paths.get(uri);
 
         final List<String> actual = Files.readAllLines(path);
+
+        try (final InputStream fileInputStream = new FileInputStream(path.toFile());
+             final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            String nextLine;
+            while ((nextLine = bufferedReader.readLine()) != null) {
+                actual.add(nextLine);
+            }
+        }
 
         assertThat(actual).containsOnly("nextstep");
     }

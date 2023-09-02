@@ -38,9 +38,12 @@ public class Http11Processor implements Runnable, Processor {
             // 경로를 기반으로 정적 파일을 읽고 응답 생성
             final String responseBody = readStaticFile(path);
 
+            //css인 경우 content type을 다르게 준다
+            final String contentType = getContentType(path);
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -50,6 +53,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getContentType(final String path) {
+        final String contentType;
+        if (path.endsWith(".css")) {
+            contentType = "text/css;charset=utf-8";
+        } else {
+            contentType = "text/html;charset=utf-8";
+        }
+        return contentType;
     }
 
     private String parseHttpRequest(InputStream inputStream) throws IOException {
@@ -69,26 +82,26 @@ public class Http11Processor implements Runnable, Processor {
     private String readStaticFile(String path) throws IOException {
         // 경로를 기반으로 정적 파일을 읽고 그 내용을 반환하는 로직을 작성해야 합니다.
         // 이 예제에서는 간단하게 파일을 읽어오는 방법을 보여줍니다.
-
-        if(path.equals("/")) {
-            return "Hello world!";
+        if (path.equals("/")) {
+            path = "/index.html";
         }
 
         // 클래스 패스에서 정적 파일을 읽을 수 있도록 리소스 로더를 사용
         ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream("static" + path);
 
+        StringBuilder content = new StringBuilder();
         if (inputStream != null) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                StringBuilder content = new StringBuilder();
+
                 String line;
                 while ((line = reader.readLine()) != null) {
                     content.append(line).append("\n");
                 }
-                return content.toString();
             }
-        } else {
-            throw new IOException("Static file not found: " + path); // 파일이 없는 경우 처리
         }
+
+        // content-type header 추가한 http 응답 변환
+        return content.toString();
     }
 }

@@ -23,21 +23,13 @@ public class GreetingController {
     }
 
     @GetMapping("/index.html")
-    public String accessIndexHtml() {
+    public String indexHtml() {
         return "index";
     }
 
-    @GetMapping("/css/styles.css")
-    @ResponseBody
-    public String getCss() throws IOException {
-        System.out.println("call");
-        Resource resource = new ClassPathResource("static/css/styles.css");
-        InputStream inputStream = resource.getInputStream();
-
-        try (Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-            scanner.useDelimiter("\\A"); // 전체 내용을 읽기 위해 구분자 설정
-            return scanner.hasNext() ? scanner.next() : "";
-        }
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
     /**

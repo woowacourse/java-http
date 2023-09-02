@@ -80,4 +80,25 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).contains("Content-Type: text/css");
     }
+
+    @Test
+    void parseQueryParameter() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
+    }
 }

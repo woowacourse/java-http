@@ -6,12 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -34,8 +38,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            StringBuilder requestBuilder = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            final StringBuilder requestBuilder = new StringBuilder();
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 requestBuilder.append(line).append("\r\n");
@@ -44,27 +49,26 @@ public class Http11Processor implements Runnable, Processor {
             String request = requestBuilder.toString();
 
             String[] requestLines = request.split("\\s+");
+
             if (requestLines.length < 2) {
+                System.out.println("request: "+request);
                 throw new UncheckedServletException(new Exception("예외"));
             }
             String resourcePath = requestLines[1];
+            System.out.println();
 
-            byte[] responseBodyBytes;
-            if (resourcePath.equals("/index.html")) {
-                String projectRootPath = System.getProperty("user.dir");
-                String htmlFilePath = projectRootPath + "/src/main/resources/static/index.html";
-                responseBodyBytes = Files.readAllBytes(Paths.get(htmlFilePath));
-            } else {
-                responseBodyBytes = "Resource not found".getBytes(StandardCharsets.UTF_8);
-            }
+            final URL fileUrl = this.getClass().getClassLoader().getResource("static"+resourcePath);
+            final byte[] responseBodyBytes = Files.readAllBytes(Paths.get(fileUrl.getPath()));
 
+            String contentType = ContentType.from(resourcePath).getContentType();
+
+            HttpResponse httpResponse = new HttpResponse(StatusCode.OK,request);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBodyBytes.length + " ",
                     "",
-                    new String(responseBodyBytes, StandardCharsets.UTF_8));
-
+                    new String(responseBodyBytes, UTF_8));
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

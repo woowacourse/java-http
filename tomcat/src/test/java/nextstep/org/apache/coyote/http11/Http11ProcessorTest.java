@@ -24,7 +24,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
-            "Content-Type: */* ",
+            "Content-Type: text/plain ",
             "Content-Length: 12 ",
             "",
             "Hello world!");
@@ -101,7 +101,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/javascript ",
+            "Content-Type: application/javascript ",
             "Content-Length: 976 ");
 
         assertThat(socket.output()).startsWith(expected);

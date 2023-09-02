@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import org.apache.coyote.Handler;
+import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
@@ -32,19 +33,19 @@ public class StaticResourceHandler implements Handler {
         }
     }
 
-    private String getContentType(String path) {
+    private HttpContentType getContentType(String path) {
         if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8";
+            return HttpContentType.TEXT_HTML;
         }
         if (path.endsWith(".css")) {
-            return "text/css";
+            return HttpContentType.TEXT_CSS;
         }
         if (path.endsWith(".js")) {
-            return "text/javascript";
+            return HttpContentType.APPLICATION_JAVASCRIPT;
         }
         if (path.endsWith(".svg")) {
-            return "image/svg+xml";
+            return HttpContentType.IMAGE_SVG;
         }
-        return "*/*";
+        return HttpContentType.TEXT_PLAIN;
     }
 }

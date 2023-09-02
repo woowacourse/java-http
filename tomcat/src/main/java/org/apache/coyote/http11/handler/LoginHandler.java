@@ -5,6 +5,7 @@ import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
+import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
@@ -24,7 +25,7 @@ public class LoginHandler implements Handler {
         String password = getQueryString(request, "password");
         if (account.isBlank() || password.isBlank()) {
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType("text/html;charset=utf-8");
+            headers.setContentType(HttpContentType.TEXT_HTML);
             HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
             response.setContentBody(ResourceResolver.resolve("/login.html"));
             return response;

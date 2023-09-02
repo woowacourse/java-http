@@ -30,8 +30,8 @@ public class HttpHeaders {
         headers.put(key, values);
     }
 
-    public void setContentType(String contentType) {
-        setHeader("Content-Type", contentType);
+    public void setContentType(HttpContentType contentType) {
+        setHeader("Content-Type", contentType.getValue());
     }
 
     public void setHeader(String key, List<String> values) {

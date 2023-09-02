@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.common.HttpRequestCookie;
 
 public class HttpRequest {
 

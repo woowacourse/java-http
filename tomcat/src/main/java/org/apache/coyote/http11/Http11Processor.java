@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedReader;
@@ -61,15 +60,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readAsUTF8(InputStream inputStream) {
-        String content = "";
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            content = reader.lines()
-                    .collect(joining());
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
+    private String readAsUTF8(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+        String line;
+        StringBuilder builder = new StringBuilder();
+        while ((line = reader.readLine()) != null & !"".equals(line)) {
+            builder.append(line).append(System.lineSeparator());
         }
-        return content;
+
+        return builder.toString();
     }
 
     private String parseURL(String content) {

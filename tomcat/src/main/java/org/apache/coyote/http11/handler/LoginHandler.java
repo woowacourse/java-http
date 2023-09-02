@@ -5,17 +5,18 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentTypeParser;
 import org.apache.coyote.http11.httpmessage.Body;
+import org.apache.coyote.http11.httpmessage.HttpMethod;
 import org.apache.coyote.http11.httpmessage.Request;
 import org.apache.coyote.http11.httpmessage.Response;
 
 public class LoginHandler extends Handler {
 
     public Response handle(Request request) throws IOException {
-        String httpMethod = request.getMethod();
-        if (httpMethod.equals("GET")) {
+        HttpMethod httpMethod = request.getMethod();
+        if (httpMethod.isEqualTo(HttpMethod.GET)) {
             return responseWhenHttpMethodIsGet(request);
         }
-        if (httpMethod.equals("POST")) {
+        if (httpMethod.isEqualTo(HttpMethod.POST)) {
             return responseWhenHttpMethodIsPost(request);
         }
 
@@ -29,7 +30,7 @@ public class LoginHandler extends Handler {
         String contentType = ContentTypeParser.parse(absolutePath);
         int contentLength = resource.getBytes().length;
 
-        return Response.from(request.getHttpVersion(), "200 UNAUTHORIZED",
+        return Response.from(request.getHttpVersion().value(), "200 UNAUTHORIZED",
                 contentType, contentLength, resource);
     }
 
@@ -55,7 +56,7 @@ public class LoginHandler extends Handler {
         String contentType = ContentTypeParser.parse(absolutePath);
         int contentLength = resource.getBytes().length;
 
-        return Response.from(request.getHttpVersion(), "401 UNAUTHORIZED",
+        return Response.from(request.getHttpVersion().value(), "401 UNAUTHORIZED",
                 contentType, contentLength, resource);
     }
 
@@ -66,7 +67,7 @@ public class LoginHandler extends Handler {
         String contentType = ContentTypeParser.parse(absolutePath);
         int contentLength = resource.getBytes().length;
 
-        return Response.from(request.getHttpVersion(), "302 FOUND",
+        return Response.from(request.getHttpVersion().value(), "302 FOUND",
                 contentType, contentLength, resource);
     }
 }

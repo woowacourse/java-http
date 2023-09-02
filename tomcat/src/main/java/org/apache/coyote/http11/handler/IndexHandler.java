@@ -15,7 +15,7 @@ public class IndexHandler extends Handler {
         String contentType = ContentTypeParser.parse(target);
         int contentLength = resource.getBytes().length;
 
-        return Response.from(request.getHttpVersion(), "200 OK",
+        return Response.from(request.getHttpVersion().value(), "200 OK",
                 contentType, contentLength, resource);
     }
 }

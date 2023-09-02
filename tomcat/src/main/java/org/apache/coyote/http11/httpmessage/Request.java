@@ -5,19 +5,19 @@ import java.util.List;
 
 public class Request {
 
-    private final String method;
-    private final String httpVersion;
+    private final HttpMethod method;
+    private final HttpVersion httpVersion;
     private final RequestURI requestURI;
     private final Headers headers;
     private final Body body;
 
-    public Request(String method, String httpVersion,
-                   String requestURI, List<String> headers, List<String> body) {
+    private Request(HttpMethod method, HttpVersion httpVersion,
+                    RequestURI requestURI, Headers headers, Body body) {
         this.method = method;
         this.httpVersion = httpVersion;
-        this.requestURI = RequestURI.from(requestURI);
-        this.headers = Headers.from(headers);
-        this.body = Body.from(body);
+        this.requestURI = requestURI;
+        this.headers = headers;
+        this.body = body;
     }
 
     public static Request from(String startLine, List<String> headers, List<String> body) {
@@ -26,14 +26,15 @@ public class Request {
         String requestURI = splitStartLine[1];
         String httpVersion = splitStartLine[2];
 
-        return new Request(method, httpVersion, requestURI, headers, body);
+        return new Request(HttpMethod.from(method), HttpVersion.from(httpVersion),
+                RequestURI.from(requestURI), Headers.from(headers), Body.from(body));
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 

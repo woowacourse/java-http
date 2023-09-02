@@ -1,5 +1,9 @@
 package study;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,9 +54,9 @@ class IOStreamTest {
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
             /**
-             * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -74,10 +78,15 @@ class IOStreamTest {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
+             * A.
+             * ByteArrayOutputStream은 OutputStream을 직접 상속받지만, BuffuredOutputStream은 FilterOutputStream을 상속받는다.
+             * ByteArrayOutputStream은 flush를 호출해도 아무런 일도 벌어지지 않는다. (OutputStream의 flush는 빈 메서드)
+             * ByteArrayOutputStream의 write(int b) 메서드는 호출될 때마다 capacity를 확인하고 필요할 경우 이를 늘리고 b를 저장한다.
+             * 반면, BufferdOutputStream의 write(int b) 메서드는 호출될 때마다 버퍼가 찼는지 확인하고, 찼으면 flush해준 뒤 b를 저장한다.
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -92,10 +101,10 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (outputStream) {}
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -122,17 +131,16 @@ class IOStreamTest {
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
-            final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
-             * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            try (final InputStream inputStream = new ByteArrayInputStream(bytes)) {
+                final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-            assertThat(actual).isEqualTo("🤩");
-            assertThat(inputStream.read()).isEqualTo(-1);
-            inputStream.close();
+                assertThat(actual).isEqualTo("🤩");
+                assertThat(inputStream.read()).isEqualTo(-1);
+            }
         }
 
         /**
@@ -144,10 +152,10 @@ class IOStreamTest {
             final InputStream inputStream = mock(InputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (inputStream) {}
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -169,15 +177,17 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            try (bufferedInputStream) {
+                final byte[] actual = bufferedInputStream.readAllBytes();
 
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            }
         }
     }
 
@@ -197,7 +207,7 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
@@ -205,9 +215,15 @@ class IOStreamTest {
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
-            final StringBuilder actual = new StringBuilder();
+            try (inputStream) {
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            assertThat(actual).hasToString(emoji);
+                final String actual = reader.lines()
+                        .collect(Collectors.joining("\r\n", "", "\r\n"));
+
+                reader.close();
+                assertThat(actual).isEqualTo(emoji);
+            }
         }
     }
 }

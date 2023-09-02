@@ -211,8 +211,13 @@ class IOStreamTest {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final StringBuilder actual = new StringBuilder();
-            while (bufferedReader.ready()) {
-                actual.append(bufferedReader.readLine()).append("\r\n");
+
+            while (true) {
+                final String line = bufferedReader.readLine();
+                if (line == null || "".equals(line)) {
+                    break;
+                }
+                actual.append(line).append("\r\n");
             }
 
             assertThat(actual).hasToString(emoji);

@@ -23,6 +23,9 @@ public class StaticResourceHandler implements Handler {
     public HttpResponse handle(HttpRequest request) throws IOException {
         String path = request.getPath();
         URL resource = resolveResource(path);
+        if (resource == null) {
+            return NotFoundHandler.INSTANCE.handle(request);
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(getContentType(path));
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);

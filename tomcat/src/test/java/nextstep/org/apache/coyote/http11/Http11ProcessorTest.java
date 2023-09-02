@@ -106,4 +106,28 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).startsWith(expected);
     }
+
+    @Test
+    void notFound() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /helloworld HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 404 NOT_FOUND ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 2426 ");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
 }

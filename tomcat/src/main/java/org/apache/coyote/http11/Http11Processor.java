@@ -21,7 +21,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    private static final int URI_INDEX = 1;
 
     private final Socket connection;
 
@@ -40,13 +39,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final String request = bufferedReader.readLine();
-
-            if (request == null) {
+            final String firstLine = bufferedReader.readLine();
+            if (firstLine == null) {
                 return;
             }
-            final String uri = request.split(" ")[URI_INDEX];
-            final String response = getResponse(uri);
+            final RequestLine requestLine = RequestLine.from(firstLine);
+            final String response = getResponse(requestLine);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -54,7 +52,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(final String uri) throws IOException {
+    private String getResponse(final RequestLine requestLine) throws IOException {
+        final String uri = requestLine.getUri();
         final String path = getPath(uri);
         final QueryString queryString = QueryString.from(uri);
         log.info("request url: {}, queryStrings: {}", uri, queryString.getItems());

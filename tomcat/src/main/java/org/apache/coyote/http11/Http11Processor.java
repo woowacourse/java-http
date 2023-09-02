@@ -1,28 +1,37 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Handler;
+import org.apache.coyote.common.HttpHeaders;
+import org.apache.coyote.common.HttpRequest;
+import org.apache.coyote.common.HttpResponse;
+import org.apache.coyote.common.RequestUri;
+import org.apache.coyote.http11.handler.IndexHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_PATH = "static";
 
     private final Socket connection;
+    private final Map<String, Handler> handlerMap = new HashMap<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        handlerMap.put("/", new IndexHandler());
     }
 
     @Override
@@ -35,15 +44,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            RequestUri requestUri = getRequestUri(bufferedReader);
-            String response = getResponse(requestUri);
-            outputStream.write(response.getBytes());
+            HttpRequest request = createHttpRequest(inputStream);
+            HttpResponse response = handle(request);
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest createHttpRequest(InputStream inputStream) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        RequestUri requestUri = getRequestUri(bufferedReader);
+        HttpHeaders httpHeaders = getHttpHeaders(bufferedReader);
+        return new HttpRequest(requestUri, httpHeaders);
     }
 
     private RequestUri getRequestUri(BufferedReader bufferedReader) throws IOException {
@@ -52,52 +67,23 @@ public class Http11Processor implements Runnable, Processor {
         return RequestUri.from(requestUri);
     }
 
-    private String getResponse(RequestUri requestUri) throws IOException {
-        String responseBody = getResponseBody(requestUri);
-        String contentType = resolveContentType(requestUri);
-        return String.join(System.lineSeparator(),
-            "HTTP/1.1 200 OK ",
-            "Content-Type: " + contentType + " ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            System.lineSeparator()) + responseBody;
+    private HttpHeaders getHttpHeaders(BufferedReader bufferedReader) throws IOException {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        while (true) {
+            String line = bufferedReader.readLine();
+            if (line == null || line.isEmpty()) {
+                break;
+            }
+            String[] header = line.split(":");
+            String key = header[0].trim();
+            List<String> values = Arrays.asList(header[1].trim().split(","));
+            httpHeaders.addHeader(key, values);
+        }
+        return httpHeaders;
     }
 
-    private String getResponseBody(RequestUri requestUri) throws IOException {
-        String path = requestUri.getPath();
-        HttpMethod httpMethod = requestUri.getHttpMethod();
-        if (path.endsWith(".html") && httpMethod == HttpMethod.GET) {
-            return resolveContents(path);
-        }
-        if (path.endsWith(".css") && httpMethod == HttpMethod.GET) {
-            return resolveContents(path);
-        }
-        if (path.endsWith(".js") && httpMethod == HttpMethod.GET) {
-            return resolveContents(path);
-        }
-        return "Hello world!";
-    }
-
-    private String resolveContents(String path) throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource(STATIC_PATH + path);
-        if (resource == null) {
-            throw new IllegalArgumentException("해당 경로의 파일을 찾을 수 없습니다.");
-        }
-        File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()));
-    }
-
-    private String resolveContentType(RequestUri requestUri) {
-        String path = requestUri.getPath();
-        if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "text/javascript";
-        }
-        return "*/*";
+    private HttpResponse handle(HttpRequest request) throws IOException {
+        Handler handler = handlerMap.getOrDefault(request.getPath(), StaticResourceHandler.INSTANCE);
+        return handler.handle(request);
     }
 }

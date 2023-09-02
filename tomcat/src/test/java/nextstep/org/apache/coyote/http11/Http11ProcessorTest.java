@@ -74,6 +74,7 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
+        // then
         var expected = String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
             "Content-Type: text/css ",
@@ -97,6 +98,7 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
+        // then
         var expected = String.join(System.lineSeparator(),
             "HTTP/1.1 200 OK ",
             "Content-Type: text/javascript ",

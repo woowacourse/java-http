@@ -3,7 +3,12 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +33,11 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
 
+        String actual = resource.getPath();
+        System.out.println(actual);
         assertThat(actual).endsWith(fileName);
     }
 
@@ -44,10 +52,20 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(getClass().getClassLoader().getResource(fileName).getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = new ArrayList<>();
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path.toFile()))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null){
+                actual.add(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         assertThat(actual).containsOnly("nextstep");
     }

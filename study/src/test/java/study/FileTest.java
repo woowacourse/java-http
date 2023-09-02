@@ -2,10 +2,13 @@ package study;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ResourceUtils;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,14 +31,26 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final URL resource = FileTest.class.getClassLoader().getResource(fileName);
+        final String actual = Objects.requireNonNull(resource).getPath();
+
+        assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void resource_디렉터리에_있는_파일의_경로를_찾는다_방법2() {
+        final String fileName = "nextstep.txt";
+
+        // todo
+        final String actual = ResourceUtils.CLASSPATH_URL_PREFIX + fileName;
+        System.out.println(actual);
 
         assertThat(actual).endsWith(fileName);
     }
 
     /**
      * 파일 내용 읽기
-     *
+
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */

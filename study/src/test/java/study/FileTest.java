@@ -1,13 +1,14 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -27,8 +28,10 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
+        Path path = Paths.get("src/test/resources")
+                .resolve(fileName);
         // todo
-        final String actual = "";
+        final String actual = path.toString();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,10 +47,18 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Paths.get("src/test/resources")
+                .resolve(fileName);
+
+        String read;
+        try {
+            read = Files.readString(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = List.of(read);
 
         assertThat(actual).containsOnly("nextstep");
     }

@@ -15,7 +15,7 @@ class RequestUriTest {
     @Test
     void httpMethod가_null이면_예외() {
         // when & then
-        assertThatThrownBy(() -> new RequestUri(null, "/", HttpProtocol.HTTP11))
+        assertThatThrownBy(() -> new RequestUri(null, HttpPath.from("/"), HttpProtocol.HTTP11))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("HttpMethod는 null이 될 수 없습니다.");
     }
@@ -31,7 +31,7 @@ class RequestUriTest {
     @Test
     void httpProtocol이_null이면_예외() {
         // when & then
-        assertThatThrownBy(() -> new RequestUri(HttpMethod.GET, "/", null))
+        assertThatThrownBy(() -> new RequestUri(HttpMethod.GET, HttpPath.from("/"), null))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("HttpProtocol은 null이 될 수 없습니다.");
     }
@@ -39,12 +39,12 @@ class RequestUriTest {
     @Test
     void 생성() {
         // given
-        RequestUri requestUri = new RequestUri(HttpMethod.GET, "/index.html", HttpProtocol.HTTP11);
+        RequestUri requestUri = new RequestUri(HttpMethod.GET, HttpPath.from("/index.html"), HttpProtocol.HTTP11);
 
         // when & then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(requestUri.getHttpMethod()).isEqualTo(HttpMethod.GET);
-            softly.assertThat(requestUri.getPath()).isEqualTo("/index.html");
+            softly.assertThat(requestUri.getHttpPath().getPath()).isEqualTo("/index.html");
             softly.assertThat(requestUri.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP11);
         });
     }
@@ -75,7 +75,7 @@ class RequestUriTest {
             // when & then
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(requestUri.getHttpMethod()).isEqualTo(HttpMethod.GET);
-                softly.assertThat(requestUri.getPath()).isEqualTo("/index.html");
+                softly.assertThat(requestUri.getHttpPath().getPath()).isEqualTo("/index.html");
                 softly.assertThat(requestUri.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP11);
             });
         }

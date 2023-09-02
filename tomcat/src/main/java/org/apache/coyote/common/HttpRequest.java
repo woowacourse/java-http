@@ -1,5 +1,8 @@
 package org.apache.coyote.common;
 
+import java.util.List;
+import java.util.Map;
+
 public class HttpRequest {
 
     private final RequestUri requestUri;
@@ -11,7 +14,11 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return requestUri.getPath();
+        return requestUri.getHttpPath().getPath();
+    }
+
+    public Map<String, List<String>> getQueryString() {
+        return requestUri.getHttpPath().getQueryStrings();
     }
 
     public HttpMethod getHttpMethod() {

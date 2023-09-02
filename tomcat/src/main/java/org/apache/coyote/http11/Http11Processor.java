@@ -9,12 +9,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.util.HttpRequestUtil;
 import org.apache.coyote.util.HttpResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,20 +56,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponse(final String uri) throws IOException {
         final String path = getPath(uri);
-        log.info("request url:{}", path);
+        final QueryString queryString = QueryString.from(uri);
+        log.info("request url: {}, queryStrings: {}", uri, queryString.getItems());
 
         if (path.equals("/")) {
             final String responseBody = "Hello world!";
             return HttpResponseUtil.generate(path, responseBody);
         }
         if (path.equals("/login")) {
-            final Map<String, String> queryStrings = getQueryString(uri);
-            log.info("request url: {}, queryStrings: {}", uri, queryStrings);
-
-            final User account = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+            final User account = InMemoryUserRepository.findByAccount(queryString.get("account"))
                     .orElseThrow();
-            log.info("account login: {}", account);
-            
+            log.info("login: {}", account);
             final URL resource = classLoader.getResource("static" + path + ".html");
             final File file = new File(resource.getFile());
             final String responseBody = new String(Files.readAllBytes(file.toPath()));
@@ -89,14 +84,5 @@ public class Http11Processor implements Runnable, Processor {
             return uri;
         }
         return uri.substring(0, queryStringIndex);
-    }
-
-    private Map<String, String> getQueryString(final String uri) {
-        int queryStringIndex = uri.indexOf("?");
-        if (queryStringIndex == -1) {
-            return Map.of();
-        }
-        final String queryString = uri.substring(queryStringIndex + 1);
-        return HttpRequestUtil.parseQueryString(queryString);
     }
 }

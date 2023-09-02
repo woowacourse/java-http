@@ -1,27 +1,26 @@
-package org.apache.coyote.util;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-import java.util.Map;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HttpRequestUtilTest {
+class QueryStringTest {
 
     @Test
-    void queryString을_입력받아_Key_Value_형태로_변환한다() {
+    void uri를_입력받아_QueryString을_생성한다() {
         // given
-        final String queryString = "account=gugu&password=password";
+        final String uri = "/login?account=gugu&password=password";
 
         // when
-        final Map<String, String> queryStrings = HttpRequestUtil.parseQueryString(queryString);
+        final QueryString queryString = QueryString.from(uri);
 
         // then
-        assertThat(queryStrings).contains(
+        assertThat(queryString.getItems()).contains(
                 entry("account", "gugu"),
                 entry("password", "password")
         );

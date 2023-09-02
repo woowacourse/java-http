@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.headers.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +21,10 @@ class HttpRequestTest {
 			"Connection: keep-alive ",
 			"",
 			"");
-		final Map<String, String> expectedHeader = Map.of(
+		final HttpHeaders expectedHeader = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
-		);
+		));
 
 		//when
 		final HttpRequest actual = HttpRequest.from(httpRequest);
@@ -34,8 +35,9 @@ class HttpRequestTest {
 				.isEqualTo(HttpMethod.GET),
 			() -> assertThat(actual.getEndPoint())
 				.isEqualTo("/index.html"),
-			() -> assertThat(actual.getHeaders().getHeaders())
-				.containsExactlyInAnyOrderEntriesOf(expectedHeader)
+			() -> assertThat(actual.getHeaders())
+				.usingRecursiveComparison()
+				.isEqualTo(expectedHeader)
 		);
 	}
 }

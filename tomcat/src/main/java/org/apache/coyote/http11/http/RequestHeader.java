@@ -17,9 +17,6 @@ public class RequestHeader {
         String line = httpRequestHeader.readLine();
         while (!line.equals("")) {
             String[] header = line.split(":");
-            if (header.length != 2) {
-                throw new IllegalArgumentException("올바르지 않은 header형식 입니다.");
-            }
             headerValues.put(header[0], header[1]);
             line = httpRequestHeader.readLine();
         }

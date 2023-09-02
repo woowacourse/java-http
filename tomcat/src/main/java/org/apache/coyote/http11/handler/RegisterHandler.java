@@ -45,7 +45,7 @@ public class RegisterHandler extends Handler {
                 contentType, contentLength, resource);
     }
 
-    private static void saveUser(Request request) {
+    private void saveUser(Request request) {
         Body body = request.getBody();
         String account = body.get("account");
         String password = body.get("password");

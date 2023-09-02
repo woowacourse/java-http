@@ -44,6 +44,6 @@ public class HttpHeaders {
     }
 
     public Map<String, List<String>> getHeaders() {
-        return headers;
+        return Collections.unmodifiableMap(headers);
     }
 }

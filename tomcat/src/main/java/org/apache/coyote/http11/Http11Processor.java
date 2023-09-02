@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,6 @@ import java.util.Objects;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String HEADER_DELIMETER = "\n";
 
     private final Socket connection;
 
@@ -43,13 +43,14 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             List<String> headers = getHeader(reader);
+            HttpRequest httpRequest = HttpRequest.from(headers);
 
             for (String header : headers) {
                 System.out.println(header);
             }
             System.out.println("-----------------");
 
-            if (headers.get(0).contains("/index.html")) {
+            if (httpRequest.getUri().contains("/index.html")) {
                 URL fileUrl = this.getClass()
                         .getClassLoader()
                         .getResource("static" + "/index.html");
@@ -66,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 outputStream.write(response.getBytes());
 
-            } else if (headers.get(0).contains("css")) {
+            } else if (httpRequest.getUri().contains("css")) {
                 URL fileUrl = this.getClass()
                         .getClassLoader()
                         .getResource("static/css" + "/styles.css");
@@ -86,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
 
                 outputStream.write(response.getBytes());
-            } else if (headers.get(0).contains("js")) {
+            } else if (httpRequest.getUri().contains("js")) {
                 URL fileUrl;
                 if (headers.get(0).contains("scripts")) {
                     fileUrl = this.getClass()

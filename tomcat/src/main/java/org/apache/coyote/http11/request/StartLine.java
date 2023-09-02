@@ -5,10 +5,10 @@ public class StartLine {
     private static final StartLine EMPTY = new StartLine(null, null, null);
 
     private final String method;
-    private final String uri;
+    private final URI uri;
     private final String httpVersion;
 
-    private StartLine(String method, String uri, String httpVersion) {
+    private StartLine(String method, URI uri, String httpVersion) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -22,7 +22,7 @@ public class StartLine {
         validateStartLine(elements);
         return new StartLine(
                 elements[0],
-                elements[1],
+                URI.from(elements[1]),
                 elements[2]
         );
     }
@@ -41,7 +41,7 @@ public class StartLine {
         return method;
     }
 
-    public String uri() {
+    public URI uri() {
         return uri;
     }
 

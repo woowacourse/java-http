@@ -42,7 +42,7 @@ class StartLineTest {
 
         // then
         assertThat(startLine.method()).isEqualTo("GET");
-        assertThat(startLine.uri()).isEqualTo("/index.html");
+        assertThat(startLine.uri().path()).isEqualTo("/index.html");
         assertThat(startLine.httpVersion()).isEqualTo("HTTP/1.1");
     }
 }

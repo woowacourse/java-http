@@ -13,6 +13,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.StartLine;
+import org.apache.coyote.http11.request.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,11 +46,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String responseBody = "";
-            String uri = startLine.uri();
-            if (uri.equals("/")) {
+            URI uri = startLine.uri();
+            if (uri.path().equals("/")) {
                 responseBody = "Hello world!";
             } else {
-                final URL resource = classLoader.getResource("static" + uri);
+                final URL resource = classLoader.getResource("static" + uri.path());
                 final File file = new File(resource.getFile());
                 responseBody = new String(Files.readAllBytes(file.toPath()));
             }
@@ -68,8 +69,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String contentType(String uri) {
-        if (uri.endsWith(".css")) {
+    private static String contentType(URI uri) {
+        if (uri.path().endsWith(".css")) {
             return "text/css;";
         }
         return "text/html;";

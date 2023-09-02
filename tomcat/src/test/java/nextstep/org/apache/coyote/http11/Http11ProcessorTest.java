@@ -59,6 +59,9 @@ class Http11ProcessorTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
+        String str = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(str.getBytes().length).isEqualTo(5564);
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

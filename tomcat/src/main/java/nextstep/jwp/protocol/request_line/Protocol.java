@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.http;
+package nextstep.jwp.protocol.request_line;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,12 +9,16 @@ public class Protocol {
 
     private final String protocol;
 
-    public Protocol(String protocol) {
-        validateProtocol(protocol);
+    private Protocol(String protocol) {
         this.protocol = protocol;
     }
 
-    private void validateProtocol(String protocol) {
+    public static Protocol from(String protocol) {
+        validateProtocol(protocol);
+        return new Protocol(protocol);
+    }
+
+    private static void validateProtocol(String protocol) {
         Pattern compiledPattern = Pattern.compile(HTTP_PROTOCOL_PATTERN);
         Matcher matcher = compiledPattern.matcher(protocol);
         if (!matcher.matches()) {
@@ -22,7 +26,7 @@ public class Protocol {
         }
     }
 
-    public String protocol() {
+    public String getProtocol() {
         return protocol;
     }
 

@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.http;
+package nextstep.jwp.protocol.request_line;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,12 +9,16 @@ public class Path {
 
     private final String path;
 
-    public Path(String path) {
-        validatePath(path);
+    private Path(String path) {
         this.path = path;
     }
 
-    private void validatePath(String path) {
+    public static Path from(String path) {
+        validatePath(path);
+        return new Path(path);
+    }
+
+    private static void validatePath(String path) {
         Pattern compiledPattern = Pattern.compile(PATH_PATTERN);
         Matcher matcher = compiledPattern.matcher(path);
         if (!matcher.matches()) {

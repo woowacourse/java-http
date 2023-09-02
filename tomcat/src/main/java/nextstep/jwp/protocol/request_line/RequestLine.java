@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.http;
+package nextstep.jwp.protocol.request_line;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package nextstep.jwp.protocol.http;
 
-import org.junit.jupiter.api.Assertions;
+import nextstep.jwp.protocol.request_line.Path;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ class PathTest {
             final String path = "/woowacourse/level4/tomcat/bebe";
 
             // when, then
-            assertDoesNotThrow(() -> new Path(path));
+            assertDoesNotThrow(() -> Path.from(path));
         }
 
         @Test
@@ -27,7 +27,7 @@ class PathTest {
             // when, then
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> new Path(path)
+                    () -> Path.from(path)
             );
         }
     }

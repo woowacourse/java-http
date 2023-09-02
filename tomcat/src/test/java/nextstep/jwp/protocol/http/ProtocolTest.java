@@ -1,11 +1,9 @@
 package nextstep.jwp.protocol.http;
 
+import nextstep.jwp.protocol.request_line.Protocol;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ProtocolTest {
 
@@ -18,7 +16,7 @@ class ProtocolTest {
 
             // when, then
             Assertions.assertDoesNotThrow(
-                    () -> new Protocol(protocol)
+                    () -> Protocol.from(protocol)
             );
         }
 
@@ -30,7 +28,7 @@ class ProtocolTest {
             // when, then
             Assertions.assertThrows(
                     IllegalArgumentException.class,
-                    () -> new Protocol(protocol)
+                    () -> Protocol.from(protocol)
             );
         }
     }

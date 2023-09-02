@@ -13,4 +13,8 @@ public class Cookie {
     public boolean hasKey(String key) {
         return cookie.containsKey(key);
     }
+
+    public String getKey(String key) {
+        return cookie.get(key);
+    }
 }

@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
+import org.apache.coyote.http11.message.Cookie;
+import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.request.Request;
-import org.apache.coyote.http11.message.request.RequestURI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +14,11 @@ public class Filter {
     }
 
     public static void logUserInfoIfExists(Request request) {
-        RequestURI requestURI = request.getRequestURI();
+        Headers requestHeaders = request.getHeaders();
+        Cookie cookie = requestHeaders.getCookie();
 
-        if (requestURI.hasQueryParameters()) {
-            Map<String, String> queryParameters = requestURI.queryParameters();
-            log.info("account = {}, password = {}",
-                    queryParameters.get("account"),
-                    queryParameters.get("password"));
+        if (cookie.hasKey("JSESSIONID")) {
+            log.info("session {} is logged in.", cookie.getKey("JSESSIONID"));
         }
     }
 }

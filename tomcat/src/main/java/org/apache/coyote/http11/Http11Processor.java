@@ -5,18 +5,17 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
+import static org.apache.coyote.http11.ContentType.ALL;
+import static org.apache.coyote.http11.ContentType.APPLICATION_JAVASCRIPT;
+import static org.apache.coyote.http11.ContentType.TEXT_CSS;
+import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LINE_BREAK = "\n";
 
     private final Socket connection;
 
@@ -35,18 +34,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            var responseBody = "Hello world!";
+            var requestReader = new RequestReader(inputStream);
+            String resource = requestReader.read();
+            String acceptValue = requestReader.getAccept();
 
-            String[] headers = getHeader(inputStream).toString().split(LINE_BREAK);
-
-            responseBody = getResponseBody(headers, responseBody);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            var response = getResponse(resource, acceptValue);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -55,27 +47,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String[] headers, String responseBody) throws IOException {
-        if (headers[0].contains("/index.html")) {
-            URL resourceURL = getClass()
-                    .getClassLoader()
-                    .getResource("static" + "/index.html");
-            Path path = new File(resourceURL.getFile()).toPath();
-            responseBody = new String(Files.readAllBytes(path));
-        }
-        return responseBody;
-    }
+    private static String getResponse(String resource, String acceptValue) throws IOException {
+        var response = new Response(ALL, resource).getResponse();
 
-    private static StringBuilder getHeader(InputStream inputStream) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        int c;
-        while ((c = inputStream.read()) != -1) {
-            stringBuilder.append((char) c);
-            if (stringBuilder.toString().endsWith("\r\n\r\n")) {
-                break;
-            }
+        if (TEXT_HTML.in(acceptValue)) {
+            response = new Response(TEXT_HTML, resource).getResponse();
+        } else if (TEXT_CSS.in(acceptValue)) {
+            response = new Response(TEXT_CSS, resource).getResponse();
+        } else if (APPLICATION_JAVASCRIPT.in(acceptValue)) {
+            response = new Response(APPLICATION_JAVASCRIPT, resource).getResponse();
         }
-        return stringBuilder;
+        return response;
     }
 }

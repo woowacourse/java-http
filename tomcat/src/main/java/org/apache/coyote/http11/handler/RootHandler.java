@@ -9,37 +9,27 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RootHandler implements HttpHandler {
 
-	private final String endPoint = "/";
+	private static final String END_POINT = "/";
+	private static final String CONSTANT_BODY = "Hello world!";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
-		return request.getEndPoint().equals(endPoint);
+		return request.getEndPoint().equals(END_POINT);
 	}
 
 	@Override
 	public HttpResponse handleTo(final HttpRequest request) {
 		return new HttpResponse(
 			HttpStatusCode.OK_200,
-			resolveBody(),
-			//TODO: resolveBody 수정하기
-			null
+			CONSTANT_BODY,
+			resolveHeader()
 		);
 	}
 
-	private String resolveBody() {
-		final String body = "Hello world!";
-		return String.join(System.lineSeparator(),
-			"Content-Type: text/html;charset=utf-8 ",
-			String.format("Content-Length: %d ", body.getBytes().length),
-			"",
-			body
-		);
-	}
-
-	private HttpHeaders resolveHeader(final HttpRequest request, final String body) {
+	private HttpHeaders resolveHeader() {
 		final HttpHeaders headers = new HttpHeaders();
 		headers.put(HttpHeaderType.CONTENT_TYPE.getValue(), MimeType.HTML.getValue());
-		headers.put(HttpHeaderType.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
+		headers.put(HttpHeaderType.CONTENT_LENGTH.getValue(), String.valueOf(CONSTANT_BODY.getBytes().length));
 		return headers;
 	}
 }

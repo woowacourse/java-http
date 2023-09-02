@@ -9,6 +9,6 @@ public class IndexController extends AbstractController {
 
     @Override
     public View handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        return new View("index.html");
+        return forwardTo("/index.html");
     }
 }

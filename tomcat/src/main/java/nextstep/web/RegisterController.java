@@ -12,7 +12,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public View handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        return new View("register.html");
+        return forwardTo("/register.html");
     }
 
     @Override

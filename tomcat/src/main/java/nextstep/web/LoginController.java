@@ -7,6 +7,7 @@ import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseStatus;
 import org.apache.coyote.http11.web.AbstractController;
 import org.apache.coyote.http11.web.View;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class LoginController extends AbstractController {
             return redirect("/index.html", response);
         }
 
-        return new View("/login.html");
+        return forwardTo("/login.html");
     }
 
     @Override
@@ -38,7 +39,7 @@ public class LoginController extends AbstractController {
             return successLogin(response, account);
         }
 
-        return new View("/401.html");
+        return forwardTo("/401.html", response, HttpResponseStatus.UNAUTHORIZED);
     }
 
     private View successLogin(final HttpResponse response, final String account) {

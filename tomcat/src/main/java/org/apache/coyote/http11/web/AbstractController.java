@@ -22,17 +22,29 @@ public abstract class AbstractController implements Controller {
     }
 
     protected View handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.METHOD_NOT_ALLOWED);
-        return new View("404.html");
+        return forwardTo("/404.html", response, HttpResponseStatus.METHOD_NOT_ALLOWED);
     }
 
     protected View handlePostRequest(final HttpRequest request, final HttpResponse response) {
-        response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.METHOD_NOT_ALLOWED);
-        return new View("404.html");
+        return forwardTo("/404.html", response, HttpResponseStatus.METHOD_NOT_ALLOWED);
     }
 
     protected View redirect(final String path, final HttpResponse response) {
         response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.MOVED_PERMANENTLY);
+        response.setHeader("Location", path);
         return new View(path);
+    }
+
+    protected View forwardTo(final String path) {
+        return new View(path);
+    }
+
+    protected View forwardTo(
+            final String path,
+            final HttpResponse response,
+            final HttpResponseStatus httpResponseStatus
+    ) {
+        response.updateHttpResponseStatusLineByStatus(httpResponseStatus);
+        return forwardTo(path);
     }
 }

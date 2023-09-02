@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestUri {
@@ -12,42 +9,38 @@ public class RequestUri {
     private static final String CSS_URI = ".css";
     private static final String JAVASCRIPT_URI = ".js";
 
-    private static final Map<String, String> contentTypeMap = Map.of(
-            HTML_URI, "text/html;charset=utf-8",
-            CSS_URI, "text/css;charset=utf-8",
-                    JAVASCRIPT_URI, "text/javascript;charset=utf-8"
-    );
-
     private final String value;
 
     public RequestUri(final String value) {
         this.value = value;
     }
 
-    public boolean isEqual(final String target) {
-        return value.equals(target);
+    public boolean isHtmlUri() {
+        return value.endsWith(HTML_URI);
     }
 
-    public String getContentType() {
-        if (value.endsWith(CSS_URI)) {
-            return contentTypeMap.get(CSS_URI);
-        } else if (value.endsWith(JAVASCRIPT_URI)) {
-            return contentTypeMap.get(JAVASCRIPT_URI);
+    public boolean isCssUri() {
+        return value.endsWith(CSS_URI);
+    }
+
+    public boolean isJavaScriptUri() {
+        return value.endsWith(JAVASCRIPT_URI);
+    }
+
+    public Map<String, Object> parseQueryParams() {
+        Map<String, Object> paramMap = new HashMap<>();
+
+        int index = value.indexOf("?");
+        String queryString = value.substring(index + 1);
+        String[] params = queryString.split("&");
+        for (String param : params) {
+            String[] paramPair = param.split("=");
+            paramMap.put(paramPair[0], paramPair[1]);
         }
-        return contentTypeMap.get(HTML_URI);
+        return paramMap;
     }
 
-    public String getResponseBody() throws IOException {
-        if (value.equals("/")) {
-            return "Hello world!";
-        } else if (value.startsWith("/login")) {
-            return readFile("static/login.html");
-        }
-        return readFile("static" + value);
-    }
-
-    private String readFile(final String filePath) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(filePath);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    public String getValue() {
+        return value;
     }
 }

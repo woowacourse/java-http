@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayName("HttpRequestMethod 테스트")
-class HttpRequestReaderTest {
+class HttpRequestMessageReaderTest {
 
     @Test
     void 요청스트림을_읽어_HttpRequest를_생성한다() throws IOException {
@@ -30,7 +31,7 @@ class HttpRequestReaderTest {
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
 
         // when
-        final HttpRequest httpRequest = HttpRequestReader.readHttpRequest(stubSocket.getInputStream());
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
 
         // then
         assertSoftly(softAssertions -> {
@@ -44,4 +45,41 @@ class HttpRequestReaderTest {
         );
     }
 
+    @Test
+    void 잘못된_HTTP_요청_메세지_시작라인인_경우_예외_발생() {
+        // given
+        final String httpRequestMessage = String.join("\r\n",
+                "GET /index.html wrongSize HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+
+        // when & then
+        assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("시작 라인의 토큰은 3개여야 합니다.");
+    }
+
+    @Test
+    void 쿼리파라미터와_URI를_분리하여_저장한다() throws IOException {
+        // given
+        final String httpRequestMessage = String.join("\r\n",
+                "GET /index.html?name=royce&password=p1234 HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+
+        // when
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+
+        // then
+        assertSoftly(softAssertions -> {
+            assertThat(httpRequest.getParam("name")).isEqualTo("royce");
+            assertThat(httpRequest.getParam("password")).isEqualTo("p1234");
+        });
+    }
 }

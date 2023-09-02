@@ -5,17 +5,23 @@ import java.util.Map;
 public class HttpRequest {
 
     private final HttpRequestStartLine httpRequestStartLine;
-    private final HttpRequestHeaders httpRequestHeaders;
+    private final Map<String, String> httpRequestHeaders;
+    private final Map<String, String> queryParams;
 
-    public HttpRequest(final HttpRequestStartLine httpRequestStartLine, final HttpRequestHeaders httpRequestHeaders) {
+    public HttpRequest(
+            final HttpRequestStartLine httpRequestStartLine,
+            final Map<String, String> httpRequestHeaders,
+            final Map<String, String> queryParams) {
         this.httpRequestStartLine = httpRequestStartLine;
         this.httpRequestHeaders = httpRequestHeaders;
+        this.queryParams = queryParams;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers) {
+    public static HttpRequest of(final HttpRequestStartLine httpRequestStartLine, final Map<String, String> headers) {
         return new HttpRequest(
-                HttpRequestStartLine.from(startLine),
-                HttpRequestHeaders.from(headers)
+                httpRequestStartLine,
+                headers,
+                httpRequestStartLine.getQueryParams()
         );
     }
 
@@ -28,6 +34,6 @@ public class HttpRequest {
     }
 
     public String getParam(final String parameter) {
-        return httpRequestStartLine.getParam(parameter);
+        return queryParams.get(parameter);
     }
 }

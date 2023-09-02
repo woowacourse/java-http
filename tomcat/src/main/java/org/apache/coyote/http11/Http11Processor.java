@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpHandler;
-import org.apache.coyote.http11.handler.IndexHtmlHandler;
 import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.RootHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
 	private static final List<HttpHandler> handlers = List.of(
-		new IndexHtmlHandler(),
+		new StaticResourceHandler(),
 		new RootHandler()
 	);
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);

@@ -55,19 +55,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             var requestURI = request.get(0).split(" ")[1];
-            if (requestURI.startsWith("/login") && requestURI.contains("?")) {
-                final int index = requestURI.indexOf("?");
-                final var queryString = requestURI.substring(index + 1);
-                final String[] queryStrings = queryString.split("&");
-                for (String querystring : queryStrings) {
-                    final int equalSignIndex = querystring.indexOf("=");
-                    final var key = querystring.substring(0, equalSignIndex);
-                    final var value = querystring.substring(equalSignIndex+1);
-                    if ("account".equals(key)) {
-                        User user = InMemoryUserRepository.findByAccount(value).get();
-                        log.info(user.toString());
-                    }
-                }
+            QueryStrings queryStrings = QueryStrings.from(requestURI);
+            if (queryStrings.getValues().containsKey("account")) {
+                String account = queryStrings.getValues().get("account");
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(IllegalArgumentException::new);
+                log.info(user.toString());
             }
             if (requestURI.contains("?")) {
                 final int index = requestURI.indexOf("?");

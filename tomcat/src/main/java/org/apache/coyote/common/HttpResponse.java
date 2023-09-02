@@ -9,7 +9,7 @@ public class HttpResponse {
     private final HttpProtocol httpProtocol;
     private final HttpStatus httpStatus;
     private final HttpHeaders httpHeaders;
-    private String contentBody;
+    private String contentBody = "";
 
     public HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus, HttpHeaders httpHeaders) {
         this.httpProtocol = httpProtocol;

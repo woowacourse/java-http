@@ -156,7 +156,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login_with_queryString() {
+    void login_with_login_fail() {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
             "GET /login?account=glen&password=password HTTP/1.1 ",
@@ -172,9 +172,31 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join(System.lineSeparator(),
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: 3796 ");
+            "HTTP/1.1 302 FOUND ",
+            "Location: /401.html");
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @Test
+    void login_with_login_success() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 302 FOUND ",
+            "Location: /index.html");
 
         assertThat(socket.output()).startsWith(expected);
     }

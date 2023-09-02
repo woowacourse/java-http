@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpProtocol;
@@ -19,24 +20,32 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        logAccount(request);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType("text/html;charset=utf-8");
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
-        String contentBody = ResourceResolver.resolve("/login.html");
-        response.setContentBody(contentBody);
-        return response;
-    }
-
-    private void logAccount(HttpRequest request) {
         String account = getQueryString(request, "account");
         String password = getQueryString(request, "password");
-        InMemoryUserRepository.findByAccount(account)
-            .ifPresent(user -> {
-                if (user.checkPassword(password)) {
-                    log.info("{}", user);
-                }
-            });
+        if (account.isBlank() || password.isBlank()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType("text/html;charset=utf-8");
+            HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK, headers);
+            response.setContentBody(ResourceResolver.resolve("/login.html"));
+            return response;
+        }
+        return InMemoryUserRepository.findByAccount(account)
+            .filter(user -> user.checkPassword(password))
+            .map(this::loginSuccess)
+            .orElseGet(this::loginFail);
+    }
+
+    private HttpResponse loginSuccess(User user) {
+        log.info("{}", user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Location", "/index.html");
+        return new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND, headers);
+    }
+
+    private HttpResponse loginFail() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Location", "/401.html");
+        return new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND, headers);
     }
 
     private String getQueryString(HttpRequest request, String key) {

@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.RequestUri;
 import org.apache.coyote.http11.response.ResponseGenerator;
@@ -38,11 +41,18 @@ public class Http11Processor implements Runnable, Processor {
             String startLine = br.readLine();
             String[] startLineElements = startLine.split(" ");
             String requestUri = startLineElements[REQUEST_URI_MESSAGE_INDEX];
+            RequestUri requestUriVo = new RequestUri(requestUri);
 
             String response = "";
             if (!requestUri.endsWith(".ico")) {
-                ResponseGenerator responseGenerator = new ResponseGenerator(new RequestUri(requestUri));
+                ResponseGenerator responseGenerator = new ResponseGenerator(requestUriVo);
                 response = responseGenerator.generateSuccessResponse();
+                if (requestUri.startsWith("/login")) {
+                    Map<String, String> loginQueryParams = requestUriVo.parseQueryParams();
+
+                    User findUser = InMemoryUserRepository.findByAccount(loginQueryParams.get("account")).get();
+                    log.info("user : {}", findUser);
+                }
             }
 
             outputStream.write(response.getBytes());

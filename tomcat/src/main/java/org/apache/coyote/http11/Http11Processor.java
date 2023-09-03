@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleRootRequest() {
         final Map<String, String> responseHeader = new HashMap<>();
         responseHeader.put("Content-Type", "text/html;charset=utf-8");
-        return HttpResponse.of(OK, responseHeader, "Hello world!");
+        return HttpResponse.from(OK, responseHeader, "Hello world!");
     }
 
     private HttpResponse handleRegisterRequest(final HttpRequest httpRequest) throws IOException {
@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeader = new HashMap<>();
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
-            return HttpResponse.of(FOUND, responseHeader, "");
+            return HttpResponse.from(FOUND, responseHeader);
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
@@ -105,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
                 final Map<String, String> responseHeader = new HashMap<>();
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                return HttpResponse.of(FOUND, responseHeader, "");
+                return HttpResponse.from(FOUND, responseHeader);
             }
             // not login user
             return handleResourceRequest(httpRequest, "login.html");
@@ -118,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
                 // invalid user
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/401.html");
-                return HttpResponse.of(FOUND, responseHeader, "");
+                return HttpResponse.from(FOUND, responseHeader);
             }
 
             // valid user
@@ -127,7 +127,7 @@ public class Http11Processor implements Runnable, Processor {
             if (sessionId != null) { // if already have session
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                return HttpResponse.of(FOUND, responseHeader, "");
+                return HttpResponse.from(FOUND, responseHeader);
             }
 
             // if no session
@@ -139,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
             responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
-            return HttpResponse.of(FOUND, responseHeader, "");
+            return HttpResponse.from(FOUND, responseHeader);
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
@@ -164,6 +164,6 @@ public class Http11Processor implements Runnable, Processor {
 
         responseHeader.put("Content-Type", contentType);
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return HttpResponse.of(statusCode, responseHeader, responseBody);
+        return HttpResponse.from(statusCode, responseHeader, responseBody);
     }
 }

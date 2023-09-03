@@ -8,14 +8,18 @@ public class HttpResponse {
     private final Map<String, String> header;
     private final String body;
 
-    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
+    private HttpResponse(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
         this.statusCode = statusCode;
         this.header = header;
         this.body = body;
     }
 
-    public static HttpResponse of(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
+    public static HttpResponse from(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
         return new HttpResponse(statusCode, header, body);
+    }
+
+    public static HttpResponse from(final HttpStatusCode statusCode, final Map<String, String> header) {
+        return new HttpResponse(statusCode, header, "");
     }
 
     public void addHeader(final String key, final String value) {

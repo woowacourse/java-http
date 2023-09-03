@@ -9,6 +9,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
+import org.apache.coyote.http11.response.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,7 @@ public class Handler {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
             final StaticResource staticResource = StaticResource.from(requestLine.getPath());
             final ResponseBody responseBody = ResponseBody.from(staticResource);
-
-            return Response.of(responseBody, HttpStatus.OK);
+            return Response.of(HttpStatus.OK, responseBody, request.getRequestHeader());
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/login")) {
@@ -40,23 +40,28 @@ public class Handler {
                 log.info("user = {}", userOptional.get());
                 final StaticResource staticResource = StaticResource.from(INDEX_HTML);
                 final ResponseBody responseBody = ResponseBody.from(staticResource);
-                return Response.redirect(INDEX_HTML, responseBody, HttpStatus.FOUND);
+                final Response response = Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
+                response.addCookie(Cookie.generateJsessionId());
+                return response;
             }
             final StaticResource staticResource = StaticResource.from(UNAUTHORIZED_HTML);
             final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.redirect(UNAUTHORIZED_HTML, responseBody, HttpStatus.FOUND);
+            return Response.redirect(HttpStatus.FOUND, UNAUTHORIZED_HTML, responseBody);
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/register")) {
             final RequestBody requestBody = request.getRequestBody();
-            final String account = requestBody.getParamValue("account");
-            final String password = requestBody.getParamValue("password");
-            final String email = requestBody.getParamValue("email");
-            InMemoryUserRepository.save(new User(account, password, email));
+            InMemoryUserRepository.save(
+                    new User(
+                            requestBody.getParamValue("account"),
+                            requestBody.getParamValue("password"),
+                            requestBody.getParamValue("email")
+                    )
+            );
 
             final StaticResource staticResource = StaticResource.from(INDEX_HTML);
             final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.redirect(INDEX_HTML, responseBody, HttpStatus.FOUND);
+            return Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
         }
 
         return null;

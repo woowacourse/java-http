@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class RequestHeader {
-    private static final Pattern PATTERN = Pattern.compile("(.+?): (.+?)\r\n");
-
     private final Map<String, String> header;
 
     private RequestHeader(final Map<String, String> header) {

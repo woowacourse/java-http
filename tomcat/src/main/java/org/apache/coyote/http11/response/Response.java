@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.response.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +19,28 @@ public class Response {
     }
 
 
-    public static Response of(final ResponseBody responseBody, final HttpStatus httpStatus) {
-        return new Response(StatusLine.of(httpStatus), ResponseHeader.basic(responseBody), responseBody);
+    public static Response of(final HttpStatus httpStatus,
+                              final ResponseBody responseBody,
+                              final RequestHeader requestHeader) {
+        return new Response(
+                StatusLine.of(httpStatus),
+                ResponseHeader.basic(requestHeader, responseBody),
+                responseBody
+        );
     }
 
-    public static Response redirect(final String redirectPath, final ResponseBody responseBody, final HttpStatus httpStatus) {
-        return new Response(StatusLine.of(httpStatus), ResponseHeader.redirect(responseBody, redirectPath), responseBody);
+    public static Response redirect(final HttpStatus httpStatus,
+                                    final String redirectPath,
+                                    final ResponseBody responseBody) {
+        return new Response(
+                StatusLine.of(httpStatus),
+                ResponseHeader.redirect(redirectPath),
+                responseBody
+        );
+    }
+
+    public void addCookie(final Cookie cookie) {
+        responseHeader.addCookie(cookie);
     }
 
     @Override

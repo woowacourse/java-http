@@ -65,7 +65,7 @@ class LoginHandlerTest {
 		}
 
 		@Test
-		@DisplayName("queryParam이 있고 로그인에 성공하는 경우 index.html을 반환한다.")
+		@DisplayName("queryParam이 있고 로그인에 성공하는 경우 302 상태코드와 Location index.html을 반환한다.")
 		void loginSuccess() throws IOException {
 			final String plainRequest = String.join("\r\n",
 				"GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -73,17 +73,15 @@ class LoginHandlerTest {
 				"Connection: keep-alive ",
 				"",
 				"");
-			final String file = "/index.html";
 			final HttpRequest request = HttpRequest.from(plainRequest);
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
-			final URL resource = getClass().getClassLoader().getResource("static" + file);
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
-				"Content-Length: 5564 \r\n" +
-				"\r\n" +
-				new String(readAllBytes(new File(resource.getFile()).toPath()));
+				"Content-Length: 0 \r\n" +
+				"Location: http://localhost:8080/index.html \r\n" +
+				"\r\n";
 
 			assertThat(actual.buildResponse())
 				.isEqualTo(expected);

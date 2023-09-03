@@ -27,6 +27,7 @@ public class LoginHandler implements HttpHandler {
 	private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 	private static final String ACCOUNT_PARAM_KEY = "account";
 	private static final String PASSWORD_PARAM_KEY = "password";
+	private static final String LOGIN_SUCCESS_LOCATION = "http://localhost:8080/index.html";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
@@ -69,18 +70,14 @@ public class LoginHandler implements HttpHandler {
 	}
 
 	private HttpResponse loginSuccessResponse() {
-		final URL url = getClass().getClassLoader()
-			.getResource("static/index.html");
-		try {
-			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-			return new HttpResponse(
-				HttpStatusCode.TEMPORARILY_MOVED_302,
-				body,
-				resolveHeader(body)
-			);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
+		final String body = "";
+		final HttpHeaders headers = resolveHeader(body);
+		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
+		return new HttpResponse(
+			HttpStatusCode.TEMPORARILY_MOVED_302,
+			body,
+			headers
+		);
 	}
 
 	private HttpHeaders resolveHeader(final String body) {

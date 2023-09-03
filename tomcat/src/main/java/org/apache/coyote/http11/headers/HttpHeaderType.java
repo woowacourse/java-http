@@ -3,7 +3,8 @@ package org.apache.coyote.http11.headers;
 public enum HttpHeaderType {
 	ACCEPT("Accept"),
 	CONTENT_TYPE("Content-Type"),
-	CONTENT_LENGTH("Content-Length");
+	CONTENT_LENGTH("Content-Length"),
+	LOCATION("Location");
 
 	private final String value;
 

@@ -23,6 +23,6 @@ public class StatusLine {
                 HTTP_VERSION,
                 String.valueOf(httpStatus.statusCode()),
                 httpStatus.responsePhrase()
-        );
+        ) + " \r\n";
     }
 }

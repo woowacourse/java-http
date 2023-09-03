@@ -23,6 +23,6 @@ class StatusLineTest {
         String actual = statusLine.toString();
 
         // then
-        assertThat(actual).isEqualTo("HTTP/1.1 200 OK");
+        assertThat(actual).isEqualTo("HTTP/1.1 200 OK \r\n");
     }
 }

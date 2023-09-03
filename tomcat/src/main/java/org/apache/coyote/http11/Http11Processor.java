@@ -17,6 +17,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.common.Content;
+import org.apache.common.HttpMethod;
 import org.apache.common.HttpStatus;
 import org.apache.coyote.Processor;
 import org.apache.request.HttpRequest;
@@ -50,9 +51,8 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
-            String url = httpRequest.getTarget();
-            Content content = readContent(url);
-            String response = HttpResponse.create(content.getValue(), url, content.getHttpStatus());
+            Content content = readContent(httpRequest);
+            String response = HttpResponse.create(content.getValue(), httpRequest.getTarget(), content.getHttpStatus());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,7 +61,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Content readContent(String path) throws IOException {
+    private Content readContent(HttpRequest httpRequest) throws IOException {
+        String path = httpRequest.getTarget();
         if (Objects.equals(path, DEFAULT_PATH)) {
             return new Content(DEFAULT_RESPONSE, HttpStatus.OK);
         }
@@ -71,9 +72,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (path.startsWith("/login")) {
-            int index = path.indexOf("?");
-            if (index > 0) {
-                String query = path.substring(index + 1);
+            if (httpRequest.getMethod().equals(HttpMethod.POST)) {
+                String query = httpRequest.getBody();
                 String[] queries = query.split("&");
                 String account = queries[0].split("=")[1];
                 String password = queries[1].split("=")[1];
@@ -89,6 +89,18 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (Objects.equals(path, "/register")) {
+            if (httpRequest.getMethod().equals(HttpMethod.POST)) {
+                String query = httpRequest.getBody();
+                String[] queries = query.split("&");
+                String account = queries[0].split("=")[1];
+                String email = queries[1].split("=")[1];
+                String password = queries[2].split("=")[1];
+
+                User user = new User(account, email, password);
+                InMemoryUserRepository.save(user);
+                log.info("회원가입 성공한 회원 : {}", user);
+                return new Content(Files.readString(Paths.get(convertPathToUri("/index.html"))), HttpStatus.OK);
+            }
             path = "/register.html";
         }
 

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.common.HttpBody;
 import org.apache.common.HttpHeaders;
 import org.apache.common.HttpLine;
+import org.apache.common.HttpMethod;
 
 public class HttpRequest {
 
@@ -22,12 +23,10 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
-        String firstLine = extractFirstLine(bufferedReader);
-
-        List<String> headerLines = extractHeaderLines(bufferedReader);
-
-//        String body = extractBody(bufferedReader);
-        return new HttpRequest(HttpLine.of(firstLine), HttpHeaders.of(headerLines), new HttpBody(""));
+        HttpLine httpLine = HttpLine.of(extractFirstLine(bufferedReader));
+        HttpHeaders httpHeaders = HttpHeaders.of(extractHeaderLines(bufferedReader));
+        HttpBody httpBody = new HttpBody(extractBody(bufferedReader, httpHeaders));
+        return new HttpRequest(httpLine, httpHeaders, httpBody);
     }
 
     private static String extractFirstLine(BufferedReader bufferedReader) throws IOException {
@@ -47,15 +46,14 @@ public class HttpRequest {
         return lines;
     }
 
-    private static String extractBody(BufferedReader bufferedReader) throws IOException {
-        StringBuilder actual = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            actual.append(line);
-            actual.append("\r\n");
+    private static String extractBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
+        if (!httpHeaders.containsHeader("Content-Length")) {
+            return new String("");
         }
-
-        return actual.toString();
+        int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public URI getUri() {
@@ -64,5 +62,13 @@ public class HttpRequest {
 
     public String getTarget() {
         return httpLine.getRequestTarget();
+    }
+
+    public String getBody() {
+        return httpBody.getContent();
+    }
+
+    public HttpMethod getMethod() {
+        return httpLine.getHttpMethod();
     }
 }

@@ -2,7 +2,6 @@ package org.apache.common;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,10 @@ public class HttpHeaders {
                 .collect(toMap(line -> line[HEADER_KEY_INDEX], line -> line[HEADER_VALUE_INDEX]));
 
         return new HttpHeaders(headers);
+    }
+
+    public boolean containsHeader(String header) {
+        return headers.containsKey(header);
     }
 
     public String getHeaderValue(String headerKey) {

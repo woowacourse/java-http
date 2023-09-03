@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class HttpHeaders {
 
+	private static final String HEADER_DELIMITER = ":";
 	private final Map<String, String> headers;
 
 	public HttpHeaders() {
@@ -21,7 +22,7 @@ public class HttpHeaders {
 	public static HttpHeaders from(final String httpRequest) {
 		final Map<String, String> headerMaps = stream(httpRequest.split(System.lineSeparator()))
 			.skip(1)
-			.map(headerLine -> headerLine.split(":", 2))
+			.map(headerLine -> headerLine.split(HEADER_DELIMITER, 2))
 			.collect(toMap(
 				header -> header[0].trim(),
 				header -> header[1].trim()

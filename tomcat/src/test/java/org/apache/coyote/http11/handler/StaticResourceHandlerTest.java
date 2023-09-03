@@ -47,12 +47,17 @@ class StaticResourceHandlerTest {
 	@Test
 	@DisplayName("요청에 해당하는 적절한 값을 반환한다,")
 	void handleTo() throws IOException {
-		final String file = "/index.html";
-		final HttpRequest request = HttpRequest.from("GET " + file + " HTTP/1.1 ");
+		final String plainRequest = String.join("\r\n",
+			"GET /index.html HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"",
+			"");
+		final HttpRequest request = HttpRequest.from(plainRequest);
 
 		final HttpResponse httpResponse = HANDLER.handleTo(request);
 
-		final URL resource = getClass().getClassLoader().getResource("static" + file);
+		final URL resource = getClass().getClassLoader().getResource("static/index.html");
 		final String expected = "HTTP/1.1 200 OK \r\n" +
 			"Content-Type: text/html;charset=utf-8 \r\n" +
 			"Content-Length: 5564 \r\n" +

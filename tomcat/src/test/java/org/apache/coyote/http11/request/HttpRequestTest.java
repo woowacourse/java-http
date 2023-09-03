@@ -15,12 +15,12 @@ class HttpRequestTest {
 	@DisplayName("http 요청 문자열을 객체로 생성")
 	void createHttpRequest() {
 		//given
-		final String httpRequest = String.join("\r\n",
+		final String httpRequest = String.join(System.lineSeparator(),
 			"GET /index.html?user=hong HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"",
-			"");
+			"body");
 		final HttpHeaders expectedHeader = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
@@ -43,7 +43,9 @@ class HttpRequestTest {
 				.isEqualTo(expectedHeader),
 			() -> assertThat(actual.getQueryParam())
 				.usingRecursiveComparison()
-				.isEqualTo(queryParam)
+				.isEqualTo(queryParam),
+			() -> assertThat(actual.getBody().get())
+				.isEqualTo("body")
 		);
 	}
 }

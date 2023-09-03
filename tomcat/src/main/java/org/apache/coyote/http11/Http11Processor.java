@@ -20,7 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String RESOURCE_PATH = "static";
     private static final int URL_INDEX = 1;
     private final Socket connection;
-
+    
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -43,9 +43,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String requestUrl = RESOURCE_PATH + requestLine.split(" ")[URL_INDEX];
-
+            
             URL resource = getClass().getClassLoader().getResource(requestUrl);
-            String response = generateResponse(resource);
+            String response = buildResponse(resource);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String generateResponse(URL resource) throws IOException {
+    private String buildResponse(URL resource) throws IOException {
         File location = new File(resource.getFile());
         String responseBody = "";
 
@@ -67,9 +67,16 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType(resource.getPath())+ ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String contentType(final String resourcePath) {
+        if (resourcePath.endsWith(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

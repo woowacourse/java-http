@@ -1,10 +1,8 @@
 package nextstep.jwp.handler;
 
-import java.io.File;
-import java.net.URL;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.FileUtil;
+import nextstep.jwp.util.ResourceFileUtil;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -18,15 +16,12 @@ import org.slf4j.LoggerFactory;
 
 public class LoginRequestHandler implements RequestHandler {
 
-    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
     public HttpResponse handle(HttpRequest request) {
         URI uri = request.startLine().uri();
-        URL resource = classLoader.getResource("static" + uri.path() + ".html");
-        File file = new File(resource.getFile());
-        String responseBody = FileUtil.readAll(file);
+        String responseBody = ResourceFileUtil.readAll("static" + uri.path() + ".html");
         User user = InMemoryUserRepository.findByAccount(uri.queryStrings().get("account"))
                 .orElse(null);
         log.info("User={}", user);

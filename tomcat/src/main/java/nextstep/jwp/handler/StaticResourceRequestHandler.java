@@ -1,8 +1,6 @@
 package nextstep.jwp.handler;
 
-import java.io.File;
-import java.net.URL;
-import nextstep.jwp.util.FileUtil;
+import nextstep.jwp.util.ResourceFileUtil;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.URI;
@@ -13,19 +11,11 @@ import org.apache.coyote.http11.response.StatusLine;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 
-    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-
     @Override
     public HttpResponse handle(HttpRequest request) {
         URI uri = request.startLine().uri();
-        String resource = readStaticResource(uri);
+        String resource = ResourceFileUtil.readAll("static" + uri.path());
         return httpResponse(uri, resource);
-    }
-
-    private String readStaticResource(URI uri) {
-        URL resource = classLoader.getResource("static" + uri.path());
-        File file = new File(resource.getFile());
-        return FileUtil.readAll(file);
     }
 
     private HttpResponse httpResponse(URI uri, String responseBody) {

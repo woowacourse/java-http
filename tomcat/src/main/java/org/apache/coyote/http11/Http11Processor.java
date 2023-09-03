@@ -108,7 +108,12 @@ public class Http11Processor implements Runnable, Processor {
         if (handlerMapper.haveAvailableHandler(request)) {
             return controllerResponse(request);
         }
-        return staticResourceResponse("/404.html");
+        return String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 12 ",
+            "",
+            "Hello world!");
     }
 
     private String staticResourceResponse(String resourcePath) {

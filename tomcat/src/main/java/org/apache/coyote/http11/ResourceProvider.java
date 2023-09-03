@@ -1,14 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
+import java.nio.file.Files;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ResourceProvider {
 
@@ -32,29 +29,16 @@ public class ResourceProvider {
     }
 
     public String resourceBodyOf(String resourcePath) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(getFile(resourcePath)))) {
-            StringBuilder stringBuilder = new StringBuilder();
-            List<String> lines = bufferedReader.lines()
-                .collect(Collectors.toList());
-            for (String line : lines) {
-                stringBuilder.append(line);
-                stringBuilder.append("\r\n");
+        try {
+            Optional<URL> fileURL = findFileURL(resourcePath);
+            if (fileURL.isPresent()) {
+                URL url = fileURL.get();
+                return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
             }
-            return stringBuilder.toString();
+            throw new IllegalArgumentException("파일이 존재하지 않습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private File getFile(String resourcePath) {
-        try {
-            return new File(
-                findFileURL(resourcePath).orElseThrow((() -> new IllegalArgumentException("파일이 존재하지 않습니다.")))
-                    .toURI());
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("URI 문법이 잘못 되었습니다.", e);
-        }
-
     }
 
     public String contentTypeOf(String resourcePath) {
@@ -70,5 +54,16 @@ public class ResourceProvider {
             return "Content-Type: text/html;charset=utf-8 ";
         }
         return "text/plain";
+    }
+
+    private File getFile(String resourcePath) {
+        try {
+            return new File(
+                findFileURL(resourcePath).orElseThrow((() -> new IllegalArgumentException("파일이 존재하지 않습니다.")))
+                    .toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("URI 문법이 잘못 되었습니다.", e);
+        }
+
     }
 }

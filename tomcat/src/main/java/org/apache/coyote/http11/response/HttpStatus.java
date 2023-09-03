@@ -6,7 +6,6 @@ import java.nio.file.Files;
 
 public enum HttpStatus {
     OK(200,"OK"),
-    CREATED(201,"Created"),
     FOUND(302,"Found"),
     UNAUTHORIZED(401,"Unauthorized");
 
@@ -26,17 +25,7 @@ public enum HttpStatus {
         return detail;
     }
 
-    public String getFile(){
-        try {
-            final var fileUrl = getClass().getClassLoader().getResource("static/" + value + ".html");
-            final var fileBytes = Files.readAllBytes(new File(fileUrl.getFile()).toPath());
-            return new String(fileBytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NullPointerException e){
-            return "";
-        }
-    }
+
 
     @Override
     public String toString() {

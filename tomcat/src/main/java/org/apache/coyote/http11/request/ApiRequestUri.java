@@ -12,8 +12,8 @@ import java.util.Optional;
 public class ApiRequestUri extends Request {
 
 
-    public ApiRequestUri(String method, String uri, Map<String, String> header) {
-        super(method, uri, header);
+    public ApiRequestUri(String method, String uri, Map<String, String> header, Map<String, String> body) {
+        super(method, uri, header, body);
     }
 
     @Override

@@ -6,9 +6,8 @@ import java.util.Optional;
 
 public class DefaultRequestUri extends Request {
 
-
-    public DefaultRequestUri(String method, String uri, Map<String, String> header) {
-        super(method, uri, header);
+    public DefaultRequestUri(String method, String uri, Map<String, String> header, Map<String, String> body) {
+        super(method, uri, header, body);
     }
 
     @Override

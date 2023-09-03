@@ -9,7 +9,7 @@ public class Response {
     private final String contentType;
     private final String responseBody;
 
-    public Response(HttpStatus status, String contentType, String responseBody) {
+    public  Response(HttpStatus status, String contentType, String responseBody) {
         this.status = status;
         this.contentType = contentType;
         this.responseBody = responseBody;
@@ -25,22 +25,20 @@ public class Response {
                 responseBody);
     }
 
-    public String redirect(String redirectUri){
+    public String redirect(String redirectUri, String file){
         return String.join("\r\n",
                 "HTTP/1.1 " + status ,
-                "Content-Type: text/" + contentType + ";",
+                "Content-Type: text/html;",
                 "charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "location : " + redirectUri,
                 "",
-                responseBody);
+                file);
     }
 
     public static Response of(HttpStatus status, String contentType, String responseBody){
         return new Response(status,contentType,responseBody);
     }
 
-    public static Response badResponseFrom(HttpStatus status){
-        return new Response(status, "html", status.getFile());
-    }
+
 }

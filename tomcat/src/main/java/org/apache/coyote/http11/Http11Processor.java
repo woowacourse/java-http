@@ -37,7 +37,8 @@ public class Http11Processor implements Runnable, Processor {
             final Request request = Request.of(inputStream);
 
             final String response = Servlet.getResponse(request);
-
+            System.out.println("api : " + request.getUri());
+            System.out.println(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

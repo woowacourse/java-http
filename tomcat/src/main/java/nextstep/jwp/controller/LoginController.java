@@ -19,4 +19,14 @@ public class LoginController {
         }
         return new Response(HttpStatus.FOUND, request.getContentType(), request.getResponseBody());
     }
+
+    public static Response signUp(Request request){
+        Map<String, String> requestBody = request.getBody();
+        final String account = requestBody.get("account");
+        final String password = requestBody.get("password");
+        final String email = requestBody.get("email");
+        User user = new User(account,password,email);
+        InMemoryUserRepository.save(user);
+        return new Response(HttpStatus.FOUND,request.getContentType(),request.getContentType());
+    }
 }

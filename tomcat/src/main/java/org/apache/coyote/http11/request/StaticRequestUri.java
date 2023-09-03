@@ -8,9 +8,8 @@ import java.util.Optional;
 
 public class StaticRequestUri extends Request {
 
-
-    public StaticRequestUri(String method, String uri, Map<String, String> header) {
-        super(method, uri, header);
+    public StaticRequestUri(String method, String uri, Map<String, String> header, Map<String, String> body) {
+        super(method, uri, header, body);
     }
 
     @Override

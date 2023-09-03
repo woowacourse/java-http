@@ -36,7 +36,6 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest request = new HttpRequest(inputStream);
             String url = request.getUrl();
-            System.out.println();
             if (Objects.equals(url, "/")) {
                 String responseBody = "Hello world!";
 
@@ -50,17 +49,18 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.write(response.getBytes());
             } else {
                 try (
-                        FileInputStream fileStream = new FileInputStream(
-                                getStaticResourceURL(url).getFile())
+                        FileInputStream fileStream = new FileInputStream(getStaticResourceURL(url).getFile())
                 ) {
+                    String path = getStaticResourceURL(url).getFile();
+                    String extension = path.split("\\.")[1];
                     byte[] fileBytes = fileStream.readAllBytes();
                     outputStream.write(String.join("\r\n",
                             "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Type: text/" + extension + ";charset=utf-8 ",
                             "Content-Length: " + fileBytes.length + " ",
                             "\r\n").getBytes());
                     outputStream.write(fileBytes);
-                } catch (FileNotFoundException e) {
+                } catch (NullPointerException | FileNotFoundException e) {
                     outputStream.write(String.join("\r\n",
                             "HTTP/1.1 404 NOT_FOUND ",
                             "Content-Type: text/html;charset=utf-8",

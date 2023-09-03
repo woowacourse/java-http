@@ -2,12 +2,16 @@ package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RequestHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
+    private static final String COOKIE_DELIMITER = ";";
+    private static final String JSESSION_ID = "JSESSIONID=";
 
     private final Map<String, String> headers;
 
@@ -24,6 +28,19 @@ public class RequestHeader {
             line = httpRequestHeader.readLine();
         }
         return new RequestHeader(headerValues);
+    }
+
+    public boolean doesNotHasJsessionCookie() {
+        if (!headers.containsKey(COOKIE)) {
+            return true;
+        }
+        String cookieHeader = headers.get(COOKIE);
+        return Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
+                .noneMatch(this::isJsession);
+    }
+
+    public boolean isJsession(String cookieFiled) {
+        return cookieFiled.trim().startsWith(JSESSION_ID);
     }
 
     public int getContentLength() {

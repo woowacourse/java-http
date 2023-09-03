@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
@@ -58,5 +61,25 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("잘못된 URI로 요청하면 예외가 발생한다")
+    void illegalUri() {
+        //given
+        final String httpRequest= String.join("\r\n",
+                "GET /nothing HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when, then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("존재하지 않는 자원입니다.");
     }
 }

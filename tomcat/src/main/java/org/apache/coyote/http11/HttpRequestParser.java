@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.coyote.http11.request.Body;
 import org.apache.coyote.http11.request.Header;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -12,11 +11,8 @@ import org.apache.coyote.http11.request.StartLine;
 
 public class HttpRequestParser {
 
-    public @Nullable HttpRequest parse(BufferedReader reader) {
+    public HttpRequest parse(BufferedReader reader) {
         StartLine startLine = StartLine.from(readLine(reader));
-        if (startLine.isEmpty()) {
-            return null;
-        }
         List<Header> headers = parseHeaders(reader);
         Body body = parseBody(reader, contentLength(headers));
         return HttpRequest.builder()

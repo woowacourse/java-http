@@ -97,18 +97,4 @@ class HttpRequestParserTest {
                 .usingRecursiveComparison()
                 .isEqualTo(body);
     }
-
-    @Test
-    void startLine이_없는_경우_null_반환() {
-        // given
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(new ByteArrayInputStream(new byte[0]))
-        );
-
-        // when
-        HttpRequest request = parser.parse(br);
-
-        // then
-        assertThat(request).isNull();
-    }
 }

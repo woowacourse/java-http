@@ -43,8 +43,7 @@ public class RegisterHandler implements Handler {
         User user = getUser(query);
         InMemoryUserRepository.save(user);
         HttpResponse response = new HttpResponse();
-        response.addHeader("Location", "/index.html");
-        response.setHttpStatus(HttpStatus.FOUND);
+        response.sendRedirect("/index.html");
         return response;
     }
 

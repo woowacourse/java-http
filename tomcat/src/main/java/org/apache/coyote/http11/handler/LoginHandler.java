@@ -40,8 +40,7 @@ public class LoginHandler implements Handler {
         User user = (User) session.getAttribute("user");
         if (user != null) {
             HttpResponse response = new HttpResponse();
-            response.setHeader("Location", "/index.html");
-            response.setHttpStatus(HttpStatus.FOUND);
+            response.sendRedirect("/index.html");
             return response;
         }
         HttpResponse response = new HttpResponse();
@@ -67,16 +66,14 @@ public class LoginHandler implements Handler {
         HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
         HttpResponse response = new HttpResponse();
-        response.addHeader("Location", "/index.html");
+        response.sendRedirect("/index.html");
         response.setCookie(new HttpCookieResponse("JSESSIONID", session.getId()));
-        response.setHttpStatus(HttpStatus.FOUND);
         return response;
     }
 
     private HttpResponse loginFail() {
         HttpResponse response = new HttpResponse();
-        response.addHeader("Location", "/401.html");
-        response.setHttpStatus(HttpStatus.FOUND);
+        response.sendRedirect("/401.html");
         return response;
     }
 }

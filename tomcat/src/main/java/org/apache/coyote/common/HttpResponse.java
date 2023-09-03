@@ -40,6 +40,11 @@ public class HttpResponse {
             .collect(joining(System.lineSeparator()));
     }
 
+    public void sendRedirect(String redirectUri) {
+        setHeader("Location", redirectUri);
+        setHttpStatus(HttpStatus.FOUND);
+    }
+
     public void setCookie(HttpCookieResponse cookie) {
         httpHeaders.setCookie(cookie);
     }
@@ -82,9 +87,5 @@ public class HttpResponse {
 
     public String getContentBody() {
         return contentBody;
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
     }
 }

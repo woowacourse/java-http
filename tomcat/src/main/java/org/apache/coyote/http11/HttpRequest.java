@@ -76,6 +76,13 @@ public class HttpRequest {
         return headers;
     }
 
+    public HttpHeader getHeader(String name) {
+        return headers.stream()
+                .filter(httpHeader -> httpHeader.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
+
     public String getBody() {
         return body;
     }

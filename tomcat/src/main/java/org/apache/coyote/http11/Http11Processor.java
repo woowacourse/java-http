@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final RequestLine requestLine = RequestLine.from(firstLine);
-//            final RequestHeaders requestHeader = getHeaders(bufferedReader);
+            final RequestHeaders requestHeader = getHeaders(bufferedReader);
 //            final RequestBody requestBody = readBody(bufferedReader, requestHeader);
 //
 //            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);

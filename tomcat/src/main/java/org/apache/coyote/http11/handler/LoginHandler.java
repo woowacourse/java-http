@@ -2,21 +2,15 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Cookie;
-import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.common.RequestMethod;
-import org.apache.coyote.http11.common.ResponseStatus;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.ResponseEntity;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,14 +27,8 @@ public class LoginHandler implements Handler {
                 return ResponseEntity.redirect("index.html");
             }
 
-            String fileData = readLoginFile();
-            List<String> headers = List.of(
-                    String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
-                    String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
-            );
-
-            return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
-
+            String fileData = FileReader.readFile("/login.html");
+            return ResponseEntity.ok(fileData, "/login.html");
         }
         if (request.getRequestMethod() == RequestMethod.POST) {
             Optional<User> userResult = findUser(request);
@@ -50,14 +38,6 @@ public class LoginHandler implements Handler {
             return loginFailResponse();
         }
         throw new UnsupportedOperationException("get, post만 가능합니다.");
-    }
-
-    private String readLoginFile() throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource("static/login.html");
-        File file = new File(resource.getFile());
-        String fileData = new String(Files.readAllBytes(file.toPath()));
-        return fileData;
     }
 
     private boolean isLoginUser(String jsessionid) throws IOException {

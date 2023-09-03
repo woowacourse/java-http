@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http;
 
+import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.ResponseStatus;
 
@@ -34,6 +35,14 @@ public class ResponseEntity {
     public static ResponseEntity redirect(String redirectionFile) {
         List<String> headers = List.of(String.join(" ", "Location:", redirectionFile));
         return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+    }
+
+    public static ResponseEntity ok(String fileData, String endPoint) {
+        List<String> headers = List.of(
+                String.join(" ", "Content-Type:", ContentType.findMatchingType(endPoint).getContentType()),
+                String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
+        );
+        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
     }
 
     public void setCookie(String key, String value) {

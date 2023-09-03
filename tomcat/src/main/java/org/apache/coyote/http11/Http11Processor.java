@@ -41,10 +41,11 @@ public class Http11Processor implements Runnable, Processor {
             String requestPath = requestInfoElements[PATH_INDEX];
 
             String responseBody = extractResponseBody(requestPath);
+            String contentType = extractContentType(requestPath);
 
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    String.format("Content-Type: %s;charset=utf-8 ", contentType),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -65,5 +66,21 @@ public class Http11Processor implements Runnable, Processor {
         URL url = getClass().getClassLoader().getResource("static" + requestPath);
 
         return new String(Files.readAllBytes(Path.of(url.getPath())));
+    }
+
+    private String extractContentType(String requestPath) {
+        if (requestPath.endsWith(".html")) {
+            return "text/html";
+        }
+
+        if (requestPath.endsWith(".css")) {
+            return "text/css";
+        }
+
+        if (requestPath.endsWith(".js")) {
+            return "text/javascript";
+        }
+
+        return null;
     }
 }

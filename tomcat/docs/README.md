@@ -9,7 +9,7 @@
     Accept: */*
   ```
 
-- [ ] GET /index.html 요청이 들어오면, 관련된 js, css 파일도 반환한다.
+- [X] GET /index.html 요청이 들어오면, 관련된 js, css 파일도 반환한다.
 ### Request
 ```http request
 GET /css/styles.css HTTP/1.1

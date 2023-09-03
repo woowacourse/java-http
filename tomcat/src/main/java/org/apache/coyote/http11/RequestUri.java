@@ -28,7 +28,7 @@ public class RequestUri {
         int index = requestUri.indexOf("?");
 
         if (index == -1) {
-            return new RequestUri(requestUri, new HashMap<>());
+            return new RequestUri(requestUri.substring(1), new HashMap<>());
         }
 
         String path = requestUri.substring(1, index);
@@ -61,17 +61,30 @@ public class RequestUri {
     private String extractResponseBody() {
         try {
             return Files.readString(findPath());
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException | NullPointerException e) {
             return DEFAULT_RESPONSE;
         }
     }
 
     private Path findPath() throws URISyntaxException {
-        String uri = path.substring(1);
         URL resource = getClass().getClassLoader()
-                .getResource(String.format("static/%s", uri));
+                .getResource(String.format("static/%s", getPath()));
 
         return Paths.get(Objects.requireNonNull(resource).toURI());
     }
 
+    private String getPath() {
+        if (path.contains(".")) {
+            return path;
+        }
+        return path + ".html";
+    }
+
+    public String findQueryStringValue(String key) {
+        return queryStrings.get(key);
+    }
+
+    public boolean isQueryStringExisted() {
+        return !queryStrings.isEmpty();
+    }
 }

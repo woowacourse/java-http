@@ -28,4 +28,13 @@ public class RequestLine {
             throw new IllegalArgumentException("해당 파일을 찾을 수 없습니다.");
         }
     }
+
+    public boolean isQueryStringExisted() {
+        return requestUri.isQueryStringExisted();
+    }
+
+    public String findQueryStringValue(String key) {
+        return requestUri.findQueryStringValue(key);
+    }
+
 }

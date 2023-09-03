@@ -37,7 +37,17 @@ public class RequestHandler {
             return login(request);
         }
 
+        if (request.getUri().equals("/register") && request.getMethod() == HttpMethod.POST) {
+            return signUp(request);
+        }
+
         throw new IllegalArgumentException();
+    }
+
+    private static boolean isStaticFile(String target) {
+        String value = target.substring(target.lastIndexOf(".") + 1);
+        return Arrays.stream(ContentType.values())
+            .anyMatch(it -> it.name().equalsIgnoreCase(value));
     }
 
     private static String login(HttpRequest request) {
@@ -54,10 +64,14 @@ public class RequestHandler {
         return getRedirectResponse(HttpStatus.FOUND, "/401.html");
     }
 
-    private static boolean isStaticFile(String target) {
-        String value = target.substring(target.lastIndexOf(".") + 1);
-        return Arrays.stream(ContentType.values())
-            .anyMatch(it -> it.name().equalsIgnoreCase(value));
+    private static String signUp(HttpRequest request) {
+        Map<String, String> body = request.getBody();
+        InMemoryUserRepository.save(new User(
+            body.get("account"),
+            body.get("password"),
+            body.get("email")
+        ));
+        return getRedirectResponse(HttpStatus.FOUND, "/index.html");
     }
 
     private static String getRedirectResponse(HttpStatus httpStatus, String location) {

@@ -1,12 +1,14 @@
 package nextstep.jwp;
 
 import static nextstep.jwp.HttpStatus.FOUND;
+import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import nextstep.jwp.db.InMemoryUserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -128,12 +130,36 @@ class RequestHandlerTest {
     }
     
     @Test
-    void 회원가입() {
+    void 회원가입_성공() {
         // given
-        
+        String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1 ",
+            "Content-Length: 46",
+            "",
+            "account=hs&password=hs123&email=hs%40naver.com");
+
         // when
-        
+        String response = HTTP_요청을_보낸다(httpRequest);
+
         // then
+        assertAll(
+            () -> assertThat(response).contains("Location: /index.html"),
+            () -> assertThat(findByAccount("hs")).isPresent()
+        );
+    }
+
+    @Test
+    void 회원가입시_GET이면_예외() {
+        // given
+        String httpRequest = String.join("\r\n",
+            "GET /register HTTP/1.1 ",
+            "Content-Length: 46",
+            "",
+            "account=hs&password=hs123&email=hs%40naver.com");
+
+        // when & then
+        assertThatThrownBy(() -> HTTP_요청을_보낸다(httpRequest))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
     private String HTTP_요청을_보낸다(String request) {

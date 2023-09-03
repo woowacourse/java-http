@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-public enum HttpResponseHeaderType {
+public enum ResponseHeaderType {
 	CONTENT_TYPE("Content-Type"),
 	CONTENT_LENGTH("Content-Length"),
 	LOCATION("Location"),
@@ -8,7 +8,7 @@ public enum HttpResponseHeaderType {
 
 	private final String name;
 
-	HttpResponseHeaderType(final String name) {
+	ResponseHeaderType(final String name) {
 		this.name = name;
 	}
 

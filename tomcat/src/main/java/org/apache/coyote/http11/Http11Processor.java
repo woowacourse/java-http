@@ -8,10 +8,10 @@ import java.util.ArrayList;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HandlerMapping;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
 			final var requestLine = readRequestLine(reader);
 			final var requestHeader = readRequestHeader(reader);
 			final var requestBody = readRequestBody(reader, requestHeader);
-			final var request = new HttpRequest(requestLine, requestHeader, requestBody);
+			final var request = new Request(requestLine, requestHeader, requestBody);
 			final var response = HandlerMapping.handle(request);
 			outputStream.write(response.format().getBytes());
 			outputStream.flush();
@@ -52,28 +52,28 @@ public class Http11Processor implements Runnable, Processor {
 		}
 	}
 
-	private HttpRequestLine readRequestLine(final BufferedReader reader) throws IOException {
-		return HttpRequestLine.from(reader.readLine());
+	private RequestLine readRequestLine(final BufferedReader reader) throws IOException {
+		return RequestLine.from(reader.readLine());
 	}
 
-	private HttpRequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
+	private RequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
 		final var header = new ArrayList<String>();
 		String line;
 		while ((!END_OF_LINE.equals(line = reader.readLine()))) {
 			header.add(line);
 		}
-		return HttpRequestHeader.from(header);
+		return RequestHeader.from(header);
 	}
 
-	private HttpRequestBody readRequestBody(final BufferedReader reader, final HttpRequestHeader header) throws
+	private RequestBody readRequestBody(final BufferedReader reader, final RequestHeader header) throws
 		IOException {
 		final var contentLength = header.get("Content-Length");
 		if (contentLength == null) {
-			return HttpRequestBody.empty();
+			return RequestBody.empty();
 		}
 		final var bodySize = Integer.parseInt(contentLength);
 		final var buffer = new char[bodySize];
 		reader.read(buffer);
-		return HttpRequestBody.from(new String(buffer));
+		return RequestBody.from(new String(buffer));
 	}
 }

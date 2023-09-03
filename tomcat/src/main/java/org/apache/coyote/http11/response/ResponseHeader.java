@@ -4,20 +4,20 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpResponseHeader {
+public class ResponseHeader {
 
 	private static final String CRLF = "\r\n";
 
 	private static final String HEADER_SEPARATOR = ": ";
 	private static final String LINE_END = " ";
 
-	private final Map<HttpResponseHeaderType, String> headers;
+	private final Map<ResponseHeaderType, String> headers;
 
-	public HttpResponseHeader(final Map<HttpResponseHeaderType, String> headers) {
+	public ResponseHeader(final Map<ResponseHeaderType, String> headers) {
 		this.headers = headers;
 	}
 
-	public void add(HttpResponseHeaderType key, String value) {
+	public void add(ResponseHeaderType key, String value) {
 		headers.put(key, value);
 	}
 

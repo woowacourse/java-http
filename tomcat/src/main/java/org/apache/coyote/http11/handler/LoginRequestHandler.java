@@ -2,8 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,25 +17,25 @@ public class LoginRequestHandler implements RequestHandler {
 	private static final String LOGIN_PAGE_PATH = "/login.html";
 
 	@Override
-	public boolean canHandle(HttpRequest request) {
+	public boolean canHandle(Request request) {
 		return request.hasPath(REQUEST_PATH);
 	}
 
 	@Override
-	public HttpResponse handle(final HttpRequest request) {
+	public Response handle(final Request request) {
 		if (request.hasMethod(HttpMethod.GET)) {
 			return doGet(request);
 		} else if (request.hasMethod(HttpMethod.POST)) {
 			return doPost(request);
 		}
-		return HttpResponse.notFound();
+		return Response.notFound();
 	}
 
-	private HttpResponse doGet(final HttpRequest request) {
-		return HttpResponse.ok(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
+	private Response doGet(final Request request) {
+		return Response.ok(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
 	}
 
-	private HttpResponse doPost(final HttpRequest request) {
+	private Response doPost(final Request request) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
 		validateQueryParam(account, password);
@@ -49,17 +49,17 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 	}
 
-	private HttpResponse login(final String account, final String password) {
+	private Response login(final String account, final String password) {
 		final var optionalUser = InMemoryUserRepository.findByAccount(account);
 		if (optionalUser.isEmpty()) {
-			return HttpResponse.unauthorized();
+			return Response.unauthorized();
 		}
 		final var user = optionalUser.get();
 		if (!user.checkPassword(password)) {
-			return HttpResponse.unauthorized();
+			return Response.unauthorized();
 		}
 
 		log.info("[LOGIN SUCCESS] account: {}", account);
-		return HttpResponse.redirect("/index.html");
+		return Response.redirect("/index.html");
 	}
 }

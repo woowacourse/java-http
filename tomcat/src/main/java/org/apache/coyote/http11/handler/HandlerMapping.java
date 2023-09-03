@@ -2,8 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import java.util.List;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 
 public class HandlerMapping {
 
@@ -21,7 +21,7 @@ public class HandlerMapping {
 	private HandlerMapping() {
 	}
 
-	public static HttpResponse handle(final HttpRequest request) {
+	public static Response handle(final Request request) {
 		for (final RequestHandler handler : handlers) {
 			if (handler.canHandle(request)) {
 				return handler.handle(request);

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpProtocolVersion;
 
-public class HttpStatusLine {
+public class StatusLine {
 
 	private static final String DELIMITER = " ";
 	private static final String LINE_END = " ";
@@ -10,7 +10,7 @@ public class HttpStatusLine {
 	private final HttpProtocolVersion version;
 	private final StatusCode code;
 
-	public HttpStatusLine(final StatusCode code) {
+	public StatusLine(final StatusCode code) {
 		this.version = HttpProtocolVersion.HTTP11;
 		this.code = code;
 	}

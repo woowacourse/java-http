@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class HttpRequestUri {
+public class RequestUri {
 
 	private static final String QUERY_STRING_SEPARATOR = "?";
 	private static final String QUERY_PARAM_DELIMITER = "&";
@@ -15,27 +15,27 @@ public class HttpRequestUri {
 	private final String path;
 	private final Map<String, String> queryParams;
 
-	private HttpRequestUri(final String path) {
+	private RequestUri(final String path) {
 		this(path, Collections.emptyMap());
 	}
 
-	private HttpRequestUri(final String path, final Map<String, String> queryParams) {
+	private RequestUri(final String path, final Map<String, String> queryParams) {
 		this.path = path;
 		this.queryParams = queryParams;
 	}
 
-	public static HttpRequestUri from(String uri) {
+	public static RequestUri from(String uri) {
 		final var queryStringIndex = uri.indexOf(QUERY_STRING_SEPARATOR);
 
 		if (hasNoQuery(queryStringIndex)) {
-			return new HttpRequestUri(uri);
+			return new RequestUri(uri);
 		}
 
 		final var path = uri.substring(0, queryStringIndex);
 		final var queryString = uri.substring(queryStringIndex + 1);
 		final var queryParams = parseQueryString(queryString);
 
-		return new HttpRequestUri(path, queryParams);
+		return new RequestUri(path, queryParams);
 	}
 
 	private static Map<String, String> parseQueryString(final String queryString) {

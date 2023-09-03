@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.FilePath;
+import nextstep.RequestFile;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,14 +36,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String fileName = parseFileName(inputStream);
-            final URL url = getClass().getClassLoader().getResource(FilePath.getPath(fileName));
+            final RequestFile requestFile = parseFileName(inputStream);
+            final URL url = getClass().getClassLoader().getResource(requestFile.getFilePath());
 
             final var responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + requestFile.getContentType(),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseFileName(final InputStream inputStream) throws IOException {
+    private RequestFile parseFileName(final InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -64,8 +64,8 @@ public class Http11Processor implements Runnable, Processor {
                          .append("\r\n");
         }
 
-        final String[] strings = stringBuilder.toString()
-                                              .split(" ");
-        return strings[1];
+        final String fileName = stringBuilder.toString()
+                                             .split(" ")[1];
+        return RequestFile.getFile(fileName);
     }
 }

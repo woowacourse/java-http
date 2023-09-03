@@ -1,5 +1,8 @@
 package org.apache.coyote.http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpRequest {
 
     private final HttpHeaders httpHeaders;
@@ -16,5 +19,15 @@ public class HttpRequest {
 
     public HttpHeaders getHeader() {
         return httpHeaders;
+    }
+
+    public HttpMessage getHttpMessage() {
+        return httpMessage;
+    }
+
+    public Map<String, String> getParameters() {
+        Map<String, String> parameters = new HashMap<>(httpHeaders.getQueryParameters());
+        parameters.putAll(httpMessage.getParameters());
+        return parameters;
     }
 }

@@ -14,10 +14,10 @@ public class HttpRequest {
     private final Map<String, String> values = new HashMap<>();
 
     public HttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         boolean isStartLine = true;
-        while ((line = reader.readLine()) != null) {
+        while ((line = bufferedReader.readLine()) != null) {
             if (line.isEmpty()) {
                 break;
             }
@@ -28,9 +28,17 @@ public class HttpRequest {
                 values.put("version", startLine[2]);
                 isStartLine = false;
             } else {
-                String[] messages = line.split(":");
+                String[] messages = line.split(": ");
                 values.put(messages[0], messages[1]);
             }
+        }
+
+        String contentLength = values.get("Content-Length");
+        if (contentLength != null) {
+            int length = Integer.parseInt(contentLength);
+            char[] buffer = new char[length];
+            bufferedReader.read(buffer, 0, length);
+            values.put("body", new String(buffer));
         }
     }
 
@@ -52,10 +60,19 @@ public class HttpRequest {
         }
 
         String queryStrings = target.substring(queryStringIdx + 1);
-        return Arrays.stream(queryStrings.split("&"))
-           .map(keyAndValue -> keyAndValue.split("="))
-           .collect(Collectors.toMap(
-               keyAndValue -> keyAndValue[0],
-               keyAndValue -> keyAndValue[1]));
+        return parseKeyAndValue(queryStrings);
+    }
+
+    public Map<String, String> getBody() {
+        System.out.println("values = " + values);
+        return parseKeyAndValue(values.get("body"));
+    }
+
+    private Map<String, String> parseKeyAndValue(String input) {
+        return Arrays.stream(input.split("&"))
+            .map(keyAndValue -> keyAndValue.split("="))
+            .collect(Collectors.toMap(
+                keyAndValue -> keyAndValue[0],
+                keyAndValue -> keyAndValue[1]));
     }
 }

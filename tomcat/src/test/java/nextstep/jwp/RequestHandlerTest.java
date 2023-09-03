@@ -126,6 +126,15 @@ class RequestHandlerTest {
             () -> assertThat(response).contains("Location: /401.html")
         );
     }
+    
+    @Test
+    void 회원가입() {
+        // given
+        
+        // when
+        
+        // then
+    }
 
     private String HTTP_요청을_보낸다(String request) {
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());

@@ -29,7 +29,12 @@ class HandlerMappingTest {
     private static Stream<Arguments> existRequestAndExpect() {
         return Stream.of(
             Arguments.of("/", HttpMethod.GET, HandlerMapping.MAIN),
-            Arguments.of("/index.html", HttpMethod.GET, HandlerMapping.INDEX)
+            Arguments.of("/index.html", HttpMethod.GET, HandlerMapping.INDEX),
+            Arguments.of("/css/styles.css", HttpMethod.GET, HandlerMapping.INDEX_STYLE),
+            Arguments.of("/js/scripts.js", HttpMethod.GET, HandlerMapping.INDEX_JS),
+            Arguments.of("/assets/chart-area.js", HttpMethod.GET, HandlerMapping.CHART_AREA_JS),
+            Arguments.of("/assets/chart-pie.js", HttpMethod.GET, HandlerMapping.CHART_PIE_JS),
+            Arguments.of("/assets/chart-bar.js", HttpMethod.GET, HandlerMapping.CHART_BAR_JS)
         );
     }
 

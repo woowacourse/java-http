@@ -6,5 +6,6 @@
   - [x] 요청에 따른 응답을 생성하는 Handler 구현
 - [x] GET /index.html 응답하기
   - [x] string을 반환하는 요청과 file을 반환하는 요청을 분리
-- [ ] CSS 및 js 지원하기
+- [x] CSS 및 JS 지원하기
+  - [x] CSS 및 JS 요청에 대한 HandlerMapping 요소 추가
 - [ ] Query String 파싱하기

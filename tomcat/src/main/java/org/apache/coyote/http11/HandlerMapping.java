@@ -6,7 +6,12 @@ import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 public enum HandlerMapping {
 
     MAIN("/", HttpMethod.GET, "Hello world!"),
-    INDEX("/index.html", HttpMethod.GET, "index.html");
+    INDEX("/index.html", HttpMethod.GET, "index.html"),
+    INDEX_STYLE("/css/styles.css", HttpMethod.GET, "css/styles.css"),
+    INDEX_JS("/js/scripts.js", HttpMethod.GET, "js/scripts.js"),
+    CHART_BAR_JS("/assets/chart-bar.js", HttpMethod.GET, "assets/chart-bar.js"),
+    CHART_AREA_JS("/assets/chart-area.js", HttpMethod.GET, "assets/chart-area.js"),
+    CHART_PIE_JS("/assets/chart-pie.js", HttpMethod.GET, "assets/chart-pie.js");
 
     private final String path;
     private final HttpMethod httpMethod;

@@ -7,14 +7,11 @@ import java.util.List;
 
 public class HttpResponse {
 
-    private final HttpProtocol httpProtocol;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
     private final HttpHeaders httpHeaders;
     private String contentBody = "";
 
-    public HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus) {
-        this.httpProtocol = httpProtocol;
-        this.httpStatus = httpStatus;
+    public HttpResponse() {
         this.httpHeaders = new HttpHeaders();
     }
 
@@ -32,7 +29,7 @@ public class HttpResponse {
 
     private String getFirstLine() {
         return String.join(" ",
-            httpProtocol.getValue(),
+            getHttpProtocol().getValue(),
             String.valueOf(httpStatus.getStatusCode()),
             httpStatus.toString()) + " ";
     }
@@ -68,7 +65,11 @@ public class HttpResponse {
     }
 
     public HttpProtocol getHttpProtocol() {
-        return httpProtocol;
+        return HttpProtocol.HTTP11;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public HttpStatus getHttpStatus() {
@@ -81,5 +82,9 @@ public class HttpResponse {
 
     public String getContentBody() {
         return contentBody;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 }

@@ -7,7 +7,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpMethod;
-import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
@@ -31,9 +30,10 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpResponse doGet() throws IOException {
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
+        HttpResponse response = new HttpResponse();
         response.setContentBody(ResourceResolver.resolve("/register.html"));
         response.setContentType(HttpContentType.TEXT_HTML);
+        response.setHttpStatus(HttpStatus.OK);
         return response;
     }
 
@@ -42,8 +42,9 @@ public class RegisterHandler implements Handler {
         QueryString query = QueryParser.parse(requestBody);
         User user = getUser(query);
         InMemoryUserRepository.save(user);
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse();
         response.addHeader("Location", "/index.html");
+        response.setHttpStatus(HttpStatus.FOUND);
         return response;
     }
 

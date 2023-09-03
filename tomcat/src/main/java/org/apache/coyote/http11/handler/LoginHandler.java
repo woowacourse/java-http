@@ -9,7 +9,6 @@ import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpCookieResponse;
 import org.apache.coyote.common.HttpMethod;
-import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
@@ -40,13 +39,15 @@ public class LoginHandler implements Handler {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user != null) {
-            HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
+            HttpResponse response = new HttpResponse();
             response.setHeader("Location", "/index.html");
+            response.setHttpStatus(HttpStatus.FOUND);
             return response;
         }
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
+        HttpResponse response = new HttpResponse();
         response.setContentBody(ResourceResolver.resolve("/login.html"));
         response.setContentType(HttpContentType.TEXT_HTML);
+        response.setHttpStatus(HttpStatus.OK);
         return response;
     }
 
@@ -65,15 +66,17 @@ public class LoginHandler implements Handler {
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
         HttpSession session = request.getSession(true);
         session.setAttribute("user", user);
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse();
         response.addHeader("Location", "/index.html");
         response.setCookie(new HttpCookieResponse("JSESSIONID", session.getId()));
+        response.setHttpStatus(HttpStatus.FOUND);
         return response;
     }
 
     private HttpResponse loginFail() {
-        HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse();
         response.addHeader("Location", "/401.html");
+        response.setHttpStatus(HttpStatus.FOUND);
         return response;
     }
 }

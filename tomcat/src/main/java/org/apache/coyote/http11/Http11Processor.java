@@ -16,6 +16,10 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.StartLine;
 import org.apache.coyote.http11.request.URI;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseHeaders;
+import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,14 +68,12 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(file.toPath()));
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType(uri) + "charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            ResponseHeaders responseHeaders = new ResponseHeaders();
+            responseHeaders.put("Content-Type", contentType(uri) + "charset=utf-8");
+            HttpResponse response = new HttpResponse(statusLine, responseHeaders, responseBody);
 
-            bufferedWriter.write(response);
+            bufferedWriter.write(response.toString());
             bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

@@ -17,7 +17,7 @@ public class HttpResponse {
         if (messageBody == null) {
             return;
         }
-        headers.put("Content-Length", String.valueOf(messageBody.length()));
+        headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
     }
 
     @Override

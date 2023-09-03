@@ -11,6 +11,7 @@ public class HandlerFinder {
     static {
         handlers = new HashMap<>();
         handlers.put("/", new HelloWorldHandler());
+        handlers.put("/login", new LoginHandler());
 
         DEFAULT_HANDLER = new DefaultHandler();
     }

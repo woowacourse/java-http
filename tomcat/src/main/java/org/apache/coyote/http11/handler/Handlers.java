@@ -15,7 +15,8 @@ public class Handlers {
             Map.of(
                     "/", new RootHandler(),
                     "/file", new FileHandler(),
-                    "/login", new LoginHandler()
+                    "/login", new LoginHandler(),
+                    "/register", new RegisterHandler()
             );
 
 

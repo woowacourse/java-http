@@ -2,11 +2,21 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.httprequest.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,12 +36,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
+            final HttpRequest request = HttpRequest.from(inputStream);
 
-            final var responseBody = "Hello world!";
+            final String responseBody = "Hello world!";
 
-            final var response = String.join("\r\n",
+            final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -43,5 +54,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse() {
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        try {
+            final Path path = Paths.get(resource.toURI());
+
+        } catch (URISyntaxException | NullPointerException e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
     }
 }

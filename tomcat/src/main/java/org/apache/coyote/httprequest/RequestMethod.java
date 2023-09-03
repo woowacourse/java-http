@@ -1,6 +1,6 @@
 package org.apache.coyote.httprequest;
 
-import org.apache.coyote.httprequest.exception.HttpMessageNotReadableException;
+import org.apache.coyote.httprequest.exception.InvalidHttpMethodException;
 
 import java.util.Arrays;
 
@@ -20,6 +20,6 @@ public enum RequestMethod {
         return Arrays.stream(values())
                 .filter(requestMethod -> requestMethod.printedName.equals(printedName))
                 .findFirst()
-                .orElseThrow(HttpMessageNotReadableException::new);
+                .orElseThrow(InvalidHttpMethodException::new);
     }
 }

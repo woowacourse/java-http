@@ -1,6 +1,6 @@
 package org.apache.coyote.httprequest;
 
-import org.apache.coyote.httprequest.exception.HttpMessageNotReadableException;
+import org.apache.coyote.httprequest.exception.InvalidHttpMethodException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -15,6 +15,6 @@ class RequestMethodTest {
 
         //when, then
         assertThatThrownBy(() -> RequestMethod.from(invalidMethodName))
-                .isInstanceOf(HttpMessageNotReadableException.class);
+                .isInstanceOf(InvalidHttpMethodException.class);
     }
 }

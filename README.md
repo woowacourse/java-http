@@ -16,3 +16,8 @@
 ### 2. CSS 지원하기
 
 - [x] MIME 형식 지원
+
+### 3. Query String 파싱
+
+- [x] Query String 파싱
+- [x] 로그 찍기

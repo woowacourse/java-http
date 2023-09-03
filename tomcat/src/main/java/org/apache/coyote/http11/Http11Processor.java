@@ -17,7 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMPTY_URL = "/";
     private static final String PATH = "static";
     private static final String END_OF_LINE = "";
+    private static final String AMPERSAND = "&";
 
     private final Socket connection;
 
@@ -53,7 +56,31 @@ public class Http11Processor implements Runnable, Processor {
 
             // parse headers
             Map<String, String> headers = parseHeaders(request);
+
+            // Query String
             String url = headers.get("URL");
+            int queryIndex = url.indexOf("?");
+            if (queryIndex != -1) {
+                String query = url.substring(queryIndex + 1);
+                url = url.substring(0, queryIndex);
+
+                Map<String, String> parameters = new HashMap<>();
+                List<String> queryParameters = Arrays.stream(query.split(AMPERSAND)).collect(toList());
+                for (String parameter : queryParameters) {
+                    int delimiterIndex = parameter.indexOf("=");
+                    String field = parameter.substring(0, delimiterIndex);
+                    String value = parameter.substring(delimiterIndex + 1);
+                    parameters.put(field, value);
+                }
+                String account = parameters.get("account");
+                String password = parameters.get("password");
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(RuntimeException::new);
+                if (!user.checkPassword(password)) {
+                    throw new RuntimeException();
+                }
+                log.info("user : {}", user);
+            }
 
             // file type
             Path path = mapToResourcePath(url);
@@ -74,20 +101,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String mapMimeType(String fileExtension) {
-        String type = "";
         if (Objects.equals(fileExtension, "html")) {
-            type = "text/html";
+            return "text/html";
         }
         if (Objects.equals(fileExtension, "css")) {
-            type = "text/css";
+            return "text/css";
         }
         if (Objects.equals(fileExtension, "svg")) {
-            type = "image/svg+xml";
+            return "image/svg+xml";
         }
         if (Objects.equals(fileExtension, "js")) {
-            type = "text/javascript";
+            return "text/javascript";
         }
-        return type;
+        return "text/plain";
     }
 
     private String extractFileExtension(String fileName) {
@@ -133,6 +159,12 @@ public class Http11Processor implements Runnable, Processor {
     private Path mapToResourcePath(String url) throws IOException {
         if (Objects.equals(url, EMPTY_URL)) {
             url = DEFAULT_URL;
+        }
+        if (Objects.equals("/login", url)) {
+            url = url + ".html";
+        }
+        if (Objects.equals("/favicon.ico", url)) {
+            url = "";
         }
 
         URL locate = getClass().getClassLoader().getResource(PATH + url);

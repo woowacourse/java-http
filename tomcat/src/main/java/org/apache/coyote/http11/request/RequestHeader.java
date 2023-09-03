@@ -14,17 +14,16 @@ public class RequestHeader {
     public static RequestHeader from(final List<String> lines) {
         Map<String, String> headers = new HashMap<>();
         for(String line : lines) {
-            String[] headerInfo = line.split(":");
+            String[] headerInfo = line.split(": ");
             headers.put(headerInfo[0], headerInfo[1]);
         }
         return new RequestHeader(headers);
     }
 
-    public boolean hasRequestBody() {
-        return headers.containsKey("Content-Type");
-    }
-
     public String getHeaderValue(final String header) {
+        if(!headers.containsKey(header)) {
+            return null;
+        }
         return headers.get(header);
     }
 }

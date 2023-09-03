@@ -75,4 +75,8 @@ public class HttpRequest {
                 keyAndValue -> keyAndValue[0],
                 keyAndValue -> keyAndValue[1]));
     }
+
+    public HttpMethod getMethod() {
+        return HttpMethod.from(values.get("method"));
+    }
 }

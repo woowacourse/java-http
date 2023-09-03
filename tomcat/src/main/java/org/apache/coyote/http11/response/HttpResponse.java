@@ -15,6 +15,17 @@ public class HttpResponse {
     private HttpResponseStatusLine httpResponseStatusLine = DEFAULT_RESPONSE_STATUS;
     private String body;
 
+    public void updateHttpResponseStatusLineByStatus(final HttpStatus httpStatus) {
+        this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, httpStatus);
+    }
+
+    public void updateByResponseEntity(final ResponseEntity response) throws IOException {
+        updateHttpResponseStatusLineByStatus(response.getHttpStatus());
+        setHeader("Content-Type", response.getView().getContentType());
+        response.getHeaders().forEach(this::setHeader);
+        setBody(response.getView().renderView());
+    }
+
     public HttpResponseStatusLine getHttpResponseStatusLine() {
         return httpResponseStatusLine;
     }
@@ -26,11 +37,7 @@ public class HttpResponse {
     public String getBody() {
         return body;
     }
-
-    public void updateHttpResponseStatusLineByStatus(final HttpStatus httpStatus) {
-        this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, httpStatus);
-    }
-
+    
     public void setBody(final String body) {
         httpHeaders.setHeader("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
@@ -42,12 +49,5 @@ public class HttpResponse {
 
     public void setCookie(final String cookieKey, final String cookieValue) {
         httpHeaders.setHeader("Set-Cookie", cookieKey + "=" + cookieValue);
-    }
-
-    public void updateByResponseEntity(final ResponseEntity response) throws IOException {
-        updateHttpResponseStatusLineByStatus(response.getHttpResponseStatus());
-        setHeader("Content-Type", response.getView().getContentType());
-        response.getHeaders().forEach(this::setHeader);
-        setBody(response.getView().renderView());
     }
 }

@@ -7,7 +7,6 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-
     public static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }

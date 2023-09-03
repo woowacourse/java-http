@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,13 +6,16 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.IOException;
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayName("HttpMethod 테스트")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class HttpRequestMessageReaderTest {
 
     @Test
@@ -68,7 +71,7 @@ class HttpRequestMessageReaderTest {
     void 쿼리파라미터와_URI를_분리하여_저장한다() throws IOException {
         // given
         final String httpRequestMessage = String.join("\r\n",
-                "GET /index.html?name=royce&password=p1234 HTTP/1.1 ",
+                "GET /login.html?name=royce&password=p1234 HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -82,6 +85,30 @@ class HttpRequestMessageReaderTest {
         assertSoftly(softAssertions -> {
             assertThat(httpRequest.getParam("name")).isEqualTo("royce");
             assertThat(httpRequest.getParam("password")).isEqualTo("p1234");
+        });
+    }
+
+    @Test
+    void POST요청시_body_데이터를_저장한다() throws IOException {
+        // given
+        final String requestBody = "name=royce&password=p1234";
+        final String httpRequestMessage = String.join("\r\n",
+                "POST /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + requestBody.length() + " ",
+                "",
+                requestBody);
+        final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+
+        // when
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+
+        // then
+        assertSoftly(softAssertions -> {
+            assertThat(httpRequest.getPayloadValue("name")).isEqualTo("royce");
+            assertThat(httpRequest.getPayloadValue("password")).isEqualTo("p1234");
         });
     }
 }

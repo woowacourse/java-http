@@ -9,7 +9,6 @@ public class ResponseEntity {
     private final View view;
     private final Map<String, String> headers;
 
-
     public ResponseEntity(final HttpStatus httpStatus, final View view) {
         this.httpStatus = httpStatus;
         this.view = view;
@@ -26,10 +25,6 @@ public class ResponseEntity {
         this.headers = headers;
     }
 
-    public static ResponseEntity of(final HttpStatus httpStatus, final View view) {
-        return new ResponseEntity(httpStatus, view);
-    }
-
     public static ResponseEntity fromSimpleStringData(final String body) {
         return new ResponseEntity(HttpStatus.OK, new SimpleStringDataView(body));
     }
@@ -42,7 +37,7 @@ public class ResponseEntity {
         try {
             return new ResponseEntity(httpStatus, StaticResourceView.of(path));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.NOT_FOUND, StaticResourceView.of("/404.html"));
+            return new ResponseEntity(HttpStatus.NOT_FOUND, StaticResourceView.of("/404.html"));
         }
     }
 
@@ -54,7 +49,7 @@ public class ResponseEntity {
         );
     }
 
-    public HttpStatus getHttpResponseStatus() {
+    public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 

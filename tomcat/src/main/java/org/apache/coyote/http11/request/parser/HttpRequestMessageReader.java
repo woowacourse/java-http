@@ -41,7 +41,7 @@ public class HttpRequestMessageReader {
     public static HttpRequestStartLine readStartLine(final String requestLine) {
         final String[] startLineTokens = requestLine.split(DELIMITER);
         validateStartLineTokenSize(startLineTokens);
-        final HttpMethod httpMethod = HttpMethod.valueOf(startLineTokens[HTTP_METHOD_INDEX]);
+        final HttpMethod httpMethod = HttpMethod.from(startLineTokens[HTTP_METHOD_INDEX]);
         final String URIWithQueryStrings = startLineTokens[REQUEST_URI_INDEX];
         final String requestURI = parseURI(URIWithQueryStrings);
         final Map<String, String> queryParams = parseQueryParams(URIWithQueryStrings);
@@ -75,7 +75,7 @@ public class HttpRequestMessageReader {
     }
 
     private static Map<String, String> readHeaders(final BufferedReader br) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         String readLine = br.readLine();
         while (readLine != null && !readLine.isEmpty()) {
             System.out.println(readLine);
@@ -107,16 +107,16 @@ public class HttpRequestMessageReader {
             final BufferedReader br,
             final HttpRequestStartLine startLine
     ) throws IOException {
-        final SupportPayloadContentType supportPayloadContentType =
-                SupportPayloadContentType.from(headers.get("Content-Type"));
+        final ContentTypePayloadParserMapper contentTypePayloadParserMapper =
+                ContentTypePayloadParserMapper.from(headers.get("Content-Type"));
         final String body = readBody(br, Integer.parseInt(headers.get("Content-Length")));
-        final PayloadParser payloadParser = supportPayloadContentType.getPayloadParser();
-        Map<String, String> payload = payloadParser.parse(body);
+        final PayloadParser payloadParser = contentTypePayloadParserMapper.getPayloadParser();
+        final Map<String, String> payload = payloadParser.parse(body);
         return HttpRequest.of(startLine, headers, payload);
     }
 
     private static String readBody(final BufferedReader br, final int contentLength) throws IOException {
-        char[] body = new char[contentLength];
+        final char[] body = new char[contentLength];
         br.read(body, 0, contentLength);
         return String.copyValueOf(body);
     }

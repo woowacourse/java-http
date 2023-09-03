@@ -1,17 +1,20 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.formatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.response.formatter.HttpResponseMessageWriter;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayName("HttpResponseMessageWriter 테스트")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class HttpResponseMessageWriterTest {
 
     @Test

@@ -17,7 +17,7 @@ public class LoginService {
     private static void enrollSession(User user, String sessionId) {
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
-        SessionManager.getInstance().add(session);
+        SessionManager.enroll(session);
     }
 
     public Optional<String> login(String account, String password) {

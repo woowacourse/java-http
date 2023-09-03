@@ -12,22 +12,22 @@ public class HandlerMapper {
 
     public HandlerMapper() {
         contollerByMapper.put(
-            (request) -> "/login".equals(request.getRequestLine().getPath()) &&
+            request -> "/login".equals(request.getRequestLine().getPath()) &&
                 Method.POST.equals(request.getRequestLine().getMethod()),
             new LoginController(new LoginService()));
 
         contollerByMapper.put(
-            (request) -> "/register".equals(request.getRequestLine().getPath()) &&
+            request -> "/register".equals(request.getRequestLine().getPath()) &&
                 Method.POST.equals(request.getRequestLine().getMethod()),
             new SignUpController(new LoginService()));
 
         contollerByMapper.put(
-            (request) -> "/login".equals(request.getRequestLine().getPath()) &&
+            request -> "/login".equals(request.getRequestLine().getPath()) &&
                 Method.GET.equals(request.getRequestLine().getMethod()),
             new LoginViewController());
 
         contollerByMapper.put(
-            (request) -> "/register".equals(request.getRequestLine().getPath()) &&
+            request -> "/register".equals(request.getRequestLine().getPath()) &&
                 Method.GET.equals(request.getRequestLine().getMethod()),
             new SignUpViewController());
     }

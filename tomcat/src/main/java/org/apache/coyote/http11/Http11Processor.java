@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return inputReader.readLine();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return stringBuilder.toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
@@ -97,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
             inputReader.read(buffer, 0, contentLength);
             return new String(buffer);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
@@ -128,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String controllerResponse(Request request) {
         Controller handler = handlerMapper.getHandler(request);
-        Response response = handler.handle(request);
+        Response<Object> response = handler.handle(request);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(requestLine(response));
         Optional<String> body = bodyOf(response);
@@ -140,16 +140,16 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.append(str).toString();
     }
 
-    private String responseNoBody(Response response) {
-        Map headers = response.getHeaders();
+    private String responseNoBody(Response<Object> response) {
+        Map<String, String> headers = response.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
         stringJoiner.add("");
         return stringJoiner.toString();
     }
 
-    private String responseWithBody(Response response, String body) {
-        Map headers = response.getHeaders();
+    private String responseWithBody(Response<Object> response, String body) {
+        Map<String, String> headers = response.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
         stringJoiner.add(resourceProvider.contentTypeOf(response.getViewPath()));
@@ -159,8 +159,8 @@ public class Http11Processor implements Runnable, Processor {
         return stringJoiner.toString();
     }
 
-    private String headerResponse(Map headers) {
-        return (String) headers.keySet()
+    private String headerResponse(Map<String, String> headers) {
+        return headers.keySet()
             .stream()
             .map(headerName -> makeHeader(headerName, headers.get(headerName)))
             .collect(Collectors.joining("\r\n"));
@@ -172,14 +172,14 @@ public class Http11Processor implements Runnable, Processor {
         return headerKey + ": " + headerValue;
     }
 
-    private Optional<String> bodyOf(Response response) {
+    private Optional<String> bodyOf(Response<Object> response) {
         if (response.isViewResponse()) {
             return Optional.of(resourceProvider.resourceBodyOf(response.getViewPath()));
         }
         return Optional.empty();
     }
 
-    private String requestLine(Response response) {
+    private String requestLine(Response<Object> response) {
         HttpResponse httpResponse = HttpResponse.of(response.getStatusCode());
         return "HTTP/1.1 " + httpResponse.getStatusCode() + " " + httpResponse.name() + " ";
     }

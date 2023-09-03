@@ -9,16 +9,7 @@ import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.Request;
 
 public class SessionManager implements Manager {
-
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
-    private static final SessionManager instance = new SessionManager();
-
-    private SessionManager() {
-    }
-
-    public static SessionManager getInstance() {
-        return instance;
-    }
 
     public static boolean loggedIn(Request request) {
         Optional<Cookies> cookie = request.getRequestHeaders().getCookie();
@@ -32,10 +23,14 @@ public class SessionManager implements Manager {
         Optional<String> sessionCookie = cookies.getSessionCookie();
         if (sessionCookie.isPresent()) {
             String sessionId = sessionCookie.get();
-            HttpSession session = SessionManager.getInstance().findSession(sessionId);
+            HttpSession session = SESSIONS.get(sessionId);
             return session != null;
         }
         return false;
+    }
+
+    public static void enroll(Session session) {
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
@@ -45,10 +40,7 @@ public class SessionManager implements Manager {
 
     @Override
     public HttpSession findSession(String id) {
-        if (SESSIONS.containsKey(id)) {
-            return SESSIONS.get(id);
-        }
-        return null;
+        return SESSIONS.get(id);
     }
 
     @Override

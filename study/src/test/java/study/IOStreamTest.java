@@ -113,7 +113,7 @@ class IOStreamTest {
             }
 
             //then
-            assertThat(charCount).isEqualTo(0);
+            assertThat(charCount).isZero();
             fileInputStream1.close();
             bufferedOutputStream.close();
         }

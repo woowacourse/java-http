@@ -1,15 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
+    private static final ClassLoader SYSTEM_CLASS_LOADER = ClassLoader.getSystemClassLoader();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -26,22 +30,50 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream()
+        ) {
+            HttpRequest request = new HttpRequest(inputStream);
+            String url = request.getUrl();
+            System.out.println();
+            if (Objects.equals(url, "/")) {
+                String responseBody = "Hello world!";
 
-            final var responseBody = "Hello world!";
+                String response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+                outputStream.write(response.getBytes());
+            } else {
+                try (
+                        FileInputStream fileStream = new FileInputStream(
+                                getStaticResourceURL(url).getFile())
+                ) {
+                    byte[] fileBytes = fileStream.readAllBytes();
+                    outputStream.write(String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + fileBytes.length + " ",
+                            "\r\n").getBytes());
+                    outputStream.write(fileBytes);
+                } catch (FileNotFoundException e) {
+                    outputStream.write(String.join("\r\n",
+                            "HTTP/1.1 404 NOT_FOUND ",
+                            "Content-Type: text/html;charset=utf-8",
+                            "").getBytes());
+                }
+            }
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private URL getStaticResourceURL(String url) {
+        return SYSTEM_CLASS_LOADER.getResource("static" + url);
     }
 }

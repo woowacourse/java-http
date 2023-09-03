@@ -11,9 +11,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import kokodak.HttpRequestMessage;
 import kokodak.StringReader;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(path));
                 response = String.join(CRLF.getValue(),
                                        "HTTP/1.1 200 OK ",
-                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Type: text/javascript ",
                                        "Content-Length: " + responseBody.getBytes().length + " ",
                                        "",
                                        responseBody);
@@ -94,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(path));
                 response = String.join(CRLF.getValue(),
                                        "HTTP/1.1 200 OK ",
-                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Type: text/javascript ",
                                        "Content-Length: " + responseBody.getBytes().length + " ",
                                        "",
                                        responseBody);
@@ -105,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(path));
                 response = String.join(CRLF.getValue(),
                                        "HTTP/1.1 200 OK ",
-                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Type: text/javascript ",
                                        "Content-Length: " + responseBody.getBytes().length + " ",
                                        "",
                                        responseBody);
@@ -116,7 +119,28 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(path));
                 response = String.join(CRLF.getValue(),
                                        "HTTP/1.1 200 OK ",
-                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Type: text/javascript ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().startsWith("/login")) {
+                if (httpRequestMessage.hasQueryString()) {
+                    final Map<String, String> queryString = httpRequestMessage.getQueryString();
+                    final String account = queryString.get("account");
+                    final String password = queryString.get("password");
+                    final User user = InMemoryUserRepository.findByAccount(account)
+                                                            .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
+                    if (user.checkPassword(password)) {
+                        log.info("user = {}", user);
+                    }
+                }
+                final String fileName = "static/login.html";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/html;charset=utf-8 ",
                                        "Content-Length: " + responseBody.getBytes().length + " ",
                                        "",
                                        responseBody);

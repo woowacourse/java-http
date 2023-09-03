@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;
-import org.apache.catalina.servlet.response.ResponseHeaders;
 import org.apache.catalina.servlet.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -19,11 +18,9 @@ class HttpResponseTest {
     @Test
     void messageBody_가_있다면_content_length를_자동으로_생성해준다() {
         // when
-        HttpResponse response = new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                new ResponseHeaders(),
-                "mallang"
-        );
+        HttpResponse response = new HttpResponse();
+        response.setStatusLine(new StatusLine(HttpStatus.OK));
+        response.setMessageBody("mallang");
 
         // then
         assertThat(response.headers().headers().get("Content-Length"))
@@ -33,13 +30,10 @@ class HttpResponseTest {
     @Test
     void 응답_메세지를_만들_수_있다() {
         // given
-        ResponseHeaders headers = new ResponseHeaders();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-        HttpResponse response = new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                headers,
-                "mallang"
-        );
+        HttpResponse response = new HttpResponse();
+        response.setStatusLine(new StatusLine(HttpStatus.OK));
+        response.addHeader("Content-Type", "text/html;charset=utf-8");
+        response.setMessageBody("mallang");
 
         // when
         String actual = response.toString();
@@ -56,13 +50,9 @@ class HttpResponseTest {
     @Test
     void 응답_메세지가_없는_경우() {
         // given
-        ResponseHeaders headers = new ResponseHeaders();
-        headers.put("hi", "yes");
-        HttpResponse response = new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                headers,
-                null
-        );
+        HttpResponse response = new HttpResponse();
+        response.setStatusLine(new StatusLine(HttpStatus.OK));
+        response.addHeader("hi", "yes");
 
         // when
         String actual = response.toString();
@@ -77,13 +67,9 @@ class HttpResponseTest {
     @Test
     void 쿠키를_세팅할_수_있다() {
         // given
-        ResponseHeaders headers = new ResponseHeaders();
-        headers.put("hi", "yes");
-        HttpResponse response = new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                headers,
-                null
-        );
+        HttpResponse response = new HttpResponse();
+        response.setStatusLine(new StatusLine(HttpStatus.OK));
+        response.addHeader("hi", "yes");
         response.addCookie("mallang", "1234");
         response.addCookie("썬샷", "12345");
 

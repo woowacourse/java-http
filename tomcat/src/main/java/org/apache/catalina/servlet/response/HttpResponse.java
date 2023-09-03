@@ -5,10 +5,10 @@ import org.apache.catalina.servlet.session.Cookies;
 
 public class HttpResponse {
 
+    private final Cookies cookies = new Cookies();
+    private final ResponseHeaders headers = new ResponseHeaders();
     private StatusLine statusLine;
     private String messageBody;
-    private final ResponseHeaders headers = new ResponseHeaders();
-    private final Cookies cookies = new Cookies();
     private BufferedWriter writer;
 
     public HttpResponse() {
@@ -18,26 +18,11 @@ public class HttpResponse {
         this.writer = writer;
     }
 
-    public HttpResponse(StatusLine statusLine, String messageBody) {
-        this(statusLine, new ResponseHeaders(), messageBody);
-    }
-
-    public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String messageBody) {
-        this.statusLine = statusLine;
-        this.headers.headers().putAll(headers.headers());
-        this.messageBody = messageBody;
-        setContentLength();
-    }
-
     private void setContentLength() {
         if (messageBody == null) {
             return;
         }
         headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
-    }
-
-    public void setWriter(BufferedWriter writer) {
-        this.writer = writer;
     }
 
     public void setStatusLine(StatusLine statusLine) {
@@ -67,10 +52,6 @@ public class HttpResponse {
 
     public Cookies cookies() {
         return cookies;
-    }
-
-    public String messageBody() {
-        return messageBody;
     }
 
     public BufferedWriter writer() {

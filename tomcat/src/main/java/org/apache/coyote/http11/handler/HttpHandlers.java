@@ -33,7 +33,7 @@ public class HttpHandlers {
 				.filter(handler -> handler.isSupported(e))
 				.findAny()
 				.orElseGet(InternalServerErrorHandler::new)
-				.handleTo();
+				.handleTo(e);
 		}
 	}
 }

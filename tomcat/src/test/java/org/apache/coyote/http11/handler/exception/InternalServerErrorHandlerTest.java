@@ -15,7 +15,7 @@ class InternalServerErrorHandlerTest {
 	void handleTo() throws IOException {
 		final InternalServerErrorHandler handler = new InternalServerErrorHandler();
 
-		final HttpResponse actual = handler.handleTo();
+		final HttpResponse actual = handler.handleTo(new Exception());
 
 		final String expected = "HTTP/1.1 302 Found \r\n" +
 			"Content-Type: text/html;charset=utf-8 \r\n" +

@@ -8,9 +8,12 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InternalServerErrorHandler implements ExceptionHandler {
 
+	private static final Logger log = LoggerFactory.getLogger(InternalServerErrorHandler.class);
 	private static final String REDIRECT_URI = "http://localhost:8080/500.html";
 
 	@Override
@@ -19,7 +22,8 @@ public class InternalServerErrorHandler implements ExceptionHandler {
 	}
 
 	@Override
-	public HttpResponse handleTo() throws IOException {
+	public HttpResponse handleTo(final Exception e) throws IOException {
+		log.error(e.getMessage(), e);
 		final String body = "";
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,

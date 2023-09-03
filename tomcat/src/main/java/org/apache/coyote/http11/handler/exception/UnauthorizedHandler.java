@@ -20,7 +20,7 @@ public class UnauthorizedHandler implements ExceptionHandler {
 	}
 
 	@Override
-	public HttpResponse handleTo() throws IOException {
+	public HttpResponse handleTo(final Exception e) throws IOException {
 		final String body = "";
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,

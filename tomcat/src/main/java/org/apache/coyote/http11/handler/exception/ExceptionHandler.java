@@ -8,5 +8,5 @@ public interface ExceptionHandler {
 
 	boolean isSupported(final Exception exception);
 
-	HttpResponse handleTo() throws IOException;
+	HttpResponse handleTo(final Exception exception) throws IOException;
 }

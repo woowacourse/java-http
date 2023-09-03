@@ -41,15 +41,15 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequest.of(new BufferedReader(new InputStreamReader(inputStream)));
             final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
-            final String response = handleRequest(httpRequest);
-            outputStream.write(response.getBytes());
+            final HttpResponse httpResponse = handleRequest(httpRequest);
+            outputStream.write(httpResponse.stringify().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String handleRequest(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.getTarget().equals("/")) {
             return handleRootRequest();
         }
@@ -65,15 +65,13 @@ public class Http11Processor implements Runnable, Processor {
         return handleResourceRequest(httpRequest, httpRequest.getTarget());
     }
 
-    private String handleRootRequest() {
+    private HttpResponse handleRootRequest() {
         final Map<String, String> responseHeader = new HashMap<>();
         responseHeader.put("Content-Type", "text/html;charset=utf-8");
-
-        final HttpResponse httpResponse = HttpResponse.of("200 OK", responseHeader, "Hello world!");
-        return httpResponse.stringify();
+        return HttpResponse.of("200 OK", responseHeader, "Hello world!");
     }
 
-    private String handleRegisterRequest(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse handleRegisterRequest(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.getMethod().equals("GET")) {
             return handleResourceRequest(httpRequest, "register.html");
         }
@@ -89,13 +87,12 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeader = new HashMap<>();
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
-            final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
-            return httpResponse.stringify();
+            return HttpResponse.of("302", responseHeader, "");
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
 
-    private String handleLoginRequest(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse handleLoginRequest(final HttpRequest httpRequest) throws IOException {
         final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
         String sessionId = httpCookie.getCookie("JSESSIONID");
 
@@ -106,8 +103,7 @@ public class Http11Processor implements Runnable, Processor {
                 final Map<String, String> responseHeader = new HashMap<>();
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
-                return httpResponse.stringify();
+                return HttpResponse.of("302", responseHeader, "");
             }
             // not login user
             return handleResourceRequest(httpRequest, "login.html");
@@ -120,8 +116,7 @@ public class Http11Processor implements Runnable, Processor {
                 // invalid user
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/401.html");
-                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
-                return httpResponse.stringify();
+                return HttpResponse.of("302", responseHeader, "");
             }
 
             // valid user
@@ -130,8 +125,7 @@ public class Http11Processor implements Runnable, Processor {
             if (sessionId != null) { // if already have session
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
-                return httpResponse.stringify();
+                return HttpResponse.of("302", responseHeader, "");
             }
 
             // if no session
@@ -143,13 +137,12 @@ public class Http11Processor implements Runnable, Processor {
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
             responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
-            final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
-            return httpResponse.stringify();
+            return HttpResponse.of("302", responseHeader, "");
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
 
-    private String handleResourceRequest(final HttpRequest httpRequest, final String resourceUrl) throws IOException {
+    private HttpResponse handleResourceRequest(final HttpRequest httpRequest, final String resourceUrl) throws IOException {
         final Map<String, String> responseHeader = new HashMap<>();
         String statusCode;
         String contentType = "text/html;charset=utf-8";
@@ -169,7 +162,6 @@ public class Http11Processor implements Runnable, Processor {
 
         responseHeader.put("Content-Type", contentType);
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final HttpResponse httpResponse = HttpResponse.of(statusCode, responseHeader, responseBody);
-        return httpResponse.stringify();
+        return HttpResponse.of(statusCode, responseHeader, responseBody);
     }
 }

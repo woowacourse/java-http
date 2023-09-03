@@ -4,7 +4,7 @@ public class ResponseHeader {
 
     private final HttpStatus httpStatus;
 
-    public ResponseHeader(final HttpStatus httpStatus) {
+    private ResponseHeader(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 
@@ -26,5 +26,4 @@ public class ResponseHeader {
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
-
 }

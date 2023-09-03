@@ -8,14 +8,12 @@
 - [x] `uri`의 `QueryString`을 파싱하는 기능이 있다.
 
 ## step2
-- [ ] HTTP Status Code 302
-  - [ ] /login 을 get 요청하면 login.html을 보여준다.
-  - [ ] /login?account=gugu&password=password 을 POST 요청하면 로그인 처리를 한다.
-  - [ ] 입력한 아이디와 비밀번호는 query string 으로 전달한다.
-  - [ ] 로그인에 실패하면 http status code를 401로 반환하고 /401.html 로 리다이렉트 한다.
-  - [ ] 로그인에 성공하면 http status code를 302로 반환하고 /index.html 로 리다이렉트 한다.
-  - [ ] 구현되지 않은 요청은 404페이지를 보여준다.
+- [x] HTTP Status Code 302
+  - [x] /login 을 get 요청하면 login.html을 보여준다.
+  - [x] /login?account=gugu&password=password 을 POST 요청하면 로그인 처리를 한다.
+  - [x] 로그인에 실패하면 http status code를 401로 반환하고 /401.html 로 리다이렉트 한다.
+  - [x] 로그인에 성공하면 http status code를 302로 반환하고 /index.html 로 리다이렉트 한다.
 
-- [ ] POST 방식으로 회원가입
+- [x] POST 방식으로 회원가입
 - [ ] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기

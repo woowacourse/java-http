@@ -49,43 +49,18 @@ public class Http11Processor implements Runnable, Processor {
             String request = requestBuilder.toString();
             System.out.println("request: "+request);
 
-            String[] requestLines = request.split("\\s+");
+            final ResponseMaker responseMaker = RequestMappingHandler.findResponseMaker(request);
+            String response = responseMaker.createResponse(request);
+            System.out.println("reponse: "+response);
 
-            if (requestLines.length < 2) {
-                throw new UncheckedServletException(new Exception("예외"));
-            }
-
-            String resourcePath = requestLines[1];
-            String requestMethod = requestLines[0];
-
-            HttpResponse httpResponse = new HttpResponse(StatusCode.OK,ContentType.from(resourcePath),new String(getResponseBodyBytes(resourcePath), UTF_8));
-
-            // 로그인 처리
-            System.out.println("resourcePath: "+resourcePath);
-            if (resourcePath.equals("/login") && requestMethod.equals("GET")) {
-                httpResponse = new HttpResponse(StatusCode.OK,ContentType.from(resourcePath),new String(getResponseBodyBytes(resourcePath), UTF_8));
-            }
-
-            if (resourcePath.contains("/login") && requestMethod.equals("POST")) {
-                // 쿼리스트링을 확인하여 로그인 확인한다.
-                LoginHandler loginHandler = new LoginHandler();
-                if(loginHandler.login(resourcePath)){
-                    httpResponse = new HttpResponse(StatusCode.FOUND,ContentType.from("/index.html"),new String(getResponseBodyBytes("/index.html"), UTF_8));
-                } else{
-                    // 이거까진 됨..
-                    httpResponse = new HttpResponse(StatusCode.OK,ContentType.from("/401.html"),new String(getResponseBodyBytes("/401.html"), UTF_8));
-                }
-            }
-
-            outputStream.write(httpResponse.getResponse().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
-    private byte[] getResponseBodyBytes(String resourcePath) throws IOException {
-        final URL fileUrl = this.getClass().getClassLoader().getResource("static"+resourcePath);
-        return Files.readAllBytes(Paths.get(fileUrl.getPath()));
-    }
+
 
 }

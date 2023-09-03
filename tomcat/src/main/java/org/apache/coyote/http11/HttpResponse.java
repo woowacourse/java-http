@@ -1,45 +1,54 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
-
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
     private final StatusCode statusCode;
-    private final ContentType contentType;
+    private final Map<String, String> header;
     private final String responseBody;
-    private final String redirectUrl;
+
+    public HttpResponse(final StatusCode statusCode,
+                        final ContentType contentType,
+                        final String responseBody) {
+        this.statusCode = statusCode;
+        this.responseBody = responseBody;
+
+        header = new HashMap<>();
+        header.put("Content-Type: ",contentType.getContentType());
+        header.put("Content-Length: ",String.valueOf(responseBody.getBytes().length));
+    }
 
     public HttpResponse(final StatusCode statusCode,
                         final ContentType contentType,
                         final String responseBody,
                         final String redirectUrl) {
         this.statusCode = statusCode;
-        this.contentType = contentType;
         this.responseBody = responseBody;
-        this.redirectUrl = redirectUrl;
+
+        header = new HashMap<>();
+        header.put("Location: ",redirectUrl);
+        header.put("Content-Type: ",contentType.getContentType());
+        header.put("Content-Length: ",String.valueOf(responseBody.getBytes().length));
     }
 
     public String getResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Type: " + header.get("Content-Type: ") + ";charset=utf-8 ",
+                "Content-Length: " + header.get("Content-Length: ") + " ",
                 "",
                 responseBody);
     }
-    private void initHeader(final ContentType contentType, final String responseBody) {
-        header.put("Content-Type", contentType.getContentType() + ";charset-utf-8");
-        header.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-    }
 
-    private void initHeader(final ContentType contentType, final String responseBody, final String redirectUrl) {
-        initHeader(contentType, responseBody);
-        header.put("Location", redirectUrl);
+    public String getRedirectResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
+                "HTTP/1.1 " + statusCode + "\r",
+                "Location: " + header.get("Location: ") + "\r",
+                "Content-Type: " + header.get("Content-Type: ") + "\r",
+                "Content-Length: " + header.get("Content-Length: ") + "\r\n",
+                responseBody);
     }
 }

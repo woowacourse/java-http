@@ -10,24 +10,26 @@ import org.apache.coyote.http11.request.ResourceContentType;
 public class StaticResourceView implements View {
 
     private static final String RESOURCE_DIRECTORY = "static/";
-    private static final String NOT_FOUND_RESOURCE = "static/404.html";
 
-    private final String viewName;
+    private final URL viewPath;
     private final String contentType;
 
-    public StaticResourceView(final String viewName) {
-        this.viewName = viewName;
-        this.contentType = ResourceContentType.from(viewName).getContentType();
+    public StaticResourceView(final URL viewPath, final String contentType) {
+        this.viewPath = viewPath;
+        this.contentType = contentType;
     }
 
+    public static StaticResourceView of(final String viewName) {
+        final ClassLoader classLoader = StaticResourceView.class.getClassLoader();
+        final URL viewPath = Optional.ofNullable(classLoader.getResource(RESOURCE_DIRECTORY + viewName))
+                .orElseThrow(() -> new IllegalArgumentException("Resource not found: " + viewName));
+        final String contentType = ResourceContentType.from(viewName).getContentType();
+        return new StaticResourceView(viewPath, contentType);
+    }
+
+    @Override
     public String renderView() throws IOException {
-        final URL resource = findStaticResource();
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private URL findStaticResource() {
-        return Optional.ofNullable(getClass().getClassLoader().getResource(RESOURCE_DIRECTORY + viewName))
-                .orElse(getClass().getClassLoader().getResource(NOT_FOUND_RESOURCE));
+        return new String(Files.readAllBytes(new File(viewPath.getFile()).toPath()));
     }
 
     @Override

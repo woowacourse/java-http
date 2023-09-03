@@ -3,6 +3,7 @@ package org.apache.coyote.http11.web;
 import java.io.IOException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FrontController {
 
@@ -14,8 +15,7 @@ public class FrontController {
 
     public void handleHttpRequest(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final Controller controller = handlerMapping.findController(httpRequest.getHttpStartLine());
-        final View view = controller.handleRequest(httpRequest, httpResponse);
-        httpResponse.setHeader("Content-Type", view.getContentType());
-        httpResponse.setBody(view.renderView());
+        final ResponseEntity response = controller.handleRequest(httpRequest, httpResponse);
+        httpResponse.updateByResponseEntity(response);
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.web;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class ForwardController extends AbstractController {
 
@@ -12,7 +13,7 @@ public class ForwardController extends AbstractController {
     }
 
     @Override
-    protected View handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        return forwardTo(forwardPath);
+    protected ResponseEntity handleGetRequest(final HttpRequest request, final HttpResponse response) {
+        return ResponseEntity.forwardTo(forwardPath);
     }
 }

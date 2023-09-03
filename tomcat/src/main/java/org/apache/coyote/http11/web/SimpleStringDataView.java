@@ -2,7 +2,7 @@ package org.apache.coyote.http11.web;
 
 public class SimpleStringDataView implements View {
 
-    private static final String CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String CONTENT_TYPE = "text/plain;charset=utf-8";
 
     private final String data;
 

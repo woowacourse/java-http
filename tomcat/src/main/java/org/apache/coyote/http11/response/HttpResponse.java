@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import java.io.IOException;
+
 public class HttpResponse {
 
     private static final String SUPPORTED_HTTP_VERSION = "HTTP/1.1";
@@ -37,5 +39,13 @@ public class HttpResponse {
 
     public void setCookie(final String cookieKey, final String cookieValue) {
         httpResponseHeaders.add("Set-Cookie", cookieKey + "=" + cookieValue);
+    }
+
+    public void updateByResponseEntity(final ResponseEntity response) throws IOException {
+        updateHttpResponseStatusLineByStatus(response.getHttpResponseStatus());
+        setHeader("Content-Type", response.getView().getContentType());
+        response.getHeaders().forEach(this::setHeader);
+
+        setBody(response.getView().renderView());
     }
 }

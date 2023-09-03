@@ -1,10 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.NoSuchElementException;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.util.FileFinder;
 
 public class HttpResponseFactory {

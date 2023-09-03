@@ -8,9 +8,11 @@ public enum HttpHeaderName {
     ACCEPT_LANGUAGE("Accept-Language"),
     CACHE_CONTROL("Cache-Control"),
     CONNECTION("Connection"),
-    LOCATION("Location"),
+    CONTENT_LENGTH("Content-Length"),
+    CONTENT_TYPE("Content-Type"),
     DNT("Dnt"),
     HOST("Host"),
+    ORIGIN("Origin"),
     PRAGMA("Pragma"),
     REFERER("Referer"),
     SEC_CH_UA("Sec-Ch-Ua"),
@@ -22,8 +24,7 @@ public enum HttpHeaderName {
     SEC_FETCH_USER("Sec-Fetch-User"),
     UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests"),
     USER_AGENT("User-Agent"),
-    CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location"),
     ;
 
     private final String value;

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
-
 public class HttpRequestURI {
 
     private static final String QUERY_STRING_DELIMITER = "?";

@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
@@ -50,7 +49,8 @@ public class LoginController extends RestController {
     }
 
     @Override
-    public boolean canHandle(final HttpRequestURI httpRequestURI) {
-        return super.canHandle(httpRequestURI) && httpRequestURI.hasQueryString();
+    public boolean canHandle(final HttpRequest httpRequest) {
+        final HttpRequestURI httpRequestURI = httpRequest.getRequestURI();
+        return super.canHandle(httpRequest) && httpRequestURI.hasQueryString();
     }
 }

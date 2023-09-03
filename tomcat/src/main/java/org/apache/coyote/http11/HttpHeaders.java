@@ -76,4 +76,11 @@ public class HttpHeaders {
 
         return stringBuilder.toString();
     }
+
+    public int getContentLength() {
+        if (headers.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
+            return Integer.parseInt(headers.get(HttpHeaderName.CONTENT_LENGTH));
+        }
+        return 0;
+    }
 }

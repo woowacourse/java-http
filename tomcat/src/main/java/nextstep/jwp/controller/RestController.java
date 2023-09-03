@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestURI;
 
 public abstract class RestController implements Controller {
@@ -11,7 +12,8 @@ public abstract class RestController implements Controller {
     }
 
     @Override
-    public boolean canHandle(final HttpRequestURI httpRequestURI) {
+    public boolean canHandle(final HttpRequest httpRequest) {
+        final HttpRequestURI httpRequestURI = httpRequest.getRequestURI();
         return httpRequestURI.hasSamePath(path);
     }
 }

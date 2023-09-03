@@ -32,6 +32,10 @@ public class HttpResponseStatusLine {
         return new HttpResponseStatusLine(302, "Found");
     }
 
+    public static HttpResponseStatusLine BAD_REQUEST() {
+        return new HttpResponseStatusLine(400, "Bad Request");
+    }
+
     public String getHttpVersion() {
         return httpVersion;
     }

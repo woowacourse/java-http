@@ -11,14 +11,6 @@ import java.util.StringJoiner;
 
 public class ResponseEntity {
 
-    /*
-    final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.toString().getBytes().length + " ",
-                    "",
-                    responseBody);
-     */
     private final HttpVersion httpVersion;
     private final ResponseStatus responseStatus;
     private final List<String> responseHeaders;

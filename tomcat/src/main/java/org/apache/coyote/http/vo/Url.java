@@ -19,7 +19,7 @@ public class Url {
 
     private QueryStrings parseQueryString(final String url) {
         if (url.split(QUERY_STRING_DELIMITER).length > 1) {
-            return new QueryStrings(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
+            return QueryStrings.of(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
         }
         return QueryStrings.getEmptyQueryStrings();
     }

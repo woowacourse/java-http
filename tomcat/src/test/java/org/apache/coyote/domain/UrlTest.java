@@ -25,7 +25,7 @@ class UrlTest {
         assertAll(
                 () -> assertThat(url.getUrlPath()).isEqualTo("/login"),
                 () -> assertThat(url.getQueryStrings()).usingRecursiveComparison().isEqualTo(
-                        new QueryStrings("name=gugu&password=1234")
+                        QueryStrings.of("name=gugu&password=1234")
                 )
         );
     }

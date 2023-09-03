@@ -34,7 +34,7 @@ class HttpHeadersTest {
                 + "Cookie: Idea-a0a07ecd=5592d2ef-3b6a-449b-a2ea-89e567e94b44";
 
         // when
-        final HttpHeaders httpHeaders = new HttpHeaders(rawHeaders);
+        final HttpHeaders httpHeaders = HttpHeaders.of(rawHeaders);
 
         // then
         assertThat(httpHeaders.getHeaderValues(ACCEPT)).hasSize(8);

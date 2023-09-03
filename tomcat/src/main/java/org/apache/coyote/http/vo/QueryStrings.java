@@ -9,18 +9,17 @@ public class QueryStrings {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final QueryStrings EMPTY_QUERY_STRINGS = new QueryStrings();
     private final MultiValueMap<String, String> queryStrings;
 
-    private QueryStrings() {
-        queryStrings = new MultiValueMap<>();
+    private QueryStrings(MultiValueMap<String, String> queryStrings) {
+        this.queryStrings = queryStrings;
     }
 
-    public QueryStrings(final String rawQueryStrings) {
-        queryStrings = parseQueryStrings(rawQueryStrings);
+    public static QueryStrings of(final String rawQueryStrings) {
+        return new QueryStrings(parseQueryStrings(rawQueryStrings));
     }
 
-    private MultiValueMap<String, String> parseQueryStrings(final String rawQueryStrings) {
+    private static MultiValueMap<String, String> parseQueryStrings(final String rawQueryStrings) {
         MultiValueMap<String, String> queryStrings = new MultiValueMap<>();
 
         Arrays.stream(rawQueryStrings.split(QUERY_STRING_DELIMITER)).forEach(
@@ -38,6 +37,6 @@ public class QueryStrings {
     }
 
     public static QueryStrings getEmptyQueryStrings(){
-        return EMPTY_QUERY_STRINGS;
+        return new QueryStrings(new MultiValueMap<>());
     }
 }

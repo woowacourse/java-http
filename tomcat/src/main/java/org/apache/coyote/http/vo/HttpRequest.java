@@ -34,7 +34,9 @@ public class HttpRequest {
     }
 
     private static String[] getRawStartLine(final String fullRawRequest) {
+        System.out.println(fullRawRequest);
         int startLineIndex = fullRawRequest.indexOf(REQUEST_LINE_DELIMITER);
+        System.out.println(startLineIndex);
         return fullRawRequest.substring(0, startLineIndex).split(START_LINE_DELIMITER);
     }
 
@@ -44,11 +46,15 @@ public class HttpRequest {
 
     private static HttpHeaders getHeaders(final String fullRawRequest) {
         final String rawHeaders = fullRawRequest.substring(fullRawRequest.indexOf(REQUEST_LINE_DELIMITER) + 1);
-        return new HttpHeaders(rawHeaders);
+        return HttpHeaders.of(rawHeaders);
     }
 
     public boolean isContainsSubStringInUrl(final String subString) {
         return url.isContainSubString(subString);
+    }
+
+    public boolean isRequestMethodOf(final HttpMethod method){
+        return this.method == method;
     }
 
     public HttpMethod getMethod() {

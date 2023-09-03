@@ -14,11 +14,15 @@ public class HttpHeaders {
     private static final int VALUE_INDEX = 1;
     private final MultiValueMap<HttpHeader, String> headers;
 
-    public HttpHeaders(final String rawHeaders) {
-        headers = parsingHeaders(rawHeaders);
+    private HttpHeaders(final MultiValueMap<HttpHeader, String> headers) {
+        this.headers = headers;
     }
 
-    private MultiValueMap<HttpHeader, String> parsingHeaders(final String rawHeaders) {
+    public static HttpHeaders of(final String rawHeaders) {
+        return new HttpHeaders(parsingHeaders(rawHeaders));
+    }
+
+    private static MultiValueMap<HttpHeader, String> parsingHeaders(final String rawHeaders) {
         final MultiValueMap<HttpHeader, String> headers = new MultiValueMap<>();
 
         for (final String rawHeader : rawHeaders.split(System.lineSeparator())) {
@@ -39,5 +43,9 @@ public class HttpHeaders {
 
     public List<String> getHeaderValues(final HttpHeader header) {
         return headers.getValues(header);
+    }
+
+    public static HttpHeaders getEmptyHeaders(){
+        return new HttpHeaders(new MultiValueMap<>());
     }
 }

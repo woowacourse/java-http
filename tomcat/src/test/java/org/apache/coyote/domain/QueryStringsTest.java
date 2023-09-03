@@ -18,7 +18,7 @@ class QueryStringsTest {
         final String rawQueryStrings = "name=gugu&password=1234";
 
         //when
-        QueryStrings queryStrings = new QueryStrings(rawQueryStrings);
+        QueryStrings queryStrings = QueryStrings.of(rawQueryStrings);
 
         //then
         assertAll(

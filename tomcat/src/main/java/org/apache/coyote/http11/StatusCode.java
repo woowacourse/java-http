@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 public enum StatusCode {
-    OK("200 OK");
+    OK("200 OK"), NOT_FOUND("404 Not Found");
 
     private final String response;
 

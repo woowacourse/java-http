@@ -1,13 +1,18 @@
 package org.apache.catalina.connector;
 
+import nextstep.jwp.HandlerResolver;
+import nextstep.jwp.JwpHttpDispatcher;
+import nextstep.jwp.handler.httpGet.GetRootHandler;
+import org.apache.coyote.Handler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 public class Connector implements Runnable {
 
@@ -33,13 +38,13 @@ public class Connector implements Runnable {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
             return new ServerSocket(checkedPort, checkedAcceptCount);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public void start() {
-        var thread = new Thread(this);
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -57,7 +62,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -66,7 +71,9 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        final Map<String, Handler> handlers = Map.of("/", new GetRootHandler());
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(handlers));
+        final var processor = new Http11Processor(connection, new HttpRequestParser(), httpDispatcher);
         new Thread(processor).start();
     }
 
@@ -74,7 +81,7 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -1,18 +1,13 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -23,9 +18,6 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -51,89 +43,39 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String request = getRequest(bufferedReader);
-            String[] split = request.split(" ");
-            String method = split[0];
-            String requestUri = split[1];
 
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-            String[] split1 = request.split("\r\n");
-
-            if (method.equals("POST")) {
-                Optional<String> any = Arrays.stream(split1)
-                        .filter(it -> it.contains("Content-Length"))
-                        .findAny();
-                if (any.isEmpty()) {
-                    throw new IllegalArgumentException("Content-Length 헤더가 존재하지 않습니다");
-                }
-                String s = any.get();
-                int index = s.indexOf(":");
-                int contentLength = Integer.parseInt(s.substring(index + 2));
-                String body = getBody(bufferedReader, contentLength);
-
-                String[] split2 = body.split("&");
-                Map<String, String> form = new HashMap<>();
-                for (String line : split2) {
-                    String[] split3 = line.split("=");
-                    String key = split3[0];
-                    String value = split3[1];
-                    form.put(key, value);
-                }
-
-                if (requestUri.equals("/register")) {
-                    register(form, outputStream);
+            if (httpRequest.method().equals("POST")) {
+                if (httpRequest.uri().equals("/register")) {
+                    register(httpRequest, outputStream);
                     return;
                 }
 
-                if (requestUri.equals("/login")) {
-                    Optional<String> cookie = Arrays.stream(split1)
-                            .filter(it -> it.contains("Cookie"))
-                            .findAny();
-                    if (cookie.isPresent()) {
-                        String a = cookie.get();
-                        String[] split100 = a.split(":");
-                        String cookies = split100[1];
-                        String[] split101 = cookies.split(";");
-                        Optional<String> any2 = Arrays.stream(split101)
-                                .filter(it -> it.contains("JSESSIONID"))
-                                .findAny();
-                        if (any2.isPresent()) {
-                            String[] split3 = any2.get().split("=");
-                            String jsessionId = split3[1];
-                            loginWithSession(outputStream, jsessionId);
-                            return;
-                        }
+                if (httpRequest.uri().equals("/login")) {
+                    Optional<String> jsessionid = httpRequest.getCookie("JSESSIONID");
+
+                    if (jsessionid.isPresent()) {
+                        loginWithSession(outputStream, jsessionid.get());
+                        return;
                     }
-                    login(form, outputStream);
+                    login(httpRequest, outputStream);
                     return;
                 }
             }
 
-            if (!requestUri.equals("/")) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                if (requestUri.equals("/login")) {
-                    Optional<String> cookie = Arrays.stream(split1)
-                            .filter(it -> it.contains("Cookie"))
-                            .findAny();
-                    if (cookie.isPresent()) {
-                        String s = cookie.get();
-                        String[] split100 = s.split(":");
-                        String cookies = split100[1];
-                        String[] split101 = cookies.split(";");
-                        Optional<String> any = Arrays.stream(split101)
-                                .filter(it -> it.contains("JSESSIONID"))
-                                .findAny();
-                        if (any.isPresent()) {
-                            String[] split2 = any.get().split("=");
-                            String jsessionId = split2[1];
-                            loginWithSession(outputStream, jsessionId);
-                            return;
-                        }
+            if (!httpRequest.uri().equals("/")) {
+                URL resource = getClass().getClassLoader().getResource("static" + httpRequest.uri());
+                if (httpRequest.uri().equals("/login")) {
+                    Optional<String> jsessionid = httpRequest.getCookie("JSESSIONID");
+                    if (jsessionid.isPresent()) {
+                        loginWithSession(outputStream, jsessionid.get());
+                        return;
                     }
-                    resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
+                    resource = getClass().getClassLoader().getResource("static" + httpRequest.uri() + ".html");
                 }
-                if (requestUri.equals("/register")) {
-                    resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
+                if (httpRequest.uri().equals("/register")) {
+                    resource = getClass().getClassLoader().getResource("static" + httpRequest.uri() + ".html");
                 }
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
@@ -144,8 +86,8 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
-            if (request.contains("Accept: text/css")) {
+            Optional<String> acceptHeader = httpRequest.getHeader("Accept");
+            if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/css;charset=utf-8 ",
@@ -153,7 +95,6 @@ public class Http11Processor implements Runnable, Processor {
                         "",
                         responseBody);
             }
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -161,13 +102,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void register(Map<String, String> form, OutputStream outputStream) throws IOException {
-        Optional<User> account = InMemoryUserRepository.findByAccount(form.get("account"));
-        if (account.isPresent()) {
+    private void register(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
+        String account = httpRequest.getBody("account")
+                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 아이디가 필요합니다"));
+        String password = httpRequest.getBody("password")
+                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 비밀번호가 필요합니다"));
+        String email = httpRequest.getBody("email")
+                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 이메일이 필요합니다"));
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             throw new IllegalStateException("이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
         }
-        User user = new User(form.get("account"), form.get("password"), form.get("email"));
-        System.out.println(user);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         String response = String.join("\r\n",
@@ -198,10 +143,14 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void login(Map<String, String> form, OutputStream outputStream) throws IOException {
-        Optional<User> user = InMemoryUserRepository.findByAccount(form.get("account"));
+    private void login(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
+        String account = httpRequest.getBody("account")
+                .orElseThrow(() -> new IllegalArgumentException("로그인하기 위해선 아이디가 필요합니다"));
+        String password = httpRequest.getBody("password")
+                .orElseThrow(() -> new IllegalArgumentException("로그인하기 위해선 비밀번호가 필요합니다"));
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            if (user.get().checkPassword(form.get("password"))) {
+            if (user.get().checkPassword(password)) {
                 UUID jsessionId = UUID.randomUUID();
                 log.info(user.get().toString());
                 Session session = new Session(jsessionId.toString());
@@ -229,23 +178,5 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
         outputStream.write(response.getBytes());
         outputStream.flush();
-    }
-
-    private String getRequest(BufferedReader bufferedReader) throws IOException {
-        String line = bufferedReader.readLine();
-        StringBuilder stringBuilder = new StringBuilder();
-        while (!"".equals(line)) {
-            stringBuilder.append(line);
-            stringBuilder.append("\r\n");
-            line = bufferedReader.readLine();
-        }
-        return stringBuilder.toString();
-    }
-
-    private String getBody(BufferedReader bufferedReader, int contentLength) throws IOException {
-        System.out.println(contentLength);
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 }

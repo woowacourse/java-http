@@ -12,17 +12,20 @@ public class Http11Request {
     final String path;
     final Map<String, String> queryParams;
     final Map<String, String> headers;
+    final Map<String, String> cookies;
     String body;
 
     public Http11Request(final Method method,
                          final String path,
                          final Map<String, String> queryParams,
-                         final Map<String, String> headers
+                         final Map<String, String> headers,
+                         final Map<String, String> cookies
     ) {
         this.method = method;
         this.path = path;
         this.queryParams = queryParams;
         this.headers = headers;
+        this.cookies = cookies;
     }
 
     public static Http11Request from(final String request) {
@@ -42,11 +45,15 @@ public class Http11Request {
         final Map<String, String> queryParams = parseQueryString(queryString);
         final Map<String, String> headers = parseHeaders(lines);
 
+        final String cookieFields = headers.remove("Cookie");
+        final Map<String, String> cookies = parseCookies(cookieFields);
+
         return new Http11Request(
                 Method.getMethod(method),
                 path,
                 queryParams,
-                headers
+                headers,
+                cookies
         );
     }
 
@@ -79,6 +86,16 @@ public class Http11Request {
         return headers;
     }
 
+    private static Map<String, String> parseCookies(final String cookieFields) {
+        final Map<String, String> cookies = new HashMap<>();
+
+        for (final String field : cookieFields.split("; ")) {
+            final String[] cookie = field.split("=", 2);
+            cookies.put(cookie[0], cookie[1]);
+        }
+        return cookies;
+    }
+
     public Method getMethod() {
         return method;
     }
@@ -101,6 +118,10 @@ public class Http11Request {
 
     public String getHeader(final String headerName) {
         return headers.get(headerName);
+    }
+
+    public boolean isCookieExist(final String cookieName) {
+        return cookies.containsKey(cookieName);
     }
 
     public String getBody() {

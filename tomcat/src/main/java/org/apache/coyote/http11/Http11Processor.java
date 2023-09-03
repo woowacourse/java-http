@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -130,6 +131,10 @@ public class Http11Processor implements Runnable, Processor {
             response = new Http11Response(status, responseBody);
             if (status == FOUND) {
                 response.addHeader("Location", "/index.html");
+                if (!request.isCookieExist("JSESSIONID")) {
+                    final UUID uuid = UUID.randomUUID();
+                    response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+                }
             }
             return response;
         }

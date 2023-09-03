@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.dto.LoginResponseDto;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import nextstep.org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,30 +72,44 @@ public class Http11Processor implements Runnable, Processor {
                 requestedUrl = requestedUrl.substring(0, queryParamIndex);
             }
 
+            String response = null;
+
             Object handler = handlerMapper.mapHandler(requestedUrl);
-            if (Objects.nonNull(handler) && requestedUrl.equals("/login")) {
+            if (Objects.nonNull(handler) && requestedUrl.equals("/login")
+                    && !queryParams.isEmpty()) {
                 LoginController loginController = (LoginController) handler;
-                User user = loginController.login(queryParams.get("account"),
+                LoginResponseDto loginDto = loginController.login(queryParams.get("account"),
                         queryParams.get("password"));
-                log.info(user.toString());
+
+                response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        String.format("Location: %s ", loginDto.getRedirectUrl()),
+                        "");
             }
 
-            String responseBody = createResponseBody(requestedUrl);
-            String contentType = negotiateContent(requestHeaders.get("Accept"));
+            if (Objects.isNull(response)) {
+                String contentType = negotiateContent(requestHeaders.get("Accept"));
+                // Todo: createResponseBody() pageController로 위임해보기
+                String responseBody = createResponseBody(requestedUrl);
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                        String.format("Content-Length: %s ",
+                                responseBody.getBytes(StandardCharsets.UTF_8).length),
+                        "",
+                        responseBody);
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                    String.format("Content-Length: %s ",
-                            responseBody.getBytes(StandardCharsets.UTF_8).length),
-                    "",
-                    responseBody);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void writeResponse(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private String negotiateContent(String acceptHeader) {
@@ -115,6 +129,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         return requestHeaders;
     }
+
 
     private String createResponseBody(String requestURL) {
         if (requestURL.equals("/")) {

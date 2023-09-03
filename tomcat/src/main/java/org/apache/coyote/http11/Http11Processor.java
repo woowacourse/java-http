@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -16,9 +19,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_PATH =
-            Paths.get("").toAbsolutePath() + "/tomcat/src/main/resources/static";
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
 
             if (!content[1].equals("/")) {
-                responseBody = readForFilePath(DEFAULT_PATH + content[1]);
+                responseBody = readForFilePath(convertAbsolutePath(content[1]));
             }
 
             String contentType = "text/" + extractExtension(content[1]);
@@ -54,8 +54,6 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
-            log.info("response info {}", response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -80,8 +78,8 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private String readForFilePath(String path) {
-        try (FileInputStream fileInputStream = new FileInputStream(path)) {
+    private String readForFilePath(URL path) {
+        try (FileInputStream fileInputStream = new FileInputStream(path.getPath())) {
             return readFileFromInputStream(fileInputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -110,6 +108,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return path.substring(lastIndexOfComma + 1);
+    }
+
+    private URL convertAbsolutePath(String requestPath) {
+        return getClass().getClassLoader()
+                .getResource("static" + requestPath);
     }
 
 }

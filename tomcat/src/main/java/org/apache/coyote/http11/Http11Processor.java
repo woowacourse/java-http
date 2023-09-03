@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
                 List<String> contents = Files.readAllLines(path);
                 String responseBody = String.join("\n", contents) + "\n";
                 String response = String.join("\r\n",
-                        "HTTP/1.1 404 NotFound ",
+                        "HTTP/1.1 404 Not Found ",
                         "Content-Type: text/html;charset=utf-8 ",
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "",

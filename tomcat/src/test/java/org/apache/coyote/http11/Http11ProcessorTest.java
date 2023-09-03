@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.apache.coyote.http11.request.Http11Processor;
+import org.apache.coyote.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

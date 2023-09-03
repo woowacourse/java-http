@@ -22,10 +22,10 @@ public class Handler {
 
     public static HttpResponse run(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestUrl();
-        if (requestURI.isPageEqualTo("/login") && requestURI.hasQueryString()) {
+        if (requestURI.isLoginPage() && requestURI.hasQueryString()) {
             return doLogin(httpRequest);
         }
-        if (requestURI.isPageEqualTo("/")) {
+        if (requestURI.isHome()) {
             return new HttpResponse(HttpStatus.OK, "Hello world!", httpRequest.contentType());
         }
         String responseBody = readResponseBody(requestURI.getResourcePath());
@@ -41,14 +41,17 @@ public class Handler {
         log.info(user.toString());
         String password = queryString.getValueOf("password");
         if (!user.checkPassword(password)) {
-            String responseBody = readResponseBody(requestURI.getResourcePath());
-            return new HttpResponse(HttpStatus.UNAUTHORIZED, responseBody, httpRequest.contentType());
+            String responseBody = readResponseBody("static/401.html");
+            return new HttpResponse(HttpStatus.UNAUTHORIZED, responseBody, httpRequest.contentType(), "401.html");
         }
-        String responseBody = readResponseBody(requestURI.getResourcePath());
-        return new HttpResponse(HttpStatus.FOUND, responseBody, httpRequest.contentType());
+        String responseBody = readResponseBody("static/index.html");
+        return new HttpResponse(HttpStatus.FOUND, responseBody, httpRequest.contentType(), "index.html");
     }
 
     private static String readResponseBody(String resourcePath) throws IOException {
+        if (resourcePath.equals("static/favicon.ico")) {
+            return "1";
+        }
         Path path = new File(Objects.requireNonNull(
                 Handler.class.getClassLoader().getResource(resourcePath)).getFile()
         ).toPath();

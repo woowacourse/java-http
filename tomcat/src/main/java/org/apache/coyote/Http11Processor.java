@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
 import nextstep.jwp.Handler;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,11 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(request);
             HttpResponse httpResponse = Handler.run(httpRequest);
 
+            if (httpResponse.hasRedirect()) {
+                outputStream.write(httpResponse.getResponseWithRedirect().getBytes());
+                outputStream.flush();
+                return;
+            }
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

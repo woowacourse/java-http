@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 public class RequestURI {
+
     private static final String STATIC_PATH = "static";
     private static final String HTML_EXTENSION = ".html";
 
@@ -30,12 +31,16 @@ public class RequestURI {
         return STATIC_PATH + uri;
     }
 
-    public boolean isPageEqualTo(String uri) {
-        return this.uri.equals(uri);
-    }
-
     public boolean hasQueryString() {
         return !queryString.getValues().isEmpty();
+    }
+
+    public boolean isLoginPage() {
+        return uri.contains("/login");
+    }
+
+    public boolean isHome() {
+        return uri.equals("/");
     }
 
     public String getResourcePath() {

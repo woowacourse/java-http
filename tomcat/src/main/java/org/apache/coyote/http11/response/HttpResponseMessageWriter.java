@@ -8,11 +8,9 @@ public class HttpResponseMessageWriter {
 
     public static void writeHttpResponse(final HttpResponse httpResponse, final OutputStream outputStream)
             throws IOException {
-
         final HttpResponseStatusLine httpResponseStatusLine = httpResponse.getHttpResponseStatusLine();
         final HttpResponseHeaders httpResponseHeaders = httpResponse.getHttpResponseHeaders();
         final String responseBody = httpResponse.getBody();
-
         final String responseMessage = String.join("\r\n",
                 parseResponseStatusLine(httpResponseStatusLine),
                 parseResponseHeaders(httpResponseHeaders),
@@ -29,12 +27,12 @@ public class HttpResponseMessageWriter {
                 httpResponseStatusLine.getHttpVersion(),
                 String.valueOf(httpResponseStatus.getStatusCode()),
                 httpResponseStatus.toString()
-        );
+        ) + " ";
     }
 
     private static String parseResponseHeaders(final HttpResponseHeaders httpResponseHeaders) {
         return httpResponseHeaders.getHeaders().entrySet().stream()
-                .map(entry -> String.join(": ", entry.getKey(), entry.getValue()))
+                .map(entry -> String.join(": ", entry.getKey(), entry.getValue() + " "))
                 .collect(Collectors.joining("\r\n"));
     }
 }

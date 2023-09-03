@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.web;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
 
 public class View {
 
@@ -23,9 +21,7 @@ public class View {
         if (resource == null) {
             throw new IllegalArgumentException("해당하는 뷰가 존재하지 않습니다.");
         }
-        final Path path = Path.of(Objects.requireNonNull(resource).getFile());
-
-        return String.join("\r\n", Files.readAllLines(path, StandardCharsets.UTF_8));
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
     private URL findStaticResource() {

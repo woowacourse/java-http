@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 public class HttpRequestParser {
@@ -24,18 +26,34 @@ public class HttpRequestParser {
             final String httpRequestMethod = stringTokenizer.nextToken();
             final String httpRequestUri = stringTokenizer.nextToken();
 
-            String headerLine;
-            while ((headerLine = bufferedReader.readLine()).length() != 0) {
-                System.out.println(headerLine);
-            }
-
+            final Map<String, String> headers = getHeaders(bufferedReader);
+            final Cookies cookies = getCookies(headers);
             final StringBuilder requestBody = getRequestBody(bufferedReader);
 
-            return new HttpRequest(httpRequestUri, httpRequestMethod, requestBody.toString());
+            return new HttpRequest(httpRequestUri, httpRequestMethod, requestBody.toString(), cookies);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static Cookies getCookies(Map<String, String> headers) throws IOException {
+        final Cookies cookies = new Cookies();
+        for (String cookie : headers.get("Cookie").split("; ")) {
+            final String[] cookieEntry = cookie.split("=");
+            cookies.add(cookieEntry[0], cookieEntry[1]);
+        }
+        return cookies;
+    }
+
+    private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> requestHeaders = new HashMap<>();
+        String header;
+        while ((header = bufferedReader.readLine()).length() != 0) {
+            final String[] headerEntry = header.split(": ");
+            requestHeaders.put(headerEntry[0], headerEntry[1]);
+        }
+        return requestHeaders;
     }
 
     private static StringBuilder getRequestBody(BufferedReader bufferedReader) throws IOException {
@@ -43,7 +61,6 @@ public class HttpRequestParser {
         while (bufferedReader.ready()) {
             requestBody.append((char) bufferedReader.read());
         }
-        System.out.println(requestBody);
         return requestBody;
     }
 }

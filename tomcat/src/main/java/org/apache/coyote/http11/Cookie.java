@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+
 public class Cookie {
 
     private String key;
@@ -17,5 +19,9 @@ public class Cookie {
 
     public String getValue() {
         return value;
+    }
+
+    public boolean isKeyName(String key) {
+        return Objects.equals(this.key, key);
     }
 }

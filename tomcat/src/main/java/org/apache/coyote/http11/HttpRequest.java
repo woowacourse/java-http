@@ -14,14 +14,17 @@ public class HttpRequest {
 
     private String requestBody;
 
+    private Cookies cookies;
+
     public static HttpRequest from(Socket connection) {
         return HttpRequestParser.parseFromSocket(connection);
     }
 
-    public HttpRequest(String uri, String method, String requestBody) {
+    public HttpRequest(String uri, String method, String requestBody, Cookies cookies) {
         this.uri = uri;
         this.method = method;
         this.requestBody = requestBody;
+        this.cookies = cookies;
     }
 
     public boolean isMethodEqualTo(final String method) {
@@ -29,9 +32,9 @@ public class HttpRequest {
     }
 
     public boolean isUriEqualTo(final String uri) {
-        final int startpointOfQueryParameter = this.uri.lastIndexOf("?");
-        if (startpointOfQueryParameter != -1) {
-            final String uriWithoutQueryParameter = this.uri.substring(0, startpointOfQueryParameter);
+        final int startPointOfQueryParameter = this.uri.lastIndexOf("?");
+        if (startPointOfQueryParameter != -1) {
+            final String uriWithoutQueryParameter = this.uri.substring(0, startPointOfQueryParameter);
             return Objects.equals(uriWithoutQueryParameter, uri);
         }
         return Objects.equals(this.uri, uri);
@@ -85,5 +88,9 @@ public class HttpRequest {
 
     private boolean isInValidParameter(String parameter) {
         return Objects.isNull(parameter) || !Objects.equals(parameter.split("=").length, 2);
+    }
+
+    public Optional<String> getSessionId() {
+        return cookies.get("JSESSIONID");
     }
 }

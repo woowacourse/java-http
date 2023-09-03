@@ -3,6 +3,8 @@ package org.apache.coyote.http11.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.*;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ public class LoginHandler implements HttpRequestHandler {
             return;
         }
         logAccount(user.get());
-        returnIndexPage(outputStream);
+        returnIndexPage(outputStream, user.get());
     }
 
     private void returnUnauthorizedPage(OutputStream outputStream) throws IOException {
@@ -50,14 +52,22 @@ public class LoginHandler implements HttpRequestHandler {
         httpResponse.flush();
     }
 
-    private void returnIndexPage(OutputStream outputStream) throws IOException {
+    private void returnIndexPage(OutputStream outputStream, User user) throws IOException {
         final HttpResponse httpResponse = new HttpResponse.Builder()
                 .responseBody(new FileHandler().readFromResourcePath("static/index.html"))
                 .build(outputStream);
 
-        httpResponse.addCookie("JSESSIONID", UUID.randomUUID().toString());
+        final String sessionId = UUID.randomUUID().toString();
+        httpResponse.addCookie("JSESSIONID", sessionId);
+        saveUserToSession(user, sessionId);
 
         httpResponse.flush();
+    }
+
+    private void saveUserToSession(User user, String sessionId) {
+        final Session session = new Session(sessionId);
+        session.setAttribute(sessionId, user);
+        SessionManager.add(session);
     }
 
     private void logAccount(User user) {

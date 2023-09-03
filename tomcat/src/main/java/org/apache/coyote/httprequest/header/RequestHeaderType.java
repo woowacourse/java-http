@@ -9,7 +9,8 @@ public enum RequestHeaderType {
     HOST("Host"),
     CONNECTION("Connection"),
     ACCEPT("Accept"),
-    PRAGMA("Pragma");
+    PRAGMA("Pragma"),
+    CACHE_CONTROL("Cache-Control");
 
     private final String headerName;
 
@@ -33,6 +34,8 @@ public enum RequestHeaderType {
             return AcceptHeader.from(value);
         } else if (this == PRAGMA) {
             return PragmaHeader.from(value);
+        } else if (this == CACHE_CONTROL) {
+            return CacheControlHeader.from(value);
         } else {
             throw new UnsupportedHeaderTypeException();
         }

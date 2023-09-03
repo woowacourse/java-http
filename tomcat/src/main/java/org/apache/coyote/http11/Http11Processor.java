@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -38,13 +39,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
             String requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
+                return;
+            }
             String[] requests = requestLine.split(" ");
 
             String httpMethod = requests[0];
             String httpUrl = requests[1];
             String fileName = httpUrl.substring(httpUrl.lastIndexOf('/') + 1);
             String response = null;
+
+            Map<String, String> header = parseToHeader(bufferedReader);
 
             if (httpUrl.startsWith("/login?")) {
                 int index = httpUrl.indexOf("?");
@@ -70,6 +77,29 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpMethod.equals("GET") && httpUrl.equals("/login")) {
                 response = createResponse("text/html", readFile("static", "login.html"));
+            }
+
+            if (httpMethod.equals("GET") && httpUrl.equals("/register")) {
+                response = createResponse("text/html", readFile("static", "register.html"));
+            }
+
+            if (httpMethod.equals("POST") && httpUrl.equals("/register")) {
+
+                int contentLength = Integer.parseInt(header.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                log.info("reqeustBody: {}",requestBody);
+
+
+                Map<String, String> queryParms = parseToQueryParms(requestBody.toString());
+
+                User user = new User(queryParms.get("account"), queryParms.get("password"),
+                        queryParms.get("email"));
+                InMemoryUserRepository.save(user);
+
+                response = createRedirectResponse("/index.html");
+                log.info(response);
             }
 
             if (httpMethod.equals("GET") && httpUrl.equals("/")) {
@@ -113,6 +143,19 @@ public class Http11Processor implements Runnable, Processor {
         return queryParms;
     }
 
+    private Map<String, String> parseToHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> header = new HashMap<>();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            String[] keyValues = line.split(":");
+            String key = keyValues[0].trim();
+            String value = keyValues[1].trim();
+            header.put(key, value);
+        }
+        return header;
+    }
+
     private String createResponse(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -127,7 +170,6 @@ public class Http11Processor implements Runnable, Processor {
                 "HTTP/1.1 302 FOUND ",
                 "Location: " + redirectUrl);
     }
-
 
     private String readFile(String directory, String fileName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(directory + "/" + fileName);

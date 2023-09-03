@@ -5,15 +5,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.FrontController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.ResponseWriter;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final FrontController frontController = FrontController.getInstance();
 
     private final Socket connection;
 
@@ -35,9 +38,11 @@ public class Http11Processor implements Runnable, Processor {
             RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
             requestReader.read();
 
-            ResponseWriter responseWriter = new ResponseWriter(outputStream, requestReader);
-            responseWriter.createResponse();
+            Controller controller = frontController.findController(requestReader);
+            Response response = controller.service(requestReader);
 
+            outputStream.write(response.format().getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

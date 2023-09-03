@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class RequestUrl {
 
@@ -21,5 +22,9 @@ public class RequestUrl {
 
     public String getUrl() {
         return url;
+    }
+
+    public Map<String, String> getParams() {
+        return new HashMap<>(params);
     }
 }

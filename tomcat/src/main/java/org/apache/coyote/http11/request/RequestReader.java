@@ -9,6 +9,7 @@ import org.apache.coyote.http11.Header;
 
 public class RequestReader {
 
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private final BufferedReader bufferedReader;
     private final Map<String, String> headers = new HashMap<>();
     private RequestUri requestUri;
@@ -20,6 +21,7 @@ public class RequestReader {
     public void read() throws IOException {
         String line;
         requestUri = RequestUri.of(bufferedReader.readLine());
+
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
@@ -33,15 +35,15 @@ public class RequestReader {
     }
 
     public String getContentType() {
-        String accept = headers.get(Header.ACCEPT.getName());
+        String accept = headers.getOrDefault(Header.ACCEPT.getName(), ContentType.HTML.getType());
         if (!accept.contains(",")) {
-            return accept + ";charset=utf-8";
+            return accept + CHARSET_UTF_8;
         }
         String[] split = accept.split(",");
         if (split[0].equals(ContentType.ALL.getType())) {
-            return ContentType.HTML.getType() + ";charset=utf-8";
+            return ContentType.HTML.getType() + CHARSET_UTF_8;
         }
-        return split[0] + ";charset=utf-8";
+        return split[0] + CHARSET_UTF_8;
     }
 
     public String getProtocol() {
@@ -56,7 +58,15 @@ public class RequestReader {
         return new HashMap<>(headers);
     }
 
+    public Map<String, String> getParams() {
+        return requestUri.getParams();
+    }
+
     public RequestUri getUriRequest() {
         return requestUri;
+    }
+
+    public boolean isPost() {
+        return this.requestUri.getMethod().equals("POST");
     }
 }

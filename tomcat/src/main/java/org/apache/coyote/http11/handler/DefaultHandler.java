@@ -15,17 +15,11 @@ import org.apache.coyote.http11.response.StatusCode;
 public class DefaultHandler implements Handler {
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
+    public HttpResponse handle(final HttpRequest request) throws IOException {
         String detail = request.getUri().getDetail();
         URL resource = getClass().getClassLoader().getResource("static" + detail);
         Path path = new File(resource.getPath()).toPath();
-
-        String content;
-        try {
-            content = new String(Files.readAllBytes(path));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String content = new String(Files.readAllBytes(path));
 
         String extension = request.getUri().getExtension();
 

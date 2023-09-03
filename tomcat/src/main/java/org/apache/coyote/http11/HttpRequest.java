@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpRequest {
 
     private static final String REQUEST_API_DELIMITER = " ";
@@ -10,8 +14,8 @@ public class HttpRequest {
     private static final String GET = "GET";
     private static final String PUT = "PUT";
     private static final String DELETE = "DELETE";
-    private static final String REG_DOT = "\\.";
-    private static final int EXTENSION_INDEX = 1;
+    private static final String DOT = ".";
+    private static final String QUERY_STRING_SYMBOL = "?";
 
     private final String method;
     private final String uri;
@@ -47,15 +51,51 @@ public class HttpRequest {
         return new HttpRequest(GET, "/index.html", "HTTP/1.1");
     }
 
+    public static HttpRequest toNotFound() {
+        return new HttpRequest(GET, "/404.html", "HTTP/1.1");
+    }
+
     public String getUri() {
+        if (hasQueryString()) {
+            final int queryIndex = uri.indexOf(QUERY_STRING_SYMBOL);
+            return uri.substring(0, queryIndex);
+        }
         return uri;
+    }
+
+    public boolean hasQueryString() {
+        return uri.contains(QUERY_STRING_SYMBOL);
     }
 
     public boolean isGet() {
         return method.equalsIgnoreCase(GET);
     }
 
+    public boolean isStaticRequest() {
+        return uri.contains(DOT);
+    }
+
     public String getExtension() {
-        return uri.split(REG_DOT)[EXTENSION_INDEX];
+        final int dotIndex = uri.indexOf(DOT);
+        return uri.substring(dotIndex + 1);
+    }
+
+    public Map<String, String> getQueryString() {
+        if (!hasQueryString()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new HashMap<>();
+        final int queryIndex = uri.indexOf(QUERY_STRING_SYMBOL);
+        final String[] queryParameters = uri.substring(queryIndex + 1).split("&");
+        for (String queryParameter : queryParameters) {
+            final String[] queryKeyAndValue = queryParameter.split("=");
+            if (queryKeyAndValue.length != 2) {
+                throw new IllegalArgumentException("잘못된 Query String 입니다.");
+            }
+            final String key = queryKeyAndValue[0];
+            final String value = queryKeyAndValue[1];
+            result.put(key, value);
+        }
+        return result;
     }
 }

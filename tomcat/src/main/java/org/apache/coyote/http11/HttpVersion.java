@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import org.apache.coyote.http11.parser.HttpFormatException;
 
 public enum HttpVersion {
+
     V1_1("1.1");
 
     private final String version;
@@ -21,5 +22,9 @@ public enum HttpVersion {
             }
         }
         throw new HttpFormatException();
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

@@ -7,7 +7,7 @@ import static kokodak.Constants.CRLF;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpResponseMessage {
+public class HttpResponse {
 
     private HttpVersion httpVersion;
 
@@ -17,17 +17,17 @@ public class HttpResponseMessage {
 
     private String body;
 
-    private HttpResponseMessage() {
+    private HttpResponse() {
     }
 
-    private HttpResponseMessage(final HttpResponseMessageBuilder builder) {
+    private HttpResponse(final HttpResponseMessageBuilder builder) {
         this.httpVersion = builder.httpVersion;
         this.httpStatusCode = builder.httpStatusCode;
         this.header = builder.header;
         this.body = builder.body;
     }
 
-    public String generate() {
+    public String generateResponseMessage() {
         final StringBuilder stringBuilder = new StringBuilder();
         generateStatusLine(stringBuilder);
         generateHeader(stringBuilder);
@@ -96,8 +96,8 @@ public class HttpResponseMessage {
             return this;
         }
 
-        public HttpResponseMessage build() {
-            return new HttpResponseMessage(this);
+        public HttpResponse build() {
+            return new HttpResponse(this);
         }
     }
 }

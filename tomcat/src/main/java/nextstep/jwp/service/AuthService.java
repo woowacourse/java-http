@@ -16,9 +16,16 @@ public class AuthService {
         return user;
     }
 
-    private void validateNonNull(String account, String password) {
-        if (account == null || password == null) {
-            throw new UnAuthenticatedException();
+    private void validateNonNull(Object... objects) {
+        for (Object object : objects) {
+            if (object == null) {
+                throw new UnAuthenticatedException();
+            }
         }
+    }
+
+    public void signUp(String account, String email, String password) {
+        validateNonNull(account, email, password);
+        InMemoryUserRepository.save(new User(account, email, password));
     }
 }

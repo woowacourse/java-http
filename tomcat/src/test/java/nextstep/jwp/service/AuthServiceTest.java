@@ -1,5 +1,6 @@
 package nextstep.jwp.service;
 
+import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -51,5 +52,14 @@ class AuthServiceTest {
 
         // then
         assertThat(login).isNotNull();
+    }
+
+    @Test
+    void 회원가입을_진행한다() {
+        // when
+        authService.signUp("mallang", "mallang@naver.com", "1234");
+
+        // then
+        assertThat(findByAccount("mallang")).isNotNull();
     }
 }

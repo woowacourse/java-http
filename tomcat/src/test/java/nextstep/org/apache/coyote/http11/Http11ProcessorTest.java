@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.model.User;
+import org.apache.catalina.Manager;
+import org.apache.catalina.session.HttpSession;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -226,6 +230,35 @@ class Http11ProcessorTest {
             "Content-Type: text/html;charset=utf-8 ",
             "Content-Length: 2417 ",
             "Allow: GET, POST" );
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @Test
+    void login_with_cookie_to_redirect() {
+        // given
+        HttpSession session = new HttpSession("1234");
+        session.setAttribute("user", new User("glen", "password", "emaail"));
+        Manager sessionManager = new SessionManager();
+        sessionManager.add(session);
+
+        final String httpRequest = String.join(System.lineSeparator(),
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Cookie: JSESSIONID=1234",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+            "HTTP/1.1 302 FOUND ",
+            "Location: /index.html");
 
         assertThat(socket.output()).startsWith(expected);
     }

@@ -9,7 +9,7 @@ import org.apache.coyote.common.HttpCookie;
 
 public class CookieParser {
 
-    private static final String DELIMITER = "; ";
+    private static final String DELIMITER = ";";
     private static final int NAME_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -21,6 +21,7 @@ public class CookieParser {
             return new HttpCookie(Collections.emptyMap());
         }
         Map<String, String> cookieMap = Arrays.stream(cookieString.split(DELIMITER))
+            .map(String::trim)
             .map(cookie -> cookie.split("=", 2))
             .collect(toMap(nameToValue -> nameToValue[NAME_INDEX], CookieParser::parseValue));
         return new HttpCookie(cookieMap);

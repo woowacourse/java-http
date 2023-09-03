@@ -2,7 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.util.UUID;
 
-import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.Request;
@@ -76,7 +76,7 @@ public class LoginRequestHandler implements RequestHandler {
 			return Response.unauthorized();
 		}
 
-		final var cookies = HttpCookies.empty();
+		final var cookies = Cookies.empty();
 		final var sessionId = UUID.randomUUID().toString();
 		cookies.addSession(sessionId);
 		SessionManager.add(new Session(sessionId));

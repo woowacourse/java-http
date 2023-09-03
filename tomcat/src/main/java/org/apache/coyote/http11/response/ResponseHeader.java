@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Cookies;
 
 public class ResponseHeader {
 
@@ -22,7 +22,7 @@ public class ResponseHeader {
 		headers.put(key, value);
 	}
 
-	public void addCookies(HttpCookies cookies) {
+	public void addCookies(Cookies cookies) {
 		headers.put(ResponseHeaderType.SET_COOKIE, cookies.format());
 	}
 

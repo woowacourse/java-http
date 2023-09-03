@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.handler.ResourceProvider;
 
@@ -34,7 +34,7 @@ public class Response {
 		return code(StatusCode.NOT_FOUND);
 	}
 
-	public static Response redirectWithCookie(final String location, final HttpCookies cookies) {
+	public static Response redirectWithCookie(final String location, final Cookies cookies) {
 		final var statusLine = new StatusLine(StatusCode.FOUND);
 		final var header = getHeader();
 		header.add(ResponseHeaderType.LOCATION, location);

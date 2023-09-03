@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.*;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpCookies {
+public class Cookies {
 
 	private static final String DELIMITER = "; ";
 	private static final String KEY_VALUE_SEPARATOR = "=";
@@ -13,28 +15,25 @@ public class HttpCookies {
 
 	private final Map<String, String> cookies = new HashMap<>();
 
-	private HttpCookies() {
+	private Cookies() {
 	}
 
-	private HttpCookies(final Map<String, String> cookies) {
+	private Cookies(final Map<String, String> cookies) {
 		this.cookies.putAll(cookies);
 	}
 
-	public static HttpCookies empty() {
-		return new HttpCookies();
+	public static Cookies empty() {
+		return new Cookies();
 	}
 
-	public static HttpCookies from(final String cookieString) {
+	public static Cookies from(final String cookieString) {
 		if (cookieString == null) {
-			return HttpCookies.empty();
+			return Cookies.empty();
 		}
 		return Arrays.stream(cookieString.split(DELIMITER))
 			.map(field -> field.split(KEY_VALUE_SEPARATOR))
 			.filter(parts -> parts.length == 2)
-			.collect(Collectors.collectingAndThen(
-				Collectors.toMap(parts -> parts[0], field -> field[1]),
-				HttpCookies::new
-			));
+			.collect(collectingAndThen(toMap(parts -> parts[0], field -> field[1]), Cookies::new));
 	}
 
 	public void addSession(final String sessionId) {

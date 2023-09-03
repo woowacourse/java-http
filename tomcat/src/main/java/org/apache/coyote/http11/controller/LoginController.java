@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.coyote.http11.request.Cookie;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.ResponseBody;
 import org.apache.coyote.http11.response.Response;
@@ -15,6 +17,7 @@ public class LoginController implements Controller {
     private static final int DONT_HAVE_VALUE = 1;
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String LOCATION_HEADER = "Location";
 
     private final LoginService loginService;
 
@@ -24,24 +27,41 @@ public class LoginController implements Controller {
 
     @Override
     public Response<String> handle(Request request) {
-        if (checkLogin(request)) {
+        if (loggedin(request)) {
             return Response.status(302)
-                .addHeader("Location", "/index.html")
+                .addHeader(LOCATION_HEADER, "/index.html")
                 .build();
         }
+
+        Optional<String> loginSession = login(request);
+        if (loginSession.isPresent()) {
+            return Response.status(302)
+                .addHeader(LOCATION_HEADER, "/index.html")
+                .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession.get())
+                .build();
+        }
+
         return Response.status(302)
-            .addHeader("Location", "/401.html")
+            .addHeader(LOCATION_HEADER, "/401.html")
             .build();
     }
 
-    private boolean checkLogin(Request request) {
+    private boolean loggedin(Request request) {
+        Optional<Cookie> cookie = request.getRequestHeaders().getCookie();
+        if (cookie.isPresent()) {
+            return cookie.get().getSessionCookie().isPresent();
+        }
+        return false;
+    }
+
+    private Optional<String> login(Request request) {
         Map<String, String> bodyData = convertBody(request.getResponseBody());
         String account = bodyData.get(ACCOUNT);
         String password = bodyData.get(PASSWORD);
         if (account != null && password != null) {
-            return loginService.checkUser(account, password);
+            return loginService.login(account, password);
         }
-        return false;
+        return Optional.empty();
     }
 
     // TODO RequestLine 중복 로직 제거

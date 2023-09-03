@@ -16,5 +16,5 @@
 2. [x] POST 방식으로 회원가입 및 로그인
    - [x] Request 를 생성한다
    - [x] 요청을 해결할 수 있는 Contoller 를 Mapper 로 엮어둔다.
-3. [ ] Cookie에 JSESSIONID 값 저장하기
+3. [x] Cookie에 JSESSIONID 값 저장하기
 4. [ ] Session 구현하기

@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
@@ -12,6 +16,7 @@ import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.request.ResponseBody;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,20 +124,59 @@ public class Http11Processor implements Runnable, Processor {
     private String controllerResponse(Request request) {
         Controller handler = handlerMapper.getHandler(request);
         Response response = handler.handle(request);
-        if (response.getStatusCode() == 302) {
-            return redirectResponse(response);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(requestLine(response));
+        Optional<String> body = bodyOf(response);
+        if (body.isPresent()) {
+            String s = stringBuilder.append(responseWithBody(response, body.get())).toString();
+            return s;
         }
-        if (response.isViewResponse()) {
-            return staticResourceResponse(response.getViewPath());
-        }
-        throw new UnsupportedOperationException();
+        String str = responseNoBody(response);
+        stringBuilder.append("\r\n");
+        return stringBuilder.append(str).toString();
     }
 
-    private String redirectResponse(Response response) {
-        String location = (String) response.getHeaders().get("Location");
-        return String.join("\r\n",
-            "HTTP/1.1 302 FOUND ",
-            "Location: " + location
-        );
+    private String responseNoBody(Response response) {
+        Map headers = response.getHeaders();
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        stringJoiner.add(headerResponse(headers));
+        stringJoiner.add("");
+        return stringJoiner.toString();
+    }
+
+    private String responseWithBody(Response response, String body) {
+        Map headers = response.getHeaders();
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        stringJoiner.add(headerResponse(headers));
+        stringJoiner.add(resourceProvider.contentTypeOf(response.getViewPath()));
+        stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
+        stringJoiner.add("");
+        stringJoiner.add(body);
+        return stringJoiner.toString();
+    }
+
+    private String headerResponse(Map headers) {
+        return (String) headers.keySet()
+            .stream()
+            .map(headerName -> makeHeader(headerName, headers.get(headerName)))
+            .collect(Collectors.joining("\r\n"));
+    }
+
+    private String makeHeader(Object headerName, Object value) {
+        String headerKey = (String) headerName;
+        String headerValue = (String) value;
+        return headerKey + ": " + headerValue;
+    }
+
+    private Optional<String> bodyOf(Response response) {
+        if (response.isViewResponse()) {
+            return Optional.of(resourceProvider.resourceBodyOf(response.getViewPath()));
+        }
+        return Optional.empty();
+    }
+
+    private String requestLine(Response response) {
+        HttpResponse httpResponse = HttpResponse.of(response.getStatusCode());
+        return "HTTP/1.1 " + httpResponse.getStatusCode() + " " + httpResponse.name() + " ";
     }
 }

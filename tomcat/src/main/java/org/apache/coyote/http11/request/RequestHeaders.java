@@ -42,7 +42,7 @@ public class RequestHeaders {
 
     public Optional<Cookie> getCookie() {
         if (!headers.containsKey(COOKIE)) {
-            Optional.empty();
+            return Optional.empty();
         }
         return Optional.of(new Cookie(extractCookie(headers.get(COOKIE))));
     }

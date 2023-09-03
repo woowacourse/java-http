@@ -30,9 +30,10 @@ public class SignUpController implements Controller {
             String account = bodyData.get(ACCOUNT);
             String password = bodyData.get(PASSWORD);
             String email = bodyData.get(EMAIL);
-            loginService.signUp(account, password, email);
+            String loginSession = loginService.signUp(account, password, email);
             return Response.status(302)
                 .addHeader("Location", "/index.html")
+                .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession)
                 .build();
         } catch (IllegalArgumentException e) {
             return Response.status(302)

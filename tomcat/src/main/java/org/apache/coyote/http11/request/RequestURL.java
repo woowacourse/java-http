@@ -1,60 +1,80 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.exception.InvalidRequestLineException;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestURL {
     private static final int METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
     private static final int VERSION_INDEX = 2;
-    private static final String ROOT_URL = "/";
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String QUERY_PARAM_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String NON_RESERVED_QUERY_PARAM_DELIMITER = "\\?";
+    private static final String NON_RESERVED_EXTENSION_DELIMITER = "\\.";
+    private static final String DEFAULT_EXTENSION = ".html";
+    private static final String EXTENSION_DELIMITER = ".";
+    private static final String SPACE_DELIMITER = " ";
 
     private final HttpMethod method;
     private final String url;
     private final String version;
-    private final String extension;
+    private final Map<String, String> requestParam;
 
-    private RequestURL(final HttpMethod method, final String url, final String version, final String extension) {
+    private RequestURL(final HttpMethod method, final String url, final String version, final Map<String, String> requestParam) {
         this.method = method;
         this.url = url;
         this.version = version;
-        this.extension = extension;
+        this.requestParam = requestParam;
     }
 
     public static RequestURL from(String line) {
         validate(line);
 
-        final String[] splitedLine = line.split(" ");
+        final String[] splitedLine = line.split(SPACE_DELIMITER);
+
         return new RequestURL(getMethod(splitedLine[METHOD_INDEX]), splitedLine[URL_INDEX],
-                splitedLine[VERSION_INDEX], getExtension(splitedLine[URL_INDEX]));
+                splitedLine[VERSION_INDEX], parseQueryParam(splitedLine[URL_INDEX]));
     }
 
     private static void validate(final String line) {
         if (line.isBlank() && line.isEmpty()) {
-            throw new IllegalArgumentException("잘못된 RequestURL입니다.");
+            throw new InvalidRequestLineException();
         }
     }
 
-    public String getResource() throws IOException {
-        if (url.equals(ROOT_URL)) {
-            return "Hello world!";
+    private static Map<String, String> parseQueryParam(String url) {
+        if (!url.contains(QUERY_STRING_DELIMITER)) {
+            return Collections.emptyMap();
         }
-        return findResource();
+        final String[] splitedQueryString = url.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[1].split(QUERY_PARAM_DELIMITER);
+        Map<String, String> queryStrings = new HashMap<>();
+        for (String queryString : splitedQueryString) {
+            final String[] splitedQuery = queryString.split(KEY_VALUE_DELIMITER);
+            queryStrings.put(splitedQuery[0], splitedQuery[1]);
+        }
+
+        return queryStrings;
     }
 
-    private String findResource() throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + url);
-        return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+    public String getAbsolutePath() {
+        String absolutePath = url;
+        if (absolutePath.contains(QUERY_STRING_DELIMITER)) {
+            absolutePath = absolutePath.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[0];
+        }
+        if (!absolutePath.contains(EXTENSION_DELIMITER)) {
+            absolutePath += DEFAULT_EXTENSION;
+        }
+        return absolutePath;
     }
 
-    private static String getExtension(final String url) {
-        final String[] splitedUrl = url.split("\\.");
-        if(splitedUrl.length>1) {
+    public String getExtension() {
+        final String[] splitedUrl = url.split(NON_RESERVED_EXTENSION_DELIMITER);
+        if (splitedUrl.length > 1) {
             return splitedUrl[splitedUrl.length - 1];
         }
         return "html";
@@ -64,19 +84,11 @@ public class RequestURL {
         return HttpMethod.valueOf(method);
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public Map<String, String> getRequestParam() {
+        return requestParam;
     }
 
     public String getUrl() {
         return url;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getExtension() {
-        return extension;
     }
 }

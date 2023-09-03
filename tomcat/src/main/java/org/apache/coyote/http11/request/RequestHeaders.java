@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class RequestHeaders {
 
+    private static final String KEY_VALUE_DELIMITER = ": ";
+    private static final String SPACE_DELIMITER = " ";
     private final Map<String, String> headers;
 
     public RequestHeaders(final Map<String, String> headers) {
@@ -17,11 +19,11 @@ public class RequestHeaders {
         Map<String, String> headers = new HashMap<>();
 
         String line;
-        while ((line = bufferedReader.readLine()) == null) {
+        while ((line = bufferedReader.readLine()) != null) {
             if (line.isEmpty()) {
                 break;
             }
-            final String[] splitedLine = line.replace(": ", " ").split(" ");
+            final String[] splitedLine = line.replace(KEY_VALUE_DELIMITER, SPACE_DELIMITER).split(SPACE_DELIMITER);
             headers.put(splitedLine[0], splitedLine[1]);
         }
 

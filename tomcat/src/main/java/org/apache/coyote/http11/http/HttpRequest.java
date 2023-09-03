@@ -13,4 +13,8 @@ public class HttpRequest {
     public String getRequestUri() {
         return requestFirstLine.getRequestUri();
     }
+
+    public String findQueryStringValue(String key) {
+        return requestFirstLine.findQueryStringValue(key);
+    }
 }

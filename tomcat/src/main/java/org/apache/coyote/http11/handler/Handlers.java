@@ -14,7 +14,8 @@ public class Handlers {
     private static final Map<String, Handler> handlers =
             Map.of(
                     "/", new RootHandler(),
-                    "/file", new FileHandler()
+                    "/file", new FileHandler(),
+                    "/login", new LoginHandler()
             );
 
 
@@ -25,6 +26,9 @@ public class Handlers {
         String extensionName = requestUri.substring(lastDotIndex + 1);
         if (FILE_PATTERN.matcher(extensionName).find()) {
             return handlers.get("/file").handle(request);
+        }
+        if (requestUri.contains("?")) {
+            return handlers.get(requestUri).handle(request);
         }
         return handlers.get(requestUri).handle(request);
     }

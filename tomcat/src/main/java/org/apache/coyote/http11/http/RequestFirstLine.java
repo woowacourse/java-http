@@ -82,4 +82,11 @@ public class RequestFirstLine {
     public Map<String, String> getQueryStrings() {
         return queryStrings;
     }
+
+    public String findQueryStringValue(String key) {
+        if (!queryStrings.containsKey(key)) {
+            throw new IllegalArgumentException("잘못된 key입니다.");
+        }
+        return queryStrings.get(key);
+    }
 }

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum MediaType {
+public enum ContentType {
 
     CSS("text/css"),
     HTML("text/html"),
@@ -9,7 +9,7 @@ public enum MediaType {
 
     private final String type;
 
-    MediaType(String type) {
+    ContentType(String type) {
         this.type = type;
     }
 

@@ -35,37 +35,11 @@ public class Http11Processor implements Runnable, Processor {
             RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
             requestReader.read();
 
-            final String response = createResponse(requestReader);
+            ResponseWriter responseWriter = new ResponseWriter(outputStream, requestReader);
+            responseWriter.createResponse();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String createResponse(RequestReader requestReader) throws IOException {
-        String url = requestReader.getUriRequest().getUrl().substring(1);
-
-        String path = "tomcat/build/resources/main/static/" + url;
-        File file = new File(path);
-
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append(System.lineSeparator());
-            }
-        }
-
-        final var responseBody = sb.toString();
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return response;
     }
 }

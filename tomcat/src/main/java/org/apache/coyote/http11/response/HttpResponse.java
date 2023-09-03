@@ -6,8 +6,12 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeaders headers;
-    private final String messageBody;
     private final Cookies cookies = new Cookies();
+    private String messageBody;
+
+    public HttpResponse(StatusLine statusLine, String messageBody) {
+        this(statusLine, new ResponseHeaders(), messageBody);
+    }
 
     public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String messageBody) {
         this.statusLine = statusLine;
@@ -21,6 +25,10 @@ public class HttpResponse {
             return;
         }
         headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
+    }
+
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
     }
 
     public void addCookie(String name, String value) {

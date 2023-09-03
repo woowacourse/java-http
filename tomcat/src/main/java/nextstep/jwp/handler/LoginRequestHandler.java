@@ -1,8 +1,10 @@
 package nextstep.jwp.handler;
 
 import static org.apache.coyote.http11.response.HttpStatus.FOUND;
+import static org.apache.coyote.http11.session.SessionConstant.JSESSIONID;
 
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.exception.UnAuthenticatedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.AuthService;
@@ -10,7 +12,6 @@ import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.util.RequestParamUtil;
 import org.slf4j.Logger;
@@ -30,14 +31,15 @@ public class LoginRequestHandler implements RequestHandler {
     public HttpResponse handle(HttpRequest request) {
         Map<String, String> formData = RequestParamUtil.parse(request.body());
         StatusLine statusLine = new StatusLine(FOUND);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
+        HttpResponse response = new HttpResponse(statusLine, null);
         try {
             User user = authService.login(formData.get("account"), formData.get("password"));
             log.info("User={}", user);
-            responseHeaders.put("Location", "/index.html");
+            response.addHeader("Location", "/index.html");
+            response.addCookie(JSESSIONID, UUID.randomUUID().toString());
         } catch (UnAuthenticatedException e) {
-            responseHeaders.put("Location", "/401.html");
+            response.addHeader("Location", "/401.html");
         }
-        return new HttpResponse(statusLine, responseHeaders, null);
+        return response;
     }
 }

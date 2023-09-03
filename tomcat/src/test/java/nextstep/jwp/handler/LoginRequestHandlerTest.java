@@ -41,7 +41,7 @@ class LoginRequestHandlerTest {
     }
 
     @Test
-    void 로그인에_성공하면_index_html로_redirect() {
+    void 로그인에_성공하면_session_쿠키를_제공하고_index_html로_redirect() {
         // given
         HttpRequest request = HttpRequest.builder()
                 .startLine(StartLine.from("POST /login HTTP/1.1"))
@@ -56,11 +56,10 @@ class LoginRequestHandlerTest {
         HttpResponse response = handler.handle(request);
 
         // then
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n";
-
-        assertThat(response.toString()).isEqualTo(expected);
+        String actual = response.toString();
+        assertThat(actual).contains("HTTP/1.1 302 FOUND \r\n");
+        assertThat(actual).contains("Location: /index.html \r\n");
+        assertThat(actual).contains("Set-Cookie: JSESSIONID=");
     }
 
     @Nested

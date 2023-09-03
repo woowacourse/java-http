@@ -1,17 +1,10 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import nextstep.jwp.ContentType;
 import nextstep.jwp.HttpRequest;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -40,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
             if (request.getTarget().equals("/")) {
-                final var response = getResponse("Hello world!");
+                final var response = getResponse("Hello world!", ContentType.HTML);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             } else {
@@ -52,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                         .getFile()
                 );
                 String responseBody = new String(Files.readAllBytes(file.toPath()));
-                String response = getResponse(responseBody);
+                String response = getResponse(responseBody, ContentType.from(file.getName()));
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             }
@@ -62,10 +55,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String getResponse(String responseBody) {
+    private static String getResponse(String responseBody, ContentType contentType) {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: "+ contentType.value  + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
             responseBody);

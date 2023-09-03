@@ -29,6 +29,7 @@ public class RegisterHandler implements Handler {
             );
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
         }
+
         return null;
     }
 }

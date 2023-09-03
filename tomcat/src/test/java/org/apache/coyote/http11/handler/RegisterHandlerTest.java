@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import nextstep.jwp.db.InMemoryUserRepository;
 
 class RegisterHandlerTest {
 
@@ -115,7 +118,7 @@ class RegisterHandlerTest {
 			final URL resource = getClass().getClassLoader().getResource("static" + file);
 			final String expected = "HTTP/1.1 200 OK \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
-				"Content-Length: 4391 \r\n" +
+				"Content-Length: 4319 \r\n" +
 				"\r\n" +
 				new String(readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -142,8 +145,12 @@ class RegisterHandlerTest {
 				"Location: http://localhost:8080/index.html \r\n" +
 				"\r\n";
 
-			assertThat(actual.buildResponse())
-				.isEqualTo(expected);
+			assertAll(
+				() -> assertThat(actual.buildResponse())
+					.isEqualTo(expected),
+				() -> assertThat(InMemoryUserRepository.findByAccount("gugu"))
+					.isPresent()
+			);
 		}
 	}
 }

@@ -14,7 +14,8 @@ public class HttpHandlers {
 	private static final List<HttpHandler> HTTP_HANDLERS = List.of(
 		new RootHandler(),
 		new StaticResourceHandler(),
-		new LoginHandler()
+		new LoginHandler(),
+		new RegisterHandler()
 	);
 	private static final List<ExceptionHandler> EXCEPTION_HANDLERS = List.of(
 		new UnauthorizedHandler()

@@ -15,7 +15,7 @@ public class HandlerAdaptor {
 
     private static final Map<HandlerMapping, Function<Request, Response>> handlerMethods = new HashMap<>(
             Map.of(
-                    new HandlerMapping(GET, "/login"), UserController::login,
+                    new HandlerMapping(POST, "/login"), UserController::login,
                     new HandlerMapping(POST, "/register"), UserController::register
             )
     );

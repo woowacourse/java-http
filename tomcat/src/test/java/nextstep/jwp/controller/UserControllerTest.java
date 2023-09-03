@@ -15,7 +15,7 @@ class UserControllerTest {
     @Test
     void loginSuccess() {
         Response response = UserController.login(Request.from(
-                "get", "/login?account=gugu&password=password", "localhost:8080", List.of(), "keep-alive", ""
+                "post", "/login", "localhost:8080", List.of(), "keep-alive", "account=gugu&password=password"
         ));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);
@@ -26,7 +26,7 @@ class UserControllerTest {
     @Test
     void loginFail() {
         Response response = UserController.login(Request.from(
-                "get", "/login?account=dodo&password=password", "localhost:8080", List.of(), "keep-alive", ""
+                "post", "/login", "localhost:8080", List.of(), "keep-alive", "account=dodo&password=password"
         ));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);

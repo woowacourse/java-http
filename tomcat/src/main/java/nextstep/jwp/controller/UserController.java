@@ -18,9 +18,10 @@ public class UserController {
     }
 
     public static Response login(Request request) {
-        Map<String, List<String>> queryParams = request.getQueryParams();
-        String account = queryParams.get("account").get(0);
-        String password = queryParams.get("password").get(0);
+        String form = request.getBody();
+        Map<String, List<String>> formContents = QueryStringParser.parse(form);
+        String account = formContents.get("account").get(0);
+        String password = formContents.get("password").get(0);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
@@ -39,7 +40,6 @@ public class UserController {
     public static Response register(Request request) {
         /// TODO: 2023/09/04 request body 형식 확인
         String form = request.getBody();
-
         Map<String, List<String>> formContents = QueryStringParser.parse(form);
         String account = formContents.get("account").get(0);
         String email = formContents.get("email").get(0);

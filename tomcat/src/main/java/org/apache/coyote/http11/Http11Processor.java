@@ -71,17 +71,21 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private HttpResponse getResponse(final HttpRequest request) throws URISyntaxException, IOException, NotFoundException {
-        if (request.isSameUri("/")) {
+    private HttpResponse getResponse(final HttpRequest httpRequest) throws URISyntaxException, IOException, NotFoundException {
+        if (httpRequest.isSamePath("/")) {
             return HttpResponse.ok("Hello world!");
         }
 
-        if (request.hasResource()) {
-            return HttpResponse.okWithResource(request.getUri());
+        if (httpRequest.hasResource()) {
+            return HttpResponse.okWithResource(httpRequest.getPath());
         }
 
-        if (request.isSameUri("/login")) {
-            return login(request.getParams());
+        if (httpRequest.isSamePath("/login")) {
+            return login(httpRequest.getParams());
+        }
+
+        if (httpRequest.isSamePath("/register")) {
+            return HttpResponse.okWithResource("/register.html");
         }
 
         throw new NotFoundException("페이지를 찾을 수 없습니다.");

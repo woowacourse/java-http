@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +30,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMPTY_URL = "/";
     private static final String PATH = "static";
     private static final String END_OF_LINE = "";
-    private static final String AMPERSAND = "&";
 
+    private boolean isActive = false;
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -53,19 +52,37 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             // read input stream
             String request = readAsUTF8(inputStream);
-
             // parse headers
             Map<String, String> headers = parseHeaders(request);
 
             // Query String
-            String url = headers.get("URL");
+            String response = makeResponse(headers);
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private String makeResponse(Map<String, String> headers) throws IOException {
+        String url = headers.get("URL");
+
+        if (Objects.equals(url, "/")) {
+            return makeRootResponse();
+        }
+
+        if (url.contains("/login?")) {
+            String code = "302 Found";
+            String location = "index.html";
+
             int queryIndex = url.indexOf("?");
             if (queryIndex != -1) {
                 String query = url.substring(queryIndex + 1);
                 url = url.substring(0, queryIndex);
 
                 Map<String, String> parameters = new HashMap<>();
-                List<String> queryParameters = Arrays.stream(query.split(AMPERSAND)).collect(toList());
+                List<String> queryParameters = Arrays.stream(query.split("&")).collect(toList());
                 for (String parameter : queryParameters) {
                     int delimiterIndex = parameter.indexOf("=");
                     String field = parameter.substring(0, delimiterIndex);
@@ -74,30 +91,76 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 String account = parameters.get("account");
                 String password = parameters.get("password");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(RuntimeException::new);
-                if (!user.checkPassword(password)) {
-                    throw new RuntimeException();
+
+                try {
+                    checkUserCredential(account, password);
+                } catch (Exception e) {
+                    code = "401 Unauthorized ";
+                    location = "401.html";
                 }
-                log.info("user : {}", user);
             }
 
+            File file = mapToResourceFile(location);
+
             // file type
-            Path path = mapToResourcePath(url);
-            String fileName = path.getFileName().toString();
+            String fileName = file.getName();
             String fileExtension = extractFileExtension(fileName);
             String type = mapMimeType(fileExtension);
 
             // resource
-            String resource = new String(Files.readAllBytes(path));
+            String responseBody = new String(Files.readAllBytes(file.toPath()));
 
-            String response = makeResponse(resource, type);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            return String.join(
+                    System.lineSeparator(),
+                    "HTTP/1.1 " + code,
+                    "Location:" + location,
+                    "Content-Type: " + type + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody
+            );
         }
+
+        File file = mapToResourceFile(url);
+
+        // file type
+        String fileName = file.getName();
+        String fileExtension = extractFileExtension(fileName);
+        String type = mapMimeType(fileExtension);
+
+        // resource
+        String responseBody = new String(Files.readAllBytes(file.toPath()));
+
+        return String.join(
+                System.lineSeparator(),
+                "HTTP/1.1 " + "200 OK ",
+                "Content-Type: " + type + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
+    private void checkUserCredential(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("계정이 없거나 비밀번호가 틀렸어요"));
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("계정이 없거나 비밀번호가 틀렸어요");
+        }
+        isActive = true;
+        log.info("user : {}", user);
+    }
+
+    private String makeRootResponse() {
+        String responseBody = "Hello world!";
+        return String.join(
+                System.lineSeparator(),
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
     }
 
     private String mapMimeType(String fileExtension) {
@@ -156,29 +219,15 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private Path mapToResourcePath(String url) throws IOException {
-        if (Objects.equals(url, EMPTY_URL)) {
-            url = DEFAULT_URL;
-        }
-        if (Objects.equals("/login", url)) {
+    private File mapToResourceFile(String url) {
+        if (!url.contains(".")) {
             url = url + ".html";
         }
-        if (Objects.equals("/favicon.ico", url)) {
-            url = "";
+        if (!url.contains("/")) {
+            url = "/" + url;
         }
 
-        URL locate = getClass().getClassLoader().getResource(PATH + url);
-        return new File(Objects.requireNonNull(locate).getFile()).toPath();
-    }
-
-    private String makeResponse(String responseBody, String type) {
-        return String.join(
-                System.lineSeparator(),
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + type + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        URL path = getClass().getClassLoader().getResource(PATH + url);
+        return new File(Objects.requireNonNull(path).getFile());
     }
 }

@@ -21,3 +21,17 @@
 
 - [x] Query String 파싱
 - [x] 로그 찍기
+
+## 2단계
+
+- [x] 그냥 하드 코딩 하자
+
+### 1. HTTP Status Code 302
+
+- [x] 로그인에 따라 다른 응답 반환
+
+### 2. Post 방식 회원가입
+
+### 3. Cookie에 JSESSIONID 값 저장
+
+### 4. Session 구현

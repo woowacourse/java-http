@@ -89,12 +89,12 @@ public class Http11Processor implements Runnable, Processor {
             return DEFAULT_RESPONSE_BODY_MESSAGE;
         }
         if (requestURI.contains("?")) {
-            QueryStrings queryStrings = QueryStrings.from(requestURI);
-            String account = queryStrings.getValues().get("account");
+            QueryString queryString = QueryString.from(requestURI);
+            String account = queryString.getValues().get("account");
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(IllegalArgumentException::new);
             log.info(user.toString());
-            requestURI = queryStrings.getUri() + ".html";
+            requestURI = queryString.getUri() + ".html";
         }
         Path path = new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static" + requestURI)).getFile()

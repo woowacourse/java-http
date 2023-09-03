@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,17 +43,13 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final List<String> headers = new ArrayList<>();
-            while (bufferedReader.ready()) {
-                headers.add(bufferedReader.readLine());
-            }
+            final HttpRequest request = HttpRequest.parse(bufferedReader);
 
-            final String requestLine = headers.get(0);
-            final String[] splitRequestLine = requestLine.split(" ");
-            final String requestURI = "static" + splitRequestLine[1];
+            // 여기부터는 response임
+            final RequestLine requestLine = request.getRequestLine();
+            final String requestURI = "static" + requestLine.getUri();
 
-            final URL url = Objects.requireNonNull(getClass().getClassLoader()
-                    .getResource(requestURI));
+            final URL url = this.getClass().getClassLoader().getResource(requestURI);
             final Path path = new File(url.getPath()).toPath();
             final byte[] responseBody = Files.readAllBytes(path);
 

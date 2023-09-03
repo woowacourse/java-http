@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,6 +38,10 @@ public class Http11Processor implements Runnable, Processor {
             final var request = httpRequestParser.parse(inputStream);
             final var response = httpDispatcher.handle(request);
 
+            if (request.notContainJsessionId()) {
+                response.addHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+            }
+
             sendResponse(outputStream, response);
         } catch (final IOException | UncheckedServletException exception) {
             log.error(exception.getMessage(), exception);
@@ -50,11 +55,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeHttpResponse(final Http11Response response) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + response.getStatusCode().getResponse() + " ",
-                "Content-Type: " + response.getContentType().getResponse() + ";charset=utf-8 ",
-                "Content-Length: " + response.getResponseBody().getBytes().length + " ",
-                "",
-                response.getResponseBody());
+        final StringBuilder httpResponse = new StringBuilder();
+
+        httpResponse.append("HTTP/1.1 ").append(response.getStatusCode().getResponse()).append("\r\n");
+        httpResponse.append("Content-Type: ").append(response.getContentType().getResponse()).append(";charset=utf-8\r\n");
+        httpResponse.append("Content-Length: ").append(response.getResponseBody().getBytes().length).append("\r\n");
+
+        if (!response.getOtherHeader().isEmpty()) {
+            final String additionalHeaders = response.getOtherHeader().entrySet().stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue())
+                    .collect(Collectors.joining("\r\n"));
+            httpResponse.append(additionalHeaders).append("\r\n");
+        }
+
+        httpResponse.append("\r\n");
+        httpResponse.append(response.getResponseBody());
+
+        return httpResponse.toString();
     }
 }

@@ -16,16 +16,16 @@ public class Http11Request {
         this.requestBody = requestBody;
     }
 
+    public boolean notContainJsessionId() {
+        return !httpHeader.containsJsessionId();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
     public String getPath() {
         return path;
-    }
-
-    public String getQuery() {
-        return query;
     }
 
     public RequestBody getRequestBody() {

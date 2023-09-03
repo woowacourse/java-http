@@ -14,9 +14,10 @@ public class ControllerAdapter {
     }
 
     private void init() {
-        map.put("/login", new LoginController());
         map.put(STATIC_CONTROLLER, new StaticController());
         map.put(ERROR_CONTROLLER, new ErrorController());
+        map.put("/login", new LoginController());
+        map.put("/register", new RegisterController());
     }
 
     public Controller findController(HttpRequest httpRequest) {

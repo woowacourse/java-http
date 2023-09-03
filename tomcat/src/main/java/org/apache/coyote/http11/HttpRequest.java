@@ -90,4 +90,8 @@ public class HttpRequest {
         }
         return result;
     }
+
+    public boolean isGetRequest() {
+        return method.equalsIgnoreCase(GET);
+    }
 }

@@ -1,14 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
 public class HttpResponse {
 
-    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    private static final String STATIC_DIRECTORY = "static";
     private static final String DELIMITER = "\r\n";
 
     private final StatusCode statusCode;
@@ -31,35 +24,10 @@ public class HttpResponse {
     }
 
     public static HttpResponse toNotFound() {
-        URL resource = classLoader.getResource(STATIC_DIRECTORY + "/404.html");
-        final File file = new File(resource.getPath());
-        try{
-            return new HttpResponse(StatusCode.NOT_FOUND, "text/html", new String(Files.readAllBytes(file.toPath())));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return toNotFound();
-        }
+        return new HttpResponse(StatusCode.NOT_FOUND, ContentType.TEXT_HTML.getValue(), ViewLoader.toNotFound());
     }
 
     public static HttpResponse toUnauthorized() {
-        URL resource = classLoader.getResource(STATIC_DIRECTORY + "/401.html");
-        final File file = new File(resource.getPath());
-        try{
-            return new HttpResponse(StatusCode.UNAUTHORIZED, "text/html", new String(Files.readAllBytes(file.toPath())));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return toNotFound();
-        }
-    }
-
-    public static String indexResponseBody() {
-        URL resource = classLoader.getResource(STATIC_DIRECTORY + "/index.html");
-        final File file = new File(resource.getFile());
-        try{
-            return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return new HttpResponse(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML.getValue(), ViewLoader.toUnauthorized());
     }
 }

@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.requests.HttpCookie;
+import org.apache.coyote.requests.RequestBody;
+import org.apache.coyote.requests.RequestHeader;
 
 import java.io.IOException;
 
@@ -9,7 +12,11 @@ import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class LoginProcessor {
 
-    public static HttpResponse doLogin(String query) throws IOException {
+    private LoginProcessor() {
+    }
+
+    public static HttpResponse doLogin(RequestHeader requestHeader, RequestBody requestBody) throws IOException {
+        String query = requestBody.getItem();
         if (query.isBlank()) {
             return ViewResolver.resolveView("/login");
         }
@@ -33,15 +40,22 @@ public class LoginProcessor {
                 .orElseGet(() -> null);
 
         if (user != null && user.checkPassword(password)) {
+            HttpResponse httpResponse = new HttpResponse("/index.html", HttpStatus.FOUND, TEXT_HTML);
             System.out.println("로그인 성공!" + user);
-            return new HttpResponse("/index.html", HttpStatus.FOUND, TEXT_HTML);
+            String cookies = requestHeader.get("Cookie");
+            HttpCookie cookie = HttpCookie.from(cookies);
+            if (cookie.get("JSESSIONID") == null) {
+                httpResponse.addHeader("Set-Cookie", cookie.generateCookie());
+            }
+            return httpResponse;
         }
 
         return ViewResolver.resolveView("/401.html");
     }
 
 
-    public static HttpResponse doRegister(String query) throws IOException {
+    public static HttpResponse doRegister(RequestBody requestBody) throws IOException {
+        String query = requestBody.getItem();
         if (query.isBlank()) {
             return ViewResolver.resolveView("/register");
         }

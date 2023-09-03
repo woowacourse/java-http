@@ -37,15 +37,10 @@ public class ViewResolver {
 
 
     public static HttpResponse routePath(String path, String query) throws IOException {
-        switch (path) {
-            case "/":
-                return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
-            case "/login":
-                return LoginProcessor.doLogin(query);
-            default:
-                break;
+        if (path.equals("/")) {
+            return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
         }
+
         return ViewResolver.resolveView(path);
     }
-
 }

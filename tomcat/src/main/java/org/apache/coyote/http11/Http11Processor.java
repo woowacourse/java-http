@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.requests.HttpCookie;
 import org.apache.coyote.requests.RequestBody;
 import org.apache.coyote.requests.RequestHeader;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public class Http11Processor implements Runnable, Processor {
@@ -49,11 +51,10 @@ public class Http11Processor implements Runnable, Processor {
                     .findAny()
                     .orElseGet(() -> "");
 
-
             RequestHeader requestHeader = readHeader(bufferedReader);
             RequestBody requestBody = readBody(bufferedReader, requestHeader);
 
-            HttpResponse httpResponse = routeByHttpMethod(uri, httpMethod, requestBody);
+            HttpResponse httpResponse = routeByHttpMethod(uri, httpMethod, requestHeader, requestBody);
             String header = createHeader(httpResponse);
 
             bufferedWriter.write(header + httpResponse.getBody());
@@ -63,20 +64,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse routeByHttpMethod(String uri, String httpMethod, RequestBody requestBody) throws IOException {
+    private HttpResponse routeByHttpMethod(String uri, String httpMethod, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
         if (httpMethod.equals("POST")) {
-            return routePost(uri, requestBody);
+            return routePost(uri, requestHeader, requestBody);
         }
 
         return createHttpResponse(uri);
     }
 
-    private HttpResponse routePost(String uri, RequestBody requestBody) throws IOException {
+    private HttpResponse routePost(String uri, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
         switch (uri) {
             case "/register":
-                return LoginProcessor.doRegister(requestBody.getItem());
+                return LoginProcessor.doRegister(requestBody);
             case "/login":
-                return LoginProcessor.doLogin(requestBody.getItem());
+                return LoginProcessor.doLogin(requestHeader, requestBody);
             default:
                 return createHttpResponse(uri);
         }
@@ -102,7 +103,6 @@ public class Http11Processor implements Runnable, Processor {
         return new RequestBody(new String(buffer));
     }
 
-
     private HttpResponse createHttpResponse(String uri) throws IOException {
         int index = uri.indexOf("?");
         String path = uri;
@@ -115,12 +115,14 @@ public class Http11Processor implements Runnable, Processor {
         return ViewResolver.routePath(path, query);
     }
 
-
-    private String createHeader(HttpResponse response) throws IOException {
+    private String createHeader(HttpResponse response) {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         HttpStatus httpStatus = response.getHttpStatus();
 
         stringJoiner.add(String.format("%s %d %s ", HTTP_11, httpStatus.getCode(), httpStatus.getMessage()));
+        for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
+            stringJoiner.add(String.format("%s: %s ", entry.getKey(), entry.getValue()));
+        }
         if (httpStatus.equals(HttpStatus.FOUND)) {
             stringJoiner.add(String.format("%s %s ", "Location:", response.getBody()));
             stringJoiner.add("\r\n");

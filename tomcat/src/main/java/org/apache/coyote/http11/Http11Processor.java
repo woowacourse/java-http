@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             int queryParamIndex = requestedUrl.indexOf('?');
 
             if (0 < queryParamIndex) {
-                String queryParamValues = requestedUrl.substring(queryParamIndex);
+                String queryParamValues = requestedUrl.substring(queryParamIndex+1);
                 Arrays.asList(queryParamValues.split("&"))
                         .forEach(queryParam -> {
                             String[] splited = queryParam.split("=");
@@ -81,6 +83,14 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
+            // requestURL에 따른 handlerMapper 클래스 생성해서 분리하기
+            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
+                LoginController loginController = new LoginController();
+                User user = loginController.login(queryParams.get("account"),
+                        queryParams.get("password"));
+                log.info(user.toString());
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

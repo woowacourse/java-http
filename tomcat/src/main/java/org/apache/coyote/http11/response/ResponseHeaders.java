@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
-    private final Map<String, Object> headerMap = new LinkedHashMap<>();
+    private final Map<String, String> headerMap = new LinkedHashMap<>();
 
-    public void addHeader(String headerKey, Object headerValue) {
+    public void addHeader(String headerKey, String headerValue) {
         headerMap.put(headerKey, headerValue);
     }
 

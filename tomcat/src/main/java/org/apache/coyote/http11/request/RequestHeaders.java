@@ -6,14 +6,14 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
-    private final Map<String, Object> headerMap;
+    private final Map<String, String> headerMap;
 
-    private RequestHeaders(final Map<String, Object> headerMap) {
+    private RequestHeaders(final Map<String, String> headerMap) {
         this.headerMap = headerMap;
     }
 
     public static RequestHeaders from(final BufferedReader br) {
-        Map<String, Object> headerMap = br.lines()
+        Map<String, String> headerMap = br.lines()
                 .takeWhile(line -> !line.equals(""))
                 .map(line -> line.split(": "))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
@@ -25,7 +25,7 @@ public class RequestHeaders {
         return !headerMap.containsKey(headerName);
     }
 
-    public Object getHeaderValue(final String headerKey) {
+    public String getHeaderValue(final String headerKey) {
         return headerMap.get(headerKey);
     }
 

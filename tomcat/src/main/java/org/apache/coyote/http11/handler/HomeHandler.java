@@ -17,7 +17,7 @@ public class HomeHandler implements RequestHandler {
 
         ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType());
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), messageBody.getBodyLength());
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), String.valueOf(messageBody.getBodyLength()));
 
         return new HttpResponse(statusLine, responseHeaders, messageBody);
     }

@@ -38,11 +38,15 @@ public class HttpRequest {
         if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
             return MessageBody.from("");
         }
-        int contentLength = Integer.parseInt((String) headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue()));
+        int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue()));
         char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
         return MessageBody.from(requestBody);
+    }
+
+    public String getHeader(final String headerKey) {
+        return requestHeaders.getHeaderValue(headerKey);
     }
 
     public Session getSession(final boolean create) {
@@ -54,9 +58,13 @@ public class HttpRequest {
             return session;
         }
 
-        String cookieValue = (String) requestHeaders.getHeaderValue(HttpHeaderName.COOKIE.getValue());
+        String cookieValue = requestHeaders.getHeaderValue(HttpHeaderName.COOKIE.getValue());
         Cookie cookie = Cookie.from(cookieValue);
         return sessionManager.findSession(cookie.getCookieValue("JSESSIONID"));
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
     }
 
     public HttpVersion getHttpVersion() {

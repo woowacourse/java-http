@@ -23,7 +23,7 @@ public enum RequestHeaderType {
                 .orElseThrow(InvalidRequestHeaderNameException::new);
     }
 
-    public RequestHeader getRequestHeader(final String value) {
+    public RequestHeader saveRequestHeader(final String value) {
         if (this == HOST) {
             return HostHeader.from(value);
         } else if (this == CONNECTION) {

@@ -26,7 +26,7 @@ public class RequestHeaders {
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             final List<String> parsedHeader = parseByDelimiter(line);
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
-            headers.put(headerType, headerType.getRequestHeader(parsedHeader.get(HEADER_VALUE_INDEX)));
+            headers.put(headerType, headerType.saveRequestHeader(parsedHeader.get(HEADER_VALUE_INDEX)));
         }
         return new RequestHeaders(headers);
     }

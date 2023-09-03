@@ -19,7 +19,6 @@ public class HttpRequest {
         boolean isStartLine = true;
         while ((line = reader.readLine()) != null) {
             if (line.isEmpty()) {
-                // 빈 줄을 만나면 헤더 읽기 종료
                 break;
             }
             if (isStartLine) {

@@ -11,7 +11,7 @@ public class Handlers {
 
     private static final Pattern FILE_PATTERN = Pattern.compile("css|js|ico|html");
 
-    private static final Map<String, Handler> handlers =
+    private static final Map<String, Handler> myHandlers =
             Map.of(
                     "/", new RootHandler(),
                     "/file", new FileHandler(),
@@ -19,6 +19,9 @@ public class Handlers {
                     "/register", new RegisterHandler()
             );
 
+    private Handlers() {
+
+    }
 
     public static ResponseEntity handle(HttpRequest request) throws IOException {
         String requestUri = request.getEndPoint();
@@ -26,11 +29,11 @@ public class Handlers {
         int lastDotIndex = requestUri.lastIndexOf('.');
         String extensionName = requestUri.substring(lastDotIndex + 1);
         if (FILE_PATTERN.matcher(extensionName).find()) {
-            return handlers.get("/file").handle(request);
+            return myHandlers.get("/file").handle(request);
         }
         if (requestUri.contains("?")) {
-            return handlers.get(requestUri).handle(request);
+            return myHandlers.get(requestUri).handle(request);
         }
-        return handlers.get(requestUri).handle(request);
+        return myHandlers.get(requestUri).handle(request);
     }
 }

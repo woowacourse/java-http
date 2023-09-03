@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,10 +102,40 @@ public class Http11Processor implements Runnable, Processor {
 
   private String handleGetRequest(final List<String> tokens)
       throws URISyntaxException, IOException {
-    final URL filePath = Optional.ofNullable(getClass().getResource("/static" + tokens.get(1)))
-        .orElse(getClass().getResource("/static/404.html"));
-    final Path path = Paths.get(Objects.requireNonNull(filePath).toURI());
+    String uri = tokens.get(1);
+    int uriSeperatorIndex = uri.indexOf("?");
+    String path;
+    String queryString;
+    if (uriSeperatorIndex == -1) {
+      path = uri;
+      queryString = "";
+    } else {
+      path = uri.substring(0, uriSeperatorIndex);
+      queryString = uri.substring(uriSeperatorIndex + 1);
+    }
+    URL filePathUrl;
+    if (path.equals("/login")) {
+      filePathUrl = getClass().getResource("/static/login.html");
+      if (!queryString.equals("")) {
+        Map<String, String> queryProperties = new HashMap<>();
+        String[] queryTokens = queryString.split("&");
+        for (int i = 0; i < queryTokens.length; i++) {
+          String[] queryPair = queryTokens[i].split("=");
+          queryProperties.put(queryPair[0], queryPair[1]);
+        }
+        final Optional<User> user = InMemoryUserRepository.findByAccount(
+            queryProperties.get("account"));
+        if (user.isPresent()) {
+          log.info("회원 정보 : {}", user);
+        }
+      }
+    } else {
+      filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
+          .orElse(getClass().getResource("/static/404.html"));
+    }
+
+    final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
     Charset charset = StandardCharsets.UTF_8;
-    return String.join(System.lineSeparator(), Files.readAllLines(path, charset));
+    return String.join(System.lineSeparator(), Files.readAllLines(filePath, charset));
   }
 }

@@ -11,9 +11,9 @@
     - [x] 존재하지 않는 페이지를 요청할 경우 404.html을 반환한다.
 - [x] 사용자가 페이지를 열었을 때 CSS 파일도 호출하도록 한다.
     - [x] 요청 파일의 확장자가 css, 또는 요청 헤더의 Accept가 text/css인 경우 응답 헤더의 Content-Type을 text/css로 전송한다.
-- [ ] Query String을 파싱하게 한다.
-    - [ ] request의 첫 라인에서 추출한 uri에서 쿼리 데이터를 추출한다.
-    - [ ] InMemoryUserRepository를 사용해 미리 가입되어 있는 회원을 조회하고 로그로 출력한다.
+- [x] Query String을 파싱하게 한다.
+    - [x] request의 첫 라인에서 추출한 uri에서 쿼리 데이터를 추출한다.
+    - [x] InMemoryUserRepository를 사용해 미리 가입되어 있는 회원을 조회하고 로그로 출력한다.
 
 ## 2단계
 

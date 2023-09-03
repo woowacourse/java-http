@@ -20,7 +20,9 @@ public class LoginController implements Controller {
         Map<String, String> queryParam = requestLine.getQueryParam();
         String account = queryParam.get(ACCOUNT);
         String password = queryParam.get(PASSWORD);
-        loginService.checkUser(account, password);
+        if (account != null && password != null) {
+            loginService.checkUser(account, password);
+        }
         return "/login.html";
     }
 }

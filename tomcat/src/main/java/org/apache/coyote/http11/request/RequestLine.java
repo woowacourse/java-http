@@ -12,7 +12,7 @@ public class RequestLine {
     private final HttpVersion httpVersion;
 
     private RequestLine(final HttpMethod httpMethod, final RequestPath requestPath,
-                       final HttpVersion httpVersion) {
+                        final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestPath = requestPath;
         this.httpVersion = httpVersion;
@@ -21,7 +21,7 @@ public class RequestLine {
     public static RequestLine convert(String line) {
         final String[] splitLine = line.split(DELIMITER);
         final HttpMethod httpMethod = HttpMethod.findByName(splitLine[METHOD_INDEX]);
-        final RequestPath requestPath = new RequestPath(splitLine[PATH_INDEX]);
+        final RequestPath requestPath = RequestPath.from(splitLine[PATH_INDEX]);
         final HttpVersion httpVersion = HttpVersion.findByVersion(splitLine[VERSION_INDEX]);
         return new RequestLine(httpMethod, requestPath, httpVersion);
     }

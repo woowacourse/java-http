@@ -1,6 +1,6 @@
-package org.apache.catalina.startup;
+package nextstep.org.apache.catalina.startup;
 
-import org.apache.catalina.connector.Connector;
+import nextstep.org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

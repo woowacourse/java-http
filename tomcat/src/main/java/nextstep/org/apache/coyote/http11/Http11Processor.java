@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Objects;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Processor;
+import nextstep.org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

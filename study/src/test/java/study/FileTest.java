@@ -1,5 +1,17 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("File 클래스 학습 테스트")
 class FileTest {
 
+    private static final String RESOURCES_PATH = "src/test/resources/";
     /**
      * resource 디렉터리 경로 찾기
      *
@@ -28,7 +41,9 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        Path currentPath = Paths.get(RESOURCES_PATH);
+        File file = new File(currentPath.toString());
+        String actual = file.listFiles()[0].getName();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,15 +55,18 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Paths.get(RESOURCES_PATH + fileName);
+        File file = path.toFile();
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+
+        List<String> actual = bufferedReader.lines()
+                .collect(Collectors.toList());
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        assertThat(actual).containsExactly("nextstep");
     }
 }

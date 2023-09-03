@@ -1,4 +1,7 @@
-package org.apache.coyote.common;
+package org.apache.coyote.response;
+
+import org.apache.coyote.common.Headers;
+import org.apache.coyote.common.HttpVersion;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

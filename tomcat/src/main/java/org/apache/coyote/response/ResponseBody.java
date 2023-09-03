@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.response;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

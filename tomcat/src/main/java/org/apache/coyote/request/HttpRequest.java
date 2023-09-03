@@ -1,5 +1,7 @@
-package org.apache.coyote.common;
+package org.apache.coyote.request;
 
+import org.apache.coyote.common.Headers;
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.exception.CoyoteIOException;
 

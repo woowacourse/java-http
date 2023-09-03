@@ -1,15 +1,15 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.response.HttpStatus.FOUND;
+import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
 
 import java.util.Map;
 import nextstep.jwp.service.AuthService;
-import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseHeaders;
-import org.apache.coyote.http11.response.StatusLine;
-import org.apache.coyote.http11.util.RequestParamUtil;
+import org.apache.catalina.servlet.handler.RequestHandler;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.ResponseHeaders;
+import org.apache.catalina.servlet.response.StatusLine;
+import org.apache.catalina.servlet.util.RequestParamUtil;
 
 public class SignUpRequestHandler implements RequestHandler {
 

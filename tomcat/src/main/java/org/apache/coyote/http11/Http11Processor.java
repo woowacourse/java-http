@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.response.HttpStatus.NOT_FOUND;
+import static org.apache.catalina.servlet.response.HttpStatus.NOT_FOUND;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,11 +11,11 @@ import java.net.Socket;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.StartLine;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusLine;
+import org.apache.catalina.servlet.handler.RequestHandler;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

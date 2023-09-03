@@ -1,7 +1,7 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.response.HttpStatus.FOUND;
-import static org.apache.coyote.http11.session.SessionConstant.JSESSIONID;
+import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
+import static org.apache.catalina.servlet.session.SessionConstant.JSESSIONID;
 
 import java.util.Map;
 import java.util.UUID;
@@ -9,13 +9,13 @@ import nextstep.jwp.exception.UnAuthenticatedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusLine;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.http11.util.RequestParamUtil;
+import org.apache.catalina.servlet.handler.RequestHandler;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.StatusLine;
+import org.apache.catalina.servlet.session.Session;
+import org.apache.catalina.servlet.session.SessionManager;
+import org.apache.catalina.servlet.util.RequestParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

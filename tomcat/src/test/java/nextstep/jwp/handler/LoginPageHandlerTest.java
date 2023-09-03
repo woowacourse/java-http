@@ -1,6 +1,6 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.response.HttpStatus.FOUND;
+import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -9,12 +9,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestHeaders;
-import org.apache.coyote.http11.request.StartLine;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.request.RequestHeaders;
+import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.session.Session;
+import org.apache.catalina.servlet.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

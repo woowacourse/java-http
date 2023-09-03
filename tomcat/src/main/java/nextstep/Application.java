@@ -7,7 +7,7 @@ import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
 import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.catalina.servlet.handler.RequestHandler;
 
 public class Application {
 

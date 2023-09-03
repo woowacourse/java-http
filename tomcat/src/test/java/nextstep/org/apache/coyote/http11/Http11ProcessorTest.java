@@ -12,7 +12,7 @@ import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
 import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.catalina.servlet.handler.RequestHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

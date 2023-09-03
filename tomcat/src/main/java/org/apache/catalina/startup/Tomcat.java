@@ -3,7 +3,7 @@ package org.apache.catalina.startup;
 import java.io.IOException;
 import java.util.List;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.catalina.servlet.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

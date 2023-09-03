@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.request.Body;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestHeaders;
-import org.apache.coyote.http11.request.StartLine;
+import org.apache.catalina.servlet.request.Body;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.request.RequestHeaders;
+import org.apache.catalina.servlet.request.StartLine;
 
 public class HttpRequestParser {
 

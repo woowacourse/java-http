@@ -1,16 +1,16 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.response.HttpStatus.FOUND;
-import static org.apache.coyote.http11.session.SessionConstant.JSESSIONID;
+import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
+import static org.apache.catalina.servlet.session.SessionConstant.JSESSIONID;
 
 import nextstep.jwp.util.ResourceFileUtil;
-import org.apache.coyote.http11.handler.RequestHandler;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseHeaders;
-import org.apache.coyote.http11.response.StatusLine;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.servlet.handler.RequestHandler;
+import org.apache.catalina.servlet.request.HttpRequest;
+import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.HttpStatus;
+import org.apache.catalina.servlet.response.ResponseHeaders;
+import org.apache.catalina.servlet.response.StatusLine;
+import org.apache.catalina.servlet.session.SessionManager;
 
 public class LoginPageHandler implements RequestHandler {
 

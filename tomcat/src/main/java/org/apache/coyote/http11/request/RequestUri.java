@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -13,15 +13,15 @@ public class RequestUri {
 	private static final String KEY_VALUE_SEPARATOR = "=";
 
 	private final String path;
-	private final Map<String, String> queryParams;
+	private final Map<String, String> queryParams = new HashMap<>();
 
 	private RequestUri(final String path) {
-		this(path, Collections.emptyMap());
+		this(path, new HashMap<>());
 	}
 
 	private RequestUri(final String path, final Map<String, String> queryParams) {
 		this.path = path;
-		this.queryParams = queryParams;
+		this.queryParams.putAll(queryParams);
 	}
 
 	public static RequestUri from(String uri) {

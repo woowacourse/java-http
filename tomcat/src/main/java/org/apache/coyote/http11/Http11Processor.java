@@ -79,12 +79,11 @@ public class Http11Processor implements Runnable, Processor {
 
   private String readContentsFromFile(final String url) throws IOException {
     final URL resource = CLASS_LOADER.getResource(PREFIX_STATIC_PATH + url);
-    final File file = new File(resource.getFile());
-
-    if (isNotExistFile(file)) {
+    if (isInvalidFile(resource)) {
       return "Hello world!";
     }
 
+    final File file = new File(resource.getFile());
     return new String(Files.readAllBytes(file.toPath()));
   }
 
@@ -96,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
     return accept.split(",")[0];
   }
 
-  private boolean isNotExistFile(final File file) {
-    return !file.exists() || file.isDirectory();
+  private boolean isInvalidFile(final URL resource) {
+    return resource == null || new File(resource.getFile()).isDirectory();
   }
 }

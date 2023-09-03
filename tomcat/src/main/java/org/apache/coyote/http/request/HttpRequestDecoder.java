@@ -15,7 +15,7 @@ import static org.apache.coyote.http.ContentType.APPLICATION_X_WWW_FORM_URL_ENCO
 public class HttpRequestDecoder {
 
     private static final int MAXIMUM_BUFFER_LEN = 8192;
-    private static final String REQUEST_LINE_HEADER_DELIMITER = "HTTP/1.1\r\n";
+    private static final String REQUEST_LINE_HEADER_DELIMITER = "HTTP/1.1";
     private static final String HEADER_BODY_DELIMITER = "\r\n\r\n";
 
     public HttpRequest decode(InputStream inputStream) {

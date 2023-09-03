@@ -19,6 +19,6 @@ public class FileUtil {
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         return bufferedReader.lines()
-                .collect(joining("\n"));
+                .collect(joining("\n")) + "\n";
     }
 }

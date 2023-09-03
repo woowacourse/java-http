@@ -20,7 +20,11 @@ public class HttpHeaderConverter {
     }
 
     public static HttpHeader decode(String headerString) {
-        String[] headerLines = headerString.split("\r\n");
+        var headerLines = Arrays.stream(headerString.split("\r\n"))
+                                .filter(line -> !line.isBlank())
+                                .collect(Collectors.toList());
+
+        log.info("header 값: {}", headerString);
 
         Map<String, List<String>> header = new HashMap<>();
         for (var headerLine : headerLines) {
@@ -44,15 +48,17 @@ public class HttpHeaderConverter {
 
     private static List<String> decodeMultipleValues(String headerValue) {
         return Arrays.stream(headerValue.split(MULTIPLE_VALUES_DELIMITER))
-                .map(String::strip)
-                .collect(Collectors.toList());
+                     .map(String::strip)
+                     .collect(Collectors.toList());
     }
 
     public static String encode(HttpHeader httpHeader) {
         Map<String, List<String>> headers = httpHeader.getHeader();
         return headers.entrySet()
-                .stream()
-                .map(header -> header.getKey() + HEADER_KEY_VALUE_DELIMITER + String.join(MULTIPLE_VALUES_DELIMITER, header.getValue()))
-                .collect(Collectors.joining("\r\n")) + "\r\n\r\n";
+                      .stream()
+                      .map(header -> header.getKey()
+                          + HEADER_KEY_VALUE_DELIMITER
+                          + String.join(MULTIPLE_VALUES_DELIMITER, header.getValue())
+                      ).collect(Collectors.joining("\r\n")) + "\r\n\r\n";
     }
 }

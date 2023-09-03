@@ -18,7 +18,7 @@ public class ViewRenderer {
         ContentType contentType = ContentType.fromFilePath(filePath);
 
         httpResponse.setStatusCode(StatusCode.OK);
+        httpResponse.setContentType(contentType.value + ";charset=utf-8");
         httpResponse.setBody(content);
-        httpResponse.setContentType(contentType.value);
     }
 }

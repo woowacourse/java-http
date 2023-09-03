@@ -13,6 +13,6 @@ public enum StatusCode {
     }
 
     public String renderStatusLine() {
-        return "HTTP/1.1 " + value + " " + name() + "\r\n";
+        return "HTTP/1.1 " + value + " " + name() + " \r\n";
     }
 }

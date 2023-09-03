@@ -34,7 +34,9 @@ public class LoginHandler implements Handler {
             String password = parsePassword(quiryString);
             if (isExistUser(account, password)) {
                 log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
+                return handleRedirectPage();
             }
+            return handleUnAuthorizedPage();
         }
         try {
             Path path = Paths.get(getClass().getClassLoader().getResource("static" + httpRequest.uri() + ".html").getPath());
@@ -77,5 +79,31 @@ public class LoginHandler implements Handler {
             return true;
         }
         return false;
+    }
+
+    private HttpResponse handleUnAuthorizedPage() {
+        try {
+            Path path = Paths.get(getClass().getClassLoader().getResource("static" + "/" + "401.html").getPath());
+            byte[] bytes = Files.readAllBytes(path);
+            String body = new String(bytes);
+            HttpResponse response = new HttpResponse();
+            response.setHttpVersion(HttpVersion.HTTP11.value());
+            response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_HTML.value())
+                    .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+            response.setBody(body);
+            return response;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private HttpResponse handleRedirectPage() {
+        HttpResponse response = new HttpResponse();
+        response.setHttpVersion(HttpVersion.HTTP11.value());
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setHeader(HttpHeader.LOCATION, "/index.html");
+        return response;
     }
 }

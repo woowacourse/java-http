@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.service.LoginService;
 
@@ -17,8 +17,8 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Response<String> handle(RequestLine requestLine) {
-        if (checkLogin(requestLine)) {
+    public Response<String> handle(Request request) {
+        if (checkLogin(request)) {
             return Response.status(302)
                 .addHeader("Location", "/index.html")
                 .build();
@@ -28,8 +28,8 @@ public class LoginController implements Controller {
             .build();
     }
 
-    private boolean checkLogin(RequestLine requestLine) {
-        Map<String, String> queryParam = requestLine.getQueryParam();
+    private boolean checkLogin(Request request) {
+        Map<String, String> queryParam = request.getRequestLine().getQueryParam();
         String account = queryParam.get(ACCOUNT);
         String password = queryParam.get(PASSWORD);
         if (account != null && password != null) {

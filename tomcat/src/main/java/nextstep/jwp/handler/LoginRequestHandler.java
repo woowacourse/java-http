@@ -13,6 +13,8 @@ import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusLine;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.RequestParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,9 @@ public class LoginRequestHandler implements RequestHandler {
             User user = authService.login(formData.get("account"), formData.get("password"));
             log.info("User={}", user);
             response.addHeader("Location", "/index.html");
-            response.addCookie(JSESSIONID, UUID.randomUUID().toString());
+            Session session = new Session(UUID.randomUUID().toString());
+            SessionManager.add(session);
+            response.addCookie(JSESSIONID, session.id());
         } catch (UnAuthenticatedException e) {
             response.addHeader("Location", "/401.html");
         }

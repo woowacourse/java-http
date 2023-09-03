@@ -7,7 +7,7 @@ public class HttpResponse {
     private final StatusLine statusLine;
     private final ResponseHeaders headers;
     private final Cookies cookies = new Cookies();
-    private String messageBody;
+    private final String messageBody;
 
     public HttpResponse(StatusLine statusLine, String messageBody) {
         this(statusLine, new ResponseHeaders(), messageBody);
@@ -35,6 +35,22 @@ public class HttpResponse {
         cookies.put(name, value);
     }
 
+    public StatusLine statusLine() {
+        return statusLine;
+    }
+
+    public ResponseHeaders headers() {
+        return headers;
+    }
+
+    public Cookies cookies() {
+        return cookies;
+    }
+
+    public String messageBody() {
+        return messageBody;
+    }
+
     @Override
     public String toString() {
         return statusLine.toString()
@@ -51,17 +67,5 @@ public class HttpResponse {
                     .append(" \r\n");
         }
         return sb.toString();
-    }
-
-    public StatusLine statusLine() {
-        return statusLine;
-    }
-
-    public ResponseHeaders headers() {
-        return headers;
-    }
-
-    public String messageBody() {
-        return messageBody;
     }
 }

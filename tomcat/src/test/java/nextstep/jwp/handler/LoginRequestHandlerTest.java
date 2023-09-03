@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import static org.apache.coyote.http11.session.SessionManager.findSession;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -60,6 +61,8 @@ class LoginRequestHandlerTest {
         assertThat(actual).contains("HTTP/1.1 302 FOUND \r\n");
         assertThat(actual).contains("Location: /index.html \r\n");
         assertThat(actual).contains("Set-Cookie: JSESSIONID=");
+        String id = response.cookies().get("JSESSIONID");
+        assertThat(findSession(id)).isNotNull();
     }
 
     @Nested

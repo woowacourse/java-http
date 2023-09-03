@@ -3,7 +3,6 @@ package nextstep.jwp.handler;
 import java.io.IOException;
 import nextstep.jwp.handler.mappaing.HandlerMapping;
 import org.apache.catalina.servlet.Servlet;
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
 
@@ -19,14 +18,14 @@ public class DispatcherServlet implements Servlet {
     public void service(HttpRequest request, HttpResponse response) {
         RequestHandler handler = mapping.getHandler(request);
         // TODO null 처리
-        HttpResponse handle = handler.handle(request);
-        writeResponse(response, handle);
+        handler.handle(request, response);
+        writeResponse(response);
 
     }
 
-    private static void writeResponse(HttpResponse response, HttpResponse handle) {
+    private static void writeResponse(HttpResponse response) {
         try {
-            response.writer().write(handle.toString());
+            response.writer().write(response.toString());
             response.writer().flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

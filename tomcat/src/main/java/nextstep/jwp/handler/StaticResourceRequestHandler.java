@@ -1,11 +1,11 @@
 package nextstep.jwp.handler;
 
+import static org.apache.catalina.servlet.response.HttpStatus.OK;
+
 import nextstep.jwp.util.ResourceFileUtil;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.URI;
 import org.apache.catalina.servlet.response.HttpResponse;
-import org.apache.catalina.servlet.response.HttpStatus;
-import org.apache.catalina.servlet.response.ResponseHeaders;
 import org.apache.catalina.servlet.response.StatusLine;
 
 public class StaticResourceRequestHandler implements RequestHandler {
@@ -16,10 +16,12 @@ public class StaticResourceRequestHandler implements RequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         URI uri = request.startLine().uri();
-        String resource = ResourceFileUtil.readAll("static" + path(uri));
-        return httpResponse(uri, resource);
+        String responseBody = ResourceFileUtil.readAll("static" + path(uri));
+        response.setStatusLine(new StatusLine(OK));
+        response.addHeader("Content-Type", contentType(uri) + "charset=utf-8");
+        response.setMessageBody(responseBody);
     }
 
     private String path(URI uri) {
@@ -28,13 +30,6 @@ public class StaticResourceRequestHandler implements RequestHandler {
         } else {
             return uri.path() + ".html";
         }
-    }
-
-    private HttpResponse httpResponse(URI uri, String responseBody) {
-        StatusLine statusLine = new StatusLine(HttpStatus.OK);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.put("Content-Type", contentType(uri) + "charset=utf-8");
-        return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
     private String contentType(URI uri) {

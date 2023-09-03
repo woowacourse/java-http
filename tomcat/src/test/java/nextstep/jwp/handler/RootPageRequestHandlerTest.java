@@ -24,9 +24,10 @@ class RootPageRequestHandlerTest {
         HttpRequest request = HttpRequest.builder()
                 .startLine(StartLine.from("GET / HTTP/1.1 "))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         var expected = String.join("\r\n",

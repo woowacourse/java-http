@@ -30,10 +30,9 @@ public class LoginRequestHandler implements RequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         Map<String, String> formData = RequestParamUtil.parse(request.body());
-        StatusLine statusLine = new StatusLine(FOUND);
-        HttpResponse response = new HttpResponse(statusLine, null);
+        response.setStatusLine(new StatusLine(FOUND));
         try {
             User user = authService.login(formData.get("account"), formData.get("password"));
             log.info("User={}", user);
@@ -44,6 +43,5 @@ public class LoginRequestHandler implements RequestHandler {
         } catch (UnAuthenticatedException e) {
             response.addHeader("Location", "/401.html");
         }
-        return response;
     }
 }

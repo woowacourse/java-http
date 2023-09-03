@@ -52,9 +52,10 @@ class LoginRequestHandlerTest {
                         ))
                 ).body(new Body("account=gugu&password=password"))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         String actual = response.toString();
@@ -79,9 +80,10 @@ class LoginRequestHandlerTest {
                             ))
                     ).body(new Body("account=gugu&password=wrong"))
                     .build();
+            HttpResponse response = new HttpResponse();
 
             // when
-            HttpResponse response = handler.handle(request);
+            handler.handle(request, response);
 
             // then
             var expected = "HTTP/1.1 302 FOUND \r\n" +
@@ -102,9 +104,10 @@ class LoginRequestHandlerTest {
                             ))
                     ).body(new Body("password=wrong"))
                     .build();
+            HttpResponse response = new HttpResponse();
 
             // when
-            HttpResponse response = handler.handle(request);
+            handler.handle(request, response);
 
             // then
             var expected = "HTTP/1.1 302 FOUND \r\n" +

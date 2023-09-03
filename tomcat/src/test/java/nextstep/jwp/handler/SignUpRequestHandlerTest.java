@@ -50,9 +50,10 @@ class SignUpRequestHandlerTest {
                         ))
                 ).body(new Body("account=mallang&email=mallang%40naver.com&password=1234"))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         var expected = "HTTP/1.1 302 FOUND \r\n" +

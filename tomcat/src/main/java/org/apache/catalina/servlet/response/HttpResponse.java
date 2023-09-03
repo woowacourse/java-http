@@ -40,6 +40,15 @@ public class HttpResponse {
         this.writer = writer;
     }
 
+    public void setStatusLine(StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void setMessageBody(String messageBody) {
+        this.messageBody = messageBody;
+        setContentLength();
+    }
+
     public void addHeader(String name, String value) {
         headers.put(name, value);
     }

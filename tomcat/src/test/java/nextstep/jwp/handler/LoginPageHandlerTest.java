@@ -57,9 +57,10 @@ class LoginPageHandlerTest {
                         "Cookie: JSESSIONID=" + session.id()
                 )))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         assertThat(response.statusLine().httpStatus()).isEqualTo(FOUND);
@@ -75,9 +76,10 @@ class LoginPageHandlerTest {
                         "Cookie: JSESSIONID=" + "1234"
                 )))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");
@@ -97,9 +99,10 @@ class LoginPageHandlerTest {
         HttpRequest request = HttpRequest.builder()
                 .startLine(StartLine.from("GET /login HTTP/1.1"))
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");

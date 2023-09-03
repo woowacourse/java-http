@@ -32,9 +32,10 @@ class StaticResourceRequestHandlerTest {
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -56,9 +57,10 @@ class StaticResourceRequestHandlerTest {
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
                 .build();
+        HttpResponse response = new HttpResponse();
 
         // when
-        HttpResponse response = handler.handle(request);
+        handler.handle(request, response);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");

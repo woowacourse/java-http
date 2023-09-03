@@ -6,7 +6,6 @@ import java.util.Map;
 import nextstep.jwp.service.AuthService;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
-import org.apache.catalina.servlet.response.ResponseHeaders;
 import org.apache.catalina.servlet.response.StatusLine;
 import org.apache.catalina.servlet.util.RequestParamUtil;
 
@@ -21,12 +20,10 @@ public class SignUpRequestHandler implements RequestHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         Map<String, String> formData = RequestParamUtil.parse(request.body());
         authService.signUp(formData.get("account"), formData.get("email"), formData.get("password"));
-        StatusLine statusLine = new StatusLine(FOUND);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.put("Location", "/index.html");
-        return new HttpResponse(statusLine, responseHeaders, null);
+        response.setStatusLine(new StatusLine(FOUND));
+        response.addHeader("Location", "/index.html");
     }
 }

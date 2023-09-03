@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LOGIN_PAGE = "/login.html";
+    private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_FAIL_PAGE = "/401.html";
     private static final String QUERY_STRING_BEGIN_CHAR = "?";
     private static final int HTTP_METHOD_INDEX = 0;
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
             return parseLoginRequestURI(uri, requestURIElements);
         }
 
-        return parseRequestURI(uri, requestURIElements);
+        return parseRequestURI(uri, QueryString.empty(), requestURIElements);
     }
 
     private List<String> parseRequestURIElements(final String requestURILine) {
@@ -83,14 +83,23 @@ public class Http11Processor implements Runnable, Processor {
 
     private RequestURI parseLoginRequestURI(final String uri, final List<String> requestURIElements) {
         final var index = uri.indexOf(QUERY_STRING_BEGIN_CHAR);
-        final var queryString = QueryString.from(uri.substring(index + 1));
 
-        final var account = queryString.getValue("account");
-        final var password = queryString.getValue("password");
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .map(user -> loginSuccess(user, queryString, requestURIElements))
-                .orElseGet(() -> loginFail(requestURIElements));
+        if (isExistQueryString(index)) {
+            final var queryString = QueryString.from(uri.substring(index + 1));
+
+            final var account = queryString.getValue("account");
+            final var password = queryString.getValue("password");
+            return InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .map(user -> loginSuccess(user, queryString, requestURIElements))
+                    .orElseGet(() -> loginFail(requestURIElements));
+        }
+
+        return parseRequestURI("/login.html", QueryString.empty(), requestURIElements);
+    }
+
+    private boolean isExistQueryString(final int index) {
+        return index != -1;
     }
 
     private RequestURI loginSuccess(
@@ -99,21 +108,29 @@ public class Http11Processor implements Runnable, Processor {
             final List<String> requestURIElements
     ) {
         log.info("user : {}", user);
-        return RequestURI.of(
-                LOGIN_PAGE,
+        return parseRequestURI(
+                INDEX_PAGE,
                 queryString,
-                requestURIElements.get(HTTP_METHOD_INDEX),
-                requestURIElements.get(HTTP_VERSION_INDEX)
+                requestURIElements
         );
     }
 
     private RequestURI loginFail(final List<String> requestURIElements) {
-        return parseRequestURI(LOGIN_FAIL_PAGE, requestURIElements);
+        return parseRequestURI(
+                LOGIN_FAIL_PAGE,
+                QueryString.empty(),
+                requestURIElements
+        );
     }
 
-    private RequestURI parseRequestURI(final String uri, final List<String> requestURIElements) {
+    private RequestURI parseRequestURI(
+            final String uri,
+            final QueryString queryString,
+            final List<String> requestURIElements
+    ) {
         return RequestURI.of(
                 uri,
+                queryString,
                 requestURIElements.get(HTTP_METHOD_INDEX),
                 requestURIElements.get(HTTP_VERSION_INDEX)
         );

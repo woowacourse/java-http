@@ -7,10 +7,6 @@ public class RequestURI {
     private final String httpMethod;
     private final String httpVersion;
 
-    private RequestURI(final String uri, final String httpMethod, final String httpVersion) {
-        this(uri, QueryString.empty(), httpMethod, httpVersion);
-    }
-
     private RequestURI(
             final String uri,
             final QueryString queryString,
@@ -21,10 +17,6 @@ public class RequestURI {
         this.queryString = queryString;
         this.httpMethod = httpMethod;
         this.httpVersion = httpVersion;
-    }
-
-    public static RequestURI of(final String uri, final String httpMethod, final String httpVersion) {
-        return new RequestURI(uri, httpMethod, httpVersion);
     }
 
     public static RequestURI of(

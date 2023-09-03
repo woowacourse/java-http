@@ -6,7 +6,8 @@ public enum HttpHeader {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
     HOST("Host"),
-    CONNECTION("Connection");
+    CONNECTION("Connection"),
+    LOCATION("Location");
 
     private final String source;
 

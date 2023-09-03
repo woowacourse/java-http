@@ -4,6 +4,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ResponseBody {
 
+    public static ResponseBody EMPTY = new ResponseBody(null);
+
     private final String source;
 
     public ResponseBody(final String source) {

@@ -1,7 +1,6 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.common.Headers;
-import org.apache.coyote.common.MediaType;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.ResponseBody;
@@ -21,10 +20,9 @@ public class ResourceRequestHandler implements RequestHandler {
     public HttpResponse handle(final HttpRequest httpRequest) {
         final String resourceBody = ResourceReader.read(httpRequest.requestPath().source());
         final ResponseBody responseBody = new ResponseBody(resourceBody);
-        final MediaType contentType = MediaType.from(httpRequest.requestPath().source());
 
         final Headers responseHeader = new Headers(Map.of(
-                CONTENT_TYPE.source(), contentType.source() + ";" + UTF_8.source(),
+                CONTENT_TYPE.source(), httpRequest.mediaType().source() + ";" + UTF_8.source(),
                 CONTENT_LENGTH.source(), String.valueOf(responseBody.length())
         ));
 

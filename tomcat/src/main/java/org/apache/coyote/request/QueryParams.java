@@ -36,6 +36,10 @@ public class QueryParams {
         return new QueryParams(mapping);
     }
 
+    public boolean isEmpty() {
+        return params.isEmpty();
+    }
+
     public List<String> paramNames() {
         return new ArrayList<>(params.keySet());
     }

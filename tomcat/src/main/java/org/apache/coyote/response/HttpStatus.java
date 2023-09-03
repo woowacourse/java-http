@@ -2,7 +2,8 @@ package org.apache.coyote.response;
 
 public enum HttpStatus {
 
-    OK("OK", 200);
+    OK("OK", 200),
+    FOUND("FOUND", 302);
 
     private final String statusName;
     private final int statusCode;

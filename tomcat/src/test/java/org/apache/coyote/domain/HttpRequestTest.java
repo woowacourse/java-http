@@ -17,14 +17,26 @@ class HttpRequestTest {
     @Test
     void HttpRequest는_어떤_요청_메서드인지_검사할_수_있다() {
         // given
-        HttpRequest parsed = new HttpRequest.Builder()
+        HttpRequest request = new HttpRequest.Builder()
                 .httpMethod(GET)
                 .url(Url.from("/index.html"))
                 .headers(HttpHeaders.getEmptyHeaders())
                 .build();
 
         // expected
-        assertThat(parsed.isRequestMethodOf(GET)).isTrue();
+        assertThat(request.isRequestMethodOf(GET)).isTrue();
     }
 
+    @Test
+    void HttpRequest는_특정_문자열을_포함하는지_검사할_수_있다() {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(GET)
+                .url(Url.from("/js/function.js"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // expected
+        assertThat(request.isContainsSubStringInUrl(".js")).isTrue();
+    }
 }

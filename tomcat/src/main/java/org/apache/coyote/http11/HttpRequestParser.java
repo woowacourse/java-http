@@ -26,7 +26,7 @@ public class HttpRequestParser {
 
             String headerLine;
             while ((headerLine = bufferedReader.readLine()).length() != 0) {
-                System.out.println(headerLine);
+//                System.out.println(headerLine);
             }
 
             final StringBuilder requestBody = getRequestBody(bufferedReader);

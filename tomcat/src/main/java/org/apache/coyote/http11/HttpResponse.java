@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponse {
 
@@ -15,6 +17,8 @@ public class HttpResponse {
 
     private int contentLength;
 
+    private List<Cookie> cookies = new ArrayList<>();
+
     private String responseBody;
 
     private HttpResponse(OutputStream outputStream, String responseStatus, String contentType, String charSet, String responseBody) {
@@ -27,16 +31,36 @@ public class HttpResponse {
     }
 
     public void flush() throws IOException {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 " + this.responseStatus,
-                "Content-Type: " + this.contentType + ";charset=" + this.charSet,
-                "Content-Length: " + this.contentLength + " ",
-                "",
-                this.responseBody
-        );
 
-        outputStream.write(response.getBytes());
+        final StringBuilder response = new StringBuilder();
+        response.append("HTTP/1.1 ")
+                .append(this.responseStatus)
+                .append(System.lineSeparator());
+        response.append("Content-Type: ")
+                .append(this.contentType)
+                .append(";charset=")
+                .append(this.charSet)
+                .append(System.lineSeparator());
+        for (Cookie cookie : cookies) {
+            response.append("Set-Cookie: ")
+                    .append(cookie.getKey())
+                    .append("=")
+                    .append(cookie.getValue())
+                    .append(System.lineSeparator());
+        }
+        response.append("Content-Length: ")
+                .append(this.contentLength)
+                .append(" ")
+                .append(System.lineSeparator());
+        response.append(System.lineSeparator());
+        response.append(this.responseBody);
+
+        outputStream.write(response.toString().getBytes());
         outputStream.flush();
+    }
+
+    public void addCookie(String key, String value) {
+        this.cookies.add(new Cookie(key, value));
     }
 
     public static class Builder {

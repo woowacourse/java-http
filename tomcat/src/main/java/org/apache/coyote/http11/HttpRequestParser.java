@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 
 public class HttpRequestParser {
 
-    private static final String KEY_VALUE_DELIMITER = ":";
+    private static final String KEY_VALUE_DELIMITER = "=";
     private static final String START_LINE_DELIMITER = " ";
+    private static final String QUERY_PARAMETER_DELIMITER_REGEX = "\\?";
+    private static final String QUERY_PARAMETER_DELIMITER = "?";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -32,7 +34,7 @@ public class HttpRequestParser {
     private void readHeader(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         while (line != null && !line.isBlank()) {
-            String[] split = line.split(KEY_VALUE_DELIMITER);
+            String[] split = line.split(":");
             header.put(split[KEY_INDEX], split[VALUE_INDEX].trim());
             line = bufferedReader.readLine();
         }
@@ -65,8 +67,27 @@ public class HttpRequestParser {
                 .filter(entry -> entry.getKey().equals("Cookie"))
                 .map(entry -> entry.getValue().split("; "))
                 .flatMap(Arrays::stream)
-                .map(line -> line.split("="))
+                .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+    }
+
+    public Map<String, String> findQueryStrings() {
+        String path = findPath();
+        if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
+            return new HashMap<>();
+        }
+        String queryString = path.split(QUERY_PARAMETER_DELIMITER_REGEX)[1];
+        return Arrays.stream(queryString.split("&"))
+                .map(line -> line.split(KEY_VALUE_DELIMITER))
+                .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+    }
+
+    public String findPathWithoutQueryString() {
+        String path = findPath();
+        if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
+            return path;
+        }
+        return path.split(QUERY_PARAMETER_DELIMITER_REGEX)[0];
     }
 
     public String getStartLine() {

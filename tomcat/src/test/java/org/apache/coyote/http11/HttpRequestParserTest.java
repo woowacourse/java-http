@@ -14,6 +14,13 @@ class HttpRequestParserTest {
     private static final String REQUEST = "GET /index.html HTTP/1.1\n" +
             "header: header\n" +
             "Cookie: test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n" +
+            "Content-Length: 12\n" +
+            "\n" +
+            "message body";
+    private static final String REQUEST_WITH_QUERY_STRING = "GET /login?account=account&password=password HTTP/1.1\n" +
+            "header: header\n" +
+            "Cookie: test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n" +
+            "Content-Length: 12\n" +
             "\n" +
             "message body";
 
@@ -38,7 +45,7 @@ class HttpRequestParserTest {
     @Test
     void findMethod() throws IOException {
         //given
-        HttpRequestParser httpRequestParser = createHttpRequestParser();
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST);
 
         //when
         String method = httpRequestParser.findMethod();
@@ -47,8 +54,8 @@ class HttpRequestParserTest {
         assertEquals("GET", method);
     }
 
-    private HttpRequestParser createHttpRequestParser() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(REQUEST.getBytes());
+    private HttpRequestParser createHttpRequestParser(String request) throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
         httpRequestParser.accept(inputStream);
         return httpRequestParser;
@@ -57,7 +64,7 @@ class HttpRequestParserTest {
     @Test
     void findPath() throws IOException {
         //given
-        HttpRequestParser httpRequestParser = createHttpRequestParser();
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST);
 
         //when
         String path = httpRequestParser.findPath();
@@ -69,7 +76,7 @@ class HttpRequestParserTest {
     @Test
     void findProtocol() throws IOException {
         //given
-        HttpRequestParser httpRequestParser = createHttpRequestParser();
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST);
 
         //when
         String protocol = httpRequestParser.findProtocol();
@@ -81,7 +88,7 @@ class HttpRequestParserTest {
     @Test
     void findCookies() throws IOException {
         //given
-        HttpRequestParser httpRequestParser = createHttpRequestParser();
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST);
 
         //when
         Map<String, String> cookies = httpRequestParser.findCookies();
@@ -93,4 +100,30 @@ class HttpRequestParserTest {
         );
     }
 
+    @Test
+    void findQueryStrings() throws IOException {
+        //given
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST_WITH_QUERY_STRING);
+
+        //when
+        Map<String, String> queryStrings = httpRequestParser.findQueryStrings();
+
+        //then
+        assertAll(
+                () -> assertEquals("account", queryStrings.get("account")),
+                () -> assertEquals("password", queryStrings.get("password"))
+        );
+    }
+
+    @Test
+    void findPathWithoutQueryString() throws IOException {
+        //given
+        HttpRequestParser httpRequestParser = createHttpRequestParser(REQUEST_WITH_QUERY_STRING);
+
+        //when
+        String path = httpRequestParser.findPathWithoutQueryString();
+
+        //then
+        assertEquals("/login", path);
+    }
 }

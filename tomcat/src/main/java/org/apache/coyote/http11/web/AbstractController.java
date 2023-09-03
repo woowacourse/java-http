@@ -32,11 +32,11 @@ public abstract class AbstractController implements Controller {
     protected View redirect(final String path, final HttpResponse response) {
         response.updateHttpResponseStatusLineByStatus(HttpResponseStatus.FOUND);
         response.setHeader("Location", path);
-        return new View(path);
+        return new StaticResourceView(path);
     }
 
     protected View forwardTo(final String path) {
-        return new View(path);
+        return new StaticResourceView(path);
     }
 
     protected View forwardTo(
@@ -46,5 +46,9 @@ public abstract class AbstractController implements Controller {
     ) {
         response.updateHttpResponseStatusLineByStatus(httpResponseStatus);
         return forwardTo(path);
+    }
+
+    protected View responseBody(final String data) {
+        return new SimpleStringDataView(data);
     }
 }

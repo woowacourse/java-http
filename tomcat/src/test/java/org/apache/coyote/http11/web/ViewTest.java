@@ -14,7 +14,7 @@ class ViewTest {
     @Test
     void 지정한_리소스를_읽는다() throws IOException {
         // given
-        final View view = new View("index.html");
+        final View view = new StaticResourceView("/index.html");
 
         // when
         final String resource = view.renderView();
@@ -26,7 +26,7 @@ class ViewTest {
     @Test
     void 지정한_리소스가_존재하지_않으면_예외발생() {
         // given
-        final View view = new View("notfoundasdfas.html");
+        final View view = new StaticResourceView("/notfoundasdfas.html");
 
         // when & then
         Assertions.assertThatThrownBy(view::renderView)

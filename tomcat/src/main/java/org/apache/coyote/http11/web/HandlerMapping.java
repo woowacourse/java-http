@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.web;
 
 import java.util.Map;
-import java.util.Optional;
+import nextstep.web.HelloController;
 import nextstep.web.IndexController;
 import nextstep.web.LoginController;
 import nextstep.web.RegisterController;
@@ -11,15 +11,15 @@ public class HandlerMapping {
     private static final String HTML_EXTENSION = ".html";
 
     private final Map<String, Controller> controllerMap = Map.of(
-            "/", new IndexController(),
+            "/", new HelloController(),
             "/index", new IndexController(),
             "/login", new LoginController(),
             "/register", new RegisterController()
     );
 
-    public Optional<Controller> findController(final HttpRequestStartLine requestStartLine) {
-        String requestURI = removeHtmlExtension(requestStartLine.getRequestURI());
-        return Optional.ofNullable(controllerMap.get(requestURI));
+    public Controller findController(final HttpRequestStartLine requestStartLine) {
+        final String requestURI = removeHtmlExtension(requestStartLine.getRequestURI());
+        return controllerMap.getOrDefault(requestURI, new ForwardController(requestStartLine.getRequestURI()));
     }
 
     private String removeHtmlExtension(final String requestURI) {

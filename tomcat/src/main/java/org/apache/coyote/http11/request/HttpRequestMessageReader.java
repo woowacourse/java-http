@@ -101,9 +101,10 @@ public class HttpRequestMessageReader {
             final BufferedReader br,
             final HttpRequestStartLine startLine
     ) throws IOException {
-        final SupportContentType supportContentType = SupportContentType.from(headers.get("Content-Type"));
+        final SupportPayloadContentType supportPayloadContentType =
+                SupportPayloadContentType.from(headers.get("Content-Type"));
         final String body = readBody(br, Integer.parseInt(headers.get("Content-Length")));
-        final PayloadParser payloadParser = supportContentType.getPayloadParser();
+        final PayloadParser payloadParser = supportPayloadContentType.getPayloadParser();
         Map<String, String> payload = payloadParser.parse(body);
         return HttpRequest.of(startLine, headers, payload);
     }

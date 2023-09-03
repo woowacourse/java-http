@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -53,12 +52,14 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> header = parseToHeader(bufferedReader);
 
-            if (httpUrl.startsWith("/login?")) {
-                int index = httpUrl.indexOf("?");
-                String path = httpUrl.substring(0, index);
-                String queryString = httpUrl.substring(index + 1);
+            if (httpMethod.equals("POST") && httpUrl.equals("/login")) {
+                int contentLength = Integer.parseInt(header.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                log.info("reqeustBody: {}", requestBody);
 
-                Map<String, String> queryParms = parseToQueryParms(queryString);
+                Map<String, String> queryParms = parseToQueryParms(requestBody);
 
                 try {
                     User user = InMemoryUserRepository.findByAccount(queryParms.get("account"))
@@ -70,6 +71,7 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("user: {}", user);
                     response = createRedirectResponse("/index.html");
                 } catch (IllegalArgumentException e) {
+                    log.error("error : {}", e);
                     response = createRedirectResponse("/401.html");
                 }
 
@@ -89,8 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
-                log.info("reqeustBody: {}",requestBody);
-
+                log.info("reqeustBody: {}", requestBody);
 
                 Map<String, String> queryParms = parseToQueryParms(requestBody.toString());
 

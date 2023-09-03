@@ -51,16 +51,8 @@ public class HttpRequest {
         return MessageBody.create(new String(buffer));
     }
 
-    public boolean hasParams(String... params) {
-        return this.startLine.getParams().hasParams(params);
-    }
-
     public RequestUri getUri() {
         return this.startLine.getUri();
-    }
-
-    public QueryParams getParams() {
-        return this.startLine.getParams();
     }
 
     public HttpMethod getMethod() {

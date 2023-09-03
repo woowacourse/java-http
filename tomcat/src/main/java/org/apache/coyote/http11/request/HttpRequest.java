@@ -3,12 +3,12 @@ package org.apache.coyote.http11.request;
 public class HttpRequest {
 
     private final StartLine startLine;
-    private final Headers headers;
+    private final RequestHeaders requestHeaders;
     private final Body body;
 
-    private HttpRequest(StartLine startLine, Headers headers, Body body) {
+    private HttpRequest(StartLine startLine, RequestHeaders requestHeaders, Body body) {
         this.startLine = startLine;
-        this.headers = headers;
+        this.requestHeaders = requestHeaders;
         this.body = body;
     }
 
@@ -20,8 +20,8 @@ public class HttpRequest {
         return startLine;
     }
 
-    public Headers headers() {
-        return headers;
+    public RequestHeaders headers() {
+        return requestHeaders;
     }
 
     public Body body() {
@@ -31,7 +31,7 @@ public class HttpRequest {
     public static class HttpRequestBuilder {
 
         private StartLine startLine;
-        private Headers headers;
+        private RequestHeaders requestHeaders;
         private Body body;
 
         public HttpRequestBuilder startLine(StartLine startLine) {
@@ -39,8 +39,8 @@ public class HttpRequest {
             return this;
         }
 
-        public HttpRequestBuilder headers(Headers headers) {
-            this.headers = headers;
+        public HttpRequestBuilder headers(RequestHeaders requestHeaders) {
+            this.requestHeaders = requestHeaders;
             return this;
         }
 
@@ -50,7 +50,7 @@ public class HttpRequest {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(startLine, headers, body);
+            return new HttpRequest(startLine, requestHeaders, body);
         }
     }
 }

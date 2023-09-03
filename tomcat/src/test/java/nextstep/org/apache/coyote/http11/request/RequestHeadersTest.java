@@ -5,16 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.request.Headers;
+import org.apache.coyote.http11.request.RequestHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("Headers 은(는)")
+@DisplayName("RequestHeaders 은(는)")
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class HeadersTest {
+class RequestHeadersTest {
 
     @Test
     void Header들의_정보를_통해_생성된다() {
@@ -25,7 +25,7 @@ class HeadersTest {
                 "Content-Length: 20");
 
         // when
-        Headers created = Headers.from(headers);
+        RequestHeaders created = RequestHeaders.from(headers);
 
         // then
         assertThat(created.headers())
@@ -40,10 +40,10 @@ class HeadersTest {
     @Test
     void 비어있을_수_있다() {
         // when
-        Headers headers = Headers.from(Collections.emptyList());
+        RequestHeaders requestHeaders = RequestHeaders.from(Collections.emptyList());
 
         // then
-        assertThat(headers.headers()).isEmpty();
+        assertThat(requestHeaders.headers()).isEmpty();
     }
 
     @Test
@@ -53,7 +53,7 @@ class HeadersTest {
                 "Host: localhost:8080",
                 "User-Agent: Insomnia/2023.5.7",
                 "Content-Length: 20");
-        Headers created = Headers.from(headers);
+        RequestHeaders created = RequestHeaders.from(headers);
 
         // when & then
         assertThat(created.contains("Content-Length")).isTrue();
@@ -67,7 +67,7 @@ class HeadersTest {
                 "Host: localhost:8080",
                 "User-Agent: Insomnia/2023.5.7",
                 "Content-Length: 20");
-        Headers created = Headers.from(headers);
+        RequestHeaders created = RequestHeaders.from(headers);
 
         // when
         String actual = created.get("Content-Length");
@@ -84,7 +84,7 @@ class HeadersTest {
                 "Host: localhost:8080",
                 "User-Agent: Insomnia/2023.5.7",
                 "Content-Length: 20");
-        Headers created = Headers.from(headers);
+        RequestHeaders created = RequestHeaders.from(headers);
 
         // when
         String actual = created.get("mallang");

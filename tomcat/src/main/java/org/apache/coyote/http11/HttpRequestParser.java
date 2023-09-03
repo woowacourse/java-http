@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.request.Body;
-import org.apache.coyote.http11.request.Headers;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.StartLine;
 
 public class HttpRequestParser {
@@ -14,11 +14,11 @@ public class HttpRequestParser {
     public HttpRequest parse(BufferedReader reader) {
         StartLine startLine = StartLine.from(readLine(reader));
         List<String> headerLines = getHeaderLines(reader);
-        Headers headers = Headers.from(headerLines);
-        Body body = parseBody(reader, contentLength(headers));
+        RequestHeaders requestHeaders = RequestHeaders.from(headerLines);
+        Body body = parseBody(reader, contentLength(requestHeaders));
         return HttpRequest.builder()
                 .startLine(startLine)
-                .headers(headers)
+                .headers(requestHeaders)
                 .body(body)
                 .build();
     }
@@ -43,11 +43,11 @@ public class HttpRequestParser {
         return headers;
     }
 
-    private Integer contentLength(Headers headers) {
-        if (!headers.contains("Content-Length")) {
+    private Integer contentLength(RequestHeaders requestHeaders) {
+        if (!requestHeaders.contains("Content-Length")) {
             return null;
         }
-        return Integer.parseInt(headers.get("Content-Length"));
+        return Integer.parseInt(requestHeaders.get("Content-Length"));
     }
 
     private Body parseBody(BufferedReader reader, Integer length) {

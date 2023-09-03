@@ -4,22 +4,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Headers {
+public class RequestHeaders {
 
     private final Map<String, String> headers;
 
-    private Headers(Map<String, String> headers) {
+    private RequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static Headers from(List<String> headers) {
+    public static RequestHeaders from(List<String> headers) {
         Map<String, String> headerMap = new HashMap<>();
         for (String header : headers) {
             String[] nameAndValue = header.split(": ");
             validateHeaderValue(nameAndValue);
             headerMap.put(nameAndValue[0], nameAndValue[1]);
         }
-        return new Headers(headerMap);
+        return new RequestHeaders(headerMap);
     }
 
     private static void validateHeaderValue(String[] nameAndValue) {

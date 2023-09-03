@@ -9,16 +9,17 @@ public class HttpRequest {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final String url;
+    private final RequestURI requestURI;
     private final Map<String, String> headers;
 
-    private HttpRequest(String url, Map<String, String> headers) {
-        this.url = url;
+    private HttpRequest(RequestURI requestURI, Map<String, String> headers) {
+        this.requestURI = requestURI;
         this.headers = headers;
     }
 
     public static HttpRequest from(List<String> request) {
-        return new HttpRequest(request.get(0).split(" ")[1], parseHeaders(request));
+        String uri = request.get(0).split(" ")[1];
+        return new HttpRequest(RequestURI.from(uri), parseHeaders(request));
     }
 
     private static Map<String, String> parseHeaders(List<String> request) {
@@ -34,8 +35,12 @@ public class HttpRequest {
         return headers;
     }
 
+    public RequestURI getRequestUrl() {
+        return requestURI;
+    }
+
     public String getUrl() {
-        return url;
+        return requestURI.getUri();
     }
 
 }

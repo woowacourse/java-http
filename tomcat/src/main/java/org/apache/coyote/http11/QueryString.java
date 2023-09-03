@@ -11,24 +11,22 @@ public class QueryString {
     private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> values;
-    private final String uri;
 
-    private QueryString(Map<String, String> values, String uri) {
+    private QueryString(Map<String, String> values) {
         this.values = values;
-        this.uri = uri;
     }
 
-    public static QueryString from(String url) {
+    public static QueryString from(String uri) {
         Map<String, String> queryStrings = new HashMap<>();
-        int index = url.indexOf(INIT_SIGN);
+        int index = uri.indexOf(INIT_SIGN);
         if (index != -1) {
-            String[] queryString = url.substring(index + 1).split(NEXT_SIGN);
-            readQueryStrings(queryString, queryStrings);
+            String[] queryString = uri.substring(index + 1).split(NEXT_SIGN);
+            readQueryString(queryString, queryStrings);
         }
-        return new QueryString(queryStrings, url.substring(0, index));
+        return new QueryString(queryStrings);
     }
 
-    private static void readQueryStrings(String[] queryString, Map<String, String> queryStrings) {
+    private static void readQueryString(String[] queryString, Map<String, String> queryStrings) {
         for (String element : queryString) {
             String[] keyAndValue = element.split(KEY_VALUE_SIGN);
             queryStrings.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
@@ -37,10 +35,6 @@ public class QueryString {
 
     public Map<String, String> getValues() {
         return values;
-    }
-
-    public String getUri() {
-        return uri;
     }
 
 }

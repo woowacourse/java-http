@@ -21,7 +21,6 @@ class QueryStringTest {
 
         // then
         assertAll(
-                () -> assertThat(queryString.getUri()).isEqualTo("/login"),
                 () -> assertThat(queryString.getValues()).containsKey("account"),
                 () -> assertThat(queryString.getValues()).containsKey("password"),
                 () -> assertThat(queryString.getValues()).containsValue("gugu"),

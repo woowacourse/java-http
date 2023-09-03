@@ -74,8 +74,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponse(HttpRequest httpRequest, ContentType contentType) throws IOException {
-        String requestUrl = httpRequest.getUrl();
-        String responseBody = makeResponseBody(requestUrl);
+        RequestURI requestURI = httpRequest.getRequestUrl();
+        String responseBody = makeResponseBody(requestURI);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
@@ -84,20 +84,19 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String makeResponseBody(String requestURI) throws IOException {
-        if ("/".equals(requestURI)) {
+    private String makeResponseBody(RequestURI requestURI) throws IOException {
+        if (requestURI.isHome()) {
             return DEFAULT_RESPONSE_BODY_MESSAGE;
         }
-        if (requestURI.contains("?")) {
-            QueryString queryString = QueryString.from(requestURI);
+        if (requestURI.hasQueryString()) {
+            QueryString queryString = requestURI.getQueryString();
             String account = queryString.getValues().get("account");
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(IllegalArgumentException::new);
             log.info(user.toString());
-            requestURI = queryString.getUri() + ".html";
         }
         Path path = new File(Objects.requireNonNull(
-                getClass().getClassLoader().getResource("static" + requestURI)).getFile()
+                getClass().getClassLoader().getResource(requestURI.getResourcePath())).getFile()
         ).toPath();
         return new String(Files.readAllBytes(path));
     }

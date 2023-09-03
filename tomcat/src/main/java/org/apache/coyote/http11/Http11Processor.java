@@ -15,7 +15,9 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.HttpCookie;
+import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
+    private static final SessionManager sessionManager = new SessionManager();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -91,8 +93,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestUri.equals("/login")) {
+                var sessionId = httpCookie.getCookie("JSESSIONID");
                 if (requestMethod.equals("GET")) {
-                    requestUri = "login.html";
+                    Session session = sessionManager.findSession(sessionId);
+                    if (session == null) {
+                        requestUri = "login.html";
+                    } else {
+                        requestUri = "index.html";
+                    }
                 }
                 if (requestMethod.equals("POST")) {
                     statusCode = "302";
@@ -104,9 +112,12 @@ public class Http11Processor implements Runnable, Processor {
                         var response = "";
                         location = "/index.html";
                         log.info("user: {}", user.get());
-                        var sessionId = httpCookie.getCookie("JSESSIONID");
                         if (sessionId == null) {
-                            sessionId = String.valueOf(UUID.randomUUID());
+                            Session session = new Session(String.valueOf(UUID.randomUUID()));
+                            session.setAttribute("user", user);
+                            sessionId = session.getId();
+                            sessionManager.add(session);
+
                             response = String.join("\r\n",
                                     "HTTP/1.1 " + statusCode + " ",
                                     "Content-Type: " + contentType + " ",

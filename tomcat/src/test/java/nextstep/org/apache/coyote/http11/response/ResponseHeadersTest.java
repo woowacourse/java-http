@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.response;
+package nextstep.org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.response.ResponseHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

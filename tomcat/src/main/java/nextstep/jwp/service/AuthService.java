@@ -26,6 +26,6 @@ public class AuthService {
 
     public void signUp(String account, String email, String password) {
         validateNonNull(account, email, password);
-        InMemoryUserRepository.save(new User(account, email, password));
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 }

@@ -7,8 +7,13 @@ public class RequestUri {
         this.detail = detail;
     }
 
-    public static RequestUri create(String uri) {
-        return new RequestUri(uri);
+    public static RequestUri create(String line) {
+        int idx = line.indexOf("?");
+        if (idx==-1) {
+            return new RequestUri(line);
+        }
+
+        return new RequestUri(line.substring(0, idx));
     }
 
     public String getExtension() {

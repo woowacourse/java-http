@@ -54,4 +54,8 @@ public class HttpRequest {
     public RequestUri getUri() {
         return this.startLine.getUri();
     }
+
+    public QueryParams getParams() {
+        return this.startLine.getParams();
+    }
 }

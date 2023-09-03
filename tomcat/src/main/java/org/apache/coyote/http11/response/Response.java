@@ -42,6 +42,10 @@ public class Response {
     public String getBody() {
         return body;
     }
+    
+    public byte[] getBytes() {
+        return toString().getBytes();
+    }
 
     @Override
     public String toString() {
@@ -51,4 +55,5 @@ public class Response {
                 + "\r\n"
                 + body;
     }
+
 }

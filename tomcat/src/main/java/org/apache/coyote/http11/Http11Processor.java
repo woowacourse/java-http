@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow(() -> new IllegalStateException("invalid request"));
             log.info("request: {}", request);
 
-            final var response = RequestHandler.handle(request).toString();
+            final var response = RequestHandler.handle(request);
             outputStream.write(response.getBytes());
             log.info("write response");
             outputStream.flush();

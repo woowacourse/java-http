@@ -66,6 +66,7 @@ public class UserLoginRequestGetHandler implements RequestHandler {
 
         final Headers successResponseHeader = new Headers(Map.of(
                 CONTENT_TYPE.source(), TEXT_HTML.source() + ";" + UTF_8.source(),
+                CONTENT_LENGTH.source(), "0",
                 LOCATION.source(), LOGIN_SUCCESS_REDIRECT_URI
         ));
         return new HttpResponse(HTTP_1_1, FOUND, successResponseHeader, ResponseBody.EMPTY);
@@ -74,6 +75,7 @@ public class UserLoginRequestGetHandler implements RequestHandler {
     private HttpResponse redirect401Page() {
         final Headers failResponseHeader = new Headers(Map.of(
                 CONTENT_TYPE.source(), TEXT_HTML.source() + ";" + UTF_8.source(),
+                CONTENT_LENGTH.source(), "0",
                 LOCATION.source(), LOGIN_FAIL_REDIRECT_URI
         ));
         return new HttpResponse(HTTP_1_1, FOUND, failResponseHeader, ResponseBody.EMPTY);

@@ -4,11 +4,6 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -30,16 +25,5 @@ class QueryParamsTest {
                 () -> assertThat(queryParams.getParamValue("name")).contains("헤나"),
                 () -> assertThat(queryParams.getParamValue("gender")).contains("male")
         );
-    }
-
-    @Test
-    void a() throws IOException {
-        final Enumeration<URL> aStatic = Thread.currentThread().getContextClassLoader().getResources("static");
-        while (aStatic.hasMoreElements()) {
-            final URL url = aStatic.nextElement();
-            final File file = new File(url.getFile());
-            System.out.println("file = " + file);
-            System.out.println("aStatic = " + url);
-        }
     }
 }

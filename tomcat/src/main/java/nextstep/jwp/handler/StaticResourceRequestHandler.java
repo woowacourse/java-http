@@ -1,7 +1,6 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.util.ResourceFileUtil;
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.URI;
 import org.apache.catalina.servlet.response.HttpResponse;

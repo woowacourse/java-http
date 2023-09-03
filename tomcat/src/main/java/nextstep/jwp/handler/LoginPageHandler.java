@@ -4,7 +4,6 @@ import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
 import static org.apache.catalina.servlet.session.SessionConstant.JSESSIONID;
 
 import nextstep.jwp.util.ResourceFileUtil;
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;

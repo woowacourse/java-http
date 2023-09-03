@@ -8,14 +8,13 @@ import java.util.UUID;
 import nextstep.jwp.exception.UnAuthenticatedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.AuthService;
-import org.apache.coyote.http11.Http11Processor;
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.StatusLine;
 import org.apache.catalina.servlet.session.Session;
 import org.apache.catalina.servlet.session.SessionManager;
 import org.apache.catalina.servlet.util.RequestParamUtil;
+import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

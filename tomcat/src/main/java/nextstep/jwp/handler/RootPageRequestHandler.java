@@ -1,6 +1,5 @@
 package nextstep.jwp.handler;
 
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;

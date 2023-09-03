@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.handler;
+package nextstep.jwp.handler;
 
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;

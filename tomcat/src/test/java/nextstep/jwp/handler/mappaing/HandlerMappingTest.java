@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import nextstep.jwp.handler.LoginPageHandler;
+import nextstep.jwp.handler.RequestHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
-import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.StartLine;
 import org.junit.jupiter.api.DisplayName;

@@ -2,7 +2,7 @@ package nextstep.jwp.handler.mappaing;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import org.apache.catalina.servlet.handler.RequestHandler;
+import nextstep.jwp.handler.RequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
 
 public class HandlerMapping {

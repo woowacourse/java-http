@@ -2,13 +2,13 @@ package org.apache.coyote.http11;
 
 public class HttpRequestFirstLineInfo {
 
-    public static final String SPACE = " ";
-    public static final String QUERY_STRING_DELIMITER = "?";
+    private static final String SPACE = " ";
+    private static final String QUERY_STRING_DELIMITER = "?";
 
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int URI_INDEX = 1;
-    public static final int PROTOCOL_VERSION_INDEX = 2;
-    public static final int NUMBER_OF_FIRST_LINE_INFOS = 3;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int PROTOCOL_VERSION_INDEX = 2;
+    private static final int NUMBER_OF_FIRST_LINE_INFOS = 3;
 
     private final HttpMethod httpMethod;
     private final String uri;

@@ -7,13 +7,13 @@ import java.util.Map;
 
 public class HttpRequestParser {
 
-    public static final String DELIMITER = ":";
-    public static final String PARAMS_DELIMITER = "&";
-    public static final String PARAM_VALUE_DELIMITER = "=";
+    private static final String DELIMITER = ":";
+    private static final String PARAMS_DELIMITER = "&";
+    private static final String PARAM_VALUE_DELIMITER = "=";
 
-    public static final int PROPERTY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
-    public static final int START_AFTER_SPACE = 2;
+    private static final int PROPERTY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final int START_AFTER_SPACE = 2;
 
     private final HttpRequestFirstLineInfo httpRequestFirstLineInfo;
     private final Map<String, String> headers;

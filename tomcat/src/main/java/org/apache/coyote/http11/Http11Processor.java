@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -34,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequestParser requestParser = HttpRequestParser.from(reader);
 
-            String response = HttpResponseMaker.makeFrom(requestParser);
+            String response = HttpResponseMaker.makeFrom(requestParser, sessionManager);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

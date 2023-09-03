@@ -18,7 +18,7 @@ public enum RequestMapper {
     CHART_PIE_JS("/assets/chart-pie.js", "/assets/chart-pie.js", GET, OK, HTML),
     FAVICON("/favicon.ico", "/favicon.ico", GET, OK, ICO),
     CSS("/css/styles.css", "/css/styles.css", GET, OK, ContentType.CSS),
-    LOG_IN("/login.html", "/login.html", GET, FOUND, HTML),
+    LOG_IN("/login", "/login.html", GET, FOUND, HTML),
     LOG_IN_WITH_INFOS("/login", null, POST, FOUND, HTML),
     UNAUTHORIZED("/401.html", "/401.html", GET, OK, HTML),
     REGISTER("/register", "/register.html", GET, OK, HTML),

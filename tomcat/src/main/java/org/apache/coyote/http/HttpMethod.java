@@ -1,10 +1,12 @@
 package org.apache.coyote.http;
 
+import java.util.Arrays;
+
 public enum HttpMethod {
 
-    GET("get"),
-    POST("post"),
-    PUT("put"),
+    GET("GET"),
+    POST("POST"),
+    PUT("PUT"),
     PATCH("PATCH"),
     DELETE("DELETE"),
     ;
@@ -13,5 +15,12 @@ public enum HttpMethod {
 
     HttpMethod(String value) {
         this.value = value;
+    }
+
+    public static HttpMethod from(String value) {
+        return Arrays.stream(values())
+                .filter(httpMethod -> httpMethod.value.equals(value.toUpperCase()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("메서드 이름이 유효하지 않습니다. 입력: " + value));
     }
 }

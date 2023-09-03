@@ -12,11 +12,11 @@ public class ViewRenderer {
         }
 
         String content = FileUtil.readStaticFile(viewName);
-        HttpMessage.ContentType contentType = HttpMessage.ContentType.from(viewName.substring(viewName.lastIndexOf(".") + 1));
+        ContentType contentType = ContentType.from(viewName.substring(viewName.lastIndexOf(".") + 1));
 
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .statusCode(StatusCode.OK)
-                .httpMessage(HttpMessage.of(content, contentType))
+                .httpMessage(HttpBody.of(content, contentType))
                 .build();
         httpResponseComposer.setHttpResponse(httpResponse);
     }

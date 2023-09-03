@@ -5,29 +5,26 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final HttpHeaders httpHeaders;
-    private final HttpMessage httpMessage;
+    private final HttpRequestLine requestLine;
+    private final HttpHeader header;
+    private final Map<String, String> parameters;
 
-    public HttpRequest(HttpHeaders httpHeaders, HttpMessage httpMessage) {
-        this.httpHeaders = httpHeaders;
-        this.httpMessage = httpMessage;
+    public HttpRequest(HttpRequestLine requestLine, HttpHeader header, Map<String, String> parameters) {
+        this.requestLine = requestLine;
+        this.header = header;
+        parameters.putAll(requestLine.getParameters());
+        this.parameters = parameters;
     }
 
     public String getPath() {
-        return httpHeaders.getPath();
+        return requestLine.getPath();
     }
 
-    public HttpHeaders getHeader() {
-        return httpHeaders;
-    }
-
-    public HttpMessage getHttpMessage() {
-        return httpMessage;
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>(httpHeaders.getQueryParameters());
-        parameters.putAll(httpMessage.getParameters());
-        return parameters;
+        return new HashMap<>(parameters);
     }
 }

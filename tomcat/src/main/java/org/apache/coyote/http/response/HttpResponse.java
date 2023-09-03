@@ -1,9 +1,11 @@
-package org.apache.coyote.http;
-
-import java.nio.charset.StandardCharsets;
+package org.apache.coyote.http.response;
 
 import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
 import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
+
+import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpHeaderConverter;
 
 public class HttpResponse {
 

@@ -1,11 +1,11 @@
 package org.apache.coyote.http.controller;
 
 import org.apache.coyote.Controller;
-import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
-import static org.apache.coyote.http.HttpMethod.*;
+import static org.apache.coyote.http.request.HttpMethod.*;
 
 public abstract class HttpController implements Controller {
 

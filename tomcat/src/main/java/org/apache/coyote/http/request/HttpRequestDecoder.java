@@ -1,8 +1,11 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
+import java.io.InputStream;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpHeaderConverter;
 import org.apache.coyote.util.ByteUtil;
 
-import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
@@ -18,7 +21,8 @@ public class HttpRequestDecoder {
     public HttpRequest decode(InputStream inputStream) {
         HttpRequestLine httpRequestLine = decodeRequestLine(inputStream);
         HttpHeader httpHeader = decodeHeader(inputStream);
-        Map<String, String> parameters = decodeBody(httpHeader.getContentLength(), httpHeader.getContentType(), inputStream);
+        Map<String, String> parameters = decodeBody(httpHeader.getContentLength(),
+            httpHeader.getContentType(), inputStream);
 
         return new HttpRequest(httpRequestLine, httpHeader, parameters);
     }
@@ -39,7 +43,8 @@ public class HttpRequestDecoder {
         return HttpHeaderConverter.decode(new String(source, 0, sourceLength));
     }
 
-    private Map<String, String> decodeBody(int contentLength, ContentType contentType, InputStream inputStream) {
+    private Map<String, String> decodeBody(int contentLength, ContentType contentType,
+        InputStream inputStream) {
         if (contentLength <= 0) {
             return Collections.emptyMap();
         }

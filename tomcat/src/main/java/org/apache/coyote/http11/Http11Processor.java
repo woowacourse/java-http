@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestDecoder;
-import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequestDecoder;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.controller.HttpController;
 import org.apache.coyote.http.controller.ViewRenderer;
 import org.reflections.Reflections;

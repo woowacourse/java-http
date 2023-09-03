@@ -1,6 +1,9 @@
 package org.apache.coyote.http.controller;
 
 import org.apache.coyote.http.*;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.util.FileUtil;
 
 public class ViewRenderer {

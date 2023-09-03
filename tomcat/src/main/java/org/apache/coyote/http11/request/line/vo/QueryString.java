@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request.line.vo;
+package org.apache.coyote.http11.request.line.vo;
 
 import java.util.Arrays;
 import java.util.List;

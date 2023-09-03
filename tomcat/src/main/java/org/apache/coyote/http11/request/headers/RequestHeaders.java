@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request.headers;
+package org.apache.coyote.http11.request.headers;
 
 import java.util.HashMap;
 import java.util.List;

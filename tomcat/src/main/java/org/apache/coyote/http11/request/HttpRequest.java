@@ -1,7 +1,7 @@
-package nextstep.jwp.protocol.request;
+package org.apache.coyote.http11.request;
 
-import nextstep.jwp.protocol.request.headers.RequestHeaders;
-import nextstep.jwp.protocol.request.line.RequestLine;
+import org.apache.coyote.http11.request.line.RequestLine;
+import org.apache.coyote.http11.request.headers.RequestHeaders;
 
 public class HttpRequest {
 

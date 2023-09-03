@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request.line;
+package org.apache.coyote.http11.request.line;
 
 public class RequestLine {
 
@@ -6,10 +6,14 @@ public class RequestLine {
     private final Path path;
     private final Protocol protocol;
 
-    public RequestLine(HttpMethod method, Path path, Protocol protocol) {
+    private RequestLine(HttpMethod method, Path path, Protocol protocol) {
         this.method = method;
         this.path = path;
         this.protocol = protocol;
+    }
+
+    public static RequestLine of(HttpMethod method, Path path, Protocol protocol) {
+        return new RequestLine(method, path, protocol);
     }
 
     public HttpMethod method() {

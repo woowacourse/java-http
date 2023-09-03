@@ -1,6 +1,7 @@
 package nextstep.jwp.protocol.request.headers;
 
 import java.util.List;
+import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

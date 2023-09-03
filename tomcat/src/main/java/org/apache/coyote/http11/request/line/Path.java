@@ -1,8 +1,8 @@
-package nextstep.jwp.protocol.request.line;
+package org.apache.coyote.http11.request.line;
 
 import java.util.Map;
-import nextstep.jwp.protocol.request.line.vo.DefaultPath;
-import nextstep.jwp.protocol.request.line.vo.QueryString;
+import org.apache.coyote.http11.request.line.vo.DefaultPath;
+import org.apache.coyote.http11.request.line.vo.QueryString;
 
 public class Path {
 

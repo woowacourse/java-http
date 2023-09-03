@@ -1,8 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import jakarta.servlet.http.HttpSession;
-import java.util.Optional;
-import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.session.SessionManager;
@@ -13,7 +10,7 @@ public class LoginViewController implements Controller {
 
     @Override
     public Response handle(Request request) {
-        if (loggedIn(request)) {
+        if (SessionManager.loggedIn(request)) {
             return Response.status(302)
                 .addHeader(LOCATION_HEADER, "/index.html")
                 .build();
@@ -21,23 +18,5 @@ public class LoginViewController implements Controller {
         Response<Object> response = Response.status(200).build();
         response.responseView("/login.html");
         return response;
-    }
-
-    private boolean loggedIn(Request request) {
-        Optional<Cookies> cookie = request.getRequestHeaders().getCookie();
-        if (cookie.isPresent()) {
-            return checkSession(cookie.get());
-        }
-        return false;
-    }
-
-    private boolean checkSession(Cookies cookies) {
-        Optional<String> sessionCookie = cookies.getSessionCookie();
-        if (sessionCookie.isPresent()) {
-            String sessionId = sessionCookie.get();
-            HttpSession session = SessionManager.getInstance().findSession(sessionId);
-            return session != null;
-        }
-        return false;
     }
 }

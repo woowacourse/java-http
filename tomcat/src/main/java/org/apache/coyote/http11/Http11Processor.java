@@ -133,8 +133,7 @@ public class Http11Processor implements Runnable, Processor {
         stringBuilder.append(requestLine(response));
         Optional<String> body = bodyOf(response);
         if (body.isPresent()) {
-            String s = stringBuilder.append(responseWithBody(response, body.get())).toString();
-            return s;
+            return stringBuilder.append(responseWithBody(response, body.get())).toString();
         }
         String str = responseNoBody(response);
         stringBuilder.append("\r\n");

@@ -1,5 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.StringTokenizer;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -27,19 +32,42 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+             final var outputStream = connection.getOutputStream();) {
 
-            final var responseBody = "Hello world!";
+            final StringTokenizer stringTokenizer = new StringTokenizer(bufferedReader.readLine());
+            final String httpRequestMethod = stringTokenizer.nextToken();
+            final String httpRequestUri = stringTokenizer.nextToken();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (Objects.equals(httpRequestMethod, "GET") && Objects.equals(httpRequestUri, "/")) {
+                final var responseBody = "Hello world!";
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
+
+            if (Objects.equals(httpRequestMethod, "GET") && Objects.equals(httpRequestUri, "/index.html")) {
+                final var responseBody = "Hello world!";
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
+
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

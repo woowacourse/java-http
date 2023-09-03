@@ -39,7 +39,7 @@ public class Headers {
     public String toString() {
         final String mappingResult = mapping.keySet()
                 .stream()
-                .map(headerName -> "        " + headerName + mapping.get(headerName))
+                .map(headerName -> "        " + headerName + " : " + mapping.get(headerName))
                 .collect(Collectors.joining("," + System.lineSeparator()));
 
         return "Headers{" + System.lineSeparator() +

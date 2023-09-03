@@ -40,17 +40,19 @@ public class LoginController implements Controller {
 
             log.info("login success!");
             Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/index.html");
             return new HttpResponse(
                     "HTTP/1.1",
-                    StatusCode.OK,
+                    StatusCode.FOUND,
                     headers
             );
         } catch (IllegalArgumentException exception) {
             log.info("login fail!");
             Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/401.html");
             return new HttpResponse(
                     "HTTP/1.1",
-                    StatusCode.UNAUTHORIZED,
+                    StatusCode.FOUND,
                     headers
             );
         }

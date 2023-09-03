@@ -37,16 +37,19 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Map<String, Handler> handlerMap = new HashMap<>();
-    private final Handler staticResourceHandler = new StaticResourceHandler();
-    private final Handler methodNotAllowedHandler = new MethodNotAllowedHandler();
-    private final Handler notFoundHandler = new NotFoundHandler();
+    private static final Map<String, Handler> HANDLER_MAP = new HashMap<>();
+    private static final Handler STATIC_RESOURCE_HANDLER = new StaticResourceHandler();
+    private static final Handler METHOD_NOT_ALLOWED_HANDLER = new MethodNotAllowedHandler();
+    private static final Handler NOT_FOUND_HANDLER = new NotFoundHandler();
+
+    static {
+        HANDLER_MAP.put("/", new IndexHandler());
+        HANDLER_MAP.put("/login", new LoginHandler());
+        HANDLER_MAP.put("/register", new RegisterHandler());
+    }
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        handlerMap.put("/", new IndexHandler());
-        handlerMap.put("/login", new LoginHandler());
-        handlerMap.put("/register", new RegisterHandler());
     }
 
     @Override
@@ -113,18 +116,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handle(HttpRequest request) throws IOException {
-        Handler handler = handlerMap.getOrDefault(request.getPath(), staticResourceHandler);
+        Handler handler = HANDLER_MAP.getOrDefault(request.getPath(), STATIC_RESOURCE_HANDLER);
         try {
             return handler.handle(request);
         } catch (MethodNotAllowedException e) {
-            HttpResponse response = methodNotAllowedHandler.handle(request);
+            HttpResponse response = METHOD_NOT_ALLOWED_HANDLER.handle(request);
             List<String> allowedMethods = e.getAllowedMethods().stream()
                 .map(Enum::name)
                 .collect(toList());
             response.setHeader("Allow", allowedMethods);
             return response;
         } catch (NoSuchFileException e) {
-            return notFoundHandler.handle(request);
+            return NOT_FOUND_HANDLER.handle(request);
         }
     }
 }

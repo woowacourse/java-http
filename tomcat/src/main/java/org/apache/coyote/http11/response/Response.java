@@ -8,6 +8,8 @@ public class Response<T> {
     private int statusCode = 200;
     private Map<String, String> headers;
     private T body;
+    private boolean viewResponse = false;
+    private String viewPath = null;
 
     private Response(int statusCode, Map<String, String> headers, T body) {
         this.statusCode = statusCode;
@@ -17,6 +19,11 @@ public class Response<T> {
 
     public static ResponseBuilder status(int statusCode) {
         return new ResponseBuilderImpl(statusCode);
+    }
+
+    public void responseView(String viewPath) {
+        this.viewResponse = true;
+        this.viewPath = viewPath;
     }
 
     public int getStatusCode() {
@@ -29,6 +36,14 @@ public class Response<T> {
 
     public T getBody() {
         return body;
+    }
+
+    public boolean isViewResponse() {
+        return viewResponse;
+    }
+
+    public String getViewPath() {
+        return viewPath;
     }
 
     public interface ResponseBuilder {

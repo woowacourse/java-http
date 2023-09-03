@@ -4,12 +4,12 @@ public class Request {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final ResponseBody responseBod;
+    private final ResponseBody responseBody;
 
-    public Request(RequestLine requestLine, RequestHeaders requestHeaders, ResponseBody responseBod) {
+    public Request(RequestLine requestLine, RequestHeaders requestHeaders, ResponseBody responseBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
-        this.responseBod = responseBod;
+        this.responseBody = responseBody;
     }
 
     public RequestLine getRequestLine() {
@@ -20,7 +20,7 @@ public class Request {
         return requestHeaders;
     }
 
-    public ResponseBody getResponseBod() {
-        return responseBod;
+    public ResponseBody getResponseBody() {
+        return responseBody;
     }
 }

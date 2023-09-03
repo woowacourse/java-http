@@ -25,4 +25,12 @@ public class LoginService {
         }
         return validLogin;
     }
+
+    public void signUp(String account, String password, String email) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 유저입니다.");
+        }
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
 }

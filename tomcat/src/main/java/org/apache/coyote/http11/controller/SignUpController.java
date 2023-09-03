@@ -8,40 +8,37 @@ import org.apache.coyote.http11.request.ResponseBody;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.service.LoginService;
 
-public class LoginController implements Controller {
+public class SignUpController implements Controller {
 
     private static final String INVIDUAL_QUERY_PARAM_DIVIDER = "&";
     private static final String QUERY_PARAM_KEY_VALUE_SPLIT = "=";
     private static final int DONT_HAVE_VALUE = 1;
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private final LoginService loginService;
 
-    public LoginController(LoginService loginService) {
+    public SignUpController(LoginService loginService) {
         this.loginService = loginService;
     }
 
     @Override
-    public Response<String> handle(Request request) {
-        if (checkLogin(request)) {
+    public Response handle(Request request) {
+        try {
+            Map<String, String> bodyData = convertBody(request.getResponseBody());
+            String account = bodyData.get(ACCOUNT);
+            String password = bodyData.get(PASSWORD);
+            String email = bodyData.get(EMAIL);
+            loginService.signUp(account, password, email);
             return Response.status(302)
                 .addHeader("Location", "/index.html")
                 .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(302)
+                .addHeader("Location", "/register.html")
+                .build();
         }
-        return Response.status(302)
-            .addHeader("Location", "/401.html")
-            .build();
-    }
-
-    private boolean checkLogin(Request request) {
-        Map<String, String> bodyData = convertBody(request.getResponseBody());
-        String account = bodyData.get(ACCOUNT);
-        String password = bodyData.get(PASSWORD);
-        if (account != null && password != null) {
-            return loginService.checkUser(account, password);
-        }
-        return false;
     }
 
     // TODO RequestLine 중복 로직 제거

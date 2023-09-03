@@ -50,9 +50,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Request readRequest(BufferedReader inputReader) {
-        return new Request(new RequestLine(readRequestLine(inputReader)),
-            new RequestHeaders(readHeaders(inputReader)),
-            new ResponseBody(readBody(inputReader)));
+        RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
+        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
+        ResponseBody responseBody = new ResponseBody(readBody(inputReader, requestHeaders));
+        return new Request(requestLine,
+            requestHeaders,
+            responseBody);
     }
 
     private String readRequestLine(BufferedReader inputReader) {
@@ -78,19 +81,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readBody(BufferedReader inputReader) {
+    private String readBody(BufferedReader inputReader, RequestHeaders requestHeaders) {
         try {
-            StringBuilder stringBuilder = new StringBuilder();
-            if (!inputReader.ready()) {
+            String s = requestHeaders.getHeaders().get("Content-Length");
+            if (s == null) {
                 return null;
             }
-            String line = inputReader.readLine();
-            while (!"".equals(line)) {
-                stringBuilder.append(line);
-                stringBuilder.append(System.lineSeparator());
-                line = inputReader.readLine();
-            }
-            return stringBuilder.toString();
+            int contentLength = Integer.parseInt(s);
+            char[] buffer = new char[contentLength];
+            inputReader.read(buffer, 0, contentLength);
+            return new String(buffer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -121,6 +121,9 @@ public class Http11Processor implements Runnable, Processor {
         Response response = handler.handle(request);
         if (response.getStatusCode() == 302) {
             return redirectResponse(response);
+        }
+        if (response.isViewResponse()) {
+            return staticResourceResponse(response.getViewPath());
         }
         throw new UnsupportedOperationException();
     }

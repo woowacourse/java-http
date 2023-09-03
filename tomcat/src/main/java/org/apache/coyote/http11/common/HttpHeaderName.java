@@ -4,7 +4,9 @@ public enum HttpHeaderName {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    LOCATION("Location");
+    LOCATION("Location"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie");
 
     private final String value;
 

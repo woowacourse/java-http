@@ -64,6 +64,10 @@ public class HttpRequest {
         return requestLine;
     }
 
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
     public MessageBody getMessageBody() {
         return messageBody;
     }

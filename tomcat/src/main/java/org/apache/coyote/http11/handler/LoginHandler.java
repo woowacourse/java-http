@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
@@ -15,6 +16,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 import org.apache.coyote.http11.response.StatusLine;
+import org.apache.coyote.http11.security.Cookie;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,15 @@ public class LoginHandler implements RequestHandler {
             String password = (String) formDataMap.get("password");
 
             checkLoginWithUserInfo(responseHeaders, account, password);
+
+
+            String cookieValue = (String) httpRequest.getRequestHeaders().getHeaderValue(HttpHeaderName.COOKIE.getValue());
+            Cookie cookie = Cookie.from(cookieValue);
+            if (cookie.hasNotKey("JSESSIONID")) {
+                UUID sessionId = UUID.randomUUID();
+                responseHeaders.addHeader(HttpHeaderName.SET_COOKIE.getValue(), "JSESSIONID=" + sessionId);
+            }
+
 
             return new HttpResponse(statusLine, responseHeaders, messageBody);
         }

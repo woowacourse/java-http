@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.StaticResourceRequestHandler;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -63,9 +64,11 @@ public class Http11Processor implements Runnable, Processor {
                         .orElse(null);
                 log.info("User={}", user);
             } else {
-                final URL resource = classLoader.getResource("static" + uri.path());
-                final File file = new File(resource.getFile());
-                responseBody = new String(Files.readAllBytes(file.toPath()));
+                StaticResourceRequestHandler staticResourceRequestHandler = new StaticResourceRequestHandler();
+                HttpResponse response = staticResourceRequestHandler.handle(request);
+                bufferedWriter.write(response.toString());
+                bufferedWriter.flush();
+                return;
             }
 
             StatusLine statusLine = new StatusLine(HttpStatus.OK);

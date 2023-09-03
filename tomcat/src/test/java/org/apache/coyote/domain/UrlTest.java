@@ -3,6 +3,8 @@ package org.apache.coyote.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.apache.coyote.http.vo.QueryStrings;
+import org.apache.coyote.http.vo.Url;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.http.vo;
 
 import java.util.Arrays;
+import util.MultiValueMap;
 
 public class QueryStrings {
 

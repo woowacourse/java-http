@@ -4,7 +4,7 @@ import static org.apache.coyote.http.HttpHeader.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.vo.HttpHeaders;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;

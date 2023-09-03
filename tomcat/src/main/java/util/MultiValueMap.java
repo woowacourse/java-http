@@ -1,4 +1,4 @@
-package org.apache.coyote.domain;
+package util;
 
 import java.util.ArrayList;
 import java.util.HashMap;

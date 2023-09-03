@@ -1,4 +1,4 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.http.vo;
 
 import org.apache.coyote.http.HttpMethod;
 

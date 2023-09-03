@@ -1,9 +1,10 @@
-package org.apache.coyote.domain;
+package org.apache.coyote.http.vo;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http.HttpHeader;
+import util.MultiValueMap;
 
 public class HttpHeaders {
 

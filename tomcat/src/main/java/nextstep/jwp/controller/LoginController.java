@@ -1,18 +1,20 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.NoSuchElementException;
+import nextstep.jwp.dto.LoginResponseDto;
 import nextstep.jwp.exception.InvalidLoginInfoException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.LoginService;
 
 public class LoginController {
 
-    public User login(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow();
-        if (user.checkPassword(password)) {
-            // TODO : 반환 타입 DTO로 변환하기
-            return user;
+    private final LoginService loginService = new LoginService();
+
+    public LoginResponseDto login(String account, String password) {
+        try {
+            loginService.login(account, password);
+            return new LoginResponseDto("/index.html");
+        } catch (NoSuchElementException | InvalidLoginInfoException e) {
+            return new LoginResponseDto("/401.html");
         }
-        throw new InvalidLoginInfoException();
     }
 }

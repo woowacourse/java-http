@@ -4,6 +4,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +50,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            RequestStartLine requestStartLine = RequestStartLine.from(request);
-            String response = createResponse(requestStartLine.getRequestURI());
+            HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(request);
+            String response = createResponse(httpRequestStartLine.getRequestURI());
 
             outputStream.write(response.getBytes());
             outputStream.flush();

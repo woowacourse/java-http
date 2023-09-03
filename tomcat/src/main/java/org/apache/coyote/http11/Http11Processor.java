@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
 		}
 		final var bodySize = Integer.parseInt(contentLength);
 		final var buffer = new char[bodySize];
-		reader.read(buffer);
+		reader.read(buffer, 0, bodySize);
 		return RequestBody.from(new String(buffer));
 	}
 }

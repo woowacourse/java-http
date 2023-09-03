@@ -45,17 +45,18 @@ public class RequestUri {
         String responseBody = extractResponseBody();
 
         if (responseBody.equals(DEFAULT_RESPONSE)) {
-            return new HttpResponse(null, responseBody);
+            return new HttpResponse(FileExtension.NONE, responseBody);
         }
 
         return new HttpResponse(getFileExtension(), responseBody);
     }
 
-    private String getFileExtension() throws URISyntaxException {
+    private FileExtension getFileExtension() throws URISyntaxException {
         File file = findPath().toFile();
         String fileName = file.getName();
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
+        return FileExtension.from(fileExtension);
     }
 
     private String extractResponseBody() {

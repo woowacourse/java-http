@@ -1,17 +1,15 @@
 package org.apache.coyote.http11;
 
-import java.util.Objects;
-
 public class HttpResponse {
 
     private static final String STATUS_LINE = "HTTP/1.1 200 OK ";
-    private static final String CONTENT_TYPE = "Content-Type: text/%s;charset=utf-8 ";
+    private static final String CONTENT_TYPE = "Content-Type: %s;charset=utf-8 ";
     private static final String CONTENT_LENGTH = "Content-Length: %d ";
 
-    private final String fileExtension;
+    private final FileExtension fileExtension;
     private final String responseBody;
 
-    public HttpResponse(String fileExtension, String responseBody) {
+    public HttpResponse(FileExtension fileExtension, String responseBody) {
         this.fileExtension = fileExtension;
         this.responseBody = responseBody;
     }
@@ -26,7 +24,7 @@ public class HttpResponse {
     }
 
     private String convertContentType() {
-        return String.format(CONTENT_TYPE, Objects.requireNonNullElse(fileExtension, "html"));
+        return String.format(CONTENT_TYPE, fileExtension.getContentType());
     }
 
     private String convertContentLength() {

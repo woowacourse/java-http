@@ -1,13 +1,17 @@
 package org.apache.coyote.http11.request.headers;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.common.Cookie;
 
 import static java.util.Arrays.*;
+import static java.util.Collections.EMPTY_LIST;
 
 public class RequestHeaders {
+    private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, List<String>> headers;
 
@@ -42,6 +46,11 @@ public class RequestHeaders {
 
     public Map<String, List<String>> headers() {
         return headers;
+    }
+
+    public Cookie getCookie() {
+        final List<String> cookie = headers.getOrDefault(COOKIE_HEADER, EMPTY_LIST);
+        return Cookie.from(cookie);
     }
 
 }

@@ -12,17 +12,22 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpResponseUtil;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.common.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponseGenerator;
+import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionRepository;
+import org.apache.coyote.http11.common.SessionRepositoryImpl;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.request.line.vo.QueryString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +40,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PAGE = "/login.html";
 
     private final Socket connection;
+    private final SessionRepository sessionRepository = new SessionRepositoryImpl();
+    private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -58,38 +65,15 @@ public class Http11Processor implements Runnable, Processor {
             final RequestLine requestLine = RequestLine.from(firstLine);
             final RequestHeaders requestHeader = getHeaders(bufferedReader);
             final RequestBody requestBody = getBody(bufferedReader, requestHeader);
-            String response = getResponse(requestLine);
 
-//            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);
-//            final String response = httpResponseGenerator.generate(responseEntity);
+            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);
+            final String response = httpResponseGenerator.generate(responseEntity);
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private String getResponse(final RequestLine requestLine) throws IOException {
-        final String path = requestLine.path().defaultPath();
-        final Map<String, String> queryString = requestLine.path().queryString();
-
-        if (path.equals("/")) {
-            final String responseBody = "Hello world!";
-            return HttpResponseUtil.generate(path, responseBody);
-        }
-        if (path.equals("/login")) {
-            final User account = InMemoryUserRepository.findByAccount(queryString.get("account"))
-                    .orElseThrow();
-            LOG.info("login: {}", account);
-            final URL resource = classLoader.getResource("static" + path + ".html");
-            final File file = new File(resource.getFile());
-            final String responseBody = new String(Files.readAllBytes(file.toPath()));
-            return HttpResponseUtil.generate(path, responseBody);
-        }
-        final URL resource = classLoader.getResource("static" + path);
-        final File file = new File(resource.getFile());
-        final String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponseUtil.generate(path, responseBody);
     }
 
     private RequestHeaders getHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -98,16 +82,6 @@ public class Http11Processor implements Runnable, Processor {
             requestHeaders.add(line);
         }
         return RequestHeaders.from(requestHeaders);
-    }
-
-    private List<String> readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        final List<String> requestHeaders = new ArrayList<>();
-        String line;
-
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            requestHeaders.add(line);
-        }
-        return requestHeaders;
     }
 
     private RequestBody getBody(final BufferedReader bufferedReader, final RequestHeaders requestHeaders)
@@ -129,12 +103,39 @@ public class Http11Processor implements Runnable, Processor {
     ) {
         final String path = requestLine.path().defaultPath();
         if (path.equals("/login")) {
-            return null;
+            return login(requestLine, requestHeaders, requestBody);
         }
         if (path.equals("/register")) {
             return null;
         }
         return new ResponseEntity(HttpStatus.OK, path);
+    }
+
+    private ResponseEntity login(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
+        if (requestLine.method().isGet()) {
+            final Cookie cookie = requestHeaders.getCookie();
+            final Session session = sessionRepository.getSession(cookie.get("JSESSIONID"));
+            if (session != null) {
+                return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+            }
+            return new ResponseEntity(HttpStatus.OK, LOGIN_PAGE);
+        }
+        final String account = requestBody.getBy("account");
+        final String password = requestBody.getBy("password");
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(this::loginSuccess)
+                .orElseGet(() -> new ResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html"));
+    }
+
+    private ResponseEntity loginSuccess(final User user) {
+        final String uuid = UUID.randomUUID().toString();
+        final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+        responseEntity.setCookie("JSESSIONID", uuid);
+        final Session session = new Session(uuid);
+        session.setAttribute("user", user);
+        sessionRepository.create(session);
+        return responseEntity;
     }
 
 }

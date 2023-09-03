@@ -19,4 +19,8 @@ public enum HttpMethod {
                 .findAny().orElseThrow(() -> new IllegalArgumentException("해당하는 HTTP 메서드를 찾을 수 없습니다."));
     }
 
+    public boolean isGet() {
+        return this == GET;
+    }
+
 }

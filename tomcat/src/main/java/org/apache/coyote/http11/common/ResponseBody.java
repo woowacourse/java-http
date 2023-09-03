@@ -27,7 +27,6 @@ public class ResponseBody {
 
     private static String readFile(final String uri) throws IOException {
         final URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_DIRECTORY + uri);
-        System.out.println("uri = " + uri);
         final File file = new File(Objects.requireNonNull(resource).getFile());
         return new String(Files.readAllBytes(file.toPath()));
     }

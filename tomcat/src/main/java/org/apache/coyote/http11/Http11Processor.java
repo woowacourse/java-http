@@ -3,18 +3,16 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.common.Constants.CRLF;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.RequestHeader;
 import org.apache.coyote.http11.common.RequestURI;
-import org.apache.coyote.http11.common.ResponseBody;
 import org.apache.coyote.http11.common.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 

@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class LoginGetHandler implements Handler {
 
@@ -25,25 +26,36 @@ public class LoginGetHandler implements Handler {
     @Override
     public Http11Response resolve(final Http11Request request) throws IOException {
         final String query = request.getQuery();
+        if (query == null) {
+            final var resource = getClass().getClassLoader().getResource(STATIC + "/login.html");
+            return makeHttp11Response(resource, StatusCode.OK);
+        }
+        final User user = findUser(query);
+
+        if (user == null) {
+            final var resource = getClass().getClassLoader().getResource(STATIC + "/401.html");
+            return makeHttp11Response(resource, StatusCode.UNAUTHORIZED);
+        }
+
+        final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
+        return makeHttp11Response(resource, StatusCode.FOUND);
+    }
+
+    private User findUser(final String query) {
         final String[] tokens = query.split("&");
 
         final String account = findValueByKey(tokens, "account");
         final String password = findValueByKey(tokens, "password");
 
-        final User user = findUser(account, password);
-        log.info(user.toString());
-
-        final var resource = getClass().getClassLoader().getResource(STATIC + "/login.html");
-        return makeHttp11Response(resource, StatusCode.OK);
+        return checkUser(account, password);
     }
 
-    private User findUser(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다."));
-        if (!user.checkPassword(password)) {
-            throw new BusinessException("비밀번호가 일치하지 않습니다.");
+    private User checkUser(final String account, final String password) {
+        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+            return optionalUser.get();
         }
-        return user;
+        return null;
     }
 
     private String findValueByKey(final String[] tokens, final String key) {

@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.Method.GET;
+import static org.apache.coyote.http11.response.Status.FOUND;
+import static org.apache.coyote.http11.response.Status.OK;
+import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,12 +20,13 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final String LINE_SEPARATOR = "\r\n";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
 
@@ -72,37 +76,56 @@ public class Http11Processor implements Runnable, Processor {
         return input.toString();
     }
 
+
     private Http11Response makeResponseOf(final Http11Request request) {
         if (request.getMethod() == GET) {
             final String path = request.getPath();
-            final String responseBody = getResponseBodyFromResource(path);
+            Status status = OK;
 
             if (path.equals("/login") && request.isQueryParamExist("account", "password")) {
-                final String account = request.getQueryParam("account");
-                final String password = request.getQueryParam("password");
-                processQueryString(account, password);
+                status = processLogIn(request);
             }
 
-            return Http11Response.of(request.getHeader("Accept"), responseBody);
+            final String responseBody = getResponseBodyFromResource(status, path);
+
+            final Http11Response response = new Http11Response(status, responseBody);
+            final String accept = request.getHeader("Accept");
+            if (accept != null && accept.contains("css")) {
+                response.addHeader("Content-Type", "text/css;charset=utf-8 ");
+            }
+            if (status == FOUND) {
+                response.addHeader("Location", "/index.html");
+            }
+
+            return response;
         }
         throw new IllegalArgumentException("Invalid Request Uri");
     }
 
-    private void processQueryString(final String account, final String password) {
+    private Status processLogIn(final Http11Request request) {
+        final String account = request.getQueryParam("account");
+        final String password = request.getQueryParam("password");
+
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
 
         if (user.checkPassword(password)) {
             log.info(user.toString());
+            return FOUND;
         }
+
+        return UNAUTHORIZED;
     }
 
-    private String getResponseBodyFromResource(String path) {
+    private String getResponseBodyFromResource(final Status status, String path) {
         if (path.equals("/")) {
             return "Hello world!";
         }
         if (path.equals("/favicon.ico")) {
             return "Icon Not Exist";
+        }
+        if (status.getCode() >= 400) {
+            path = "/" + status.getCode();
         }
         if (!path.contains(".")) {
             path += ".html";

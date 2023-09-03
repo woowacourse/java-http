@@ -29,7 +29,6 @@ public class LoginHandler implements Handler {
             );
 
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
-
         }
 
         List<String> headers = List.of(

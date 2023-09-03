@@ -1,9 +1,12 @@
-package kokodak;
+package kokodak.handler;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import kokodak.http.HttpRequest;
+import kokodak.http.HttpResponse;
+import kokodak.http.RequestTarget;
 
 public class MappingHandler {
 

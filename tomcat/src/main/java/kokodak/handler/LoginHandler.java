@@ -1,12 +1,15 @@
-package kokodak;
+package kokodak.handler;
 
-import static kokodak.HttpStatusCode.FOUND;
+import static kokodak.http.HttpStatusCode.FOUND;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import kokodak.http.HttpRequest;
+import kokodak.http.HttpResponse;
+import kokodak.http.RequestTarget;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 

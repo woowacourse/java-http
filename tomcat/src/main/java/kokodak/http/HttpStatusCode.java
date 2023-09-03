@@ -1,4 +1,4 @@
-package kokodak;
+package kokodak.http;
 
 public enum HttpStatusCode {
 

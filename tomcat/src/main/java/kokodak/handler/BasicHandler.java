@@ -1,4 +1,7 @@
-package kokodak;
+package kokodak.handler;
+
+import kokodak.http.HttpRequest;
+import kokodak.http.HttpResponse;
 
 public class BasicHandler implements Handler {
 

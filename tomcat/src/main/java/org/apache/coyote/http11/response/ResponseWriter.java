@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import org.apache.coyote.http11.request.RequestReader;
 
 public class ResponseWriter {
 
     private static final String STATIC = "static";
-    private static final String CSS = "/css";
 
     private final OutputStream outputStream;
     private final RequestReader requestReader;
@@ -20,19 +20,24 @@ public class ResponseWriter {
     }
 
     public void createResponse() throws IOException {
-        String contentType = requestReader.getContentType();
-        if (contentType.contains(ContentType.CSS.getType())) {
-            createCssResponse();
-            return;
-        }
-        if (contentType.contains(ContentType.ALL.getType()) || contentType.contains(ContentType.HTML.getType())) {
-            createHtmlResponse();
-            return;
+        String url = requestReader.getRequestUrl();
+        String path = getClass().getClassLoader().getResource(STATIC + url).getPath();
+        String responseBody = createResponseBody(path);
+        Response response = new Response(requestReader, StatusCode.OK, responseBody);
+
+        String result = response.format();
+
+        try (outputStream) {
+            outputStream.write(result.getBytes());
+            outputStream.flush();
         }
     }
 
     private void createHtmlResponse() throws IOException {
         String url = requestReader.getRequestUrl();
+        if (!url.endsWith(".html")) {
+            url += ".html";
+        }
         String path = getClass().getClassLoader().getResource(STATIC + url).getPath();
         String responseBody = createResponseBody(path);
 

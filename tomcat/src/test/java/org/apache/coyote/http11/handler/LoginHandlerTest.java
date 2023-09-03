@@ -68,7 +68,7 @@ class LoginHandlerTest {
 		@DisplayName("queryParam이 있고 로그인에 성공하는 경우 302 상태코드와 Location index.html을 반환한다.")
 		void loginSuccess() throws IOException {
 			final String plainRequest = String.join("\r\n",
-				"GET /login?account=gugu&password=password HTTP/1.1 ",
+				"POST /login?account=gugu&password=password HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
 				"",
@@ -91,7 +91,7 @@ class LoginHandlerTest {
 		@DisplayName("queryParam이 있고 로그인에 실패하는 경우 UnauthorizedException을 반환한다.")
 		void loginFail() {
 			final String plainRequest = String.join("\r\n",
-				"GET /login?account=gugu&password=invalid HTTP/1.1 ",
+				"POST /login?account=gugu&password=invalid HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
 				"",

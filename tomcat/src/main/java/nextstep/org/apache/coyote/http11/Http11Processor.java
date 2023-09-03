@@ -34,9 +34,11 @@ public class Http11Processor implements Runnable, Processor {
     public static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
 
     private final Socket connection;
+    private final HandlerMapper handlerMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.handlerMapper = new HandlerMapper();
     }
 
     @Override
@@ -70,6 +72,14 @@ public class Http11Processor implements Runnable, Processor {
                 requestedUrl = requestedUrl.substring(0, queryParamIndex);
             }
 
+            Object handler = handlerMapper.mapHandler(requestedUrl);
+            if (Objects.nonNull(handler) && requestedUrl.equals("/login")) {
+                LoginController loginController = (LoginController) handler;
+                User user = loginController.login(queryParams.get("account"),
+                        queryParams.get("password"));
+                log.info(user.toString());
+            }
+
             String responseBody = createResponseBody(requestedUrl);
             String contentType = negotiateContent(requestHeaders.get("Accept"));
 
@@ -83,14 +93,6 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-
-            // requestURL에 따른 handlerMapper 클래스 생성해서 분리하기
-            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-                LoginController loginController = new LoginController();
-                User user = loginController.login(queryParams.get("account"),
-                        queryParams.get("password"));
-                log.info(user.toString());
-            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

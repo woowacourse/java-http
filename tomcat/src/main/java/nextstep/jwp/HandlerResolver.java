@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import org.apache.coyote.Handler;
+import org.apache.coyote.http11.Handler;
 import java.util.Map;
 
 public class HandlerResolver {

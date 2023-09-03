@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.HttpDispatcher;
-import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;

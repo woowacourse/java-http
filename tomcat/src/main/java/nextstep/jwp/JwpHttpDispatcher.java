@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
-import org.apache.coyote.Handler;
-import org.apache.coyote.HttpDispatcher;
+import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.HttpDispatcher;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.Http11Request;
@@ -31,7 +31,7 @@ public class JwpHttpDispatcher implements HttpDispatcher {
         }
         final var resource = getClass().getClassLoader().getResource(STATIC + request.getPath());
         if (resource == null) {
-            final URL notFoundResource = getClass().getClassLoader().getResource(STATIC + "404.html");
+            final var notFoundResource = getClass().getClassLoader().getResource(STATIC + "/404.html");
             return makeHttp11Response(Objects.requireNonNull(notFoundResource), StatusCode.NOT_FOUND);
         }
         return makeHttp11Response(resource, StatusCode.OK);
@@ -41,6 +41,6 @@ public class JwpHttpDispatcher implements HttpDispatcher {
         final var actualFilePath = new File(resource.getPath()).toPath();
         final var fileBytes = Files.readAllBytes(actualFilePath);
         final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-        return new Http11Response(statusCode, ContentType.HTML, responseBody);
+        return new Http11Response(statusCode, ContentType.findByPath(resource.getPath()), responseBody);
     }
 }

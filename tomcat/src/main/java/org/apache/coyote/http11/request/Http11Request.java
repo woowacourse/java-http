@@ -19,4 +19,8 @@ public class Http11Request {
     public String getPath() {
         return path;
     }
+
+    public String getQuery() {
+        return query;
+    }
 }

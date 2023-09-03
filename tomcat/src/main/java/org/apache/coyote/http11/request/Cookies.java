@@ -21,7 +21,7 @@ public class Cookies {
 
     public Optional<String> getSessionCookie() {
         if (!cookies.containsKey(SESSION_COOKIE)) {
-            Optional.empty();
+            return Optional.empty();
         }
         return Optional.of(cookies.get(SESSION_COOKIE));
     }

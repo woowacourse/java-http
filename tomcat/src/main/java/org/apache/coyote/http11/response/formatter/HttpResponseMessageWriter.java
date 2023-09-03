@@ -1,10 +1,12 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.formatter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseStatusLine;
 
 public class HttpResponseMessageWriter {
 

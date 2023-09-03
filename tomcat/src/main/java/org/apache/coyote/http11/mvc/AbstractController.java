@@ -23,10 +23,10 @@ public abstract class AbstractController implements Controller {
     }
 
     protected ResponseEntity handleGetRequest(final HttpRequest request, final HttpResponse response) {
-        return ResponseEntity.forwardTo(HttpStatus.METHOD_NOT_ALLOWED, "/404.html");
+        return ResponseEntity.forwardTo(HttpStatus.METHOD_NOT_ALLOWED, "/405.html");
     }
 
     protected ResponseEntity handlePostRequest(final HttpRequest request, final HttpResponse response) {
-        return ResponseEntity.forwardTo(HttpStatus.METHOD_NOT_ALLOWED, "/404.html");
+        return ResponseEntity.forwardTo(HttpStatus.METHOD_NOT_ALLOWED, "/405.html");
     }
 }

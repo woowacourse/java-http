@@ -9,7 +9,7 @@ import org.apache.coyote.http11.mvc.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseMessageWriter;
+import org.apache.coyote.http11.response.formatter.HttpResponseMessageWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

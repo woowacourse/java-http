@@ -1,5 +1,6 @@
 package org.apache.coyote.http.controller;
 
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http.*;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -15,10 +16,11 @@ public class ViewRenderer {
         }
 
         String content = FileUtil.readStaticFile(filePath);
-        ContentType contentType = ContentType.fromFilePath(filePath);
+        MediaType mediaType = MediaType.fromFilePath(filePath);
 
         httpResponse.setStatusCode(StatusCode.OK);
-        httpResponse.setContentType(contentType.value + ";charset=utf-8");
+        httpResponse.setMediaType(mediaType);
+        httpResponse.setCharset(StandardCharsets.UTF_8);
         httpResponse.setBody(content);
     }
 }

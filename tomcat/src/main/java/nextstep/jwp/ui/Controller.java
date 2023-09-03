@@ -1,6 +1,8 @@
 package nextstep.jwp.ui;
 
-import org.apache.coyote.http.ContentType;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import org.apache.coyote.http.MediaType;
 import org.apache.coyote.http.controller.HttpController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -11,7 +13,8 @@ public class Controller extends HttpController {
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatusCode(StatusCode.OK);
-        httpResponse.setContentType(ContentType.TEXT_HTML.value + ";charset=utf-8");
+        httpResponse.setMediaType(MediaType.TEXT_HTML);
+        httpResponse.setCharset(UTF_8);
         httpResponse.setBody("Hello world!");
     }
 }

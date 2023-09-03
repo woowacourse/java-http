@@ -1,7 +1,7 @@
 package org.apache.coyote.http.request;
 
 import java.io.InputStream;
-import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.MediaType;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaderConverter;
 import org.apache.coyote.util.ByteUtil;
@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.apache.coyote.http.ContentType.APPLICATION_X_WWW_FORM_URL_ENCODED;
+import static org.apache.coyote.http.MediaType.APPLICATION_X_WWW_FORM_URL_ENCODED;
 
 public class HttpRequestDecoder {
 
@@ -22,7 +22,7 @@ public class HttpRequestDecoder {
         HttpRequestLine httpRequestLine = decodeRequestLine(inputStream);
         HttpHeader httpHeader = decodeHeader(inputStream);
         Map<String, String> parameters = decodeBody(httpHeader.getContentLength(),
-            httpHeader.getContentType(), inputStream);
+            httpHeader.getMediaType(), inputStream);
 
         return new HttpRequest(httpRequestLine, httpHeader, parameters);
     }
@@ -40,16 +40,16 @@ public class HttpRequestDecoder {
         byte[] target = HEADER_BODY_DELIMITER.getBytes(StandardCharsets.UTF_8);
         int sourceLength = ByteUtil.readStreamUntilEndsWith(inputStream, source, target);
 
-        return HttpHeaderConverter.decode(new String(source, 0, sourceLength));
+        return HttpHeaderConverter.decode(new String(source, "\r\n".getBytes().length, sourceLength));
     }
 
-    private Map<String, String> decodeBody(int contentLength, ContentType contentType,
+    private Map<String, String> decodeBody(int contentLength, MediaType mediaType,
         InputStream inputStream) {
         if (contentLength <= 0) {
             return Collections.emptyMap();
         }
-        if (contentType != APPLICATION_X_WWW_FORM_URL_ENCODED) {
-            throw new IllegalArgumentException("지원 되지 않는 타입입니다. 타입: " + contentType.value);
+        if (mediaType != APPLICATION_X_WWW_FORM_URL_ENCODED) {
+            throw new IllegalArgumentException("지원 되지 않는 타입입니다. 타입: " + mediaType.value);
         }
 
         byte[] source = new byte[contentLength];

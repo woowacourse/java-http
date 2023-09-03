@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.HttpHeader.HEADER_KEY;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +21,9 @@ public class HttpHeaderConverter {
     }
 
     public static HttpHeader decode(String headerString) {
-        var headerLines = Arrays.stream(headerString.split("\r\n"))
-                                .filter(line -> !line.isBlank())
+        var headerLines = Arrays.stream(headerString.split("\r\n", 0))
+                                .filter(line -> !line.isBlank() && !line.matches("\\x00+"))
                                 .collect(Collectors.toList());
-
         log.info("header 값: {}", headerString);
 
         Map<String, List<String>> header = new HashMap<>();
@@ -54,6 +54,10 @@ public class HttpHeaderConverter {
 
     public static String encode(HttpHeader httpHeader) {
         Map<String, List<String>> headers = httpHeader.getHeader();
+
+        String contentType = httpHeader.getContentType();
+        headers.put(HEADER_KEY.CONTENT_TYPE.value, List.of(contentType));
+
         return headers.entrySet()
                       .stream()
                       .map(header -> header.getKey()

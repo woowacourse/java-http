@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,31 +13,54 @@ import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
 public class HttpHeader {
 
     private final Map<String, List<String>> header;
-    private ContentType contentType;
+    private MediaType mediaType;
+    private Charset charset;
     private int contentLength;
 
-    private HttpHeader(Map<String, List<String>> header, ContentType contentType, int contentLength) {
+    private HttpHeader(Map<String, List<String>> header, MediaType mediaType, Charset charset, int contentLength) {
         this.header = header;
-        this.contentType = contentType;
+        this.mediaType = mediaType;
+        this.charset = charset;
         this.contentLength = contentLength;
     }
 
     public HttpHeader() {
-        this(new HashMap<>(), null, 0);
+        this(new HashMap<>(), null, null, 0);
     }
 
     public static HttpHeader from(Map<String, List<String>> header) {
-        ContentType contentType = readContentType(header);
+        String[] mediaTypeAndCharset = readContentType(header);
+        MediaType mediaType = null;
+        Charset charset = null;
+        if (mediaTypeAndCharset != null) {
+            mediaType = MediaType.fromValue(mediaTypeAndCharset[0]);
+            charset = readCharset(mediaTypeAndCharset);
+        }
+
         int contentLength = readContentLength(header);
-        return new HttpHeader(header, contentType, contentLength);
+
+        return new HttpHeader(header, mediaType, charset, contentLength);
     }
 
-    private static ContentType readContentType(Map<String, List<String>> header) {
+    private static String[] readContentType(Map<String, List<String>> header) {
         List<String> contentType = header.get(CONTENT_TYPE.value);
         if (contentType == null) {
             return null;
         }
-        return ContentType.fromFilePath(contentType.get(0));
+
+        String contentTypeValue = contentType.get(0);
+        return contentTypeValue.split(";");
+    }
+
+    private static Charset readCharset(String[] mediaTypeAndCharset) {
+        if (mediaTypeAndCharset.length < 2) {
+            return null;
+        }
+        String charset = mediaTypeAndCharset[1];
+        if (!charset.equalsIgnoreCase("utf-8")) {
+            throw new IllegalArgumentException("지원하지 않는 인코딩 방식입니다.");
+        }
+        return StandardCharsets.UTF_8;
     }
 
     private static int readContentLength(Map<String, List<String>> header) {
@@ -46,8 +71,20 @@ public class HttpHeader {
         return Integer.parseInt(contentLength.get(0));
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public String getContentType() {
+        return mediaType.value + ";" + charset.name();
+    }
+
+    public Map<String, List<String>> getHeader() {
+        return new HashMap<>(header);
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public Charset getCharset() {
+        return charset;
     }
 
     public int getContentLength() {
@@ -59,8 +96,12 @@ public class HttpHeader {
         values.add(value);
     }
 
-    public Map<String, List<String>> getHeader() {
-        return new HashMap<>(header);
+    public void setMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
     }
 
     public enum HEADER_KEY {

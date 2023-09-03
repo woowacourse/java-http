@@ -1,11 +1,12 @@
 package org.apache.coyote.http.response;
 
 import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaderConverter;
+import org.apache.coyote.http.MediaType;
 
 public class HttpResponse {
 
@@ -37,17 +38,21 @@ public class HttpResponse {
         return isCompleted;
     }
 
+    public void addHeader(String key, String value) {
+        header.setValue(key, value);
+    }
+
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;
         this.isCompleted = true;
     }
 
-    public void addHeader(String key, String value) {
-        header.setValue(key, value);
+    public MediaType getMediaType() {
+        return header.getMediaType();
     }
 
-    public void setContentType(String contentType) {
-        addHeader(CONTENT_TYPE.value, contentType);
+    public void setMediaType(MediaType mediaType) {
+        header.setMediaType(mediaType);
     }
 
     public void setBody(String body) {
@@ -58,5 +63,9 @@ public class HttpResponse {
 
     public String getForwardPath() {
         return forwardPath;
+    }
+
+    public void setCharset(Charset charset) {
+        header.setCharset(charset);
     }
 }

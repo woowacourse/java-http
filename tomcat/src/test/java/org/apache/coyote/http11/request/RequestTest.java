@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.common.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.BufferedReader;
@@ -8,6 +9,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +37,7 @@ class RequestTest {
             softly.assertThat(request.getHeader()).isEqualTo(expectedHeader);
             softly.assertThat(request.getLine().getHttpMethod()).isEqualTo(HttpMethod.GET);
             softly.assertThat(request.getLine().getRequestPath()).isEqualTo("/index.html");
-            softly.assertThat(request.getLine().getHttpVersion()).isEqualTo("HTTP/1.1");
+            softly.assertThat(request.getLine().getHttpVersion()).isEqualTo(HTTP_1_1);
         });
     }
 

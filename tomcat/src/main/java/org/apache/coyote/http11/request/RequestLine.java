@@ -34,7 +34,7 @@ public class RequestLine {
         return requestPath.getPath();
     }
 
-    public String getHttpVersion() {
-        return httpVersion.getVersion();
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 }

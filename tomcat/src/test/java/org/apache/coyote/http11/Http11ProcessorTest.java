@@ -1,13 +1,12 @@
-package nextstep.org.apache.coyote.http11;
-
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -14,7 +14,6 @@ import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +43,9 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         ) {
             List<String> request = readRequest(bufferedReader);
-            ContentType contentType = readContentType(request);
             HttpRequest httpRequest = HttpRequest.from(request);
 
-            String response = makeResponse(httpRequest, contentType);
+            String response = makeResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,20 +63,12 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private ContentType readContentType(List<String> request) {
-        String extension = request.stream()
-                .filter(it -> it.startsWith(CONTENT_TYPE_PREFIX))
-                .findFirst()
-                .orElse("html");
-        return ContentType.from(extension);
-    }
-
-    private String makeResponse(HttpRequest httpRequest, ContentType contentType) throws IOException {
+    private String makeResponse(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestUrl();
         String responseBody = makeResponseBody(requestURI);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
+                "Content-Type: " + httpRequest.contentType().getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

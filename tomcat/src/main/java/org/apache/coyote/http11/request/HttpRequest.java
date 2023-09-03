@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.MessageBody;
 
 public class HttpRequest {
     private final StartLine startLine;
@@ -49,7 +51,7 @@ public class HttpRequest {
         return MessageBody.create(new String(buffer));
     }
 
-    public String getUri() {
+    public RequestUri getUri() {
         return this.startLine.getUri();
     }
 }

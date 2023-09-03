@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpVersion;
+
 public class StartLine {
     private final HttpMethod method;
     private final RequestUri uri;
@@ -17,7 +19,7 @@ public class StartLine {
                 HttpVersion.fromDetail(targets[2]));
     }
 
-    public String getUri() {
-        return uri.getUri();
+    public RequestUri getUri() {
+        return uri;
     }
 }

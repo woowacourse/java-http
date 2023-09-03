@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common;
 
 public class MessageBody {
     private final String content;
@@ -13,5 +13,9 @@ public class MessageBody {
 
     public static MessageBody create(final String input) {
         return new MessageBody(input);
+    }
+
+    public String getContent() {
+        return content;
     }
 }

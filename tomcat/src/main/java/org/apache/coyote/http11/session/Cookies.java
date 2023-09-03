@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.session;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.InvalidHeaderException;
 
 public class Cookies {
 
-    private final Map<String, String> cookies = new HashMap<>();
+    private final Map<String, String> cookies = new LinkedHashMap<>();
 
     private Cookies(Map<String, String> cookies) {
         this.cookies.putAll(cookies);
@@ -16,7 +16,7 @@ public class Cookies {
     }
 
     public static Cookies from(String cookies) {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new LinkedHashMap<>();
         String[] split = cookies.split("; ");
         for (String header : split) {
             String[] nameAndValue = header.split("=");

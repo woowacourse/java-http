@@ -58,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             if (response == null) {
                 response = new HttpResponse(new StatusLine(NOT_FOUND), null, null);
             }
+
             bufferedWriter.write(response.toString());
             bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {

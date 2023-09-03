@@ -73,4 +73,29 @@ class HttpResponseTest {
                 "\r\n";
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    void 쿠키를_세팅할_수_있다() {
+        // given
+        ResponseHeaders headers = new ResponseHeaders();
+        headers.put("hi", "yes");
+        HttpResponse response = new HttpResponse(
+                new StatusLine(HttpStatus.OK),
+                headers,
+                null
+        );
+        response.addCookie("mallang", "1234");
+        response.addCookie("썬샷", "12345");
+
+        // when
+        String actual = response.toString();
+
+        // then
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Set-Cookie: mallang=1234 \r\n" +
+                "Set-Cookie: 썬샷=12345 \r\n" +
+                "hi: yes \r\n" +
+                "\r\n";
+        assertThat(actual).isEqualTo(expected);
+    }
 }

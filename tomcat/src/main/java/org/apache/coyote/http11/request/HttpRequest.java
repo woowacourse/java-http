@@ -1,15 +1,30 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.session.Cookies;
+
 public class HttpRequest {
 
     private final StartLine startLine;
     private final RequestHeaders requestHeaders;
+    private final Cookies cookies;
     private final Body body;
 
     private HttpRequest(StartLine startLine, RequestHeaders requestHeaders, Body body) {
         this.startLine = startLine;
         this.requestHeaders = requestHeaders;
         this.body = body;
+        this.cookies = extractCookie(requestHeaders);
+    }
+
+    private Cookies extractCookie(RequestHeaders requestHeaders) {
+        if (requestHeaders == null) {
+            return new Cookies();
+        }
+        String cookies = requestHeaders.get("Cookies");
+        if (cookies == null) {
+            return new Cookies();
+        }
+        return Cookies.from(cookies);
     }
 
     public static HttpRequestBuilder builder() {
@@ -26,6 +41,10 @@ public class HttpRequest {
 
     public String body() {
         return body.body();
+    }
+
+    public Cookies cookies() {
+        return cookies;
     }
 
     public static class HttpRequestBuilder {

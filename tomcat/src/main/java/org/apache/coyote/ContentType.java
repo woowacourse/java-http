@@ -19,7 +19,7 @@ public enum ContentType {
 
     public static ContentType from(String other) {
         return Arrays.stream(values())
-                .filter(content -> content.extension.equals(other))
+                .filter(content -> other.contains(content.getExtension()))
                 .findFirst()
                 .orElse(HTML);
     }
@@ -28,4 +28,7 @@ public enum ContentType {
         return value;
     }
 
+    public String getExtension() {
+        return extension;
+    }
 }

@@ -11,9 +11,11 @@ public class QueryStrings {
     private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> values;
+    private final String uri;
 
-    private QueryStrings(Map<String, String> values) {
+    private QueryStrings(Map<String, String> values, String uri) {
         this.values = values;
+        this.uri = uri;
     }
 
     public static QueryStrings from(String url) {
@@ -23,7 +25,7 @@ public class QueryStrings {
             String[] queryString = url.substring(index + 1).split(NEXT_SIGN);
             readQueryStrings(queryString, queryStrings);
         }
-        return new QueryStrings(queryStrings);
+        return new QueryStrings(queryStrings, url.substring(0, index));
     }
 
     private static void readQueryStrings(String[] queryString, Map<String, String> queryStrings) {
@@ -35,6 +37,10 @@ public class QueryStrings {
 
     public Map<String, String> getValues() {
         return values;
+    }
+
+    public String getUri() {
+        return uri;
     }
 
 }

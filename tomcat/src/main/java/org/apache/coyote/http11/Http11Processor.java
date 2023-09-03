@@ -19,8 +19,6 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.lang.String.join;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -47,21 +45,9 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             List<String> request = readRequest(bufferedReader);
             ContentType contentType = readContentType(request);
+            HttpRequest httpRequest = HttpRequest.from(request);
 
-            var requestURI = request.get(0).split(" ")[1];
-
-            if (requestURI.contains("?")) {
-                final int index = requestURI.indexOf("?");
-                requestURI = requestURI.substring(0, index) + ".html";
-                QueryStrings queryStrings = QueryStrings.from(requestURI);
-
-                String account = queryStrings.getValues().get("account");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(IllegalArgumentException::new);
-                log.info(user.toString());
-            }
-
-            String response = makeResponse(requestURI, contentType);
+            String response = makeResponse(httpRequest, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -87,8 +73,9 @@ public class Http11Processor implements Runnable, Processor {
         return ContentType.from(extension);
     }
 
-    private String makeResponse(String requestURI, ContentType contentType) throws IOException {
-        String responseBody = makeResponseBody(requestURI);
+    private String makeResponse(HttpRequest httpRequest, ContentType contentType) throws IOException {
+        String requestUrl = httpRequest.getUrl();
+        String responseBody = makeResponseBody(requestUrl);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
@@ -98,9 +85,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponseBody(String requestURI) throws IOException {
-        System.out.println(requestURI);
         if ("/".equals(requestURI)) {
             return DEFAULT_RESPONSE_BODY_MESSAGE;
+        }
+        if (requestURI.contains("?")) {
+            QueryStrings queryStrings = QueryStrings.from(requestURI);
+            String account = queryStrings.getValues().get("account");
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(IllegalArgumentException::new);
+            log.info(user.toString());
+            requestURI = queryStrings.getUri() + ".html";
         }
         Path path = new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("static" + requestURI)).getFile()

@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
+import static kokodak.Constants.CRLF;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import kokodak.HttpRequestMessage;
+import kokodak.StringReader;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,16 +37,90 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            final List<String> primitiveRequest = StringReader.readAll(bufferedReader);
+            final HttpRequestMessage httpRequestMessage = new HttpRequestMessage(primitiveRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String responseBody = "";
+            String response = "";
+
+            if (httpRequestMessage.getRequestTarget().equals("/")) {
+                responseBody = "Hello world!";
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/html;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/index.html")) {
+                final String fileName = "static/index.html";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/html;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/css/styles.css")) {
+                final String fileName = "static/css/styles.css";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/css ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/js/scripts.js")) {
+                final String fileName = "static/js/scripts.js";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/assets/chart-area.js")) {
+                final String fileName = "static/assets/chart-area.js";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/assets/chart-bar.js")) {
+                final String fileName = "static/assets/chart-bar.js";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            } else if (httpRequestMessage.getRequestTarget().equals("/assets/chart-pie.js")) {
+                final String fileName = "static/assets/chart-pie.js";
+                final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                final Path path = new File(resourceUrl.getPath()).toPath();
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join(CRLF.getValue(),
+                                       "HTTP/1.1 200 OK ",
+                                       "Content-Type: text/javascript;charset=utf-8 ",
+                                       "Content-Length: " + responseBody.getBytes().length + " ",
+                                       "",
+                                       responseBody);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

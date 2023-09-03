@@ -10,6 +10,7 @@ public class HandlerAdapter {
     static {
         requestHandlerMap.put("/", new HomeHandler());
         requestHandlerMap.put("/login", new LoginHandler());
+        requestHandlerMap.put("/register", new RegisterHandler());
     }
 
     public static RequestHandler findRequestHandler(String requestUri) {

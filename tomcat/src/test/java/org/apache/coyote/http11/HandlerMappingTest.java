@@ -34,7 +34,8 @@ class HandlerMappingTest {
             Arguments.of("/js/scripts.js", HttpMethod.GET, HandlerMapping.INDEX_JS),
             Arguments.of("/assets/chart-area.js", HttpMethod.GET, HandlerMapping.CHART_AREA_JS),
             Arguments.of("/assets/chart-pie.js", HttpMethod.GET, HandlerMapping.CHART_PIE_JS),
-            Arguments.of("/assets/chart-bar.js", HttpMethod.GET, HandlerMapping.CHART_BAR_JS)
+            Arguments.of("/assets/chart-bar.js", HttpMethod.GET, HandlerMapping.CHART_BAR_JS),
+            Arguments.of("/login", HttpMethod.GET, HandlerMapping.LOGIN)
         );
     }
 

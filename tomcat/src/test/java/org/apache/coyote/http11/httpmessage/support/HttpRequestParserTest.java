@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.util.Map;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
+import org.apache.coyote.http11.httpmessage.request.QueryString;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -88,5 +89,42 @@ class HttpRequestParserTest {
         assertThat(header.get("Connection")).isEqualTo("keep-alive");
         assertThat(header.get("Accept")).isEqualTo("*/*");
 
+    }
+
+    @Test
+    @DisplayName("httpRequest가 들어올 때 queryString을 반환한다.")
+    void get_query_string_from_request() {
+        // given
+        final String request = String.join("\r\n",
+            "GET /login.html?account=ako HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Accept: */*");
+
+        // when
+        final QueryString result = HttpRequestParser.getQueryString(request);
+
+        // then
+        final Map<String, String> queryString = result.getQueryString();
+
+        assertThat(queryString.size()).isEqualTo(1);
+        assertThat(queryString.get("account")).isEqualTo("ako");
+    }
+
+    @Test
+    @DisplayName("httpRequest가 들어올 때 queryString이 없으면 null을 반환한다.")
+    void get_no_query_string_from_request() {
+        // given
+        final String request = String.join("\r\n",
+            "GET /login.html HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Accept: */*");
+
+        // when
+        final QueryString result = HttpRequestParser.getQueryString(request);
+
+        // then
+        assertThat(result).isNull();
     }
 }

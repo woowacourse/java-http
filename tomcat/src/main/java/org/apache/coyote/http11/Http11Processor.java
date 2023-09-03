@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
                 httpRequest.getPath(),
                 httpRequest.getHttpMethod());
 
-            final Handler handler = new Handler(handlerMapping);
+            final Handler handler = new Handler(handlerMapping, httpRequest.getQueryString());
             final HttpResponse httpResponse = handler.makeResponse();
 
             outputStream.write(httpResponse.makeToString().getBytes());

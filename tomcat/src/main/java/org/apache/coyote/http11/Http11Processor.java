@@ -63,7 +63,8 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestURI.equals("/")) {
             final var responseBody = "Hello world!";
-            return generateResponse(requestURI, responseBody);
+            HttpResponse response = HttpResponse.of(requestURI, responseBody);
+            return response.getResponse();
         }
 
         if (requestURI.equals("/login")) {
@@ -82,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                     .getResource("static" + requestURI + ".html");
             File file = new File(resource.getFile());
             String responseBody = new String(Files.readAllBytes(file.toPath()));
-            return generateResponse(requestURI, responseBody);
+            return HttpResponse.of(requestURI, responseBody).getResponse();
         }
 
         URL resource = getClass()
@@ -90,17 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI);
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return generateResponse(requestURI, responseBody);
-    }
-
-    private String generateResponse(String requestURI, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType(requestURI) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        return HttpResponse.of(requestURI, responseBody).getResponse();
     }
 
     private User findAccount(Map<String, String> queryStrings) {
@@ -124,12 +115,5 @@ public class Http11Processor implements Runnable, Processor {
         return Arrays.stream(nonParsedQueryString.split("&"))
                 .map(it -> Arrays.stream(it.split("=")).collect(Collectors.toList()))
                 .collect(Collectors.toMap(it -> it.get(0), it -> it.get(1)));
-    }
-
-    private String contentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html";
     }
 }

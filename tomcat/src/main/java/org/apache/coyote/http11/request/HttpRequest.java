@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
+import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequest {
 

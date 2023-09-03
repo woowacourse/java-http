@@ -1,14 +1,11 @@
 package org.apache.coyote.http11.request.line.vo;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.*;
+import static java.util.Collections.EMPTY_MAP;
 
 public class QueryString {
 

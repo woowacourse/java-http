@@ -25,4 +25,15 @@ class HttpCookieTest {
 		assertThat(actual.getCookies())
 			.containsExactlyInAnyOrderEntriesOf(expected);
 	}
+
+	@Test
+	@DisplayName("jssession id가 헤더에 존재하는지 확인한다.")
+	void isExistJSessionId() {
+		final String cookieValue
+			= "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+		final HttpCookie cookie = HttpCookie.from(cookieValue);
+
+		assertThat(cookie.isExistJSessionId())
+			.isTrue();
+	}
 }

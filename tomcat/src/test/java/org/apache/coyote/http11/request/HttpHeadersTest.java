@@ -36,4 +36,21 @@ class HttpHeadersTest {
 			.usingRecursiveComparison()
 			.isEqualTo(expected);
 	}
+
+	@Test
+	@DisplayName("jssession id가 헤더에 존재하는지 확인한다.")
+	void isExistJSessionId() {
+		//given
+		final String httpRequest = String.join("\r\n",
+			"GET /index.html HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Cookie: JSESSIONID=str",
+			"",
+			"");
+		final HttpHeaders headers = HttpHeaders.from(httpRequest);
+
+		assertThat(headers.isExistJSessionId())
+			.isTrue();
+	}
 }

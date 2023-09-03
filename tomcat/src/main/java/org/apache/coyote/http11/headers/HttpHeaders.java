@@ -59,4 +59,8 @@ public class HttpHeaders {
 	public Optional<String> get(final String key) {
 		return Optional.ofNullable(headers.get(key));
 	}
+
+	public boolean isExistJSessionId(){
+		return cookie.isExistJSessionId();
+	}
 }

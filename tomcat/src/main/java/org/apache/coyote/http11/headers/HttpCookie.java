@@ -10,6 +10,7 @@ public class HttpCookie {
 
 	private static final String COOKIE_DELIMITER = "; ";
 	private static final String KEY_VALUE_DELIMITER = "=";
+	private static final String JSESSOIN_ID_KEY = "JSESSIONID";
 
 	private final Map<String, String> cookies;
 
@@ -33,5 +34,9 @@ public class HttpCookie {
 
 	public Map<String, String> getCookies() {
 		return cookies;
+	}
+
+	public boolean isExistJSessionId() {
+		return cookies.containsKey(JSESSOIN_ID_KEY);
 	}
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handle;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.start.HttpVersion;
+import org.apache.coyote.http11.request.start.RequestTarget;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.File;
@@ -17,13 +18,14 @@ public class HtmlHandler extends Handler {
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         final HttpVersion httpVersion = request.getHttpStartLine().getHttpVersion();
-        final String responseBody = makeResponseBody(request.getHttpStartLine().getRequestTarget().getOrigin());
+        final String responseBody = makeResponseBody(request.getHttpStartLine().getRequestTarget());
 
         return HttpResponse.of(httpVersion, HTTP_STATUS_OK, CONTENT_TYPE, responseBody);
     }
 
-    private String makeResponseBody(final String requestTarget) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/" + requestTarget);
+    private String makeResponseBody(final RequestTarget requestTarget) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(
+                "static/" + requestTarget.getResources() + requestTarget.getExtensionName());
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

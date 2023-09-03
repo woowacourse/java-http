@@ -40,6 +40,10 @@ public class HttpStartLine {
         }
     }
 
+    public HttpExtension getExtension() {
+        return requestTarget.getExtension();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

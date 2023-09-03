@@ -3,6 +3,7 @@ package org.apache.coyote.http11.common;
 public enum Status {
 
     OK(200),
+    FOUND(302),
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
     NOT_FOUND(404);

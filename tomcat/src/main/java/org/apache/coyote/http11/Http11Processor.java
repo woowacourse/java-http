@@ -83,13 +83,22 @@ public class Http11Processor implements Runnable, Processor {
                 return responseStaticFile("/login.html", requestHeader);
             }
             if (requestLine.getRequestMethod().equals("POST")) {
-                return login(requestBody);
+                return login(requestHeader, requestBody);
             }
+        }
+        if (requestUrl.startsWith("/register")) {
+            if (requestLine.getRequestMethod().equals("GET")) {
+                return responseStaticFile("/register.html", requestHeader);
+            }
+            if (requestLine.getRequestMethod().equals("POST")) {
+                return register(requestBody);
+            }
+
         }
         return responseStaticFile(requestUrl, requestHeader);
     }
 
-    private static Response login(final RequestBody requestBody) {
+    private static Response login(final RequestHeader requestHeader, final RequestBody requestBody) {
         try {
             if (requestBody == null) {
                 return Response.redirection("401.html");
@@ -99,13 +108,28 @@ public class Http11Processor implements Runnable, Processor {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() -> new IllegalArgumentException()
             );//todo : 해당하는 계정이 존재하지 않는다
             if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException(); //todo :비밀번호가 일치하지 않는다.
+                throw new RuntimeException(); //todo :비밀번호가 일치하지 않는다.
             }
             return Response.redirection("/index.html");
         } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
         }
         return Response.redirection("/401.html");
+    }
+
+    //회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+    //회원가입을 완료하면 index.html로 리다이렉트한다.
+    //로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+
+    private static Response register(final RequestBody requestBody) {
+        if (requestBody == null) {
+            return Response.redirection("401.html");
+        }
+        String account = requestBody.getContentValue("account");
+        String email = requestBody.getContentValue("email");
+        String password = requestBody.getContentValue("password");
+        InMemoryUserRepository.save(new User(account, password, email));
+        return Response.redirection("/index.html");
     }
 
     //todo : 정적파일은 다 있다고 가정? 없는 파일이면?

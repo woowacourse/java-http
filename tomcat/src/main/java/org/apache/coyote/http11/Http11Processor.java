@@ -58,15 +58,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readFileFrom(final String path) throws IOException {
-        if (DEFAULT_RESPONSES.containsKey(path)) {
-            return DEFAULT_RESPONSES.get(path);
+    private String readFileFrom(final String target) throws IOException {
+        if (DEFAULT_RESPONSES.containsKey(target)) {
+            return DEFAULT_RESPONSES.get(target);
         }
-        Path resourcePath = getResourcePathFrom(path);
+        Path resourcePath = getResourceFileFrom(target);
         return Files.readString(resourcePath);
     }
 
-    private Path getResourcePathFrom(final String target) {
+    private Path getResourceFileFrom(final String target) {
         URL resource = CLASS_LOADER.getResource(getRelativePathFrom(target));
         validatePresenceOf(resource);
 
@@ -80,10 +80,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getRelativePathFrom(final String path) {
-        if (path.endsWith("/")) {
-            return STATIC_RESOURCES_PATH + path + DEFAULT_INDEX;
+    private String getRelativePathFrom(final String target) {
+        if (target.endsWith("/")) {
+            return STATIC_RESOURCES_PATH + target + DEFAULT_INDEX;
         }
-        return STATIC_RESOURCES_PATH + path;
+        return STATIC_RESOURCES_PATH + target;
     }
 }

@@ -9,10 +9,10 @@
   - [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여주도록 만들자.
   - [x] Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나오도록 만들자.
 
-- [ ] 로그인에 성공하면
-  - [ ] 응답 헤더에 http status code를 302로 반환
-  - [ ] index.html 로 리다이렉트
-- [ ] 로그인에 실패하면 401.html로 리다이렉트
+- [x] 로그인에 성공하면
+  - [x] 응답 헤더에 http status code를 302로 반환
+  - [x] index.html 로 리다이렉트
+- [x] 로그인에 실패하면 401.html로 리다이렉트
 
 - [ ] http://localhost:8080/register 로 접속하면 회원가입 페이지를 보옂ㄴ다.
 - [ ] 페이지를 보여줄 때는 GET을 사용한다.

@@ -19,6 +19,8 @@ public class User {
     }
 
     public boolean checkPassword(String password) {
+        System.out.println("this.password = " + this.password);
+        System.out.println("password = " + password);
         return this.password.equals(password);
     }
 
@@ -35,4 +37,5 @@ public class User {
                 ", password='" + password + '\'' +
                 '}';
     }
+
 }

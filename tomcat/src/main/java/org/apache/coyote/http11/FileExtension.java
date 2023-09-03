@@ -5,7 +5,8 @@ public enum FileExtension {
     NONE("text/plain"),
     HTML("text/html"),
     CSS("text/css"),
-    JS("text/javascript");
+    JS("text/javascript"),
+    ICO("image/x-icon");
 
     private final String contentType;
 

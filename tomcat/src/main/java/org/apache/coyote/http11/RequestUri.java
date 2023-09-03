@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 public class RequestUri {
 
     private static final String DEFAULT_RESPONSE = "Hello world!";
+
     private final String path;
     private final Map<String, String> queryStrings;
 
@@ -45,10 +46,10 @@ public class RequestUri {
         String responseBody = extractResponseBody();
 
         if (responseBody.equals(DEFAULT_RESPONSE)) {
-            return new HttpResponse(FileExtension.NONE, responseBody);
+            return HttpResponse.of(FileExtension.NONE, responseBody);
         }
 
-        return new HttpResponse(getFileExtension(), responseBody);
+        return HttpResponse.of(getFileExtension(), responseBody);
     }
 
     private FileExtension getFileExtension() throws URISyntaxException {

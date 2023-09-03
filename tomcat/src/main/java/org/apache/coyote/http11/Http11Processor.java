@@ -1,7 +1,15 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.common.Constants.CRLF;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.RequestHeader;
+import org.apache.coyote.http11.common.RequestURI;
+import org.apache.coyote.http11.common.ResponseBody;
+import org.apache.coyote.http11.common.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,15 +36,14 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final String firstLine = bufferedReader.readLine();
 
-            final var responseBody = "Hello world!";
+            final var requestURI = RequestURI.from(firstLine);
+            final var requestHeader = readHeader(bufferedReader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var responseEntity = ResponseEntity.from(requestURI);
+            final var response = responseEntity.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -44,4 +51,13 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
+            stringBuilder.append(line).append(CRLF);
+        }
+        return RequestHeader.from(stringBuilder.toString());
+    }
+
 }

@@ -15,7 +15,7 @@ class ResponseHeadersTest {
         // given
         ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), 124);
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), "124");
 
         String expected = String.join("\r\n",
                 HttpHeaderName.CONTENT_TYPE.getValue() + ": " + ContentType.TEXT_HTML.getValue() + " ",

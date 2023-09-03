@@ -2,7 +2,9 @@ package org.apache.coyote.http11.response;
 
 public enum StatusCode {
 
-    OK("200", "OK");
+    OK("200", "OK"),
+    FOUND("302", "FOUND"),
+    UNAUTHORIZED("401", "UNAUTHORIZED");
 
     private final String code;
     private final String text;
@@ -19,4 +21,4 @@ public enum StatusCode {
     public String getText() {
         return text;
     }
-}
+    }

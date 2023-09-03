@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpHeaders;
 
@@ -57,5 +54,10 @@ public class HttpResponse {
                 .stream()
                 .map(header -> String.format("%s: %s ", header.getKey(), header.getValue()))
                 .collect(Collectors.joining(NEW_LINE));
+    }
+
+    public void sendRedirect(String location) {
+        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", StatusCode.FOUND);
+        headers.add("Location", location);
     }
 }

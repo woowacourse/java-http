@@ -35,6 +35,10 @@ public class HttpRequest {
         return httpRequestStartLine.getUri().getPath();
     }
 
+    public String getQuery(){
+        return httpRequestStartLine.getUri().getQuery();
+    }
+
     public boolean isSameMethod(String method) {
         return httpRequestStartLine.getHttpMethod()
                 .equals(HttpMethod.valueOf(method));

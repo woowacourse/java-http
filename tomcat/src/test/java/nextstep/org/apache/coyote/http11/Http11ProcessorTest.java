@@ -1,7 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.exception.NotFoundAccountException;
+import org.apache.coyote.http11.HttpContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -12,7 +12,6 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class Http11ProcessorTest {
 
@@ -140,8 +139,8 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("쿼리스트링이 있어도 로그인 페이지를 반환한다.")
-    void getLoginPageWithQueryString() throws IOException {
+    @DisplayName("로그인이 성공하면 /index.html로 리다이렉트 된다.")
+    void redirectIfLoginSuccess() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -150,22 +149,22 @@ class Http11ProcessorTest {
                 "",
                 "");
 
+        String httpResponse = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /index.html\r\n"
+        );
+
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
-
-        // when
         processor.process(socket);
 
-        // then
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).contains(expectedResponseBody);
+        // when, then
+        assertThat(socket.output()).isEqualTo(httpResponse);
     }
 
     @Test
-    @DisplayName("회원 account, password가 잘못되었을 경우 예외가 발생한다.")
-    void getLoginPageWithQueryStringException() throws IOException {
+    @DisplayName("회원 account, password가 잘못되었을 경우 401.html로 리다이렉트 한다.")
+    void redirectIfLoginFail() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login?account=zz&password=zz HTTP/1.1 ",
@@ -174,11 +173,15 @@ class Http11ProcessorTest {
                 "",
                 "");
 
+        String httpResponse = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /401.html\r\n");
+
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
+        processor.process(socket);
 
         // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(NotFoundAccountException.class);
+        assertThat(socket.output()).isEqualTo(httpResponse);
     }
 }

@@ -7,22 +7,27 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.NotCorrectPasswordException;
 import org.apache.coyote.http11.exception.NotFoundAccountException;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
-    private static final String LOGIN_PATH = "/login.html";
     private static final String ROOT_RESOURCE = "Hello world!";
     private static final String STATIC_PATH = "static";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String LOGIN_PATH = "/login.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String INTERNAL_SERVER_PATH = "/500.html";
 
     private final Socket connection;
 
@@ -42,46 +47,71 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequest.from(inputStream);
-            final String response = getResponse(httpRequest);
+            final HttpResponse response =getRespond(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public String getResponse(final HttpRequest httpRequest) throws IOException {
-        final String content = getContent(httpRequest);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + HttpContentType.valueOfCotentType(httpRequest.getRequestURL().getExtension()).getContentType(),
-                "Content-Length: " + content.getBytes().length + " ",
-                "",
-                content);
+    private HttpResponse getRespond(final HttpRequest httpRequest) {
+        try {
+            return getResponse(httpRequest);
+        } catch (NotFoundAccountException | NotCorrectPasswordException e) {
+            return foundResponse(UNAUTHORIZED_PATH);
+        } catch (Exception e) {
+            return foundResponse(INTERNAL_SERVER_PATH);
+        }
     }
 
-    public String getContent(final HttpRequest httpRequest) throws IOException {
+    public HttpResponse getResponse(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.getRequestURL().getUrl().equals(ROOT_PATH)) {
-            return ROOT_RESOURCE;
+            return okResponse(httpRequest, ROOT_RESOURCE);
         }
         final String requestUrl = httpRequest.getRequestURL().getAbsolutePath();
+        final String responseBody = Resource.readResource(STATIC_PATH + requestUrl);
         if (requestUrl.equals(LOGIN_PATH)) {
-            return Resource.readResource(login(requestUrl, httpRequest.getRequestURL().getRequestParam()));
+            return renderLogin(httpRequest);
         }
-        return Resource.readResource(STATIC_PATH + requestUrl);
+        return okResponse(httpRequest, responseBody);
     }
 
-    private String login(final String url, final Map<String, String> requestParam) {
+    private HttpResponse renderLogin(final HttpRequest httpRequest) throws IOException {
+        final Map<String, String> requestParam = httpRequest.getRequestURL().getRequestParam();
+        final String url = httpRequest.getRequestURL().getAbsolutePath();
         if (!requestParam.isEmpty()) {
-            final User user = InMemoryUserRepository.findByAccount(requestParam.get(ACCOUNT))
-                    .orElseThrow(NotFoundAccountException::new);
-
-            if (!user.checkPassword(requestParam.get(PASSWORD))) {
-                throw new NotCorrectPasswordException();
-            }
-            log.info(user.toString());
+            return login(requestParam);
         }
-        return STATIC_PATH + url;
+
+        return okResponse(httpRequest, Resource.readResource(STATIC_PATH + url));
+    }
+
+    private HttpResponse login(final Map<String, String> requestParam) {
+        final User user = InMemoryUserRepository.findByAccount(requestParam.get(ACCOUNT))
+                .orElseThrow(NotFoundAccountException::new);
+
+        if (!user.checkPassword(requestParam.get(PASSWORD))) {
+            throw new NotCorrectPasswordException();
+        }
+        log.info(user.toString());
+        return foundResponse("/index.html");
+    }
+
+    private HttpResponse okResponse(final HttpRequest httpRequest, final String responseBody) {
+        final Map<String, String> responseHeaders = new LinkedHashMap<>();
+        responseHeaders.put("Content-Type", HttpContentType.valueOfCotentType(httpRequest.getRequestURL().getExtension()).getContentType());
+        if (!responseBody.isBlank()) {
+            responseHeaders.put("Content-Length", responseBody.getBytes().length +" ");
+        }
+
+        return new HttpResponse(HttpStatus.OK, responseHeaders, responseBody);
+    }
+
+    private HttpResponse foundResponse(final String location) {
+        Map<String, String> responseHeaders = new HashMap<>();
+        responseHeaders.put("Location",location);
+        return new HttpResponse(HttpStatus.FOUND, responseHeaders, "");
     }
 }

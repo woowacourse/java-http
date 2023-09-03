@@ -35,4 +35,7 @@ public class HttpRequest {
         return requestURL;
     }
 
+    public String getRequestBody() {
+        return requestBody.getRequestBody();
+    }
 }

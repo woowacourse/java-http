@@ -21,7 +21,7 @@ public enum HttpContentType {
         return Arrays.stream(values())
                 .filter(value -> value.extension.equals(requestExtension))
                 .findAny()
-                .orElse(null);
+                .orElse(HTML);
     }
 
     public String getContentType() {

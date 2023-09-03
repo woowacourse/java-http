@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +54,17 @@ public class Http11Processor implements Runnable, Processor {
                 registerUser(requestBody);
             }
 
+            String jsessionId="";
+            if (isContainJsessionId(headers)) {
+               jsessionId = parseJsessionId(headers);
+            }
+
             // 파싱된 HTTP 요청에서 경로 추출
             final String path = parseHttpRequest(requestLine);
 
             // 경로를 기반으로 정적 파일을 읽고 응답 생성
-            final String parsedPath = parsePath(path, httpMethod);
-            final String responseBody = readStaticFile(path, httpMethod,parsedPath);
+            final String parsedPath = parsePath(path, httpMethod, jsessionId);
+            final String responseBody = readStaticFile(path, httpMethod, parsedPath);
 
             //css인 경우 content type을 다르게 준다
             final String contentType = getContentType(path);
@@ -75,9 +81,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponse(String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath) {
         if (path.contains("/login?") && parsedPath.equals("/index.html") && !isContainJsessionId(headers)) {
+            final String jsessionId = UUID.randomUUID().toString();
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Set-Cookie: " + "JSESSIONID=" + UUID.randomUUID().toString() + " ",
+                    "Set-Cookie: " + "JSESSIONID=" + jsessionId + " ",
                     "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
@@ -99,13 +106,28 @@ public class Http11Processor implements Runnable, Processor {
             String[] cookiePairs = cookieValue.split("; ");
             for (String cookiePair : cookiePairs) {
                 String[] parts = cookiePair.split("=");
-                if (parts.length == 2 && parts[0].equals("JESESSIONID")) {
+                if (parts[0].equals("JSESSIONID")) {
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private String parseJsessionId(final Map<String, String> headers) {
+        if (headers.containsKey("Cookie")) {
+            final String cookieValue = headers.get("Cookie");
+            String[] cookiePairs = cookieValue.split("; ");
+            for (String cookiePair : cookiePairs) {
+                String[] parts = cookiePair.split("=");
+                if (parts[0].equals("JSESSIONID")) {
+                    return parts[1];
+                }
+            }
+        }
+
+       return "";
     }
 
     private String readRequestBody(BufferedReader br, Map<String, String> headers) throws IOException {
@@ -194,17 +216,21 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private String parsePath(String path, String httpMethod) {
+    private String parsePath(String path, String httpMethod, String jsessionId) {
         if (path.equals("/")) {
             return "/index.html";
         }
 
         if (path.equals("/login")) {
-            path = "/login.html";
+            if(SessionManager.validJsession(jsessionId) && !jsessionId.equals("")) {
+                path = "/index.html";
+            } else {
+                path = "/login.html";
+            }
         }
 
         if (path.startsWith("/login?")) {
-            if (isValidUser(path)) {
+            if (isValidUser(path, jsessionId)) {
                 path = "/index.html";
             } else {
                 path = "/401.html";
@@ -222,7 +248,7 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private boolean isValidUser(final String path) {
+    private boolean isValidUser(final String path, String jsessionId) {
         final StringTokenizer st = new StringTokenizer(path, "&");
         String parsedAccount = "";
         String parsedPassword = "";
@@ -240,8 +266,9 @@ public class Http11Processor implements Runnable, Processor {
         final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(parsedAccount);
         if (maybeUser.isPresent()) {
             final User foundUser = maybeUser.get();
-            if (foundUser.checkPassword(parsedPassword)) {
+            if (foundUser.checkPassword(parsedPassword) && !SessionManager.validUser(foundUser)) {
                 log.info("로그인 성공! 아이디 : " + parsedAccount);
+                SessionManager.add(foundUser, jsessionId);
                 return true;
             }
         }

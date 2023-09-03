@@ -13,6 +13,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
+import org.apache.coyote.http11.util.StaticFileLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +24,8 @@ public class LoginHandler implements Handler {
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         if (!request.hasParams("account", "password")) {
-            URL resource = getClass().getClassLoader().getResource("static/login.html");
-            Path path = new File(resource.getPath()).toPath();
-            String content = new String(Files.readAllBytes(path));
+            String content = StaticFileLoader.load("/login.html");
+
             HttpHeaders headers = new HttpHeaders();
             headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
             headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));

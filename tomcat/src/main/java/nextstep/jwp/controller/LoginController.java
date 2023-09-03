@@ -13,7 +13,7 @@ public class LoginController {
         try {
             loginService.login(account, password);
             return new LoginResponseDto("/index.html");
-        } catch (NoSuchElementException | InvalidLoginInfoException e) {
+        } catch (NoSuchElementException | InvalidLoginInfoException | NullPointerException e) {
             return new LoginResponseDto("/401.html");
         }
     }

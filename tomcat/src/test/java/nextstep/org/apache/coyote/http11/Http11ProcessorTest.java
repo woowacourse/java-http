@@ -121,12 +121,14 @@ class Http11ProcessorTest {
     @Test
     void loginSuccessTest() {
         // given
+        final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                String.format("Content-Length: %d ", requestBody.getBytes().length),
                 "",
-                "");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -145,12 +147,14 @@ class Http11ProcessorTest {
     @Test
     void loginFailTest() {
         // given
+        final String requestBody = "account=gugu&password=wrongPassword";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=pppp HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                String.format("Content-Length: %d ", requestBody.getBytes().length),
                 "",
-                "");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

@@ -4,10 +4,9 @@ import java.util.Arrays;
 
 public enum RequestFile {
 
-    INDEX_HTML("/index.html", "/index.html", Constants.TEXT_HTML_CHARSET_UTF_8),
-    CSS("/css/styles.css", "/css/styles.css", Constants.TEXT_CSS_CHARSET_UTF_8),
-    // TODO: account & password 변수로 바꾸기
-    LOGIN("/login?account=gugu&password=password", "/login.html", Constants.TEXT_HTML_CHARSET_UTF_8),
+    INDEX_HTML("/index.html", "index.html", Constants.TEXT_HTML_CHARSET_UTF_8),
+    CSS("/css/styles.css", "css/styles.css", Constants.TEXT_CSS_CHARSET_UTF_8),
+    LOGIN("/login", "login.html", Constants.TEXT_HTML_CHARSET_UTF_8),
     ;
 
     private final String requestPath;
@@ -21,14 +20,19 @@ public enum RequestFile {
     }
 
     public String getFilePath() {
-        return "static" + this.fileName;
+        return "static/" + this.fileName;
     }
 
-    public static RequestFile getFile(final String filePath) {
+    public static RequestFile getFile(String filePath) {
+        if (filePath.contains(Constants.QUESTION_MARK)) {
+            final int index = filePath.indexOf(Constants.QUESTION_MARK);
+            filePath = filePath.substring(0, index);
+        }
+        final String finalFilePath = filePath;
         return Arrays.stream(RequestFile.values())
-                     .filter(fileName -> fileName.requestPath.equals(filePath))
+                     .filter(fileName -> fileName.requestPath.equals(finalFilePath))
                      .findFirst()
-                     .orElseThrow(() -> new IllegalArgumentException("잘못된 파일 경로입니다. " + filePath));
+                     .orElseThrow(() -> new IllegalArgumentException("잘못된 파일 경로입니다. " + finalFilePath));
     }
 
     public String getContentType() {
@@ -39,5 +43,6 @@ public enum RequestFile {
 
         private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
         private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8";
+        private static final String QUESTION_MARK = "?";
     }
 }

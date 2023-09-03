@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.util.QueryParser;
 
 public class QueryParams {
 
     private final Map<String, String> params;
 
-    private QueryParams(final Map<String, String> params) {
+    public QueryParams(final Map<String, String> params) {
         this.params = params;
     }
 
@@ -18,15 +18,7 @@ public class QueryParams {
             return QueryParams.empty();
         }
         String paramLine = line.substring(questionMarkIdx + 1);
-        String[] split = paramLine.split("&");
-
-        Map<String, String> params = new HashMap<>();
-        for (String piece : split) {
-            int equalSignIdx = piece.indexOf("=");
-            params.put(piece.substring(0, equalSignIdx), piece.substring(equalSignIdx+1));
-        }
-
-        return new QueryParams(params);
+        return QueryParser.parse(paramLine);
     }
 
     private static QueryParams empty() {

@@ -37,7 +37,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final String url = findUrl(inputStream);
             final String responseBody = makeResponseBody(url);
-            final String response = makeResponse(responseBody);
+            final String contentType = makeContentType(url);
+            final String response = makeResponse(responseBody, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -62,10 +63,17 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n", fileContent);
     }
 
-    private String makeResponse(final String responseBody) {
+    private String makeContentType(final String url) {
+        if (url.endsWith("css")) {
+            return "text/css";
+        }
+        return "text/html";
+    }
+
+    private String makeResponse(final String responseBody, final String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

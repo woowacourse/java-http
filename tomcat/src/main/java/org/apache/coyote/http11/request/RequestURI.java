@@ -28,6 +28,9 @@ public class RequestURI {
         if (index != -1) {
             return STATIC_PATH + uri.substring(0, index) + HTML_EXTENSION;
         }
+        if (!uri.contains(".")) {
+            return STATIC_PATH + uri + HTML_EXTENSION;
+        }
         return STATIC_PATH + uri;
     }
 
@@ -41,6 +44,10 @@ public class RequestURI {
 
     public boolean isHome() {
         return uri.equals("/");
+    }
+
+    public boolean isRegister() {
+        return uri.contains("/register");
     }
 
     public String getResourcePath() {

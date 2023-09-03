@@ -7,9 +7,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.Handler;
+import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            List<String> request = readRequest(bufferedReader);
+            List<String> requestHeader = readRequestHeader(bufferedReader);
+            RequestBody requestBody = readRequestBody(requestHeader, bufferedReader);
 
-            HttpRequest httpRequest = HttpRequest.from(request);
+            HttpRequest httpRequest = HttpRequest.from(requestHeader, requestBody);
             HttpResponse httpResponse = Handler.run(httpRequest);
 
             if (httpResponse.hasRedirect()) {
@@ -53,13 +55,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> readRequest(BufferedReader bufferedReader) throws IOException {
+    private List<String> readRequestHeader(BufferedReader bufferedReader) throws IOException {
         List<String> request = new ArrayList<>();
         String line;
         while (!(line = bufferedReader.readLine()).isBlank()) {
             request.add(line);
         }
         return request;
+    }
+
+    private RequestBody readRequestBody(List<String> headers, BufferedReader bufferedReader) throws IOException {
+        int contentLength = 0;
+        for (String header: headers) {
+            if (header.startsWith("Content-Length")) {
+                contentLength = Integer.parseInt(header.split(" ")[1]);
+            }
+        }
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return RequestBody.from(new String(buffer));
     }
 
 }

@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.common;
 
-public enum HttpResponseStatus {
+public enum HttpStatus {
     OK(200),
     MOVED_PERMANENTLY(301),
     FOUND(302),
@@ -12,7 +12,7 @@ public enum HttpResponseStatus {
 
     private final int statusCode;
 
-    HttpResponseStatus(final int statusCode) {
+    HttpStatus(final int statusCode) {
         this.statusCode = statusCode;
     }
 

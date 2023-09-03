@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.web;
+package org.apache.coyote.http11.mvc;
 
 import java.util.Map;
 import nextstep.web.HelloController;
@@ -7,7 +7,7 @@ import nextstep.web.LoginController;
 import nextstep.web.RegisterController;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 
-public class HandlerMapping {
+public class ControllerMapping {
     private static final String HTML_EXTENSION = ".html";
 
     private final Map<String, Controller> controllerMap = Map.of(

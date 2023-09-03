@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.mvc.ControllerMapping;
+import org.apache.coyote.http11.mvc.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestMessageReader;
+import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseMessageWriter;
-import org.apache.coyote.http11.web.FrontController;
-import org.apache.coyote.http11.web.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
             final HttpResponse httpResponse = new HttpResponse();
 
-            FrontController frontController = new FrontController(new HandlerMapping()); //FIXME DI
+            FrontController frontController = new FrontController(new ControllerMapping()); //FIXME DI
             frontController.handleHttpRequest(httpRequest, httpResponse);
 
             HttpResponseMessageWriter.writeHttpResponse(httpResponse, outputStream);

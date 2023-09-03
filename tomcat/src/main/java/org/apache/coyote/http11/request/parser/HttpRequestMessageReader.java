@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestStartLine;
 
 public class HttpRequestMessageReader {
 
@@ -22,11 +25,14 @@ public class HttpRequestMessageReader {
     private static final String PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_DELIMITER = "=";
 
+    private HttpRequestMessageReader() {
+    }
+
     public static HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         final HttpRequestStartLine startLine = readStartLine(br.readLine());
         final Map<String, String> headers = readHeaders(br);
-        if (startLine.getHttpRequestMethod() == HttpRequestMethod.POST) {
+        if (startLine.getHttpRequestMethod() == HttpMethod.POST) {
             return httpRequestWithBody(headers, br, startLine);
         }
         return HttpRequest.of(startLine, headers);
@@ -35,12 +41,12 @@ public class HttpRequestMessageReader {
     public static HttpRequestStartLine readStartLine(final String requestLine) {
         final String[] startLineTokens = requestLine.split(DELIMITER);
         validateStartLineTokenSize(startLineTokens);
-        final HttpRequestMethod httpRequestMethod = HttpRequestMethod.valueOf(startLineTokens[HTTP_METHOD_INDEX]);
+        final HttpMethod httpMethod = HttpMethod.valueOf(startLineTokens[HTTP_METHOD_INDEX]);
         final String URIWithQueryStrings = startLineTokens[REQUEST_URI_INDEX];
         final String requestURI = parseURI(URIWithQueryStrings);
         final Map<String, String> queryParams = parseQueryParams(URIWithQueryStrings);
         final String httpVersion = startLineTokens[HTTP_VERSION_INDEX];
-        return new HttpRequestStartLine(httpRequestMethod, requestURI, httpVersion, queryParams);
+        return new HttpRequestStartLine(httpMethod, requestURI, httpVersion, queryParams);
     }
 
     private static Map<String, String> parseQueryParams(final String URIWithQueryStrings) {

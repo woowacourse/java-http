@@ -5,12 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.IOException;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
-@DisplayName("HttpRequestMethod 테스트")
+@DisplayName("HttpMethod 테스트")
 class HttpRequestMessageReaderTest {
 
     @Test
@@ -35,7 +37,7 @@ class HttpRequestMessageReaderTest {
 
         // then
         assertSoftly(softAssertions -> {
-                    assertThat(httpRequest.getHttpStartLine().getHttpRequestMethod()).isEqualTo(HttpRequestMethod.GET);
+                    assertThat(httpRequest.getHttpStartLine().getHttpRequestMethod()).isEqualTo(HttpMethod.GET);
                     assertThat(httpRequest.getHttpStartLine().getRequestURI()).isEqualTo("/index.html");
                     assertThat(httpRequest.getHttpStartLine().getHttpVersion()).isEqualTo("HTTP/1.1");
                     assertThat(httpRequest.getHeader("Connection")).isEqualTo("keep-alive");

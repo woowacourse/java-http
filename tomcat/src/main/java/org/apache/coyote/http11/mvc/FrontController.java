@@ -1,20 +1,20 @@
-package org.apache.coyote.http11.web;
+package org.apache.coyote.http11.mvc;
 
 import java.io.IOException;
+import org.apache.coyote.http11.mvc.view.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FrontController {
 
-    private final HandlerMapping handlerMapping;
+    private final ControllerMapping controllerMapping;
 
-    public FrontController(final HandlerMapping handlerMapping) {
-        this.handlerMapping = handlerMapping;
+    public FrontController(final ControllerMapping controllerMapping) {
+        this.controllerMapping = controllerMapping;
     }
 
     public void handleHttpRequest(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final Controller controller = handlerMapping.findController(httpRequest.getHttpStartLine());
+        final Controller controller = controllerMapping.findController(httpRequest.getHttpStartLine());
         final ResponseEntity response = controller.handleRequest(httpRequest, httpResponse);
         httpResponse.updateByResponseEntity(response);
     }

@@ -3,13 +3,13 @@ package nextstep.web;
 import java.util.UUID;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.mvc.AbstractController;
+import org.apache.coyote.http11.mvc.view.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseStatus;
-import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.http11.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
             return successLogin(response, account);
         }
 
-        return ResponseEntity.forwardTo(HttpResponseStatus.UNAUTHORIZED, "/401.html");
+        return ResponseEntity.forwardTo(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     private ResponseEntity successLogin(final HttpResponse response, final String account) {

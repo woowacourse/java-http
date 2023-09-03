@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.web;
+package org.apache.coyote.http11.mvc.view;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
-import org.apache.coyote.http11.request.ResourceContentType;
+import org.apache.coyote.http11.common.ResourceContentType;
 
 public class StaticResourceView implements View {
 

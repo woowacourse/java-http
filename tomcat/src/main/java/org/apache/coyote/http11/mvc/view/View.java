@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.web;
+package org.apache.coyote.http11.mvc.view;
 
 import java.io.IOException;
 

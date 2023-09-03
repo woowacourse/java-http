@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpRequestCookie {
+public class HttpCookie {
 
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String COOKIE_DELIMITER = "=";
@@ -12,19 +12,19 @@ public class HttpRequestCookie {
 
     private final Map<String, String> cookies;
 
-    public HttpRequestCookie(final Map<String, String> cookies) {
+    public HttpCookie(final Map<String, String> cookies) {
         this.cookies = cookies;
     }
 
-    public static HttpRequestCookie from(final String cookieHeader) {
+    public static HttpCookie from(final String cookieHeader) {
         if (cookieHeader == null) {
-            return new HttpRequestCookie(Map.of());
+            return new HttpCookie(Map.of());
         }
 
         final Map<String, String> cookieKeyValues = Arrays.stream(cookieHeader.split(COOKIE_SEPARATOR))
                 .map(param -> param.split(COOKIE_DELIMITER))
                 .collect(Collectors.toMap(e -> e[0], e -> e[1]));
-        return new HttpRequestCookie(cookieKeyValues);
+        return new HttpCookie(cookieKeyValues);
     }
 
     public String getCookieValue(final String cookieKey) {

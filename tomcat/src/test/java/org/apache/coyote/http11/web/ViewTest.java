@@ -3,6 +3,8 @@ package org.apache.coyote.http11.web;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import org.apache.coyote.http11.mvc.view.StaticResourceView;
+import org.apache.coyote.http11.mvc.view.View;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

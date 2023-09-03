@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -18,7 +19,7 @@ class HttpResponseMessageWriterTest {
         final var socket = new StubSocket();
         final OutputStream outputStream = socket.getOutputStream();
         final HttpResponse httpResponse = new HttpResponse();
-        httpResponse.updateHttpResponseStatusLineByStatus(HttpResponseStatus.OK);
+        httpResponse.updateHttpResponseStatusLineByStatus(HttpStatus.OK);
         httpResponse.setHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.setBody("Hello world!");
 

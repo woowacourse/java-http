@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
@@ -33,13 +34,24 @@ public class RequestHandler {
         }
 
         if (request.getUri().equals("/login")) {
-            Map<String, String> queryString = request.getQueryString();
-            User user = InMemoryUserRepository.findByAccount(queryString.get("account"))
-                .orElseThrow(IllegalArgumentException::new);
-            log.info(user.toString());
+            return login(request);
         }
 
         throw new IllegalArgumentException();
+    }
+
+    private static String login(HttpRequest request) {
+        Map<String, String> queryString = request.getQueryString();
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryString.get("account"));
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.checkPassword(queryString.get("password"))) {
+                log.info(user.toString());
+                return getRedirectResponse(HttpStatus.FOUND, "/index.html");
+            }
+        }
+
+        return getRedirectResponse(HttpStatus.FOUND, "/401.html");
     }
 
     private static boolean isStaticFile(String target) {
@@ -48,10 +60,22 @@ public class RequestHandler {
             .anyMatch(it -> it.name().equalsIgnoreCase(value));
     }
 
-    private static String getResponse(String responseBody, ContentType contentType) {
+    private static String getRedirectResponse(HttpStatus httpStatus, String location) {
         return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: "+ contentType.value  + ";charset=utf-8 ",
+            "HTTP/1.1 " + httpStatus.code + " " + httpStatus.name() + " ",
+            "Content-Type: " + ContentType.HTML.value + ";charset=utf-8 ",
+            "Content-Length:  ",
+            "Location: " + location);
+    }
+
+    private static String getResponse(String responseBody, ContentType contentType) {
+        return getResponse(responseBody, contentType, HttpStatus.OK);
+    }
+
+    private static String getResponse(String responseBody, ContentType contentType, HttpStatus httpStatus) {
+        return String.join("\r\n",
+            "HTTP/1.1 " + httpStatus.code + " " + httpStatus.name() + " ",
+            "Content-Type: " + contentType.value + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

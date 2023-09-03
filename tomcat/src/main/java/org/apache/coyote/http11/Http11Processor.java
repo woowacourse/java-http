@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
@@ -54,8 +55,10 @@ public class Http11Processor implements Runnable, Processor {
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final StringBuilder input = new StringBuilder();
-        try (bufferedReader) {
-            for (String s = bufferedReader.readLine(); s != null; s = bufferedReader.readLine()) {
+        try {
+            for (String s = bufferedReader.readLine();
+                 !"".equals(s);
+                 s = bufferedReader.readLine()) {
                 input.append(s);
                 input.append(LINE_SEPARATOR);
             }
@@ -66,17 +69,29 @@ public class Http11Processor implements Runnable, Processor {
         return input.toString();
     }
 
-    private Http11Response makeResponseOf(final Http11Request request) throws IOException {
+    private Http11Response makeResponseOf(final Http11Request request) {
         if (request.getMethod() == GET) {
             if (request.getUri().equals("/")) {
                 return new Http11Response("Hello world!");
             }
 
-            final URL resource = getClass().getClassLoader().getResource("static" + request.getUri());
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final String responseBody = getResponseBodyFromResource(request.getUri());
             return new Http11Response(responseBody);
         }
 
         throw new IllegalArgumentException("Invalid Request Uri");
+    }
+
+    private String getResponseBodyFromResource(final String uri) {
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+
+        try {
+            final Path filePath = new File(resource.getFile()).toPath();
+            return new String(Files.readAllBytes(filePath));
+
+        } catch (final NullPointerException | IOException e) {
+            log.error(e.getMessage(), e);
+            return "Resource Not Exist";
+        }
     }
 }

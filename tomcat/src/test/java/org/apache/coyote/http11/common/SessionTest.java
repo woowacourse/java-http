@@ -42,8 +42,9 @@ class SessionTest {
         final Object attribute = session.getAttribute(key);
 
         // then
-        assertThat(attribute).isInstanceOf(User.class);
-        assertThat(attribute).isEqualTo(value);
+        assertThat(attribute)
+                .isInstanceOf(User.class)
+                .isEqualTo(value);
     }
 
     @Test

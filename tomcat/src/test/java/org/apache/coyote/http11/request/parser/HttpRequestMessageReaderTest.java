@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.IOException;
+import java.io.InputStream;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -34,9 +35,10 @@ class HttpRequestMessageReaderTest {
                 "",
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+        final InputStream inputStream = stubSocket.getInputStream();
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
 
         // then
         assertSoftly(softAssertions -> {
@@ -60,9 +62,10 @@ class HttpRequestMessageReaderTest {
                 "",
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+        final InputStream inputStream = stubSocket.getInputStream();
 
         // when & then
-        assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream()))
+        assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(inputStream))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("시작 라인의 토큰은 3개여야 합니다.");
     }
@@ -77,9 +80,10 @@ class HttpRequestMessageReaderTest {
                 "",
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+        final InputStream inputStream = stubSocket.getInputStream();
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
 
         // then
         assertSoftly(softAssertions -> {

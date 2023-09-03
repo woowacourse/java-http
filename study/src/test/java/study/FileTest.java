@@ -31,8 +31,8 @@ class FileTest {
         final URL resource = getClass().getClassLoader().getResource(fileName);
         final String actual = Objects.requireNonNull(resource).getFile();
 
-        assertThat(actual).isNotNull();
-        assertThat(actual).endsWith(fileName);
+        assertThat(actual).isNotNull()
+                .endsWith(fileName);
     }
 
     /**

@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequestMessageReader {
 
@@ -24,6 +26,8 @@ public class HttpRequestMessageReader {
     private static final String HTTP_HEADER_VALUE_DELIMITER = ":";
     private static final String PARAMETER_SEPARATOR = "&";
     private static final String QUERY_PARAMETER_DELIMITER = "=";
+
+    private static Logger log = LoggerFactory.getLogger(HttpRequestMessageReader.class);
 
     private HttpRequestMessageReader() {
     }
@@ -78,7 +82,7 @@ public class HttpRequestMessageReader {
         final Map<String, String> headers = new LinkedHashMap<>();
         String readLine = br.readLine();
         while (readLine != null && !readLine.isEmpty()) {
-            System.out.println(readLine);
+            log.info(readLine);
             addHeaderByReadLine(readLine, headers);
             readLine = br.readLine();
         }

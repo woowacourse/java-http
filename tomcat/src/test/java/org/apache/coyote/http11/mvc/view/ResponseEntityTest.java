@@ -52,7 +52,7 @@ class ResponseEntityTest {
 
             // then
             assertThat(responseEntity.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
-            assertThat(responseEntity.getHeaders().get("Location")).isEqualTo(uri);
+            assertThat(responseEntity.getHeaders()).containsEntry("Location", uri);
         }
 
         @Test

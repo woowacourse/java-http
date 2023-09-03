@@ -20,18 +20,20 @@ public class LoginController implements Controller{
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        final Map<String, String> queryString = request.getQueryString();
-  
-        final String account = queryString.get("account");
-        final String password = queryString.get("password");
-
-        final Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
-        if (userOpt.isPresent()) {
-            final User user = userOpt.get();
-            if (user.checkPassword(password)) {
-                log.info("user : {}", user);
+        if (request.hasQueryString()) {
+            final Map<String, String> queryString = request.getQueryString();
+            if (queryString.isEmpty() || queryString.size() != 2) {
+                return HttpResponse.toUnauthorized();
             }
+            final String account = queryString.get("account");
+            final String password = queryString.get("password");
+            final boolean loginSuccess = login(account, password);
+            if (loginSuccess) {
+                return new HttpResponse(StatusCode.FOUND, "text/html", HttpResponse.indexResponseBody());
+            }
+            return HttpResponse.toUnauthorized();
         }
+
 
         URL resource = classLoader.getResource(STATIC_DIRECTORY + "/login.html");
         final File file = new File(resource.getFile());
@@ -41,5 +43,17 @@ public class LoginController implements Controller{
             e.printStackTrace();
             return null;
         }
+    }
+
+    private boolean login(final String account, final String password) {
+        final Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
+        if (userOpt.isPresent()) {
+            final User user = userOpt.get();
+            if (user.checkPassword(password)) {
+                log.info("user : {}", user);
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -51,4 +51,15 @@ public class HttpResponse {
             return toNotFound();
         }
     }
+
+    public static String indexResponseBody() {
+        URL resource = classLoader.getResource(STATIC_DIRECTORY + "/index.html");
+        final File file = new File(resource.getFile());
+        try{
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

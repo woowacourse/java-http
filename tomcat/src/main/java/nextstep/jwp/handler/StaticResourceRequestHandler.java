@@ -19,8 +19,16 @@ public class StaticResourceRequestHandler implements RequestHandler {
     @Override
     public HttpResponse handle(HttpRequest request) {
         URI uri = request.startLine().uri();
-        String resource = ResourceFileUtil.readAll("static" + uri.path());
+        String resource = ResourceFileUtil.readAll("static" + path(uri));
         return httpResponse(uri, resource);
+    }
+
+    private String path(URI uri) {
+        if (uri.path().contains(".")) {
+            return uri.path();
+        } else {
+            return uri.path() + ".html";
+        }
     }
 
     private HttpResponse httpResponse(URI uri, String responseBody) {

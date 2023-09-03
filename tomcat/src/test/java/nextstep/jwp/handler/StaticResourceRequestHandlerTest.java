@@ -46,4 +46,28 @@ class StaticResourceRequestHandlerTest {
 
         assertThat(response.toString()).isEqualTo(expected);
     }
+
+    @Test
+    void 확장자가_없는_경우_html_파일을_반환한다() throws IOException {
+        // given
+        HttpRequest request = HttpRequest.builder()
+                .startLine(StartLine.from("GET /login HTTP/1.1 "))
+                .headers(RequestHeaders.from(
+                        List.of("Host: localhost:8080 ", "Connection: keep-alive "))
+                )
+                .build();
+
+        // when
+        HttpResponse response = handler.handle(request);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3796 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(response.toString()).isEqualTo(expected);
+    }
 }

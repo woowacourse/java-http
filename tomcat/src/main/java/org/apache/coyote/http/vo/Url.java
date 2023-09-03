@@ -39,4 +39,8 @@ public class Url {
     public QueryStrings getQueryStrings() {
         return queryStrings;
     }
+
+    public boolean isSameUrl(final Url url) {
+        return this.urlPath.equals(url.urlPath);
+    }
 }

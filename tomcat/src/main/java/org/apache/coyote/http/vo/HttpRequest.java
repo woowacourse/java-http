@@ -38,6 +38,10 @@ public class HttpRequest {
         return headers;
     }
 
+    public boolean isUrl(final Url url) {
+        return this.url.isSameUrl(url);
+    }
+
     public static class Builder {
         private HttpMethod method;
         private Url url;

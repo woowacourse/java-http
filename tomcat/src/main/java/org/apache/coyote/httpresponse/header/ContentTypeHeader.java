@@ -18,11 +18,11 @@ public enum ContentTypeHeader implements ResponseHeader {
         this.fileExtension = fileExtension;
     }
 
-    public static ContentTypeHeader from(final Path path) {
+    public static ContentTypeHeader from(final String path) {
         return Arrays.stream(values())
-                .filter(contentTypeHeader -> path.toString().endsWith(contentTypeHeader.fileExtension))
+                .filter(contentTypeHeader -> path.endsWith(contentTypeHeader.fileExtension))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("지원하지 않는 MimeType 입니다."));
+                .orElse(TEXT_HTML);
     }
 
     @Override

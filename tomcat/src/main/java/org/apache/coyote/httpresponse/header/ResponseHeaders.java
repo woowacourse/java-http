@@ -1,7 +1,7 @@
 package org.apache.coyote.httpresponse.header;
 
-import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseHeaders {
@@ -12,10 +12,20 @@ public class ResponseHeaders {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(final Path path) {
-        final Map<ResponseHeaderType, ResponseHeader> headers = new HashMap<>();
+    public static ResponseHeaders of(final String path, final String content) {
+        final Map<ResponseHeaderType, ResponseHeader> headers = new LinkedHashMap<>();
         headers.put(ResponseHeaderType.CONTENT_TYPE, ContentTypeHeader.from(path));
-        headers.put(ResponseHeaderType.CONTENT_LENGTH, new ContentLengthHeader(path));
+        headers.put(ResponseHeaderType.CONTENT_LENGTH, new ContentLengthHeader(content));
         return new ResponseHeaders(headers);
+    }
+
+    public String getFormattedHeaders() {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<ResponseHeaderType, ResponseHeader> header : headers.entrySet()) {
+            final ResponseHeaderType responseHeaderType = header.getKey();
+            final ResponseHeader responseHeader = header.getValue();
+            stringBuilder.append(responseHeader.getKeyAndValue(responseHeaderType)).append(" \r\n");
+        }
+        return stringBuilder.toString();
     }
 }

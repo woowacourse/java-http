@@ -1,18 +1,10 @@
 package org.apache.coyote.httprequest;
 
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.httprequest.exception.InvalidHttpRequestLineException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class HttpRequestLine {
-
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String DELIMITER = " ";
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
@@ -21,10 +13,10 @@ public class HttpRequestLine {
     public static final int HTTP_VERSION_INDEX = 2;
 
     private final RequestMethod requestMethod;
-    private final Path requestUri;
+    private final String requestUri;
     private final String httpVersion;
 
-    private HttpRequestLine(final RequestMethod requestMethod, final Path requestUri, final String httpVersion) {
+    private HttpRequestLine(final RequestMethod requestMethod, final String requestUri, final String httpVersion) {
         this.requestMethod = requestMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -34,7 +26,7 @@ public class HttpRequestLine {
         final List<String> parsedRequestLine = parseByDelimiter(requestLine);
         return new HttpRequestLine(
                 RequestMethod.from(parsedRequestLine.get(REQUEST_METHOD_INDEX)),
-                convertToPath(parsedRequestLine.get(REQUEST_URI_INDEX)),
+                parsedRequestLine.get(REQUEST_URI_INDEX),
                 parsedRequestLine.get(HTTP_VERSION_INDEX));
     }
 
@@ -46,20 +38,15 @@ public class HttpRequestLine {
         return parsedRequestLine;
     }
 
-    private static Path convertToPath(final String pathText) {
-        try {
-            return Paths.get(HttpRequestLine.class.getResource(pathText).toURI());
-        } catch (URISyntaxException | NullPointerException e) {
-            log.error(e.getMessage(), e);
-            return Path.of("/");
-        }
-    }
-
     public RequestMethod getRequestMethod() {
         return requestMethod;
     }
 
-    public Path getRequestUri() {
+    public String getRequestUri() {
         return requestUri;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

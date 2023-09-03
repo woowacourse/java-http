@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +26,7 @@ class HttpRequestTest {
 			"Connection", "keep-alive"
 		));
 		final QueryParam queryParam = new QueryParam(Map.of(
-			"user", Set.of("hong")
+			"user", "hong"
 		));
 
 		//when

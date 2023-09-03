@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.*;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 
 public class QueryParam {
 
@@ -14,10 +13,10 @@ public class QueryParam {
 	private static final int KEY_INDEX = 0;
 	private static final int VALUE_INDEX = 1;
 
-	private final Map<String, Set<String>> multiMap;
+	private final Map<String, String> paramMap;
 
-	public QueryParam(final Map<String, Set<String>> multiMap) {
-		this.multiMap = multiMap;
+	public QueryParam(final Map<String, String> paramMap) {
+		this.paramMap = paramMap;
 	}
 
 	public static QueryParam from(final String uri) {
@@ -28,19 +27,16 @@ public class QueryParam {
 			return new QueryParam(Map.of());
 		}
 
-		final Map<String, Set<String>> result = Arrays.stream(queryString.split(QUERY_DELIMITER))
+		final Map<String, String> result = Arrays.stream(queryString.split(QUERY_DELIMITER))
 			.map(str -> str.split(KEY_VALUE_DELIMITER))
-			.collect(groupingBy(
-				query -> query[KEY_INDEX],
-				mapping(
-					query -> query[VALUE_INDEX],
-					toSet()
-				)
+			.collect(toMap(
+				parsed -> parsed[KEY_INDEX],
+				parsed -> parsed[VALUE_INDEX]
 			));
 		return new QueryParam(result);
 	}
 
-	public Set<String> get(final String key) {
-		return multiMap.get(key);
+	public String get(final String key) {
+		return paramMap.get(key);
 	}
 }

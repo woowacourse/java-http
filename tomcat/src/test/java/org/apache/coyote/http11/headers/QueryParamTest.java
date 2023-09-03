@@ -3,7 +3,6 @@ package org.apache.coyote.http11.headers;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.http11.request.QueryParam;
@@ -29,8 +28,8 @@ class QueryParamTest {
 
 		final QueryParam expected = new QueryParam(
 			Map.of(
-				"key1", Set.of("value1"),
-				"key2", Set.of("value2")
+				"key1", "value1",
+				"key2", "value2"
 			)
 		);
 		assertThat(actual)
@@ -42,14 +41,14 @@ class QueryParamTest {
 	@DisplayName("key값으로 value를 조회할 수 있다.")
 	void get() {
 		final String queryKey = "key1";
-		final Set<String> queryValue = Set.of("value1", "value2");
+		final String queryValue = "value1";
 		final QueryParam queryParam = new QueryParam(Map.of(
 			queryKey, queryValue
 		));
 
-		final Set<String> actual = queryParam.get(queryKey);
+		final String actual = queryParam.get(queryKey);
 
 		assertThat(actual)
-			.containsExactlyElementsOf(queryValue);
+			.isEqualTo(queryValue);
 	}
 }

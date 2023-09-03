@@ -1,7 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
 import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -51,9 +50,11 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        File file = new File(resource.getPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+//                "Content-Length: 5564 \r\n" +
+                String.format("Content-Length: %d \r\n", file.length()) +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

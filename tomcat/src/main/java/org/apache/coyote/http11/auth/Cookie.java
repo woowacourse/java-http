@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.auth;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,4 @@ public class Cookie {
         return elements.get(key);
     }
 
-    public Map<String, String> getItems() {
-        return elements;
-    }
 }

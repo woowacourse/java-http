@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.auth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +15,6 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public Session getSession(String id) {
         return SESSIONS.get(id);
-    }
-
-    @Override
-    public void remove(String id) {
-        SESSIONS.remove(id);
     }
 
 }

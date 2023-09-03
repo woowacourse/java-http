@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.auth.Cookie;
 import org.apache.coyote.http11.common.HttpStatus;
 
 public class ResponseEntity {

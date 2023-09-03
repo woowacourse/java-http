@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    public static final String LINE_SEPARATOR = "\r\n";
+    private static final String LINE_SEPARATOR = "\r\n";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
 
@@ -40,6 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final Http11Request request = Http11Request.from(readInputStream(inputStream));
+
             final Http11Response response = makeResponseOf(request);
 
             outputStream.write(response.getResponse().getBytes());
@@ -71,18 +72,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response makeResponseOf(final Http11Request request) {
         if (request.getMethod() == GET) {
-            if (request.getUri().equals("/")) {
-                return new Http11Response("Hello world!");
-            }
-
             final String responseBody = getResponseBodyFromResource(request.getUri());
-            return new Http11Response(responseBody);
+            return Http11Response.of(request.getHeader("Accept"), responseBody);
         }
-
         throw new IllegalArgumentException("Invalid Request Uri");
     }
 
     private String getResponseBodyFromResource(final String uri) {
+        if (uri.equals("/")) {
+            return "Hello world!";
+        }
+
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
 
         try {
@@ -90,8 +90,8 @@ public class Http11Processor implements Runnable, Processor {
             return new String(Files.readAllBytes(filePath));
 
         } catch (final NullPointerException | IOException e) {
-            log.error(e.getMessage(), e);
-            return "Resource Not Exist";
+            log.error(e.getMessage() + uri, e);
+            return "Resource Not Exist: " + uri;
         }
     }
 }

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class Handlers {
 
-    private static final Pattern FILE_PATTERN = Pattern.compile(".css|.js|.ico|.html");
+    private static final Pattern FILE_PATTERN = Pattern.compile("css|js|ico|html");
 
     private static final Map<String, Handler> handlers =
             Map.of(
@@ -22,7 +22,7 @@ public class Handlers {
         String requestUri = request.getRequestUri();
 
         int lastDotIndex = requestUri.lastIndexOf('.');
-        String extensionName = requestUri.substring(lastDotIndex);
+        String extensionName = requestUri.substring(lastDotIndex + 1);
         if (FILE_PATTERN.matcher(extensionName).find()) {
             return handlers.get("/file").handle(request);
         }

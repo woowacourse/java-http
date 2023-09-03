@@ -1,15 +1,17 @@
 package org.apache.coyote.http11.http;
 
+import org.apache.coyote.http11.common.RequestMethod;
+
 public class RequestFirstLine {
 
     private static final int VALID_ELEMENT_COUNT = 3;
 
-    private final String httpMethod;
+    private final RequestMethod httpMethod;
     private final String requestUri;
     private final String httpVersion;
 
     private RequestFirstLine(String httpMethod, String requestUri, String httpVersion) {
-        this.httpMethod = httpMethod;
+        this.httpMethod = RequestMethod.find(httpMethod);
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
     }
@@ -27,7 +29,7 @@ public class RequestFirstLine {
     }
 
     public String getHttpMethod() {
-        return httpMethod;
+        return httpMethod.name();
     }
 
     public String getRequestUri() {

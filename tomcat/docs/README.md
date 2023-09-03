@@ -24,9 +24,9 @@ Connection: keep-alive
 
 ## 2단계 - 로그인 구현하기
 
-- [ ] 로그인 여부에 따라 다른 페이지로 리다이렉트 한다.
-  - [ ] 로그인에 성공하면, 302 status code와 함께 /index.html로 리다이렉트 한다.
-  - [ ] 로그인에 실패하면, 302 status code와 함께 /401.html로 리다이렉트 한다.
+- [X] 로그인 여부에 따라 다른 페이지로 리다이렉트 한다.
+  - [X] 로그인에 성공하면, 302 status code와 함께 /index.html로 리다이렉트 한다.
+  - [X] 로그인에 실패하면, 302 status code와 함께 /401.html로 리다이렉트 한다.
   
 - [ ] 회원가입
   - [ ] GET /register 요청이 들어오면, register.html을 반환한다.

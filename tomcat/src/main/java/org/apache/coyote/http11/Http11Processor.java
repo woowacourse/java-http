@@ -50,17 +50,41 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = extractResponseBody(requestPath);
             String contentType = extractContentType(requestPath);
 
+            if (requestPath.startsWith("/login") && !"/login".equals(requestPath)) {
+                if (login(requestPath)) {
+                    String response = String.join("\r\n",
+                            "HTTP/1.1 302 FOUND ",
+                            "Location: /index.html",
+                            String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+
+                    return;
+                }
+                String response = String.join("\r\n",
+                        "HTTP/1.1 302 FOUND ",
+                        "Location: /401.html",
+                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     String.format("Content-Type: %s;charset=utf-8 ", contentType),
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
-            if (requestPath.startsWith("/login")) {
-                handleLoginQueryString(requestPath);
-
-            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -69,42 +93,61 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleLoginQueryString(String requestPath) {
+    private boolean login(String requestPath) {
         int index = requestPath.indexOf("?");
 
         if (index == -1) {
-            return;
+            return false;
         }
 
-        String queryString = requestPath.substring(index + 1);
-        String[] elements = queryString.split("&");
-        Map<String, String> paramMap = Arrays.stream(elements)
-                .map(element -> element.split("="))
-                .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+        Map<String, String> paramMap = handleQueryString(requestPath, index);
 
         User user = InMemoryUserRepository.findByAccount(paramMap.get(ACCOUNT))
                 .orElseThrow(IllegalArgumentException::new);
 
         if (user.checkPassword(paramMap.get(PASSWORD))) {
-            log.info("user : {}",user);
+            log.info("user : {}", user);
+
+            return true;
         }
+
+        return false;
+    }
+
+    private Map<String, String> handleQueryString(String requestPath, int index) {
+        String queryString = requestPath.substring(index + 1);
+        String[] elements = queryString.split("&");
+        return Arrays.stream(elements)
+                .map(element -> element.split("="))
+                .collect(Collectors.toMap(param -> param[0], param -> param[1]));
     }
 
     private String extractResponseBody(String requestPath) throws IOException {
-        if ("/".equals(requestPath)) {
+        String nativePath = getNativePath(requestPath);
 
+        if ("/".equals(nativePath)) {
             return "Hello world!";
         }
 
-        if (requestPath.startsWith("/login")) {
+        if (nativePath.equals("/login")) {
             URL url = getClass().getClassLoader().getResource("static/login.html");
 
             return new String(Files.readAllBytes(Path.of(url.getPath())));
         }
 
-        URL url = getClass().getClassLoader().getResource("static" + requestPath);
+        URL url = getClass().getClassLoader().getResource("static" + nativePath);
 
         return new String(Files.readAllBytes(Path.of(url.getPath())));
+    }
+
+    private String getNativePath(String requestPath) {
+        int index = requestPath.indexOf("?");
+
+        if (index == -1) {
+            return requestPath;
+        }
+
+        return requestPath.substring(0, index);
     }
 
     private String extractContentType(String requestPath) {

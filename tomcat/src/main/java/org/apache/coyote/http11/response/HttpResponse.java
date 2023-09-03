@@ -10,14 +10,10 @@ public class HttpResponse {
     public static final String NEW_LINE = "\r\n";
     private HttpResponseStartLine httpResponseStartLine;
     private HttpHeaders headers;
-    private String body;
+    private String responseBody;
 
     public HttpResponse() {
         this.headers = HttpHeaders.empty();
-    }
-
-    public void setHttpResponseStartLine(String httpVersion, StatusCode statusCode) {
-        httpResponseStartLine = new HttpResponseStartLine(httpVersion, statusCode);
     }
 
     public void setHttpResponseStartLine(StatusCode statusCode) {
@@ -28,9 +24,9 @@ public class HttpResponse {
         headers.add(name, value);
     }
 
-    public void setBody(final byte[] body) {
-        headers.add("Content-Length", String.valueOf(body.length));
-        this.body = new String(body);
+    public void setResponseBody(final byte[] responseBody) {
+        headers.add("Content-Length", String.valueOf(responseBody.length));
+        this.responseBody = new String(responseBody);
     }
 
     public byte[] generateResponse() throws IOException {
@@ -38,7 +34,7 @@ public class HttpResponse {
                 generateStartLine(),
                 generateHeaders(),
                 EMPTY_LINE,
-                body).getBytes();
+                responseBody).getBytes();
     }
 
     private String generateStartLine() {

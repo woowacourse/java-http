@@ -31,10 +31,10 @@ public class HttpHeaders {
                 throw new IllegalArgumentException("HTTP 헤더 값은 'null'일 수 없습니다.");
             }
 
-            String[] requestHeaderParts = line.split(":");
+            String[] requestHeaderParts = line.split(": ");
 
             requestHeaders.put(
-                    requestHeaderParts[REQUEST_HEADER_KEY_INDEX],
+                    requestHeaderParts[REQUEST_HEADER_KEY_INDEX].toLowerCase(),
                     requestHeaderParts[REQUEST_HEADER_VALUE_INDEX]
             );
         }
@@ -43,11 +43,15 @@ public class HttpHeaders {
     }
 
     public HttpHeaders add(String key, String value) {
-        headers.put(key, value);
+        headers.put(key.toLowerCase(), value);
         return new HttpHeaders(headers);
     }
 
-    public Set<Entry<String, String>> getEntrySet(){
+    public Set<Entry<String, String>> getEntrySet() {
         return headers.entrySet();
+    }
+
+    public String getValue(String key) {
+        return headers.get(key.toLowerCase());
     }
 }

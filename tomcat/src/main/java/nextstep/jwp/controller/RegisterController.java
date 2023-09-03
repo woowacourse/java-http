@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.logging.Logger;
 import nextstep.jwp.FileIOUtils;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -13,10 +14,11 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class LoginController extends HttpServlet {
+public class RegisterController extends HttpServlet {
 
     private static final String PREFIX = "static";
     private static final String SUFFIX = ".html";
+    private final static Logger LOG = Logger.getGlobal();
 
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException, URISyntaxException {
@@ -33,10 +35,17 @@ public class LoginController extends HttpServlet {
         RequestParam requestParam = RequestParam.of(req.getRequestBody());
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
-        if (!findAccount.isEmpty() && findAccount.get().checkPassword(requestParam.get("password"))) {
-            resp.sendRedirect("/index.html");
-        } else {
+        if (!findAccount.isEmpty()) {
             resp.sendRedirect("/401.html");
+        } else {
+            User user = new User(
+                    requestParam.get("account"),
+                    requestParam.get("password"),
+                    requestParam.get("email")
+            );
+            InMemoryUserRepository.save(user);
+            LOG.info(user.toString());
+            resp.sendRedirect("/index.html");
         }
     }
 }

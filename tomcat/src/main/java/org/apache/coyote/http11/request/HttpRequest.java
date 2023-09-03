@@ -9,12 +9,16 @@ import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
 
+    private static final String EMPTY_BODY = "";
     private final HttpRequestStartLine httpRequestStartLine;
     private final HttpHeaders httpHeaders;
+    private final String requestBody;
 
-    private HttpRequest(final HttpRequestStartLine requestLine, final HttpHeaders httpHeaders) {
+    private HttpRequest(final HttpRequestStartLine requestLine, final HttpHeaders httpHeaders,
+                        final String requestBody) {
         this.httpRequestStartLine = requestLine;
         this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest of(InputStream inputStream) throws IOException {
@@ -24,18 +28,30 @@ public class HttpRequest {
         HttpRequestStartLine requestLine = HttpRequestStartLine.of(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(bufferedReader);
 
-        return new HttpRequest(requestLine, httpHeaders);
+        String findContentLength = httpHeaders.getValue("content-length");
+        if (findContentLength != null) {
+            int contentLength = Integer.parseInt(findContentLength);
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer);
+            return new HttpRequest(requestLine, httpHeaders, requestBody);
+        }
+        return new HttpRequest(requestLine, httpHeaders, EMPTY_BODY);
     }
 
     public String getHttpVersion() {
         return httpRequestStartLine.getHttpVersion();
     }
 
+    public String getRequestBody() {
+        return requestBody;
+    }
+
     public String getPath() {
         return httpRequestStartLine.getUri().getPath();
     }
 
-    public String getQuery(){
+    public String getQuery() {
         return httpRequestStartLine.getUri().getQuery();
     }
 

@@ -19,7 +19,7 @@ public class ResourceController extends HttpServlet {
         resp.setHttpResponseStartLine(StatusCode.OK);
 
         Path path = FileIOUtils.getPath(PREFIX + req.getPath());
-        resp.setBody(Files.readAllBytes(path));
+        resp.setResponseBody(Files.readAllBytes(path));
         resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
     }
 }

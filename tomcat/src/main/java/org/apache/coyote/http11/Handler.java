@@ -47,6 +47,18 @@ public class Handler {
             return Response.redirect(UNAUTHORIZED_HTML, responseBody, HttpStatus.FOUND);
         }
 
+        if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/register")) {
+            final RequestBody requestBody = request.getRequestBody();
+            final String account = requestBody.getParamValue("account");
+            final String password = requestBody.getParamValue("password");
+            final String email = requestBody.getParamValue("email");
+            InMemoryUserRepository.save(new User(account, password, email));
+
+            final StaticResource staticResource = StaticResource.from(INDEX_HTML);
+            final ResponseBody responseBody = ResponseBody.from(staticResource);
+            return Response.redirect(INDEX_HTML, responseBody, HttpStatus.FOUND);
+        }
+
         return null;
     }
 }

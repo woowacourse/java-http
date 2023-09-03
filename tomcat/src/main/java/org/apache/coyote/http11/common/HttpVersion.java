@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
 
@@ -19,5 +19,9 @@ public enum HttpVersion {
                 .filter(it -> it.detail.equals(detail))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No enum constant with detail: " + detail));
+    }
+
+    public String getDetail() {
+        return detail;
     }
 }

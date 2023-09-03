@@ -1,15 +1,13 @@
 package kokodak;
 
-public enum Constants {
+public enum HttpVersion {
 
-    CRLF("\r\n"),
-    BLANK(" "),
-    COLON(":"),
+    HTTP11("HTTP/1.1"),
     ;
 
     private String value;
 
-    Constants(final String value) {
+    HttpVersion(final String value) {
         this.value = value;
     }
 

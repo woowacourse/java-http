@@ -12,8 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class HttpRequestTest {
 
     @Test
@@ -25,7 +23,7 @@ class HttpRequestTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive "
         );
-        final String givenRequestBody = "body";
+        final String givenRequestBody = "";
         final String givenHttpRequest= String.join("\r\n",
                 givenRequestLine,
                 givenRequestHeaders,

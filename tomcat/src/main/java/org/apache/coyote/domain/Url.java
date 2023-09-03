@@ -18,7 +18,10 @@ public class Url {
     }
 
     private QueryStrings parseQueryString(final String url) {
-        return new QueryStrings(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
+        if (url.split(QUERY_STRING_DELIMITER).length > 1) {
+            return new QueryStrings(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
+        }
+        return QueryStrings.getEmptyQueryStrings();
     }
 
     public String getUrlPath() {

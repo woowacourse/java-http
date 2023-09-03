@@ -8,7 +8,12 @@ public class QueryStrings {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final QueryStrings EMPTY_QUERY_STRINGS = new QueryStrings();
     private final MultiValueMap<String, String> queryStrings;
+
+    private QueryStrings() {
+        queryStrings = new MultiValueMap<>();
+    }
 
     public QueryStrings(final String rawQueryStrings) {
         queryStrings = parseQueryStrings(rawQueryStrings);
@@ -29,5 +34,9 @@ public class QueryStrings {
 
     public String getQueryString(final String key) {
         return queryStrings.getRecentValue(key);
+    }
+
+    public static QueryStrings getEmptyQueryStrings(){
+        return EMPTY_QUERY_STRINGS;
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.handler;
 
 import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.handler.get.UserLoginRequestGetHandler;
+import org.apache.coyote.handler.get.UserRegisterRequestGetHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -18,6 +19,7 @@ public class RequestHandlerComposite {
     static {
         mapping.put(new MappingInfo(GET.name(), "/"), new HomeRequestHandler());
         mapping.put(new MappingInfo(GET.name(), "/login"), new UserLoginRequestGetHandler());
+        mapping.put(new MappingInfo(GET.name(), "/register"), new UserRegisterRequestGetHandler());
     }
 
     public static HttpResponse handle(final HttpRequest httpRequest) {

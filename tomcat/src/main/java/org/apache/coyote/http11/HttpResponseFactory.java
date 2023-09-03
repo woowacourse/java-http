@@ -28,4 +28,16 @@ public class HttpResponseFactory {
 
         return new HttpResponse(statusLine, httpHeaders, EMPTY_BODY);
     }
+
+    public static HttpResponse createRedirectHttpResponse(
+        final HttpResponseStatusLine statusLine,
+        final String location,
+        final HttpCookie httpCookie
+    ) {
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.addHeader(HttpHeaderName.LOCATION, location);
+        httpHeaders.addHeader(HttpHeaderName.SET_COOKIE, httpCookie.toString());
+
+        return new HttpResponse(statusLine, httpHeaders, EMPTY_BODY);
+    }
 }

@@ -12,6 +12,7 @@ public class HttpRequest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
     private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String JSESSION_ID = "JSESSIONID";
 
     private final HttpHeaders headers;
     private final HttpMethod method;
@@ -77,6 +78,10 @@ public class HttpRequest {
 
     public boolean containsContentType(final String value) {
         return headers.containsHeaderNameAndValue(HttpHeaderName.CONTENT_TYPE, value);
+    }
+
+    public boolean containsCookieAndJSessionID() {
+        return headers.containsHeaderNameAndValue(HttpHeaderName.COOKIE, JSESSION_ID);
     }
 
     public String getPath() {

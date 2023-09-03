@@ -39,11 +39,21 @@ public class HttpHeaders {
 
                 headers.put(headerName, headerContent);
             }
+            parseToCookie(headers);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
         return headers;
+    }
+
+    private static void parseToCookie(final Map<HttpHeaderName, String> headers) {
+        if (headers.containsKey(HttpHeaderName.COOKIE)) {
+            final String rawCookie = headers.get(HttpHeaderName.COOKIE);
+            final HttpCookie cookie = HttpCookie.from(rawCookie);
+
+            headers.put(HttpHeaderName.COOKIE, cookie.toString());
+        }
     }
 
     public static HttpHeaders makeHttpResponseHeaders(final String contentType, final String body) {

@@ -39,6 +39,10 @@ public class QueryParameters {
         return new QueryParameters(queryParameters);
     }
 
+    public boolean isEmpty() {
+        return queryParameters.isEmpty();
+    }
+
     public Map<String, String> getQueryParameters() {
         return queryParameters;
     }

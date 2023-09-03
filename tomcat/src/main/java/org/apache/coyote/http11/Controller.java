@@ -12,13 +12,11 @@ import org.apache.coyote.http11.response.statusLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URL;
-
 public class Controller {
 
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
-    public static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String DIRECTORY_SEPARATOR = "/";
+    private static final String INDEX_FILE = "index.html";
 
     private final HttpRequest httpRequest;
 
@@ -26,7 +24,7 @@ public class Controller {
         this.httpRequest = httpRequest;
     }
 
-    public ResponseEntity run() throws IOException {
+    public ResponseEntity run() {
         final RequestUri requestUri = httpRequest.getRequestLine().getRequestUri();
         final ResourcePath resourcePath = requestUri.getResourcePath();
         if (resourcePath.isRootPath()) {
@@ -34,30 +32,38 @@ public class Controller {
         }
 
         if (resourcePath.is("/login")) {
-            return loginByUri(requestUri);
+            return login(requestUri);
         }
 
-        final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath.getResourcePath());
-
-        return ResponseEntity.of(HttpStatus.OK, resourceFileUrl);
+        return ResponseEntity.of(HttpStatus.OK, resourcePath.getResourcePath());
     }
 
-    private ResponseEntity loginByUri(final RequestUri requestUri) {
+    private ResponseEntity login(final RequestUri requestUri) {
+        if (requestUri.isQueryParameterEmpty()) {
+            return ResponseEntity.of(HttpStatus.OK, "/login.html");
+        }
+
         final QueryParameters queryParameters = requestUri.getQueryParameters();
-        login(queryParameters);
 
-        final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + "/login.html");
-        return ResponseEntity.of(HttpStatus.OK, resourceFileUrl);
-    }
-
-    private void login(final QueryParameters queryParameters) {
         final String account = queryParameters.search("account");
         final String password = queryParameters.search("password");
 
-        final User findUser = InMemoryUserRepository.findByAccount(account)
-                                                    .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-        if (findUser.checkPassword(password)) {
-            log.info("user: {}", findUser);
-        }
+        return InMemoryUserRepository.findByAccount(account)
+                                     .filter(user -> user.checkPassword(password))
+                                     .map(this::loginSuccess)
+                                     .orElseGet(this::loginFail);
+    }
+
+    private ResponseEntity loginSuccess(final User findUser) {
+        log.info("user: {}", findUser);
+        final String resourcePath = DIRECTORY_SEPARATOR + INDEX_FILE;
+
+        return ResponseEntity.of(HttpStatus.FOUND, resourcePath);
+    }
+
+    private ResponseEntity loginFail() {
+        final String resourcePath = DIRECTORY_SEPARATOR + HttpStatus.UNAUTHORIZED.getResourceName();
+
+        return ResponseEntity.of(HttpStatus.UNAUTHORIZED, resourcePath);
     }
 }

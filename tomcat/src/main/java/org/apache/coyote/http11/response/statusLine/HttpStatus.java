@@ -5,6 +5,7 @@ public enum HttpStatus {
     OK(200, "OK", ""),
     CREATED(201, "Created", ""),
     NO_CONTENT(204, "No Content", ""),
+    FOUND(302, "Found", ""),
     BAD_REQUEST(400, "Bad Request", ""),
     UNAUTHORIZED(401, "Unauthorized", "401.html"),
     FORBIDDEN(403, "Forbidden", ""),

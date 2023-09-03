@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringTokenizer;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -44,6 +46,11 @@ public class HttpRequest {
     }
 
     public boolean isUriEqualTo(final String uri) {
+        final int startpointOfQueryParameter = this.uri.lastIndexOf("?");
+        if (startpointOfQueryParameter != -1) {
+            final String uriWithoutQueryParameter = this.uri.substring(0, startpointOfQueryParameter);
+            return Objects.equals(uriWithoutQueryParameter, uri);
+        }
         return Objects.equals(this.uri, uri);
     }
 
@@ -57,5 +64,20 @@ public class HttpRequest {
 
     public String getEndPoint() {
         return this.uri.substring(this.uri.lastIndexOf("/") + 1, this.uri.length());
+    }
+
+    public Map<String, String> getQueryParameters() {
+        final HashMap<String, String> queryParameters = new HashMap<>();
+        final String parameters = this.uri.substring(this.uri.lastIndexOf("?") + 1, this.uri.length());
+        for (String parameter : parameters.split("&")) {
+            final String key = parameter.split("=")[0];
+            final String value = parameter.split("=")[1];
+            queryParameters.put(key, value);
+        }
+        return queryParameters;
+    }
+
+    public String getQueryParameter(String parameter) {
+        return this.getQueryParameters().get(parameter);
     }
 }

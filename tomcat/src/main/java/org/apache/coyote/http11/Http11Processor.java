@@ -21,7 +21,8 @@ public class Http11Processor implements Runnable, Processor {
             new IndexPageHandler(),
             new IndexCSSHandler(),
             new HttpJavascriptHandler(),
-            new HttpAssetHandler()
+            new HttpAssetHandler(),
+            new LoginPageHandler()
     );
 
     public Http11Processor(final Socket connection) {

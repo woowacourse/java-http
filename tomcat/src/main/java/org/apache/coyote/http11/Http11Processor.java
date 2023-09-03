@@ -40,6 +40,15 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestLines = extractRequestLines(inputStream);
             final var requestURI = extractResourceName(requestLines);
+
+            if ("/".equals(requestURI)) {
+                final var response = Response.of(OK, "text/html", "Hello world!").toString();
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            
 //            Request request = Request.parse(inputStream);
             final var resource = getClass().getClassLoader().getResource("static" + requestURI);
 

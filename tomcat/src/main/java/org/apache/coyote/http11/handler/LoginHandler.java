@@ -13,19 +13,18 @@ import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticResourceHandler implements HttpHandler {
+public class LoginHandler implements HttpHandler {
 
-	private static final String RESOURCE_PREFIX = "static";
+	private static final String END_POINT = "/login";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
-		final URL resourceUrl = extractURL(request);
-		return resourceUrl != null;
+		return request.getEndPoint().equals(END_POINT);
 	}
 
 	@Override
 	public HttpResponse handleTo(final HttpRequest request) throws IOException {
-		final String body = resolveBody(request);
+		final String body = resolveBody();
 		return new HttpResponse(
 			OK_200,
 			body,
@@ -33,20 +32,16 @@ public class StaticResourceHandler implements HttpHandler {
 		);
 	}
 
-	private String resolveBody(final HttpRequest request) throws IOException {
-		final URL url = extractURL(request);
+	private String resolveBody() throws IOException {
+		final URL url = getClass().getClassLoader()
+			.getResource("static/login.html");
 		return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 	}
 
-	private HttpHeaders resolveHeader(final HttpRequest request, final String body) {
-		final MimeType mimeType = MimeType.parseEndpoint(request.getEndPoint()); final HttpHeaders headers = new HttpHeaders();
-		headers.put(CONTENT_TYPE.getValue(), mimeType.getValue());
+	private HttpHeaders resolveHeader(HttpRequest request, String body) {
+		final HttpHeaders headers = new HttpHeaders();
+		headers.put(CONTENT_TYPE.getValue(), MimeType.HTML.getValue());
 		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
 		return headers;
-	}
-
-	private URL extractURL(final HttpRequest request) {
-		return getClass().getClassLoader()
-			.getResource(RESOURCE_PREFIX.concat(request.getEndPoint()));
 	}
 }

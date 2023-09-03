@@ -30,4 +30,8 @@ public class Cookie {
     public boolean hasNotKey(final String key) {
         return !cookieMap.containsKey(key);
     }
+
+    public String getCookieValue(final String cookieKey) {
+        return cookieMap.get(cookieKey);
+    }
 }

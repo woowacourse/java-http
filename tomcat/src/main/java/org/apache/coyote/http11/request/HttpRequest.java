@@ -3,10 +3,14 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.MessageBody;
+import org.apache.coyote.http11.security.Cookie;
+import org.apache.coyote.http11.security.Session;
+import org.apache.coyote.http11.security.SessionManager;
 
 public class HttpRequest {
 
@@ -39,6 +43,20 @@ public class HttpRequest {
         br.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
         return MessageBody.from(requestBody);
+    }
+
+    public Session getSession(final boolean create) {
+        SessionManager sessionManager = new SessionManager();
+
+        if (create) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        }
+
+        String cookieValue = (String) requestHeaders.getHeaderValue(HttpHeaderName.COOKIE.getValue());
+        Cookie cookie = Cookie.from(cookieValue);
+        return sessionManager.findSession(cookie.getCookieValue("JSESSIONID"));
     }
 
     public HttpVersion getHttpVersion() {

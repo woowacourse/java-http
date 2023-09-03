@@ -11,12 +11,14 @@ import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.exception.HttpMethodNotAllowedException;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
 import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.security.Cookie;
+import org.apache.coyote.http11.security.Session;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,17 @@ public class LoginHandler implements RequestHandler {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.getRequestLine().getHttpMethod() == HttpMethod.GET) {
+            Cookie cookie = Cookie.from((String) httpRequest.getRequestHeaders().getHeaderValue(HttpHeaderName.COOKIE.getValue()));
+            String sessionId = cookie.getCookieValue("JSESSIONID");
+            if (sessionId != null) {
+                StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
+                ResponseHeaders responseHeaders = new ResponseHeaders();
+                responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
+                responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/index.html");
+                MessageBody messageBody = MessageBody.from("");
+                return new HttpResponse(statusLine, responseHeaders, messageBody);
+            }
+
             StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.OK);
 
             String responseBody = FileReader.read("/login.html");
@@ -66,23 +79,16 @@ public class LoginHandler implements RequestHandler {
             String account = (String) formDataMap.get("account");
             String password = (String) formDataMap.get("password");
 
-            checkLoginWithUserInfo(responseHeaders, account, password);
-
-
-            String cookieValue = (String) httpRequest.getRequestHeaders().getHeaderValue(HttpHeaderName.COOKIE.getValue());
-            Cookie cookie = Cookie.from(cookieValue);
-            if (cookie.hasNotKey("JSESSIONID")) {
-                UUID sessionId = UUID.randomUUID();
-                responseHeaders.addHeader(HttpHeaderName.SET_COOKIE.getValue(), "JSESSIONID=" + sessionId);
-            }
-
+            checkLoginWithUserInfo(responseHeaders, httpRequest, account, password);
 
             return new HttpResponse(statusLine, responseHeaders, messageBody);
         }
         throw new HttpMethodNotAllowedException("허용되지 않는 HTTP Method입니다.");
     }
 
-    private void checkLoginWithUserInfo(final ResponseHeaders responseHeaders, final String account, final String password) {
+    private void checkLoginWithUserInfo(final ResponseHeaders responseHeaders, final HttpRequest httpRequest,
+                                        final String account, final String password) {
+        RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
 
         if (optionalUser.isPresent()) {
@@ -90,6 +96,17 @@ public class LoginHandler implements RequestHandler {
             if (user.checkPassword(password)) {
                 responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/index.html");
                 log.info("user : {}", user);
+
+                String cookieValue = (String) requestHeaders.getHeaderValue(HttpHeaderName.COOKIE.getValue());
+                Cookie cookie = Cookie.from(cookieValue);
+                if (cookie.hasNotKey("JSESSIONID")) {
+                    UUID sessionId = UUID.randomUUID();
+                    responseHeaders.addHeader(HttpHeaderName.SET_COOKIE.getValue(), "JSESSIONID=" + sessionId);
+                    Session session = httpRequest.getSession(true);
+                    session.setAttribute("user", user);
+                    log.info("create sessionId : {}", session.getId());
+                }
+
             } else {
                 responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/401.html");
             }

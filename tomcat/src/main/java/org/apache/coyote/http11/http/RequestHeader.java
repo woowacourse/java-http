@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestHeader {
+
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> headers;
 
     private RequestHeader(Map<String, String> headers) {
@@ -21,5 +24,13 @@ public class RequestHeader {
             line = httpRequestHeader.readLine();
         }
         return new RequestHeader(headerValues);
+    }
+
+    public int getContentLength() {
+        if (headers.containsKey(CONTENT_LENGTH)) {
+            String contentLengthValue = headers.get(CONTENT_LENGTH).trim();
+            return Integer.parseInt(contentLengthValue);
+        }
+        return 0;
     }
 }

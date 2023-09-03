@@ -17,7 +17,18 @@ public class ResourceProvider {
     }
 
     private Optional<URL> findFileURL(String resourcePath) {
-        return Optional.ofNullable(getClass().getClassLoader().getResource("static" + resourcePath));
+        try {
+            URL resourceURL = getClass().getClassLoader().getResource("static" + resourcePath);
+            if (resourceURL == null) {
+                return Optional.empty();
+            }
+            if (new File(resourceURL.toURI()).isDirectory()) {
+                return Optional.empty();
+            }
+            return Optional.of(resourceURL);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String resourceBodyOf(String resourcePath) {

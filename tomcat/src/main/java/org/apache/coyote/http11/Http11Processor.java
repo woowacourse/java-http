@@ -4,7 +4,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.LoginException;
+import org.apache.coyote.http11.exception.NotCorrectPasswordException;
+import org.apache.coyote.http11.exception.NotFoundAccountException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +75,10 @@ public class Http11Processor implements Runnable, Processor {
     private String login(final String url, final Map<String, String> requestParam) {
         if (!requestParam.isEmpty()) {
             final User user = InMemoryUserRepository.findByAccount(requestParam.get(ACCOUNT))
-                    .orElseThrow(() -> new LoginException("사용자 정보가 일치하지 않습니다."));
+                    .orElseThrow(NotFoundAccountException::new);
 
             if (!user.checkPassword(requestParam.get(PASSWORD))) {
-                throw new LoginException("패스워드가 일치하지 않습니다.");
+                throw new NotCorrectPasswordException();
             }
             log.info(user.toString());
         }

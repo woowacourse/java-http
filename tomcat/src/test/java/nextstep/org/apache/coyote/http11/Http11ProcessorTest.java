@@ -1,7 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.exception.LoginException;
+import org.apache.coyote.http11.exception.NotFoundAccountException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -179,6 +179,6 @@ class Http11ProcessorTest {
 
         // when, then
         assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(LoginException.class);
+                .isExactlyInstanceOf(NotFoundAccountException.class);
     }
 }

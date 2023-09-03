@@ -24,10 +24,6 @@ public enum HttpContentType {
                 .orElse(null);
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
     public String getContentType() {
         return contentType;
     }

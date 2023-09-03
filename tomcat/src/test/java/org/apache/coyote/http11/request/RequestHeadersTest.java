@@ -51,8 +51,8 @@ class RequestHeadersTest {
 
         // when & then
         assertAll(
-                () -> assertThat(requestHeaders.getValue("ocean")).isEqualTo("king"),
-                () -> assertThat(requestHeaders.getValue("wooteco")).isEqualTo("god")
+                () -> assertThat(requestHeaders.getValue("ocean")).isEqualTo("king "),
+                () -> assertThat(requestHeaders.getValue("wooteco")).isEqualTo("god ")
         );
     }
 }

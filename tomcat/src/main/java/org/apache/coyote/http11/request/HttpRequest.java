@@ -35,7 +35,4 @@ public class HttpRequest {
         return requestURL;
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
-    }
 }

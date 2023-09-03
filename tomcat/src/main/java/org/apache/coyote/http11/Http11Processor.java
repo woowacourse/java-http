@@ -6,6 +6,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.response.StatusLine;
@@ -39,44 +41,14 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream();
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            final List<String> requestHeaderLines = new ArrayList<>();
+            final Request request = Request.from(bufferedReader);
 
-            String nextLine;
-            while (!"".equals(nextLine = bufferedReader.readLine())) {
-                if (nextLine == null) {
-                    return;
-                }
-                requestHeaderLines.add(nextLine);
-            }
-
-            final String requestFirstLine = requestHeaderLines.get(0);
-
-            final String[] requestFirstLineElements = requestFirstLine.split(" ");
-            final String requestMethod = requestFirstLineElements[0];
-            final String requestUrl = requestFirstLineElements[1];
-            final String requestProtocol = requestFirstLineElements[2];
-
-            final Map<String, String> requestHeaders = getRequestHeaders(requestHeaderLines);
-
-            String requestUri = requestUrl;
-
-            Map<String, String> requestQueryParameter = new HashMap<>();
-
-            if (requestUrl.contains("?")) {
-                requestUri = requestUrl.substring(0, requestUrl.indexOf("?"));
-                requestQueryParameter = getQueryString(requestUrl);
-            }
-
-            log.info("method={}\r\nuri={}\r\nprotocol={}", requestMethod, requestUri, requestProtocol);
-            log.info("queryString={}", requestQueryParameter);
-
-            final Response response = getResponse(requestUri, requestHeaders, requestQueryParameter);
-            final String requestAcceptHeader = requestHeaders.getOrDefault("accept", "");
-            response.decideContentType(requestAcceptHeader, requestUri);
+            final Response response = handle(request);
+            response.decideContentType(request);
             response.decideContentLength();
 
             outputStream.write(response.parseString().getBytes());
@@ -86,71 +58,46 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getRequestHeaders(final List<String> requestHeaderLines) {
-        final Map<String, String> requestHeaders = new HashMap<>();
-        for (int i = 1; i < requestHeaderLines.size(); i++) {
-            final String requestHeader = requestHeaderLines.get(i);
-            final String[] requestHeaderNameAndValue = requestHeader.split(":");
-            final String requestHeaderName = requestHeaderNameAndValue[0].trim().toLowerCase();
-            final String requestHeaderValue = requestHeaderNameAndValue[1].trim().toLowerCase();
-            requestHeaders.put(requestHeaderName, requestHeaderValue);
+    private Response handle(final Request request) throws URISyntaxException, IOException {
+        final String requestPath = request.getRequestLine().getRequestPath();
+        if (requestPath.contains(".")) {
+            return findStaticResource(requestPath);
         }
-        return requestHeaders;
+        return mapPath(request);
     }
 
-    private Map<String, String> getQueryString(final String requestUri) {
-        final Map<String, String> requestQueryParameters = new HashMap<>();
-        final String queryStrings = requestUri.substring(requestUri.indexOf("?") + 1);
-        final String[] queryStringsNameAndValue = queryStrings.split("&");
-        for (String queryString : queryStringsNameAndValue) {
-            final String[] queryStringNameAndValue = queryString.split("=");
-            final String name = queryStringNameAndValue[0];
-            final String value = queryStringNameAndValue[1];
-            requestQueryParameters.put(name, value);
-        }
-        return requestQueryParameters;
-    }
+    private Response mapPath(final Request request) throws IOException, URISyntaxException {
 
-    private Response getResponse(final String requestUri,
-                               final Map<String, String> requestHeaders,
-                               final Map<String, String> requestParameter) throws URISyntaxException, IOException {
-        if (requestUri.contains(".")) {
-            return findStaticResource(requestUri, requestHeaders, requestParameter);
-        }
-        return mapPath(requestUri, requestHeaders, requestParameter);
-    }
+        final String requestPath = request.getRequestLine().getRequestPath();
+        final RequestParameters requestParameters = request.getRequestParameters();
 
-    private Response mapPath(final String requestUri,
-                           final Map<String, String> requestHeaders,
-                           final Map<String, String> requestParameter) throws IOException, URISyntaxException {
-        if (requestUri.equals("/")) {
+        if ("/".equals(requestPath)) {
             return new Response("Hello world!");
         }
-        if ("/login".equals(requestUri)) {
-            final String account = requestParameter.get("account");
+
+        if ("/login".equals(requestPath)) {
+            final String account = requestParameters.getValue("account");
             if (account == null) {
-                return findStaticResource("/login.html", requestHeaders, requestParameter);
+                return findStaticResource("/login.html");
             }
             final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
             if (maybeUser.isEmpty()) {
                 return Response.UNAUTHORIZED_RESPONSE;
             }
             final User user = maybeUser.get();
-            if (!user.checkPassword(requestParameter.get("password"))) {
+            if (!user.checkPassword(requestParameters.getValue("password"))) {
                 return Response.UNAUTHORIZED_RESPONSE;
             }
             log.info("user: {}", user);
-
             final Headers headers = new Headers();
             headers.addHeader(ResponseHeader.LOCATION, "/index.html");
             return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
+
         return Response.NOT_FOUND_RESPONSE;
     }
 
-    private Response findStaticResource(final String requestUri,
-                                      final Map<String, String> requestHeaders,
-                                      final Map<String, String> requestParameter) throws IOException, URISyntaxException {
+    private Response findStaticResource(final String requestUri) throws IOException, URISyntaxException {
         final ClassLoader classLoader = getClass().getClassLoader();
         final String name = "static" + requestUri;
         final URL fileURL = classLoader.getResource(name);

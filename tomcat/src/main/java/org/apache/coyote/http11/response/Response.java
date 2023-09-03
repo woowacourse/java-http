@@ -2,7 +2,11 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.header.EntityHeader;
 import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.RequestHeader;
 import org.apache.coyote.http11.header.ResponseHeader;
+import org.apache.coyote.http11.request.Request;
+
+import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 
 public class Response {
 
@@ -28,11 +32,6 @@ public class Response {
     }
 
     public Response(final StatusLine statusLine,
-                    final String body) {
-        this(statusLine, new Headers(), body);
-    }
-
-    public Response(final StatusLine statusLine,
                     final Headers headers,
                     final String body) {
         this.statusLine = statusLine;
@@ -40,9 +39,11 @@ public class Response {
         this.body = body;
     }
 
-    public void decideContentType(final String requestAcceptHeader,
-                                  final String requestUri) {
-        headers.addHeader(EntityHeader.CONTENT_TYPE, decideResponseContentType(requestAcceptHeader, requestUri));
+    public void decideContentType(final Request request) {
+        final String acceptHeaderValue = request.getHeaders().getValue(RequestHeader.ACCEPT);
+        final String requestPath = request.getRequestLine().getRequestPath();
+        final String contentTypeValue = decideResponseContentType(acceptHeaderValue, requestPath);
+        headers.addHeader(CONTENT_TYPE, contentTypeValue);
     }
 
     private String decideResponseContentType(final String requestAcceptHeader,
@@ -68,18 +69,6 @@ public class Response {
                 headers.parseResponse(),
                 "",
                 body);
-    }
-
-    public StatusLine getStatusLine() {
-        return statusLine;
-    }
-
-    public Headers getHeaders() {
-        return headers;
-    }
-
-    public String getBody() {
-        return body;
     }
 
     @Override

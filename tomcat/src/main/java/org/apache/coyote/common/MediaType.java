@@ -3,7 +3,8 @@ package org.apache.coyote.common;
 public enum MediaType {
 
     TEXT_HTML("text/html"),
-    TEXT_CSS("text/css");
+    TEXT_CSS("text/css"),
+    APPLICATION_JAVASCRIPT("application/javascript");
 
     private final String source;
 

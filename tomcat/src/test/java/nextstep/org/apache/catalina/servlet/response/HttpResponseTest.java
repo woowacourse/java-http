@@ -1,5 +1,6 @@
 package nextstep.org.apache.catalina.servlet.response;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.catalina.servlet.response.HttpResponse;
@@ -28,60 +29,23 @@ class HttpResponseTest {
     }
 
     @Test
-    void 응답_메세지를_만들_수_있다() {
-        // given
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine(HttpStatus.OK));
-        response.addHeader("Content-Type", "text/html;charset=utf-8");
-        response.setMessageBody("mallang");
-
-        // when
-        String actual = response.toString();
-
-        // then
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 7 \r\n" +
-                "\r\n" +
-                "mallang";
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void 응답_메세지가_없는_경우() {
-        // given
-        HttpResponse response = new HttpResponse();
-        response.setStatusLine(new StatusLine(HttpStatus.OK));
-        response.addHeader("hi", "yes");
-
-        // when
-        String actual = response.toString();
-
-        // then
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "hi: yes \r\n" +
-                "\r\n";
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
     void 쿠키를_세팅할_수_있다() {
         // given
         HttpResponse response = new HttpResponse();
         response.setStatusLine(new StatusLine(HttpStatus.OK));
         response.addHeader("hi", "yes");
+
+        // when
         response.addCookie("mallang", "1234");
         response.addCookie("썬샷", "12345");
 
-        // when
-        String actual = response.toString();
-
         // then
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Set-Cookie: mallang=1234 \r\n" +
-                "Set-Cookie: 썬샷=12345 \r\n" +
-                "hi: yes \r\n" +
-                "\r\n";
-        assertThat(actual).isEqualTo(expected);
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("hi", "yes");
+        expected.addCookie("mallang", "1234");
+        expected.addCookie("썬샷", "12345");
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 }

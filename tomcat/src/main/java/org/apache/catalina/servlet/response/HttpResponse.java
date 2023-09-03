@@ -58,21 +58,7 @@ public class HttpResponse {
         return writer;
     }
 
-    @Override
-    public String toString() {
-        return statusLine.toString()
-                + cookieHeadersToString()
-                + headers.toString()
-                + ((messageBody == null) ? "" : messageBody);
-    }
-
-    private String cookieHeadersToString() {
-        StringBuilder sb = new StringBuilder();
-        for (String name : cookies.cookies().keySet()) {
-            sb.append("Set-Cookie: ")
-                    .append(name).append("=").append(cookies.get(name))
-                    .append(" \r\n");
-        }
-        return sb.toString();
+    public String messageBody() {
+        return messageBody;
     }
 }

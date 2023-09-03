@@ -8,6 +8,8 @@ import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
 import org.apache.catalina.servlet.request.StartLine;
 import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.HttpStatus;
+import org.apache.catalina.servlet.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -56,10 +58,11 @@ class SignUpRequestHandlerTest {
         handler.handle(request, response);
 
         // then
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n";
-
-        assertThat(response.toString()).isEqualTo(expected);
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.FOUND));
+        expected.addHeader("Location", "/index.html");
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 }

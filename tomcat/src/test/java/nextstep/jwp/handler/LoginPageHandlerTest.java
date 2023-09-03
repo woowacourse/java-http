@@ -1,6 +1,5 @@
 package nextstep.jwp.handler;
 
-import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -13,6 +12,8 @@ import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
 import org.apache.catalina.servlet.request.StartLine;
 import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.HttpStatus;
+import org.apache.catalina.servlet.response.StatusLine;
 import org.apache.catalina.servlet.session.Session;
 import org.apache.catalina.servlet.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
@@ -63,8 +64,12 @@ class LoginPageHandlerTest {
         handler.handle(request, response);
 
         // then
-        assertThat(response.statusLine().httpStatus()).isEqualTo(FOUND);
-        assertThat(response.headers().headers().get("Location")).isEqualTo("/index.html");
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.FOUND));
+        expected.addHeader("Location", "/index.html");
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 
     @Test
@@ -83,12 +88,13 @@ class LoginPageHandlerTest {
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3447 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(response.toString()).isEqualTo(expected);
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("Content-Type", "text/html;charset=utf-8");
+        expected.setMessageBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 
     @Test
@@ -106,11 +112,12 @@ class LoginPageHandlerTest {
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3447 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(response.toString()).isEqualTo(expected);
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("Content-Type", "text/html;charset=utf-8");
+        expected.setMessageBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 }

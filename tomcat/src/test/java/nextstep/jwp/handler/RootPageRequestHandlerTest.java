@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.StartLine;
 import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.HttpStatus;
+import org.apache.catalina.servlet.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -30,13 +32,12 @@ class RootPageRequestHandlerTest {
         handler.handle(request, response);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(response.toString()).isEqualTo(expected);
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("Content-Type", "text/html;charset=utf-8");
+        expected.setMessageBody("Hello world!");
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 }

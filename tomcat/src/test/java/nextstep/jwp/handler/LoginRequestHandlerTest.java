@@ -1,5 +1,7 @@
 package nextstep.jwp.handler;
 
+import static org.apache.catalina.servlet.response.HttpStatus.FOUND;
+import static org.apache.catalina.servlet.session.SessionConstant.JSESSIONID;
 import static org.apache.catalina.servlet.session.SessionManager.findSession;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,6 +11,7 @@ import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
 import org.apache.catalina.servlet.request.StartLine;
 import org.apache.catalina.servlet.response.HttpResponse;
+import org.apache.catalina.servlet.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -58,12 +61,15 @@ class LoginRequestHandlerTest {
         handler.handle(request, response);
 
         // then
-        String actual = response.toString();
-        assertThat(actual).contains("HTTP/1.1 302 FOUND \r\n");
-        assertThat(actual).contains("Location: /index.html \r\n");
-        assertThat(actual).contains("Set-Cookie: JSESSIONID=");
         String id = response.cookies().get("JSESSIONID");
+
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(FOUND));
+        expected.addHeader("Location", "/index.html");
+        expected.addCookie(JSESSIONID, id);
         assertThat(findSession(id)).isNotNull();
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 
     @Nested
@@ -86,11 +92,11 @@ class LoginRequestHandlerTest {
             handler.handle(request, response);
 
             // then
-            var expected = "HTTP/1.1 302 FOUND \r\n" +
-                    "Location: /401.html \r\n" +
-                    "\r\n";
-            assertThat(response.toString()).isEqualTo(expected);
-            ;
+            HttpResponse expected = new HttpResponse();
+            expected.setStatusLine(new StatusLine(FOUND));
+            expected.addHeader("Location", "/401.html");
+            assertThat(response).usingRecursiveComparison()
+                    .isEqualTo(expected);
         }
 
         @Test
@@ -110,10 +116,11 @@ class LoginRequestHandlerTest {
             handler.handle(request, response);
 
             // then
-            var expected = "HTTP/1.1 302 FOUND \r\n" +
-                    "Location: /401.html \r\n" +
-                    "\r\n";
-            assertThat(response.toString()).isEqualTo(expected);
+            HttpResponse expected = new HttpResponse();
+            expected.setStatusLine(new StatusLine(FOUND));
+            expected.addHeader("Location", "/401.html");
+            assertThat(response).usingRecursiveComparison()
+                    .isEqualTo(expected);
         }
     }
 }

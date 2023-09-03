@@ -22,7 +22,9 @@ public class Http11Processor implements Runnable, Processor {
             new IndexCSSHandler(),
             new HttpJavascriptHandler(),
             new HttpAssetHandler(),
-            new LoginPageHandler()
+            new LoginPageHandler(),
+            new RegistrationPageHandler(),
+            new RegistrationHandler()
     );
 
     public Http11Processor(final Socket connection) {

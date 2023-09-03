@@ -1,42 +1,27 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import nextstep.jwp.exception.UncheckedServletException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class HttpRequest {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private String uri;
 
     private String method;
 
-    private String uri;
+    private String requestBody;
 
     public static HttpRequest from(Socket connection) {
-        try {
-            final var inputStream = connection.getInputStream();
-            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-            final StringTokenizer stringTokenizer = new StringTokenizer(bufferedReader.readLine());
-            final String httpRequestMethod = stringTokenizer.nextToken();
-            final String httpRequestUri = stringTokenizer.nextToken();
-            return new HttpRequest(httpRequestMethod, httpRequestUri);
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
+        return HttpRequestParser.parseFromSocket(connection);
     }
 
-    public HttpRequest(final String method, final String uri) {
-        this.method = method;
+    public HttpRequest(String uri, String method, String requestBody) {
         this.uri = uri;
+        this.method = method;
+        this.requestBody = requestBody;
     }
 
     public boolean isMethodEqualTo(final String method) {
@@ -69,8 +54,24 @@ public class HttpRequest {
             return Map.of();
         }
 
-        final HashMap<String, String> queryParameters = new HashMap<>();
         final String parameters = this.uri.substring(this.uri.lastIndexOf("?") + 1, this.uri.length());
+        return parseParameterAsMap(parameters);
+    }
+
+    public boolean hasQueryParameter() {
+        return !Objects.equals(this.uri.lastIndexOf("?"), -1);
+    }
+
+    public Optional<String> getQueryParameter(String parameter) {
+        return Optional.ofNullable(this.getQueryParameters().get(parameter));
+    }
+
+    public Map<String, String> getRequestBodyAsMap() {
+        return parseParameterAsMap(this.requestBody);
+    }
+
+    private HashMap<String, String> parseParameterAsMap(String parameters) {
+        final HashMap<String, String> queryParameters = new HashMap<>();
         for (String parameter : parameters.split("&")) {
             if (isInValidParameter(parameter)) {
                 continue;
@@ -84,13 +85,5 @@ public class HttpRequest {
 
     private boolean isInValidParameter(String parameter) {
         return Objects.isNull(parameter) || !Objects.equals(parameter.split("=").length, 2);
-    }
-
-    public boolean hasQueryParameter() {
-        return !Objects.equals(this.uri.lastIndexOf("?"), -1);
-    }
-
-    public Optional<String> getQueryParameter(String parameter) {
-        return Optional.ofNullable(this.getQueryParameters().get(parameter));
     }
 }

@@ -2,9 +2,9 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.session.HttpSession;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpCookieResponse;
@@ -28,7 +28,7 @@ public class LoginHandler implements Handler {
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpMethod httpMethod = request.getHttpMethod();
         if (httpMethod == HttpMethod.GET) {
-            return doGet();
+            return doGet(request);
         }
         if (httpMethod == HttpMethod.POST) {
             return doPost(request);
@@ -36,7 +36,14 @@ public class LoginHandler implements Handler {
         throw new MethodNotAllowedException(List.of(HttpMethod.GET, HttpMethod.POST));
     }
 
-    private HttpResponse doGet() throws IOException {
+    private HttpResponse doGet(HttpRequest request) throws IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
+            response.setHeader("Location", "/index.html");
+            return response;
+        }
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.OK);
         response.setContentBody(ResourceResolver.resolve("/login.html"));
         response.setContentType(HttpContentType.TEXT_HTML);
@@ -50,15 +57,17 @@ public class LoginHandler implements Handler {
         String password = query.get("password");
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
-            .map(this::loginSuccess)
+            .map(user -> loginSuccess(request, user))
             .orElseGet(this::loginFail);
     }
 
-    private HttpResponse loginSuccess(User user) {
+    private HttpResponse loginSuccess(HttpRequest request, User user) {
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
+        HttpSession session = request.getSession(true);
+        session.setAttribute("user", user);
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
         response.addHeader("Location", "/index.html");
-        response.setCookie(new HttpCookieResponse("JSESSIONID", UUID.randomUUID().toString()));
+        response.setCookie(new HttpCookieResponse("JSESSIONID", session.getId()));
         return response;
     }
 

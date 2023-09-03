@@ -32,7 +32,12 @@ public class LoginController implements Controller {
         final String password = requestBody.get("password");
         final boolean loginSuccess = login(account, password);
         if (loginSuccess) {
-            return new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML.getValue(), ViewLoader.toIndex());
+            HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML.getValue(),
+                    ViewLoader.toIndex());
+            if(!request.hasJSessionId()) {
+                httpResponse.setCookie();
+            }
+            return httpResponse;
         }
         return HttpResponse.toUnauthorized();
     }

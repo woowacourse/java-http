@@ -23,6 +23,7 @@ public class HttpRequest {
     private final String uri;
     private final String version;
     private final Map<String, String> headers = new HashMap<>();
+    private HttpCookie cookie;
     private Map<String, String> requestBody;
 
     private HttpRequest(final String method, final String uri, final String version) {
@@ -66,10 +67,14 @@ public class HttpRequest {
     private void initHeaders(final BufferedReader bufferedReader) throws IOException {
         String line = "";
 
-        while(!(line = bufferedReader.readLine()).isBlank()) {
+        while (!(line = bufferedReader.readLine()).isBlank()) {
             final String[] headerInfo = line.split(":");
             final String headerName = headerInfo[0];
             final String value = headerInfo[1].trim();
+
+            if (headerName.equals("Cookie")) {
+                cookie = new HttpCookie(value);
+            }
             headers.put(headerName, value);
         }
     }
@@ -146,5 +151,16 @@ public class HttpRequest {
 
     public Map<String, String> getRequestBody() {
         return requestBody;
+    }
+
+    public boolean hasCookie() {
+        return cookie != null;
+    }
+
+    public boolean hasJSessionId() {
+        if(hasCookie()){
+            return cookie.hasJSessionId();
+        }
+        return false;
     }
 }

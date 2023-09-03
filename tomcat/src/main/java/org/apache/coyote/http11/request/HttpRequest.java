@@ -31,6 +31,9 @@ public class HttpRequest {
 
 	private static String extractEndPoint(final String uri) {
 		final int index = uri.indexOf("?");
+		if (index == -1) {
+			return uri;
+		}
 		return uri.substring(0, index);
 	}
 

@@ -24,7 +24,7 @@ public class QueryParam {
 		final int queryStartIndex = uri.indexOf(QUERY_START_CHAR);
 		final String queryString = uri.substring(queryStartIndex + VALUE_INDEX);
 
-		if (queryString.isBlank()) {
+		if (queryStartIndex == -1) {
 			return new QueryParam(Map.of());
 		}
 

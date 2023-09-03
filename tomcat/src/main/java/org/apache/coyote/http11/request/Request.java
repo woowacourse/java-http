@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.HttpVersion;
+
 public class Request {
     private final RequestLine line;
     private final RequestHeader header;
@@ -25,5 +27,13 @@ public class Request {
 
     public Map<String, String> getHeader() {
         return header.getHeader();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return line.getHttpMethod();
+    }
+
+    public HttpVersion getHttpVersion() {
+        return line.getHttpVersion();
     }
 }

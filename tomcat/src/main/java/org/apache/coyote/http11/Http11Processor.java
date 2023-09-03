@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -52,22 +55,65 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createBody(String request) throws IOException {
-        String path = null;
+        String uri = "";
 
         for (String element : request.split(" ")) {
             if (element.startsWith("/")) {
-                path = element;
+                uri = element;
             }
+        }
+
+        int index = uri.indexOf("?");
+        String path = uri;
+        String query = "";
+        if (index != -1) {
+            path = uri.substring(0, index);
+            query = uri.substring(index + 1);
         }
 
         if (Objects.equals(path, "/")) {
             return "Hello world!";
         }
 
+        if (Objects.equals(path, "/login")) {
+            createLogin(query);
+        }
+
+        if (!path.contains(".")) {
+            path += ".html";
+        }
+
         final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
         final URL resource = systemClassLoader.getResource("static" + path);
-        File file = new File(resource.getFile());
+        File file = new File(resource.getPath());
         return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    private void createLogin(String query) {
+        if (query.isBlank()) {
+            return;
+        }
+
+        String account = "";
+        String password = "";
+
+        for (String parameter : query.split("&")) {
+            int idx = parameter.indexOf("=");
+            String key = parameter.substring(0, idx);
+            String value = parameter.substring(idx + 1);
+            if ("account".equals(key)) {
+                account = value;
+            }
+            if ("password".equals(key)) {
+                password = value;
+            }
+        }
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+        if (user.checkPassword(password)) {
+            System.out.println(user);
+        }
     }
 
     private String createHeader(String request, String body) {

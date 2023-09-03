@@ -11,27 +11,35 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HttpResponse {
 
     private final StatusCode statusCode;
-    private final String request;
+    private final ContentType contentType;
+    private final String responseBody;
+    private final String redirectUrl;
 
-    public HttpResponse(final StatusCode statusCode, final String request) {
+    public HttpResponse(final StatusCode statusCode,
+                        final ContentType contentType,
+                        final String responseBody,
+                        final String redirectUrl) {
         this.statusCode = statusCode;
-        this.request = request;
+        this.contentType = contentType;
+        this.responseBody = responseBody;
+        this.redirectUrl = redirectUrl;
     }
 
     public String getResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType() + ";charset=utf-8 ",
-                "Content-Length: " + request.getBytes().length + " ",
+                "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
-                request);
+                responseBody);
+    }
+    private void initHeader(final ContentType contentType, final String responseBody) {
+        header.put("Content-Type", contentType.getContentType() + ";charset-utf-8");
+        header.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
     }
 
-    private String contentType(){
-
-        final String[] requestLines = request.split("\\s+");
-        System.out.println("request111: "+request);
-        System.out.println("출력: "+requestLines[1]);
-        return ContentType.from(requestLines[1]).getContentType();
+    private void initHeader(final ContentType contentType, final String responseBody, final String redirectUrl) {
+        initHeader(contentType, responseBody);
+        header.put("Location", redirectUrl);
     }
 }

@@ -6,7 +6,8 @@ public enum ContentType {
 
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
-    JS(".js", "text/javascript");
+    JS(".js", "text/javascript"),
+    IMAGE_X_ICON("ico", "image/x-icon");
 
     private final String extension;
     private final String contentType;
@@ -17,9 +18,9 @@ public enum ContentType {
     }
 
     public static ContentType from(final String requestFirstLine) {
-        System.out.println("requestFirstLine: "+requestFirstLine);
-        int dotIndex = requestFirstLine.lastIndexOf(".");
-        String extension = requestFirstLine.substring(dotIndex);
+        final int dotIndex = requestFirstLine.lastIndexOf(".");
+        final String extension = requestFirstLine.substring(dotIndex);
+
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> contentType.isSameExtension(extension))
                 .findFirst()

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
+import org.apache.coyote.http11.controller.util.BodyExtractor;
 import org.apache.coyote.http11.exception.MemberAlreadyExistsException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;

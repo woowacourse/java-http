@@ -1,15 +1,14 @@
 package org.apache.coyote.http11.session;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.catalina.Manager;
 import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.Request;
 
-public class SessionManager implements Manager {
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+public class SessionManager {
+
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     public static boolean loggedIn(Request request) {
         Optional<Cookies> cookie = request.getRequestHeaders().getCookie();
@@ -23,7 +22,7 @@ public class SessionManager implements Manager {
         Optional<String> sessionCookie = cookies.getSessionCookie();
         if (sessionCookie.isPresent()) {
             String sessionId = sessionCookie.get();
-            HttpSession session = SESSIONS.get(sessionId);
+            Session session = SESSIONS.get(sessionId);
             return session != null;
         }
         return false;
@@ -33,18 +32,7 @@ public class SessionManager implements Manager {
         SESSIONS.put(session.getId(), session);
     }
 
-    @Override
-    public void add(HttpSession session) {
+    public void add(Session session) {
         SESSIONS.put(session.getId(), session);
-    }
-
-    @Override
-    public HttpSession findSession(String id) {
-        return SESSIONS.get(id);
-    }
-
-    @Override
-    public void remove(HttpSession session) {
-        SESSIONS.remove(session.getId());
     }
 }

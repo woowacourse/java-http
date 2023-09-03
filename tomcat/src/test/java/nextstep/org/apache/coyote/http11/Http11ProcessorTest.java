@@ -6,17 +6,28 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import nextstep.jwp.handler.LoginRequestHandler;
+import nextstep.jwp.handler.RootPageRequestHandler;
+import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.handler.RequestHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private final List<RequestHandler> requestHandlers = List.of(
+            new RootPageRequestHandler(),
+            new LoginRequestHandler(),
+            new StaticResourceRequestHandler()
+    );
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(requestHandlers, socket);
 
         // when
         processor.process(socket);
@@ -43,7 +54,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(requestHandlers, socket);
 
         // when
         processor.process(socket);
@@ -71,7 +82,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(requestHandlers, socket);
 
         // when
         processor.process(socket);
@@ -98,7 +109,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(requestHandlers, socket);
 
         // when
         processor.process(socket);

@@ -1,11 +1,21 @@
 package nextstep;
 
+import java.util.List;
+import nextstep.jwp.handler.LoginRequestHandler;
+import nextstep.jwp.handler.RootPageRequestHandler;
+import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.coyote.http11.handler.RequestHandler;
 
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
+        List<RequestHandler> requestHandlers = List.of(
+                new RootPageRequestHandler(),
+                new LoginRequestHandler(),
+                new StaticResourceRequestHandler()
+        );
+        final var tomcat = new Tomcat(requestHandlers);
         tomcat.start();
     }
 }

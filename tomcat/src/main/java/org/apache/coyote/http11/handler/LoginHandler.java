@@ -51,7 +51,7 @@ public class LoginHandler implements Handler {
                 headers.add(String.join(" ", "Location: index.html"));
                 if (request.getRequestHeader().doesNotHasJsessionCookie()) {
                     UUID uuid = Cookie.generateCookie();
-                    headers.add(String.join(" ", "Set-Cookie:", String.valueOf(uuid)));
+                    headers.add(String.join(" ", "Set-Cookie: JSESSIONID=", String.valueOf(uuid)));
                 }
                 return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
             } else {

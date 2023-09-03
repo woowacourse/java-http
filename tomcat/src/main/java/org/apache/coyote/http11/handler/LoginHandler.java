@@ -33,7 +33,8 @@ public class LoginHandler implements Handler {
         if (request.getRequestMethod() == RequestMethod.POST) {
             Optional<User> userResult = findUser(request);
             if (userResult.isPresent()) {
-                return loginSuccessResponse(userResult);
+                User user = userResult.get();
+                return loginSuccessResponse(user);
             }
             return loginFailResponse();
         }
@@ -48,10 +49,9 @@ public class LoginHandler implements Handler {
         return session != null;
     }
 
-    private ResponseEntity loginSuccessResponse(Optional<User> userResult) {
-        User user = userResult.get();
+    private ResponseEntity loginSuccessResponse(User user) {
         ResponseEntity responseEntity = ResponseEntity.redirect("index.html");
-        UUID uuid = createSesstion(user);
+        UUID uuid = createSession(user);
         responseEntity.setCookie("JSESSIONID", uuid.toString());
         return responseEntity;
     }
@@ -65,7 +65,7 @@ public class LoginHandler implements Handler {
                 .filter(user -> user.checkPassword(password));
     }
 
-    private UUID createSesstion(User user) {
+    private UUID createSession(User user) {
         UUID uuid = UUID.randomUUID();
         Session session = new Session(uuid);
         session.setAttribute("user", user);

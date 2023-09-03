@@ -4,7 +4,9 @@ public enum Status {
 
     OK(200, "OK"),
     NOT_FOUND(404, "NOT FOUND"),
-    FOUND(302, "FOUND");
+    FOUND(302, "FOUND"),
+    UNAUTHORIZED(401, "UNAUTHORIZED"),
+    BAD_REQUEST(400, "BAD REQUEST");
 
     private static final String VERSION = "HTTP/1.1";
 

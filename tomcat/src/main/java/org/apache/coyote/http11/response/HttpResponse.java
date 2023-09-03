@@ -41,6 +41,10 @@ public class HttpResponse {
         return new HttpResponse(Status.OK, body);
     }
 
+    public static HttpResponse unAuthorized(final String path) throws NotFoundException, IOException, URISyntaxException {
+        return new HttpResponse(ContentType.of(path), Status.UNAUTHORIZED, ResourceFinder.getStaticResource(path));
+    }
+
     public static HttpResponse okWithResource(final String path) throws IOException, URISyntaxException, NotFoundException {
         return new HttpResponse(ContentType.of(path), Status.OK, ResourceFinder.getStaticResource(path));
     }

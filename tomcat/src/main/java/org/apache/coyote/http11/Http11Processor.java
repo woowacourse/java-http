@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
+import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
@@ -95,7 +96,12 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
         }
 
-        userService.login(queryParams.get("account"), queryParams.get("password"));
+        try {
+            userService.login(queryParams.get("account"), queryParams.get("password"));
+        } catch (UnAuthorizedException e) {
+            return HttpResponse.unAuthorized("/401.html");
+        }
+
         return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
     }
 }

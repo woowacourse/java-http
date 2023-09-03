@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,5 +106,31 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains("text/javascript;");
+    }
+
+    @DisplayName("로그인 페이지를 내려준다.")
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+
+        final String expectedContents = new String(Files.readAllBytes(
+                new File(Objects.requireNonNull(resource).getFile()).toPath())
+        );
+
+        // then
+        assertThat(socket.output()).contains(expectedContents);
     }
 }

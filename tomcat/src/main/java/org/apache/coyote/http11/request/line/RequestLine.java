@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request.line;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class RequestLine {
 
     private final HttpMethod method;
@@ -12,7 +15,11 @@ public class RequestLine {
         this.protocol = protocol;
     }
 
-    public static RequestLine of(HttpMethod method, Path path, Protocol protocol) {
+    public static RequestLine from(String requestLine) {
+        List<String> requestLineElements = Arrays.asList(requestLine.split(" "));
+         HttpMethod method = HttpMethod.from(requestLineElements.get(0));
+         Path path = Path.from(requestLineElements.get(1));
+         Protocol protocol = Protocol.from(requestLineElements.get(2));
         return new RequestLine(method, path, protocol);
     }
 

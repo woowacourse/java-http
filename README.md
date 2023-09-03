@@ -9,6 +9,6 @@
   - [x] Query String을 파싱하면서 로그인 페이지 띄우는 기능을 추가한다.
 - step2
   - [x] 로그인 성공 시 HTTP Status Code 302를 반환하고 리다이렉트 하는 기능 구현
-  - [ ] POST 방식으로 회원가입하는 기능 구현
+  - [x] POST 방식으로 회원가입하는 기능 구현
   - [ ] Cookie에 JSESSIONID 값 저장하는 기능 구현
   - [ ] Session 구현

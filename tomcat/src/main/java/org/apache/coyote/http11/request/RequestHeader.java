@@ -28,4 +28,8 @@ public class RequestHeader {
                 ));
     }
 
+    public String get(final String key) {
+        return headers.get(key);
+    }
+
 }

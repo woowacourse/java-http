@@ -36,6 +36,10 @@ public class RequestHeaders {
                 .collect(Collectors.toList());
     }
 
+    public List<String> get(String key) {
+        return headers.get(key);
+    }
+
     public Map<String, List<String>> headers() {
         return headers;
     }

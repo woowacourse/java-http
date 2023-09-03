@@ -7,11 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Set;
 
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.QueryParam;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ public class LoginHandler implements HttpHandler {
 	private static final String END_POINT = "/login";
 	private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 	private static final String ACCOUNT_PARAM_KEY = "account";
+	private static final String PASSWORD_PARAM_KEY = "password";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
@@ -31,11 +32,14 @@ public class LoginHandler implements HttpHandler {
 
 	@Override
 	public HttpResponse handleTo(final HttpRequest request) throws IOException {
-		final Set<String> accounts = request.getQueryParam().get(ACCOUNT_PARAM_KEY);
-		for (final String account : accounts) {
-			InMemoryUserRepository.findByAccount(account)
-				.ifPresent(user -> log.info(user.toString()));
-		}
+		final QueryParam queryParam = request.getQueryParam();
+		final String account = queryParam.get(ACCOUNT_PARAM_KEY);
+		InMemoryUserRepository.findByAccount(account)
+			.ifPresent(user -> {
+				if (user.checkPassword(queryParam.get(PASSWORD_PARAM_KEY))) {
+					log.info(user.toString());
+				}
+			});
 		final String body = resolveBody();
 		return new HttpResponse(
 			OK_200,

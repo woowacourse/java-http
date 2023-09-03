@@ -18,11 +18,14 @@ class LoginHandlerTest {
         String validAccount = "gugu";
         String validPassword = "password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=" + validAccount + "&password=" + validPassword + " HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
-                "");
+                "account=" + validAccount + "&password=" + validPassword);
 
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
@@ -39,11 +42,14 @@ class LoginHandlerTest {
         String invalidAccount = "leo";
         String invalidPassword = "password1234";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=" + invalidAccount + "&password=" + invalidPassword + " HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
-                "");
+                "account=" + invalidAccount + "&password=" + invalidPassword);
 
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));

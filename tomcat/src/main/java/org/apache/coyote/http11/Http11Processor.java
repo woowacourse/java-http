@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int INDEX_URI = 1;
 
     private final Socket connection;
 
@@ -40,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             String request = bufferedReader.readLine();
 
             List<String> requests = Arrays.stream(request.split(" ")).collect(Collectors.toList());
-            String requestURI = requests.get(1);
+            String requestURI = requests.get(INDEX_URI);
             String response = createResponse(requestURI);
 
             outputStream.write(response.getBytes());
@@ -69,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody
         );

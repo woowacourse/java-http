@@ -2,10 +2,12 @@ package org.apache.coyote.http11.handler;
 
 import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -14,6 +16,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 class LoginHandlerTest {
 
@@ -77,6 +80,9 @@ class LoginHandlerTest {
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
 				.body(requestBody)
 				.build();
+			final MockedStatic<UUID> mockUUID = mockStatic(UUID.class);
+			final UUID uuidValue = new UUID(517873L, 2190581L);
+			when(UUID.randomUUID()).thenReturn(uuidValue);
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
@@ -84,10 +90,12 @@ class LoginHandlerTest {
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 0 \r\n" +
 				"Location: http://localhost:8080/index.html \r\n" +
+				"Set-cookie: " + uuidValue + " \r\n" +
 				"\r\n";
 
 			assertThat(actual.buildResponse())
 				.isEqualTo(expected);
+			mockUUID.close();
 		}
 
 		@Test

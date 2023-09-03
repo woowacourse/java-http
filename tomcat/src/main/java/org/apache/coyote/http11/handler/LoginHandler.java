@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
@@ -87,6 +88,7 @@ public class LoginHandler implements HttpHandler {
 		final String body = "";
 		final HttpHeaders headers = resolveHeader(body);
 		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
+		headers.put(SET_COOKIE.getValue(), UUID.randomUUID().toString());
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,
 			body,

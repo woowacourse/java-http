@@ -13,7 +13,8 @@ public class HandlerMapping {
 	static {
 		handlers = List.of(
 			new BaseRequestHandler(),
-			new LoginRequestHandler()
+			new LoginRequestHandler(),
+			new RegisterRequestHandler()
 		);
 		defaultHandler = new StaticContentRequestHandler();
 	}

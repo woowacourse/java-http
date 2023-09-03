@@ -38,12 +38,12 @@ public class LoginRequestHandler implements RequestHandler {
 	private Response doPost(final Request request) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
-		validateQueryParam(account, password);
+		validateFields(account, password);
 
 		return login(account, password);
 	}
 
-	private void validateQueryParam(final String account, final String password) {
+	private void validateFields(final String account, final String password) {
 		if (account == null || password == null) {
 			throw new IllegalArgumentException("필요한 정보가 없습니다.");
 		}

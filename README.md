@@ -18,6 +18,6 @@
         - [x] 요청 POST로 변경
 - [x] exception handler 구현하기
     - [x] UnauthorizedException 반환 시 401 과 함께 401페이지 리다이렉트
-- [ ] 회원가입 구현하기
-    - [ ] GET 요청 시 회원가입 페이지를 반환
+- [x] 회원가입 구현하기
+    - [x] GET 요청 시 회원가입 페이지를 반환
     - [ ] POST 요청 시 회원가입 진행

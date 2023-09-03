@@ -34,4 +34,5 @@ public class ResponseEntity {
     public Cookie getHttpCookie() {
         return cookie;
     }
+
 }

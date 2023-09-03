@@ -10,6 +10,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 
 public class RequestHeader {
+
     private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, List<String>> headers;

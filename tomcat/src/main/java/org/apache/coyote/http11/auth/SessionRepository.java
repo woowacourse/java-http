@@ -1,9 +1,18 @@
 package org.apache.coyote.http11.auth;
 
-public interface SessionRepository {
+import java.util.HashMap;
+import java.util.Map;
 
-    void create(final Session session);
+public class SessionRepository {
 
-    Session getSession(final String id);
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
+
+    public void create(Session session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
+    public Session getSession(String id) {
+        return SESSIONS.get(id);
+    }
 
 }

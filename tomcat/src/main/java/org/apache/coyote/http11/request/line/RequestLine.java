@@ -17,9 +17,9 @@ public class RequestLine {
 
     public static RequestLine from(String requestLine) {
         List<String> requestLineElements = Arrays.asList(requestLine.split(" "));
-         HttpMethod method = HttpMethod.from(requestLineElements.get(0));
-         Path path = Path.from(requestLineElements.get(1));
-         Protocol protocol = Protocol.from(requestLineElements.get(2));
+        HttpMethod method = HttpMethod.from(requestLineElements.get(0));
+        Path path = Path.from(requestLineElements.get(1));
+        Protocol protocol = Protocol.from(requestLineElements.get(2));
         return new RequestLine(method, path, protocol);
     }
 

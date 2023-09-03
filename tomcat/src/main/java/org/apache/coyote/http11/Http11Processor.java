@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import static kokodak.HttpStatusCode.FOUND;
 import static kokodak.HttpStatusCode.INTERNAL_SERVER_ERROR;
+import static kokodak.HttpStatusCode.UNAUTHORIZED;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -131,14 +133,36 @@ public class Http11Processor implements Runnable, Processor {
                     final User user = InMemoryUserRepository.findByAccount(account)
                                                             .orElseThrow(() -> new IllegalArgumentException("User Not Found"));
                     if (user.checkPassword(password)) {
-                        log.info("user = {}", user);
+                        httpResponseMessage = HttpResponseMessage.builder()
+                                                                 .httpStatusCode(FOUND)
+                                                                 .header("Location", "http://localhost:8080/index.html")
+                                                                 .header("Content-Type", "text/html;charset=utf-8")
+                                                                 .build();
+                    } else {
+                        httpResponseMessage = HttpResponseMessage.builder()
+                                                                 .httpStatusCode(FOUND)
+                                                                 .header("Location", "http://localhost:8080/401.html")
+                                                                 .header("Content-Type", "text/html;charset=utf-8")
+                                                                 .build();
                     }
+                } else {
+                    final String fileName = "static/login.html";
+                    final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+                    final Path path = new File(resourceUrl.getPath()).toPath();
+                    final String responseBody = new String(Files.readAllBytes(path));
+                    httpResponseMessage = HttpResponseMessage.builder()
+                                                             .header("Content-Type", "text/html;charset=utf-8")
+                                                             .header("Content-Length", String.valueOf(responseBody.getBytes().length))
+                                                             .body(responseBody)
+                                                             .build();
                 }
-                final String fileName = "static/login.html";
+            } else if (httpRequestMessage.getRequestTarget().equals("/401.html")) {
+                final String fileName = "static/401.html";
                 final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
                 final Path path = new File(resourceUrl.getPath()).toPath();
                 final String responseBody = new String(Files.readAllBytes(path));
                 httpResponseMessage = HttpResponseMessage.builder()
+                                                         .httpStatusCode(UNAUTHORIZED)
                                                          .header("Content-Type", "text/html;charset=utf-8")
                                                          .header("Content-Length", String.valueOf(responseBody.getBytes().length))
                                                          .body(responseBody)

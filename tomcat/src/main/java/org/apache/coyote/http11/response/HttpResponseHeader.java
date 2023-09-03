@@ -17,6 +17,10 @@ public class HttpResponseHeader {
 		this.headers = headers;
 	}
 
+	public void add(HttpResponseHeaderType key, String value) {
+		headers.put(key, value);
+	}
+
 	public String formatHeader() {
 		return headers.entrySet().stream()
 			.sorted(Comparator.comparingInt(e -> e.getKey().ordinal()))

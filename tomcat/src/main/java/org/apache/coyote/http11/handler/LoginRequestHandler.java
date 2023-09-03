@@ -3,7 +3,6 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,19 +26,23 @@ public class LoginRequestHandler implements RequestHandler {
 		final var password = request.findQueryParam("password");
 
 		if (account != null && password != null) {
-			findUser(account, password);
+			return login(account, password);
 		}
 
 		final var responseBody = ResourceProvider.provide(LOGIN_PAGE_PATH);
 		return HttpResponse.ok(responseBody, MimeType.fromPath(LOGIN_PAGE_PATH));
 	}
 
-	private void findUser(final String account, final String password) {
-		InMemoryUserRepository.findByAccount(account)
-			.ifPresent(user -> {
-				if (user.checkPassword(password)) {
-					log.info(user.toString());
-				}
-			});
+	private HttpResponse login(final String account, final String password) {
+		final var optionalUser = InMemoryUserRepository.findByAccount(account);
+		if (optionalUser.isEmpty()) {
+			return HttpResponse.unauthorized();
+		}
+		final var user = optionalUser.get();
+		if (!user.checkPassword(password)) {
+			return HttpResponse.unauthorized();
+		}
+		log.info(user.toString());
+		return HttpResponse.redirect("/index.html");
 	}
 }

@@ -1,23 +1,28 @@
 package org.apache.coyote.http11;
 
+import javassist.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.Params;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.header.ContentType;
+import org.apache.coyote.http11.response.header.Header;
+import org.apache.coyote.http11.response.header.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
@@ -25,9 +30,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final UserService userService;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        userService = new UserService();
     }
 
     @Override
@@ -40,82 +47,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            List<String> headers = getHeader(reader);
-            HttpRequest httpRequest = HttpRequest.from(headers);
-
-            for (String header : headers) {
-                System.out.println(header);
-            }
-            System.out.println("-----------------");
-
-            if (httpRequest.getUri().contains("/index.html")) {
-                URL fileUrl = this.getClass()
-                        .getClassLoader()
-                        .getResource("static" + "/index.html");
-
-                Path path = new File(Objects.requireNonNull(fileUrl).getFile()).toPath();
-                String responseBody = new String(Files.readAllBytes(path));
-
-                String response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-
-            } else if (httpRequest.getUri().contains("css")) {
-                URL fileUrl = this.getClass()
-                        .getClassLoader()
-                        .getResource("static/css" + "/styles.css");
-
-                if (Objects.isNull(fileUrl)) {
-                    return;
-                }
-
-                Path path = new File(Objects.requireNonNull(fileUrl).getFile()).toPath();
-                String responseBody = new String(Files.readAllBytes(path));
-
-                String response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css ",
-                        "Content-Length: " + responseBody.length() + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-            } else if (httpRequest.getUri().contains("js")) {
-                URL fileUrl;
-                if (headers.get(0).contains("scripts")) {
-                    fileUrl = this.getClass()
-                            .getClassLoader()
-                            .getResource("static/js" + "/scripts.js");
-                } else {
-                    String fileDir = headers.get(0).split(" ")[1];
-                    String[] fileDirSplits = fileDir.split("assets/");
-                    fileUrl = this.getClass()
-                            .getClassLoader()
-                            .getResource("static/assets/" + fileDirSplits[1]);
-                }
-
-                Path path = new File(Objects.requireNonNull(fileUrl).getFile()).toPath();
-                String responseBody = new String(Files.readAllBytes(path));
-
-                String response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-
-            }
-
-        } catch (IOException | UncheckedServletException e) {
+            HttpRequest httpRequest = HttpRequest.from(getHeader(bufferedReader));
+            HttpResponse httpResponse = getResponse(httpRequest);
+            outputStream.write(httpResponse.toString().getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException | NotFoundException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -130,5 +68,34 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return lines;
+    }
+
+    private HttpResponse getResponse(final HttpRequest request) throws URISyntaxException, IOException, NotFoundException {
+        if (request.isSameUri("/")) {
+            return HttpResponse.ok("Hello world!");
+        }
+
+        if (request.hasResource()) {
+            return HttpResponse.okWithResource(request.getUri());
+        }
+
+        if (request.isSameUri("/login")) {
+            return login(request.getParams());
+        }
+
+        throw new NotFoundException("페이지를 찾을 수 없습니다.");
+    }
+
+    private HttpResponse login(final Params queryParams) throws URISyntaxException, IOException, NotFoundException {
+        if (queryParams.isEmpty()) {
+            return HttpResponse.okWithResource("/login.html");
+        }
+
+        if (!queryParams.hasParam("account") || !queryParams.hasParam("password")) {
+            throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
+        }
+
+        userService.login(queryParams.get("account"), queryParams.get("password"));
+        return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
     }
 }

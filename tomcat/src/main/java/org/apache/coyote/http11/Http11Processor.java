@@ -62,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
             String body = buildResponseBody(page);
             return new HttpResponse("401 Unauthorized", contentType, body);
         }
-        log.info("user: {}", user);
+        log.info("user: {}", user.get());
         return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
                 Map.of("Location", "/index.html"));
     }

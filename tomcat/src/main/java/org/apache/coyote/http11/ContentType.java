@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 public enum ContentType {
     TEXT_HTML("text/html"),
     CSS("text/css"),
+    APPLICATION_JSON("application/json"),
     ;
     private static final String DEFAULT_UTF8 = "charset=utf-8";
     private final String type;

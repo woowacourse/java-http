@@ -1,8 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +114,6 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-
     @Test
     void login() throws IOException {
         // given
@@ -159,12 +158,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 11 \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "/index.html";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

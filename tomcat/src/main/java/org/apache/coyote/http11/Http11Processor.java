@@ -9,20 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.StringJoiner;
 
-import static org.apache.coyote.http11.ContentType.CSS;
 import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String HTTP_11 = "HTTP/1.1";
-    private static final String DEFAULT_FILE_ROUTE = "static";
 
     private final Socket connection;
 
@@ -83,17 +78,16 @@ public class Http11Processor implements Runnable, Processor {
             case "/":
                 return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
             case "/login":
-                doLogin(query);
-                break;
+                return doLogin(query);
             default:
                 break;
         }
-        return resolveViewResponse(path);
+        return ViewResolver.resolveView(path);
     }
 
-    private void doLogin(String query) {
+    private HttpResponse doLogin(String query) throws IOException {
         if (query.isBlank()) {
-            return;
+            return ViewResolver.resolveView("/login");
         }
 
         String account = "";
@@ -112,43 +106,29 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
-        if (user.checkPassword(password)) {
+                .orElseGet(() -> null);
+
+        if (user != null && user.checkPassword(password)) {
             System.out.println(user);
+            return new HttpResponse("/index.html", HttpStatus.FOUND, TEXT_HTML);
         }
+
+        return ViewResolver.resolveView("/401.html");
     }
 
-    private HttpResponse resolveViewResponse(String path) throws IOException {
-        if (!path.contains(".")) {
-            path += ".html";
-        }
-
-        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-        final URL resource = systemClassLoader.getResource(String.format("%s%s", DEFAULT_FILE_ROUTE, path));
-
-        if (resource == null) {
-            final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
-            File notFound = new File(notFoundUrl.getPath());
-            String body = new String(Files.readAllBytes(notFound.toPath()));
-            return new HttpResponse(body, HttpStatus.NOT_FOUND, TEXT_HTML);
-        }
-
-        File file = new File(resource.getPath());
-        if (file.getName().endsWith(".css")) {
-            return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, CSS);
-        }
-        return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, TEXT_HTML);
-    }
-
-    private String createHeader(HttpResponse response) {
+    private String createHeader(HttpResponse response) throws IOException {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         HttpStatus httpStatus = response.getHttpStatus();
 
         stringJoiner.add(String.format("%s %d %s ", HTTP_11, httpStatus.getCode(), httpStatus.getMessage()));
+        if (httpStatus.equals(HttpStatus.FOUND)) {
+            stringJoiner.add(String.format("%s %s ", "Location:", response.getBody()));
+            stringJoiner.add("\r\n");
+            return stringJoiner.toString();
+        }
         stringJoiner.add(String.format("%s %s ", "Content-Type:", response.getContentType()));
         stringJoiner.add(String.format("%s %s ", "Content-Length:", response.getBody().getBytes().length));
         stringJoiner.add("\r\n");
-
         return stringJoiner.toString();
     }
 }

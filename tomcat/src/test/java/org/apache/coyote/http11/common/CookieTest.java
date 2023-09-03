@@ -3,6 +3,7 @@ package org.apache.coyote.http11.common;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("NonAsciiCharacters")
 class CookieTest {
 
     @Test

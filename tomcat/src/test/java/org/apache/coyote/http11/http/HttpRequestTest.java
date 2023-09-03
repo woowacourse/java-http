@@ -27,9 +27,9 @@ class HttpRequestTest {
         Map<String, String> queryStrings = request.getQueryStrings();
 
         assertAll(
-                () -> assertThat(queryStrings.size()).isEqualTo(2),
-                () -> assertThat(queryStrings.get("account")).isEqualTo("gugu"),
-                () -> assertThat(queryStrings.get("password")).isEqualTo("password")
+                () -> assertThat(queryStrings).hasSize(2),
+                () -> assertThat(queryStrings).containsEntry("account", "gugu"),
+                () -> assertThat(queryStrings).containsEntry("password", "password")
         );
     }
 
@@ -51,10 +51,10 @@ class HttpRequestTest {
         Map<String, String> queryStrings = request.getQueryStrings();
 
         assertAll(
-                () -> assertThat(queryStrings.size()).isEqualTo(3),
-                () -> assertThat(queryStrings.get("account")).isEqualTo("gugu"),
-                () -> assertThat(queryStrings.get("password")).isEqualTo("password"),
-                () -> assertThat(queryStrings.get("email")).isEqualTo("hkkang%40woowahan.com")
+                () -> assertThat(queryStrings).hasSize(3),
+                () -> assertThat(queryStrings).containsEntry("account", "gugu"),
+                () -> assertThat(queryStrings).containsEntry("password", "password"),
+                () -> assertThat(queryStrings).containsEntry("email", "hkkang%40woowahan.com")
         );
     }
 

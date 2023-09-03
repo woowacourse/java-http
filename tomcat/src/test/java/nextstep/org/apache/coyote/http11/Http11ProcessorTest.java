@@ -55,40 +55,6 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Test
-    void css_요청이_오면_content_type은_css() {
-        // given
-        final String httpRequest= String.join("\r\n",
-            "GET /css/styles.css HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-
-        // when
-        StubSocket socket = HTTP_요청을_보낸다(httpRequest);
-
-        // then
-        assertThat(socket.output()).contains("text/css");
-    }
-
-    @Test
-    void js_요청이_오면_content_type은_js() {
-        // given
-        final String httpRequest= String.join("\r\n",
-            "GET /js/scripts.js HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-
-        // when
-        StubSocket socket = HTTP_요청을_보낸다(httpRequest);
-
-        // then
-        assertThat(socket.output()).contains("application/javascript");
-    }
-
     private StubSocket HTTP_요청을_보낸다(String httpRequest) {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

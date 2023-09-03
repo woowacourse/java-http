@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Objects;
@@ -30,6 +31,21 @@ public class ResponseBodyFinder {
         }
 
         return Files.readAllBytes(new File(resource.getFile()).toPath());
+    }
+
+    public String getContentType(final String targetUrl) {
+        if (StaticResourceContentType.findable(targetUrl)) {
+            return StaticResourceContentType.find(targetUrl);
+        }
+        return "";
+    }
+
+    public String getContentTypeWithCharSet(final String targetUrl, final String charset) {
+        if (StaticResourceContentType.findable(targetUrl)) {
+            return StaticResourceContentType.findWithAdditionalCharset(targetUrl,
+                Charset.forName(charset));
+        }
+        return "";
     }
 
     enum UrlsWithBodyEnum {

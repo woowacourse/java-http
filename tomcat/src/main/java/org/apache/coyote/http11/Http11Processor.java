@@ -54,10 +54,11 @@ public class Http11Processor implements Runnable, Processor {
 
         if (responseBodyFinder.isBodyExist(targetUrl)) {
             final byte[] responseBody = responseBodyFinder.getBody(targetUrl);
-
+            final String contentType = responseBodyFinder.getContentType(targetUrl);
+            
             return String.join(System.lineSeparator(),
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody));

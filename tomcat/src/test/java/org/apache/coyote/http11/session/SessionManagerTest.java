@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Test;
 
 class SessionManagerTest {
 
-	private final SessionManager SESSION_MANAGER = SessionManager.getInstance();
-
 	@AfterEach
 	void tearDown() {
-		SESSION_MANAGER.clear();
+		SessionManager.clear();
 	}
 
 	@Test
@@ -20,9 +18,9 @@ class SessionManagerTest {
 	void add() {
 		final Session session = new Session("unique Id");
 
-		SESSION_MANAGER.add(session);
+		SessionManager.add(session);
 
-		final Session foundSession = SESSION_MANAGER.findSession(session.getId());
+		final Session foundSession = SessionManager.findSession(session.getId());
 		assertThat(foundSession)
 			.usingRecursiveComparison()
 			.isEqualTo(session);
@@ -32,9 +30,9 @@ class SessionManagerTest {
 	@DisplayName("sessionManager에 session을 추가한다.")
 	void findSession() {
 		final Session session = new Session("unique Id");
-		SESSION_MANAGER.add(session);
+		SessionManager.add(session);
 
-		final Session foundSession = SESSION_MANAGER.findSession(session.getId());
+		final Session foundSession = SessionManager.findSession(session.getId());
 
 		assertThat(foundSession)
 			.usingRecursiveComparison()

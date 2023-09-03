@@ -6,24 +6,19 @@ import java.util.Map;
 public class SessionManager {
 
 	private static final Map<String, Session> SESSIONS = new HashMap<>();
-	private static final SessionManager INSTANCE = new SessionManager();
 
 	private SessionManager() {
 	}
 
-	public void add(final Session session) {
+	public static void add(final Session session) {
 		SESSIONS.put(session.getId(), session);
 	}
 
-	public Session findSession(final String id) {
+	public static Session findSession(final String id) {
 		return SESSIONS.get(id);
 	}
 
-	public void clear() {
+	public static void clear() {
 		SESSIONS.clear();
-	}
-
-	public static SessionManager getInstance() {
-		return INSTANCE;
 	}
 }

@@ -6,8 +6,7 @@ import java.net.Socket;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.BasicURIHandler;
-import org.apache.coyote.http11.handler.IndexPageHandler;
+import org.apache.coyote.http11.handler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private final List<HttpRequestHandler> requestHandlers = List.of(
             new BasicURIHandler(),
-            new IndexPageHandler()
+            new IndexPageHandler(),
+            new IndexCSSHandler(),
+            new HttpJavascriptHandler(),
+            new HttpAssetHandler()
     );
 
     public Http11Processor(final Socket connection) {

@@ -46,4 +46,16 @@ public class HttpRequest {
     public boolean isUriEqualTo(final String uri) {
         return Objects.equals(this.uri, uri);
     }
+
+    public boolean isJavascriptRequest() {
+        return isMethodEqualTo("GET") && this.uri.startsWith("/js/");
+    }
+
+    public boolean isAssetRequest() {
+        return isMethodEqualTo("GET") && this.uri.startsWith("/assets/");
+    }
+
+    public String getEndPoint() {
+        return this.uri.substring(this.uri.lastIndexOf("/") + 1, this.uri.length());
+    }
 }

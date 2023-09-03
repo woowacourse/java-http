@@ -7,20 +7,22 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.StringJoiner;
+
+import static org.apache.coyote.http11.ContentType.CSS;
+import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String HTTP_11 = "HTTP/1.1";
+    private static final String DEFAULT_FILE_ROUTE = "static";
 
     private final Socket connection;
 
@@ -38,30 +40,25 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             String line = bufferedReader.readLine();
             if (line == null) {
                 return;
             }
 
-            String body = createBody(line);
-            String header = createHeader(line, body);
+            HttpResponse httpResponse = createHttpResponse(line);
+            String header = createHeader(httpResponse);
 
-            outputStream.write((header + body).getBytes());
-            outputStream.flush();
+            bufferedWriter.write(header + httpResponse.getBody());
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createBody(String request) throws IOException {
-        String uri = "";
-
-        for (String element : request.split(" ")) {
-            if (element.startsWith("/")) {
-                uri = element;
-            }
-        }
+    private HttpResponse createHttpResponse(String request) throws IOException {
+        String uri = findUri(request);
 
         int index = uri.indexOf("?");
         String path = uri;
@@ -71,29 +68,30 @@ public class Http11Processor implements Runnable, Processor {
             query = uri.substring(index + 1);
         }
 
-        if (Objects.equals(path, "/")) {
-            return "Hello world!";
-        }
-
-        if (Objects.equals(path, "/login")) {
-            createLogin(query);
-        }
-
-        if (!path.contains(".")) {
-            path += ".html";
-        }
-
-        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-        final URL resource = systemClassLoader.getResource("static" + path);
-        String resourcePath = resource.getPath();
-        if (request == null) {
-            return "Not Found";
-        }
-        File file = new File(resourcePath);
-        return new String(Files.readAllBytes(file.toPath()));
+        return routePath(path, query);
     }
 
-    private void createLogin(String query) {
+    private String findUri(String request) {
+        return Arrays.stream(request.split(" "))
+                .filter(it -> it.startsWith("/"))
+                .findAny()
+                .orElseGet(() -> "");
+    }
+
+    private HttpResponse routePath(String path, String query) throws IOException {
+        switch (path) {
+            case "/":
+                return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
+            case "/login":
+                doLogin(query);
+                break;
+            default:
+                break;
+        }
+        return resolveViewResponse(path);
+    }
+
+    private void doLogin(String query) {
         if (query.isBlank()) {
             return;
         }
@@ -120,19 +118,37 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createHeader(String request, String body) {
-
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        String contentType = "text/html;charset=utf-8";
-
-        if (request.contains(".css")) {
-            contentType = "text/css;charset=utf-8";
+    private HttpResponse resolveViewResponse(String path) throws IOException {
+        if (!path.contains(".")) {
+            path += ".html";
         }
 
-        stringJoiner.add("HTTP/1.1 200 OK ");
-        stringJoiner.add("Content-Type: " + contentType + " ");
-        stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
+        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        final URL resource = systemClassLoader.getResource(String.format("%s%s", DEFAULT_FILE_ROUTE, path));
+
+        if (resource == null) {
+            final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
+            File notFound = new File(notFoundUrl.getPath());
+            String body = new String(Files.readAllBytes(notFound.toPath()));
+            return new HttpResponse(body, HttpStatus.NOT_FOUND, TEXT_HTML);
+        }
+
+        File file = new File(resource.getPath());
+        if (file.getName().endsWith(".css")) {
+            return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, CSS);
+        }
+        return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, TEXT_HTML);
+    }
+
+    private String createHeader(HttpResponse response) {
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        HttpStatus httpStatus = response.getHttpStatus();
+
+        stringJoiner.add(String.format("%s %d %s ", HTTP_11, httpStatus.getCode(), httpStatus.getMessage()));
+        stringJoiner.add(String.format("%s %s ", "Content-Type:", response.getContentType()));
+        stringJoiner.add(String.format("%s %s ", "Content-Length:", response.getBody().getBytes().length));
         stringJoiner.add("\r\n");
+
         return stringJoiner.toString();
     }
 }

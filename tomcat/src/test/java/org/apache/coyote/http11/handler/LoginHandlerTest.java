@@ -79,7 +79,7 @@ class LoginHandlerTest {
 			final HttpResponse actual = HANDLER.handleTo(request);
 
 			final URL resource = getClass().getClassLoader().getResource("static" + file);
-			final String expected = "HTTP/1.1 302 Temporarily Moved \r\n" +
+			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 5564 \r\n" +
 				"\r\n" +

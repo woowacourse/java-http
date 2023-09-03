@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +13,18 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
+    private static void enrollSession(User user, String sessionId) {
+        Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        SessionManager.getInstance().add(session);
+    }
+
     public Optional<String> login(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && checkPassword(user.get(), password)) {
-            return Optional.of(makeRandomUUID());
+            String sessionId = makeRandomUUID();
+            enrollSession(user.get(), sessionId);
+            return Optional.of(sessionId);
         }
         return Optional.empty();
     }
@@ -36,7 +46,10 @@ public class LoginService {
         if (user.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 유저입니다.");
         }
-        InMemoryUserRepository.save(new User(account, password, email));
-        return makeRandomUUID();
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+        String sessionId = makeRandomUUID();
+        enrollSession(newUser, sessionId);
+        return sessionId;
     }
 }

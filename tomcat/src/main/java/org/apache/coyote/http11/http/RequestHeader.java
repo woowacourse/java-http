@@ -11,9 +11,6 @@ public class RequestHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
-    private static final String COOKIE_DELIMITER = ";";
-    private static final String JSESSION_ID = "JSESSIONID=";
-
     private final Map<String, String> headers;
 
     private RequestHeader(Map<String, String> headers) {

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http;
 
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.RequestMethod;
 
@@ -58,6 +59,10 @@ public class HttpRequest {
                 queryStrings,
                 requestHeader
         );
+    }
+
+    public Cookie parseCookie() {
+        return requestHeader.parseCookie();
     }
 
     private static String[] validateRequestFirstLine(String requestFirstLine) {

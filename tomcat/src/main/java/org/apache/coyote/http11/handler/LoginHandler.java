@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.RequestMethod;
 import org.apache.coyote.http11.common.ResponseStatus;
@@ -26,8 +27,16 @@ public class LoginHandler implements Handler {
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
         if (request.getRequestMethod() == RequestMethod.GET) {
+            String redirectionFile = "login.html";
+            Cookie cookie = request.parseCookie();
+            String jsessionid = cookie.findByKey("JSESSIONID");
+
+            if (jsessionid != null && isLoginUser(jsessionid)) {
+                redirectionFile = "index.html";
+            }
+
             ClassLoader classLoader = getClass().getClassLoader();
-            URL resource = classLoader.getResource("static/login.html");
+            URL resource = classLoader.getResource("static/" + redirectionFile);
 
             File file = new File(resource.getFile());
             String fileData = new String(Files.readAllBytes(file.toPath()));
@@ -52,6 +61,11 @@ public class LoginHandler implements Handler {
             return loginFailResponse(headers);
         }
         throw new UnsupportedOperationException("get, post만 가능합니다.");
+    }
+
+    private boolean isLoginUser(String jsessionid) throws IOException {
+        Session session = SessionManager.findSession(UUID.fromString(jsessionid));
+        return session != null;
     }
 
     private ResponseEntity loginSuccessResponse(List<String> headers, Optional<User> userResult) {

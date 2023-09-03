@@ -5,5 +5,5 @@ import org.apache.catalina.servlet.response.HttpResponse;
 
 public interface Servlet {
 
-    HttpResponse service(HttpRequest request);
+    void service(HttpRequest request, HttpResponse response);
 }

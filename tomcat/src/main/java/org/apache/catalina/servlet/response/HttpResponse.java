@@ -1,13 +1,22 @@
 package org.apache.catalina.servlet.response;
 
+import java.io.BufferedWriter;
 import org.apache.catalina.servlet.session.Cookies;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final ResponseHeaders headers;
+    private StatusLine statusLine;
+    private String messageBody;
+    private final ResponseHeaders headers = new ResponseHeaders();
     private final Cookies cookies = new Cookies();
-    private final String messageBody;
+    private BufferedWriter writer;
+
+    public HttpResponse() {
+    }
+
+    public HttpResponse(BufferedWriter writer) {
+        this.writer = writer;
+    }
 
     public HttpResponse(StatusLine statusLine, String messageBody) {
         this(statusLine, new ResponseHeaders(), messageBody);
@@ -15,7 +24,7 @@ public class HttpResponse {
 
     public HttpResponse(StatusLine statusLine, ResponseHeaders headers, String messageBody) {
         this.statusLine = statusLine;
-        this.headers = headers;
+        this.headers.headers().putAll(headers.headers());
         this.messageBody = messageBody;
         setContentLength();
     }
@@ -25,6 +34,10 @@ public class HttpResponse {
             return;
         }
         headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
+    }
+
+    public void setWriter(BufferedWriter writer) {
+        this.writer = writer;
     }
 
     public void addHeader(String name, String value) {
@@ -49,6 +62,10 @@ public class HttpResponse {
 
     public String messageBody() {
         return messageBody;
+    }
+
+    public BufferedWriter writer() {
+        return writer;
     }
 
     @Override

@@ -38,9 +38,8 @@ public class Http11Processor implements Runnable, Processor {
         try (var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
             HttpRequest request = parser.parse(bufferedReader);
-            HttpResponse response = dispatcherServlet.service(request);
-            bufferedWriter.write(response.toString());
-            bufferedWriter.flush();
+            HttpResponse response = new HttpResponse(bufferedWriter);
+            dispatcherServlet.service(request, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

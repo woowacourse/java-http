@@ -1,6 +1,7 @@
 package org.apache.coyote.common;
 
 import org.apache.coyote.exception.CoyoteHttpException;
+import org.apache.coyote.request.HttpRequest;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class HttpRequestTest {
         // then
         assertAll(
                 () -> assertThat(httpRequest.httpMethod().name()).isEqualTo("GET"),
-                () -> assertThat(httpRequest.requestUri().getPath()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.requestUri().source()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.httpVersion().version()).isEqualTo("HTTP/1.1")
         );
     }

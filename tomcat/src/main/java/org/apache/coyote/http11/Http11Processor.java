@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.Response;
@@ -58,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestLine requestLine = readRequestLine(reader);
             RequestHeader requestHeader = readHeader(reader);
-            String requestBody = readRequestBody(reader, requestHeader);
+            RequestBody requestBody = readRequestBody(reader, requestHeader);
 
             Response response = getResponse(requestLine, requestHeader, requestBody);
 
@@ -71,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static Response getResponse(final RequestLine requestLine, final RequestHeader requestHeader, String requestBody) {
+    private static Response getResponse(final RequestLine requestLine, final RequestHeader requestHeader, RequestBody requestBody) {
         String requestUrl = requestLine.getRequestUrl();
         // "/"인 경우
         if (requestUrl.equals("/") && requestLine.getRequestMethod().equals("GET")) {
@@ -82,19 +83,19 @@ public class Http11Processor implements Runnable, Processor {
                 return responseStaticFile("/login.html", requestHeader);
             }
             if (requestLine.getRequestMethod().equals("POST")) {
-                return login(requestUrl);
+                return login(requestBody);
             }
         }
         return responseStaticFile(requestUrl, requestHeader);
     }
 
-    private static Response login(final String requestUrl) {
+    private static Response login(final RequestBody requestBody) {
         try {
-            int index = requestUrl.indexOf("?");
-            String queryString = requestUrl.substring(index + 1);
-            String[] splitQueryString = queryString.split("&");
-            String account = splitQueryString[0].split("=")[1];
-            String password = splitQueryString[1].split("=")[1];
+            if (requestBody == null) {
+                return Response.redirection("401.html");
+            }
+            String account = requestBody.getContentValue("account");
+            String password = requestBody.getContentValue("password");
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() -> new IllegalArgumentException()
             );//todo : 해당하는 계정이 존재하지 않는다
             if (!user.checkPassword(password)) {
@@ -102,9 +103,9 @@ public class Http11Processor implements Runnable, Processor {
             }
             return Response.redirection("/index.html");
         } catch (RuntimeException e) {
-            log.error(e.getMessage(),e);
-            return Response.redirection("/401.html");
+            log.error(e.getMessage(), e);
         }
+        return Response.redirection("/401.html");
     }
 
     //todo : 정적파일은 다 있다고 가정? 없는 파일이면?
@@ -148,17 +149,15 @@ public class Http11Processor implements Runnable, Processor {
         return RequestHeader.from(lines);
     }
 
-    //아직 쓰이지는 않음
-    private String readRequestBody(final BufferedReader reader, final RequestHeader requestHeader) throws IOException {
-        if (!requestHeader.hasRequestBody()) {
+    private RequestBody readRequestBody(final BufferedReader reader, final RequestHeader requestHeader) throws IOException {
+        if (requestHeader.getHeaderValue("Content-Type") == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        String str;
-        while ((str = reader.readLine()) != null) {
-            sb.append(str + "\r\n");
-        }
-        return sb.toString();
+        int contentLength = Integer.valueOf(requestHeader.getHeaderValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return RequestBody.from(requestBody);
     }
 
 

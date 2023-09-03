@@ -1,5 +1,10 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -8,10 +13,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,14 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader);
 
             final String uri = readRequestHeader(bufferedReader);
-            final String responseBody = findResponseBody(Objects.requireNonNull(uri));
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = handleRequest(Objects.requireNonNull(uri));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,10 +47,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String findResponseBody(final String uri) throws IOException {
+    private String handleRequest(final String uri) throws IOException {
         if (uri.equals("/")) {
-            return "Hello world!";
+            return getResponseMessage("Hello world!", "text/html;");
         }
+        if (uri.endsWith(".css")) {
+            final String responseBody = findResponseBody(uri);
+            return getResponseMessage(responseBody, "text/css;");
+        }
+        final String responseBody = findResponseBody(uri);
+        return getResponseMessage(responseBody, "text/html;");
+    }
+
+    private String getResponseMessage(final String responseBody, final String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + "charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String findResponseBody(String uri) throws IOException {
         final URL fileUrl = getClass().getClassLoader().getResource("./static" + uri);
         final String filePath = Objects.requireNonNull(fileUrl).getPath();
         return Files.readString(new File(filePath).toPath());

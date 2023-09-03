@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringTokenizer;
+import java.util.*;
+
 import nextstep.jwp.exception.UncheckedServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +65,16 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryParameters() {
+        if (!hasQueryParameter()) {
+            return Map.of();
+        }
+
         final HashMap<String, String> queryParameters = new HashMap<>();
         final String parameters = this.uri.substring(this.uri.lastIndexOf("?") + 1, this.uri.length());
         for (String parameter : parameters.split("&")) {
+            if (isInValidParameter(parameter)) {
+                continue;
+            }
             final String key = parameter.split("=")[0];
             final String value = parameter.split("=")[1];
             queryParameters.put(key, value);
@@ -77,7 +82,15 @@ public class HttpRequest {
         return queryParameters;
     }
 
-    public String getQueryParameter(String parameter) {
-        return this.getQueryParameters().get(parameter);
+    private boolean isInValidParameter(String parameter) {
+        return Objects.isNull(parameter) || !Objects.equals(parameter.split("=").length, 2);
+    }
+
+    public boolean hasQueryParameter() {
+        return !Objects.equals(this.uri.lastIndexOf("?"), -1);
+    }
+
+    public Optional<String> getQueryParameter(String parameter) {
+        return Optional.ofNullable(this.getQueryParameters().get(parameter));
     }
 }

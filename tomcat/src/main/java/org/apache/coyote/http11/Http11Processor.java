@@ -11,7 +11,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
@@ -72,26 +74,49 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response makeResponseOf(final Http11Request request) {
         if (request.getMethod() == GET) {
-            final String responseBody = getResponseBodyFromResource(request.getUri());
+            final String path = request.getPath();
+            final String responseBody = getResponseBodyFromResource(path);
+
+            if (path.equals("/login") && request.isQueryParamExist("account", "password")) {
+                final String account = request.getQueryParam("account");
+                final String password = request.getQueryParam("password");
+                processQueryString(account, password);
+            }
+
             return Http11Response.of(request.getHeader("Accept"), responseBody);
         }
         throw new IllegalArgumentException("Invalid Request Uri");
     }
 
-    private String getResponseBodyFromResource(final String uri) {
-        if (uri.equals("/")) {
+    private void processQueryString(final String account, final String password) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(IllegalArgumentException::new);
+
+        if (user.checkPassword(password)) {
+            log.info(user.toString());
+        }
+    }
+
+    private String getResponseBodyFromResource(String path) {
+        if (path.equals("/")) {
             return "Hello world!";
         }
+        if (path.equals("/favicon.ico")) {
+            return "Icon Not Exist";
+        }
+        if (!path.contains(".")) {
+            path += ".html";
+        }
 
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
 
         try {
             final Path filePath = new File(resource.getFile()).toPath();
             return new String(Files.readAllBytes(filePath));
 
         } catch (final NullPointerException | IOException e) {
-            log.error(e.getMessage() + uri, e);
-            return "Resource Not Exist: " + uri;
+            log.error(e.getMessage() + path, e);
+            return "Resource Not Exist: " + path;
         }
     }
 }

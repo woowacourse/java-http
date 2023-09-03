@@ -68,4 +68,8 @@ public class ResponseEntity {
         }
         return headers.toString();
     }
+
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
 }

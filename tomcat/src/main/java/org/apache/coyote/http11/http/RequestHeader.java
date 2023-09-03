@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.http;
 
+import org.apache.coyote.http11.common.Cookie;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,17 +31,11 @@ public class RequestHeader {
         return new RequestHeader(headerValues);
     }
 
-    public boolean doesNotHasJsessionCookie() {
-        if (!headers.containsKey(COOKIE)) {
-            return true;
+    public Cookie parseCookie() {
+        if (headers.containsKey(COOKIE)) {
+            return Cookie.from(headers.get(COOKIE));
         }
-        String cookieHeader = headers.get(COOKIE);
-        return Arrays.stream(cookieHeader.split(COOKIE_DELIMITER))
-                .noneMatch(this::isJsession);
-    }
-
-    public boolean isJsession(String cookieFiled) {
-        return cookieFiled.trim().startsWith(JSESSION_ID);
+        return Cookie.from("");
     }
 
     public int getContentLength() {

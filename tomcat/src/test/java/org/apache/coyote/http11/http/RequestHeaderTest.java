@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.http;
 
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.handler.RequestParser;
 import org.junit.jupiter.api.Test;
 
@@ -41,21 +42,7 @@ class RequestHeaderTest {
     }
 
     @Test
-    void cookie에_JSESSION이_없으면_false() throws IOException {
-        final String httpRequest = String.join("\r\n",
-                "Content-Length: 127 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        BufferedReader input = RequestParser.requestToInput(httpRequest);
-        RequestHeader header = RequestHeader.from(input);
-
-        assertThat(header.doesNotHasJsessionCookie()).isTrue();
-    }
-
-    @Test
-    void cookie에_JSESSION이_있으면_true() throws IOException {
+    void cookie를_파싱한다() throws IOException {
         final String httpRequest = String.join("\r\n",
                 "Content-Length: 127 ",
                 "Connection: keep-alive ",
@@ -65,8 +52,9 @@ class RequestHeaderTest {
 
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         RequestHeader header = RequestHeader.from(input);
+        Cookie cookie = header.parseCookie();
 
-        assertThat(header.doesNotHasJsessionCookie()).isFalse();
+        assertThat(cookie.findByKey("JSESSIONID")).isNotNull();
     }
 
 }

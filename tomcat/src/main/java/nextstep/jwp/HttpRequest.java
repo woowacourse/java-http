@@ -9,9 +9,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-
     private final Map<String, String> values = new HashMap<>();
-
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -34,7 +32,13 @@ public class HttpRequest {
         }
     }
 
-    public String getTarget() {
-        return values.get("target");
+    public String getUri() {
+        String target = values.get("target");
+        int queryStringIdx = target.indexOf("?");
+        if (queryStringIdx == -1) {
+            return target;
+        }
+
+        return target.substring(0, queryStringIdx);
     }
 }

@@ -21,5 +21,4 @@ public enum ContentType {
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
     }
-
 }

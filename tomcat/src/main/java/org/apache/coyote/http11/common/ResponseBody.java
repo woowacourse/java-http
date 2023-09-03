@@ -9,18 +9,21 @@ public class ResponseBody {
 
     private static final String STATIC_DIRECTORY = "static";
 
+    private final String requestFile;
     private final String body;
 
-    private ResponseBody(final String body) {
+    private ResponseBody(final String requestFile, final String body) {
         this.body = body;
+        this.requestFile = requestFile;
     }
 
-    public static ResponseBody from(final String uri) throws IOException {
+    public static ResponseBody from(final RequestURI requestURI) throws IOException {
+        final var uri = requestURI.getUri();
         if("/".equals(uri)) {
-            return new ResponseBody("Hello world!");
+            return new ResponseBody(requestURI.getUri(), "Hello world!");
         }
 
-        return new ResponseBody(readFile(uri));
+        return new ResponseBody(requestURI.getUri(), readFile(uri));
     }
 
     private static String readFile(final String uri) throws IOException {
@@ -29,12 +32,16 @@ public class ResponseBody {
         return new String(Files.readAllBytes(file.toPath()));
     }
 
+    public int contentLength() {
+        return this.body.getBytes().length;
+    }
+
     public String body() {
         return body;
     }
 
-    public int contentLength() {
-        return this.body.getBytes().length;
+    public String requestFile() {
+        return requestFile;
     }
 
 }

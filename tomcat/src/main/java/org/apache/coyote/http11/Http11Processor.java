@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LOGIN_PAGE = "/login.html";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_FAIL_PAGE = "/401.html";
     private static final String QUERY_STRING_BEGIN_CHAR = "?";
@@ -95,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseGet(() -> loginFail(requestURIElements));
         }
 
-        return parseRequestURI("/login.html", QueryString.empty(), requestURIElements);
+        return parseRequestURI(LOGIN_PAGE, QueryString.empty(), requestURIElements);
     }
 
     private boolean isExistQueryString(final int index) {

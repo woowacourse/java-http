@@ -33,6 +33,10 @@ public class QueryString {
         return new QueryString(Collections.emptyMap());
     }
 
+    public boolean isEmpty() {
+        return queryStrings.isEmpty();
+    }
+
     public String getValue(final String key) {
         return this.queryStrings.get(key);
     }

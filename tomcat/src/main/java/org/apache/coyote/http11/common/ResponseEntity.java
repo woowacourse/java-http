@@ -20,15 +20,27 @@ public class ResponseEntity {
 
     public String getResponse() throws IOException {
         final var uri = requestURI.getUri();
-        final var responseBody = ResponseBody.from(uri);
+        final var responseHeader = ResponseHeader.from(requestURI);
+        final var responseBody = ResponseBody.from(requestURI);
 
         return String.join(
                 CRLF,
-                parseHttpStatusLine(),
+                parseHttpStatusLine(responseHeader),
                 parseContentTypeLine(uri),
                 parseContentLengthLine(responseBody),
                 EMPTY,
                 responseBody.body()
+        );
+    }
+
+    private String parseHttpStatusLine(final ResponseHeader responseHeader) {
+        final HttpStatus httpStatus = responseHeader.getHttpStatus();
+        return String.join(
+                SPACE,
+                requestURI.getHttpVersion(),
+                String.valueOf(httpStatus.getCode()),
+                httpStatus.name(),
+                ""
         );
     }
 
@@ -38,10 +50,6 @@ public class ResponseEntity {
         }
 
         return "Content-Type: text/html;charset=utf-8 ";
-    }
-
-    private String parseHttpStatusLine() {
-        return String.join(SPACE, requestURI.getHttpVersion(), "200", "OK", "");
     }
 
     private String parseContentLengthLine(final ResponseBody responseBody) {

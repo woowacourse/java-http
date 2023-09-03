@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,7 @@ class FileTest {
         String fileName = "nextstep.txt";
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            List<String> actual = bufferedReader.lines().toList();
+            List<String> actual = bufferedReader.lines().collect(Collectors.toList());
             assertThat(actual).containsOnly("nextstep");
         } catch (Exception e) {
         }

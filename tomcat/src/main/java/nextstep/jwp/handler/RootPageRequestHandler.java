@@ -10,6 +10,11 @@ import org.apache.coyote.http11.response.StatusLine;
 public class RootPageRequestHandler implements RequestHandler {
 
     @Override
+    public boolean canHandle(HttpRequest request) {
+        return request.startLine().uri().path().equals("/");
+    }
+
+    @Override
     public HttpResponse handle(HttpRequest request) {
         String responseBody = "Hello world!";
         StatusLine statusLine = new StatusLine(HttpStatus.OK);

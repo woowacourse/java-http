@@ -19,6 +19,11 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
+    public boolean canHandle(HttpRequest request) {
+        return request.startLine().uri().path().equals("/login");
+    }
+
+    @Override
     public HttpResponse handle(HttpRequest request) {
         URI uri = request.startLine().uri();
         String responseBody = ResourceFileUtil.readAll("static" + uri.path() + ".html");

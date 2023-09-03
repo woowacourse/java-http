@@ -12,6 +12,11 @@ import org.apache.coyote.http11.response.StatusLine;
 public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
+    public boolean canHandle(HttpRequest request) {
+        return true;
+    }
+
+    @Override
     public HttpResponse handle(HttpRequest request) {
         URI uri = request.startLine().uri();
         String resource = ResourceFileUtil.readAll("static" + uri.path());

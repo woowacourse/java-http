@@ -50,7 +50,7 @@ public class HttpRequest {
         return url.isContainSubString(subString);
     }
 
-    public boolean isRequestMethodOf(final HttpMethod method){
+    public boolean isRequestMethodOf(final HttpMethod method) {
         return this.method == method;
     }
 

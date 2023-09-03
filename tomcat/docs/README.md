@@ -1,6 +1,6 @@
 ## 1단계 - HTTP 서버 구현하기
 
-- [ ] GET /index.html 요청이 들어오면, index.html을 반환한다.
+- [X] GET /index.html 요청이 들어오면, index.html을 반환한다.
 ### Request
 ```http request
   GET /index.html HTTP/1.1

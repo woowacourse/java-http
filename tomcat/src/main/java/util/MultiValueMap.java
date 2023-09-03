@@ -2,6 +2,7 @@ package util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class MultiValueMap<K, V> {
     }
 
     public MultiValueMap(int initialCapacity) {
-        this.multiValueMap = new HashMap<>(initialCapacity);
+        this.multiValueMap = new LinkedHashMap<>(initialCapacity);
     }
 
     public void put(final K key, final V value) {

@@ -8,6 +8,7 @@ public class HttpRequest {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String CONTENT_TYPE_HEADER = "Accept";
 
     private final RequestURI requestURI;
     private final Map<String, String> headers;
@@ -31,16 +32,15 @@ public class HttpRequest {
         return headers;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public ContentType contentType() {
+        if (!headers.containsKey(CONTENT_TYPE_HEADER)) {
+            return ContentType.HTML;
+        }
+        return ContentType.from(headers.get(CONTENT_TYPE_HEADER));
     }
 
     public RequestURI getRequestUrl() {
         return requestURI;
-    }
-
-    public String getUrl() {
-        return requestURI.getUri();
     }
 
 }

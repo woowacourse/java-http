@@ -1,13 +1,18 @@
-package org.apache.coyote.http11.mapper;
+package org.apache.coyote.http11.request;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class StringRequestUri extends Mapper{
-    protected StringRequestUri(String method, String uri, Map<String, String> header) {
+
+
+public class ApiRequestUri extends Request {
+
+
+    public ApiRequestUri(String method, String uri, Map<String, String> header) {
         super(method, uri, header);
     }
 
@@ -32,5 +37,10 @@ public class StringRequestUri extends Mapper{
     @Override
     public Optional<Map<String, String>> getQueries() {
         return Optional.empty();
+    }
+
+    @Override
+    public String getApi() {
+        return uri;
     }
 }

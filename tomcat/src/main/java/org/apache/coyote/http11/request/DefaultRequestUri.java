@@ -1,11 +1,13 @@
-package org.apache.coyote.http11.mapper;
+package org.apache.coyote.http11.request;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DefaultRequestUri extends Mapper{
+public class DefaultRequestUri extends Request {
 
-    protected DefaultRequestUri(String method, String uri, Map<String, String> header) {
+
+    public DefaultRequestUri(String method, String uri, Map<String, String> header) {
         super(method, uri, header);
     }
 
@@ -22,5 +24,10 @@ public class DefaultRequestUri extends Mapper{
     @Override
     public Optional<Map<String, String>> getQueries() {
         return Optional.empty();
+    }
+
+    @Override
+    public String getApi() {
+        return "/";
     }
 }

@@ -40,9 +40,9 @@ public interface Manager {
      * @exception IllegalStateException if a new session cannot be
      *  instantiated for any reason
      * @exception IOException if an input/output error occurs while
-     *  processing this request
+     *  processing this Request
      *
-     * @return the request session or {@code null} if a session with the
+     * @return the Request session or {@code null} if a session with the
      *         requested ID could not be found
      */
     HttpSession findSession(String id) throws IOException;

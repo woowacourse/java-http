@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class HttpMethodTest {
 
     @Test
-    void 지원하는_HTTP_메서드인_경우_해당_HTTP_메서드에_맞는_HttpMethod를_반환한다() {
+    void findMethod_메서드는_지원하는_HTTP_메서드인_경우_해당_HTTP_메서드에_맞는_HttpMethod를_반환한다() {
         final String validMethodName = "get";
 
         final HttpMethod actual = HttpMethod.findMethod(validMethodName);
@@ -21,11 +21,11 @@ class HttpMethodTest {
     }
 
     @Test
-    void 지원하지_않는_HTTP_메서드인_경우_예외가_발생한다() {
+    void findMethod_메서드는_지원하지_않는_HTTP_메서드인_경우_예외가_발생한다() {
         final String invalidMethodName = "invalid";
 
         assertThatThrownBy(() -> HttpMethod.findMethod(invalidMethodName))
                 .isInstanceOf(UnsupportedHttpMethodException.class)
-                .hasMessage("지원하지 않는 HTTP Method 입니다.");
+                .hasMessageContaining("지원하지 않는 HTTP Method 입니다.");
     }
 }

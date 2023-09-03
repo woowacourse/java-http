@@ -5,14 +5,12 @@ import static org.apache.coyote.http11.common.Status.OK;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +35,15 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            log.info("process start");
 
-            final var requestLines = extractRequestLines(inputStream);
-            final var requestURI = extractResourceName(requestLines);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final var request = Request.read(bufferedReader)
+                    .orElseThrow(() -> new IllegalStateException("invalid request"));
+            final var requestURI = request.getURI();
+            log.info("request: {}", request);
 
+            // TODO 요청 URI 구분하여 다르게 동작하게 하기
             if ("/".equals(requestURI)) {
                 final var response = Response.of(OK, "text/html", "Hello world!").toString();
 
@@ -48,42 +51,20 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.flush();
                 return;
             }
-            
-//            Request request = Request.parse(inputStream);
+
             final var resource = getClass().getClassLoader().getResource("static" + requestURI);
-
-            // TODO 요청 URI 구분하여 다르게 동작하게 하기
-
             assert resource != null;
-            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            log.info("resource found : {}", resource.getPath());
 
+            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             final var response = Response.of(OK, "text/html", responseBody).toString();
 
             outputStream.write(response.getBytes());
+            log.info("write response: {}", response);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private List<String> extractRequestLines(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> requestLines = new ArrayList<>();
-
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            return requestLines;
-        }
-        while (!"".equals(line)) {
-            requestLines.add(line);
-            log.info("request line {}", line);
-            line = bufferedReader.readLine();
-        }
-        return requestLines;
-    }
-
-    private String extractResourceName(List<String> requestLines) {
-        String requestHead = requestLines.get(0);
-        return requestHead.split(" ")[1];
-    }
 }

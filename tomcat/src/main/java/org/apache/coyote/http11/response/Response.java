@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.common.ContentType.TEXT;
+
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Status;
 
@@ -25,7 +27,7 @@ public class Response {
             String responseBody
     ) {
         ContentType contentType = ContentType.from(contentTypeString)
-                .orElseThrow(() -> new IllegalArgumentException("invalid contentType :" + contentTypeString));
+                .orElse(TEXT);
         return new Response(status, contentType, responseBody);
     }
 

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.handler.LoginRequestHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
+import nextstep.jwp.handler.SignUpRequestHandler;
 import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.handler.RequestHandler;
@@ -20,6 +21,7 @@ class Http11ProcessorTest {
     private final List<RequestHandler> requestHandlers = List.of(
             new RootPageRequestHandler(),
             new LoginRequestHandler(),
+            new SignUpRequestHandler(),
             new StaticResourceRequestHandler()
     );
 
@@ -141,6 +143,30 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
+                "\r\n";
+
+        String actual = socket.output();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void 회원가입_성공() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Content-Length: 55",
+                "",
+                "account=mallang&email=mallang%40naver.com&password=1234");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(requestHandlers, socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n";
 
         String actual = socket.output();

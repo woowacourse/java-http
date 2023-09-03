@@ -1,4 +1,4 @@
-package org.apache.coyote.httprequest;
+package org.apache.coyote.httprequest.header;
 
 import org.apache.coyote.httprequest.exception.InvalidRequestHeaderNameException;
 

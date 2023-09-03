@@ -1,10 +1,10 @@
-package org.apache.coyote.httprequest;
+package org.apache.coyote.httprequest.header;
 
 import org.apache.coyote.httprequest.exception.InvalidConnectionHeaderException;
 
 import java.util.Arrays;
 
-public enum ConnectionHeader {
+public enum ConnectionHeader implements RequestHeader {
     KEEP_ALIVE("keep-alive"),
     CLOSE("close");
 
@@ -19,5 +19,10 @@ public enum ConnectionHeader {
                 .filter(connectionHeader -> connectionHeader.printedName.equals(printedName))
                 .findFirst()
                 .orElseThrow(InvalidConnectionHeaderException::new);
+    }
+
+    @Override
+    public String getValue() {
+        return printedName;
     }
 }

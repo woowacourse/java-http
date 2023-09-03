@@ -1,10 +1,10 @@
-package org.apache.coyote.httprequest;
+package org.apache.coyote.httprequest.header;
 
 import org.apache.coyote.httprequest.exception.InvalidHostHeaderException;
 
 import java.util.List;
 
-public class HostHeader {
+public class HostHeader implements RequestHeader {
 
     private static final String DELIMITER = ":";
     private static final int PARSED_SIZE = 2;
@@ -42,11 +42,8 @@ public class HostHeader {
         }
     }
 
-    public String getDomainName() {
-        return domainName;
-    }
-
-    public int getPortNumber() {
-        return portNumber;
+    @Override
+    public String getValue() {
+        return domainName + DELIMITER + portNumber;
     }
 }

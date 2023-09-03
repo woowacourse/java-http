@@ -1,6 +1,7 @@
 package org.apache.coyote.httprequest;
 
 import org.apache.coyote.httprequest.exception.InvalidConnectionHeaderException;
+import org.apache.coyote.httprequest.header.ConnectionHeader;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

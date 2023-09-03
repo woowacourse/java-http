@@ -1,10 +1,12 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.http11.common.Constants.CRLF;
 import static org.apache.coyote.http11.common.Constants.EMPTY;
 import static org.apache.coyote.http11.common.Constants.SPACE;
 
 import java.io.IOException;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.request.RequestURI;
 
 public class ResponseEntity {
 

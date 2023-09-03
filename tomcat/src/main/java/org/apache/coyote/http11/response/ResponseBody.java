@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
+import org.apache.coyote.http11.request.RequestURI;
 
 public class ResponseBody {
 

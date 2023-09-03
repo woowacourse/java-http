@@ -1,4 +1,7 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.request.RequestURI;
 
 public class ResponseHeader {
 

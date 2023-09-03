@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.common.Constants.SPACE;
 

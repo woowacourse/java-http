@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.parser.HttpFormatException;
-
 public enum HttpMethod {
     GET("GET"),
     POST("POST");

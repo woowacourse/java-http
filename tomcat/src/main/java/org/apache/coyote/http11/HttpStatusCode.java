@@ -11,6 +11,14 @@ public enum HttpStatusCode {
         this.statusCode = statusCode;
     }
 
+    public boolean isSuccess() {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
+    public boolean isRedirect() {
+        return statusCode >= 300 && statusCode < 400;
+    }
+
     public String toResponseFormat() {
         return statusCode + " " + name();
     }

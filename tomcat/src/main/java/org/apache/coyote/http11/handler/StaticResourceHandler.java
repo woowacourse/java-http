@@ -34,7 +34,8 @@ public class StaticResourceHandler implements Handler {
         ) {
             String path = findStaticResourceURL(url).getFile();
             String extension = getResourceExtension(path);
-            return new HttpResponse.Builder().setHttpStatusCode(HttpStatusCode.OK)
+            return new HttpResponse.Builder()
+                    .setHttpStatusCode(HttpStatusCode.OK)
                     .setContentType(toTextContentType(extension))
                     .setBody(fileStream.readAllBytes())
                     .build();

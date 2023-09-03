@@ -7,15 +7,18 @@ public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private final HttpStatusCode httpStatusCode;
+    private final String location;
     private final String contentType;
     private final String charset;
     private final int contentLength;
     private final byte[] body;
 
-    public HttpResponse(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String contentType,
+    public HttpResponse(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String location,
+            String contentType,
             String charset, byte[] body) {
         this.httpVersion = httpVersion;
         this.httpStatusCode = httpStatusCode;
+        this.location = location;
         this.contentType = contentType;
         this.charset = charset;
         this.contentLength = body.length;
@@ -23,16 +26,30 @@ public class HttpResponse {
     }
 
     public void addToOutputStream(OutputStream outputStream) throws IOException {
+        addRequestLine(outputStream);
         addHeaders(outputStream);
         addBody(outputStream);
     }
 
-    private void addHeaders(OutputStream outputStream) throws IOException {
+    private void addRequestLine(OutputStream outputStream) throws IOException {
         outputStream.write(String.join("\r\n",
                 "HTTP/" + httpVersion.getVersion() + " " + httpStatusCode.toResponseFormat() + " ",
-                "Content-Type: " + contentType + ";charset=" + charset + " ",
-                "Content-Length: " + contentLength + " ",
                 "").getBytes());
+    }
+
+    private void addHeaders(OutputStream outputStream) throws IOException {
+        if (httpStatusCode.isSuccess()) {
+            outputStream.write(String.join("\r\n",
+                    "Content-Type: " + contentType + ";charset=" + charset + " ",
+                    "Content-Length: " + contentLength + " ",
+                    "").getBytes());
+            return;
+        }
+        if (httpStatusCode.isRedirect()) {
+            outputStream.write(String.join("\r\n",
+                    "Location: http://localhost:8080" + location + " ",
+                    "").getBytes());
+        }
     }
 
     private void addBody(OutputStream outputStream) throws IOException {
@@ -47,10 +64,10 @@ public class HttpResponse {
         private static final HttpVersion HTTP_VERSION_DEFAULT = HttpVersion.V1_1;
         private static final HttpStatusCode HTTP_STATUS_CODE_DEFAULT = HttpStatusCode.OK;
 
-
         private HttpVersion httpVersion = HTTP_VERSION_DEFAULT;
         private HttpStatusCode httpStatusCode = HTTP_STATUS_CODE_DEFAULT;
-        private String contentType;
+        private String location = "";
+        private String contentType = "";
         private String charset = "utf-8";
         private byte[] body = {};
 
@@ -61,6 +78,11 @@ public class HttpResponse {
 
         public Builder setHttpStatusCode(HttpStatusCode httpStatusCode) {
             this.httpStatusCode = httpStatusCode;
+            return this;
+        }
+
+        public Builder setLocation(String location) {
+            this.location = location;
             return this;
         }
 
@@ -85,7 +107,8 @@ public class HttpResponse {
         }
 
         public HttpResponse build() {
-            return new HttpResponse(httpVersion, httpStatusCode, contentType, charset, body);
+            return new HttpResponse(httpVersion, httpStatusCode, location, contentType, charset,
+                    body);
         }
     }
 }

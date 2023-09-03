@@ -12,6 +12,9 @@ public class HttpRequestReader {
 
     public static HttpRequest read(final BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
+        if(startLine == null) {
+            return null;
+        }
         final Map<String, String> headers = extractHeaders(bufferedReader);
         final String body = extractBody(bufferedReader, headers.get("Content-Length"));
         return HttpRequest.of(startLine, headers, body);

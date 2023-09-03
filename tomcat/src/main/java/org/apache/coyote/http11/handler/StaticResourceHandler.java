@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.resourcehandler;
+package org.apache.coyote.http11.handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class StaticResourceHandler implements ResourceHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        String fileName = "static" + httpRequest.getRequestUri();
+        String fileName = "static" + httpRequest.getPath();
         URL resource = getClass().getClassLoader().getResource(fileName);
         if (resource == null) {
             fileName = "static/404.html";

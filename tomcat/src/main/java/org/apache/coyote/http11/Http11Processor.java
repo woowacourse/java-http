@@ -6,10 +6,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.handler.ControllerMapper;
+import org.apache.coyote.http11.handler.ResourceHandler;
+import org.apache.coyote.http11.handler.ResourceHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
-import org.apache.coyote.http11.resourcehandler.ResourceHandler;
-import org.apache.coyote.http11.resourcehandler.ResourceHandlerMapper;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseWriter;
 import org.slf4j.Logger;
@@ -39,9 +41,19 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest request = HttpRequestReader.read(bufferedReader);
+            if(request == null){
+                return;
+            }
+            final Controller controller = ControllerMapper.findController(request);
+            if (controller != null) {
+                final HttpResponse response = controller.handle(request);
+                HttpResponseWriter.write(outputStream, response);
+                outputStream.flush();
+                return;
+            }
 
-            final ResourceHandler handler = ResourceHandlerMapper.findHandler(request);
-            final HttpResponse response = handler.handle(request);
+            final ResourceHandler resourceHandler = ResourceHandlerMapper.findHandler(request);
+            final HttpResponse response = resourceHandler.handle(request);
 
             HttpResponseWriter.write(outputStream, response);
             outputStream.flush();

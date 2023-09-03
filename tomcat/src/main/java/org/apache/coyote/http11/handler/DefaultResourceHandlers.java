@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.resourcehandler;
+package org.apache.coyote.http11.handler;
 
 import java.util.HashMap;
 import java.util.Map;

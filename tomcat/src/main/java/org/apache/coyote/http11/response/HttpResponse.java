@@ -17,6 +17,13 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public HttpResponse(final String httpVersion, final StatusCode statusCode, final Map<String, String> headers) {
+        this.httpVersion = httpVersion;
+        this.statusCode = statusCode;
+        this.headers = headers;
+        this.body = "";
+    }
+
     public String getHttpVersion() {
         return httpVersion;
     }

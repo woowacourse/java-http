@@ -38,7 +38,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 쿠키_없이_로그인에_성공하면_쿠키를_설정해준다() throws IOException {
+    void 로그인에_성공하면_세션이_추가된다() throws IOException {
         String validAccount = "gugu";
         String validPassword = "password";
         final String httpRequest = String.join("\r\n",
@@ -56,13 +56,36 @@ class LoginHandlerTest {
         String response = responseEntity.generateResponseMessage();
 
         assertThat(response).contains(
+                "Location: index.html",
+                "HTTP/1.1 302 "
+        );
+    }
+
+    @Test
+    void 쿠키_없이_로그인에_성공하면_쿠키를_설정해준다() throws IOException {
+        String validAccount = "gugu";
+        String validPassword = "password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=" + validAccount + "&password=" + validPassword);
+
+        BufferedReader input = RequestParser.requestToInput(httpRequest);
+        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
+        String response = responseEntity.generateResponseMessage();
+        assertThat(response).contains(
                 "Set-Cookie:",
                 "HTTP/1.1 302 "
         );
     }
 
     @Test
-    void 쿠키_있을_때_로그인에_성공하면_쿠키_설정_안한다() throws IOException {
+    void 쿠키_있을_때_로그인에_성공하면_쿠키_재발급() throws IOException {
         String validAccount = "gugu";
         String validPassword = "password";
         final String httpRequest = String.join("\r\n",
@@ -80,7 +103,7 @@ class LoginHandlerTest {
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
         String response = responseEntity.generateResponseMessage();
 
-        assertThat(response).doesNotContain(
+        assertThat(response).contains(
                 "Set-Cookie:"
         );
     }

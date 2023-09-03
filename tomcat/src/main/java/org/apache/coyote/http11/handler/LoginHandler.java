@@ -3,14 +3,13 @@ package org.apache.coyote.http11.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.RequestMethod;
 import org.apache.coyote.http11.common.ResponseStatus;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.ResponseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,11 +23,8 @@ import java.util.UUID;
 
 public class LoginHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
-        System.out.println(request.getRequestMethod() == RequestMethod.POST);
         if (request.getRequestMethod() == RequestMethod.GET) {
             ClassLoader classLoader = getClass().getClassLoader();
             URL resource = classLoader.getResource("static/login.html");
@@ -44,39 +40,49 @@ public class LoginHandler implements Handler {
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
         }
         if (request.getRequestMethod() == RequestMethod.POST) {
-            ArrayList<String> headers = new ArrayList<>();
+            List<String> headers = new ArrayList<>();
             headers.add(String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()));
             headers.add(String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)));
-            if (checkIsRegisterUser(request)) {
-                headers.add(String.join(" ", "Location: index.html"));
-                if (request.getRequestHeader().doesNotHasJsessionCookie()) {
-                    UUID uuid = Cookie.generateCookie();
-                    headers.add(String.join(" ", "Set-Cookie: JSESSIONID=", String.valueOf(uuid)));
-                }
-                return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
-            } else {
-                headers.add(String.join(" ", "Location: 401.html"));
-                return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+
+            Optional<User> userResult = findUser(request);
+
+            if (userResult.isPresent()) {
+                return loginSuccessResponse(headers, userResult);
             }
+            return loginFailResponse(headers);
         }
         throw new UnsupportedOperationException("get, post만 가능합니다.");
     }
 
-    private boolean checkIsRegisterUser(HttpRequest request) {
+    private ResponseEntity loginSuccessResponse(List<String> headers, Optional<User> userResult) {
+        User user = userResult.get();
+        headers.add(String.join(" ", "Location: index.html"));
+        ResponseEntity responseEntity = new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+        UUID uuid = createSesstion(user);
+        responseEntity.setCookie("JSESSIONID", uuid.toString());
+        return responseEntity;
+    }
+
+    private static Optional<User> findUser(HttpRequest request) {
         Map<String, String> queryStrings = request.getQueryStrings();
         String account = queryStrings.get("account");
-        System.out.println(account);
-        Optional<User> userFindResult = InMemoryUserRepository.findByAccount(account);
-        if (userFindResult.isEmpty()) {
-            return false;
-        }
-        User user = userFindResult.get();
-
         String password = queryStrings.get("password");
-        if (!user.checkPassword(password)) {
-            return false;
-        }
-        log.info(user.toString());
-        return true;
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+    }
+
+    private UUID createSesstion(User user) {
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        SessionManager.add(session);
+        return uuid;
+    }
+
+    private ResponseEntity loginFailResponse(List<String> headers) {
+        headers.add(String.join(" ", "Location: 401.html"));
+        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
     }
 }

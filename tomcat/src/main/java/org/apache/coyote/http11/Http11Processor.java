@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.requests.RequestBody;
+import org.apache.coyote.requests.RequestHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +11,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.StringJoiner;
-
-import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,7 +40,20 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            HttpResponse httpResponse = createHttpResponse(line);
+            String httpMethod = Arrays.stream(line.split(" "))
+                    .findFirst()
+                    .orElseGet(() -> "");
+
+            String uri = Arrays.stream(line.split(" "))
+                    .filter(it -> it.startsWith("/"))
+                    .findAny()
+                    .orElseGet(() -> "");
+
+
+            RequestHeader requestHeader = readHeader(bufferedReader);
+            RequestBody requestBody = readBody(bufferedReader, requestHeader);
+
+            HttpResponse httpResponse = routeByHttpMethod(uri, httpMethod, requestBody);
             String header = createHeader(httpResponse);
 
             bufferedWriter.write(header + httpResponse.getBody());
@@ -52,9 +63,47 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse createHttpResponse(String request) throws IOException {
-        String uri = findUri(request);
+    private HttpResponse routeByHttpMethod(String uri, String httpMethod, RequestBody requestBody) throws IOException {
+        if (httpMethod.equals("POST")) {
+            return routePost(uri, requestBody);
+        }
 
+        return createHttpResponse(uri);
+    }
+
+    private HttpResponse routePost(String uri, RequestBody requestBody) throws IOException {
+        switch (uri) {
+            case "/register":
+                return LoginProcessor.doRegister(requestBody.getItem());
+            case "/login":
+                return LoginProcessor.doLogin(requestBody.getItem());
+            default:
+                return createHttpResponse(uri);
+        }
+    }
+
+    private RequestHeader readHeader(BufferedReader bufferedReader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (String line = bufferedReader.readLine();
+             !"".equals(line); line = bufferedReader.readLine()) {
+            stringBuilder.append(line).append("\r\n");
+        }
+        return RequestHeader.from(stringBuilder.toString());
+    }
+
+    private RequestBody readBody(BufferedReader bufferedReader, RequestHeader requestHeader) throws IOException {
+        final String contentLength = requestHeader.get("Content-Length");
+        if (contentLength == null) {
+            return new RequestBody();
+        }
+        final int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        return new RequestBody(new String(buffer));
+    }
+
+
+    private HttpResponse createHttpResponse(String uri) throws IOException {
         int index = uri.indexOf("?");
         String path = uri;
         String query = "";
@@ -63,58 +112,9 @@ public class Http11Processor implements Runnable, Processor {
             query = uri.substring(index + 1);
         }
 
-        return routePath(path, query);
+        return ViewResolver.routePath(path, query);
     }
 
-    private String findUri(String request) {
-        return Arrays.stream(request.split(" "))
-                .filter(it -> it.startsWith("/"))
-                .findAny()
-                .orElseGet(() -> "");
-    }
-
-    private HttpResponse routePath(String path, String query) throws IOException {
-        switch (path) {
-            case "/":
-                return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
-            case "/login":
-                return doLogin(query);
-            default:
-                break;
-        }
-        return ViewResolver.resolveView(path);
-    }
-
-    private HttpResponse doLogin(String query) throws IOException {
-        if (query.isBlank()) {
-            return ViewResolver.resolveView("/login");
-        }
-
-        String account = "";
-        String password = "";
-
-        for (String parameter : query.split("&")) {
-            int idx = parameter.indexOf("=");
-            String key = parameter.substring(0, idx);
-            String value = parameter.substring(idx + 1);
-            if ("account".equals(key)) {
-                account = value;
-            }
-            if ("password".equals(key)) {
-                password = value;
-            }
-        }
-
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseGet(() -> null);
-
-        if (user != null && user.checkPassword(password)) {
-            System.out.println(user);
-            return new HttpResponse("/index.html", HttpStatus.FOUND, TEXT_HTML);
-        }
-
-        return ViewResolver.resolveView("/401.html");
-    }
 
     private String createHeader(HttpResponse response) throws IOException {
         StringJoiner stringJoiner = new StringJoiner("\r\n");

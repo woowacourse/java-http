@@ -12,27 +12,40 @@ public class ViewResolver {
     private static final String DEFAULT_FILE_ROUTE = "static";
 
     public static HttpResponse resolveView(String path) throws IOException {
-            String filePath = path;
-            if (!filePath.contains(".")) {
-                filePath += ".html";
-            }
+        String filePath = path;
+        if (!filePath.contains(".")) {
+            filePath += ".html";
+        }
 
-            final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-            final URL resource = systemClassLoader.getResource(String.format("%s%s", DEFAULT_FILE_ROUTE, filePath));
+        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        final URL resource = systemClassLoader.getResource(String.format("%s%s", DEFAULT_FILE_ROUTE, filePath));
 
-            if (resource == null) {
-                final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
-                File notFound = new File(notFoundUrl.getPath());
-                String body = new String(Files.readAllBytes(notFound.toPath()));
-                return new HttpResponse(body, HttpStatus.NOT_FOUND, TEXT_HTML);
-            }
+        if (resource == null) {
+            final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
+            File notFound = new File(notFoundUrl.getPath());
+            String body = new String(Files.readAllBytes(notFound.toPath()));
+            return new HttpResponse(body, HttpStatus.NOT_FOUND, TEXT_HTML);
+        }
 
-            File file = new File(resource.getPath());
-            if (file.getName().endsWith(".css")) {
-                return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, CSS);
-            }
-            return new HttpResponse(new String(Files.readAllBytes(file.toPath())), HttpStatus.OK, TEXT_HTML);
+        File file = new File(resource.getPath());
+        String body = new String(Files.readAllBytes(file.toPath()));
+        if (file.getName().endsWith(".css")) {
+            return new HttpResponse(body, HttpStatus.OK, CSS);
+        }
+        return new HttpResponse(body, HttpStatus.OK, TEXT_HTML);
     }
 
+
+    public static HttpResponse routePath(String path, String query) throws IOException {
+        switch (path) {
+            case "/":
+                return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
+            case "/login":
+                return LoginProcessor.doLogin(query);
+            default:
+                break;
+        }
+        return ViewResolver.resolveView(path);
+    }
 
 }

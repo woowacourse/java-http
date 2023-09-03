@@ -19,31 +19,37 @@ public class QueryHandler extends Handler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
-        String httpStatus = "200 OK";
         final String[] splitRequestTarget = request.getHttpStartLine().getRequestTarget().getOrigin().split("\\?", 2);
         final Map<String, String> totalQuery = extractQuery(splitRequestTarget);
         final HttpVersion httpVersion = request.getHttpStartLine().getHttpVersion();
-        final String responseBody = makeResponseBody(request.getHttpStartLine().getRequestTarget().getOrigin());
 
-        httpStatus = executionLogic(httpStatus, totalQuery);
+        final String httpStatus = executionLogic(totalQuery);
 
+        final String responseBody = makeResponseBody(httpStatus);
         return HttpResponse.of(httpVersion, httpStatus, CONTENT_TYPE, responseBody);
     }
 
-    private String makeResponseBody(final String requestTarget) throws IOException {
-        final String resourceName = requestTarget.substring(0, requestTarget.indexOf("?")) + ".html";
+    private String makeResponseBody(final String httpStatus) throws IOException {
+        final String resourceName = findResourceName(httpStatus);
         final URL resource = getClass().getClassLoader().getResource("static/" + resourceName);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private static String executionLogic(String httpStatus, final Map<String, String> totalQuery) {
+    private static String findResourceName(final String httpStatus) {
+        if (httpStatus.equals("301")) {
+            return "index.html";
+        }
+        return httpStatus + ".html";
+    }
+
+    private static String executionLogic(final Map<String, String> totalQuery) {
         try {
             final UserController userController = new UserController();
             userController.loginlogin(totalQuery);
+            return "301";
         } catch (IllegalArgumentException e) {
-            httpStatus = "400 UNAUTHORIZED";
+            return "401";
         }
-        return httpStatus;
     }
 
     private static Map<String, String> extractQuery(final String[] splitRequestTarget) {

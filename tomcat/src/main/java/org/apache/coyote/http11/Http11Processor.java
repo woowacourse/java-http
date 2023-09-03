@@ -32,16 +32,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             final var outputStream = connection.getOutputStream()) {
 
-            String requestLine = inputReader.readLine();
-            String requestURI = requestURIOf(requestLine);
+            RequestLine requestLine = new RequestLine(inputReader.readLine());
 
             var responseBody = "Hello world";
             var contentType = "Content-Type: text/html;charset=utf-8 ";
 
-            if (resourceProvider.haveResource(requestURI)) {
-                responseBody = resourceProvider.resourceBodyOf(requestURI);
-                contentType = resourceProvider.contentTypeOf(requestURI);
+            if (resourceProvider.haveResource(requestLine.getPath())) {
+                responseBody = resourceProvider.resourceBodyOf(requestLine.getPath());
+                contentType = resourceProvider.contentTypeOf(requestLine.getPath());
             }
+
             final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 contentType,

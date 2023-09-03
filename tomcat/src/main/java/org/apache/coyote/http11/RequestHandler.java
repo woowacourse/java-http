@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.common.ContentType.TEXT;
 import static org.apache.coyote.http11.common.Method.GET;
 import static org.apache.coyote.http11.common.Status.BAD_REQUEST;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
@@ -11,13 +10,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.util.UriComponentsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +21,7 @@ public class RequestHandler {
 
     private static final Pattern RESOURCE_PATTERN_FILE_EXTENSION = Pattern.compile(".*\\.[^.]+");
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final HandlerAdaptor handlerAdaptor = new HandlerAdaptor();
 
     private RequestHandler() {
     }
@@ -41,16 +38,20 @@ public class RequestHandler {
         if ("/".equals(uri)) {
             return Response.of(OK, "text/html", "Hello world!");
         }
-
-        if (isStaticResource(uri)) {
-            final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
-            return createResponse(url);
+        if ("/login".equals(uri)) {
+            return getResponseForStaticResource("/login.html");
         }
 
-        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.of(uri);
-        Map<String, List<String>> queryParams = uriComponentsBuilder.build().createQueryParams();
+        if (isStaticResourceURI(uri)) {
+            return getResponseForStaticResource(uri);
+        }
 
-        return Response.of(BAD_REQUEST, TEXT.toString(), "");
+        return handlerAdaptor.get(request);
+    }
+
+    private static Response getResponseForStaticResource(String uri) throws IOException {
+        final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
+        return createResponse(url);
     }
 
     private static Response createResponse(URL url) throws IOException {
@@ -65,7 +66,7 @@ public class RequestHandler {
         return Response.of(OK, Files.probeContentType(path), responseBody);
     }
 
-    private static boolean isStaticResource(String uri) {
+    private static boolean isStaticResourceURI(String uri) {
         Path path = Paths.get(uri);
         String fileName = path.getFileName().toString();
         return RESOURCE_PATTERN_FILE_EXTENSION

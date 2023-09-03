@@ -17,7 +17,7 @@ class UriComponentsBuilderTest {
 
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.of(expectedUri.getUri());
 
-        Map<String, List<String>> actual = uriComponentsBuilder.build().createQueryParams();
+        Map<String, List<String>> actual = uriComponentsBuilder.build().getQueryParams();
         assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

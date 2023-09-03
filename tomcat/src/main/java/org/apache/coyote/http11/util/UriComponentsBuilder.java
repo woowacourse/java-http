@@ -48,24 +48,32 @@ public class UriComponentsBuilder {
         return new UriComponentsBuilder(uri, createQueryParams());
     }
 
-    public Map<String, List<String>> createQueryParams() {
-        HashMap<String, List<String>> queryParams = new HashMap<>();
+    private Map<String, List<String>> createQueryParams() {
+        HashMap<String, List<String>> result = new HashMap<>();
         String query = uri.getQuery();
 
         Matcher matcher = QUERY_STRING_PATTERN.matcher(query);
         while (matcher.find()) {
             String key = matcher.group(1);
             String value = matcher.group(2);
-            List<String> values = queryParams.getOrDefault(key, new ArrayList<>());
+            List<String> values = result.getOrDefault(key, new ArrayList<>());
             values.add(value);
 
-            queryParams.put(key, values);
+            result.put(key, values);
         }
 
-        return queryParams;
+        return result;
     }
 
     public String getUri() {
         return uri.toString();
+    }
+
+    public String getPath() {
+        return uri.getPath();
+    }
+
+    public Map<String, List<String>> getQueryParams() {
+        return queryParams;
     }
 }

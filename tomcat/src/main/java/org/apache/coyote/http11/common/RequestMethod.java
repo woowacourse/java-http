@@ -8,7 +8,8 @@ import java.util.stream.Stream;
 
 public enum RequestMethod {
 
-    GET("GET");
+    GET("GET"),
+    POST("POST");
 
     private final String method;
 

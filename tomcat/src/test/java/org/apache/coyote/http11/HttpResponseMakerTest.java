@@ -74,7 +74,7 @@ class HttpResponseMakerTest {
     }
 
     @Test
-    void 회원_정보가_없을_시에_예외를_발생시킨다() throws IOException {
+    void 회원_정보가_없을_시에_예외를_발생시킨다() {
         // given
         when(mockParser.getHttpRequestFirstLineInfo()).thenReturn(
                 HttpRequestFirstLineInfo.from("POST /login HTTP/1.1"));

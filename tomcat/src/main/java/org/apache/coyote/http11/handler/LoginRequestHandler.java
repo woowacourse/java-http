@@ -7,6 +7,8 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,7 @@ public class LoginRequestHandler implements RequestHandler {
 
 	private static final String REQUEST_PATH = "/login";
 	private static final String LOGIN_PAGE_PATH = "/login.html";
+	private static final String REDIRECT_LOCATION = "/index.html";
 
 	@Override
 	public boolean canHandle(Request request) {
@@ -35,15 +38,26 @@ public class LoginRequestHandler implements RequestHandler {
 	}
 
 	private Response doGet(final Request request) {
+		if (isSessionExist(request)) {
+			return Response.redirect(REDIRECT_LOCATION);
+		}
 		return Response.ok(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
+	}
+
+	private boolean isSessionExist(final Request request) {
+		final var sessionId = request.findSession();
+		if (sessionId == null) {
+			return false;
+		}
+
+		return SessionManager.findById(sessionId) != null;
 	}
 
 	private Response doPost(final Request request) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
 		validateFields(account, password);
-
-		return login(request, account, password);
+		return login(account, password);
 	}
 
 	private void validateFields(final String account, final String password) {
@@ -52,7 +66,7 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 	}
 
-	private Response login(final Request request, final String account, final String password) {
+	private Response login(final String account, final String password) {
 		final var optionalUser = InMemoryUserRepository.findByAccount(account);
 		if (optionalUser.isEmpty()) {
 			return Response.unauthorized();
@@ -63,8 +77,10 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 
 		final var cookies = HttpCookies.empty();
-		cookies.addSession(UUID.randomUUID().toString());
+		final var sessionId = UUID.randomUUID().toString();
+		cookies.addSession(sessionId);
+		SessionManager.add(new Session(sessionId));
 		log.info("[LOGIN SUCCESS] account: {}", account);
-		return Response.redirectWithCookie("/index.html", cookies);
+		return Response.redirectWithCookie(REDIRECT_LOCATION, cookies);
 	}
 }

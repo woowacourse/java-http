@@ -35,6 +35,10 @@ public class Request {
 		return header.findCookie(key);
 	}
 
+	public String findSession() {
+		return header.findSession();
+	}
+	
 	public String getPath() {
 		return requestLine.getPath();
 	}

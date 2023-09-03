@@ -41,6 +41,10 @@ public class HttpCookies {
 		cookies.put(SESSION_ID_KEY, sessionId);
 	}
 
+	public String findSession() {
+		return cookies.get(SESSION_ID_KEY);
+	}
+
 	public String find(final String key) {
 		return cookies.get(key);
 	}

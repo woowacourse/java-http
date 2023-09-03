@@ -34,4 +34,8 @@ public class RequestHeader {
 	public String findCookie(final String key) {
 		return cookie.find(key);
 	}
+
+	public String findSession() {
+		return cookie.findSession();
+	}
 }

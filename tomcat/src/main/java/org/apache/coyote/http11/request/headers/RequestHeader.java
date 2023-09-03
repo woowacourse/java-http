@@ -9,17 +9,17 @@ import org.apache.coyote.http11.common.Cookie;
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 
-public class RequestHeaders {
+public class RequestHeader {
     private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, List<String>> headers;
 
-    private RequestHeaders(Map<String, List<String>> headers) {
+    private RequestHeader(Map<String, List<String>> headers) {
         this.headers = headers;
     }
 
-    public static RequestHeaders from(List<String> headers) {
-        return new RequestHeaders(convertKeyAndValue(headers));
+    public static RequestHeader from(List<String> headers) {
+        return new RequestHeader(convertKeyAndValue(headers));
     }
 
     private static Map<String, List<String>> convertKeyAndValue(List<String> headers) {

@@ -1,17 +1,17 @@
 package org.apache.coyote.http11.request.request.headers;
 
 import java.util.List;
-import org.apache.coyote.http11.request.headers.RequestHeaders;
+import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class RequestHeadersTest {
+class RequestHeaderTest {
 
     @Nested
-    class RequestHeaders_생성을_검증한다 {
+    class RequestHeader_생성을_검증한다 {
 
         @Test
         void 유효한_RequestHeader라면_생성한다() {
@@ -26,21 +26,21 @@ class RequestHeadersTest {
             );
 
             // when
-            RequestHeaders requestHeaders = RequestHeaders.from(requests);
+            RequestHeader requestHeader = RequestHeader.from(requests);
 
             // then
             assertAll(
-                    () -> assertThat(requestHeaders.headers().get("Host"))
+                    () -> assertThat(requestHeader.headers().get("Host"))
                             .contains("www.test01.com"),
-                    () -> assertThat(requestHeaders.headers().get("Accept"))
+                    () -> assertThat(requestHeader.headers().get("Accept"))
                             .contains("image/gif", "image/jpeg", "*/*"),
-                    () -> assertThat(requestHeaders.headers().get("Accept-Language"))
+                    () -> assertThat(requestHeader.headers().get("Accept-Language"))
                             .contains("en-us"),
-                    () -> assertThat(requestHeaders.headers().get("Accept-Encoding"))
+                    () -> assertThat(requestHeader.headers().get("Accept-Encoding"))
                             .contains("gzip", "deflate"),
-                    () -> assertThat(requestHeaders.headers().get("User-Agent"))
+                    () -> assertThat(requestHeader.headers().get("User-Agent"))
                             .contains("Mozilla/4.0"),
-                    () -> assertThat(requestHeaders.headers().get("Content-Length"))
+                    () -> assertThat(requestHeader.headers().get("Content-Length"))
                             .contains("35")
             );
         }

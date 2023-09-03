@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
 import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
@@ -57,7 +58,7 @@ public class HttpHeader {
             return null;
         }
         String charset = mediaTypeAndCharset[1];
-        if (!charset.equalsIgnoreCase("utf-8")) {
+        if (!charset.substring("charset=".length()).equalsIgnoreCase("utf-8")) {
             throw new IllegalArgumentException("지원하지 않는 인코딩 방식입니다.");
         }
         return StandardCharsets.UTF_8;
@@ -72,7 +73,15 @@ public class HttpHeader {
     }
 
     public String getContentType() {
-        return mediaType.value + ";" + charset.name();
+        String contentType = null;
+        if (mediaType != null) {
+            contentType = mediaType.value;
+            if (charset != null) {
+                contentType += ";charset=" + charset.name().toLowerCase();
+            }
+        }
+
+        return contentType;
     }
 
     public Map<String, List<String>> getHeader() {
@@ -102,6 +111,34 @@ public class HttpHeader {
 
     public void setCharset(Charset charset) {
         this.charset = charset;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpHeader that = (HttpHeader) o;
+        return contentLength == that.contentLength && Objects.equals(header, that.header)
+            && mediaType == that.mediaType && Objects.equals(charset, that.charset);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(header, mediaType, charset, contentLength);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpHeader{" +
+            "header=" + header +
+            ", mediaType=" + mediaType +
+            ", charset=" + charset +
+            ", contentLength=" + contentLength +
+            '}';
     }
 
     public enum HEADER_KEY {

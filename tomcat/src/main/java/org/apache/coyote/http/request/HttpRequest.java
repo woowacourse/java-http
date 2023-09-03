@@ -1,5 +1,6 @@
 package org.apache.coyote.http.request;
 
+import java.util.Objects;
 import org.apache.coyote.http.HttpHeader;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ public class HttpRequest {
     public HttpRequest(HttpRequestLine requestLine, HttpHeader header, Map<String, String> parameters) {
         this.requestLine = requestLine;
         this.header = header;
+        parameters = new HashMap<>(parameters);
         parameters.putAll(requestLine.getParameters());
         this.parameters = parameters;
     }
@@ -28,5 +30,32 @@ public class HttpRequest {
 
     public Map<String, String> getParameters() {
         return new HashMap<>(parameters);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpRequest that = (HttpRequest) o;
+        return Objects.equals(requestLine, that.requestLine) && Objects.equals(
+            header, that.header) && Objects.equals(parameters, that.parameters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestLine, header, parameters);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+            "requestLine=" + requestLine +
+            ", header=" + header +
+            ", parameters=" + parameters +
+            '}';
     }
 }

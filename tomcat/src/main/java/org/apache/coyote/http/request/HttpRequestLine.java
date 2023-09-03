@@ -1,5 +1,6 @@
 package org.apache.coyote.http.request;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,10 @@ public class HttpRequestLine {
         this.path = path;
         this.parameters = parameters;
         this.httpVersion = httpVersion;
+    }
+
+    public static HttpRequestLine decode(HttpMethod httpMethod, String path, Map<String, String> parameters, String httpVersion) {
+        return new HttpRequestLine(httpMethod, path, parameters, httpVersion);
     }
 
     public static HttpRequestLine decode(String requestLineString) {
@@ -66,5 +71,34 @@ public class HttpRequestLine {
 
     public Map<String, String> getParameters() {
         return new HashMap<>(parameters);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpRequestLine that = (HttpRequestLine) o;
+        return httpMethod == that.httpMethod && Objects.equals(path, that.path)
+            && Objects.equals(parameters, that.parameters) && Objects.equals(
+            httpVersion, that.httpVersion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, path, parameters, httpVersion);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestLine{" +
+            "httpMethod=" + httpMethod +
+            ", path='" + path + '\'' +
+            ", parameters=" + parameters +
+            ", httpVersion='" + httpVersion + '\'' +
+            '}';
     }
 }

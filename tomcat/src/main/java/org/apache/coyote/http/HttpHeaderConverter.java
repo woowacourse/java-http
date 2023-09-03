@@ -21,10 +21,11 @@ public class HttpHeaderConverter {
     }
 
     public static HttpHeader decode(String headerString) {
-        var headerLines = Arrays.stream(headerString.split("\r\n", 0))
+        String stripped = headerString.strip();
+        var headerLines = Arrays.stream(stripped.split("\r\n", 0))
                                 .filter(line -> !line.isBlank() && !line.matches("\\x00+"))
                                 .collect(Collectors.toList());
-        log.info("header 값: {}", headerString);
+        log.info("header 값: {}", stripped);
 
         Map<String, List<String>> header = new HashMap<>();
         for (var headerLine : headerLines) {
@@ -56,13 +57,15 @@ public class HttpHeaderConverter {
         Map<String, List<String>> headers = httpHeader.getHeader();
 
         String contentType = httpHeader.getContentType();
-        headers.put(HEADER_KEY.CONTENT_TYPE.value, List.of(contentType));
+        if (contentType != null) {
+            headers.put(HEADER_KEY.CONTENT_TYPE.value, List.of(contentType));
+        }
 
         return headers.entrySet()
                       .stream()
                       .map(header -> header.getKey()
                           + HEADER_KEY_VALUE_DELIMITER
                           + String.join(MULTIPLE_VALUES_DELIMITER, header.getValue())
-                      ).collect(Collectors.joining("\r\n")) + "\r\n\r\n";
+                      ).collect(Collectors.joining(" \r\n")) + " \r\n\r\n";
     }
 }

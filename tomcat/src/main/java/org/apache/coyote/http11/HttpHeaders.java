@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,16 +11,20 @@ public class HttpHeaders {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_TYPE_UTF_8 = "text/html;charset=utf-8";
     public static final String CONTENT_TYPE_CSS = "text/css";
+    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String ACCEPT = "Accept";
-
+    public static final String LOCATION = "Location";
     public static final String HTTP_LINE_SUFFIX = "\r\n";
-
 
     private final Map<String, String> headers;
 
     public HttpHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+
+    public static HttpHeaders RestHeaders() {
+        return new HttpHeaders(new HashMap<>(Map.of(CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)));
     }
 
     public static HttpHeaders from(List<String> request) {

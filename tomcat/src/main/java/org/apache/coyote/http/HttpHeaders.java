@@ -117,6 +117,14 @@ public class HttpHeaders {
         return method;
     }
 
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
+    }
+
+    public Map<String, List<String>> getHeaderValues() {
+        return headerValues;
+    }
+
     public String getPath() {
         return path;
     }

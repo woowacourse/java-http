@@ -13,4 +13,8 @@ public class HttpRequest {
     public String getPath() {
         return httpHeaders.getPath();
     }
+
+    public HttpHeaders getHeader() {
+        return httpHeaders;
+    }
 }

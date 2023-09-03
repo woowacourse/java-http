@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -42,18 +46,46 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String responseBody = "Hello world!";
-            String request = getRequest(inputStream);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String request = getRequest(bufferedReader);
             String[] split = request.split(" ");
+            String method = split[0];
             String requestUri = split[1];
+
+
+
+            if (method.equals("POST")) {
+                String[] split1 = request.split("\r\n");
+                Optional<String> any = Arrays.stream(split1)
+                        .filter(it -> it.contains("Content-Length"))
+                        .findAny();
+                if (any.isEmpty()) {
+                    throw new IllegalArgumentException();
+                }
+                String s = any.get();
+                int index = s.indexOf(":");
+                int contentLength = Integer.parseInt(s.substring(index + 2));
+                String body = getBody(bufferedReader, contentLength);
+
+                if (requestUri.equals("/register")) {
+                    register(body, outputStream);
+                    return;
+                }
+            }
 
             if (requestUri.startsWith("/login?")) {
                 login(requestUri, outputStream);
                 return;
             }
 
+            if (requestUri.equals("/register")) {
+                log.info(request);
+            }
+
             if (!requestUri.equals("/")) {
                 URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                if (requestUri.equals("/login")) {
+                if (requestUri.equals("/login") || requestUri.equals("/register")) {
                     resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
                 }
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -80,6 +112,32 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void register(String body, OutputStream outputStream) throws IOException {
+        String[] split2 = body.split("&");
+        Map<String, String> form = new HashMap<>();
+        for (String line : split2) {
+            String[] split3 = line.split("=");
+            String key = split3[0];
+            String value = split3[1];
+            form.put(key, value);
+        }
+        Optional<User> account = InMemoryUserRepository.findByAccount(form.get("account"));
+        if (account.isPresent()) {
+            throw new IllegalStateException("이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
+        }
+        User user = new User(form.get("account"), form.get("password"), form.get("email"));
+        System.out.println(user);
+        InMemoryUserRepository.save(user);
+
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /index.html ",
+                "",
+                "");
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private void login(String requestUri, OutputStream outputStream) throws IOException {
@@ -123,15 +181,21 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String getRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    private String getRequest(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         StringBuilder stringBuilder = new StringBuilder();
         while (!"".equals(line)) {
             stringBuilder.append(line);
+            stringBuilder.append("\r\n");
             line = bufferedReader.readLine();
         }
         return stringBuilder.toString();
+    }
+
+    private String getBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        System.out.println(contentLength);
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

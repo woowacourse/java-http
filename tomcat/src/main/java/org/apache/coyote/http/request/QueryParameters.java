@@ -93,7 +93,7 @@ public class QueryParameters {
                 content.isBlank();
     }
 
-    public String findQueryParameter(final String queryParameterKey) {
+    public String findValue(final String queryParameterKey) {
         return parameters.get(queryParameterKey);
     }
 

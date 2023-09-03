@@ -19,8 +19,8 @@ class QueryParametersTest {
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual).isExactlyInstanceOf(QueryParameters.class);
             softAssertions.assertThat(actual.size()).isEqualTo(2);
-            softAssertions.assertThat(actual.findQueryParameter("user")).isEqualTo("gugu");
-            softAssertions.assertThat(actual.findQueryParameter("password")).isEqualTo("password");
+            softAssertions.assertThat(actual.findValue("user")).isEqualTo("gugu");
+            softAssertions.assertThat(actual.findValue("password")).isEqualTo("password");
         });
     }
 
@@ -41,8 +41,8 @@ class QueryParametersTest {
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual).isExactlyInstanceOf(QueryParameters.class);
-            softAssertions.assertThat(actual.findQueryParameter("user")).isEqualTo("gugu");
-            softAssertions.assertThat(actual.findQueryParameter("password")).isEqualTo("password");
+            softAssertions.assertThat(actual.findValue("user")).isEqualTo("gugu");
+            softAssertions.assertThat(actual.findValue("password")).isEqualTo("password");
         });
     }
 

@@ -10,11 +10,6 @@ import org.apache.coyote.util.ResourceResolver;
 
 public class NotFoundHandler implements Handler {
 
-    public static final NotFoundHandler INSTANCE = new NotFoundHandler();
-
-    private NotFoundHandler() {
-    }
-
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpResponse response = new HttpResponse();

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.handler.IndexHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
+import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.util.CookieParser;
@@ -36,6 +38,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final Map<String, Handler> handlerMap = new HashMap<>();
+    private final Handler staticResourceHandler = new StaticResourceHandler();
+    private final Handler methodNotAllowedHandler = new MethodNotAllowedHandler();
+    private final Handler notFoundHandler = new NotFoundHandler();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -108,16 +113,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handle(HttpRequest request) throws IOException {
-        Handler handler = handlerMap.getOrDefault(request.getPath(), StaticResourceHandler.INSTANCE);
+        Handler handler = handlerMap.getOrDefault(request.getPath(), staticResourceHandler);
         try {
             return handler.handle(request);
         } catch (MethodNotAllowedException e) {
-            HttpResponse response = MethodNotAllowedHandler.INSTANCE.handle(request);
+            HttpResponse response = methodNotAllowedHandler.handle(request);
             List<String> allowedMethods = e.getAllowedMethods().stream()
                 .map(Enum::name)
                 .collect(toList());
             response.setHeader("Allow", allowedMethods);
             return response;
+        } catch (NoSuchFileException e) {
+            return notFoundHandler.handle(request);
         }
     }
 }

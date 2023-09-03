@@ -10,11 +10,6 @@ import org.apache.coyote.util.ResourceResolver;
 
 public class MethodNotAllowedHandler implements Handler {
 
-    public static final MethodNotAllowedHandler INSTANCE = new MethodNotAllowedHandler();
-
-    private MethodNotAllowedHandler() {
-    }
-
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpResponse response = new HttpResponse();

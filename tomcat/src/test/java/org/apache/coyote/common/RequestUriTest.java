@@ -14,24 +14,39 @@ class RequestUriTest {
 
     @Test
     void httpMethod가_null이면_예외() {
+        // given
+        HttpMethod method = null;
+        HttpPath path = HttpPath.from("/");
+        HttpProtocol protocol = HttpProtocol.HTTP11;
+
         // when & then
-        assertThatThrownBy(() -> new RequestUri(null, HttpPath.from("/"), HttpProtocol.HTTP11))
+        assertThatThrownBy(() -> new RequestUri(method, path, protocol))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("HttpMethod는 null이 될 수 없습니다.");
     }
 
     @Test
     void path가_null이면_예외() {
+        // given
+        HttpMethod method = HttpMethod.GET;
+        HttpPath path = null;
+        HttpProtocol protocol = HttpProtocol.HTTP11;
+
         // when & then
-        assertThatThrownBy(() -> new RequestUri(HttpMethod.GET, null, HttpProtocol.HTTP11))
+        assertThatThrownBy(() -> new RequestUri(method, path, protocol))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Path는 null이 될 수 없습니다.");
     }
 
     @Test
     void httpProtocol이_null이면_예외() {
+        // given
+        HttpMethod method = HttpMethod.GET;
+        HttpPath path = HttpPath.from("/");
+        HttpProtocol protocol = null;
+
         // when & then
-        assertThatThrownBy(() -> new RequestUri(HttpMethod.GET, HttpPath.from("/"), null))
+        assertThatThrownBy(() -> new RequestUri(method, path, protocol))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("HttpProtocol은 null이 될 수 없습니다.");
     }

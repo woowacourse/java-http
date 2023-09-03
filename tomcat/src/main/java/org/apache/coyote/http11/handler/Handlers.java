@@ -20,7 +20,7 @@ public class Handlers {
 
 
     public static ResponseEntity handle(HttpRequest request) throws IOException {
-        String requestUri = request.getRequestUri();
+        String requestUri = request.getEndPoint();
 
         int lastDotIndex = requestUri.lastIndexOf('.');
         String extensionName = requestUri.substring(lastDotIndex + 1);

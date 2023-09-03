@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class LoginHandler implements Handler {
@@ -24,22 +25,22 @@ public class LoginHandler implements Handler {
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        System.out.println("handler: " + request.getRequestUri());
+        System.out.println("handler: " + request.getEndPoint());
         URL resource = classLoader.getResource("static/login.html");
 
         File file = new File(resource.getFile());
         String fileData = new String(Files.readAllBytes(file.toPath()));
 
         List<String> headers = List.of(
-                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getRequestUri()).getContentType()),
+                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
         );
-
-        String account = request.findQueryStringValue("account");
+        Map<String, String> queryStrings = request.getQueryStrings();
+        String account = queryStrings.get("account");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 유저입니다."));
 
-        String password = request.findQueryStringValue("password");
+        String password = queryStrings.get("password");
         if (user.checkPassword(password)) {
             log.info(user.toString());
         }

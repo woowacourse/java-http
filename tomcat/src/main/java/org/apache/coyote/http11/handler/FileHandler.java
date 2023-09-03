@@ -16,14 +16,14 @@ public class FileHandler implements Handler {
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        System.out.println("handler: " + request.getRequestUri());
-        URL resource = classLoader.getResource("static" + request.getRequestUri());
+        System.out.println("handler: " + request.getEndPoint());
+        URL resource = classLoader.getResource("static" + request.getEndPoint());
 
         File file = new File(resource.getFile());
         String fileData = new String(Files.readAllBytes(file.toPath()));
 
         List<String> headers = List.of(
-                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getRequestUri()).getContentType()),
+                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
         );
 

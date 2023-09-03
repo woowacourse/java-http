@@ -41,37 +41,37 @@ public class Http11Processor implements Runnable, Processor {
 
             List<String> requests = Arrays.stream(request.split(" ")).collect(Collectors.toList());
             String requestURI = requests.get(1);
-
-            if (requestURI.equals("/")) {
-                final var responseBody = "Hello world!";
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            URL resource = getClass()
-                    .getClassLoader()
-                    .getResource("static" + requestURI);
-            File file = new File(resource.getFile());
-            String responseBody = new String(Files.readAllBytes(file.toPath()));
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 5564 ",
-                    "",
-                    responseBody
-            );
+            String response = createResponse(requestURI);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponse(String requestURI) throws IOException {
+        if (requestURI.equals("/")) {
+            final var responseBody = "Hello world!";
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        URL resource = getClass()
+                .getClassLoader()
+                .getResource("static" + requestURI);
+        File file = new File(resource.getFile());
+        String responseBody = new String(Files.readAllBytes(file.toPath()));
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5564 ",
+                "",
+                responseBody
+        );
     }
 }

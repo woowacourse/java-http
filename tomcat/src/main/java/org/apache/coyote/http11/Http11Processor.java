@@ -59,11 +59,38 @@ public class Http11Processor implements Runnable, Processor {
                     queryParams.put(key, value);
                 }
                 Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-                user.ifPresent(it -> {
-                    if (it.checkPassword(queryParams.get("password"))) {
-                        log.info(it.toString());
+                if (user.isPresent()) {
+                    if (user.get().checkPassword(queryParams.get("password"))) {
+                        log.info(user.get().toString());
+                        String response = String.join("\r\n",
+                                "HTTP/1.1 302 FOUND ",
+                                "Location: /index.html ",
+                                "",
+                                "");
+                        try {
+                            outputStream.write(response.getBytes());
+                            outputStream.flush();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return;
                     }
-                });
+                }
+                URL resource = getClass().getClassLoader().getResource("static/401.html");
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                String response = String.join("\r\n",
+                        "HTTP/1.1 401 UNAUTHORIZED ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+                try {
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
             }
 
             if (!path.equals("/")) {

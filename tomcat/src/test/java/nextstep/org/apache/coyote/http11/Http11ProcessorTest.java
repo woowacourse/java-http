@@ -99,6 +99,27 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
+        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: /index.html");
+    }
+
+    @Test
+    void loginWithInvalidValue() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=abc&password=abc HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 401 UNAUTHORIZED");
     }
 }

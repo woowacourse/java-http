@@ -3,8 +3,8 @@ package org.apache.coyote.http11.headers;
 public enum MimeType {
 
 	HTML("text/html;charset=utf-8"),
-	CSS("text/css;charset=utf-8"),
-	JS("text/css;charset=utf-8");
+	CSS("text/css;"),
+	JS("text/css;");
 
 	private final String value;
 

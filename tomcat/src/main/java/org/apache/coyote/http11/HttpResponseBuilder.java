@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HttpResponseBuilder {
 
     private static final String STATIC_DIRECTORY = "static";
     private static final String LINE_FEED = "\r\n";
     private static final String SPACE = " ";
+    private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico");
 
     public String buildStaticFileOkResponse(HttpRequestParser httpRequestParser, String path) throws IOException {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
@@ -21,7 +25,7 @@ public class HttpResponseBuilder {
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                getJSessionId(httpRequestParser) + SPACE + LINE_FEED +
+                findCookie(httpRequestParser) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
@@ -44,11 +48,10 @@ public class HttpResponseBuilder {
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                getJSessionId(httpRequestParser) + SPACE + LINE_FEED +
+                findCookie(httpRequestParser) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 "Location: " + redirectPath + SPACE + LINE_FEED +
-                LINE_FEED +
                 content;
     }
 
@@ -59,7 +62,7 @@ public class HttpResponseBuilder {
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                getJSessionId(httpRequestParser) + SPACE + LINE_FEED +
+                findCookie(httpRequestParser) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
@@ -71,11 +74,23 @@ public class HttpResponseBuilder {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String getJSessionId(HttpRequestParser httpRequestParser) {
+    private String findCookie(HttpRequestParser httpRequestParser) {
         Map<String, String> cookies = httpRequestParser.findCookies();
-        if (!cookies.containsKey("JSESSIONID")) {
-            return "Set-Cookie: JSESSIONID=" + UUID.randomUUID().toString();
+        if (!isStaticPath(httpRequestParser.findPath()) && !cookies.isEmpty()) {
+            StringBuilder cookieHeader = new StringBuilder("Set-Cookie: ");
+            Set<Map.Entry<String, String>> entries = cookies.entrySet();
+            String collect = entries.stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.joining());
+            cookieHeader.append(collect);
+
+            return cookieHeader.toString() + SPACE + LINE_FEED;
         }
         return "";
     }
+
+    private boolean isStaticPath(String path) {
+        return STATIC_PATH.stream().anyMatch(path::endsWith);
+    }
+
 }

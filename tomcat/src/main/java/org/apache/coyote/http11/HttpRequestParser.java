@@ -63,12 +63,13 @@ public class HttpRequestParser {
     }
 
     public Map<String, String> findCookies() {
-        return header.entrySet().stream()
+        Map<String, String> cookie = header.entrySet().stream()
                 .filter(entry -> entry.getKey().equals("Cookie"))
                 .map(entry -> entry.getValue().split("; "))
                 .flatMap(Arrays::stream)
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+        return cookie;
     }
 
     public Map<String, String> findQueryStrings() {
@@ -100,6 +101,10 @@ public class HttpRequestParser {
 
     public String getMessageBody() {
         return messageBody;
+    }
+
+    public void addHeader(String key, String value) {
+        header.put(key, value);
     }
 
 }

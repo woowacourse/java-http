@@ -6,15 +6,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.handler.HandlerAdaptor;
+import nextstep.jwp.http.HttpBody;
+import nextstep.jwp.http.HttpHeaders;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.HttpUri;
+import nextstep.jwp.http.HttpVersion;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,48 +45,22 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String requestInfo = br.readLine();
-            String[] requestInfoElements = requestInfo.split(" ");
-            String requestPath = requestInfoElements[PATH_INDEX];
 
-            String responseBody = extractResponseBody(requestPath);
-            String contentType = extractContentType(requestPath);
-
-            if (requestPath.startsWith("/login") && !"/login".equals(requestPath)) {
-                if (login(requestPath)) {
-                    String response = String.join("\r\n",
-                            "HTTP/1.1 302 FOUND ",
-                            "Location: /index.html",
-                            String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
-
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-
-                    return;
-                }
-                String response = String.join("\r\n",
-                        "HTTP/1.1 302 FOUND ",
-                        "Location: /401.html",
-                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-
+            String startLine = br.readLine();
+            if (startLine == null) {
                 return;
             }
 
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String[] elements = startLine.split(" ");
+            HttpMethod httpMethod = HttpMethod.from(elements[0]);
+            HttpUri httpUri = HttpUri.from(elements[1]);
+            HttpVersion httpVersion = HttpVersion.from(elements[2]);
+            HttpHeaders httpHeaders = readHeaders(br);
+            HttpBody httpBody = readBody(httpHeaders, br);
+
+            HttpRequest request = new HttpRequest(httpHeaders, httpMethod, httpVersion, httpUri, httpBody);
+
+            HttpResponse response = HandlerAdaptor.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -93,72 +69,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean login(String requestPath) {
-        int index = requestPath.indexOf("?");
-
-        if (index == -1) {
-            return false;
+    private HttpBody readBody(HttpHeaders headers, BufferedReader br) throws IOException {
+        if (!headers.containsKey("Content-Length")) {
+            return HttpBody.from("");
         }
 
-        Map<String, String> paramMap = handleQueryString(requestPath, index);
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
 
-        User user = InMemoryUserRepository.findByAccount(paramMap.get(ACCOUNT))
-                .orElseThrow(IllegalArgumentException::new);
-
-        if (user.checkPassword(paramMap.get(PASSWORD))) {
-            log.info("user : {}", user);
-
-            return true;
-        }
-
-        return false;
+        return HttpBody.from(new String(buffer));
     }
 
-    private Map<String, String> handleQueryString(String requestPath, int index) {
-        String queryString = requestPath.substring(index + 1);
-        String[] elements = queryString.split("&");
-        return Arrays.stream(elements)
-                .map(element -> element.split("="))
-                .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+    private HttpHeaders readHeaders(BufferedReader br) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+
+        while (!"".equals(line = br.readLine())) {
+            lines.add(line);
+        }
+
+        return HttpHeaders.from(lines);
     }
 
-    private String extractResponseBody(String requestPath) throws IOException {
-        String nativePath = getNativePath(requestPath);
-
-        if ("/".equals(nativePath)) {
-            return "Hello world!";
-        }
-
-        if (nativePath.equals("/login")) {
-            URL url = getClass().getClassLoader().getResource("static/login.html");
-
-            return new String(Files.readAllBytes(Path.of(url.getPath())));
-        }
-
-        URL url = getClass().getClassLoader().getResource("static" + nativePath);
-
-        return new String(Files.readAllBytes(Path.of(url.getPath())));
-    }
-
-    private String getNativePath(String requestPath) {
-        int index = requestPath.indexOf("?");
-
-        if (index == -1) {
-            return requestPath;
-        }
-
-        return requestPath.substring(0, index);
-    }
-
-    private String extractContentType(String requestPath) {
-        if (requestPath.endsWith(".css")) {
-            return "text/css";
-        }
-
-        if (requestPath.endsWith(".js")) {
-            return "text/javascript";
-        }
-
-        return "text/html";
-    }
 }

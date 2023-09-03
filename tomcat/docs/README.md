@@ -28,10 +28,10 @@ Connection: keep-alive
   - [X] 로그인에 성공하면, 302 status code와 함께 /index.html로 리다이렉트 한다.
   - [X] 로그인에 실패하면, 302 status code와 함께 /401.html로 리다이렉트 한다.
   
-- [ ] 회원가입
-  - [ ] GET /register 요청이 들어오면, register.html을 반환한다.
-  - [ ] 회원가입 버튼을 누르면 POST 요청을 보낸다.
-  - [ ] 회원가입이 완료되면, index.html로 리다이렉트 한다.
+- [X] 회원가입
+  - [X] GET /register 요청이 들어오면, register.html을 반환한다.
+  - [X] 회원가입 버튼을 누르면 POST 요청을 보낸다.
+  - [X] 회원가입이 완료되면, index.html로 리다이렉트 한다.
 
 - [ ] Cookie에 JSESSIONID 값 저장하기
   - [ ] 요청 헤더에 JSESSIONID가 없을 경우, 응답 헤더에 Set-Cookie를 추가한다.

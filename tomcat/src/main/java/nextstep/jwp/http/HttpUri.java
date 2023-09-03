@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import java.util.Map;
+
 public class HttpUri {
 
     private final String nativePath;
@@ -24,5 +26,13 @@ public class HttpUri {
 
     public String getNativePath() {
         return nativePath;
+    }
+
+    public QueryString getQueryString(){
+        return queryString;
+    }
+
+    public boolean hasQueryString(){
+        return queryString.hasValues();
     }
 }

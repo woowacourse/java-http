@@ -143,12 +143,34 @@ class LoginHandlerTest {
         // when
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
         String response = responseEntity.generateResponseMessage();
-        System.out.println("1432314");
-        System.out.println(response);
         // then
         assertThat(response).contains(
                 "Location: index.html",
                 "HTTP/1.1 302 "
+        );
+    }
+
+    @Test
+    void 세션_없이_로그인_페이지에_접속하면_login_리다이렉션() throws IOException {
+        // given
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid);
+        SessionManager.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        BufferedReader input = RequestParser.requestToInput(httpRequest);
+
+        // when
+        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
+        String response = responseEntity.generateResponseMessage();
+        // then
+        assertThat(response).contains(
+                "HTTP/1.1 200 "
         );
     }
 

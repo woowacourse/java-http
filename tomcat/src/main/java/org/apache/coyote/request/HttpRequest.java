@@ -10,7 +10,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
+
+import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
 
 public class HttpRequest {
 
@@ -29,13 +32,15 @@ public class HttpRequest {
     private final HttpVersion httpVersion;
     private final Headers headers;
     private final MediaType mediaType;
+    private final RequestBody requestBody;
 
     private HttpRequest(final HttpMethod httpMethod,
-                       final RequestPath requestPath,
-                       final QueryParams queryParams,
-                       final HttpVersion httpVersion,
-                       final Headers headers,
-                       final MediaType mediaType
+                        final RequestPath requestPath,
+                        final QueryParams queryParams,
+                        final HttpVersion httpVersion,
+                        final Headers headers,
+                        final MediaType mediaType,
+                        final RequestBody requestBody
     ) {
         this.httpMethod = httpMethod;
         this.requestPath = requestPath;
@@ -43,6 +48,7 @@ public class HttpRequest {
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.mediaType = mediaType;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest from(final BufferedReader br) {
@@ -68,8 +74,17 @@ public class HttpRequest {
                 queryParams = QueryParams.from(queryParamsValue);
             }
 
+            RequestBody requestBody = RequestBody.EMPTY;
+            final String contentLengthHeader = headers.getHeaderValue(CONTENT_LENGTH.source());
+            if (Objects.nonNull(contentLengthHeader)) {
+                final int contentLength = Integer.parseInt(contentLengthHeader);
+                final char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                requestBody = RequestBody.from(new String(buffer));
+            }
+
             final MediaType mediaType = MediaType.from(requestUri);
-            return new HttpRequest(httpMethod, requestPath, queryParams, httpVersion, headers, mediaType);
+            return new HttpRequest(httpMethod, requestPath, queryParams, httpVersion, headers, mediaType, requestBody);
 
         } catch (IOException e) {
             throw new CoyoteIOException("HTTP 요청 정보를 읽던 도중에 예외가 발생하였습니다.");
@@ -111,6 +126,10 @@ public class HttpRequest {
         return mediaType;
     }
 
+    public RequestBody requestBody() {
+        return requestBody;
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" + System.lineSeparator() +
@@ -120,6 +139,7 @@ public class HttpRequest {
                "    httpVersion = " + httpVersion + ", " + System.lineSeparator() +
                "    headers = " + headers + System.lineSeparator() +
                "    mediaType = " + mediaType + System.lineSeparator() +
+               "    requestBody = " + requestBody + System.lineSeparator() +
                '}';
     }
 }

@@ -24,7 +24,7 @@ class HttpRequestTest {
                 "Host: localhost:8080",
                 "Connection: keep-alive",
                 "Content-Length: 12",
-                "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5",
+                "Accept: */*;q=1,text/html;q=0.9,application/json;q=0.8",
                 "",
                 "Hello world!"
         );
@@ -39,9 +39,9 @@ class HttpRequestTest {
             softly.assertThat(httpRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP_11);
             softly.assertThat(httpRequest.getAccepts()).usingRecursiveComparison().isEqualTo(
                     List.of(
-                            new Accept("text/html", 0.8),
-                            new Accept("application/json", 0.5),
-                            new Accept("*/*", 0.1)
+                            Accept.from(new String[]{"*/*"}),
+                            Accept.from(new String[]{"text/html"}),
+                            Accept.from(new String[]{"application/json"})
                     )
             );
             softly.assertThat(httpRequest.getBody(ContentType.TEXT_PLAIN).get("body")).isEqualTo("Hello world!");

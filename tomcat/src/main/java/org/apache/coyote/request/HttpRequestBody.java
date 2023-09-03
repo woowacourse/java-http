@@ -1,7 +1,6 @@
 package org.apache.coyote.request;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,10 +25,13 @@ public class HttpRequestBody {
         if (contentType == ContentType.APPLICATION_JSON) {
             return parseBodyForJson();
         }
-        return new HashMap<>(Map.of("body", body));
+        return defaultBody();
     }
 
     private Map<String, String> parseBodyForJson() {
+        if (body == null) {
+            return defaultBody();
+        }
         return Arrays.stream(body.split(BODY_DELIMITER))
                 .map(bodies -> bodies.split(ELEMENT_DELIMITER))
                 .filter(bodies -> bodies.length == 2)
@@ -39,5 +41,11 @@ public class HttpRequestBody {
                         (exist, replace) -> replace,
                         LinkedHashMap::new
                 ));
+    }
+
+    private Map<String, String> defaultBody() {
+        final Map<String, String> defaultBody = new LinkedHashMap<>();
+        defaultBody.put("body", body);
+        return defaultBody;
     }
 }

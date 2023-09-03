@@ -3,8 +3,6 @@ package org.apache.coyote.common;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.coyote.request.Accept;
 
 public enum ContentType {
@@ -37,12 +35,17 @@ public enum ContentType {
     }
 
     public static String getTypeFrom(final List<Accept> accepts) {
-        final Set<String> contentTypes = Arrays.stream(ContentType.values())
-                .map(contentType -> contentType.type)
-                .collect(Collectors.toSet());
         return accepts.stream()
-                .map(accept -> accept.getAcceptType())
-                .filter(accept -> contentTypes.contains(accept))
+                .map(ContentType::from)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(ContentType::getType)
+                .orElse(null);
+    }
+
+    private static ContentType from(final Accept accept) {
+        return Arrays.stream(ContentType.values())
+                .filter(contentType -> contentType.type.contains(accept.getAcceptType()))
                 .findFirst()
                 .orElse(null);
     }
@@ -51,7 +54,7 @@ public enum ContentType {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> Objects.equals(contentType.extension, extension))
                 .findAny()
-                .map(contentType -> contentType.type)
+                .map(ContentType::getType)
                 .orElse(null);
     }
 

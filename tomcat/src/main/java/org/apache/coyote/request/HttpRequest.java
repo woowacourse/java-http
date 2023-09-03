@@ -82,9 +82,8 @@ public class HttpRequest {
 
         if (accepts != null) {
             return Arrays.stream(accepts.split(ACCEPT_DELIMITER))
-                    .map(accept -> accept.trim().split(ACCEPT_QUALITY_DELIMITER))
+                    .map(accept -> accept.split(ACCEPT_QUALITY_DELIMITER))
                     .map(Accept::from)
-                    .sorted((o1, o2) -> Double.compare(o2.getQuality(), o1.getQuality()))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();

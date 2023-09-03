@@ -21,8 +21,8 @@ class ContentTypeTest {
         void accept에_유효한_type이_존재하면_해당_타입을_반환한다() {
             final List<Accept> accepts = new ArrayList<>(
                     List.of(
-                            new Accept("application/json", 1),
-                            new Accept("text/html", 0.8)
+                            Accept.from(new String[]{"application/json"}),
+                            Accept.from(new String[]{"text/html"})
                     )
             );
 
@@ -35,8 +35,8 @@ class ContentTypeTest {
         void accept에_유효한_type이_존재하지_않으면_null을_반환한다() {
             final List<Accept> accepts = new ArrayList<>(
                     List.of(
-                            new Accept("application/text", 1),
-                            new Accept("text/text", 0.8)
+                            Accept.from(new String[]{"application/text"}),
+                            Accept.from(new String[]{"text/text"})
                     )
             );
 

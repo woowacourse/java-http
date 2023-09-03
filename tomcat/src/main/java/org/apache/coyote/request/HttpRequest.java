@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import org.apache.coyote.common.Headers;
 import org.apache.coyote.common.HttpVersion;
+import org.apache.coyote.common.MediaType;
 import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.exception.CoyoteIOException;
 
@@ -27,13 +28,21 @@ public class HttpRequest {
     private final QueryParams queryParams;
     private final HttpVersion httpVersion;
     private final Headers headers;
+    private final MediaType mediaType;
 
-    public HttpRequest(final HttpMethod httpMethod, final RequestPath requestPath, final QueryParams queryParams, final HttpVersion httpVersion, final Headers headers) {
+    private HttpRequest(final HttpMethod httpMethod,
+                       final RequestPath requestPath,
+                       final QueryParams queryParams,
+                       final HttpVersion httpVersion,
+                       final Headers headers,
+                       final MediaType mediaType
+    ) {
         this.httpMethod = httpMethod;
         this.requestPath = requestPath;
         this.queryParams = queryParams;
         this.httpVersion = httpVersion;
         this.headers = headers;
+        this.mediaType = mediaType;
     }
 
     public static HttpRequest from(final BufferedReader br) {
@@ -59,7 +68,8 @@ public class HttpRequest {
                 queryParams = QueryParams.from(queryParamsValue);
             }
 
-            return new HttpRequest(httpMethod, requestPath, queryParams, httpVersion, headers);
+            final MediaType mediaType = MediaType.from(requestUri);
+            return new HttpRequest(httpMethod, requestPath, queryParams, httpVersion, headers, mediaType);
 
         } catch (IOException e) {
             throw new CoyoteIOException("HTTP 요청 정보를 읽던 도중에 예외가 발생하였습니다.");
@@ -74,8 +84,7 @@ public class HttpRequest {
             header = br.readLine();
         }
 
-        final Headers headers = new Headers(headersWithValue);
-        return headers;
+        return new Headers(headersWithValue);
     }
 
     public HttpMethod httpMethod() {
@@ -98,6 +107,10 @@ public class HttpRequest {
         return headers;
     }
 
+    public MediaType mediaType() {
+        return mediaType;
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" + System.lineSeparator() +
@@ -106,6 +119,7 @@ public class HttpRequest {
                "    queryParams = " + queryParams + ", " + System.lineSeparator() +
                "    httpVersion = " + httpVersion + ", " + System.lineSeparator() +
                "    headers = " + headers + System.lineSeparator() +
+               "    mediaType = " + mediaType + System.lineSeparator() +
                '}';
     }
 }

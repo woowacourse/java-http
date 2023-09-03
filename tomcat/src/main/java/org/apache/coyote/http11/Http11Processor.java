@@ -2,8 +2,13 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.mapper.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +37,22 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final InputMapper inputMapper = InputMapper.of(bufferedReader);
+
+            final Mapper inputMapper = Mapper.of(bufferedReader);
+            final String contentType = inputMapper.getContentType();
             final String responseBody = inputMapper.getResponseBody();
+            final Optional<Map<String, String>> queries = inputMapper.getQueries();
+
+            if(queries.isPresent()){
+                String account = queries.get().get("account");
+                User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+                log.info("로그인 : {}" , user);
+             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + contentType + ";",
+                    "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

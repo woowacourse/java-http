@@ -16,7 +16,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class LoginHandler implements Handler {
 
@@ -24,10 +24,18 @@ public class LoginHandler implements Handler {
 
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        System.out.println("handler: " + request.getEndPoint());
-        URL resource = classLoader.getResource("static/login.html");
+        if (checkIsRegisterUser(request)) {
+            List<String> headers = List.of(
+                    String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
+                    String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)),
+                    String.join(" ", "Location: index.html")
+            );
 
+            return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+
+        }
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource("static/login.html");
         File file = new File(resource.getFile());
         String fileData = new String(Files.readAllBytes(file.toPath()));
 
@@ -35,16 +43,23 @@ public class LoginHandler implements Handler {
                 String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
         );
+        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
+    }
+
+    private boolean checkIsRegisterUser(HttpRequest request) {
         Map<String, String> queryStrings = request.getQueryStrings();
         String account = queryStrings.get("account");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 유저입니다."));
+        Optional<User> userFindResult = InMemoryUserRepository.findByAccount(account);
+        if (userFindResult.isEmpty()) {
+            return false;
+        }
+        User user = userFindResult.get();
 
         String password = queryStrings.get("password");
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
+        if (!user.checkPassword(password)) {
+            return false;
         }
-
-        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
+        log.info(user.toString());
+        return true;
     }
 }

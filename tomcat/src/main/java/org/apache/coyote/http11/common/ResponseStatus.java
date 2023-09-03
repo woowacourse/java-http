@@ -2,7 +2,8 @@ package org.apache.coyote.http11.common;
 
 public enum ResponseStatus {
 
-    OK(200);
+    OK(200),
+    FOUND(302);
 
     private final int statusCode;
 

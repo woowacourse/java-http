@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
@@ -15,20 +16,23 @@ public class StaticResourceHandler implements ResourceHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getRequestUri());
+        String fileName = "static" + httpRequest.getRequestUri();
+        URL resource = getClass().getClassLoader().getResource(fileName);
         if (resource == null) {
-            resource = getClass().getClassLoader().getResource("static/404.html");
-            return createHttpResponse(StatusCode.BAD_REQUEST, resource);
+            fileName = "static/404.html";
+            resource = getClass().getClassLoader().getResource(fileName);
+            return createHttpResponse(StatusCode.BAD_REQUEST, resource, ContentType.from(fileName).getContentType());
         }
-        return createHttpResponse(StatusCode.OK, resource);
+        return createHttpResponse(StatusCode.OK, resource, ContentType.from(fileName).getContentType());
     }
 
-    private HttpResponse createHttpResponse(final StatusCode statusCode, final URL resource) throws IOException {
+    private HttpResponse createHttpResponse(final StatusCode statusCode, final URL resource, final String contentType)
+            throws IOException {
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
 
         return new HttpResponse(

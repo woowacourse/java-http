@@ -1,18 +1,17 @@
 package org.apache.coyote.http11.handler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.FileHandler;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestHandler;
+import org.apache.coyote.http11.HttpResponse;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class IndexCSSHandler implements HttpRequestHandler {
+
+    public static final String CSS_PATH_PREFIX = "static/css/";
+
     @Override
     public boolean support(final HttpRequest httpRequest) {
         return httpRequest.isMethodEqualTo("GET") && httpRequest.isUriEqualTo("/css/styles.css");
@@ -20,35 +19,10 @@ public class IndexCSSHandler implements HttpRequestHandler {
 
     @Override
     public void handle(final HttpRequest httpRequest, final OutputStream outputStream) throws IOException {
-        final var responseBody = new StringBuilder();
-
-        final URL indexPageURL = this.getClass().getClassLoader().getResource("static/css/styles.css");
-        final File indexFile;
-        try {
-            indexFile = new File(indexPageURL.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        try (
-                final FileInputStream fileInputStream = new FileInputStream(indexFile);
-                final BufferedReader bufferedReader = new BufferedReader(
-                        new InputStreamReader(fileInputStream, StandardCharsets.UTF_8))
-        ) {
-            while (bufferedReader.ready()) {
-                responseBody
-                        .append(bufferedReader.readLine())
-                        .append(System.lineSeparator());
-            }
-        }
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + responseBody.toString().getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        final HttpResponse httpResponse = new HttpResponse.Builder()
+                .contentType("text/css")
+                .responseBody(new FileHandler().readFromResourcePath(CSS_PATH_PREFIX + httpRequest.getEndPoint()))
+                .build(outputStream);
+        httpResponse.flush();
     }
 }

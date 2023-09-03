@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.RootHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
@@ -22,7 +23,8 @@ public class Http11Processor implements Runnable, Processor {
 
 	private static final List<HttpHandler> handlers = List.of(
 		new RootHandler(),
-		new StaticResourceHandler()
+		new StaticResourceHandler(),
+		new LoginHandler()
 	);
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 

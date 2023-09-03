@@ -40,11 +40,11 @@ public class RequestHeaders {
         return stringBuilder.toString().trim();
     }
 
-    public Optional<Cookie> getCookie() {
+    public Optional<Cookies> getCookie() {
         if (!headers.containsKey(COOKIE)) {
             return Optional.empty();
         }
-        return Optional.of(new Cookie(extractCookie(headers.get(COOKIE))));
+        return Optional.of(new Cookies(extractCookie(headers.get(COOKIE))));
     }
 
     private Map<String, String> extractCookie(String cookies) {

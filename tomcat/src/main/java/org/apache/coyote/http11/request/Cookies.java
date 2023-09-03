@@ -3,12 +3,12 @@ package org.apache.coyote.http11.request;
 import java.util.Map;
 import java.util.Optional;
 
-public class Cookie {
+public class Cookies {
 
     private static final String SESSION_COOKIE = "JSESSIONID";
     private Map<String, String> cookies;
 
-    public Cookie(Map<String, String> cookies) {
+    public Cookies(Map<String, String> cookies) {
         this.cookies = cookies;
     }
 

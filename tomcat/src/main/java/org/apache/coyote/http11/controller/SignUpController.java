@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.exception.MemberAlreadyExistsException;
-import org.apache.coyote.http11.request.Cookie;
+import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.ResponseBody;
 import org.apache.coyote.http11.response.Response;
@@ -50,15 +50,15 @@ public class SignUpController implements Controller {
     }
 
     private boolean loggedIn(Request request) {
-        Optional<Cookie> cookie = request.getRequestHeaders().getCookie();
+        Optional<Cookies> cookie = request.getRequestHeaders().getCookie();
         if (cookie.isPresent()) {
             return checkSession(cookie.get());
         }
         return false;
     }
 
-    private boolean checkSession(Cookie cookie) {
-        Optional<String> sessionCookie = cookie.getSessionCookie();
+    private boolean checkSession(Cookies cookies) {
+        Optional<String> sessionCookie = cookies.getSessionCookie();
         if (sessionCookie.isPresent()) {
             String sessionId = sessionCookie.get();
             HttpSession session = SessionManager.getInstance().findSession(sessionId);

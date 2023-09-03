@@ -14,9 +14,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +57,14 @@ public class Http11Processor implements Runnable, Processor {
             String requestUri = split[1];
 
 
+            String[] split1 = request.split("\r\n");
 
             if (method.equals("POST")) {
-                String[] split1 = request.split("\r\n");
                 Optional<String> any = Arrays.stream(split1)
                         .filter(it -> it.contains("Content-Length"))
                         .findAny();
                 if (any.isEmpty()) {
-                    throw new IllegalArgumentException("dfdf");
+                    throw new IllegalArgumentException("Content-Length 헤더가 존재하지 않습니다");
                 }
                 String s = any.get();
                 int index = s.indexOf(":");
@@ -83,6 +86,24 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (requestUri.equals("/login")) {
+                    Optional<String> cookie = Arrays.stream(split1)
+                            .filter(it -> it.contains("Cookie"))
+                            .findAny();
+                    if (cookie.isPresent()) {
+                        String a = cookie.get();
+                        String[] split100 = a.split(":");
+                        String cookies = split100[1];
+                        String[] split101 = cookies.split(";");
+                        Optional<String> any2 = Arrays.stream(split101)
+                                .filter(it -> it.contains("JSESSIONID"))
+                                .findAny();
+                        if (any2.isPresent()) {
+                            String[] split3 = any2.get().split("=");
+                            String jsessionId = split3[1];
+                            loginWithSession(outputStream, jsessionId);
+                            return;
+                        }
+                    }
                     login(form, outputStream);
                     return;
                 }
@@ -90,7 +111,28 @@ public class Http11Processor implements Runnable, Processor {
 
             if (!requestUri.equals("/")) {
                 URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                if (requestUri.equals("/login") || requestUri.equals("/register")) {
+                if (requestUri.equals("/login")) {
+                    Optional<String> cookie = Arrays.stream(split1)
+                            .filter(it -> it.contains("Cookie"))
+                            .findAny();
+                    if (cookie.isPresent()) {
+                        String s = cookie.get();
+                        String[] split100 = s.split(":");
+                        String cookies = split100[1];
+                        String[] split101 = cookies.split(";");
+                        Optional<String> any = Arrays.stream(split101)
+                                .filter(it -> it.contains("JSESSIONID"))
+                                .findAny();
+                        if (any.isPresent()) {
+                            String[] split2 = any.get().split("=");
+                            String jsessionId = split2[1];
+                            loginWithSession(outputStream, jsessionId);
+                            return;
+                        }
+                    }
+                    resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
+                }
+                if (requestUri.equals("/register")) {
                     resource = getClass().getClassLoader().getResource("static" + requestUri + ".html");
                 }
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -137,14 +179,39 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private void loginWithSession(OutputStream outputStream, String jsessionId) throws IOException {
+        SessionManager sessionManager = new SessionManager();
+        Session session = sessionManager.findSession(jsessionId);
+        if (session == null) {
+            throw new IllegalArgumentException("잘못된 세션 아이디입니다");
+        }
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            throw new IllegalArgumentException("잘못된 세션입니다");
+        }
+        String response = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /index.html ",
+                "",
+                "");
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
     private void login(Map<String, String> form, OutputStream outputStream) throws IOException {
         Optional<User> user = InMemoryUserRepository.findByAccount(form.get("account"));
         if (user.isPresent()) {
             if (user.get().checkPassword(form.get("password"))) {
+                UUID jsessionId = UUID.randomUUID();
                 log.info(user.get().toString());
+                Session session = new Session(jsessionId.toString());
+                session.setAttribute("user", user.get());
+                SessionManager sessionManager = new SessionManager();
+                sessionManager.add(session);
                 String response = String.join("\r\n",
                         "HTTP/1.1 302 FOUND ",
                         "Location: /index.html ",
+                        "Set-Cookie: JSESSIONID=" + jsessionId + " ",
                         "",
                         "");
                 outputStream.write(response.getBytes());

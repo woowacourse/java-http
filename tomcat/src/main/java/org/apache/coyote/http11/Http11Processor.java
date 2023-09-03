@@ -1,5 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -27,16 +37,30 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final var responseBody = "Hello world!";
+            final List<String> headers = new ArrayList<>();
+            while (bufferedReader.ready()) {
+                headers.add(bufferedReader.readLine());
+            }
+
+            final String requestLine = headers.get(0);
+            final String[] splitRequestLine = requestLine.split(" ");
+            final String requestURI = "static" + splitRequestLine[1];
+
+            final URL url = Objects.requireNonNull(getClass().getClassLoader()
+                    .getResource(requestURI));
+            final Path path = new File(url.getPath()).toPath();
+            final byte[] responseBody = Files.readAllBytes(path);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    new String(responseBody, StandardCharsets.UTF_8));
 
             outputStream.write(response.getBytes());
             outputStream.flush();

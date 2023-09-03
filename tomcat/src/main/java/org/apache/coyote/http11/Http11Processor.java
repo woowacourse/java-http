@@ -4,7 +4,6 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Cookie;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Sessions;
@@ -19,26 +18,24 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String STATIC_DIRECTORY = "static";
     private static final String SPACE = " ";
-    private static final String QUERY_STRING_SEPARATOR = "\\?";
     private static final String MULTIPLE_QUERY_STRING_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String LINE_FEED = "\r\n";
     private static final String HTML_SUFFIX = ".html";
-    private static final int PATH_INDEX = 1;
-    private static final int PROTOCOL_INDEX = 2;
     private static List<String> STATIC_PATH = List.of(".css", ".js");
 
     private final Socket connection;
+    private final HttpRequestParser httpRequestParser;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.httpRequestParser = new HttpRequestParser();
     }
 
     @Override
@@ -51,12 +48,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            byte[] bytes = new byte[2048];
-            inputStream.read(bytes);
-            final String request = new String(bytes);
-
-            final String response = createResponse(request);
+            httpRequestParser.accept(inputStream);
+            final String response = createResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,33 +58,31 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(String request) throws IOException {
-
-        String path = getPath(request);
-        String method = getMethod(request);
+    private String createResponse() throws IOException {
+        String path = httpRequestParser.findPath();
+        String method = httpRequestParser.findMethod();
         String prevPath = path;
-        Cookie cookie = new Cookie();
-        Map<String, String> cookies = cookie.getCookies(request);
+        Map<String, String> cookies = httpRequestParser.findCookies();
         String jsessionid = cookies.get("JSESSIONID");
         if (method.equals("GET")) {
             path = processGetRequest(path, jsessionid);
         } else if (method.equals("POST")) {
             if (path.equals("/login")) {
-                path = processLogin(request);
+                path = processLogin();
             } else if (path.equals("/register")) {
-                path = processRegister(request);
+                path = processRegister();
             }
         }
         String status = getStatus(prevPath, path);
 
-        String protocol = getRequestElement(request, PROTOCOL_INDEX);
+        String protocol = httpRequestParser.findProtocol();
         String contentType = getContentType(path);
 
         String content = getContent(path);
         String contentLength = "Content-Length: " + content.getBytes().length;
 
         String response = protocol +  SPACE + status + SPACE + LINE_FEED +
-                getJSessionId(request) + SPACE + LINE_FEED +
+                getJSessionId() + SPACE + LINE_FEED +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 getLocationIfRedirect(status, path) +
@@ -100,23 +91,22 @@ public class Http11Processor implements Runnable, Processor {
         return response;
     }
 
-    private String getJSessionId(String request) {
-        Cookie cookie = new Cookie();
-        Map<String, String> cookies = cookie.getCookies(request);
+    private String getJSessionId() {
+        Map<String, String> cookies = httpRequestParser.findCookies();
         if (!cookies.containsKey("JSESSIONID")) {
-            return cookie.createCookie();
+            return "Set-Cookie: JSESSIONID=" + UUID.randomUUID().toString();
         }
         return "";
     }
 
-    private String processLogin(String request) {
+    private String processLogin() {
         String path;
-        String[] splitRequestBody = getRequestBody(request);
+        String[] splitRequestBody = httpRequestParser.getMessageBody().split(MULTIPLE_QUERY_STRING_SEPARATOR);
         String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
         String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-            addSession(request, user);
+            addSession(user);
             path = getRedirectPath(password, user);
             log.info(user.toString());
         } catch (UserNotFoundException e) {
@@ -125,23 +115,15 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private void addSession(String request, User user) {
-        Cookie cookie = new Cookie();
+    private void addSession(User user) {
         Sessions sessions = new Sessions();
-        Map<String, String> cookies = cookie.getCookies(request);
+        Map<String, String> cookies = httpRequestParser.findCookies();
         String jsessionid = cookies.get("JSESSIONID");
         sessions.add(jsessionid, user);
     }
 
-    private static String[] getRequestBody(String request) {
-        String[] splitRequest = request.split(LINE_FEED);
-        String requestBody = splitRequest[splitRequest.length - 1].trim();
-        String[] splitRequestBody = requestBody.split(MULTIPLE_QUERY_STRING_SEPARATOR);
-        return splitRequestBody;
-    }
-
-    private static String processRegister(String request) {
-        String[] splitRequestBody = getRequestBody(request);
+    private String processRegister() {
+        String[] splitRequestBody = httpRequestParser.getMessageBody().split(MULTIPLE_QUERY_STRING_SEPARATOR);
         String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
         String email = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         email = email.replace("%40", "@");
@@ -158,10 +140,6 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String getMethod(String request) {
-        return getRequestElement(request, 0);
-    }
-
     private String getStatus(String prevPath, String path) {
         if (!isSamePage(prevPath, path) && !prevPath.equals(path)) {
             return HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
@@ -175,10 +153,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String processGetRequest(String path, String jSessionId) {
         if (isRequest(path)) {
-//            if (haveQueryString(path)) {
-//                path = processLogin(path);
-//                return path;
-//            }
+            if (path.equals("/")) {
+                return path;
+            }
             if (path.equals("/login")) {
                 Sessions sessions = new Sessions();
                 if (sessions.isAlreadyLogin(jSessionId)) {
@@ -190,22 +167,6 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-//    QueryString으로 login logic
-//    private String processLogin(String path) {
-//        String queryString = splitQueryString(path)[1];
-//        String[] splitQueryString = queryString.split("&");
-//        String account = splitQueryString[0].split(KEY_VALUE_SEPARATOR)[1];
-//        String password = splitQueryString[1].split(KEY_VALUE_SEPARATOR)[1];
-//        try {
-//            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-//            path = getRedirectPath(password, user);
-//            log.info(user.toString());
-//            return path;
-//        } catch (UserNotFoundException e) {
-//            return "/401.html";
-//        }
-//    }
-
     private String getRedirectPath(String password, User user) {
         String path;
         if (user.checkPassword(password)) {
@@ -214,11 +175,6 @@ public class Http11Processor implements Runnable, Processor {
             path = "/401.html";
         }
         return path;
-    }
-
-    private boolean haveQueryString(String path) {
-        Pattern pattern = Pattern.compile(QUERY_STRING_SEPARATOR);
-        return pattern.matcher(path).find();
     }
 
     private String getContentType(String path) {
@@ -247,20 +203,8 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String getPath(String request) {
-        return getRequestElement(request, PATH_INDEX);
-    }
-
     private boolean isRequest(String path) {
         return !isStaticPath(path) && !path.endsWith(HTML_SUFFIX);
-    }
-
-    private String[] splitQueryString(String path) {
-        return path.split(QUERY_STRING_SEPARATOR);
-    }
-
-    private String getRequestElement(String request, int index) {
-        return request.split(SPACE + "|" + LINE_FEED)[index];
     }
 
 }

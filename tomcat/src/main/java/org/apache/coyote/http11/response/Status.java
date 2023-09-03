@@ -3,7 +3,8 @@ package org.apache.coyote.http11.response;
 public enum Status {
     OK(200, "OK"),
     FOUND(302, "Found"),
-    UNAUTHORIZED(401, "Unauthorized");
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found");
 
     final int code;
     final String name;

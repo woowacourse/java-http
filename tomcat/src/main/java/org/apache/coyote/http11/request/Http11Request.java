@@ -12,6 +12,7 @@ public class Http11Request {
     final String path;
     final Map<String, String> queryParams;
     final Map<String, String> headers;
+    String body;
 
     public Http11Request(final Method method,
                          final String path,
@@ -100,5 +101,13 @@ public class Http11Request {
 
     public String getHeader(final String headerName) {
         return headers.get(headerName);
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(final String body) {
+        this.body = body;
     }
 }

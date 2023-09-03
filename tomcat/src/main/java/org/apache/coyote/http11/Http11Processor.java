@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.Method.GET;
+import static org.apache.coyote.http11.request.Method.POST;
 import static org.apache.coyote.http11.response.Status.FOUND;
+import static org.apache.coyote.http11.response.Status.NOT_FOUND;
 import static org.apache.coyote.http11.response.Status.OK;
 import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
 
@@ -14,11 +16,14 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
@@ -45,8 +50,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Http11Request request = Http11Request.from(readInputStream(inputStream));
-
+            final Http11Request request = readRequest(inputStream);
             final Http11Response response = makeResponseOf(request);
 
             outputStream.write(response.getResponse().getBytes());
@@ -57,10 +61,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readInputStream(final InputStream inputStream) {
+    private Http11Request readRequest(final InputStream inputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
+        final Http11Request request = readRequestHeader(bufferedReader);
+        final String contentLength = request.getHeader("Content-Length");
+        if (contentLength != null) {
+            final String requestBody = readRequestBody(bufferedReader, Integer.parseInt(contentLength));
+            request.setBody(requestBody);
+        }
+        return request;
+    }
+
+    private Http11Request readRequestHeader(final BufferedReader bufferedReader) {
         final StringBuilder input = new StringBuilder();
         try {
             for (String s = bufferedReader.readLine();
@@ -73,38 +87,59 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
 
-        return input.toString();
+        return Http11Request.from(input.toString());
     }
 
+    private String readRequestBody(final BufferedReader bufferedReader, final int contentLength) {
+        final char[] buffer = new char[contentLength];
+        try {
+            bufferedReader.read(buffer, 0, contentLength);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new String(buffer);
+    }
 
     private Http11Response makeResponseOf(final Http11Request request) {
-        if (request.getMethod() == GET) {
-            final String path = request.getPath();
-            Status status = OK;
+        final Method method = request.getMethod();
+        final String path = request.getPath();
+        Status status;
+        final Http11Response response;
 
-            if (path.equals("/login") && request.isQueryParamExist("account", "password")) {
-                status = processLogIn(request);
-            }
-
-            final String responseBody = getResponseBodyFromResource(status, path);
-
-            final Http11Response response = new Http11Response(status, responseBody);
+        if (method == GET) {
+            status = OK;
+            final String responseBody = getResponseBodyFromResource(OK, path);
+            response = new Http11Response(status, responseBody);
             final String accept = request.getHeader("Accept");
             if (accept != null && accept.contains("css")) {
                 response.addHeader("Content-Type", "text/css;charset=utf-8 ");
             }
+            return response;
+        }
+        if (method == POST) {
+            status = NOT_FOUND;
+            if (path.equals("/login")) {
+                status = logIn(request);
+            }
+            if (path.equals("/register")) {
+                status = register(request);
+            }
+
+            final String responseBody = getResponseBodyFromResource(status, path);
+
+            response = new Http11Response(status, responseBody);
             if (status == FOUND) {
                 response.addHeader("Location", "/index.html");
             }
-
             return response;
         }
         throw new IllegalArgumentException("Invalid Request Uri");
     }
 
-    private Status processLogIn(final Http11Request request) {
-        final String account = request.getQueryParam("account");
-        final String password = request.getQueryParam("password");
+    private Status logIn(final Http11Request request) {
+        final Map<String, String> bodyFields = parseFormData(request.getBody());
+        final String account = bodyFields.get("account");
+        final String password = bodyFields.get("password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
@@ -115,6 +150,31 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return UNAUTHORIZED;
+    }
+
+    private Status register(final Http11Request request) {
+        final Map<String, String> bodyFields = parseFormData(request.getBody());
+
+        final String account = bodyFields.get("account");
+        final String password = bodyFields.get("password");
+        final String email = bodyFields.get("email");
+
+        final User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+        return FOUND;
+    }
+
+    private Map<String, String> parseFormData(final String body) {
+        final Map<String, String> fields = new HashMap<>();
+
+        for (final String field : body.split("&")) {
+            final String[] param = field.split("=", 2);
+            final String name = param[0];
+            final String value = param[1];
+            fields.put(name, value);
+        }
+        return fields;
     }
 
     private String getResponseBodyFromResource(final Status status, String path) {

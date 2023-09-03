@@ -7,16 +7,19 @@ import java.util.ArrayList;
 public class HttpRequest {
 
     private static final String HEADER_BODY_DELIMITER = "";
+    private static final String PATH_QUERY_STRING_DELIMITER = "\\?";
 
     private final HttpMethod method;
     private final String path;
     private final HttpHeaders headers;
+    private final QueryStrings queryStrings;
     private final String body;
 
-    private HttpRequest(HttpMethod method, String path, HttpHeaders headers, String body) {
+    private HttpRequest(HttpMethod method, String path, HttpHeaders headers, QueryStrings queryStrings, String body) {
         this.method = method;
         this.path = path;
         this.headers = headers;
+        this.queryStrings = queryStrings;
         this.body = body;
     }
 
@@ -40,10 +43,22 @@ public class HttpRequest {
             body = new String(bodyChars);
         }
 
-        final var method = HttpMethod.of(request.get(0).split(" ")[0]);
-        final var path = request.get(0).split(" ")[1];
+        final String[] uri = request.get(0).split(" ");
+        final var method = HttpMethod.of(uri[0]);
+        final var fullPath = uri[1];
 
-        return new HttpRequest(method, path, HttpHeaders.from(request), body);
+        if (fullPath.contains("?")) {
+            final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
+            final var path = pathAndQueryParams[0].trim();
+            final var queryStrings = new QueryStrings(pathAndQueryParams[1]);
+            return new HttpRequest(method, path, HttpHeaders.from(request), queryStrings, body);
+        }
+
+        return new HttpRequest(method, fullPath, HttpHeaders.from(request), null, body);
+    }
+
+    public boolean hasQueryStrings() {
+        return queryStrings != null;
     }
 
     public HttpHeaders getHeaders() {
@@ -52,6 +67,10 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return method;
+    }
+
+    public String getQueryString(String key) {
+        return queryStrings.getValue(key);
     }
 
     public String getPath() {

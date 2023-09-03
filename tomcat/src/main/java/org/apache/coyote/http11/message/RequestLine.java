@@ -1,8 +1,12 @@
 package org.apache.coyote.http11.message;
 
+import java.util.Optional;
+
 public class RequestLine {
 
     private static final String DELIMITER = " ";
+    private static final String PATH_EXTENSION_DELIMITER = ".";
+    private static final String PATH_DELIMITER = "/";
     private static final int START_LINE_INFORMATION_COUNT = 3;
 
     private final HttpMethod method;
@@ -34,6 +38,17 @@ public class RequestLine {
 
     public boolean isMatchingRequest(final HttpMethod method, final String path) {
         return this.method == method && this.path.equals(path);
+    }
+
+    public Optional<String> parseFileExtensionFromPath() {
+        // TODO: 2023-09-04 Path 도메인으로 이동
+        if (!path.contains(PATH_EXTENSION_DELIMITER)) {
+            return Optional.empty();
+        }
+        final String[] parsedPath = path.split(PATH_DELIMITER);
+        final String fileName = parsedPath[parsedPath.length - 1];
+        final String[] parsedFileName = fileName.split("\\" + PATH_EXTENSION_DELIMITER);
+        return Optional.of(parsedFileName[parsedFileName.length - 1]);
     }
 
     public HttpMethod getMethod() {

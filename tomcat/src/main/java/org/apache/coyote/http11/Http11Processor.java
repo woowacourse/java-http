@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.slf4j.Logger;
@@ -40,10 +41,11 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.from(reader);
 
             final String responseBody = createResponseBody(httpRequest);
+            final ContentType responseContentType = ContentType.findResponseContentTypeFromRequest(httpRequest);
 
             final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + responseContentType.getType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -56,21 +58,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponseBody(final HttpRequest httpRequest) throws IOException {
-        String responseBody = "";
-
         if (httpRequest.isRequestOf(HttpMethod.GET, "/")) {
-            responseBody = "Hello world!";
-        }
-        if (httpRequest.isRequestOf(HttpMethod.GET, "/index.html")) {
-            final URL url = getClass().getClassLoader().getResource("static/index.html");
-            responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-
-        }
-        if (responseBody.isEmpty()) {
-            final URL url = getClass().getClassLoader().getResource("static/404.html");
-            responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+            return "Hello world!";
         }
 
-        return responseBody;
+        URL url = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
+        if (url == null) {
+            url = getClass().getClassLoader().getResource("static/404.html");
+            return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+        }
+
+        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 }

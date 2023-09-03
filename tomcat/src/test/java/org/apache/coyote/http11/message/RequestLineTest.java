@@ -3,6 +3,7 @@ package org.apache.coyote.http11.message;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,5 +33,32 @@ class RequestLineTest {
         assertThatThrownBy(() -> RequestLine.from(startLine))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("잘못된 HTTP 요청입니다.");
+    }
+
+    @Test
+    @DisplayName("요청 경로로부터 정적 파일의 확장자를 추출한다.")
+    void parseFileExtensionFromPath() {
+        // given
+        final RequestLine requestLine = RequestLine.from("GET /chart-pie.js HTTP/1.1");
+
+        // when
+        final Optional<String> extension = requestLine.parseFileExtensionFromPath();
+
+        // then
+        assertThat(extension).isPresent()
+            .get().isEqualTo("js");
+    }
+
+    @Test
+    @DisplayName("요청 경로가 정적 파일이 아니라면 Optional.empty() 가 반환된다.")
+    void parseFileExtensionFromPath_notStaticFilePath() {
+        // given
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+
+        // when
+        final Optional<String> extension = requestLine.parseFileExtensionFromPath();
+
+        // then
+        assertThat(extension).isEmpty();
     }
 }

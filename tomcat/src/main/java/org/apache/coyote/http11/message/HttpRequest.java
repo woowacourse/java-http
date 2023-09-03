@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -54,5 +55,13 @@ public class HttpRequest {
 
     public RequestHeaders getHeaders() {
         return headers;
+    }
+
+    public Optional<String> findFirstHeaderValue(final String field) {
+        return headers.findFirstValueOfField(field);
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 }

@@ -69,10 +69,17 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = new String(Files.readAllBytes(file.toPath()));
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType(requestURI) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody
         );
+    }
+
+    private String contentType(String requestURI) {
+        if (requestURI.endsWith(".html")) {
+            return "text/html";
+        }
+        return "text/css";
     }
 }

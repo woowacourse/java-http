@@ -41,7 +41,7 @@ public class LoginHandler implements Handler {
         throw new UnsupportedOperationException("get, post만 가능합니다.");
     }
 
-    private boolean isLoginUser(String jsessionid) throws IOException {
+    private boolean isLoginUser(String jsessionid) {
         if (jsessionid == null) {
             return false;
         }

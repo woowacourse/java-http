@@ -2,16 +2,12 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.List;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HttpHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.NotFoundHandler;
-import org.apache.coyote.http11.handler.RootHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.HttpHandlers;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -21,11 +17,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
-	private static final List<HttpHandler> handlers = List.of(
-		new RootHandler(),
-		new StaticResourceHandler(),
-		new LoginHandler()
-	);
+	private static final HttpHandlers HTTP_HANDLERS = new HttpHandlers();
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
 	private final Socket connection;
@@ -44,27 +36,27 @@ public class Http11Processor implements Runnable, Processor {
 	public void process(final Socket connection) {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-			final StringBuilder builder = new StringBuilder();
+			final String plainRequest = readRequest(inputStream);
 
-			for (String readLine = reader.readLine();
-				 readLine != null && !readLine.isEmpty();
-				 readLine = reader.readLine()) {
-				builder.append(readLine);
-			}
-
-			final HttpRequest request = HttpRequest.from(builder.toString());
-
-			final HttpResponse response = handlers.stream()
-				.filter(handler -> handler.isSupported(request))
-				.findAny()
-				.orElseGet(NotFoundHandler::new)
-				.handleTo(request);
+			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpResponse response = HTTP_HANDLERS.handleTo(request);
 
 			outputStream.write(response.buildResponse().getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	private static String readRequest(final InputStream inputStream) throws IOException {
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		final StringBuilder builder = new StringBuilder();
+
+		for (String readLine = reader.readLine();
+			 readLine != null && !readLine.isEmpty();
+			 readLine = reader.readLine()) {
+			builder.append(readLine);
+		}
+		return builder.toString();
 	}
 }

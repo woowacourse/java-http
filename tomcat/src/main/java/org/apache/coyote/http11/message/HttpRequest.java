@@ -10,29 +10,29 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
+    private final QueryParams queryParams;
     private final String body;
 
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers, final String body) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers,
+        final QueryParams queryParams, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
+        this.queryParams = queryParams;
         this.body = body;
     }
 
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers) {
-        this(requestLine, headers, null);
+    private HttpRequest(final RequestLine requestLine, final QueryParams queryParams, final RequestHeaders headers) {
+        this(requestLine, headers, queryParams, null);
     }
 
     public static HttpRequest from(final BufferedReader messageReader) throws IOException {
-        final RequestLine requestLine = parseStartLine(messageReader);
+        final String startLine = messageReader.readLine();
+        final RequestLine requestLine = RequestLine.from(startLine);
+        final QueryParams queryParams = QueryParams.from(requestLine);
         final RequestHeaders requestHeaders = parseHeaders(messageReader);
 
         // TODO: 2023-09-03 header에 Content-Length 필드 있으면 body 읽어오고, 아니면 읽지 않도록
-        return new HttpRequest(requestLine, requestHeaders);
-    }
-
-    private static RequestLine parseStartLine(final BufferedReader messageReader) throws IOException {
-        final String startLine = messageReader.readLine();
-        return RequestLine.from(startLine);
+        return new HttpRequest(requestLine, queryParams, requestHeaders);
     }
 
     private static RequestHeaders parseHeaders(final BufferedReader messageReader) throws IOException {
@@ -49,6 +49,10 @@ public class HttpRequest {
         return requestLine.isMatchingRequest(method, path);
     }
 
+    public Optional<String> findFirstHeaderValue(final String field) {
+        return headers.findFirstValueOfField(field);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -57,11 +61,11 @@ public class HttpRequest {
         return headers;
     }
 
-    public Optional<String> findFirstHeaderValue(final String field) {
-        return headers.findFirstValueOfField(field);
-    }
-
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public String getParamOf(final String field) {
+        return queryParams.getValueOf(field);
     }
 }

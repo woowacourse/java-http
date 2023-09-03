@@ -61,4 +61,35 @@ class RequestLineTest {
         // then
         assertThat(extension).isEmpty();
     }
+
+    @Test
+    @DisplayName("QueryString이 존재한다면, URI로부터 QueryString 과 path를 따로 파싱한다.")
+    void parseQueryString() {
+        // given
+        final RequestLine requestLine = RequestLine.from("GET /login?account=gugu&password=password HTTP/1.1");
+
+        // when
+        final Optional<String> queryString = requestLine.parseQueryString();
+        final String path = requestLine.getPath();
+
+        // then
+        assertThat(queryString).isPresent()
+            .get().isEqualTo("account=gugu&password=password");
+        assertThat(path).isEqualTo("/login");
+    }
+
+    @Test
+    @DisplayName("QueryString 이 없다면 파싱 결과는 Optional.empty() 가 반환된다.")
+    void parseQueryString_notExist() {
+        // given
+        final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
+
+        // when
+        final Optional<String> queryString = requestLine.parseQueryString();
+        final String path = requestLine.getPath();
+
+        // then
+        assertThat(queryString).isEmpty();
+        assertThat(path).isEqualTo("/login");
+    }
 }

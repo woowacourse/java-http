@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpMethod;
@@ -61,11 +63,23 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.isRequestOf(HttpMethod.GET, "/")) {
             return "Hello world!";
         }
+        if (httpRequest.isRequestOf(HttpMethod.GET, "/login")) {
+            final User user = InMemoryUserRepository.findByAccount(httpRequest.getParamOf("account"))
+                .filter(foundUser -> foundUser.checkPassword(httpRequest.getParamOf("password")))
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
 
-        URL url = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
+            log.info(user.toString());
+            return createStaticFileResponse("/login.html");
+        }
+
+        return createStaticFileResponse(httpRequest.getPath());
+    }
+
+    private String createStaticFileResponse(final String path) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + path);
+
         if (url == null) {
             url = getClass().getClassLoader().getResource("static/404.html");
-            return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
         }
 
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));

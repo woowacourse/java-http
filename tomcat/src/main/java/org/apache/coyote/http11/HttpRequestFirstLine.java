@@ -6,7 +6,7 @@ import java.util.List;
 public class HttpRequestFirstLine {
 
     private final String method;
-    private final String path;
+    private final HttpPath httpPath;
     private final String protocolVersion;
 
     public static HttpRequestFirstLine from(final String firstLine) {
@@ -16,11 +16,11 @@ public class HttpRequestFirstLine {
 
     public HttpRequestFirstLine(
             final String method,
-            final String path,
+            final String uri,
             final String protocolVersion
     ) {
         this.method = method;
-        this.path = path;
+        this.httpPath = HttpPath.from(uri);
         this.protocolVersion = protocolVersion;
     }
 
@@ -28,12 +28,12 @@ public class HttpRequestFirstLine {
         return method;
     }
 
-    public String getPath() {
-        return path;
+    public HttpPath getHttpPath() {
+        return httpPath;
     }
 
     public String getProtocolVersion() {
         return protocolVersion;
     }
-    
+
 }

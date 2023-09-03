@@ -16,6 +16,14 @@ public class HttpResponse {
         }
         if (path.endsWith(".css")) {
             contentType = "text/css;charset=utf-8";
+            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + path);
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
+        }
+        if (path.equals("/login")) {
+            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + "/login.html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
         }
 
         final URL resource = HttpResponse.class.getClassLoader().getResource("static" + path);

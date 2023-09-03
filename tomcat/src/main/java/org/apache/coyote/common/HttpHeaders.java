@@ -39,7 +39,7 @@ public class HttpHeaders {
         headers.put(key, header);
     }
 
-    public void setCookie(HttpCookie cookie) {
+    public void setCookie(HttpCookieResponse cookie) {
         Header header = new SemicolonSeparateHeader();
         header.add(cookie.getName() + "=" + cookie.getValue());
         if (cookie.isHttpOnly()) {

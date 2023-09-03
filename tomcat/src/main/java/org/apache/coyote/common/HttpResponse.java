@@ -43,7 +43,7 @@ public class HttpResponse {
             .collect(joining(System.lineSeparator()));
     }
 
-    public void setCookie(HttpCookie cookie) {
+    public void setCookie(HttpCookieResponse cookie) {
         httpHeaders.setCookie(cookie);
     }
 

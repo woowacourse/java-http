@@ -1,49 +1,16 @@
 package org.apache.coyote.common;
 
-import java.time.Duration;
+import java.util.Map;
 
 public class HttpCookie {
 
-    private final String name;
-    private final String value;
-    private boolean secure;
-    private boolean httpOnly;
-    private Duration maxAge = Duration.ofSeconds(-1);
+    private final Map<String, String> cookies;
 
-    public HttpCookie(String name, String value) {
-        this.name = name;
-        this.value = value;
+    public HttpCookie(Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
-    public void setSecure() {
-        this.secure = true;
-    }
-
-    public void setHttpOnly() {
-        this.httpOnly = true;
-    }
-
-    public void setMaxAge(long seconds) {
-        this.maxAge = Duration.ofSeconds(Math.max(-1, seconds));
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public boolean isHttpOnly() {
-        return httpOnly;
-    }
-
-    public Duration getMaxAge() {
-        return maxAge;
+    public String get(String name) {
+        return cookies.getOrDefault(name, "");
     }
 }

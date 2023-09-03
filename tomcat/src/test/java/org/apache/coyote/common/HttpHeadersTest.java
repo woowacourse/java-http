@@ -53,7 +53,7 @@ class HttpHeadersTest {
     void 쿠키_추가() {
         // given
         HttpHeaders httpHeaders = new HttpHeaders();
-        HttpCookie httpCookie = new HttpCookie("foo", "bar");
+        HttpCookieResponse httpCookie = new HttpCookieResponse("foo", "bar");
         httpCookie.setMaxAge(100);
         httpCookie.setHttpOnly();
         httpCookie.setSecure();

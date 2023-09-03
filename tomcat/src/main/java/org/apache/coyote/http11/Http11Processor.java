@@ -15,6 +15,7 @@ import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Handler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
@@ -25,6 +26,7 @@ import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
 import org.apache.coyote.http11.handler.RegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.util.CookieParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +68,9 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         RequestUri requestUri = getRequestUri(bufferedReader);
         HttpHeaders httpHeaders = getHttpHeaders(bufferedReader);
+        HttpCookie cookie = getCookie(httpHeaders);
         String requestBody = getRequestBody(httpHeaders, bufferedReader);
-        return new HttpRequest(requestUri, httpHeaders, requestBody);
+        return new HttpRequest(requestUri, httpHeaders, cookie, requestBody);
     }
 
     private RequestUri getRequestUri(BufferedReader bufferedReader) throws IOException {
@@ -89,6 +92,10 @@ public class Http11Processor implements Runnable, Processor {
             httpHeaders.addHeader(key, values);
         }
         return httpHeaders;
+    }
+
+    private HttpCookie getCookie(HttpHeaders httpHeaders) {
+        return CookieParser.parse(httpHeaders.getHeader("Cookie"));
     }
 
     private String getRequestBody(HttpHeaders httpHeaders, BufferedReader bufferedReader) throws IOException {

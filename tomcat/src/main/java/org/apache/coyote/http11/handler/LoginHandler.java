@@ -7,7 +7,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.common.HttpContentType;
-import org.apache.coyote.common.HttpCookie;
+import org.apache.coyote.common.HttpCookieResponse;
 import org.apache.coyote.common.HttpMethod;
 import org.apache.coyote.common.HttpProtocol;
 import org.apache.coyote.common.HttpRequest;
@@ -58,7 +58,7 @@ public class LoginHandler implements Handler {
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
         HttpResponse response = new HttpResponse(HttpProtocol.HTTP11, HttpStatus.FOUND);
         response.addHeader("Location", "/index.html");
-        response.setCookie(new HttpCookie("JSESSIONID", UUID.randomUUID().toString()));
+        response.setCookie(new HttpCookieResponse("JSESSIONID", UUID.randomUUID().toString()));
         return response;
     }
 

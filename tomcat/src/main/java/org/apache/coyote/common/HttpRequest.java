@@ -5,10 +5,12 @@ public class HttpRequest {
     private final RequestUri requestUri;
     private final HttpHeaders headers;
     private final String requestBody;
+    private final HttpCookie cookie;
 
-    public HttpRequest(RequestUri requestUri, HttpHeaders headers, String requestBody) {
+    public HttpRequest(RequestUri requestUri, HttpHeaders headers, HttpCookie cookie, String requestBody) {
         this.requestUri = requestUri;
         this.headers = headers;
+        this.cookie = cookie;
         this.requestBody = requestBody;
     }
 

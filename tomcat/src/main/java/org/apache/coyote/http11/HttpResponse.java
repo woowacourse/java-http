@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HttpResponse {
 
@@ -17,7 +15,7 @@ public class HttpResponse {
 
     private int contentLength;
 
-    private List<Cookie> cookies = new ArrayList<>();
+    private Cookies cookies = new Cookies();
 
     private String responseBody;
 
@@ -60,7 +58,7 @@ public class HttpResponse {
     }
 
     public void addCookie(String key, String value) {
-        this.cookies.add(new Cookie(key, value));
+        this.cookies.add(key, value);
     }
 
     public static class Builder {

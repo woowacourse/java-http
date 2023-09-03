@@ -11,10 +11,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.util.UriComponentsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,9 @@ public class RequestHandler {
             final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
             return createResponse(url);
         }
+
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.of(uri);
+        Map<String, List<String>> queryParams = uriComponentsBuilder.build().createQueryParams();
 
         return Response.of(BAD_REQUEST, TEXT.toString(), "");
     }

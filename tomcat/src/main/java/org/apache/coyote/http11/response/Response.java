@@ -42,7 +42,7 @@ public class Response {
     public String getBody() {
         return body;
     }
-    
+
     public byte[] getBytes() {
         return toString().getBytes();
     }

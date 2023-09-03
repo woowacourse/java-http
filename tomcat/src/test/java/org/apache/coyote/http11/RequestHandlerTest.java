@@ -65,4 +65,15 @@ class RequestHandlerTest {
         assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);
     }
 
+    @DisplayName("파일명이 아닌 자원을 표현한 요청에 대해 응답할 수 있다.")
+    @Test
+    void handleRest() throws IOException {
+        Response response = RequestHandler.handle(
+                Request.from("get", "/login?account=doy&password=1234", "localhost:8080", List.of("application/json"),
+                        "keep-alive", "")
+        );
+
+        assertThat(response.getStatus()).isEqualTo(Status.OK);
+    }
+
 }

@@ -12,9 +12,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.common.Content;
+import org.apache.common.HttpStatus;
 import org.apache.coyote.Processor;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
@@ -48,8 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
             String url = httpRequest.getTarget();
-            String content = readContent(url);
-            String response = HttpResponse.create(content, url);
+            Content content = readContent(url);
+            String response = HttpResponse.create(content.getValue(), url, content.getHttpStatus());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -58,10 +61,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readContent(String path) throws IOException {
-        System.out.println("path = " + path);
+    private Content readContent(String path) throws IOException {
         if (Objects.equals(path, DEFAULT_PATH)) {
-            return DEFAULT_RESPONSE;
+            return new Content(DEFAULT_RESPONSE, HttpStatus.OK);
+        }
+
+        if (Objects.equals(path, "/favicon.ico")) {
+            return new Content(Files.readAllBytes(Paths.get(convertPathToUri("/favicon.ico"))).toString(), HttpStatus.OK);
         }
 
         if (path.startsWith("/login")) {
@@ -72,12 +78,12 @@ public class Http11Processor implements Runnable, Processor {
                 String account = queries[0].split("=")[1];
                 String password = queries[1].split("=")[1];
 
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("일치하는 회원을 찾을 수 없습니다."));
-
-                if (user.checkPassword(password)) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                if (user.isPresent() && user.get().checkPassword(password)) {
                     log.info("로그인 성공한 회원 : {}", user);
+                    return new Content(Files.readString(Paths.get(convertPathToUri("/index.html"))),  HttpStatus.FOUND);
                 }
+                return new Content(Files.readString(Paths.get(convertPathToUri("/401.html"))), HttpStatus.UNAUTHORIZED);
             }
             path = "/login.html";
         }
@@ -88,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
 
         URI uri = convertPathToUri(path);
         
-        return Files.readString(Paths.get(uri));
+        return new Content(Files.readString(Paths.get(uri)), HttpStatus.OK);
     }
 
     private URI convertPathToUri(String path) {

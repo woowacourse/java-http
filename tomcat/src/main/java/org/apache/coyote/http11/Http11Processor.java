@@ -74,9 +74,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestUri getRequestUri(BufferedReader bufferedReader) throws IOException {
-        String requestUri = bufferedReader.readLine();
-        log.info("requestUri: {}", requestUri);
-        return RequestUri.from(requestUri);
+        return RequestUri.from(bufferedReader.readLine());
     }
 
     private HttpHeaders getHttpHeaders(BufferedReader bufferedReader) throws IOException {

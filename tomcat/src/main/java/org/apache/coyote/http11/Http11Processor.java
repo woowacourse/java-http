@@ -37,7 +37,9 @@ public class Http11Processor implements Runnable, Processor {
             final String firstLine = bufferedReader.readLine();
             final HttpRequest request = HttpRequest.of(firstLine);
             final Controller controller = controllerAdapter.findController(request);
-            controller.handle(request, outputStream);
+            final HttpResponse httpResponse = controller.handle(request);
+            outputStream.write(httpResponse.toBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }

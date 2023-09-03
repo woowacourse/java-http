@@ -51,10 +51,6 @@ public class HttpRequest {
         return new HttpRequest(GET, "/index.html", "HTTP/1.1");
     }
 
-    public static HttpRequest toNotFound() {
-        return new HttpRequest(GET, "/404.html", "HTTP/1.1");
-    }
-
     public String getUri() {
         if (hasQueryString()) {
             final int queryIndex = uri.indexOf(QUERY_STRING_SYMBOL);
@@ -67,12 +63,8 @@ public class HttpRequest {
         return uri.contains(QUERY_STRING_SYMBOL);
     }
 
-    public boolean isGet() {
-        return method.equalsIgnoreCase(GET);
-    }
-
     public boolean isStaticRequest() {
-        return uri.contains(DOT);
+        return uri.contains(DOT) || uri.equals("/");
     }
 
     public String getExtension() {

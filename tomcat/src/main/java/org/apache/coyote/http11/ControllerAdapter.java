@@ -7,6 +7,7 @@ public class ControllerAdapter {
 
     private static final Map<String, Controller> map = new ConcurrentHashMap<>();
     private static final String STATIC_CONTROLLER = "staticController";
+    private static final String ERROR_CONTROLLER = "errorController";
 
     public ControllerAdapter() {
         init();
@@ -15,6 +16,7 @@ public class ControllerAdapter {
     private void init() {
         map.put("/login", new LoginController());
         map.put(STATIC_CONTROLLER, new StaticController());
+        map.put(ERROR_CONTROLLER, new ErrorController());
     }
 
     public Controller findController(HttpRequest httpRequest) {
@@ -24,6 +26,6 @@ public class ControllerAdapter {
         if (map.containsKey(httpRequest.getUri())) {
             return map.get(httpRequest.getUri());
         }
-        return map.get(STATIC_CONTROLLER);
+        return map.get(ERROR_CONTROLLER);
     }
 }

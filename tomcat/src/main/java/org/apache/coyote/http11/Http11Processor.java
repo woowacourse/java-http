@@ -12,7 +12,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
@@ -57,9 +59,33 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readContent(String path) throws IOException {
+        System.out.println("path = " + path);
         if (Objects.equals(path, DEFAULT_PATH)) {
             return DEFAULT_RESPONSE;
         }
+
+        if (path.startsWith("/login")) {
+            int index = path.indexOf("?");
+            if (index > 0) {
+                String query = path.substring(index + 1);
+                String[] queries = query.split("&");
+                String account = queries[0].split("=")[1];
+                String password = queries[1].split("=")[1];
+
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("일치하는 회원을 찾을 수 없습니다."));
+
+                if (user.checkPassword(password)) {
+                    log.info("로그인 성공한 회원 : {}", user);
+                }
+            }
+            path = "/login.html";
+        }
+
+        if (Objects.equals(path, "/register")) {
+            path = "/register.html";
+        }
+
         URI uri = convertPathToUri(path);
         
         return Files.readString(Paths.get(uri));

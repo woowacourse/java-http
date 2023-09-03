@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -22,15 +23,30 @@ public class LoginRequestHandler implements RequestHandler {
 
 	@Override
 	public HttpResponse handle(final HttpRequest request) {
-		final var account = request.findQueryParam("account");
-		final var password = request.findQueryParam("password");
-
-		if (account != null && password != null) {
-			return login(account, password);
+		if (request.hasMethod(HttpMethod.GET)) {
+			return doGet(request);
+		} else if (request.hasMethod(HttpMethod.POST)) {
+			return doPost(request);
 		}
+		return HttpResponse.notFound();
+	}
 
-		final var responseBody = ResourceProvider.provide(LOGIN_PAGE_PATH);
-		return HttpResponse.ok(responseBody, MimeType.fromPath(LOGIN_PAGE_PATH));
+	private HttpResponse doGet(final HttpRequest request) {
+		return HttpResponse.ok(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
+	}
+
+	private HttpResponse doPost(final HttpRequest request) {
+		final var account = request.findBodyField("account");
+		final var password = request.findBodyField("password");
+		validateQueryParam(account, password);
+
+		return login(account, password);
+	}
+
+	private void validateQueryParam(final String account, final String password) {
+		if (account == null || password == null) {
+			throw new IllegalArgumentException("필요한 정보가 없습니다.");
+		}
 	}
 
 	private HttpResponse login(final String account, final String password) {
@@ -42,7 +58,8 @@ public class LoginRequestHandler implements RequestHandler {
 		if (!user.checkPassword(password)) {
 			return HttpResponse.unauthorized();
 		}
-		log.info(user.toString());
+
+		log.info("[LOGIN SUCCESS] account: {}", account);
 		return HttpResponse.redirect("/index.html");
 	}
 }

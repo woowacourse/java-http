@@ -29,6 +29,10 @@ public class HttpResponse {
 		return code(StatusCode.UNAUTHORIZED);
 	}
 
+	public static HttpResponse notFound() {
+		return code(StatusCode.NOT_FOUND);
+	}
+
 	public static HttpResponse redirect(final String location) {
 		final var statusLine = new HttpStatusLine(StatusCode.FOUND);
 		final var header = getHeader();

@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +40,10 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream();
 			 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-			final var request = readRequest(reader);
+			final var requestLine = readRequestLine(reader);
+			final var requestHeader = readRequestHeader(reader);
+			final var requestBody = readRequestBody(reader, requestHeader);
+			final var request = new HttpRequest(requestLine, requestHeader, requestBody);
 			final var response = HandlerMapping.handle(request);
 			outputStream.write(response.format().getBytes());
 			outputStream.flush();
@@ -46,12 +52,28 @@ public class Http11Processor implements Runnable, Processor {
 		}
 	}
 
-	private HttpRequest readRequest(BufferedReader reader) throws IOException {
+	private HttpRequestLine readRequestLine(final BufferedReader reader) throws IOException {
+		return HttpRequestLine.from(reader.readLine());
+	}
+
+	private HttpRequestHeader readRequestHeader(final BufferedReader reader) throws IOException {
 		final var header = new ArrayList<String>();
 		String line;
-		while ((line = reader.readLine()) != null && !END_OF_LINE.equals(line)) {
+		while ((!END_OF_LINE.equals(line = reader.readLine()))) {
 			header.add(line);
 		}
-		return HttpRequest.from(header);
+		return HttpRequestHeader.from(header);
+	}
+
+	private HttpRequestBody readRequestBody(final BufferedReader reader, final HttpRequestHeader header) throws
+		IOException {
+		final var contentLength = header.get("Content-Length");
+		if (contentLength == null) {
+			return HttpRequestBody.empty();
+		}
+		final var bodySize = Integer.parseInt(contentLength);
+		final var buffer = new char[bodySize];
+		reader.read(buffer);
+		return HttpRequestBody.from(new String(buffer));
 	}
 }

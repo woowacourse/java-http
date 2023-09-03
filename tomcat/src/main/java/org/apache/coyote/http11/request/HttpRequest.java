@@ -1,40 +1,34 @@
 package org.apache.coyote.http11.request;
 
-import java.util.List;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
 	private final HttpRequestLine requestLine;
 	private final HttpRequestHeader header;
+	private final HttpRequestBody body;
 
-	public HttpRequest(final HttpRequestLine requestLine) {
-		this(requestLine, HttpRequestHeader.empty());
-	}
-
-	private HttpRequest(final HttpRequestLine requestLine, final HttpRequestHeader header) {
+	public HttpRequest(final HttpRequestLine requestLine, final HttpRequestHeader header,
+		final HttpRequestBody body) {
 		this.requestLine = requestLine;
 		this.header = header;
-	}
-
-	public static HttpRequest from(final List<String> request) {
-		if (request.isEmpty()) {
-			throw new IllegalArgumentException("빈 요청입니다.");
-		}
-		final var requestLine = HttpRequestLine.from(request.get(0));
-		
-		if (request.size() == 1) {
-			return new HttpRequest(requestLine);
-		}
-		final var header = HttpRequestHeader.from(request.subList(1, request.size()));
-		return new HttpRequest(requestLine, header);
+		this.body = body;
 	}
 
 	public boolean hasPath(final String path) {
 		return requestLine.hasPath(path);
 	}
 
+	public boolean hasMethod(final HttpMethod method) {
+		return requestLine.hasMethod(method);
+	}
+
 	public String getPath() {
 		return requestLine.getPath();
+	}
+
+	public String findBodyField(final String key) {
+		return body.findField(key);
 	}
 
 	public String findQueryParam(final String key) {

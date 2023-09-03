@@ -4,6 +4,7 @@ public enum StatusCode {
 	OK(200, "OK", "/index.html"),
 	FOUND(302, "Found", "/index.html"),
 	UNAUTHORIZED(401, "Unauthorized", "/401.html"),
+	NOT_FOUND(404, "Not Found", "/404.html"),
 	;
 
 	private final int code;

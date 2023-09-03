@@ -37,4 +37,8 @@ public class HttpRequestLine {
 	public String getPath() {
 		return uri.getPath();
 	}
+
+	public boolean hasMethod(final HttpMethod method) {
+		return this.method.equals(method);
+	}
 }

@@ -29,4 +29,8 @@ public class HttpRequestHeader {
 			.collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
 		return new HttpRequestHeader(headers);
 	}
+
+	public String get(final String key) {
+		return headers.get(key);
+	}
 }

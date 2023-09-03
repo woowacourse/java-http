@@ -39,4 +39,8 @@ public class Params {
     public String get(String key) {
         return params.get(key);
     }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
 }

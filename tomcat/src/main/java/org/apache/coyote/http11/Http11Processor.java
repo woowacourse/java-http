@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -21,10 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,25 +48,13 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest httpRequest = HttpRequest.from(getHeader(bufferedReader));
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = getResponse(httpRequest);
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | NotFoundException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private List<String> getHeader(final BufferedReader reader) throws IOException {
-        List<String> lines = new ArrayList<>();
-
-        String line = Objects.requireNonNull(reader.readLine());
-        while (!line.isEmpty()) {
-            lines.add(line);
-            line = reader.readLine();
-        }
-
-        return lines;
     }
 
     private HttpResponse getResponse(final HttpRequest httpRequest) throws URISyntaxException, IOException, NotFoundException {
@@ -84,9 +70,17 @@ public class Http11Processor implements Runnable, Processor {
             return login(httpRequest.getParams());
         }
 
-        if (httpRequest.isSamePath("/register")) {
+        if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             return HttpResponse.okWithResource("/register.html");
         }
+
+        if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+            Map<String, String> params = httpRequest.getBody().getParams();
+            System.out.println(params);
+            userService.register(params.get("account"), params.get("password"), params.get("email"));
+            return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+        }
+
 
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }

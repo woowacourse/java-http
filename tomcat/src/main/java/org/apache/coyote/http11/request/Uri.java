@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.List;
-
 public class Uri {
 
     private final HttpMethod httpMethod;
@@ -14,11 +12,11 @@ public class Uri {
         this.httpVersion = httpVersion;
     }
 
-    public static Uri from(final List<String> requestLines) {
+    public static Uri from(final String requestLines) {
         return new Uri(
-                HttpMethod.from(requestLines.get(0).split(" ")[0]),
-                requestLines.get(0).split(" ")[1],
-                requestLines.get(0).split(" ")[2]
+                HttpMethod.from(requestLines.split(" ")[0]),
+                requestLines.split(" ")[1],
+                requestLines.split(" ")[2]
         );
     }
 

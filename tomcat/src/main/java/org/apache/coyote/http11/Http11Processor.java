@@ -61,26 +61,31 @@ public class Http11Processor implements Runnable, Processor {
                         .filter(it -> it.contains("Content-Length"))
                         .findAny();
                 if (any.isEmpty()) {
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("dfdf");
                 }
                 String s = any.get();
                 int index = s.indexOf(":");
                 int contentLength = Integer.parseInt(s.substring(index + 2));
                 String body = getBody(bufferedReader, contentLength);
 
+                String[] split2 = body.split("&");
+                Map<String, String> form = new HashMap<>();
+                for (String line : split2) {
+                    String[] split3 = line.split("=");
+                    String key = split3[0];
+                    String value = split3[1];
+                    form.put(key, value);
+                }
+
                 if (requestUri.equals("/register")) {
-                    register(body, outputStream);
+                    register(form, outputStream);
                     return;
                 }
-            }
 
-            if (requestUri.startsWith("/login?")) {
-                login(requestUri, outputStream);
-                return;
-            }
-
-            if (requestUri.equals("/register")) {
-                log.info(request);
+                if (requestUri.equals("/login")) {
+                    login(form, outputStream);
+                    return;
+                }
             }
 
             if (!requestUri.equals("/")) {
@@ -114,15 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void register(String body, OutputStream outputStream) throws IOException {
-        String[] split2 = body.split("&");
-        Map<String, String> form = new HashMap<>();
-        for (String line : split2) {
-            String[] split3 = line.split("=");
-            String key = split3[0];
-            String value = split3[1];
-            form.put(key, value);
-        }
+    private void register(Map<String, String> form, OutputStream outputStream) throws IOException {
         Optional<User> account = InMemoryUserRepository.findByAccount(form.get("account"));
         if (account.isPresent()) {
             throw new IllegalStateException("이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
@@ -140,24 +137,10 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void login(String requestUri, OutputStream outputStream) throws IOException {
-        int index = requestUri.indexOf("?");
-        if (index == -1) {
-            throw new IllegalArgumentException("로그인 정보가 없습니다");
-        }
-        String path = requestUri.substring(0, index);
-        String queryString = requestUri.substring(index + 1);
-        String[] keyValues = queryString.split("&");
-        Map<String, String> queryParams = new HashMap<>();
-        for (String keyValue : keyValues) {
-            String[] keyAndValue = keyValue.split("=");
-            String key = keyAndValue[0];
-            String value = keyAndValue[1];
-            queryParams.put(key, value);
-        }
-        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+    private void login(Map<String, String> form, OutputStream outputStream) throws IOException {
+        Optional<User> user = InMemoryUserRepository.findByAccount(form.get("account"));
         if (user.isPresent()) {
-            if (user.get().checkPassword(queryParams.get("password"))) {
+            if (user.get().checkPassword(form.get("password"))) {
                 log.info(user.get().toString());
                 String response = String.join("\r\n",
                         "HTTP/1.1 302 FOUND ",

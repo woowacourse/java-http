@@ -84,13 +84,16 @@ class Http11ProcessorTest {
     @Test
     void parseQueryParameter() {
         // given
+        String requestBody = "account=gugu&password=password";
+        int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html,*/*;q=0.1 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
                 "",
-                "");
+                requestBody);
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
@@ -105,13 +108,16 @@ class Http11ProcessorTest {
     @Test
     void loginWithInvalidValue() {
         // given
+        String requestBody = "account=abc&password=abc";
+        int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
-                "GET /login?account=abc&password=abc HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html,*/*;q=0.1 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
                 "",
-                "");
+                requestBody);
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 

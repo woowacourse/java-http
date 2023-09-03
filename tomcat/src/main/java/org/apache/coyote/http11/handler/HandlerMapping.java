@@ -22,11 +22,15 @@ public class HandlerMapping {
 	}
 
 	public static Response handle(final Request request) {
-		for (final RequestHandler handler : handlers) {
-			if (handler.canHandle(request)) {
-				return handler.handle(request);
+		try {
+			for (final RequestHandler handler : handlers) {
+				if (handler.canHandle(request)) {
+					return handler.handle(request);
+				}
 			}
+			return defaultHandler.handle(request);
+		} catch (IllegalArgumentException e) {
+			return Response.notFound();
 		}
-		return defaultHandler.handle(request);
 	}
 }

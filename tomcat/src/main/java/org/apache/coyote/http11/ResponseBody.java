@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
+import static org.apache.common.Config.CHARSET;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -12,19 +12,24 @@ import java.util.Objects;
 public class ResponseBody {
 
     private static final ClassLoader CLASS_LOADER = ResponseBody.class.getClassLoader();
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    public static final String HTTP_1_1 = "HTTP/1.1";
 
     private final byte[] data;
+    private final ContentType contentType;
+    private final HttpStatus httpStatus;
 
-    private ResponseBody(final byte[] data) {
+    private ResponseBody(final byte[] data, final ContentType contentType, final HttpStatus httpStatus) {
         this.data = data;
+        this.contentType = contentType;
+        this.httpStatus = httpStatus;
     }
 
-    public static <T> ResponseBody from(final T info) {
+    public static <T> ResponseBody from(final T info, final HttpStatus httpStatus) {
         if (info.equals("/")) {
-            return new ResponseBody("Hello world!".getBytes());
+            return new ResponseBody("Hello world!".getBytes(), ContentType.HTML, httpStatus);
         }
-        return new ResponseBody(getNotDefaultPathResponseBody((String) info));
+        return new ResponseBody(getNotDefaultPathResponseBody((String) info),
+                ContentType.findContentTypeByURI((String) info), httpStatus);
     }
 
     private static byte[] getNotDefaultPathResponseBody(final String requestURI) {
@@ -55,12 +60,34 @@ public class ResponseBody {
         return !ContentType.checkFileExtension(requestURI);
     }
 
-    public String getResponseMessage(final String contentType) {
+    public static String redirectResponse(final String page) {
+        return getLocationHeaderMessage(page);
+    }
+
+    private static String getLocationHeaderMessage(final String page) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=" + CHARSET.name().toLowerCase() + " ",
+                HTTP_1_1 + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
+                "Location: " + page,
+                "");
+    }
+
+    public String getResponseMessage() {
+        return String.join("\r\n",
+                HTTP_1_1 + " " + httpStatus.getStatus() + " " + httpStatus.name() + " ",
+                "Content-Type: " + contentType.getContentType() + ";charset=" + CHARSET.name().toLowerCase() + " ",
                 "Content-Length: " + data.length + " ",
                 "",
                 new String(data, CHARSET));
+    }
+
+    public static String redirectResponse(final String page, final HttpRequest httpRequest, final String sessionId) {
+        if (httpRequest.hasCookie("JSESSIONID")) {
+            return getLocationHeaderMessage(page);
+        }
+        return String.join("\r\n",
+                HTTP_1_1 + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
+                "Location: " + page,
+                "Set-Cookie: " + "JSESSIONID=" + sessionId,
+                "");
     }
 }

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.common.Config.CHARSET;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,15 +33,39 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            final RequestHeader requestHeader = getRequestHeader(bufferedReader);
+             final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), CHARSET))) {
+            final RequestHeader requestHeader = getRequestHeader(br);
             final QueryString queryString = QueryString.from(requestHeader.getOriginRequestURI());
-            final RequestHandler handler = RequestHandler.from(requestHeader, queryString);
+            final RequestBody requestBody = getRequestBody(requestHeader, br);
+
+            final HttpRequest httpRequest = new HttpRequest(requestHeader, requestBody, queryString);
+            final RequestHandler handler = RequestHandler.from(httpRequest);
+
             final var responseBody = handler.execute();
             outputStream.write(responseBody.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private RequestBody getRequestBody(final RequestHeader requestHeader, final BufferedReader bufferedReader) {
+        if (requestHeader.hasHeader("Content-Length")) {
+            final String contentLength = requestHeader.getHeader("Content-Length");
+            final String requestBody = parseRequestBody(contentLength, bufferedReader);
+            return RequestBody.from(requestBody);
+        }
+        return RequestBody.emptyBody();
+    }
+
+    private String parseRequestBody(final String contentLength, final BufferedReader bufferedReader) {
+        final int length = Integer.parseInt(contentLength);
+        final char[] buffer = new char[length];
+        try {
+            bufferedReader.read(buffer, 0, length);
+            return new String(buffer);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("알 수 없는 에러입니다.");
         }
     }
 

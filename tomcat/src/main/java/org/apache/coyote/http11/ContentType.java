@@ -21,11 +21,14 @@ public enum ContentType {
                 .anyMatch(it -> requestURI.contains(it.fileExtension));
     }
 
-    public static String findContentTypeByURI(final String requestURI) {
-        final ContentType findContentType = Arrays.stream(values())
+    public static ContentType findContentTypeByURI(final String requestURI) {
+        return Arrays.stream(values())
                 .filter(it -> requestURI.contains(it.fileExtension))
                 .findFirst()
                 .orElse(HTML);
-        return findContentType.contentType;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }

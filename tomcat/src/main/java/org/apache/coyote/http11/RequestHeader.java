@@ -1,44 +1,66 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RequestHeader {
 
-    private static final String DELIMITER = " ";
+    public static final String HEADER_DELIMITER = ": ";
+    public static final String COOKIE = "Cookie";
 
-    private final List<String> headers;
-    private final HttpMethod httpMethod;
+    private final RequestInfo requestInfo;
+    private final Map<String, String> headers;
 
-    private RequestHeader(final List<String> headers, final HttpMethod httpMethod) {
+    private RequestHeader(final RequestInfo requestInfo, final Map<String, String> headers) {
+        this.requestInfo = requestInfo;
         this.headers = headers;
-        this.httpMethod = httpMethod;
     }
 
     public static RequestHeader from(final List<String> requestHeader) {
-        final String httpMethodString = requestHeader.get(0).split(DELIMITER)[0];
-        final HttpMethod httpMethod = HttpMethod.findHttpMethod(httpMethodString);
-        return new RequestHeader(requestHeader, httpMethod);
+        final Map<String, String> headers = parseRequestHeaders(requestHeader);
+        final RequestInfo requestInfo = new RequestInfo(requestHeader.get(0), headers.get(COOKIE));
+        return new RequestHeader(requestInfo, headers);
+    }
+
+    private static Map<String, String> parseRequestHeaders(final List<String> requestHeader) {
+        Map<String, String> headers = new HashMap<>();
+        for (int i = 1; i < requestHeader.size(); i++) {
+            final String[] splitHeader = requestHeader.get(i).split(HEADER_DELIMITER);
+            headers.put(splitHeader[0], splitHeader[1]);
+        }
+        return headers;
     }
 
     public String getParsedRequestURI() {
-        String requestURI = getOriginRequestURI();
-        if (requestURI.contains("?")) {
-            requestURI = requestURI.split("\\?")[0];
-        }
-        return requestURI;
+        return requestInfo.getParsedRequestURI();
     }
 
     public String getOriginRequestURI() {
-        final String firstLineOfRequestHeaders = headers.get(0);
-        final String[] splitFirstLine = firstLineOfRequestHeaders.split(" ");
-        return splitFirstLine[1];
+        return requestInfo.getRequestURI();
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return requestInfo.getHttpMethod();
     }
 
     public boolean isSameParsedRequestURI(final String uri) {
-        return getParsedRequestURI().equals(uri);
+        return requestInfo.isSameParsedRequestURI(uri);
+    }
+
+    public String getHeader(final String header) {
+        return headers.get(header);
+    }
+
+    public boolean hasHeader(final String header) {
+        return headers.containsKey(header);
+    }
+
+    public boolean hasCookie(final String cookie) {
+        return requestInfo.hasCookie(cookie);
+    }
+
+    public String getCookie(final String cookie) {
+        return requestInfo.getCookie(cookie);
     }
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class ContentTypeTest {
@@ -17,14 +16,6 @@ class ContentTypeTest {
 
         //when, then
         assertDoesNotThrow(() -> ContentType.from(file));
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 타입으로 생성하면 예외가 발생한다")
-    void construct_fail() {
-        assertThatThrownBy(() -> ContentType.from("nothing"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("허용되지 않는 타입입니다.");
     }
 
     @Test

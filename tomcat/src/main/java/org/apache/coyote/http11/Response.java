@@ -31,15 +31,16 @@ public class Response {
         final String location = br.readLine().split(HTTP_HEADER_DELIMITER)[LOCATION_INDEX];
 
         final ContentType contentType = ContentType.from(location);
-        final Path path = getPath(location);
+        final Path path = getPath(location, contentType);
 
         return new Response(path, contentType);
     }
 
-    private static Path getPath(final String location) {
+    private static Path getPath(final String location, final ContentType contentType) {
         final ClassLoader classLoader = Response.class.getClassLoader();
-        final URL resource = classLoader.getResource(BASE_PATH + location);
-
+        final String locationWithoutExtension = location.replaceAll("\\.[^.]+$", "");
+        final URL resource = classLoader.getResource(BASE_PATH + locationWithoutExtension + contentType.getExtension());
+        
         if (isNull(resource)) {
             throw new IllegalArgumentException("존재하지 않는 자원입니다.");
         }

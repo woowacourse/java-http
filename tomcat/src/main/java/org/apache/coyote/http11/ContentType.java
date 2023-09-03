@@ -17,9 +17,6 @@ public enum ContentType {
         final String[] split = filePath.split(EXTENSION_DELIMITER);
         final String extension = split[split.length - 1];
 
-        if ("html".equals(extension) || "/".equals(extension)) {
-            return HTML;
-        }
         if ("css".equals(extension)) {
             return CSS;
         }
@@ -27,10 +24,15 @@ public enum ContentType {
             return JS;
         }
 
-        throw new IllegalArgumentException("허용되지 않는 타입입니다.");
+        return HTML;
     }
 
     public String toHeader() {
         return "Content-Type: " + type + ";charset=utf-8 ";
+    }
+
+    public String getExtension() {
+        final String[] split = type.split("/");
+        return "." + split[split.length - 1];
     }
 }

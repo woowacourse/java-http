@@ -27,16 +27,12 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public RequestUri getRequestUri() {
-        return requestUri;
-    }
-
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
-    }
-
     public String getPath() {
-        return requestUri.getPath();
+        final String path = requestUri.getPath();
+        if (path.indexOf(".") == -1) {
+            return path + ".html";
+        }
+        return path;
     }
 
     public String getQueryParamValue(final String key) {

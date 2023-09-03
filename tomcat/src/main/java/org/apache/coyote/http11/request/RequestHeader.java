@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RequestHeader {
@@ -20,10 +19,8 @@ public class RequestHeader {
         Map<String, String> result = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
-            final Matcher matcher = PATTERN.matcher(line);
-            if (matcher.find()) {
-                result.put(matcher.group(1), matcher.group(2));
-            }
+            final String[] split = line.split(": ", 2);
+            result.put(split[0], split[1]);
             line = bufferedReader.readLine();
         }
         return new RequestHeader(result);

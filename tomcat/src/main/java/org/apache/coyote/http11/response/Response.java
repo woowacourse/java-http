@@ -24,7 +24,7 @@ public class Response {
     public String toString() {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.name() + " ",
-                "Content-Type: " + responseBody.getContentType() + ";charset=utf-8 ",
+                "Content-Type: " + responseBody.getContentType().getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getContent().getBytes().length + " ",
                 "",
                 responseBody.getContent());

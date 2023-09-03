@@ -29,7 +29,8 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(InputStream inputStream) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String[] requestLineElements = reader.readLine().split(WHITE_SPACE);
 
             List<String> headerLines = new ArrayList<>();
@@ -38,8 +39,12 @@ public class HttpRequest {
                 headerLines.add(next);
             }
 
-            String body = reader.lines()
-                    .collect(Collectors.joining(CRLF));
+            List<String> bodyLines = new ArrayList<>();
+            while (reader.ready()) {
+                next = reader.readLine();
+                bodyLines.add(next);
+            }
+            String body = String.join(CRLF, bodyLines);
 
             return new HttpRequest(
                     requestLineElements[0],

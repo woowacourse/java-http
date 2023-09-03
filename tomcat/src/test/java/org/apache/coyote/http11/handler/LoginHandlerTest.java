@@ -38,6 +38,54 @@ class LoginHandlerTest {
     }
 
     @Test
+    void 쿠키_없이_로그인에_성공하면_쿠키를_설정해준다() throws IOException {
+        String validAccount = "gugu";
+        String validPassword = "password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=" + validAccount + "&password=" + validPassword);
+
+        BufferedReader input = RequestParser.requestToInput(httpRequest);
+        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
+        String response = responseEntity.generateResponseMessage();
+
+        assertThat(response).contains(
+                "Set-Cookie:",
+                "HTTP/1.1 302 "
+        );
+    }
+
+    @Test
+    void 쿠키_있을_때_로그인에_성공하면_쿠키_설정_안한다() throws IOException {
+        String validAccount = "gugu";
+        String validPassword = "password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=" + validAccount + "&password=" + validPassword);
+
+        BufferedReader input = RequestParser.requestToInput(httpRequest);
+        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
+        String response = responseEntity.generateResponseMessage();
+
+        assertThat(response).doesNotContain(
+                "Set-Cookie:"
+        );
+    }
+
+    @Test
     void 로그인에_실패하면_401html_로_리다이렉션() throws IOException {
         String invalidAccount = "leo";
         String invalidPassword = "password1234";
@@ -60,5 +108,4 @@ class LoginHandlerTest {
                 "HTTP/1.1 302 "
         );
     }
-
 }

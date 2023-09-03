@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.RequestMethod;
 import org.apache.coyote.http11.common.ResponseStatus;
@@ -15,9 +16,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class LoginHandler implements Handler {
 
@@ -41,21 +44,18 @@ public class LoginHandler implements Handler {
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
         }
         if (request.getRequestMethod() == RequestMethod.POST) {
+            ArrayList<String> headers = new ArrayList<>();
+            headers.add(String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()));
+            headers.add(String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)));
             if (checkIsRegisterUser(request)) {
-                List<String> headers = List.of(
-                        String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
-                        String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)),
-                        String.join(" ", "Location: index.html")
-                );
-
+                headers.add(String.join(" ", "Location: index.html"));
+                if (request.getRequestHeader().doesNotHasJsessionCookie()) {
+                    UUID uuid = Cookie.generateCookie();
+                    headers.add(String.join(" ", "Set-Cookie:", String.valueOf(uuid)));
+                }
                 return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
             } else {
-                List<String> headers = List.of(
-                        String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
-                        String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)),
-                        String.join(" ", "Location: 401.html")
-                );
-
+                headers.add(String.join(" ", "Location: 401.html"));
                 return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
             }
         }

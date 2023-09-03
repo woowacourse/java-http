@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parsePath(Class<? extends HttpController> clazz) {
-        return "/" + clazz.getSimpleName().toLowerCase();
+        return "/" + clazz.getSimpleName().toLowerCase().replace("controller", "");
     }
 
     private HttpController getInstance(Class<? extends HttpController> clazz) {

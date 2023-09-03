@@ -1,11 +1,16 @@
 package org.apache.coyote.http;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
 public class HttpHeaders {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpHeaders.class);
 
     private static final String CRLF = "\r\n";
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
@@ -29,6 +34,8 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders from(String header) {
+        log.info("header: {}", header);
+
         validateHeader(header);
         String[] requestLineAndHeaderValues = header.split(CRLF, 2);
         String[] requestLineTokens = parseRequestLine(requestLineAndHeaderValues[0]);

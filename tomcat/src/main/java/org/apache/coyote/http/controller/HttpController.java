@@ -9,7 +9,7 @@ import static org.apache.coyote.http.HttpMethod.*;
 public abstract class HttpController implements Controller {
 
     public final void service(HttpRequest httpRequest, HttpResponseComposer httpResponseComposer) {
-        String method = httpRequest.getHeader().getMethod();
+        String method = httpRequest.getHeader().getMethod().toLowerCase();
         if (GET.value.equals(method)) {
             doGet(httpRequest, httpResponseComposer);
         } else if (POST.value.equals(method)) {

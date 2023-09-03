@@ -1,16 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handler.HandlerFinder;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,24 +36,8 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             HttpRequest request = HttpRequest.create(bufferedReader);
-            final var tar = request.getUri();
-
-            final var builder = new StringBuilder();
-            if (tar.equals("/")) {
-                builder.append("Hello world!");
-            } else {
-                URL resource = getClass().getClassLoader().getResource("static" + tar);
-                Path path = new File(resource.getPath()).toPath();
-                builder.append(new String(Files.readAllBytes(path)));
-            }
-            final var responseBody = builder.toString();
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Handler handler = HandlerFinder.find(request);
+            HttpResponse response = handler.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

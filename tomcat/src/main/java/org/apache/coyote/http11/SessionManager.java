@@ -1,20 +1,19 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import nextstep.jwp.model.User;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Sessions {
+public class SessionManager {
 
     private static final Map<String, User> sessions = new ConcurrentHashMap<>();
 
-    public void add(String sessionId, User user) {
+    public static void add(String sessionId, User user) {
         sessions.put(sessionId, user);
     }
 
-    public boolean isAlreadyLogin(String sessionId) {
+    public static boolean isAlreadyLogin(String sessionId) {
         return sessions.containsKey(sessionId);
     }
-
 }

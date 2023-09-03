@@ -11,6 +11,7 @@ public class HandlerMapper {
     static {
         LoginController loginController = new LoginController();
         handlerMapper.put("/login", loginController);
+        handlerMapper.put("/register", loginController);
     }
 
     public Object mapHandler(String requestedUrl) {

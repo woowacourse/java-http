@@ -17,4 +17,9 @@ public class LoginController {
             return new LoginResponseDto("/401.html");
         }
     }
+
+    public LoginResponseDto register(String account, String password, String email) {
+        loginService.register(account, password, email);
+        return new LoginResponseDto("/index.html");
+    }
 }

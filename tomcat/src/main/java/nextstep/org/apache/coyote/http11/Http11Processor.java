@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             int queryParamIndex = requestedUrl.indexOf('?');
 
             if (0 < queryParamIndex) {
-                String queryParamValues = requestedUrl.substring(queryParamIndex+1);
+                String queryParamValues = requestedUrl.substring(queryParamIndex + 1);
                 Arrays.asList(queryParamValues.split("&"))
                         .forEach(queryParam -> {
                             String[] splited = queryParam.split("=");
@@ -86,7 +86,6 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = null;
 
-            // POST
             Object handler = handlerMapper.mapHandler(requestedUrl);
             if (Objects.nonNull(handler) && httpMethod.equals("POST")
                     && requestedUrl.equals("/login")) {
@@ -100,7 +99,18 @@ public class Http11Processor implements Runnable, Processor {
                         "");
             }
 
-            // GET
+            if (Objects.nonNull(handler) && httpMethod.equals("POST")
+                    && requestedUrl.equals("/register")) {
+                LoginController loginController = (LoginController) handler;
+                LoginResponseDto loginDto = loginController.register(parsedBody.get("account"),
+                        parsedBody.get("password"), parsedBody.get("email"));
+
+                response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        String.format("Location: %s ", loginDto.getRedirectUrl()),
+                        "");
+            }
+
             if (httpMethod.equals("GET") && Objects.isNull(response)) {
                 String contentType = negotiateContent(requestHeaders.get("Accept"));
                 // Todo: createResponseBody() pageController로 위임해보기
@@ -120,7 +130,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> requestHeaders)
+    private String extractRequestBody(BufferedReader bufferedReader,
+            Map<String, String> requestHeaders)
             throws IOException {
         int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];

@@ -18,4 +18,8 @@ public class LoginService {
         }
         log.info(user.toString());
     }
+
+    public void register(String account, String password, String email) {
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
 }

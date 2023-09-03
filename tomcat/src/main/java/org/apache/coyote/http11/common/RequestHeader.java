@@ -10,6 +10,8 @@ import java.util.Map;
 public class RequestHeader {
 
     private static final String DELIMITER = ": ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -21,7 +23,7 @@ public class RequestHeader {
         return Arrays.stream(requestHeader.split(CRLF))
                 .map(header -> header.split(DELIMITER))
                 .collect(collectingAndThen(
-                        toUnmodifiableMap(header -> header[0], header -> header[1]),
+                        toUnmodifiableMap(header -> header[KEY_INDEX], header -> header[VALUE_INDEX]),
                         RequestHeader::new
                 ));
     }

@@ -19,20 +19,20 @@ public class ResponseEntity {
     }
 
     public String getResponse() throws IOException {
-        final ResponseBody responseBody = ResponseBody.from(requestURI);
+        final var uri = requestURI.getUri();
+        final var responseBody = ResponseBody.from(uri);
 
         return String.join(
                 CRLF,
                 parseHttpStatusLine(),
-                parseContentTypeLine(),
+                parseContentTypeLine(uri),
                 parseContentLengthLine(responseBody),
                 EMPTY,
                 responseBody.body()
         );
     }
 
-    private String parseContentTypeLine() {
-        final String uri = requestURI.getUri();
+    private String parseContentTypeLine(final String uri) {
         if (uri.endsWith(".css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }

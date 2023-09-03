@@ -1,44 +1,51 @@
 package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.http11.common.Constants.SPACE;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class RequestURI {
 
-    private static final int HTTP_METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
-    private static final int HTTP_VERSION_INDEX = 2;
-
-    private final String httpMethod;
     private final String uri;
+    private final QueryString queryString;
+    private final String httpMethod;
     private final String httpVersion;
 
-    private RequestURI(final String httpMethod, final String uri, final String httpVersion) {
-        this.httpMethod = httpMethod;
+    private RequestURI(final String uri, final String httpMethod, final String httpVersion) {
+        this(uri, QueryString.empty(), httpMethod, httpVersion);
+    }
+
+    private RequestURI(
+            final String uri,
+            final QueryString queryString,
+            final String httpMethod,
+            final String httpVersion
+    ) {
         this.uri = uri;
+        this.queryString = queryString;
+        this.httpMethod = httpMethod;
         this.httpVersion = httpVersion;
     }
 
-    public static RequestURI from(final String requestURILine) {
-        final List<String> requestURI = Arrays.stream(requestURILine.split(SPACE))
-                .collect(Collectors.toUnmodifiableList());
-
-        return new RequestURI(
-                requestURI.get(HTTP_METHOD_INDEX),
-                requestURI.get(URI_INDEX),
-                requestURI.get(HTTP_VERSION_INDEX)
-        );
+    public static RequestURI of(final String uri, final String httpMethod, final String httpVersion) {
+        return new RequestURI(uri, httpMethod, httpVersion);
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    public static RequestURI of(
+            final String uri,
+            final QueryString queryString,
+            final String httpMethod,
+            final String httpVersion
+    ) {
+        return new RequestURI(uri, queryString, httpMethod, httpVersion);
     }
 
     public String getUri() {
         return uri;
+    }
+
+    public QueryString getQueryString() {
+        return queryString;
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
     }
 
     public String getHttpVersion() {

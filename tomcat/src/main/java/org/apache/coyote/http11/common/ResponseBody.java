@@ -2,7 +2,6 @@ package org.apache.coyote.http11.common;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -16,8 +15,7 @@ public class ResponseBody {
         this.body = body;
     }
 
-    public static ResponseBody from(final RequestURI requestURI) throws IOException {
-        final String uri = requestURI.getUri();
+    public static ResponseBody from(final String uri) throws IOException {
         if("/".equals(uri)) {
             return new ResponseBody("Hello world!");
         }
@@ -26,8 +24,8 @@ public class ResponseBody {
     }
 
     private static String readFile(final String uri) throws IOException {
-        final URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_DIRECTORY + uri);
-        final File file = new File(Objects.requireNonNull(resource).getFile());
+        final var resource = ClassLoader.getSystemClassLoader().getResource(STATIC_DIRECTORY + uri);
+        final var file = new File(Objects.requireNonNull(resource).getFile());
         return new String(Files.readAllBytes(file.toPath()));
     }
 

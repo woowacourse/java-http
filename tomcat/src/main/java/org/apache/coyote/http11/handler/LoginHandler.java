@@ -27,17 +27,26 @@ public class LoginHandler implements Handler {
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
         if (request.getRequestMethod() == RequestMethod.GET) {
+            ClassLoader classLoader = getClass().getClassLoader();
             String redirectionFile = "login.html";
             Cookie cookie = request.parseCookie();
             String jsessionid = cookie.findByKey("JSESSIONID");
 
             if (jsessionid != null && isLoginUser(jsessionid)) {
                 redirectionFile = "index.html";
+                URL resource = classLoader.getResource("static/" + redirectionFile);
+                File file = new File(resource.getFile());
+                String fileData = new String(Files.readAllBytes(file.toPath()));
+
+                List<String> headers = List.of(
+                        String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
+                        String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length)),
+                        String.join(" ", "Location: index.html")
+                );
+                return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, fileData);
             }
 
-            ClassLoader classLoader = getClass().getClassLoader();
             URL resource = classLoader.getResource("static/" + redirectionFile);
-
             File file = new File(resource.getFile());
             String fileData = new String(Files.readAllBytes(file.toPath()));
 
@@ -47,6 +56,7 @@ public class LoginHandler implements Handler {
             );
 
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
+
         }
         if (request.getRequestMethod() == RequestMethod.POST) {
             List<String> headers = new ArrayList<>();

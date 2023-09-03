@@ -16,11 +16,19 @@ public class Http11Request {
         this.requestBody = requestBody;
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     public String getPath() {
         return path;
     }
 
     public String getQuery() {
         return query;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

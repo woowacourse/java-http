@@ -1,4 +1,4 @@
-package nextstep.jwp.handler.httpGet;
+package nextstep.jwp.handler.post;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BusinessException;
@@ -7,55 +7,35 @@ import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.Http11Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Optional;
 
-public class LoginGetHandler implements Handler {
+public class RegisterPostHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginGetHandler.class);
     private static final String STATIC = "static";
 
     @Override
     public Http11Response resolve(final Http11Request request) throws IOException {
-        final String query = request.getQuery();
-        if (query == null) {
-            final var resource = getClass().getClassLoader().getResource(STATIC + "/login.html");
-            return makeHttp11Response(resource, StatusCode.OK);
-        }
-        final User user = findUser(query);
-
-        if (user == null) {
-            final var resource = getClass().getClassLoader().getResource(STATIC + "/401.html");
-            return makeHttp11Response(resource, StatusCode.UNAUTHORIZED);
-        }
-
+        final User user = makeUser(request.getRequestBody());
+        InMemoryUserRepository.save(user);
         final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
-        return makeHttp11Response(resource, StatusCode.FOUND);
+        return makeHttp11Response(resource, StatusCode.CREATED);
     }
 
-    private User findUser(final String query) {
-        final String[] tokens = query.split("&");
+    private User makeUser(final RequestBody requestBody) {
+        final String[] tokens = requestBody.getValue().split("&");
 
         final String account = findValueByKey(tokens, "account");
+        final String email = findValueByKey(tokens, "email");
         final String password = findValueByKey(tokens, "password");
 
-        return checkUser(account, password);
-    }
-
-    private User checkUser(final String account, final String password) {
-        final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-            return optionalUser.get();
-        }
-        return null;
+        return new User(account, password, email);
     }
 
     private String findValueByKey(final String[] tokens, final String key) {

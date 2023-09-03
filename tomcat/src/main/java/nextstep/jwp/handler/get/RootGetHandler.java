@@ -1,4 +1,4 @@
-package nextstep.jwp.handler.httpGet;
+package nextstep.jwp.handler.get;
 
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.StatusCode;

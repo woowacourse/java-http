@@ -1,7 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.handler.get;
 
 import org.apache.coyote.http11.Handler;
-import org.apache.coyote.http11.HttpDispatcher;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.Http11Request;
@@ -11,29 +10,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Objects;
 
-public class JwpHttpDispatcher implements HttpDispatcher {
+public class RegisterGetHandler implements Handler {
 
     private static final String STATIC = "static";
 
-    private final HandlerResolver handlerResolver;
-
-    public JwpHttpDispatcher(final HandlerResolver handlerResolver) {
-        this.handlerResolver = handlerResolver;
-    }
-
     @Override
-    public Http11Response handle(final Http11Request request) throws IOException {
-        final Handler handler = handlerResolver.resolve(request.getHttpMethod(), request.getPath());
-        if (handler != null) {
-            return handler.resolve(request);
-        }
-        final var resource = getClass().getClassLoader().getResource(STATIC + request.getPath());
-        if (resource == null) {
-            final var notFoundResource = getClass().getClassLoader().getResource(STATIC + "/404.html");
-            return makeHttp11Response(Objects.requireNonNull(notFoundResource), StatusCode.NOT_FOUND);
-        }
+    public Http11Response resolve(final Http11Request request) throws IOException {
+        final var resource = getClass().getClassLoader().getResource(STATIC + "/register.html");
         return makeHttp11Response(resource, StatusCode.OK);
     }
 

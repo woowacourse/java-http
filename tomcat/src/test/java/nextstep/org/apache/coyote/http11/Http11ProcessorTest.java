@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.HandlerResolver;
 import nextstep.jwp.JwpHttpDispatcher;
-import nextstep.jwp.handler.httpGet.LoginGetHandler;
-import nextstep.jwp.handler.httpGet.RootGetHandler;
+import nextstep.jwp.handler.get.LoginGetHandler;
+import nextstep.jwp.handler.get.RegisterGetHandler;
+import nextstep.jwp.handler.get.RootGetHandler;
+import nextstep.jwp.handler.post.LoginPostHandler;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -19,12 +21,18 @@ import java.util.Map;
 
 class Http11ProcessorTest {
 
+    private final Map<String, Handler> httpGetHandlers =
+            Map.of("/", new RootGetHandler(),
+                    "/login", new LoginGetHandler(),
+                    "/register", new RegisterGetHandler());
+    private final Map<String, Handler> httpPostHandlers =
+            Map.of("/login", new LoginPostHandler());
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final Map<String, Handler> handlers = Map.of("/", new RootGetHandler(), "/login", new LoginGetHandler());
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(handlers));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when
@@ -52,8 +60,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Map<String, Handler> handlers = Map.of("/", new RootGetHandler(), "/login", new LoginGetHandler());
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(handlers));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when

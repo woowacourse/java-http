@@ -2,8 +2,11 @@ package org.apache.catalina.connector;
 
 import nextstep.jwp.HandlerResolver;
 import nextstep.jwp.JwpHttpDispatcher;
-import nextstep.jwp.handler.httpGet.LoginGetHandler;
-import nextstep.jwp.handler.httpGet.RootGetHandler;
+import nextstep.jwp.handler.get.LoginGetHandler;
+import nextstep.jwp.handler.get.RegisterGetHandler;
+import nextstep.jwp.handler.get.RootGetHandler;
+import nextstep.jwp.handler.post.LoginPostHandler;
+import nextstep.jwp.handler.post.RegisterPostHandler;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -21,8 +24,14 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private final Map<String, Handler> handlers =
-            Map.of("/", new RootGetHandler(), "/login", new LoginGetHandler());
+
+    private final Map<String, Handler> httpGetHandlers =
+            Map.of("/", new RootGetHandler(),
+                    "/login", new LoginGetHandler(),
+                    "/register", new RegisterGetHandler());
+    private final Map<String, Handler> httpPostHandlers =
+            Map.of("/login", new LoginPostHandler(),
+                    "/register", new RegisterPostHandler());
 
     private final ServerSocket serverSocket;
     private boolean stopped;
@@ -74,7 +83,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(handlers));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
         final var processor = new Http11Processor(connection, new HttpRequestParser(), httpDispatcher);
         new Thread(processor).start();
     }

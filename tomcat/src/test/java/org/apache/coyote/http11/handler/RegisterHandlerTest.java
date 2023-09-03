@@ -41,6 +41,31 @@ class RegisterHandlerTest {
         assertThat(responseBody).isEqualTo(fileData);
     }
 
+    @Test
+    void POST_요청_시_indexHTML로_리다이렉션() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com");
+        BufferedReader request = RequestParser.requestToInput(httpRequest);
+
+        // when
+        ResponseEntity responseEntity = registerHandler.handle(HttpRequest.from(request));
+        String response = responseEntity.generateResponseMessage();
+
+        // then
+        assertThat(response).contains(
+                "Location: index.html",
+                "HTTP/1.1 302 "
+        );
+    }
+
     private String extractFileData(String filePath) throws IOException {
         URL resource = classLoader.getResource("static" + filePath);
         File file = new File(resource.getFile());

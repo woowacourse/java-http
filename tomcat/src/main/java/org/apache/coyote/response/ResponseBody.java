@@ -4,7 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ResponseBody {
 
-    public static ResponseBody EMPTY = new ResponseBody(null);
+    public static ResponseBody EMPTY = new ResponseBody("");
 
     private final String source;
 

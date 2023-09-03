@@ -1,21 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RequestUri {
-
-    private static final String DEFAULT_RESPONSE = "Hello world!";
 
     private final String path;
     private final Map<String, String> queryStrings;
@@ -42,51 +32,15 @@ public class RequestUri {
         return new RequestUri(path, queryStrings);
     }
 
-    public HttpResponse extractHttpResponse() throws URISyntaxException {
-        String responseBody = extractResponseBody();
-
-        if (responseBody.equals(DEFAULT_RESPONSE)) {
-            return HttpResponse.of(FileExtension.NONE, responseBody);
-        }
-
-        return HttpResponse.of(getFileExtension(), responseBody);
-    }
-
-    private FileExtension getFileExtension() throws URISyntaxException {
-        File file = findPath().toFile();
-        String fileName = file.getName();
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
-        return FileExtension.from(fileExtension);
-    }
-
-    private String extractResponseBody() {
-        try {
-            return Files.readString(findPath());
-        } catch (IOException | URISyntaxException | NullPointerException e) {
-            return DEFAULT_RESPONSE;
-        }
-    }
-
-    private Path findPath() throws URISyntaxException {
-        URL resource = getClass().getClassLoader()
-                .getResource(String.format("static/%s", getPath()));
-
-        return Paths.get(Objects.requireNonNull(resource).toURI());
-    }
-
-    private String getPath() {
-        if (path.contains(".")) {
-            return path;
-        }
-        return path + ".html";
-    }
-
     public String findQueryStringValue(String key) {
         return queryStrings.get(key);
     }
 
     public boolean isQueryStringExisted() {
         return !queryStrings.isEmpty();
+    }
+
+    public String getPath() {
+        return path;
     }
 }

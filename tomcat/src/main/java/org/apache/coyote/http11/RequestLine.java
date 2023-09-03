@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.net.URISyntaxException;
-
 public class RequestLine {
 
     private final String httpMethod;
@@ -21,20 +19,16 @@ public class RequestLine {
         return new RequestLine(requestLineParts[0], requestUri, requestLineParts[2]);
     }
 
-    public HttpResponse extractHttpResponse() {
-        try {
-            return requestUri.extractHttpResponse();
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("해당 파일을 찾을 수 없습니다.");
-        }
-    }
-
     public boolean isQueryStringExisted() {
         return requestUri.isQueryStringExisted();
     }
 
     public String findQueryStringValue(String key) {
         return requestUri.findQueryStringValue(key);
+    }
+
+    public String getPath() {
+        return requestUri.getPath();
     }
 
 }

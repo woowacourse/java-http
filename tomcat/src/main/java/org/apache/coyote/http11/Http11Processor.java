@@ -42,12 +42,14 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             RequestLine requestLine = RequestLine.from(firstLine);
+            RequestHandler requestHandler = new RequestHandler(requestLine);
 
             if (requestLine.isQueryStringExisted()) {
                 logUser(requestLine);
             }
 
-            HttpResponse httpResponse = requestLine.extractHttpResponse();
+
+            HttpResponse httpResponse = requestHandler.extractHttpResponse();
 
             String response = httpResponse.extractResponse();
 

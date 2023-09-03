@@ -8,21 +8,21 @@ public enum ConnectionHeader implements RequestHeader {
     KEEP_ALIVE("keep-alive"),
     CLOSE("close");
 
-    private final String printedName;
+    private final String option;
 
-    ConnectionHeader(final String printedName) {
-        this.printedName = printedName;
+    ConnectionHeader(final String option) {
+        this.option = option;
     }
 
-    public static ConnectionHeader from(final String printedName) {
+    public static ConnectionHeader from(final String option) {
         return Arrays.stream(values())
-                .filter(connectionHeader -> connectionHeader.printedName.equals(printedName))
+                .filter(connectionHeader -> connectionHeader.option.equals(option))
                 .findFirst()
                 .orElseThrow(InvalidConnectionHeaderException::new);
     }
 
     @Override
     public String getValue() {
-        return printedName;
+        return option;
     }
 }

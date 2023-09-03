@@ -38,16 +38,6 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequest request = HttpRequest.from(inputStream);
             final HttpResponse response = HttpResponse.from(request);
-
-//            final String responseBody = "Hello world!";
-//
-//            final String response = String.join("\r\n",
-//                    "HTTP/1.1 200 OK ",
-//                    "Content-Type: text/html;charset=utf-8 ",
-//                    "Content-Length: " + responseBody.getBytes().length + " ",
-//                    "",
-//                    responseBody);
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

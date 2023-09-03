@@ -8,7 +8,8 @@ import java.util.Arrays;
 public enum RequestHeaderType {
     HOST("Host"),
     CONNECTION("Connection"),
-    ACCEPT("Accept");
+    ACCEPT("Accept"),
+    PRAGMA("Pragma");
 
     private final String headerName;
 
@@ -30,6 +31,8 @@ public enum RequestHeaderType {
             return ConnectionHeader.from(value);
         } else if (this == ACCEPT) {
             return AcceptHeader.from(value);
+        } else if (this == PRAGMA) {
+            return PragmaHeader.from(value);
         } else {
             throw new UnsupportedHeaderTypeException();
         }

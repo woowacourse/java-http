@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,17 +38,15 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final ResponseEntity responseEntity = ResponseEntity.from(httpRequest);
+            final Controller controller = new Controller(httpRequest);
+            final ResponseEntity responseEntity = controller.run();
 
-            final HttpResponse response = HttpResponse.of(httpRequest.getRequestLine()
-                                                                     .getHttpVersion(), responseEntity);
+            final HttpResponse response = HttpResponse.of(httpRequest.getRequestLine().getHttpVersion(), responseEntity);
 
             outputStream.write(response.convertToString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 }

@@ -5,6 +5,7 @@ import java.util.Objects;
 public class ResourcePath {
 
     public static final String ROOT_PATH = "/";
+
     private final String resourcePath;
 
     private ResourcePath(final String resourcePath) {
@@ -17,6 +18,10 @@ public class ResourcePath {
 
     public boolean isRootPath() {
         return resourcePath.equals(ROOT_PATH);
+    }
+
+    public boolean is(final String targetUrl) {
+        return resourcePath.equals(targetUrl);
     }
 
     public String getResourcePath() {

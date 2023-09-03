@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.request.Accept;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +19,12 @@ class ContentTypeTest {
 
         @Test
         void accept에_유효한_type이_존재하면_해당_타입을_반환한다() {
-            final List<String> accepts = new ArrayList<>(List.of("application/json"));
+            final List<Accept> accepts = new ArrayList<>(
+                    List.of(
+                            new Accept("application/json", 1),
+                            new Accept("text/html", 0.8)
+                    )
+            );
 
             final String result = ContentType.getTypeFrom(accepts);
 
@@ -27,7 +33,12 @@ class ContentTypeTest {
 
         @Test
         void accept에_유효한_type이_존재하지_않으면_null을_반환한다() {
-            final List<String> accepts = new ArrayList<>(List.of("application/image"));
+            final List<Accept> accepts = new ArrayList<>(
+                    List.of(
+                            new Accept("application/text", 1),
+                            new Accept("text/text", 0.8)
+                    )
+            );
 
             final String result = ContentType.getTypeFrom(accepts);
 

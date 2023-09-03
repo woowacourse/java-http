@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.coyote.request.Accept;
 
 public enum ContentType {
 
@@ -35,12 +36,13 @@ public enum ContentType {
         this.extension = extension;
     }
 
-    public static String getTypeFrom(final List<String> accepts) {
+    public static String getTypeFrom(final List<Accept> accepts) {
         final Set<String> contentTypes = Arrays.stream(ContentType.values())
                 .map(contentType -> contentType.type)
                 .collect(Collectors.toSet());
         return accepts.stream()
-                .filter(contentTypes::contains)
+                .map(accept -> accept.getAcceptType())
+                .filter(accept -> contentTypes.contains(accept))
                 .findFirst()
                 .orElse(null);
     }

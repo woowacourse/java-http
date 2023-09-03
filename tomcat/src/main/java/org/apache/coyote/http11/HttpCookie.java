@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public static HttpCookie make(final String cookies) {
+    public static HttpCookie of(final String cookies) {
         return new HttpCookie(parse(cookies));
     }
 

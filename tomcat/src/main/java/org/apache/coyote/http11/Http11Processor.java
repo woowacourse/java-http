@@ -1,26 +1,22 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,155 +39,137 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final String request = reader.readLine();
-            String requestMethod = request.split(" ")[0];
-            String requestUri = request.split(" ")[1];
-            log.info("requestMethod = {}", requestMethod);
-            log.info("requestUri = {}", requestUri);
-
-            final Map<String, String> requestHeaders = new HashMap<>();
-            String line;
-            while (!"".equals(line = reader.readLine())) {
-                String[] value = line.split(": ");
-                requestHeaders.put(value[0], value[1]);
-            }
-            final HttpCookie httpCookie = HttpCookie.make(requestHeaders.get("Cookie"));
-            log.info("requestHeaders = {}", requestHeaders);
-
-            final Map<String, String> requestBody = new HashMap<>();
-            if (requestHeaders.get("Content-Length") != null) {
-                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-                for (String body : new String(buffer).split("&")) {
-                    String[] value = body.split("=");
-                    requestBody.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
-                }
-                log.info("requestBody = {}", requestBody);
-            }
-
-            var statusCode = "404";
-            var contentType = "text/html;charset=utf-8";
-            final URL resource404 = getClass().getClassLoader().getResource("static/404.html");
-            var responseBody = new String(Files.readAllBytes(new File(resource404.getFile()).toPath()));
-
-            if (requestUri.equals("/")) {
-                statusCode = "200 OK";
-                contentType = "text/html;charset=utf-8";
-                responseBody = "Hello world!";
-
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 " + statusCode + " ",
-                        "Content-Type: " + contentType + " ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            if (requestUri.equals("/login")) {
-                var sessionId = httpCookie.getCookie("JSESSIONID");
-                if (requestMethod.equals("GET")) {
-                    Session session = sessionManager.findSession(sessionId);
-                    if (session == null) {
-                        requestUri = "login.html";
-                    } else {
-                        requestUri = "index.html";
-                    }
-                }
-                if (requestMethod.equals("POST")) {
-                    statusCode = "302";
-                    contentType = "text/html;charset=utf-8";
-                    var location = "";
-
-                    Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
-                    if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
-                        var response = "";
-                        location = "/index.html";
-                        log.info("user: {}", user.get());
-                        if (sessionId == null) {
-                            Session session = new Session(String.valueOf(UUID.randomUUID()));
-                            session.setAttribute("user", user);
-                            sessionId = session.getId();
-                            sessionManager.add(session);
-
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 " + statusCode + " ",
-                                    "Content-Type: " + contentType + " ",
-                                    "Set-Cookie: JSESSIONID=" + sessionId + " ",
-                                    "Location: " + location + " ",
-                                    "");
-                        } else {
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 " + statusCode + " ",
-                                    "Content-Type: " + contentType + " ",
-                                    "Location: " + location + " ",
-                                    "");
-                        }
-                        outputStream.write(response.getBytes());
-                        outputStream.flush();
-                        return;
-                    } else {
-                        location = "/401.html";
-                    }
-
-                    final var response = String.join("\r\n",
-                            "HTTP/1.1 " + statusCode + " ",
-                            "Content-Type: " + contentType + " ",
-                            "Location: " + location + " ",
-                            "");
-
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-            }
-
-            if (requestUri.equals("/register")) {
-                if (requestMethod.equals("GET")) {
-                    requestUri = "register.html";
-                }
-                if (requestMethod.equals("POST")) {
-                    final User newUser = new User(requestBody.get("account"), requestBody.get("password"),
-                            requestBody.get("email"));
-                    InMemoryUserRepository.save(newUser);
-
-                    statusCode = "302";
-                    var location = "/index.html";
-                    final var response = String.join("\r\n",
-                            "HTTP/1.1 " + statusCode + " ",
-                            "Content-Type: " + contentType + " ",
-                            "Location: " + location + " ",
-                            "");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-            }
-
-            final String fileName = "static/" + requestUri;
-            final URL resource = getClass().getClassLoader().getResource(fileName);
-            if (requestHeaders.get("Accept") != null) {
-                contentType = requestHeaders.get("Accept").split(",")[0];
-            }
-            if (resource != null) {
-                statusCode = "200 OK";
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 " + statusCode + " ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest httpRequest = HttpRequest.of(new BufferedReader(new InputStreamReader(inputStream)));
+            final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
+            final String response = handleRequest(httpRequest);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String handleRequest(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getTarget().equals("/")) {
+            return handleRootRequest();
+        }
+
+        if (httpRequest.getTarget().equals("/login")) {
+            return handleLoginRequest(httpRequest);
+        }
+
+        if (httpRequest.getTarget().equals("/register")) {
+            return handleRegisterRequest(httpRequest);
+        }
+
+        return handleResourceRequest(httpRequest, httpRequest.getTarget());
+    }
+
+    private String handleRootRequest() {
+        final Map<String, String> responseHeader = new HashMap<>();
+        responseHeader.put("Content-Type", "text/html;charset=utf-8");
+
+        final HttpResponse httpResponse = HttpResponse.of("200 OK", responseHeader, "Hello world!");
+        return httpResponse.stringify();
+    }
+
+    private String handleRegisterRequest(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getMethod().equals("GET")) {
+            return handleResourceRequest(httpRequest, "register.html");
+        }
+
+        if (httpRequest.getMethod().equals("POST")) {
+            final User newUser = new User(
+                    httpRequest.getBody().get("account"),
+                    httpRequest.getBody().get("password"),
+                    httpRequest.getBody().get("email")
+            );
+
+            InMemoryUserRepository.save(newUser);
+            final Map<String, String> responseHeader = new HashMap<>();
+            responseHeader.put("Content-Type", "text/html;charset=utf-8");
+            responseHeader.put("Location", "/index.html");
+            final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
+            return httpResponse.stringify();
+        }
+        return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
+    }
+
+    private String handleLoginRequest(final HttpRequest httpRequest) throws IOException {
+        final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
+        String sessionId = httpCookie.getCookie("JSESSIONID");
+
+        if (httpRequest.getMethod().equals("GET")) {
+            final Session session = sessionManager.findSession(sessionId);
+            if (session != null) {
+                // already login user
+                final Map<String, String> responseHeader = new HashMap<>();
+                responseHeader.put("Content-Type", "text/html;charset=utf-8");
+                responseHeader.put("Location", "/index.html");
+                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
+                return httpResponse.stringify();
+            }
+            // not login user
+            return handleResourceRequest(httpRequest, "login.html");
+        }
+
+        if (httpRequest.getMethod().equals("POST")) {
+            final Map<String, String> responseHeader = new HashMap<>();
+            Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBody().get("account"));
+            if (user.isEmpty() || !user.get().checkPassword(httpRequest.getBody().get("password"))) {
+                // invalid user
+                responseHeader.put("Content-Type", "text/html;charset=utf-8");
+                responseHeader.put("Location", "/401.html");
+                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
+                return httpResponse.stringify();
+            }
+
+            // valid user
+            log.info("user: {}", user.get());
+
+            if (sessionId != null) { // if already have session
+                responseHeader.put("Content-Type", "text/html;charset=utf-8");
+                responseHeader.put("Location", "/index.html");
+                final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
+                return httpResponse.stringify();
+            }
+
+            // if no session
+            Session session = new Session(String.valueOf(UUID.randomUUID()));
+            session.setAttribute("user", user);
+            sessionManager.add(session);
+            sessionId = session.getId();
+
+            responseHeader.put("Content-Type", "text/html;charset=utf-8");
+            responseHeader.put("Location", "/index.html");
+            responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
+            final HttpResponse httpResponse = HttpResponse.of("302", responseHeader, "");
+            return httpResponse.stringify();
+        }
+        return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
+    }
+
+    private String handleResourceRequest(final HttpRequest httpRequest, final String resourceUrl) throws IOException {
+        final Map<String, String> responseHeader = new HashMap<>();
+        String statusCode;
+        String contentType = "text/html;charset=utf-8";
+
+        if (httpRequest.getHeader().get("Accept") != null) {
+            contentType = httpRequest.getHeader().get("Accept").split(",")[0];
+        }
+
+        URL resource = getClass().getClassLoader().getResource("static/" + resourceUrl);
+        if (resource != null) {
+            statusCode = "200 OK";
+        } else {
+            resource = getClass().getClassLoader().getResource("static/" + "404.html");
+            statusCode = "404";
+            contentType = "text/html;charset=utf-8";
+        }
+
+        responseHeader.put("Content-Type", contentType);
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final HttpResponse httpResponse = HttpResponse.of(statusCode, responseHeader, responseBody);
+        return httpResponse.stringify();
     }
 }

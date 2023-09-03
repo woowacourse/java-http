@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
         final String account = params.get("account");
         final User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-        System.out.println("user = " + user);
+        log.debug(user.toString());
       }
 
       final String responseBody = readContentsFromFile(url);

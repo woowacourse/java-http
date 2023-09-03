@@ -36,15 +36,24 @@ public class HttpResponse {
                 .collect(Collectors.joining());
     }
 
+    private String joinBodyMetadata() {
+        if (body == null) {
+            return "";
+        }
+        return String.join("\r\n",
+                contentType + " ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
+    }
+
     public String buildResponse() {
         String headers = joinHeaders();
+        String body = joinBodyMetadata();
 
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus,
                 headers + " ",
-                contentType + " ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
                 body);
     }
 

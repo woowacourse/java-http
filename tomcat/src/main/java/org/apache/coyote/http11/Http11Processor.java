@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
-
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -44,10 +44,11 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);
+            final Map<String, String> headers = parseRequestHeaders(br);
 
             //post method일 때만 requestBody 읽음
             if ("POST".equals(httpMethod)) {
-                final String requestBody = readRequestBody(br);
+                final String requestBody = readRequestBody(br, headers);
                 // 이제 requestBody 변수에 POST 요청의 request body가 저장되어 있음
                 registerUser(requestBody);
             }
@@ -56,17 +57,14 @@ public class Http11Processor implements Runnable, Processor {
             final String path = parseHttpRequest(requestLine);
 
             // 경로를 기반으로 정적 파일을 읽고 응답 생성
-            final String responseBody = readStaticFile(path, httpMethod);
+            final String parsedPath = parsePath(path, httpMethod);
+            final String responseBody = readStaticFile(path, httpMethod,parsedPath);
 
             //css인 경우 content type을 다르게 준다
             final String contentType = getContentType(path);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + "charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
+            final var response = getResponse(path, contentType, responseBody, headers, parsedPath);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -75,7 +73,51 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestBody(BufferedReader br) throws IOException {
+    private String getResponse(String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath) {
+        if (path.contains("/login?") && parsedPath.equals("/index.html") && !isContainJsessionId(headers)) {
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Set-Cookie: " + "JSESSIONID=" + UUID.randomUUID().toString() + " ",
+                    "Content-Type: " + contentType + "charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + "charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+    }
+
+    private boolean isContainJsessionId(final Map<String, String> headers) {
+        if (headers.containsKey("Cookie")) {
+            final String cookieValue = headers.get("Cookie");
+            String[] cookiePairs = cookieValue.split("; ");
+            for (String cookiePair : cookiePairs) {
+                String[] parts = cookiePair.split("=");
+                if (parts.length == 2 && parts[0].equals("JESESSIONID")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private String readRequestBody(BufferedReader br, Map<String, String> headers) throws IOException {
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+
+        return new String(buffer);
+    }
+
+    private Map<String, String> parseRequestHeaders(final BufferedReader br) throws IOException {
+        //request Header들 읽어오기
         Map<String, String> headers = new HashMap<>();
 
         final List<String> lines = new ArrayList<>();
@@ -99,12 +141,7 @@ public class Http11Processor implements Runnable, Processor {
                 headers.put(key, value);
             }
         }
-
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-
-        return new String(buffer);
+        return headers;
     }
 
     private String getContentType(final String path) {
@@ -134,14 +171,13 @@ public class Http11Processor implements Runnable, Processor {
         return requestParts[0];
     }
 
-    private String readStaticFile(String path, String httpMethod) throws IOException {
+    private String readStaticFile(String path, String httpMethod, String parsedPath) throws IOException {
         // 경로를 기반으로 정적 파일을 읽고 그 내용을 반환하는 로직을 작성해야 합니다.
         // 이 예제에서는 간단하게 파일을 읽어오는 방법을 보여줍니다.
-        path = parsePath(path, httpMethod);
 
         // 클래스 패스에서 정적 파일을 읽을 수 있도록 리소스 로더를 사용
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream resourceInputStream = classLoader.getResourceAsStream("static" + path);
+        InputStream resourceInputStream = classLoader.getResourceAsStream("static" + parsedPath);
 
         StringBuilder content = new StringBuilder();
         if (resourceInputStream != null) {
@@ -158,7 +194,7 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private String parsePath(String path, String httpMethod) throws IOException {
+    private String parsePath(String path, String httpMethod) {
         if (path.equals("/")) {
             return "/index.html";
         }
@@ -168,7 +204,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (path.startsWith("/login?")) {
-            isValidUser(path);
             if (isValidUser(path)) {
                 path = "/index.html";
             } else {

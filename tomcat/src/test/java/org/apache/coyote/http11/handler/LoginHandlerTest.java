@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -93,8 +95,12 @@ class LoginHandlerTest {
 				"Set-cookie: " + uuidValue + " \r\n" +
 				"\r\n";
 
-			assertThat(actual.buildResponse())
-				.isEqualTo(expected);
+			assertAll(
+				() -> assertThat(actual.buildResponse())
+					.isEqualTo(expected),
+				() -> assertThat(SessionManager.findSession(uuidValue.toString()))
+					.isNotNull()
+			);
 			mockUUID.close();
 		}
 

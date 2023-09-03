@@ -18,6 +18,8 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.QueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +90,9 @@ public class LoginHandler implements HttpHandler {
 		final String body = "";
 		final HttpHeaders headers = resolveHeader(body);
 		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
-		headers.put(SET_COOKIE.getValue(), UUID.randomUUID().toString());
+		final String jSessionId = UUID.randomUUID().toString();
+		SessionManager.add(new Session(jSessionId));
+		headers.put(SET_COOKIE.getValue(), jSessionId);
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,
 			body,

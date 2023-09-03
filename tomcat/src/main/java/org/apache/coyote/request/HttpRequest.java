@@ -1,9 +1,7 @@
 package org.apache.coyote.request;
 
 import org.apache.coyote.common.Headers;
-import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
-import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.exception.CoyoteIOException;
 
 import java.io.BufferedReader;
@@ -11,41 +9,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
 
 public class HttpRequest {
 
-    private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("^[^?]*\\?[^?]*$");
-    private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String QUERY_PARAM_START_DELIMITER = "?";
     private static final String HEADER_END_CONDITION = "";
-    private static final int REQUEST_LINE_LENGTH = 3;
-    private static final int HTTP_METHOD_INDEX = 0;
-    private static final int HTTP_REQUEST_URI_INDEX = 1;
-    private static final int HTTP_VERSION_INDEX = 2;
 
-    private final HttpMethod httpMethod;
-    private final RequestPath requestPath;
-    private final QueryParams queryParams;
-    private final HttpVersion httpVersion;
+    private final RequestLine requestLine;
     private final Headers headers;
     private final MediaType mediaType;
     private final RequestBody requestBody;
 
-    private HttpRequest(final HttpMethod httpMethod,
-                        final RequestPath requestPath,
-                        final QueryParams queryParams,
-                        final HttpVersion httpVersion,
+    private HttpRequest(final RequestLine requestLine,
                         final Headers headers,
                         final MediaType mediaType,
                         final RequestBody requestBody
     ) {
-        this.httpMethod = httpMethod;
-        this.requestPath = requestPath;
-        this.queryParams = queryParams;
-        this.httpVersion = httpVersion;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.mediaType = mediaType;
         this.requestBody = requestBody;
@@ -53,39 +34,12 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader br) {
         try {
-            final String[] requestLine = br.readLine().split(REQUEST_LINE_DELIMITER);
-            if (requestLine.length != REQUEST_LINE_LENGTH) {
-                throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 HttpMethod, URI, HttpVersion가 존재해야 합니다.");
-            }
-
+            final RequestLine requestLine = RequestLine.from(br.readLine());
             final Headers headers = parseToHeaders(br);
-            final HttpMethod httpMethod = HttpMethod.from(requestLine[HTTP_METHOD_INDEX]);
-            final HttpVersion httpVersion = HttpVersion.from(requestLine[HTTP_VERSION_INDEX]);
+            final MediaType mediaType = MediaType.from(requestLine.requestPath().source());
+            final RequestBody requestBody = parseToResponseBody(br, headers);
 
-            final String requestUri = requestLine[HTTP_REQUEST_URI_INDEX];
-            RequestPath requestPath = new RequestPath(requestUri);
-            QueryParams queryParams = QueryParams.empty();
-            if (QUERY_PARAM_PATTERN.matcher(requestUri).matches()) {
-                final int queryParamStartIndex = requestUri.indexOf(QUERY_PARAM_START_DELIMITER);
-                final String requestPathValue = requestUri.substring(0, queryParamStartIndex);
-                final String queryParamsValue = requestUri.substring(queryParamStartIndex);
-
-                requestPath = new RequestPath(requestPathValue);
-                queryParams = QueryParams.from(queryParamsValue);
-            }
-
-            RequestBody requestBody = RequestBody.EMPTY;
-            final String contentLengthHeader = headers.getHeaderValue(CONTENT_LENGTH.source());
-            if (Objects.nonNull(contentLengthHeader)) {
-                final int contentLength = Integer.parseInt(contentLengthHeader);
-                final char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                requestBody = RequestBody.from(new String(buffer));
-            }
-
-            final MediaType mediaType = MediaType.from(requestUri);
-            return new HttpRequest(httpMethod, requestPath, queryParams, httpVersion, headers, mediaType, requestBody);
-
+            return new HttpRequest(requestLine, headers, mediaType, requestBody);
         } catch (IOException e) {
             throw new CoyoteIOException("HTTP 요청 정보를 읽던 도중에 예외가 발생하였습니다.");
         }
@@ -102,20 +56,20 @@ public class HttpRequest {
         return new Headers(headersWithValue);
     }
 
-    public HttpMethod httpMethod() {
-        return httpMethod;
+    private static RequestBody parseToResponseBody(final BufferedReader br, final Headers headers) throws IOException {
+        RequestBody requestBody = RequestBody.EMPTY;
+        final String contentLengthHeader = headers.getHeaderValue(CONTENT_LENGTH.source());
+        if (Objects.nonNull(contentLengthHeader)) {
+            final int contentLength = Integer.parseInt(contentLengthHeader);
+            final char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+            requestBody = RequestBody.from(new String(buffer));
+        }
+        return requestBody;
     }
 
-    public RequestPath requestPath() {
-        return requestPath;
-    }
-
-    public QueryParams queryParams() {
-        return queryParams;
-    }
-
-    public HttpVersion httpVersion() {
-        return httpVersion;
+    public RequestLine requestLine() {
+        return requestLine;
     }
 
     public Headers headers() {
@@ -133,10 +87,7 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" + System.lineSeparator() +
-               "    httpMethod = " + httpMethod + ", " + System.lineSeparator() +
-               "    requestPath = " + requestPath + ", " + System.lineSeparator() +
-               "    queryParams = " + queryParams + ", " + System.lineSeparator() +
-               "    httpVersion = " + httpVersion + ", " + System.lineSeparator() +
+               "    requestLine = " + requestLine + ", " + System.lineSeparator() +
                "    headers = " + headers + System.lineSeparator() +
                "    mediaType = " + mediaType + System.lineSeparator() +
                "    requestBody = " + requestBody + System.lineSeparator() +

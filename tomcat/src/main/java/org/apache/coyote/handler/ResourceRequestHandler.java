@@ -18,7 +18,7 @@ public class ResourceRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        final String resourceBody = ResourceReader.read(httpRequest.requestPath().source());
+        final String resourceBody = ResourceReader.read(httpRequest.requestLine().requestPath().source());
         final ResponseBody responseBody = new ResponseBody(resourceBody);
 
         final Headers responseHeader = new Headers(Map.of(

@@ -34,7 +34,7 @@ public class UserLoginRequestGetHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        final QueryParams queryParams = httpRequest.queryParams();
+        final QueryParams queryParams = httpRequest.requestLine().queryParams();
         if (queryParams.isEmpty()) {
             return responseLoginPage();
         }

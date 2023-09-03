@@ -25,6 +25,11 @@ public class HomeRequestHandler implements RequestHandler {
                 CONTENT_LENGTH.source(), String.valueOf(responseBody.length())
         ));
 
-        return new HttpResponse(httpRequest.httpVersion(), HttpStatus.OK, responseHeader, responseBody);
+        return new HttpResponse(
+                httpRequest.requestLine().httpVersion(),
+                HttpStatus.OK,
+                responseHeader,
+                responseBody
+        );
     }
 }

@@ -22,7 +22,7 @@ class RequestHeaderTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         RequestHeader header = RequestHeader.from(input);
 
-        assertThat(header.getContentLength()).isEqualTo(0);
+        assertThat(header.getContentLength()).isZero();
     }
 
     @Test

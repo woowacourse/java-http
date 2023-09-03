@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +35,7 @@ class RegisterHandlerTest {
 				"",
 				"");
 
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -52,7 +53,7 @@ class RegisterHandlerTest {
 				"",
 				"");
 
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -70,7 +71,7 @@ class RegisterHandlerTest {
 				"",
 				"");
 
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -88,7 +89,7 @@ class RegisterHandlerTest {
 				"",
 				"");
 
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -111,7 +112,7 @@ class RegisterHandlerTest {
 				"",
 				"");
 			final String file = "/register.html";
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
@@ -129,13 +130,16 @@ class RegisterHandlerTest {
 		@Test
 		@DisplayName("Post메서드로 요청 시 회원가입에 성공하는 경우 302 상태코드와 Location index.html을 반환한다.")
 		void loginSuccess() throws IOException {
+			final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
 			final String plainRequest = String.join("\r\n",
 				"POST /register HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
-				"",
-				"account=gugu&password=password&email=hkkang%40woowahan.com");
-			final HttpRequest request = HttpRequest.from(plainRequest);
+				""
+			);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
+				.body(requestBody)
+				.build();
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 

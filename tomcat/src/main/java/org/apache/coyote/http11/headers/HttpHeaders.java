@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpHeaders {
 
@@ -39,5 +40,9 @@ public class HttpHeaders {
 
 	public void put(final String key, final String value) {
 		headers.put(key, value);
+	}
+
+	public Optional<String> get(final String key) {
+		return Optional.ofNullable(headers.get(key));
 	}
 }

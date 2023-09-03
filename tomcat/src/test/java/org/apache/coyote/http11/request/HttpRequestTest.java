@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Map;
 
 import org.apache.coyote.http11.headers.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ class HttpRequestTest {
 	@DisplayName("http 요청 문자열을 객체로 생성")
 	void createHttpRequest() {
 		//given
+		final String reqeustBody = "body";
 		final String httpRequest = String.join(System.lineSeparator(),
 			"GET /index.html?user=hong HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
-			"",
-			"body");
+			"");
 		final HttpHeaders expectedHeader = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
@@ -30,7 +31,9 @@ class HttpRequestTest {
 		));
 
 		//when
-		final HttpRequest actual = HttpRequest.from(httpRequest);
+		final HttpRequest actual = HttpRequestBuilder.from(httpRequest)
+			.body(reqeustBody)
+			.build();
 
 		//then
 		assertAll(

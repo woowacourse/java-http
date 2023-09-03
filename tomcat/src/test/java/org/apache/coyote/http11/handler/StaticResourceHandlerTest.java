@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +25,7 @@ class StaticResourceHandlerTest {
 		@Test
 		@DisplayName("endpoint가 resources에 있는 파일인 경우 true를 반환한다.")
 		void success() {
-			final HttpRequest request = HttpRequest.from("GET /index.html HTTP/1.1 ");
+			final HttpRequest request = HttpRequestBuilder.from("GET /index.html HTTP/1.1 ").build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -35,7 +36,7 @@ class StaticResourceHandlerTest {
 		@Test
 		@DisplayName("endpoint가 resources에 없는 파일인 경우 false를 반환한다.")
 		void fail() {
-			final HttpRequest request = HttpRequest.from("GET /aaa HTTP/1.1 ");
+			final HttpRequest request = HttpRequestBuilder.from("GET /aaa HTTP/1.1 ").build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -53,7 +54,7 @@ class StaticResourceHandlerTest {
 			"Connection: keep-alive ",
 			"",
 			"");
-		final HttpRequest request = HttpRequest.from(plainRequest);
+		final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 		final HttpResponse httpResponse = HANDLER.handleTo(request);
 

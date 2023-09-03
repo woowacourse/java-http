@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import static org.assertj.core.api.Assertions.*;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,7 +20,7 @@ class RootHandlerTest {
 			"Connection: keep-alive ",
 			"",
 			"");
-		final HttpRequest request = HttpRequest.from(plainRequest);
+		final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 		final HttpResponse httpResponse = new RootHandler().handleTo(request);
 
@@ -40,7 +41,7 @@ class RootHandlerTest {
 		@Test
 		@DisplayName("/로 접근하면 true를 반환한다.")
 		void success() {
-			final HttpRequest request = HttpRequest.from("GET / HTTP/1.1 ");
+			final HttpRequest request = HttpRequestBuilder.from("GET / HTTP/1.1 ").build();
 
 			final boolean supported = new RootHandler().isSupported(request);
 
@@ -51,7 +52,7 @@ class RootHandlerTest {
 		@Test
 		@DisplayName("/외 경로로 접근하면 true를 반환한다.")
 		void fail() {
-			final HttpRequest request = HttpRequest.from("GET /aaa HTTP/1.1 ");
+			final HttpRequest request = HttpRequestBuilder.from("GET /invalid HTTP/1.1 ").build();
 
 			final boolean supported = new RootHandler().isSupported(request);
 

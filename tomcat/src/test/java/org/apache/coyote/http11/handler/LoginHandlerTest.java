@@ -9,6 +9,7 @@ import java.net.URL;
 
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +28,7 @@ class LoginHandlerTest {
 			"Connection: keep-alive ",
 			"",
 			"");
-		final HttpRequest request = HttpRequest.from(plainRequest);
+		final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 		final boolean supported = HANDLER.isSupported(request);
 
@@ -49,7 +50,7 @@ class LoginHandlerTest {
 				"",
 				"");
 			final String file = "/login.html";
-			final HttpRequest request = HttpRequest.from(plainRequest);
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
@@ -67,13 +68,15 @@ class LoginHandlerTest {
 		@Test
 		@DisplayName("Post메서드고, 로그인에 성공하는 경우 302 상태코드와 Location index.html을 반환한다.")
 		void loginSuccess() {
+			final String requestBody = "account=gugu&password=password";
 			final String plainRequest = String.join("\r\n",
 				"POST /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
-				"",
-				"account=gugu&password=password");
-			final HttpRequest request = HttpRequest.from(plainRequest);
+				"");
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
+				.body(requestBody)
+				.build();
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
@@ -90,13 +93,16 @@ class LoginHandlerTest {
 		@Test
 		@DisplayName("Post 메서드고, 로그인에 실패하는 경우 UnauthorizedException을 반환한다.")
 		void loginFail() {
-			final String plainRequest = String.join("\r\n",
+			final String requestBody = "account=gugu&password=invalid";
+			final String plainRequest = String.join(System.lineSeparator(),
 				"POST /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
-				"",
-				"account=gugu&password=invalid");
-			final HttpRequest request = HttpRequest.from(plainRequest);
+				"Content-length: 80 ",
+				"");
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
+				.body(requestBody)
+				.build();
 
 			assertThatThrownBy(() -> HANDLER.handleTo(request))
 				.isInstanceOf(UnauthorizedException.class);

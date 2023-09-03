@@ -9,6 +9,7 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpHandlers;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,8 @@ public class Http11Processor implements Runnable, Processor {
 	public void process(final Socket connection) {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
-			final String plainRequest = readRequest(inputStream);
+			final HttpRequest request = readRequest(inputStream);
 
-			final HttpRequest request = HttpRequest.from(plainRequest);
 			final HttpResponse response = HTTP_HANDLERS.handleTo(request);
 
 			outputStream.write(response.buildResponse().getBytes());
@@ -48,14 +48,33 @@ public class Http11Processor implements Runnable, Processor {
 		}
 	}
 
-	private static String readRequest(final InputStream inputStream) throws IOException {
+	private static HttpRequest readRequest(final InputStream inputStream) throws IOException {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-		final StringBuilder builder = new StringBuilder();
 
+		final String requestHeader = readRequestHeader(reader);
+		final HttpRequestBuilder builder = HttpRequestBuilder.from(requestHeader);
+		final String requestBody = readRequestBody(reader, builder);
+
+		return builder
+			.body(requestBody)
+			.build();
+	}
+
+	private static String readRequestBody(BufferedReader reader, HttpRequestBuilder builder) throws IOException {
+		final Integer contentLength = builder.bodyLength();
+		final char[] buffer = new char[contentLength];
+		reader.read(buffer, 0, contentLength);
+		final String requestBody = new String(buffer);
+		return requestBody;
+	}
+
+	private static String readRequestHeader(final BufferedReader reader) throws IOException {
+		final StringBuilder builder = new StringBuilder();
 		for (String readLine = reader.readLine();
 			 readLine != null && !readLine.isEmpty();
 			 readLine = reader.readLine()) {
 			builder.append(readLine);
+			builder.append(System.lineSeparator());
 		}
 		return builder.toString();
 	}

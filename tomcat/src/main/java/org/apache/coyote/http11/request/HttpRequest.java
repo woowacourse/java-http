@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.Header;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionHolder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class HttpRequest {
+
+    private static final SessionHolder SESSION_MANAGER = new SessionHolder();
 
     private final Uri uri;
     private final Headers headers;
@@ -79,6 +84,29 @@ public class HttpRequest {
 
     public boolean hasResource() {
         return uri.hasResource();
+    }
+
+    public Session createSession() {
+        Session session = new Session();
+        SESSION_MANAGER.add(session);
+        return session;
+    }
+
+    public Optional<Object> getSessionAttribute(final String name) {
+        final Session session = getSession();
+        if (session == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(session.getAttribute(name));
+    }
+
+    private Session getSession() {
+        final Cookie cookie = headers.getCookie();
+        final Optional<String> jSessionId = cookie.getJSessionId();
+        if (jSessionId.isEmpty()) {
+            return null;
+        }
+        return SESSION_MANAGER.findSession(jSessionId.get());
     }
 
     public HttpMethod getHttpMethod() {

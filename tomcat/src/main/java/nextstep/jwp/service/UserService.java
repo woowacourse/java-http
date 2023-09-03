@@ -12,10 +12,10 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public void login(final String account, final String password) {
+    public User login(final String account, final String password) {
         User user = findUser(account);
         validatePassword(password, user);
-        log.info("로그인 성공! " + account);
+        return user;
     }
 
     private User findUser(final String account) {

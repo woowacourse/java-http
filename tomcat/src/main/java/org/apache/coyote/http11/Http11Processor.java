@@ -3,8 +3,10 @@ package org.apache.coyote.http11;
 import javassist.NotFoundException;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
@@ -12,6 +14,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Status;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpRequest.isSamePath("/login")) {
-            return login(httpRequest.getParams());
+            return login(httpRequest);
         }
 
         if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
@@ -76,30 +79,44 @@ public class Http11Processor implements Runnable, Processor {
 
         if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
             Map<String, String> params = httpRequest.getBody().getParams();
-            System.out.println(params);
             userService.register(params.get("account"), params.get("password"), params.get("email"));
             return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
         }
 
-
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
-    private HttpResponse login(final Params queryParams) throws URISyntaxException, IOException, NotFoundException {
-        if (queryParams.isEmpty()) {
+    private HttpResponse login(final HttpRequest httpRequest) throws URISyntaxException, IOException, NotFoundException {
+        Params queryParams = httpRequest.getParams();
+
+        // 로그인 페이지 접속
+        if (queryParams.isEmpty() && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
+            if (httpRequest.getSessionAttribute("user").isPresent()) {
+                return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            }
             return HttpResponse.okWithResource("/login.html");
-        }
+        } else {
+            // 로그인 진행
 
-        if (!queryParams.hasParam("account") || !queryParams.hasParam("password")) {
-            throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
-        }
+            Map<String, String> params = httpRequest.getBody().getParams();
 
-        try {
-            userService.login(queryParams.get("account"), queryParams.get("password"));
-        } catch (UnAuthorizedException e) {
-            return HttpResponse.unAuthorized("/401.html");
-        }
+            // 파람이 존재하지 않는 경우
+            if (params.isEmpty()) {
+                throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
+            }
 
-        return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            User user;
+            try {
+                user = userService.login(params.get("account"), params.get("password"));
+            } catch (UnAuthorizedException e) {
+                return HttpResponse.unAuthorized("/401.html");
+            }
+
+            Session session = httpRequest.createSession();
+            session.setAttribute("user", user);
+            HttpResponse response = HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            response.setCookie(Cookie.fromUserJSession(session.getId()));
+            return response;
+        }
     }
 }

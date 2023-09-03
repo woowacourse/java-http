@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.Header;
 
 import java.util.List;
@@ -33,6 +34,24 @@ public class Headers {
             return Optional.of(headers.get(key));
         }
 
+        return Optional.empty();
+    }
+
+    public Cookie getCookie() {
+        Optional<String> cookie = get(Header.COOKIE);
+
+        if (cookie.isEmpty()) {
+            return Cookie.createDefault();
+        }
+
+        return Cookie.from(cookie.get());
+    }
+
+    public Optional<String> get(final Header header) {
+        final String key = header.getName();
+        if (headers.containsKey(key)) {
+            return Optional.of(headers.get(key));
+        }
         return Optional.empty();
     }
 }

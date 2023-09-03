@@ -19,6 +19,10 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public void put(final Header header, final String value) {
+        this.headers.put(header, value);
+    }
+
     public void putAll(final Map<Header, String> headers) {
         this.headers.putAll(headers);
     }

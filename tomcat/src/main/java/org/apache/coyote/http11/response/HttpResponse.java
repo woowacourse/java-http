@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import javassist.NotFoundException;
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Headers;
@@ -47,6 +48,10 @@ public class HttpResponse {
 
     public static HttpResponse okWithResource(final String path) throws IOException, URISyntaxException, NotFoundException {
         return new HttpResponse(ContentType.of(path), Status.OK, ResourceFinder.getStaticResource(path));
+    }
+
+    public void setCookie(final Cookie cookie) {
+        headers.put(Header.SET_COOKIE, cookie.toString());
     }
 
     @Override

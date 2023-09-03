@@ -1,15 +1,12 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class HttpRequest {
 
     private final StartLine startLine;
-    private final List<Header> headers;
+    private final Headers headers;
     private final Body body;
 
-    private HttpRequest(StartLine startLine, List<Header> headers, Body body) {
+    private HttpRequest(StartLine startLine, Headers headers, Body body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -23,7 +20,7 @@ public class HttpRequest {
         return startLine;
     }
 
-    public List<Header> headers() {
+    public Headers headers() {
         return headers;
     }
 
@@ -34,7 +31,7 @@ public class HttpRequest {
     public static class HttpRequestBuilder {
 
         private StartLine startLine;
-        private List<Header> headers;
+        private Headers headers;
         private Body body;
 
         public HttpRequestBuilder startLine(StartLine startLine) {
@@ -42,13 +39,8 @@ public class HttpRequest {
             return this;
         }
 
-        public HttpRequestBuilder headers(List<Header> headers) {
+        public HttpRequestBuilder headers(Headers headers) {
             this.headers = headers;
-            return this;
-        }
-
-        public HttpRequestBuilder headers(Header... headers) {
-            this.headers = Arrays.asList(headers);
             return this;
         }
 

@@ -16,10 +16,18 @@ public class Headers {
         Map<String, String> headerMap = new HashMap<>();
         for (String header : headers) {
             String[] nameAndValue = header.split(": ");
+            validateHeaderValue(nameAndValue);
             headerMap.put(nameAndValue[0], nameAndValue[1]);
         }
         return new Headers(headerMap);
     }
+
+    private static void validateHeaderValue(String[] nameAndValue) {
+        if (nameAndValue.length != 2) {
+            throw new InvalidHeaderException();
+        }
+    }
+
 
     public Map<String, String> headers() {
         return headers;

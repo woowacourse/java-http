@@ -5,10 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.util.Map;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.request.Body;
-import org.apache.coyote.http11.request.Header;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.StartLine;
 import org.junit.jupiter.api.DisplayName;
@@ -33,10 +32,10 @@ class HttpRequestParserTest {
         sb.append("Accept: */*\r\n");
         String requestString = sb.toString();
         StartLine expectedStartLine = StartLine.from("GET /index.html HTTP/1.1");
-        List<Header> expectedHeaders = List.of(
-                Header.from("Host: localhost:8080"),
-                Header.from("User-Agent: Insomnia/2023.5.7"),
-                Header.from("Accept: */*")
+        Map<String, String> expectedHeaders = Map.of(
+                "Host", "localhost:8080",
+                "User-Agent", "Insomnia/2023.5.7",
+                "Accept", "*/*"
         );
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(requestString.getBytes()))
@@ -49,7 +48,7 @@ class HttpRequestParserTest {
         assertThat(request.startLine())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedStartLine);
-        assertThat(request.headers())
+        assertThat(request.headers().headers())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);
         assertThat(request.body().body()).isNull();
@@ -70,11 +69,11 @@ class HttpRequestParserTest {
                 + "}");
         String requestString = sb.toString();
         StartLine expectedStartLine = StartLine.from("POST /post HTTP/1.1");
-        List<Header> expectedHeaders = List.of(
-                Header.from("Host: localhost:8080"),
-                Header.from("User-Agent: Insomnia/2023.5.7"),
-                Header.from("Accept: */*"),
-                Header.from("Content-Length: 20")
+        Map<String, String> expectedHeaders = Map.of(
+                "Host", "localhost:8080",
+                "User-Agent", "Insomnia/2023.5.7",
+                "Accept", "*/*",
+                "Content-Length", "20"
         );
         Body body = new Body("{\n"
                 + "\tname: \"mallang\"\n"
@@ -90,7 +89,7 @@ class HttpRequestParserTest {
         assertThat(request.startLine())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedStartLine);
-        assertThat(request.headers())
+        assertThat(request.headers().headers())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);
         assertThat(request.body())

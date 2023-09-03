@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,17 @@ public class QueryParams {
     }
 
     private static QueryParams empty() {
-        return new QueryParams(new HashMap<>());
+        return new QueryParams(null);
+    }
+
+    public boolean hasParams(String... params) {
+        if (this.params == null) {
+            return false;
+        }
+        return Arrays.stream(params)
+                .filter(it -> this.params.get(it) == null)
+                .findAny()
+                .isEmpty();
     }
 
     public String getParam(String name) {

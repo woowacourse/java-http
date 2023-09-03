@@ -16,6 +16,10 @@ public class HttpResponse {
         this.messageBody = messageBody;
     }
 
+    public static HttpResponse create(StatusCode code, HttpHeaders headers) {
+        return new HttpResponse(StatusLine.create(code), headers, MessageBody.empty());
+    }
+
     public static HttpResponse create(StatusCode code, HttpHeaders headers, String content) {
         return new HttpResponse(StatusLine.create(code), headers, MessageBody.create(content));
     }

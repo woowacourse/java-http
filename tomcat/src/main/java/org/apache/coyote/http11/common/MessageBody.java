@@ -16,6 +16,9 @@ public class MessageBody {
     }
 
     public String getContent() {
+        if (content == null) {
+            return "";
+        }
         return content;
     }
 }

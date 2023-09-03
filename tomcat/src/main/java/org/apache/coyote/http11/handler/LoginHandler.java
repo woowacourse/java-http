@@ -6,7 +6,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -23,25 +22,34 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
+        if (!request.hasParams("account", "password")) {
+            URL resource = getClass().getClassLoader().getResource("static/login.html");
+            Path path = new File(resource.getPath()).toPath();
+            String content = new String(Files.readAllBytes(path));
+            HttpHeaders headers = new HttpHeaders();
+            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
+            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+            return HttpResponse.create(StatusCode.OK, headers, content);
+        }
+
+        if (loginSuccess(request)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.addHeader(HttpHeaderName.LOCATION, "/index.html");
+            return HttpResponse.create(StatusCode.FOUND, headers);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.LOCATION, "/401.html");
+        return HttpResponse.create(StatusCode.FOUND, headers);
+    }
+
+    private boolean loginSuccess(final HttpRequest request) {
         QueryParams params = request.getParams();
         String account = params.getParam("account");
         String password = params.getParam("password");
 
-        if (account!=null && password!=null) {
-            InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .ifPresent(user -> log.info(user.toString()));
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        Path path = new File(resource.getPath()).toPath();
-
-        String content = new String(Files.readAllBytes(path));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
-        headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
-
-        return HttpResponse.create(StatusCode.OK, headers, content);
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 }

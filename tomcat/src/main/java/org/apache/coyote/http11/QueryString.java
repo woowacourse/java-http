@@ -7,9 +7,6 @@ public class QueryString {
 
     private final Map<String, String> queryStrings = new HashMap<>();
 
-    private QueryString() {
-    }
-
     private static QueryString emptyQueryString() {
         return new QueryString();
     }
@@ -44,11 +41,10 @@ public class QueryString {
         queryString.queryStrings.put(splitKeyValue[0], splitKeyValue[1]);
     }
 
-    public boolean isEmpty() {
-        return queryStrings.isEmpty();
-    }
-
     public String get(final String key) {
         return queryStrings.get(key);
+    }
+
+    private QueryString() {
     }
 }

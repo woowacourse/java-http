@@ -25,10 +25,6 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public QueryString getQueryString() {
-        return queryString;
-    }
-
     public HttpMethod getHttpMethod() {
         return requestHeader.getHttpMethod();
     }

@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import org.apache.coyote.http11.util.RequestParamUtil;
 
 public class URI {
 
@@ -23,17 +24,11 @@ public class URI {
 
     private static Map<String, String> queryStrings(String uri) {
         int start = uri.indexOf("?");
-        Map<String, String> result = new HashMap<>();
         if (start == -1) {
-            return result;
+            return Collections.emptyMap();
         }
         String queryStrings = uri.substring(uri.indexOf("?") + 1);
-        String[] strings = queryStrings.split("&");
-        for (String string : strings) {
-            String[] nameAndValue = string.split("=");
-            result.put(nameAndValue[0], nameAndValue[1]);
-        }
-        return result;
+        return RequestParamUtil.parse(queryStrings);
     }
 
     public String uri() {

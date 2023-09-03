@@ -10,7 +10,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,14 @@ public class Http11Processor implements Runnable, Processor {
       final String request = inputStream.readLine();
       final String url = request.split(" ")[1];
       final Map<String, String> headers = extractHeaders(inputStream);
+      final Map<String, String> params = extractParams(url);
+
+      if (url.startsWith("/login")) {
+        final String account = params.get("account");
+        final User user = InMemoryUserRepository.findByAccount(account)
+            .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        System.out.println("user = " + user);
+      }
 
       final String responseBody = readContentsFromFile(url);
       final String contentType = getContentType(headers);
@@ -60,6 +70,20 @@ public class Http11Processor implements Runnable, Processor {
     } catch (final IOException | UncheckedServletException e) {
       log.error(e.getMessage(), e);
     }
+  }
+
+  private Map<String, String> extractParams(final String url) {
+    final Map<String, String> params = new HashMap<>();
+    if (!url.contains("?")) {
+      return params;
+    }
+
+    final String queryString = url.split("\\?")[1];
+    for (final String query : queryString.split("&")) {
+      final String[] tokens = query.split("=");
+      params.put(tokens[0], tokens[1]);
+    }
+    return params;
   }
 
   private Map<String, String> extractHeaders(final BufferedReader inputStream) throws IOException {

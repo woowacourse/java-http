@@ -1,12 +1,12 @@
-package org.apache.coyote.http11.headers;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.request.QueryParam;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class QueryParamTest {
@@ -51,4 +51,34 @@ class QueryParamTest {
 		assertThat(actual)
 			.isEqualTo(queryValue);
 	}
+
+	@Nested
+	@DisplayName("queryParam이 비어있는지 확인할 수 있다.")
+	class IsBlank {
+
+		@Test
+		@DisplayName("비어있는 경우")
+		void tureCase() {
+			final QueryParam queryParam = new QueryParam(Map.of());
+
+			final boolean blank = queryParam.isBlank();
+
+			assertThat(blank)
+				.isTrue();
+		}
+
+		@Test
+		@DisplayName("비어있지 않은 경우")
+		void falseCase() {
+			final QueryParam queryParam = new QueryParam(Map.of(
+				"key", "value"
+			));
+
+			final boolean blank = queryParam.isBlank();
+
+			assertThat(blank)
+				.isFalse();
+		}
+	}
+
 }

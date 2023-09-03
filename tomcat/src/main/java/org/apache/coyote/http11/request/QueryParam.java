@@ -39,4 +39,8 @@ public class QueryParam {
 	public String get(final String key) {
 		return paramMap.get(key);
 	}
+
+	public boolean isBlank() {
+		return paramMap.size() == 0;
+	}
 }

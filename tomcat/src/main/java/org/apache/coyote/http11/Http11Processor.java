@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String body = createBody(line);
-            String header = createHeader(body);
+            String header = createHeader(line, body);
 
             outputStream.write((header + body).getBytes());
             outputStream.flush();
@@ -70,10 +70,17 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String createHeader(String body) {
+    private String createHeader(String request, String body) {
+
         StringJoiner stringJoiner = new StringJoiner("\r\n");
+        String contentType = "text/html;charset=utf-8";
+
+        if (request.contains(".css")) {
+            contentType = "text/css;charset=utf-8";
+        }
+
         stringJoiner.add("HTTP/1.1 200 OK ");
-        stringJoiner.add("Content-Type: text/html;charset=utf-8 ");
+        stringJoiner.add("Content-Type: " + contentType + " ");
         stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
         stringJoiner.add("\r\n");
         return stringJoiner.toString();

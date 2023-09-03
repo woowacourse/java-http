@@ -62,4 +62,12 @@ public class HttpRequest {
     public QueryParams getParams() {
         return this.startLine.getParams();
     }
+
+    public HttpMethod getMethod() {
+        return this.startLine.getMethod();
+    }
+
+    public MessageBody getBody() {
+        return body;
+    }
 }

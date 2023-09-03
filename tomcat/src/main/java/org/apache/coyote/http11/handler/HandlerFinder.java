@@ -12,6 +12,7 @@ public class HandlerFinder {
         handlers = new HashMap<>();
         handlers.put("/", new HelloWorldHandler());
         handlers.put("/login", new LoginHandler());
+        handlers.put("/register", new RegisterHandler());
 
         DEFAULT_HANDLER = new DefaultHandler();
     }

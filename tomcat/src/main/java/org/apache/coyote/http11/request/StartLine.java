@@ -37,4 +37,8 @@ public class StartLine {
     public QueryParams getParams() {
         return params;
     }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
 }

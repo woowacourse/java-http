@@ -22,7 +22,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequest.from(toInputStream(message));
         assertThat(httpRequest.getMethod()).isEqualTo("GET");
-        assertThat(httpRequest.getPath()).isEqualTo("/index.html");
+        assertThat(httpRequest.getTarget()).isEqualTo("/index.html");
         assertThat(httpRequest.getVersion()).isEqualTo("HTTP/1.1");
         assertThat(httpRequest.getHeaders())
                 .usingRecursiveFieldByFieldElementComparator()

@@ -14,15 +14,15 @@ public class HttpRequest {
     private static final String WHITE_SPACE = " ";
 
     private final String method;
-    private final String uri;
+    private final String target;
     private final String version;
     private final List<HttpHeader> headers;
     private final String body;
 
-    private HttpRequest(final String method, final String uri, final String version, final List<HttpHeader> headers,
+    private HttpRequest(final String method, final String target, final String version, final List<HttpHeader> headers,
                         final String body) {
         this.method = method;
-        this.uri = uri;
+        this.target = target;
         this.version = version;
         this.headers = headers;
         this.body = body;
@@ -59,8 +59,8 @@ public class HttpRequest {
         return method;
     }
 
-    public String getPath() {
-        return uri;
+    public String getTarget() {
+        return target;
     }
 
     public String getVersion() {

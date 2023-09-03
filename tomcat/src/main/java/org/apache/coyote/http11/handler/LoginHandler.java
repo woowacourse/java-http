@@ -10,10 +10,7 @@ import org.apache.coyote.http11.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,16 +31,13 @@ public class LoginHandler implements Handler {
             return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
 
         }
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource("static/login.html");
-        File file = new File(resource.getFile());
-        String fileData = new String(Files.readAllBytes(file.toPath()));
 
         List<String> headers = List.of(
                 String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
-                String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
+                String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)),
+                String.join(" ", "Location: 401.html")
         );
-        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
+        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
     }
 
     private boolean checkIsRegisterUser(HttpRequest request) {

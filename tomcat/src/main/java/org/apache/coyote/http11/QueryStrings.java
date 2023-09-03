@@ -8,7 +8,7 @@ public class QueryStrings {
     private static final String DELIMITER = "=";
     private static final String QUERY_STRING_DELIMITER = "&";
 
-    private Map<String, String> values;
+    private final Map<String, String> values;
 
     public QueryStrings(final Map<String, String> values) {
         this.values = values;
@@ -39,11 +39,11 @@ public class QueryStrings {
     }
 
     public String getValueByName(final String name) {
-        if(values.containsKey(name)) {
+        if (values.containsKey(name)) {
             return values.get(name);
         }
 
-        throw new IllegalArgumentException("해당 이름이 존재하지 않습니다.");
+        throw new IllegalArgumentException("조회한 쿼리 스트링이 존재하지 않습니다.");
     }
 
     public Map<String, String> getValues() {

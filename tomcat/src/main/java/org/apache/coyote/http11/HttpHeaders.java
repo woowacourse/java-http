@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +12,10 @@ public class HttpHeaders {
     private static final String CRLF = "\r\n";
 
     private final Map<HttpHeaderName, String> headers;
+
+    public HttpHeaders() {
+        this.headers = new HashMap<>();
+    }
 
     public HttpHeaders(final Map<HttpHeaderName, String> headers) {
         this.headers = headers;
@@ -54,6 +57,10 @@ public class HttpHeaders {
 
     public boolean containsHeaderNameAndValue(final HttpHeaderName headerName, final String headerValue) {
         return headers.containsKey(headerName) && headers.get(headerName).contains(headerValue);
+    }
+
+    public void addHeader(final HttpHeaderName headerName, final String value) {
+        headers.put(headerName, value);
     }
 
     @Override

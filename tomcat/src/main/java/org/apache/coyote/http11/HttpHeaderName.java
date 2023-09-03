@@ -8,6 +8,7 @@ public enum HttpHeaderName {
     ACCEPT_LANGUAGE("Accept-Language"),
     CACHE_CONTROL("Cache-Control"),
     CONNECTION("Connection"),
+    LOCATION("Location"),
     DNT("Dnt"),
     HOST("Host"),
     PRAGMA("Pragma"),

@@ -11,18 +11,18 @@ public class HttpRequest {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
 
     private final HttpHeaders headers;
-    private final String method;
+    private final HttpMethod method;
     private final HttpRequestURI requestURI;
     private final String protocol;
 
     public HttpRequest(
         final HttpHeaders headers,
-        final String method,
+        final HttpMethod httpMethod,
         final HttpRequestURI requestURI,
         final String protocol
     ) {
         this.headers = headers;
-        this.method = method;
+        this.method = httpMethod;
         this.requestURI = requestURI;
         this.protocol = protocol;
     }
@@ -38,7 +38,7 @@ public class HttpRequest {
 
             LOGGER.info("method: {}, uri: {}, protocol: {}", method, uri, protocol);
 
-            return new HttpRequest(headers, method, HttpRequestURI.from(uri), protocol);
+            return new HttpRequest(headers, HttpMethod.of(method), HttpRequestURI.from(uri), protocol);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -46,6 +46,10 @@ public class HttpRequest {
 
     public boolean containsAccept(final String contentType) {
         return headers.containsHeaderNameAndValue(HttpHeaderName.ACCEPT, contentType);
+    }
+
+    public boolean hasQueryString() {
+        return requestURI.hasQueryString();
     }
 
     public String getPath() {
@@ -60,7 +64,7 @@ public class HttpRequest {
         return headers;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
@@ -68,7 +72,7 @@ public class HttpRequest {
         return protocol;
     }
 
-    public boolean hasQueryString() {
-        return requestURI.hasQueryString();
+    public HttpRequestURI getRequestURI() {
+        return requestURI;
     }
 }

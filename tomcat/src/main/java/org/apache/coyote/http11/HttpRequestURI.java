@@ -19,7 +19,7 @@ public class HttpRequestURI {
     public static HttpRequestURI from(final String rawURI) {
         final int queryStringDelimiterIndex = rawURI.indexOf(QUERY_STRING_DELIMITER);
 
-        if(queryStringDelimiterIndex == -1) {
+        if (queryStringDelimiterIndex == -1) {
             return new HttpRequestURI(rawURI, QueryStrings.from(null));
         }
 
@@ -27,6 +27,14 @@ public class HttpRequestURI {
         final String queryString = rawURI.substring(queryStringDelimiterIndex + 1);
 
         return new HttpRequestURI(path, QueryStrings.from(queryString));
+    }
+
+    public boolean hasQueryString() {
+        return queryStrings.exists();
+    }
+
+    public boolean hasSamePath(final String path) {
+        return path.equals(getPath());
     }
 
     public String getPath() {
@@ -38,9 +46,5 @@ public class HttpRequestURI {
 
     public QueryStrings getQueryStrings() {
         return queryStrings;
-    }
-
-    public boolean hasQueryString() {
-        return queryStrings.exists();
     }
 }

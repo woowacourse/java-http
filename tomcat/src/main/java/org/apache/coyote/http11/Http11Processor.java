@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import nextstep.servlet.DispatcherServlet;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HttpResponseFactory RESPONSE_FACTORY = new HttpResponseFactory();
 
     private final Socket connection;
 
@@ -39,17 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest httpRequest = parseRequest(bufferedReader);
-            final HttpResponse httpResponse = RESPONSE_FACTORY.createHttpResponse(httpRequest);
-
-            if (httpRequest.hasQueryString()) {
-                final QueryStrings queryStrings = httpRequest.getQueryStrings();
-
-                final User existUser = InMemoryUserRepository.findByAccount(queryStrings.getValueByName("account"))
-                    .filter(user -> user.checkPassword(queryStrings.getValueByName("password")))
-                    .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
-
-                LOGGER.info("user: {}", existUser);
-            }
+            final HttpResponse httpResponse = new DispatcherServlet().service(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();

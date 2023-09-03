@@ -24,6 +24,14 @@ public class HttpResponseStatusLine {
         return new HttpResponseStatusLine(200, "OK");
     }
 
+    public static HttpResponseStatusLine UNAUTHORIZED() {
+        return new HttpResponseStatusLine(401, "Unauthorized");
+    }
+
+    public static HttpResponseStatusLine FOUND() {
+        return new HttpResponseStatusLine(302, "Found");
+    }
+
     public String getHttpVersion() {
         return httpVersion;
     }

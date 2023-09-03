@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.common;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MessageBody {
 
@@ -9,15 +9,6 @@ public class MessageBody {
 
     private MessageBody(final String value) {
         this.value = value;
-    }
-
-    public static MessageBody from(final BufferedReader br) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        while (br.ready()) {
-            sb.append(br.readLine())
-                    .append("\r\n");
-        }
-        return new MessageBody(sb.toString());
     }
 
     public static MessageBody from(final String messageBody) {
@@ -30,5 +21,16 @@ public class MessageBody {
 
     public String getValue() {
         return value;
+    }
+
+    public Map<String, Object> getFormData() {
+        Map<String, Object> formDataMap = new LinkedHashMap<>();
+
+        String[] formData = value.split("&");
+        for (String data : formData) {
+            String[] dataPair = data.split("=");
+            formDataMap.put(dataPair[0], dataPair[1]);
+        }
+        return formDataMap;
     }
 }

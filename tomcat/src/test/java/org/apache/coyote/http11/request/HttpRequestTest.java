@@ -39,7 +39,8 @@ class HttpRequestTest {
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(inputStreamReader);
-        HttpRequest expectedRequest = HttpRequest.from(br);
+        String startLine = br.readLine();
+        HttpRequest expectedRequest = HttpRequest.from(br, startLine);
 
         // when
         String expectedContentType = expectedRequest.getContentType();

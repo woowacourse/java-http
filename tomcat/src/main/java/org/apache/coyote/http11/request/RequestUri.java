@@ -43,4 +43,11 @@ public class RequestUri {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "RequestUri{" +
+                "value='" + value + '\'' +
+                '}';
+    }
 }

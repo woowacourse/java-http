@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int REQUEST_URI_MESSAGE_INDEX = 1;
 
     private final Socket connection;
 
@@ -37,8 +36,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            String startLine = br.readLine();
+            if (startLine == null) {
+                return;
+            }
 
-            HttpRequest httpRequest = HttpRequest.from(br);
+            HttpRequest httpRequest = HttpRequest.from(br, startLine);
 
             RequestHandler handler = HandlerAdapter.findRequestHandler(httpRequest.getRequestUri());
             HttpResponse response = handler.handle(httpRequest);

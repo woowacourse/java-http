@@ -2,7 +2,8 @@ package org.apache.coyote.http11.response;
 
 public enum Status {
 
-    OK(200, "OK");
+    OK(200, "OK"),
+    FOUND(302, "Found");
 
     private final int code;
 

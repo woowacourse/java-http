@@ -11,4 +11,11 @@ public class HttpVersion {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "HttpVersion{" +
+                "value='" + value + '\'' +
+                '}';
+    }
 }

@@ -1,14 +1,11 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Map;
 import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
 
     private static final String SPLIT_DELIMITER = " ";
-    private static final String HOME_PATH = "/";
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
     private final HttpVersion httpVersion;
@@ -19,8 +16,7 @@ public class RequestLine {
         this.httpVersion = httpVersion;
     }
 
-    public static RequestLine from(final BufferedReader br) throws IOException {
-        String startLine = br.readLine();
+    public static RequestLine from(final String startLine) {
         String[] startLineElements = startLine.split(SPLIT_DELIMITER);
         HttpMethod httpMethod = HttpMethod.findHttpMethod(startLineElements[0]);
         RequestUri requestUri = new RequestUri(startLineElements[1]);
@@ -38,5 +34,18 @@ public class RequestLine {
 
     public HttpVersion getHttpVersion() {
         return httpVersion;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestLine{" +
+                "httpMethod=" + httpMethod +
+                ", requestUri=" + requestUri +
+                ", httpVersion=" + httpVersion +
+                '}';
     }
 }

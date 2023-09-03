@@ -20,12 +20,12 @@ public class RequestHandler {
     }
 
     public HttpResponse extractHttpResponse() {
+        String path = requestLine.getPath();
         String responseBody = extractResponseBody();
 
-        if (responseBody.equals(DEFAULT_RESPONSE)) {
-            return HttpResponse.of(FileExtension.NONE, responseBody);
+        if (path.equals("/")) {
+            return HttpResponse.of(FileExtension.HTML, responseBody);
         }
-
         return HttpResponse.of(getFileExtension(), responseBody);
     }
 
@@ -46,11 +46,12 @@ public class RequestHandler {
 
     public String findResourcePath() {
         String path = requestLine.getPath();
+        String fileName = path.substring(1);
 
-        if (path.contains(".")) {
-            return path;
+        if (fileName.contains(".")) {
+            return fileName;
         }
-        return path + ".html";
+        return fileName + ".html";
     }
 
     private FileExtension getFileExtension() {

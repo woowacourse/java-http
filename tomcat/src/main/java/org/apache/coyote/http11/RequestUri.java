@@ -19,10 +19,10 @@ public class RequestUri {
         int index = requestUri.indexOf("?");
 
         if (index == -1) {
-            return new RequestUri(requestUri.substring(1), new HashMap<>());
+            return new RequestUri(requestUri, new HashMap<>());
         }
 
-        String path = requestUri.substring(1, index);
+        String path = requestUri.substring(0, index);
         String queryString = requestUri.substring(index + 1);
 
         Map<String, String> queryStrings = Stream.of(queryString.split("&"))

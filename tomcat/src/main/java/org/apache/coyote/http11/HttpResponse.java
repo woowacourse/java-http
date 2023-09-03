@@ -28,7 +28,7 @@ public class HttpResponse {
     private String convertStatusLine() {
         String statusLineFormat = "HTTP/1.1 %s %s ";
 
-        return String.format(statusLineFormat, httpStatus.name(), httpStatus.getStatusCode());
+        return String.format(statusLineFormat, httpStatus.getStatusCode(), httpStatus.name());
     }
 
     private String convertContentType() {

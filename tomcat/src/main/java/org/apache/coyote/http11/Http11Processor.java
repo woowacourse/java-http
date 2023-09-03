@@ -48,9 +48,7 @@ public class Http11Processor implements Runnable, Processor {
                 logUser(requestLine);
             }
 
-
             HttpResponse httpResponse = requestHandler.extractHttpResponse();
-
             String response = httpResponse.extractResponse();
 
             outputStream.write(response.getBytes());

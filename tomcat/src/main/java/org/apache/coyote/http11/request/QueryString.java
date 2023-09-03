@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +31,10 @@ public class QueryString {
             String[] keyAndValue = element.split(KEY_VALUE_SIGN);
             queryStrings.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
         }
+    }
+
+    public String getValueOf(String key) {
+        return values.get(key);
     }
 
     public Map<String, String> getValues() {

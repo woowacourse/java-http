@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class RequestURI {
     private static final String STATIC_PATH = "static";
@@ -30,16 +30,12 @@ public class RequestURI {
         return STATIC_PATH + uri;
     }
 
-    public boolean isHome() {
-        return uri.equals("/");
+    public boolean isPageEqualTo(String uri) {
+        return this.uri.equals(uri);
     }
 
     public boolean hasQueryString() {
         return !queryString.getValues().isEmpty();
-    }
-
-    public String getUri() {
-        return uri;
     }
 
     public String getResourcePath() {
@@ -48,6 +44,10 @@ public class RequestURI {
 
     public QueryString getQueryString() {
         return queryString;
+    }
+
+    public String getUri() {
+        return uri;
     }
 
 }

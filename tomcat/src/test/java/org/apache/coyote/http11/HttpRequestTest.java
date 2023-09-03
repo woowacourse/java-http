@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.util.List;
 
+import org.apache.coyote.http11.request.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;

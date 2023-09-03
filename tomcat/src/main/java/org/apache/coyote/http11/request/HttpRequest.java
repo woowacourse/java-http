@@ -1,11 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
-
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String CONTENT_TYPE_KEY = "Accept";

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class RequestHeaderTest {
     @Test
-    @DisplayName("")
+    @DisplayName("RequestHeader를 생성한다.")
     void convert() {
         // given
         String input = "Key1: value1\r\n"

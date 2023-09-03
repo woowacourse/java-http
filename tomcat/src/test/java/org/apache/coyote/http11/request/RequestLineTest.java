@@ -19,7 +19,7 @@ class RequestLineTest {
         //then
         assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(requestLine.getRequestPath()).isEqualTo("/index.html");
-        assertThat(requestLine.getRequestVersion()).isEqualTo("HTTP/1.1");
+        assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
     }
 
 }

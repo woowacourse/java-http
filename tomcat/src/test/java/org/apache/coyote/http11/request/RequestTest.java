@@ -35,7 +35,7 @@ class RequestTest {
             softly.assertThat(request.getHeader()).isEqualTo(expectedHeader);
             softly.assertThat(request.getLine().getHttpMethod()).isEqualTo(HttpMethod.GET);
             softly.assertThat(request.getLine().getRequestPath()).isEqualTo("/index.html");
-            softly.assertThat(request.getLine().getRequestVersion()).isEqualTo("HTTP/1.1");
+            softly.assertThat(request.getLine().getHttpVersion()).isEqualTo("HTTP/1.1");
         });
     }
 

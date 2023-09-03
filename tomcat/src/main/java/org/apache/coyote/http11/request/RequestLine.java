@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpVersion;
+
 public class RequestLine {
     private static final String DELIMITER = " ";
     private static final int METHOD_INDEX = 0;
@@ -7,21 +9,21 @@ public class RequestLine {
     private static final int VERSION_INDEX = 2;
     private final HttpMethod httpMethod;
     private final RequestPath requestPath;
-    private final RequestVersion requestVersion;
+    private final HttpVersion httpVersion;
 
     private RequestLine(final HttpMethod httpMethod, final RequestPath requestPath,
-                       final RequestVersion requestVersion) {
+                       final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestPath = requestPath;
-        this.requestVersion = requestVersion;
+        this.httpVersion = httpVersion;
     }
 
     public static RequestLine convert(String line) {
         final String[] splitLine = line.split(DELIMITER);
         final HttpMethod httpMethod = HttpMethod.findByName(splitLine[METHOD_INDEX]);
         final RequestPath requestPath = new RequestPath(splitLine[PATH_INDEX]);
-        final RequestVersion requestVersion = new RequestVersion(splitLine[VERSION_INDEX]);
-        return new RequestLine(httpMethod, requestPath, requestVersion);
+        final HttpVersion httpVersion = HttpVersion.findByVersion(splitLine[VERSION_INDEX]);
+        return new RequestLine(httpMethod, requestPath, httpVersion);
     }
 
     public HttpMethod getHttpMethod() {
@@ -32,7 +34,7 @@ public class RequestLine {
         return requestPath.getPath();
     }
 
-    public String getRequestVersion() {
-        return requestVersion.getVersion();
+    public String getHttpVersion() {
+        return httpVersion.getVersion();
     }
 }

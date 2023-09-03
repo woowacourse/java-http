@@ -2,35 +2,39 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.Connection;
+import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Method;
 
 public class Request {
 
     private final Method method;
-    private final String URI;
+    private final String uri;
     private final String host;
-    private final String[] accept;
+    private final List<String> accept;
     private final Connection connection;
     private final String body;
 
     private Request(
             Method method,
-            String URI,
+            String uri,
             String host,
-            String[] accept,
+            List<String> accept,
             Connection connection,
             String body
     ) {
         this.method = method;
-        this.URI = URI;
+        this.uri = uri;
         this.host = host;
-        this.accept = accept;
+        this.accept = new ArrayList<>(accept);
         this.connection = connection;
         this.body = body;
     }
@@ -39,7 +43,7 @@ public class Request {
             String methodName,
             String requestURI,
             String host,
-            String[] accept,
+            List<String> accept,
             String connectionName,
             String body
     ) {
@@ -80,11 +84,13 @@ public class Request {
         );
     }
 
-    private static String[] parseAccept(String accepts) {
+    private static List<String> parseAccept(String accepts) {
         if (Objects.isNull(accepts)) {
-            return new String[1];
+            return new ArrayList<>();
         }
-        return accepts.split(",");
+        return Arrays.stream(accepts.split(","))
+                .filter(accept -> ContentType.from(accept).isPresent())
+                .collect(Collectors.toList());
     }
 
     private static Map<String, String> extractHeaders(BufferedReader bufferedReader) throws IOException {
@@ -99,19 +105,41 @@ public class Request {
         return headers;
     }
 
-    public String getURI() {
-        return URI;
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public List<String> getAccept() {
+        return new ArrayList<>(accept);
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     @Override
     public String toString() {
         return "Request{" +
                 "method=" + method +
-                ", URI='" + URI + '\'' +
+                ", URI='" + uri + '\'' +
                 ", host='" + host + '\'' +
-                ", accept=" + Arrays.toString(accept) +
+                ", accept=" + accept +
                 ", connection=" + connection +
                 ", body='" + body + '\'' +
                 '}';
     }
+
+    // TODO Builder 패턴 적용
 }

@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,6 +15,7 @@ public enum ContentType {
     JSON("application/json", "application/javascript", "text/javascript", "text/json"),
     XML("application/xml", "text/xml", "application/xhtml+xml"),
     HTML("text/html"),
+    CSS("text/css"),
     URLENC("application/x-www-form-urlencoded"),
     BINARY("application/octet-stream"),
     MULTIPART("multipart/form-data", "multipart/alternative", "multipart/byteranges", "multipart/digest",
@@ -27,6 +29,9 @@ public enum ContentType {
     }
 
     public static Optional<ContentType> from(String contentTypeString) {
+        if (Objects.isNull(contentTypeString)) {
+            return Optional.empty();
+        }
         return Arrays.stream(values())
                 .filter(contentType -> contentType.matches(contentTypeString))
                 .findFirst();
@@ -34,7 +39,7 @@ public enum ContentType {
 
     private boolean matches(String contentTypeString) {
         return Arrays.stream(this.contentTypeStrings)
-                .anyMatch(contentType -> contentType.equalsIgnoreCase(trim(contentTypeString)));
+                .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
     }
 
     public String[] getContentTypeStrings() {

@@ -37,4 +37,19 @@ class QueryParamTest {
 			.usingRecursiveComparison()
 			.isEqualTo(expected);
 	}
+
+	@Test
+	@DisplayName("key값으로 value를 조회할 수 있다.")
+	void get() {
+		final String queryKey = "key1";
+		final Set<String> queryValue = Set.of("value1", "value2");
+		final QueryParam queryParam = new QueryParam(Map.of(
+			queryKey, queryValue
+		));
+
+		final Set<String> actual = queryParam.get(queryKey);
+
+		assertThat(actual)
+			.containsExactlyElementsOf(queryValue);
+	}
 }

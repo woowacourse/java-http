@@ -39,4 +39,8 @@ public class QueryParam {
 			));
 		return new QueryParam(result);
 	}
+
+	public Set<String> get(final String key) {
+		return multiMap.get(key);
+	}
 }

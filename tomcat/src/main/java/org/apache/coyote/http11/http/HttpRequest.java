@@ -44,7 +44,11 @@ public class HttpRequest {
         Map<String, String> queryStrings = extractQueryStrings(requestUri, queryStringIndex);
 
         RequestHeader requestHeader = RequestHeader.from(request);
-
+        if (request.ready()) {
+            System.out.println("body");
+            String requestBody = request.readLine();
+            queryStrings = parseQueryStrings(requestBody);
+        }
         return new HttpRequest(
                 requestMethod,
                 endPoint,
@@ -73,6 +77,7 @@ public class HttpRequest {
         if (queryStringIndex == -1) {
             return Map.of();
         }
+        System.out.println("query string");
         String queryStringValue = requestUri.substring(queryStringIndex + 1);
         return parseQueryStrings(queryStringValue);
     }

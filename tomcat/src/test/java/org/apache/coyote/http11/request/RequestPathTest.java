@@ -31,4 +31,17 @@ class RequestPathTest {
         }));
     }
 
+    @Test
+    @DisplayName("Empty인 경우 false를 반환한다.")
+    void hasQueryString() {
+        //given
+        final String path = "/login";
+
+        //when
+        final RequestPath requestPath = RequestPath.from(path);
+
+        //then
+        assertThat(requestPath.hasQueryString()).isFalse();
+    }
+
 }

@@ -36,4 +36,12 @@ public class Request {
     public HttpVersion getHttpVersion() {
         return line.getHttpVersion();
     }
+
+    public boolean hasQueryString() {
+        return line.hasQueryString();
+    }
+
+    public Map<String, String> getQueryString() {
+        return line.getQueryString();
+    }
 }

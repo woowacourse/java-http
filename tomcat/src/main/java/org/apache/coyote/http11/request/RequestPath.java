@@ -37,4 +37,8 @@ public class RequestPath {
     public Map<String, String> getQueryString() {
         return queryString.getQueryStrings();
     }
+
+    public boolean hasQueryString() {
+        return !queryString.equals(QueryString.EMPTY);
+    }
 }

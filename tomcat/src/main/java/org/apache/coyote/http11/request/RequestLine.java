@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Map;
+
 import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
@@ -36,5 +38,13 @@ public class RequestLine {
 
     public HttpVersion getHttpVersion() {
         return httpVersion;
+    }
+
+    public boolean hasQueryString() {
+        return requestPath.hasQueryString();
+    }
+
+    public Map<String, String> getQueryString() {
+        return requestPath.getQueryString();
     }
 }

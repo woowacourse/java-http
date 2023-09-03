@@ -4,17 +4,17 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private final String statusCode;
+    private final HttpStatusCode statusCode;
     private final Map<String, String> header;
     private final String body;
 
-    private HttpResponse(final String statusCode, final Map<String, String> header, final String body) {
+    public HttpResponse(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
         this.statusCode = statusCode;
         this.header = header;
         this.body = body;
     }
 
-    public static HttpResponse of(final String statusCode, final Map<String, String> header, final String body) {
+    public static HttpResponse of(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
         return new HttpResponse(statusCode, header, body);
     }
 
@@ -25,7 +25,7 @@ public class HttpResponse {
     public String stringify() {
         return String.join(
                 "\r\n",
-                "HTTP/1.1 " + statusCode + " ",
+                "HTTP/1.1 " + statusCode.stringify() + " ",
                 stringifyHeaders(),
                 "",
                 body

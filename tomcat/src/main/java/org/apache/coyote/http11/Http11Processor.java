@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.coyote.http11.HttpStatusCode.*;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -68,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleRootRequest() {
         final Map<String, String> responseHeader = new HashMap<>();
         responseHeader.put("Content-Type", "text/html;charset=utf-8");
-        return HttpResponse.of("200 OK", responseHeader, "Hello world!");
+        return HttpResponse.of(OK, responseHeader, "Hello world!");
     }
 
     private HttpResponse handleRegisterRequest(final HttpRequest httpRequest) throws IOException {
@@ -87,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> responseHeader = new HashMap<>();
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
-            return HttpResponse.of("302", responseHeader, "");
+            return HttpResponse.of(FOUND, responseHeader, "");
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
@@ -103,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
                 final Map<String, String> responseHeader = new HashMap<>();
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                return HttpResponse.of("302", responseHeader, "");
+                return HttpResponse.of(FOUND, responseHeader, "");
             }
             // not login user
             return handleResourceRequest(httpRequest, "login.html");
@@ -116,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
                 // invalid user
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/401.html");
-                return HttpResponse.of("302", responseHeader, "");
+                return HttpResponse.of(FOUND, responseHeader, "");
             }
 
             // valid user
@@ -125,7 +127,7 @@ public class Http11Processor implements Runnable, Processor {
             if (sessionId != null) { // if already have session
                 responseHeader.put("Content-Type", "text/html;charset=utf-8");
                 responseHeader.put("Location", "/index.html");
-                return HttpResponse.of("302", responseHeader, "");
+                return HttpResponse.of(FOUND, responseHeader, "");
             }
 
             // if no session
@@ -137,14 +139,14 @@ public class Http11Processor implements Runnable, Processor {
             responseHeader.put("Content-Type", "text/html;charset=utf-8");
             responseHeader.put("Location", "/index.html");
             responseHeader.put("Set-Cookie", "JSESSIONID=" + sessionId);
-            return HttpResponse.of("302", responseHeader, "");
+            return HttpResponse.of(FOUND, responseHeader, "");
         }
         return handleResourceRequest(httpRequest, "404.html"); // Method Not Allowed
     }
 
     private HttpResponse handleResourceRequest(final HttpRequest httpRequest, final String resourceUrl) throws IOException {
         final Map<String, String> responseHeader = new HashMap<>();
-        String statusCode;
+        HttpStatusCode statusCode;
         String contentType = "text/html;charset=utf-8";
 
         if (httpRequest.getHeader().get("Accept") != null) {
@@ -153,10 +155,10 @@ public class Http11Processor implements Runnable, Processor {
 
         URL resource = getClass().getClassLoader().getResource("static/" + resourceUrl);
         if (resource != null) {
-            statusCode = "200 OK";
+            statusCode = OK;
         } else {
             resource = getClass().getClassLoader().getResource("static/" + "404.html");
-            statusCode = "404";
+            statusCode = NOT_FOUND;
             contentType = "text/html;charset=utf-8";
         }
 

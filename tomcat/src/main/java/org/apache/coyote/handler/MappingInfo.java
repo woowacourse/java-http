@@ -7,15 +7,15 @@ import java.util.Objects;
 public class MappingInfo {
 
     private final String httpMethod;
-    private final String requestUri;
+    private final String requestPath;
 
-    public MappingInfo(final String httpMethod, final String requestUri) {
+    public MappingInfo(final String httpMethod, final String requestPath) {
         this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
+        this.requestPath = requestPath;
     }
 
     public static MappingInfo from(final HttpRequest request) {
-        return new MappingInfo(request.httpMethod().name(), request.requestUri().source());
+        return new MappingInfo(request.httpMethod().name(), request.requestPath().source());
     }
 
     @Override
@@ -23,11 +23,11 @@ public class MappingInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final MappingInfo that = (MappingInfo) o;
-        return Objects.equals(httpMethod, that.httpMethod) && Objects.equals(requestUri, that.requestUri);
+        return Objects.equals(httpMethod, that.httpMethod) && Objects.equals(requestPath, that.requestPath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpMethod, requestUri);
+        return Objects.hash(httpMethod, requestPath);
     }
 }

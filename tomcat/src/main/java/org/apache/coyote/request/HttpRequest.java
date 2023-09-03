@@ -82,7 +82,7 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public RequestPath requestUri() {
+    public RequestPath requestPath() {
         return requestPath;
     }
 

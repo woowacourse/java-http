@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
 
 	private RequestBody readRequestBody(final BufferedReader reader, final RequestHeader header) throws
 		IOException {
-		final var contentLength = header.get("Content-Length");
+		final var contentLength = header.find("Content-Length");
 		if (contentLength == null) {
 			return RequestBody.empty();
 		}

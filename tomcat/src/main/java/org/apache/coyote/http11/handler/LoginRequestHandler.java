@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.handler;
 
+import java.util.UUID;
+
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.Request;
@@ -40,7 +43,7 @@ public class LoginRequestHandler implements RequestHandler {
 		final var password = request.findBodyField("password");
 		validateFields(account, password);
 
-		return login(account, password);
+		return login(request, account, password);
 	}
 
 	private void validateFields(final String account, final String password) {
@@ -49,7 +52,7 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 	}
 
-	private Response login(final String account, final String password) {
+	private Response login(final Request request, final String account, final String password) {
 		final var optionalUser = InMemoryUserRepository.findByAccount(account);
 		if (optionalUser.isEmpty()) {
 			return Response.unauthorized();
@@ -59,7 +62,9 @@ public class LoginRequestHandler implements RequestHandler {
 			return Response.unauthorized();
 		}
 
+		final var cookies = HttpCookies.empty();
+		cookies.addSession(UUID.randomUUID().toString());
 		log.info("[LOGIN SUCCESS] account: {}", account);
-		return Response.redirect("/index.html");
+		return Response.redirectWithCookie("/index.html", cookies);
 	}
 }

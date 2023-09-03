@@ -4,10 +4,11 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.http11.HttpCookies;
+
 public class ResponseHeader {
 
 	private static final String CRLF = "\r\n";
-
 	private static final String HEADER_SEPARATOR = ": ";
 	private static final String LINE_END = " ";
 
@@ -19,6 +20,10 @@ public class ResponseHeader {
 
 	public void add(ResponseHeaderType key, String value) {
 		headers.put(key, value);
+	}
+
+	public void addCookies(HttpCookies cookies) {
+		headers.put(ResponseHeaderType.SET_COOKIE, cookies.format());
 	}
 
 	public String formatHeader() {

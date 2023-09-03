@@ -2,9 +2,9 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RequestUri {
 
@@ -39,14 +39,10 @@ public class RequestUri {
 	}
 
 	private static Map<String, String> parseQueryString(final String queryString) {
-		final Map<String, String> queryParams = new HashMap<>();
-
-		Arrays.stream(queryString.split(QUERY_PARAM_DELIMITER))
+		return Arrays.stream(queryString.split(QUERY_PARAM_DELIMITER))
 			.map(queryParam -> queryParam.split(KEY_VALUE_SEPARATOR, 2))
 			.filter(parts -> parts.length == 2)
-			.forEach(parts -> queryParams.put(parts[0], parts[1]));
-
-		return queryParams;
+			.collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
 	}
 
 	private static boolean hasNoQuery(final int index) {

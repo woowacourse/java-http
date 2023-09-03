@@ -28,7 +28,7 @@ public class RequestBody {
 		return Arrays.stream(body.split(DELIMITER))
 			.map(field -> field.split(KEY_VALUE_SEPARATOR))
 			.collect(Collectors.collectingAndThen(
-				Collectors.toMap(field -> field[0], field -> field[1]),
+				Collectors.toMap(parts -> parts[0], field -> field[1]),
 				RequestBody::new
 			));
 	}

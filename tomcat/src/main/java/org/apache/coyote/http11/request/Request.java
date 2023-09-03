@@ -23,15 +23,19 @@ public class Request {
 		return requestLine.hasMethod(method);
 	}
 
-	public String getPath() {
-		return requestLine.getPath();
-	}
-
 	public String findBodyField(final String key) {
 		return body.findField(key);
 	}
 
 	public String findQueryParam(final String key) {
 		return requestLine.findQueryParam(key);
+	}
+
+	public String findCookie(final String key) {
+		return header.findCookie(key);
+	}
+
+	public String getPath() {
+		return requestLine.getPath();
 	}
 }

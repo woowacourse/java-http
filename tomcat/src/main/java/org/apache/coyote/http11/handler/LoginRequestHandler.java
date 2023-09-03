@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 public class LoginRequestHandler implements RequestHandler {
 
@@ -77,10 +78,17 @@ public class LoginRequestHandler implements RequestHandler {
 		}
 
 		final var cookies = Cookies.empty();
-		final var sessionId = UUID.randomUUID().toString();
-		cookies.addSession(sessionId);
-		SessionManager.add(new Session(sessionId));
+		cookies.addSession(createSession(user));
+
 		log.info("[LOGIN SUCCESS] account: {}", account);
 		return Response.redirectWithCookie(REDIRECT_LOCATION, cookies);
+	}
+
+	private String createSession(final User user) {
+		final var sessionId = UUID.randomUUID().toString();
+		final var session = new Session(sessionId);
+		session.setAttribute("user", user);
+		SessionManager.add(session);
+		return sessionId;
 	}
 }

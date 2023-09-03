@@ -68,6 +68,11 @@ public class Http11Processor implements Runnable, Processor {
                 });
             }
 
+            HttpCookie httpCookie = new HttpCookie();
+            if (requestHeaders.containsKey("Cookie")) {
+                httpCookie.parseCookieHeaders(requestHeaders.get("Cookie"));
+            }
+
             Map<String, String> queryParams = new HashMap<>();
 
             String httpMethod = startLine.get(HTTP_METHOD_INDEX);
@@ -90,13 +95,17 @@ public class Http11Processor implements Runnable, Processor {
             if (Objects.nonNull(handler) && httpMethod.equals("POST")
                     && requestedUrl.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.login(parsedBody.get("account"),
+                LoginResponseDto loginDto = loginController.login(httpCookie, parsedBody.get("account"),
                         parsedBody.get("password"));
 
                 response = String.join("\r\n",
                         "HTTP/1.1 302 Found ",
-                        String.format("Location: %s ", loginDto.getRedirectUrl()),
-                        "");
+                        String.format("Location: %s \r\n", loginDto.getRedirectUrl()));
+
+                if (!httpCookie.isEmpty()) {
+                    response += httpCookie.createSetCookieHeader();
+                }
+                response += "";
             }
 
             if (Objects.nonNull(handler) && httpMethod.equals("POST")

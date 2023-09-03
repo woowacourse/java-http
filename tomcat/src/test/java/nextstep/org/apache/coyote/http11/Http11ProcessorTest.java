@@ -167,9 +167,9 @@ class Http11ProcessorTest {
         // then
         var expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n" +
-                "";
+                "Set-Cookie: ";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expected);
     }
 
     @Test

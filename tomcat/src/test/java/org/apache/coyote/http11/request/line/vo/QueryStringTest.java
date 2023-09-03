@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request_line.vo;
+package org.apache.coyote.http11.request.line.vo;
 
 import org.apache.coyote.http11.request.line.vo.QueryString;
 import org.junit.jupiter.api.Nested;
@@ -36,18 +36,6 @@ class QueryStringTest {
                             .isEqualTo("베베"),
                     () -> assertThat(queryString.value().get("age"))
                             .isEqualTo("19")
-            );
-        }
-
-        @Test
-        void 쿼리스트링이_유효하지_않다면_예외가_발생한다() {
-            // given
-            final String queryString = "name=베베??";
-
-            // when, then
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> QueryString.from(queryString)
             );
         }
 

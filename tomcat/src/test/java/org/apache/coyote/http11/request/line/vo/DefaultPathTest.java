@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request_line.vo;
+package org.apache.coyote.http11.request.line.vo;
 
 import org.apache.coyote.http11.request.line.vo.DefaultPath;
 import org.junit.jupiter.api.Nested;

@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request.headers;
+package org.apache.coyote.http11.request.request.headers;
 
 import java.util.List;
 import org.apache.coyote.http11.request.headers.RequestHeaders;

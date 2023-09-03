@@ -20,6 +20,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpResponseUtil;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponseGenerator;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.common.Session;
@@ -31,10 +32,12 @@ import org.apache.coyote.http11.request.line.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.coyote.http11.common.HttpStatus.*;
+import static org.apache.coyote.http11.common.HttpStatus.UNAUTHORIZED;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String LOGIN_PAGE = "/login.html";
@@ -106,9 +109,9 @@ public class Http11Processor implements Runnable, Processor {
             return login(requestLine, requestHeaders, requestBody);
         }
         if (path.equals("/register")) {
-            return null;
+            return register(requestLine, requestBody);
         }
-        return new ResponseEntity(HttpStatus.OK, path);
+        return new ResponseEntity(OK, path);
     }
 
     private ResponseEntity login(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
@@ -116,26 +119,41 @@ public class Http11Processor implements Runnable, Processor {
             final Cookie cookie = requestHeaders.getCookie();
             final Session session = sessionRepository.getSession(cookie.get("JSESSIONID"));
             if (session != null) {
-                return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+                return new ResponseEntity(FOUND, INDEX_PAGE);
             }
-            return new ResponseEntity(HttpStatus.OK, LOGIN_PAGE);
+            return new ResponseEntity(OK, LOGIN_PAGE);
         }
         final String account = requestBody.getBy("account");
         final String password = requestBody.getBy("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(this::loginSuccess)
-                .orElseGet(() -> new ResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html"));
+                .orElseGet(() -> new ResponseEntity(UNAUTHORIZED, "/401.html"));
     }
 
     private ResponseEntity loginSuccess(final User user) {
         final String uuid = UUID.randomUUID().toString();
-        final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
+        final ResponseEntity responseEntity = new ResponseEntity(FOUND, INDEX_PAGE);
         responseEntity.setCookie("JSESSIONID", uuid);
         final Session session = new Session(uuid);
         session.setAttribute("user", user);
         sessionRepository.create(session);
         return responseEntity;
+    }
+
+    private ResponseEntity register(final RequestLine requestLine, final RequestBody requestBody) {
+        if (requestLine.method() == HttpMethod.GET) {
+            return new ResponseEntity(OK, REGISTER_PAGE);
+        }
+        final String account = requestBody.getBy("account");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return new ResponseEntity(CONFLICT, "/409.html");
+        }
+        final String email = requestBody.getBy("email");
+        final String password = requestBody.getBy("password");
+        InMemoryUserRepository.save(new User(account, password, email));
+        return new ResponseEntity(FOUND, INDEX_PAGE);
     }
 
 }

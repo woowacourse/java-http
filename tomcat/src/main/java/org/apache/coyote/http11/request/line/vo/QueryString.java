@@ -12,8 +12,6 @@ import static java.util.Collections.*;
 
 public class QueryString {
 
-    private static final String QUERY_STRING_PATTERN = "^[\\p{L}\\d.-]+=[\\p{L}\\d.-]+(&[\\p{L}\\d.-]+=[\\p{L}\\d.-]+)*$";
-
     private static String QUERY_STRING_SEPARATOR = "&";
     private static String QUERY_STRING_KEY_VALUE_SEPARATOR = "=";
 
@@ -27,16 +25,7 @@ public class QueryString {
         if (queryString == null) {
             return new QueryString(EMPTY_MAP);
         }
-        validateQueryString(queryString);
         return new QueryString(getQueryStringPairs(queryString));
-    }
-
-    private static void validateQueryString(String queryString) {
-        Pattern compiledPattern = Pattern.compile(QUERY_STRING_PATTERN);
-        Matcher matcher = compiledPattern.matcher(queryString);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("유효하지 않은 쿼리스트링입니다. 올바른 쿼리스트링인지 다시 확인해주세요.");
-        }
     }
 
     private static Map<String, String> getQueryStringPairs(String queryString) {

@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.http;
+package org.apache.coyote.http11.request.http;
 
 import org.apache.coyote.http11.request.line.Path;
 import org.junit.jupiter.api.Nested;

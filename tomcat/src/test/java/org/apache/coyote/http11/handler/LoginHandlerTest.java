@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.handler;
 
+import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -39,10 +40,10 @@ class LoginHandlerTest {
 	class HandleTo {
 
 		@Test
-		@DisplayName("login.html 반환하고, 멤버 조회 후 로깅한다.")
-		void handleTo() throws IOException {
+		@DisplayName("쿼리파람이 없는 경우 login.html을 반환한다")
+		void resolveHtml() throws IOException {
 			final String plainRequest = String.join("\r\n",
-				"GET /login?account=gugu&password=password HTTP/1.1 ",
+				"GET /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
 				"",
@@ -57,10 +58,50 @@ class LoginHandlerTest {
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 3796 \r\n" +
 				"\r\n" +
-				new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+				new String(readAllBytes(new File(resource.getFile()).toPath()));
 
 			assertThat(actual.buildResponse())
 				.isEqualTo(expected);
+		}
+
+		@Test
+		@DisplayName("queryParam이 있고 로그인에 성공하는 경우 index.html을 반환한다.")
+		void loginSuccess() throws IOException {
+			final String plainRequest = String.join("\r\n",
+				"GET /login?account=gugu&password=password HTTP/1.1 ",
+				"Host: localhost:8080 ",
+				"Connection: keep-alive ",
+				"",
+				"");
+			final String file = "/index.html";
+			final HttpRequest request = HttpRequest.from(plainRequest);
+
+			final HttpResponse actual = HANDLER.handleTo(request);
+
+			final URL resource = getClass().getClassLoader().getResource("static" + file);
+			final String expected = "HTTP/1.1 302 Temporarily Moved \r\n" +
+				"Content-Type: text/html;charset=utf-8 \r\n" +
+				"Content-Length: 5564 \r\n" +
+				"\r\n" +
+				new String(readAllBytes(new File(resource.getFile()).toPath()));
+
+			assertThat(actual.buildResponse())
+				.isEqualTo(expected);
+		}
+
+		@Test
+		@DisplayName("queryParam이 있고 로그인에 실패하는 경우 UnauthorizedException을 반환한다.")
+		void loginFail() {
+			final String plainRequest = String.join("\r\n",
+				"GET /login?account=gugu&password=invalid HTTP/1.1 ",
+				"Host: localhost:8080 ",
+				"Connection: keep-alive ",
+				"",
+				"");
+			final HttpRequest request = HttpRequest.from(plainRequest);
+
+			assertThatThrownBy(() -> HANDLER.handleTo(request))
+				.isInstanceOf(UnauthorizedException.class);
 		}
 	}
 }

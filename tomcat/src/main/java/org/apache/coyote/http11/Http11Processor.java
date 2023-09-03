@@ -40,6 +40,10 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String request = bufferedReader.readLine();
 
+            if (request == null) {
+                return;
+            }
+
             List<String> requests = Arrays.stream(request.split(" ")).collect(Collectors.toList());
             String requestURI = requests.get(INDEX_URI);
             String response = createResponse(requestURI);
@@ -52,6 +56,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(String requestURI) throws IOException {
+        log.info("REQUEST URI: {}", requestURI);
+
         if (requestURI.equals("/")) {
             final var responseBody = "Hello world!";
             return String.join("\r\n",

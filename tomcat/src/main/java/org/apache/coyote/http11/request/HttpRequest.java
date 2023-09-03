@@ -24,8 +24,8 @@ public class HttpRequest {
         return requestHeaders;
     }
 
-    public Body body() {
-        return body;
+    public String body() {
+        return body.body();
     }
 
     public static class HttpRequestBuilder {

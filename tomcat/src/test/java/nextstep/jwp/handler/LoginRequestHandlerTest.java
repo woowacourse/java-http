@@ -2,16 +2,16 @@ package nextstep.jwp.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.List;
+import org.apache.coyote.http11.request.Body;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("LoginRequestHandler 은(는)")
@@ -22,23 +22,93 @@ class LoginRequestHandlerTest {
     private final LoginRequestHandler handler = new LoginRequestHandler();
 
     @Test
-    void 로그인_요청을_처리한다() throws IOException {
+    void POST_이면서_login으로_들어온_요청만_처리한다() {
+        // given
+        HttpRequest onlyPost = HttpRequest.builder()
+                .startLine(StartLine.from("POST /dd HTTP/1.1"))
+                .build();
+        HttpRequest onlyLogin = HttpRequest.builder()
+                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .build();
+        HttpRequest match = HttpRequest.builder()
+                .startLine(StartLine.from("POST /login HTTP/1.1"))
+                .build();
+
+        // when & then
+        assertThat(handler.canHandle(onlyPost)).isFalse();
+        assertThat(handler.canHandle(onlyLogin)).isFalse();
+        assertThat(handler.canHandle(match)).isTrue();
+    }
+
+    @Test
+    void 로그인에_성공하면_index_html로_redirect() {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login?account=gugu&password=password HTTP/1.1"))
+                .startLine(StartLine.from("POST /login HTTP/1.1"))
+                .headers(RequestHeaders.from(List.of(
+                                "Content-Type: application/x-www-form-urlencoded",
+                                "Content-Length: 30"
+                        ))
+                ).body(new Body("account=gugu&password=password"))
                 .build();
 
         // when
         HttpResponse response = handler.handle(request);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n";
 
         assertThat(response.toString()).isEqualTo(expected);
+    }
+
+    @Nested
+    class 로그인에_실패하면_401_html로_redirect {
+
+        @Test
+        void 계정정보가_잘못된_경우() {
+            // given
+            HttpRequest request = HttpRequest.builder()
+                    .startLine(StartLine.from("POST /login HTTP/1.1"))
+                    .headers(RequestHeaders.from(List.of(
+                                    "Content-Type: application/x-www-form-urlencoded",
+                                    "Content-Length: 27"
+                            ))
+                    ).body(new Body("account=gugu&password=wrong"))
+                    .build();
+
+            // when
+            HttpResponse response = handler.handle(request);
+
+            // then
+            var expected = "HTTP/1.1 302 FOUND \r\n" +
+                    "Location: /401.html \r\n" +
+                    "\r\n";
+            assertThat(response.toString()).isEqualTo(expected);
+            ;
+        }
+
+        @Test
+        void 로그인_정보가_없는_경우() {
+            // given
+            HttpRequest request = HttpRequest.builder()
+                    .startLine(StartLine.from("POST /login HTTP/1.1"))
+                    .headers(RequestHeaders.from(List.of(
+                                    "Content-Type: application/x-www-form-urlencoded",
+                                    "Content-Length: 14"
+                            ))
+                    ).body(new Body("password=wrong"))
+                    .build();
+
+            // when
+            HttpResponse response = handler.handle(request);
+
+            // then
+            var expected = "HTTP/1.1 302 FOUND \r\n" +
+                    "Location: /401.html \r\n" +
+                    "\r\n";
+            assertThat(response.toString()).isEqualTo(expected);
+        }
     }
 }

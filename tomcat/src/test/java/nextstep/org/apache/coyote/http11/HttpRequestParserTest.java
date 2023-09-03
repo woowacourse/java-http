@@ -51,7 +51,7 @@ class HttpRequestParserTest {
         assertThat(request.headers().headers())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);
-        assertThat(request.body().body()).isNull();
+        assertThat(request.body()).isNull();
     }
 
     @Test
@@ -93,7 +93,6 @@ class HttpRequestParserTest {
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);
         assertThat(request.body())
-                .usingRecursiveComparison()
-                .isEqualTo(body);
+                .isEqualTo(body.body());
     }
 }

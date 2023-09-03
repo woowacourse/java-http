@@ -51,6 +51,44 @@ public class LoginHandler implements RequestHandler {
         throw new HttpMethodNotAllowedException("허용되지 않는 HTTP Method입니다.");
     }
 
+    private HttpResponse getIndexPageRedirectResponse(final HttpRequest httpRequest) {
+        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
+        responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/index.html");
+        MessageBody messageBody = MessageBody.from("");
+        return new HttpResponse(statusLine, responseHeaders, messageBody);
+    }
+
+    private HttpResponse getQueryParamResponse(final HttpRequest httpRequest) throws IOException {
+        Map<String, Object> queryParams = httpRequest.getQueryParams();
+        String account = (String) queryParams.get("account");
+        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
+        String responseBody = FileReader.read("/login.html");
+        MessageBody messageBody = MessageBody.from(responseBody);
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            log.info("user : {}", user);
+        }
+        return new HttpResponse(statusLine, responseHeaders, messageBody);
+    }
+
+    private HttpResponse getLoginPageResponse(final HttpRequest httpRequest) throws IOException {
+        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.OK);
+
+        String responseBody = FileReader.read("/login.html");
+        MessageBody messageBody = MessageBody.from(responseBody);
+
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
+        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), String.valueOf(messageBody.getBodyLength()));
+
+        return new HttpResponse(statusLine, responseHeaders, messageBody);
+    }
+
     private HttpResponse getLoginRedirectResponse(final HttpRequest httpRequest) {
         ResponseHeaders responseHeaders = new ResponseHeaders();
         StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
@@ -91,45 +129,6 @@ public class LoginHandler implements RequestHandler {
     private HttpResponse getLoginFailResponse(final ResponseHeaders responseHeaders, final StatusLine statusLine) {
         responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/401.html");
         return new HttpResponse(statusLine, responseHeaders, MessageBody.from(null));
-    }
-
-
-    private HttpResponse getLoginPageResponse(final HttpRequest httpRequest) throws IOException {
-        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.OK);
-
-        String responseBody = FileReader.read("/login.html");
-        MessageBody messageBody = MessageBody.from(responseBody);
-
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_LENGTH.getValue(), String.valueOf(messageBody.getBodyLength()));
-
-        return new HttpResponse(statusLine, responseHeaders, messageBody);
-    }
-
-    private HttpResponse getQueryParamResponse(final HttpRequest httpRequest) throws IOException {
-        Map<String, Object> queryParams = httpRequest.getQueryParams();
-        String account = (String) queryParams.get("account");
-        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
-        String responseBody = FileReader.read("/login.html");
-        MessageBody messageBody = MessageBody.from(responseBody);
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            log.info("user : {}", user);
-        }
-        return new HttpResponse(statusLine, responseHeaders, messageBody);
-    }
-
-    private HttpResponse getIndexPageRedirectResponse(final HttpRequest httpRequest) {
-        StatusLine statusLine = new StatusLine(httpRequest.getHttpVersion(), Status.FOUND);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.addHeader(HttpHeaderName.CONTENT_TYPE.getValue(), ContentType.TEXT_HTML.getValue());
-        responseHeaders.addHeader(HttpHeaderName.LOCATION.getValue(), "/index.html");
-        MessageBody messageBody = MessageBody.from("");
-        return new HttpResponse(statusLine, responseHeaders, messageBody);
     }
 
     private Session createSession(final ResponseHeaders responseHeaders, final HttpRequest httpRequest, final User user) {

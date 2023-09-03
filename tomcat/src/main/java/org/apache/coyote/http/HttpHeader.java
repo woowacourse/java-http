@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,13 +11,17 @@ import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
 public class HttpHeader {
 
     private final Map<String, List<String>> header;
-    private final ContentType contentType;
-    private final int contentLength;
+    private ContentType contentType;
+    private int contentLength;
 
     private HttpHeader(Map<String, List<String>> header, ContentType contentType, int contentLength) {
         this.header = header;
         this.contentType = contentType;
         this.contentLength = contentLength;
+    }
+
+    public HttpHeader() {
+        this(new HashMap<>(), null, 0);
     }
 
     public static HttpHeader from(Map<String, List<String>> header) {
@@ -29,7 +35,7 @@ public class HttpHeader {
         if (contentType == null) {
             return null;
         }
-        return ContentType.from(contentType.get(0));
+        return ContentType.fromFilePath(contentType.get(0));
     }
 
     private static int readContentLength(Map<String, List<String>> header) {
@@ -48,11 +54,20 @@ public class HttpHeader {
         return contentLength;
     }
 
+    public void setValue(String key, String value) {
+        List<String> values = header.computeIfAbsent(key, ignored -> new ArrayList<>());
+        values.add(value);
+    }
+
+    public Map<String, List<String>> getHeader() {
+        return new HashMap<>(header);
+    }
+
     public enum HEADER_KEY {
 
         CONTENT_LENGTH("Content-Length"),
         CONTENT_TYPE("Content-Type"),
-        ;
+        LOCATION("Location");
 
         public final String value;
 

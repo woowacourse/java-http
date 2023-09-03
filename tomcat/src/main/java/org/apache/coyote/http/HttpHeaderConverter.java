@@ -6,14 +6,14 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class HttpHeaderDecoder {
+public class HttpHeaderConverter {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpHeaderDecoder.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpHeaderConverter.class);
 
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final String MULTIPLE_VALUES_DELIMITER = ",";
 
-    private HttpHeaderDecoder() {
+    private HttpHeaderConverter() {
     }
 
     public static HttpHeader decode(String headerString) {
@@ -43,5 +43,13 @@ public class HttpHeaderDecoder {
         return Arrays.stream(headerValue.split(MULTIPLE_VALUES_DELIMITER))
                 .map(String::strip)
                 .collect(Collectors.toList());
+    }
+
+    public static String encode(HttpHeader httpHeader) {
+        Map<String, List<String>> headers = httpHeader.getHeader();
+        return headers.entrySet()
+                .stream()
+                .map(header -> header.getKey() + HEADER_KEY_VALUE_DELIMITER + String.join(MULTIPLE_VALUES_DELIMITER, header.getValue()))
+                .collect(Collectors.joining("\r\n")) + "\r\n\r\n";
     }
 }

@@ -3,26 +3,26 @@ package org.apache.coyote.http.controller;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponseComposer;
+import org.apache.coyote.http.HttpResponse;
 
 import static org.apache.coyote.http.HttpMethod.*;
 
 public abstract class HttpController implements Controller {
 
-    public final void service(HttpRequest httpRequest, HttpResponseComposer httpResponseComposer) {
+    public final void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         HttpMethod method = httpRequest.getMethod();
         if (GET == method) {
-            doGet(httpRequest, httpResponseComposer);
+            doGet(httpRequest, httpResponse);
         } else if (POST == method) {
-            doPost(httpRequest, httpResponseComposer);
+            doPost(httpRequest, httpResponse);
         }
     }
 
-    public void doGet(HttpRequest httpRequest, HttpResponseComposer httpResponseComposer) {
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         throw new IllegalArgumentException();
     }
 
-    public void doPost(HttpRequest httpRequest, HttpResponseComposer httpResponseComposer) {
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         throw new IllegalArgumentException();
     }
 }

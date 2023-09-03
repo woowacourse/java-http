@@ -2,59 +2,59 @@ package org.apache.coyote.http;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
+import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
+
 public class HttpResponse {
 
-    private final StatusCode statusCode;
-    private final HttpMessage httpMessage;
-    private final String location;
+    private StatusCode statusCode;
+    private final HttpHeader header;
+    private String body;
+    private String forwardPath;
+    private boolean isCompleted;
 
-    private HttpResponse(StatusCode statusCode, HttpMessage httpMessage, String location) {
-        if (statusCode == null) {
-            throw new IllegalArgumentException(); 
-        }
-        this.statusCode = statusCode;
-        this.httpMessage = httpMessage;
-        this.location = location;
+    public HttpResponse() {
+        this.header = new HttpHeader();
+        this.isCompleted = false;
     }
 
     public byte[] getBytes() {
-        String response = "HTTP/1.1 " + statusCode.value + " " + statusCode.name() + "\r\n";
-        if (location != null) {
-            response += "Location: " + location + "\r\n";
-        }
-        if (httpMessage != null) {
-            byte[] contentBytes = httpMessage.getContent().getBytes(StandardCharsets.UTF_8);
-            response += "Content-Length: " + contentBytes.length + " \r\n";
-            response += "Content-Type: " + httpMessage.getContentType().value + " \r\n";
-            response += "\r\n" + httpMessage.getContent();
-        }
+        String response = statusCode.renderStatusLine()
+                + HttpHeaderConverter.encode(header)
+                + body;
 
-        return response.getBytes();
+        return response.getBytes(StandardCharsets.UTF_8);
     }
 
-    public static class Builder {
+    public void forward(String forwardPath) {
+        this.forwardPath = forwardPath;
+        this.isCompleted = false;
+    }
 
-        private StatusCode statusCode;
-        private HttpMessage httpMessage;
-        private String location;
+    public boolean isCompleted() {
+        return isCompleted;
+    }
 
-        public Builder statusCode(StatusCode statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+        this.isCompleted = true;
+    }
 
-        public Builder httpMessage(HttpMessage httpMessage) {
-            this.httpMessage = httpMessage;
-            return this;
-        }
+    public void addHeader(String key, String value) {
+        header.setValue(key, value);
+    }
 
-        public Builder location(String location) {
-            this.location = location;
-            return this;
-        }
+    public void setContentType(String contentType) {
+        addHeader(CONTENT_TYPE.value, contentType);
+    }
 
-        public HttpResponse build() {
-            return new HttpResponse(statusCode, httpMessage, location);
-        }
+    public void setBody(String body) {
+        this.body = body;
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        addHeader(CONTENT_LENGTH.value, String.valueOf(bytes.length));
+    }
+
+    public String getForwardPath() {
+        return forwardPath;
     }
 }

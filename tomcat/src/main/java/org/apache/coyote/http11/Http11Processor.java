@@ -3,9 +3,8 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpRequestDecoder;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpResponseComposer;
 import org.apache.coyote.http.controller.HttpController;
 import org.apache.coyote.http.controller.ViewRenderer;
 import org.reflections.Reflections;
@@ -40,24 +39,23 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         readControllers();
+
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequestParser requestParser = new HttpRequestParser();
-            HttpRequest httpRequest = requestParser.parse(inputStream);
-            HttpResponseComposer httpResponseComposer = new HttpResponseComposer();
+            HttpRequestDecoder requestParser = new HttpRequestDecoder();
+            HttpRequest httpRequest = requestParser.decode(inputStream);
 
+            HttpResponse httpResponse = new HttpResponse();
             HttpController controller = controllers.get(httpRequest.getPath());
             if (controller != null) {
-                controller.service(httpRequest, httpResponseComposer);
+                controller.service(httpRequest, httpResponse);
             }
 
-            if (httpResponseComposer.isViewRenderingNecessary()) {
-                VIEW_RENDERER.render(httpRequest, httpResponseComposer);
+            if (!httpResponse.isCompleted()) {
+                VIEW_RENDERER.render(httpRequest, httpResponse);
             }
 
-            HttpResponse response = httpResponseComposer.getResponse();
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

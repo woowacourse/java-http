@@ -5,19 +5,17 @@ import org.apache.coyote.util.FileUtil;
 
 public class ViewRenderer {
 
-    public void render(HttpRequest httpRequest, HttpResponseComposer httpResponseComposer) {
-        String viewName = httpResponseComposer.getViewName();
-        if (viewName == null) {
-            viewName = httpRequest.getPath();
+    public void render(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String filePath = httpRequest.getPath();
+        if (httpResponse.getForwardPath() != null) {
+            filePath = httpResponse.getForwardPath();
         }
 
-        String content = FileUtil.readStaticFile(viewName);
-        ContentType contentType = ContentType.from(viewName.substring(viewName.lastIndexOf(".") + 1));
+        String content = FileUtil.readStaticFile(filePath);
+        ContentType contentType = ContentType.fromFilePath(filePath);
 
-        HttpResponse httpResponse = new HttpResponse.Builder()
-                .statusCode(StatusCode.OK)
-                .httpMessage(HttpBody.of(content, contentType))
-                .build();
-        httpResponseComposer.setHttpResponse(httpResponse);
+        httpResponse.setStatusCode(StatusCode.OK);
+        httpResponse.setBody(content);
+        httpResponse.setContentType(contentType.value);
     }
 }

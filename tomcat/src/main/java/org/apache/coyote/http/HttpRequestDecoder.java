@@ -36,7 +36,7 @@ public class HttpRequestDecoder {
         byte[] target = HEADER_BODY_DELIMITER.getBytes(StandardCharsets.UTF_8);
         int sourceLength = ByteUtil.readStreamUntilEndsWith(inputStream, source, target);
 
-        return HttpHeaderDecoder.decode(new String(source, 0, sourceLength));
+        return HttpHeaderConverter.decode(new String(source, 0, sourceLength));
     }
 
     private Map<String, String> decodeBody(int contentLength, ContentType contentType, InputStream inputStream) {

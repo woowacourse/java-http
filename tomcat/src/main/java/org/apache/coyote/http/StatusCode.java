@@ -11,4 +11,8 @@ public enum StatusCode {
     StatusCode(String value) {
         this.value = value;
     }
+
+    public String renderStatusLine() {
+        return "HTTP/1.1 " + value + " " + name() + "\r\n";
+    }
 }

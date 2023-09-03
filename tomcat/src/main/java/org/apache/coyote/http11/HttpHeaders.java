@@ -16,6 +16,7 @@ public class HttpHeaders {
     public static final String ACCEPT = "Accept";
     public static final String LOCATION = "Location";
     public static final String HTTP_LINE_SUFFIX = "\r\n";
+    private static final String CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     private final Map<String, String> headers;
 
@@ -38,6 +39,14 @@ public class HttpHeaders {
 
     public boolean isAcceptCss() {
         return headers.get(ACCEPT).contains(CONTENT_TYPE_CSS);
+    }
+
+    public boolean isContentTypeUrlEncoded() {
+        return headers.get(CONTENT_TYPE).contains(CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH, "0"));
     }
 
     public void put(String key, String value) {

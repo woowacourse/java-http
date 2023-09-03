@@ -26,13 +26,14 @@ public class StaticResourceController implements Controller {
     private static final String RESOURCE_ROOT_PATH = "static";
 
     private final List<String> staticRequestPaths = List.of(
-            "/login"
+            "/login",
+            "/register"
     );
 
     @Override
     public boolean canHandle(HttpRequest request) {
         final String path = request.getPath();
-        return path.substring(path.lastIndexOf("/") + 1).contains(".") || (staticRequestPaths.contains(path) && !request.hasQueryStrings());
+        return path.substring(path.lastIndexOf("/") + 1).contains(".") || (staticRequestPaths.contains(path) && !request.hasQueryStrings() && request.getMethod() == HttpMethod.GET);
     }
 
     @Override

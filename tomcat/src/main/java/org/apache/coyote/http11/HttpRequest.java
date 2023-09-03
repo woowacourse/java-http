@@ -14,19 +14,22 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final QueryStrings queryStrings;
     private final String body;
+    private final JsonProperties jsonProperties;
 
-    private HttpRequest(HttpMethod method, String path, HttpHeaders headers, QueryStrings queryStrings, String body) {
+    private HttpRequest(HttpMethod method, String path, HttpHeaders headers, QueryStrings queryStrings, String body, JsonProperties jsonProperties) {
         this.method = method;
         this.path = path;
         this.headers = headers;
         this.queryStrings = queryStrings;
         this.body = body;
+        this.jsonProperties = jsonProperties;
     }
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
         final var request = new ArrayList<String>();
         String line;
         var body = "";
+        JsonProperties properties = null;
         var contentLength = 0;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -36,11 +39,13 @@ public class HttpRequest {
             request.add(line);
         }
         request.add(HEADER_BODY_DELIMITER);
+        final HttpHeaders header = HttpHeaders.from(request);
 
-        if (contentLength > 0) {
+        if (header.getContentLength() > 0) {
             var bodyChars = new char[contentLength];
             reader.read(bodyChars, 0, contentLength);
             body = new String(bodyChars);
+            properties = JsonProperties.from(body, header);
         }
 
         final String[] uri = request.get(0).split(" ");
@@ -51,10 +56,10 @@ public class HttpRequest {
             final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
             final var path = pathAndQueryParams[0].trim();
             final var queryStrings = new QueryStrings(pathAndQueryParams[1]);
-            return new HttpRequest(method, path, HttpHeaders.from(request), queryStrings, body);
+            return new HttpRequest(method, path, header, queryStrings, body, properties);
         }
 
-        return new HttpRequest(method, fullPath, HttpHeaders.from(request), null, body);
+        return new HttpRequest(method, fullPath, header, null, body, properties);
     }
 
     public boolean hasQueryStrings() {
@@ -71,6 +76,10 @@ public class HttpRequest {
 
     public String getQueryString(String key) {
         return queryStrings.getValue(key);
+    }
+
+    public String getJsonProperty(String key) {
+        return jsonProperties.getValue(key);
     }
 
     public String getPath() {

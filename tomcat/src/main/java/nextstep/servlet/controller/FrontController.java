@@ -3,6 +3,7 @@ package nextstep.servlet.controller;
 import java.io.IOException;
 import java.util.List;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
@@ -10,6 +11,7 @@ public class FrontController {
 
     private final List<Controller> controllers = List.of(
             new LoginController(),
+            new RegisterController(),
             new StaticResourceController()
     );
 

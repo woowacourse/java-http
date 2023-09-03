@@ -20,22 +20,22 @@ class HttpRequestTest {
     @Test
     void HTTP_메시지를_파싱해서_HTTP_요청_객체를_생성한다() throws Exception {
         final String httpRequestMessage = String.join("\r\n",
-                "GET /index.html HTTP/1.1",
+                "POST /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
                 "Content-Length: 12",
                 "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5",
                 "",
-                "Hello world!");
+                "Hello world!"
+        );
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
         assertSoftly(softly -> {
-            softly.assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
+            softly.assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
             softly.assertThat(httpRequest.getUriPath()).isEqualTo("/index.html");
-            softly.assertThat(httpRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP_11);
             softly.assertThat(httpRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP_11);
             softly.assertThat(httpRequest.getAccepts()).usingRecursiveComparison().isEqualTo(
                     List.of(

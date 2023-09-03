@@ -4,6 +4,11 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.ResponseHeader;
+import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.StatusCode;
+import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
@@ -70,18 +74,12 @@ public class Http11Processor implements Runnable, Processor {
             log.info("method={}\r\nuri={}\r\nprotocol={}", requestMethod, requestUri, requestProtocol);
             log.info("queryString={}", requestQueryParameter);
 
-            final String responseContentType = getResponseContentType(requestHeaders, requestUri);
+            final Response response = getResponse(requestUri, requestHeaders, requestQueryParameter);
+            final String requestAcceptHeader = requestHeaders.getOrDefault("accept", "");
+            response.decideContentType(requestAcceptHeader, requestUri);
+            response.decideContentLength();
 
-            final String responseBody = getResponseBody(requestUri, requestHeaders, requestQueryParameter);
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + responseContentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.parseString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -113,47 +111,44 @@ public class Http11Processor implements Runnable, Processor {
         return requestQueryParameters;
     }
 
-    private String getResponseContentType(final Map<String, String> requestHeaders,
-                                          final String requestUri) {
-        String requestAcceptHeader = requestHeaders.getOrDefault("accept", "");
-        String responseFileExtension = requestUri.substring(requestUri.indexOf(".") + 1);
-        if ("text/css".equals(requestAcceptHeader) || "css".equals(responseFileExtension)) {
-            return  "text/css,*/*;q=0.1";
-        }
-        if ("application/javascript".equals(requestAcceptHeader) || "js".equals(responseFileExtension)) {
-            return "application/javascript;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
-    }
-
-    private String getResponseBody(final String requestUri,
-                                   final Map<String, String> requestHeaders,
-                                   final Map<String, String> requestParameter) throws URISyntaxException, IOException {
+    private Response getResponse(final String requestUri,
+                               final Map<String, String> requestHeaders,
+                               final Map<String, String> requestParameter) throws URISyntaxException, IOException {
         if (requestUri.contains(".")) {
             return findStaticResource(requestUri, requestHeaders, requestParameter);
         }
         return mapPath(requestUri, requestHeaders, requestParameter);
     }
 
-    private String mapPath(final String requestUri,
+    private Response mapPath(final String requestUri,
                            final Map<String, String> requestHeaders,
                            final Map<String, String> requestParameter) throws IOException, URISyntaxException {
         if (requestUri.equals("/")) {
-            return "Hello world!";
+            return new Response("Hello world!");
         }
         if ("/login".equals(requestUri)) {
-            final User user = InMemoryUserRepository.findByAccount(requestParameter.get("account"))
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+            final String account = requestParameter.get("account");
+            if (account == null) {
+                return findStaticResource("/login.html", requestHeaders, requestParameter);
+            }
+            final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
+            if (maybeUser.isEmpty()) {
+                return Response.UNAUTHORIZED_RESPONSE;
+            }
+            final User user = maybeUser.get();
             if (!user.checkPassword(requestParameter.get("password"))) {
-                throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+                return Response.UNAUTHORIZED_RESPONSE;
             }
             log.info("user: {}", user);
-            return findStaticResource("/login.html", requestHeaders, requestParameter);
+
+            final Headers headers = new Headers();
+            headers.addHeader(ResponseHeader.LOCATION, "/index.html");
+            return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
-        throw new RuntimeException("404 NOT FOUND");
+        return Response.NOT_FOUND_RESPONSE;
     }
 
-    private String findStaticResource(final String requestUri,
+    private Response findStaticResource(final String requestUri,
                                       final Map<String, String> requestHeaders,
                                       final Map<String, String> requestParameter) throws IOException, URISyntaxException {
         final ClassLoader classLoader = getClass().getClassLoader();
@@ -161,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
         final URL fileURL = classLoader.getResource(name);
 
         if (fileURL == null) {
-            throw new RuntimeException("404 NOT FOUND");
+            return Response.NOT_FOUND_RESPONSE;
         }
 
         final URI fileURI = fileURL.toURI();
@@ -178,6 +173,6 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        return stringBuilder.toString();
+        return new Response(stringBuilder.toString());
     }
 }

@@ -20,7 +20,7 @@ public class HttpRequest {
         if (requestHeaders == null) {
             return new Cookies();
         }
-        String cookies = requestHeaders.get("Cookies");
+        String cookies = requestHeaders.get("Cookie");
         if (cookies == null) {
             return new Cookies();
         }

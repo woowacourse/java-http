@@ -1,6 +1,7 @@
 package nextstep;
 
 import java.util.List;
+import nextstep.jwp.handler.LoginPageHandler;
 import nextstep.jwp.handler.LoginRequestHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
@@ -13,6 +14,7 @@ public class Application {
     public static void main(String[] args) {
         List<RequestHandler> requestHandlers = List.of(
                 new RootPageRequestHandler(),
+                new LoginPageHandler(),
                 new LoginRequestHandler(),
                 new SignUpRequestHandler(),
                 new StaticResourceRequestHandler()

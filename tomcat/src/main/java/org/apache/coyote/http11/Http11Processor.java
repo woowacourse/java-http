@@ -1,19 +1,19 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.security.sasl.AuthenticationException;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -53,9 +53,9 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> headerPropertyAndValue = parseRequestHeader(requestHeader);
 
-            String requestURL = extractRequestURL(requestHeader);
+            String requestURI = extractRequestURI(requestHeader);
 
-            String responseBody = makeResponseBody(requestURL);
+            String responseBody = makeResponseBody(requestURI);
 
             String contentType = determineContentType(headerPropertyAndValue);
 
@@ -98,9 +98,34 @@ public class Http11Processor implements Runnable, Processor {
         return headerPropertyAndValue;
     }
 
-    private String extractRequestURL(List<String> requestHeader) {
+    private String extractRequestURI(List<String> requestHeader) throws AuthenticationException {
         String firstLine = requestHeader.get(FIRST_LINE_INDEX);
-        return firstLine.split(SPACE)[URL_INDEX];
+        String requestURI = firstLine.split(SPACE)[URL_INDEX];
+
+        if (requestURI.startsWith("/login")) {
+            int index = requestURI.indexOf("?");
+            String queryString = requestURI.substring(index + 1);
+            String[] queryParams = queryString.split("&");
+
+            Map<String, String> paramAndValues = new HashMap<>();
+            for (String queryParam : queryParams) {
+                String[] paramAndValue = queryParam.split("=");
+                String param = paramAndValue[0];
+                String value = paramAndValue[1];
+                paramAndValues.put(param, value);
+
+            }
+            Optional<User> optionalUser = InMemoryUserRepository.findByAccount(paramAndValues.get("account"));
+
+            if (optionalUser.isEmpty()) {
+                throw new AuthenticationException("회원 정보가 존재하지 않습니다.");
+            }
+
+            log.info("user : {}", optionalUser.get());
+
+            requestURI = "/login.html";
+        }
+        return requestURI;
     }
 
     private String determineContentType(Map<String, String> headerPropertyAndValue) {

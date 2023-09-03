@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +22,10 @@ public class HttpRequest {
     private final String method;
     private final String uri;
     private final String version;
+    private final Map<String, String> headers = new HashMap<>();
+    private Map<String, String> requestBody;
 
-    public HttpRequest(final String method, final String uri, final String version) {
+    private HttpRequest(final String method, final String uri, final String version) {
         validateMethod(method);
         this.method = method;
         this.uri = uri;
@@ -38,13 +42,54 @@ public class HttpRequest {
         throw new IllegalArgumentException("지원하지 않는 HTTP METHOD 입니다.");
     }
 
-    public static HttpRequest of(String requestInfo) {
-        final String[] httpRequest = requestInfo.split(REQUEST_API_DELIMITER);
-        if (httpRequest.length != 3) {
+    public HttpRequest(BufferedReader bufferedReader) throws IOException {
+        final String requestApi = bufferedReader.readLine();
+        final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
+
+        if (apiInfo.length != 3) {
             throw new IllegalArgumentException("잘못된 http 요청 입니다.");
         }
-        return new HttpRequest(httpRequest[HTTP_METHOD_INDEX], httpRequest[REQUEST_URI_INDEX],
-                httpRequest[HTTP_VERSION_INDEX]);
+
+        final String requestMethod = apiInfo[HTTP_METHOD_INDEX];
+        final String requestUri = apiInfo[REQUEST_URI_INDEX];
+        final String requestVersion = apiInfo[HTTP_VERSION_INDEX];
+
+        validateMethod(requestMethod);
+
+        this.method = requestMethod;
+        this.uri = requestUri;
+        this.version = requestVersion;
+        initHeaders(bufferedReader);
+        initRequestBody(bufferedReader);
+    }
+
+    private void initHeaders(final BufferedReader bufferedReader) throws IOException {
+        String line = "";
+
+        while(!(line = bufferedReader.readLine()).isBlank()) {
+            final String[] headerInfo = line.split(":");
+            final String headerName = headerInfo[0];
+            final String value = headerInfo[1].trim();
+            headers.put(headerName, value);
+        }
+    }
+
+    private void initRequestBody(final BufferedReader bufferedReader) throws IOException {
+        if (headers.containsKey("Content-Length")) {
+            this.requestBody = new HashMap<>();
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String requestBodyBuffer = new String(buffer);
+
+            final String[] requestBodies = requestBodyBuffer.split("&");
+            for (String body : requestBodies) {
+                final String[] requestBodyInfo = body.split("=");
+                final String requestBodyName = requestBodyInfo[0];
+                final String requestBodyValue = requestBodyInfo[1];
+                this.requestBody.put(requestBodyName, requestBodyValue);
+            }
+        }
     }
 
     public static HttpRequest toIndex() {
@@ -93,5 +138,13 @@ public class HttpRequest {
 
     public boolean isGetRequest() {
         return method.equalsIgnoreCase(GET);
+    }
+
+    public boolean hasRequestBody() {
+        return requestBody != null;
+    }
+
+    public Map<String, String> getRequestBody() {
+        return requestBody;
     }
 }

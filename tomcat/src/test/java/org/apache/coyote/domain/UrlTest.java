@@ -19,13 +19,13 @@ class UrlTest {
         final String rawUrl = "/login?name=gugu&password=1234";
 
         // when
-        Url url = new Url(rawUrl);
+        Url url = Url.from(rawUrl);
 
         // then
         assertAll(
                 () -> assertThat(url.getUrlPath()).isEqualTo("/login"),
                 () -> assertThat(url.getQueryStrings()).usingRecursiveComparison().isEqualTo(
-                        QueryStrings.of("name=gugu&password=1234")
+                        QueryStrings.from("name=gugu&password=1234")
                 )
         );
     }
@@ -36,7 +36,7 @@ class UrlTest {
         final String rawUrl = "/login.html";
 
         // when
-        Url url = new Url(rawUrl);
+        Url url = Url.from(rawUrl);
 
         // then
         assertThat(url.isContainSubString(".html")).isTrue();

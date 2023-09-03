@@ -1,7 +1,8 @@
 package org.apache.coyote.http.vo;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.coyote.http.HttpHeader;
 import util.MultiValueMap;
@@ -10,42 +11,36 @@ public class HttpHeaders {
 
     private static final String KEY_VALUE_DELIMITER = ":";
     private static final String VALUE_DELIMITER = ",";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
     private final MultiValueMap<HttpHeader, String> headers;
 
     private HttpHeaders(final MultiValueMap<HttpHeader, String> headers) {
         this.headers = headers;
     }
 
-    public static HttpHeaders of(final String rawHeaders) {
-        return new HttpHeaders(parsingHeaders(rawHeaders));
+    public void put(final HttpHeader key, final String value) {
+        this.headers.put(key, value);
     }
 
-    private static MultiValueMap<HttpHeader, String> parsingHeaders(final String rawHeaders) {
-        final MultiValueMap<HttpHeader, String> headers = new MultiValueMap<>();
-
-        for (final String rawHeader : rawHeaders.split(System.lineSeparator())) {
-            final String[] keyWithValue = rawHeader.split(KEY_VALUE_DELIMITER);
-            final HttpHeader key = HttpHeader.of(keyWithValue[KEY_INDEX]);
-
-            if (key != null) {
-                headers.putAll(key,
-                        Arrays.stream(keyWithValue[VALUE_INDEX].split(VALUE_DELIMITER))
-                        .map(String::trim)
-                        .collect(Collectors.toUnmodifiableList())
-                );
-            }
-        }
-
-        return headers;
+    public void putAll(final HttpHeader key, final List<String> values) {
+        this.headers.putAll(key, values);
     }
 
     public List<String> getHeaderValues(final HttpHeader header) {
         return headers.getValues(header);
     }
 
-    public static HttpHeaders getEmptyHeaders(){
+    public static HttpHeaders getEmptyHeaders() {
         return new HttpHeaders(new MultiValueMap<>());
+    }
+
+    public String getRawHeaders() {
+        Map<HttpHeader, List<String>> multiValueMap = headers.getMultiValueMap();
+        return multiValueMap.entrySet().stream()
+                .map(HttpHeaders::getHeaderFormat)
+                .collect(Collectors.joining("\n"));
+    }
+
+    private static String getHeaderFormat(final Entry<HttpHeader, List<String>> it) {
+        return it.getKey().getKey() + KEY_VALUE_DELIMITER + " " + String.join(VALUE_DELIMITER, it.getValue());
     }
 }

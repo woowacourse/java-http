@@ -4,9 +4,6 @@ import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String REQUEST_LINE_DELIMITER = "\n";
-    private static final String START_LINE_DELIMITER = " ";
-
     private final HttpMethod method;
     private final Url url;
     private final HttpHeaders headers;
@@ -67,5 +64,30 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public static class Builder {
+        private HttpMethod method;
+        private Url url;
+        private HttpHeaders headers;
+
+        public Builder httpMethod(final HttpMethod method) {
+            this.method = method;
+            return this;
+        }
+
+        public Builder url(final Url url) {
+            this.url = url;
+            return this;
+        }
+
+        public Builder headers(final HttpHeaders headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public HttpRequest build() {
+            return new HttpRequest(method, url, headers);
+        }
     }
 }

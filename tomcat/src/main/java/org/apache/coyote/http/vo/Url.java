@@ -8,18 +8,22 @@ public class Url {
     private final String urlPath;
     private final QueryStrings queryStrings;
 
-    public Url(final String url) {
-        this.urlPath = parseUrlPath(url);
-        this.queryStrings = parseQueryString(url);
+    public Url(final String urlPath, final QueryStrings queryStrings) {
+        this.urlPath = urlPath;
+        this.queryStrings = queryStrings;
     }
 
-    private String parseUrlPath(final String url) {
-        return url.split(QUERY_STRING_DELIMITER)[URL_PATH_INDEX];
+    public static Url from(final String url) {
+        return new Url(parseUrlPath(url), parseQueryString(url));
     }
 
-    private QueryStrings parseQueryString(final String url) {
+    private static String parseUrlPath(final String url) {
+        return url.split(QUERY_STRING_DELIMITER)[URL_PATH_INDEX].trim();
+    }
+
+    private static QueryStrings parseQueryString(final String url) {
         if (url.split(QUERY_STRING_DELIMITER).length > 1) {
-            return QueryStrings.of(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
+            return QueryStrings.from(url.split(QUERY_STRING_DELIMITER)[QUERY_STRING_INDEX]);
         }
         return QueryStrings.getEmptyQueryStrings();
     }

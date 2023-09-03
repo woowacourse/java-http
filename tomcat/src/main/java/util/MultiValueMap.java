@@ -59,4 +59,8 @@ public class MultiValueMap<K, V> {
             throw new IllegalArgumentException("해당 키가 존재하지 않습니다.");
         }
     }
+
+    public Map<K, List<V>> getMultiValueMap() {
+        return multiValueMap;
+    }
 }

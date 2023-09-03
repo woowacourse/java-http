@@ -15,7 +15,7 @@ public class QueryStrings {
         this.queryStrings = queryStrings;
     }
 
-    public static QueryStrings of(final String rawQueryStrings) {
+    public static QueryStrings from(final String rawQueryStrings) {
         return new QueryStrings(parseQueryStrings(rawQueryStrings));
     }
 

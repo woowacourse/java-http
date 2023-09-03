@@ -1,5 +1,7 @@
 # 톰캣 구현하기
 
+- [x] /로 접근 시 index.html 반환하기
+- [x] 정적 리소스 반환하기
 - [x] 요청의 queryParam 파싱하기
     - [x] 복수개의 value가 올 수 있게 하기
     - [x] 요청에 쿼리가 없는 경우 빈 map 반환하도록 처리
@@ -21,3 +23,6 @@
 - [x] 회원가입 구현하기
     - [x] GET 요청 시 회원가입 페이지를 반환
     - [x] POST 요청 시 회원가입 진행
+- [ ] Http cookie 구현하기
+    - [x] request를 cookie 클래스 형태로 파싱하기
+    - [ ] 로그인 후 response를 반환할 때, SET-COOKIES : JSESSIONID값 추가하기

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.headers.HttpCookie;
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,7 @@ class HttpRequestTest {
 		final HttpHeaders expectedHeader = new HttpHeaders(Map.of(
 			"Host", "localhost:8080",
 			"Connection", "keep-alive"
-		));
+		), new HttpCookie());
 		final QueryParam queryParam = new QueryParam(Map.of(
 			"user", "hong"
 		));

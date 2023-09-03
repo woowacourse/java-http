@@ -22,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DELIMITER = "\r\n";
     private static final String STATIC_DIRECTORY = "static";
     private static final String NOT_FOUND_VIEW = "/404.html";
+    private static final String INDEX_URI = "/";
 
     private final Socket connection;
 
@@ -46,31 +47,28 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequest.of(firstLine);
 
             if (request.isGet()) {
-                sendResponse(outputStream, request.getUri());
+                sendResponse(outputStream, request);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void sendResponse(final OutputStream outputStream, final String requestUri) throws IOException {
-        if (requestUri.equals("/")) {
-            final String response = makeResponse("Hello world!");
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-            return;
+    private void sendResponse(final OutputStream outputStream, HttpRequest request) throws IOException {
+        if (request.getUri().equals(INDEX_URI)) {
+            request = HttpRequest.toIndex();
         }
-        File file = readStaticFile(requestUri);
-        final String response = makeResponse(new String(Files.readAllBytes(file.toPath())));
+        File file = readStaticFile(request.getUri());
+        final String response = makeResponse(new String(Files.readAllBytes(file.toPath())), request);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
 
-    private String makeResponse(final String responseBody) {
+    private String makeResponse(final String responseBody, final HttpRequest httpRequest) {
         return String.join(DELIMITER,
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + httpRequest.getExtension() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -10,6 +10,8 @@ public class HttpRequest {
     private static final String GET = "GET";
     private static final String PUT = "PUT";
     private static final String DELETE = "DELETE";
+    private static final String REG_DOT = "\\.";
+    private static final int EXTENSION_INDEX = 1;
 
     private final String method;
     private final String uri;
@@ -41,12 +43,8 @@ public class HttpRequest {
                 httpRequest[HTTP_VERSION_INDEX]);
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public String getMethod() {
-        return method;
+    public static HttpRequest toIndex() {
+        return new HttpRequest(GET, "/index.html", "HTTP/1.1");
     }
 
     public String getUri() {
@@ -55,5 +53,9 @@ public class HttpRequest {
 
     public boolean isGet() {
         return method.equalsIgnoreCase(GET);
+    }
+
+    public String getExtension() {
+        return uri.split(REG_DOT)[EXTENSION_INDEX];
     }
 }

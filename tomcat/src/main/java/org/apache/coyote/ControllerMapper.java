@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
 import org.apache.coyote.controller.LoginController;
+import org.apache.coyote.controller.RegisterController;
 
 public enum ControllerMapper {
 
@@ -15,8 +16,11 @@ public enum ControllerMapper {
     }
 
     public static Controller getController(final String parsedUri) {
-        if (parsedUri.contains(LOGIN.uri) || parsedUri.contains(REGISTER.uri)) {
+        if (parsedUri.contains(LOGIN.uri)) {
             return new LoginController();
+        }
+        if (parsedUri.contains(REGISTER.uri)) {
+            return new RegisterController();
         }
 
         return null;

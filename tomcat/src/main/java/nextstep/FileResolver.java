@@ -10,6 +10,7 @@ public enum FileResolver {
 
     INDEX_HTML("/index.html", "index.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     CSS("/css/styles.css", "css/styles.css", Constants.TEXT_CSS_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
+    SCRIPTS_JS("/js/scripts.js", "js/scripts.js", Constants.APPLICATION_JSON, Constants.RESPONSE_HEADER),
     LOGIN("/login", "login.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     REGISTER("/register", "register.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     HTML_401("/401.html", "/401.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
@@ -30,7 +31,8 @@ public enum FileResolver {
     public static boolean containsExtension(final String parsedUri) {
         return parsedUri.contains(Constants.CSS_EXTENSION)
                 || parsedUri.contains(Constants.HTML_EXTENSION)
-                || parsedUri.contains(Constants.JS_EXTENSION);
+                || parsedUri.contains(Constants.JS_EXTENSION)
+                || parsedUri.contains(Constants.ICON);
     }
 
     public static FileResolver findFile(final String parsedUri) {
@@ -80,9 +82,11 @@ public enum FileResolver {
         public static final String RESPONSE_HEADER = "HTTP/1.1 200 OK ";
         private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
         private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8";
+        private static final String APPLICATION_JSON = "application/json";
         private static final String QUESTION_MARK = "?";
         private static final String CSS_EXTENSION = ".css";
         private static final String HTML_EXTENSION = ".html";
         private static final String JS_EXTENSION = ".js";
+        private static final String ICON = ".ico";
     }
 }

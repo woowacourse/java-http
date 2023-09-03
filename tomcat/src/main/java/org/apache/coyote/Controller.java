@@ -1,8 +1,11 @@
 package org.apache.coyote;
 
+import org.apache.coyote.domain.HttpRequestHeader;
+
 import java.io.IOException;
 
-public interface Controller {
+public abstract class Controller {
 
-    String run(final String queryStrings) throws IOException;
+    public abstract String run(final HttpRequestHeader httpRequestHeader) throws IOException;
+
 }

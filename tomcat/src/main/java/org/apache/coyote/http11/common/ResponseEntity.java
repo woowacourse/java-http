@@ -24,11 +24,20 @@ public class ResponseEntity {
         return String.join(
                 CRLF,
                 parseHttpStatusLine(),
-                "Content-Type: text/html;charset=utf-8 ",
+                parseContentTypeLine(),
                 parseContentLengthLine(responseBody),
                 EMPTY,
                 responseBody.body()
         );
+    }
+
+    private String parseContentTypeLine() {
+        final String uri = requestURI.getUri();
+        if (uri.endsWith(".css")) {
+            return "Content-Type: text/css;charset=utf-8 ";
+        }
+
+        return "Content-Type: text/html;charset=utf-8 ";
     }
 
     private String parseHttpStatusLine() {

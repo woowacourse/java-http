@@ -1,5 +1,5 @@
 # 톰캣 구현하기
 
-- [ ] GET /index.html 응답하기
-- [ ] CSS 지원하기[
-- [ ] Query String 파싱
+- [x] GET /index.html 응답하기
+- [x] CSS 지원하기
+- [x] Query String 파싱

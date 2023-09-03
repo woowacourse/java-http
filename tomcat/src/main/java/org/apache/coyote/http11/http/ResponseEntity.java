@@ -31,6 +31,11 @@ public class ResponseEntity {
         this.responseBody = responseBody;
     }
 
+    public static ResponseEntity redirect(String redirectionFile) {
+        List<String> headers = List.of(String.join(" ", "Location:", redirectionFile));
+        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+    }
+
     public void setCookie(String key, String value) {
         cookies.put(key, value);
     }

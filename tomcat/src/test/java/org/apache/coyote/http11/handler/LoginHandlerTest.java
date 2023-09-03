@@ -34,7 +34,8 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
         String response = responseEntity.generateResponseMessage();
-
+        System.out.println(response);
+        
         assertThat(response).contains(
                 "Location: index.html",
                 "HTTP/1.1 302 "

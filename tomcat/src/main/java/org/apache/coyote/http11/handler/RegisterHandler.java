@@ -44,13 +44,7 @@ public class RegisterHandler implements Handler {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            List<String> headers = List.of(
-                    String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
-                    String.join(" ", "Content-Length:", String.valueOf("".getBytes().length)),
-                    String.join(" ", "Location: index.html")
-            );
-
-            return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+            return ResponseEntity.redirect("index.html");
         }
 
         throw new UnsupportedOperationException("get, post만 가능합니다");

@@ -27,7 +27,7 @@ public class SessionManager implements Manager {
         if (SESSIONS.containsKey(id)) {
             return SESSIONS.get(id);
         }
-        throw new IllegalStateException("해당 아이디의 세션은 없습니다");
+        return null;
     }
 
     @Override

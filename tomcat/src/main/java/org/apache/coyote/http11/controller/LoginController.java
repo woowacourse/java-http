@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.controller;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.ResponseBody;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.service.LoginService;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginController implements Controller {
 
@@ -27,7 +29,7 @@ public class LoginController implements Controller {
 
     @Override
     public Response<String> handle(Request request) {
-        if (loggedin(request)) {
+        if (loggedIn(request)) {
             return Response.status(302)
                 .addHeader(LOCATION_HEADER, "/index.html")
                 .build();
@@ -46,10 +48,20 @@ public class LoginController implements Controller {
             .build();
     }
 
-    private boolean loggedin(Request request) {
+    private boolean loggedIn(Request request) {
         Optional<Cookie> cookie = request.getRequestHeaders().getCookie();
         if (cookie.isPresent()) {
-            return cookie.get().getSessionCookie().isPresent();
+            return checkSession(cookie.get());
+        }
+        return false;
+    }
+
+    private boolean checkSession(Cookie cookie) {
+        Optional<String> sessionCookie = cookie.getSessionCookie();
+        if (sessionCookie.isPresent()) {
+            String sessionId = sessionCookie.get();
+            HttpSession session = SessionManager.getInstance().findSession(sessionId);
+            return session != null;
         }
         return false;
     }

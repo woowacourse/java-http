@@ -41,6 +41,10 @@ public class Response {
         return new Response(HttpStatus.REDIRECTION, headers, null);
     }
 
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
 
     public String toString() {
         String responseLine = String.join(" ", "HTTP/1.1", String.valueOf(httpStatus.getCode()), httpStatus.getMessage());

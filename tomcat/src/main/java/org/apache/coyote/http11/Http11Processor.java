@@ -110,7 +110,11 @@ public class Http11Processor implements Runnable, Processor {
             if (!user.checkPassword(password)) {
                 throw new RuntimeException(); //todo :비밀번호가 일치하지 않는다.
             }
-            return Response.redirection("/index.html");
+            Response response = Response.redirection("/index.html");
+            if(!requestHeader.getHeaderValue("Cookie").contains("JSESSIONID")) {
+                response.addHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+            }
+            return response;
         } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
         }

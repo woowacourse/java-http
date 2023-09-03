@@ -115,16 +115,17 @@ public class Http11Processor implements Runnable, Processor {
     - 파일 없으면 : Location 헤더만 돌려줌
      */
     private static Response responseStaticFile(String requestUri, RequestHeader requestHeader) {
-        String requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestUri).getFile();
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(requestedFile, Charset.forName("UTF-8")))) {
+        try {
+            String requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestUri).getFile();
+            StringBuilder sb = new StringBuilder();
+            BufferedReader br = new BufferedReader(new FileReader(requestedFile, Charset.forName("UTF-8")));
             String str;
             while ((str = br.readLine()) != null) {
                 sb.append(str + "\n");
             }
             String responseBody = sb.toString();
             return Response.ok(responseBody, requestHeader);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
         return Response.redirection("404.html");

@@ -24,7 +24,6 @@ public class Response {
     public static Response ok(final String responseBody, RequestHeader requestHeader) {
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE_HEADER, requestHeader.getHeaderValue("Accept").split(",")[0]+";charset=utf-8");
-//        headers.put(CONTENT_TYPE_HEADER, "text/html;charset=utf-8");
         headers.put(CONTENT_LENGTH_HEADER, String.valueOf(responseBody.getBytes().length));
         return new Response(HttpStatus.OK, headers, responseBody);
     }

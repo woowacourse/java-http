@@ -44,6 +44,9 @@ public class MappingHandler {
     }
 
     private String getLastPathSnippet(final String path) {
+        if ("/".equals(path)) {
+            return "";
+        }
         final String[] pathSnippets = path.split("/");
         return pathSnippets[pathSnippets.length - 1];
     }

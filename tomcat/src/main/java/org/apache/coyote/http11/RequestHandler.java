@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.common.Method.GET;
+import static org.apache.coyote.http11.common.Method.POST;
 import static org.apache.coyote.http11.common.Status.BAD_REQUEST;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
@@ -30,6 +31,10 @@ public class RequestHandler {
         if (request.getMethod() == GET) {
             return get(request);
         }
+        if (request.getMethod() == POST) {
+            log.info("post request: {}", request);
+            return post(request);
+        }
         return Response.of(BAD_REQUEST, "text/plain", "");
     }
 
@@ -41,12 +46,15 @@ public class RequestHandler {
         if ("/login".equals(uri)) {
             return getResponseForStaticResource("/login.html");
         }
+        if ("/register".equals(uri)) {
+            return getResponseForStaticResource("/register.html");
+        }
 
         if (isStaticResourceURI(uri)) {
             return getResponseForStaticResource(uri);
         }
 
-        return handlerAdaptor.get(request);
+        return handlerAdaptor.getMapping(request);
     }
 
     private static Response getResponseForStaticResource(String uri) throws IOException {
@@ -72,6 +80,10 @@ public class RequestHandler {
         return RESOURCE_PATTERN_FILE_EXTENSION
                 .matcher(fileName)
                 .matches();
+    }
+
+    private static Response post(Request request) {
+        return handlerAdaptor.postMapping(request);
     }
 
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.Connection;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Method;
+import org.apache.coyote.http11.util.UriComponentsBuilder;
 
 public class Request {
 
@@ -69,8 +71,7 @@ public class Request {
         String host = headers.get("Host");
         String accepts = headers.get("Accept");
         String connection = headers.get("Connection");
-        /// TODO: 2023/09/03  body도 읽어오기 (bufferedReader에서 로딩 길어지는 문제 해결해야 함)
-        String body = "";
+        String body = readBody(bufferedReader, headers);
 
         return Optional.of(
                 Request.from(
@@ -82,6 +83,17 @@ public class Request {
                         body
                 )
         );
+    }
+
+    private static String readBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+        String body = "";
+        if (headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] bodyChars = new char[contentLength];
+            bufferedReader.read(bodyChars, 0, contentLength);
+            body = new String(bodyChars);
+        }
+        return body;
     }
 
     private static List<String> parseAccept(String accepts) {
@@ -105,24 +117,23 @@ public class Request {
         return headers;
     }
 
+    public Map<String, List<String>> getQueryParams() {
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.of(uri);
+
+        return uriComponentsBuilder.build().getQueryParams();
+    }
+
+    public String getPath() {
+
+        return URI.create(uri).getPath();
+    }
+
     public Method getMethod() {
         return method;
     }
 
     public String getUri() {
         return uri;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public List<String> getAccept() {
-        return new ArrayList<>(accept);
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
     public String getBody() {

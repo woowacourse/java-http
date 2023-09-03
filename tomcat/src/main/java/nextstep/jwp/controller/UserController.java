@@ -8,14 +8,17 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.util.QueryStringParser;
 
 public class UserController {
 
     private UserController() {
     }
 
-    public static Response login(Map<String, List<String>> queryParams) {
+    public static Response login(Request request) {
+        Map<String, List<String>> queryParams = request.getQueryParams();
         String account = queryParams.get("account").get(0);
         String password = queryParams.get("password").get(0);
 
@@ -31,5 +34,22 @@ public class UserController {
         Response response = Response.of(FOUND, HTML.toString(), "");
         response.addLocation(location);
         return response;
+    }
+
+    public static Response register(Request request) {
+        /// TODO: 2023/09/04 request body 형식 확인
+        String form = request.getBody();
+
+        Map<String, List<String>> formContents = QueryStringParser.parse(form);
+        String account = formContents.get("account").get(0);
+        String email = formContents.get("email").get(0);
+        String password = formContents.get("password").get(0);
+
+        if (InMemoryUserRepository.isExistByAccount(account)) {
+            return redirect("/401.html");
+        }
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return redirect("/index.html");
     }
 }

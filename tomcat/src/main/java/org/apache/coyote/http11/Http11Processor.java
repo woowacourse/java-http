@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Request;
@@ -34,11 +32,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
         ) {
 
-            final Request request = Request.of(inputStream);
+            final Request request = Request.from(inputStream);
+            String response = Servlet.getResponse(request);
 
-            final String response = Servlet.getResponse(request);
-            System.out.println("api : " + request.getUri());
-            System.out.println(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

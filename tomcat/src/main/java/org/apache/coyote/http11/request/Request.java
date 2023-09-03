@@ -21,8 +21,10 @@ public abstract class Request {
         this.header = header;
         this.body = body;
     }
-
-    public static Request of(InputStream inputStream) throws IOException{
+    public static Request ofStaticRequest(String method, String uri){
+        return new StaticRequestUri(method,uri,Map.of(),Map.of());
+    }
+    public static Request from(InputStream inputStream) throws IOException{
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = bufferedReader.readLine();
         valid(line);
@@ -87,6 +89,18 @@ public abstract class Request {
         return body;
     }
 
+    public Map<String, String> getCookie(){
+        final Map<String, String> cookie = new HashMap<>();
+        if(!header.containsKey("Cookie")){
+            return cookie;
+        }
+        final String cookieString = header.get("Cookie");
+        for(String entryString : cookieString.split("; ")){
+            String[] entry =entryString.split("=");
+            cookie.put(entry[0],entry[1]);
+        }
+        return cookie;
+    }
     public abstract String getContentType();
     public abstract String getResponseBody();
     public abstract Optional<Map<String, String>> getQueries();

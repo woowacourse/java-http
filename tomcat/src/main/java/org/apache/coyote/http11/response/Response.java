@@ -1,44 +1,99 @@
 package org.apache.coyote.http11.response;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Response {
     private final HttpStatus status;
     private final String contentType;
     private final String responseBody;
+    private final String location;
+    private final Map<String,String> cookie;
 
-    public  Response(HttpStatus status, String contentType, String responseBody) {
-        this.status = status;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
+    private Response(Builder builder){
+        this.status = builder.status;
+        this.contentType = builder.contentType;
+        this.responseBody = builder.responseBody;
+        this.location = builder.location;
+        this.cookie = builder.cookie;
     }
 
-    public String getRequest(){
+    public static Builder builder(){
+        return new Builder();
+    }
+
+    public static Response badResponse(HttpStatus httpStatus){
+        return builder()
+                .status(httpStatus)
+                .responseBody("")
+                .contentType("html")
+                .location(httpStatus.getValue()+".html")
+                .build();
+    }
+    public String getResponse(){
         return String.join("\r\n",
                 "HTTP/1.1 " + status ,
                 "Content-Type: text/" + contentType + ";",
                 "charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
+                "Set-Cookie :" + makeCookie(),
                 "",
                 responseBody);
     }
 
-    public String redirect(String redirectUri, String file){
+    public String redirect(String file){
         return String.join("\r\n",
                 "HTTP/1.1 " + status ,
                 "Content-Type: text/html;",
                 "charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "location : " + redirectUri,
+                "Content-Length: " + file.getBytes().length + " ",
+                "Set-Cookie :" + makeCookie(),
+                "location : " + location,
                 "",
                 file);
     }
 
-    public static Response of(HttpStatus status, String contentType, String responseBody){
-        return new Response(status,contentType,responseBody);
+
+    private String makeCookie(){
+        if(cookie == null){
+            return "";
+        }
+        return cookie.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining("; "));
     }
 
+    public static class Builder{
+        private HttpStatus status;
+        private String contentType;
+        private String responseBody;
+        private String location;
+        private Map<String,String> cookie;
 
+        public Builder status(HttpStatus status){
+            this.status = status;
+            return this;
+        }
+        public Builder contentType(String contentType){
+            this.contentType = contentType;
+            return this;
+        }
+        public Builder responseBody(String responseBody){
+            this.responseBody = responseBody;
+            return this;
+        }
+
+        public Builder location(String location){
+            this.location = location;
+            return this;
+        }
+
+        public Builder cookie(Map<String,String> cookie){
+            this.cookie = cookie;
+            return this;
+        }
+        public Response build(){
+            return new Response(this);
+        }
+    }
 }

@@ -1,6 +1,8 @@
 package nextstep.jwp.controller;
 
+import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.db.InMemorySession;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.AuthUser;
@@ -17,7 +19,18 @@ public class LoginController {
         if(!user.checkPassword(authUser.getPassword())){
             throw new UnauthorizedException("아이디 및 패스워드가 틀렸습니다.");
         }
-        return new Response(HttpStatus.FOUND, request.getContentType(), request.getResponseBody());
+        String jSessionId = InMemorySession.login(user);
+        Map<String,String> cookie = new HashMap<>();
+        if(!request.getCookie().containsKey("JSESSIONID")){
+            cookie.put("JSESSIONID",jSessionId);
+        }
+        return Response.builder()
+                .status(HttpStatus.FOUND)
+                .contentType(request.getContentType())
+                .responseBody(request.getResponseBody())
+                .cookie(cookie)
+                .location("index.html")
+                .build();
     }
 
     public static Response signUp(Request request){
@@ -27,6 +40,11 @@ public class LoginController {
         final String email = requestBody.get("email");
         User user = new User(account,password,email);
         InMemoryUserRepository.save(user);
-        return new Response(HttpStatus.FOUND,request.getContentType(),request.getContentType());
+        return Response.builder()
+                .status(HttpStatus.FOUND)
+                .contentType(request.getContentType())
+                .responseBody(request.getResponseBody())
+                .location("index.html")
+                .build();
     }
 }

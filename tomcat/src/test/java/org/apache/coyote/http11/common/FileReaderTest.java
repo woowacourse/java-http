@@ -9,6 +9,7 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("NonAsciiCharacters")
 class FileReaderTest {
 
     private final ClassLoader classLoader = getClass().getClassLoader();

@@ -35,7 +35,10 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
+//        File file = new File(classLoader.getResource(fileName).getFile());
+//        String actual = file.getAbsolutePath();
         String actual = classLoader.getResource(fileName).getFile();
+        System.out.println(actual);
 
         assertThat(actual).endsWith(fileName);
     }
@@ -50,7 +53,7 @@ class FileTest {
     void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
         String filePath = classLoader.getResource(fileName).getFile();
-
+        System.out.println(filePath);
         Path path = Paths.get(filePath);
         InputStream inputStream = Files.newInputStream(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));

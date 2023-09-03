@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final RequestLine requestLine = RequestLine.from(firstLine);
             final RequestHeaders requestHeader = getHeaders(bufferedReader);
-//            final RequestBody requestBody = readBody(bufferedReader, requestHeader);
+            final RequestBody requestBody = getBody(bufferedReader, requestHeader);
 //
 //            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);
 
@@ -71,6 +72,14 @@ public class Http11Processor implements Runnable, Processor {
             requestHeaders.add(line);
         }
         return requestHeaders;
+    }
+
+    private RequestBody getBody(final BufferedReader bufferedReader, final RequestHeaders requestHeaders)
+            throws IOException {
+        int contentLength = Integer.parseInt(requestHeaders.headers().get("Content-Length").get(0));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return RequestBody.from(new String(buffer));
     }
 
 }

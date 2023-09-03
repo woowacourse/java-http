@@ -3,8 +3,6 @@ package org.apache.coyote.response;
 import org.apache.coyote.common.Headers;
 import org.apache.coyote.common.HttpVersion;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 public class HttpResponse {
 
     private static final String SPACE = " ";
@@ -21,32 +19,6 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.httpHeaders = httpHeaders;
         this.responseBody = responseBody;
-    }
-
-    public byte[] bytes() {
-        final StringBuilder responseForm = new StringBuilder();
-
-        responseForm.append(httpVersion.version())
-                .append(SPACE)
-                .append(httpStatus.statusCode())
-                .append(SPACE)
-                .append(httpStatus.statusName())
-                .append(SPACE)
-                .append(ENTER);
-
-        for (String headerName : httpHeaders.headerNames()) {
-            responseForm.append(headerName)
-                    .append(HEADER_SPLIT_DELIMITER)
-                    .append(SPACE)
-                    .append(httpHeaders.getHeaderValue(headerName))
-                    .append(SPACE)
-                    .append(ENTER);
-        }
-
-        responseForm.append(ENTER)
-                .append(responseBody.source());
-
-        return responseForm.toString().getBytes(UTF_8);
     }
 
     public HttpVersion httpVersion() {

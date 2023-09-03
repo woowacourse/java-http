@@ -12,7 +12,7 @@
 
 ## Mission 2 : 로그인 구현하기
 
-1. [ ] HTTP Status Code 302
+1. [x] HTTP Status Code 302
 2. [ ] POST 방식으로 회원가입
 3. [ ] Cookie에 JSESSIONID 값 저장하기
 4. [ ] Session 구현하기

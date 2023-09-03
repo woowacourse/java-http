@@ -9,6 +9,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private String controllerResponse(RequestLine requestLine) {
         Controller handler = handlerMapper.getHandler(requestLine);
-        String controllerResponse = handler.handle(requestLine);
-        return staticResourceResponse(controllerResponse);
+        Response response = handler.handle(requestLine);
+        if (response.getStatusCode() == 302) {
+            return redirectResponse(response);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    private String redirectResponse(Response response) {
+        String location = (String) response.getHeaders().get("Location");
+        return String.join("\r\n",
+            "HTTP/1.1 302 FOUND ",
+            "Location: " + location
+        );
     }
 }

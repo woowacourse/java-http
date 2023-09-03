@@ -10,16 +10,19 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
-    public void checkUser(String account, String password) {
+    public boolean checkUser(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            checkPassword(user.get(), password);
+            return checkPassword(user.get(), password);
         }
+        return false;
     }
 
-    private void checkPassword(User user, String password) {
-        if (user.checkPassword(password)) {
+    private boolean checkPassword(User user, String password) {
+        boolean validLogin = user.checkPassword(password);
+        if (validLogin) {
             log.info("{}", user);
         }
+        return validLogin;
     }
 }

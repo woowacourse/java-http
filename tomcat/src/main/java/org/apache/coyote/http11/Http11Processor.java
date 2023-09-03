@@ -1,5 +1,11 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.ContentType.TEXT_CSS;
+import static org.apache.coyote.http11.ContentType.TEXT_HTML;
+import static org.apache.coyote.http11.HttpStatus.FOUND;
+import static org.apache.coyote.http11.HttpStatus.OK;
+import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String INDEX_HTML = "/index.html";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -53,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 if (httpRequest.uri().equals("/login")) {
-                    Optional<String> jsessionid = httpRequest.getCookie("JSESSIONID");
+                    Optional<String> jsessionid = httpRequest.getCookie(JSESSIONID);
 
                     if (jsessionid.isPresent()) {
                         loginWithSession(outputStream, jsessionid.get());
@@ -80,22 +88,12 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             }
 
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse httpResponse = HttpResponse.from(OK, TEXT_HTML, responseBody);
             Optional<String> acceptHeader = httpRequest.getHeader("Accept");
             if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
+                httpResponse = HttpResponse.from(OK, TEXT_CSS, responseBody);
             }
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -115,12 +113,9 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: /index.html ",
-                "",
-                "");
-        outputStream.write(response.getBytes());
+        HttpResponse httpResponse = HttpResponse.from(FOUND);
+        httpResponse.sendRedirect(INDEX_HTML);
+        outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }
 
@@ -134,12 +129,9 @@ public class Http11Processor implements Runnable, Processor {
         if (user == null) {
             throw new IllegalArgumentException("잘못된 세션입니다");
         }
-        String response = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: /index.html ",
-                "",
-                "");
-        outputStream.write(response.getBytes());
+        HttpResponse httpResponse = HttpResponse.from(FOUND);
+        httpResponse.sendRedirect(INDEX_HTML);
+        outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }
 
@@ -151,32 +143,25 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
             if (user.get().checkPassword(password)) {
-                UUID jsessionId = UUID.randomUUID();
+                UUID jsessionid = UUID.randomUUID();
                 log.info(user.get().toString());
-                Session session = new Session(jsessionId.toString());
+                Session session = new Session(jsessionid.toString());
                 session.setAttribute("user", user.get());
                 SessionManager sessionManager = new SessionManager();
                 sessionManager.add(session);
-                String response = String.join("\r\n",
-                        "HTTP/1.1 302 FOUND ",
-                        "Location: /index.html ",
-                        "Set-Cookie: JSESSIONID=" + jsessionId + " ",
-                        "",
-                        "");
-                outputStream.write(response.getBytes());
+
+                HttpResponse httpResponse = HttpResponse.from(FOUND);
+                httpResponse.sendRedirect(INDEX_HTML);
+                httpResponse.addCookie(JSESSIONID, jsessionid.toString());
+                outputStream.write(httpResponse.getBytes());
                 outputStream.flush();
                 return;
             }
         }
         URL resource = getClass().getClassLoader().getResource("static/401.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String response = String.join("\r\n",
-                "HTTP/1.1 401 UNAUTHORIZED ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        outputStream.write(response.getBytes());
+        HttpResponse httpResponse = HttpResponse.from(UNAUTHORIZED, TEXT_HTML, responseBody);
+        outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }
 }

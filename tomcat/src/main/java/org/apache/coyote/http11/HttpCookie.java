@@ -29,6 +29,18 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
+    public static HttpCookie empty() {
+        return new HttpCookie(new HashMap<>());
+    }
+
+    public void addCookie(String cookieName, String cookieValue) {
+        cookies.put(cookieName, cookieValue);
+    }
+
+    public boolean isEmpty() {
+        return cookies.isEmpty();
+    }
+
     public Optional<String> getCookie(String cookieName) {
         if (cookies.containsKey(cookieName)) {
             return Optional.of(cookies.get(cookieName));

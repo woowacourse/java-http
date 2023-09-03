@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Test;
 @DisplayNameGeneration(ReplaceUnderscores.class)
 class HttpRequestParserTest {
 
-    private final HttpRequestParser parser = new HttpRequestParser();
-
     @Test
     void body_없는_http_메세지를_파싱한다() {
         // given
@@ -42,7 +40,7 @@ class HttpRequestParserTest {
         );
 
         // when
-        HttpRequest request = parser.parse(br);
+        HttpRequest request = HttpRequestParser.parse(br);
 
         // then
         assertThat(request.startLine())
@@ -83,7 +81,7 @@ class HttpRequestParserTest {
         );
 
         // when
-        HttpRequest request = parser.parse(br);
+        HttpRequest request = HttpRequestParser.parse(br);
 
         // then
         assertThat(request.startLine())

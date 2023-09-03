@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HttpRequestParser parser = new HttpRequestParser();
 
     private final Servlet dispatcherServlet;
     private final Socket connection;
@@ -37,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
-            HttpRequest request = parser.parse(bufferedReader);
+            HttpRequest request = HttpRequestParser.parse(bufferedReader);
             HttpResponse response = new HttpResponse(bufferedWriter);
             dispatcherServlet.service(request, response);
             String responseMessage = HttpResponseMessageMaker.make(response);

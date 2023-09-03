@@ -11,7 +11,7 @@ import org.apache.catalina.servlet.request.StartLine;
 
 public class HttpRequestParser {
 
-    public HttpRequest parse(BufferedReader reader) {
+    public static HttpRequest parse(BufferedReader reader) {
         StartLine startLine = StartLine.from(readLine(reader));
         List<String> headerLines = getHeaderLines(reader);
         RequestHeaders requestHeaders = RequestHeaders.from(headerLines);
@@ -23,7 +23,7 @@ public class HttpRequestParser {
                 .build();
     }
 
-    private String readLine(BufferedReader reader) {
+    private static String readLine(BufferedReader reader) {
         try {
             return reader.readLine();
         } catch (Exception e) {
@@ -31,7 +31,7 @@ public class HttpRequestParser {
         }
     }
 
-    private List<String> getHeaderLines(BufferedReader reader) {
+    private static List<String> getHeaderLines(BufferedReader reader) {
         List<String> headers = new ArrayList<>();
         String line;
         while ((line = readLine(reader)) != null) {
@@ -43,14 +43,14 @@ public class HttpRequestParser {
         return headers;
     }
 
-    private Integer contentLength(RequestHeaders requestHeaders) {
+    private static Integer contentLength(RequestHeaders requestHeaders) {
         if (!requestHeaders.contains("Content-Length")) {
             return null;
         }
         return Integer.parseInt(requestHeaders.get("Content-Length"));
     }
 
-    private Body parseBody(BufferedReader reader, Integer length) {
+    private static Body parseBody(BufferedReader reader, Integer length) {
         if (length == null) {
             return new Body(null);
         }

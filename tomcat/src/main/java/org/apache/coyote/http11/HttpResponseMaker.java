@@ -11,12 +11,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import static org.apache.coyote.http11.RequestMapper.LOG_IN_WITH_INFOS;
+import static org.apache.coyote.http11.RequestMapper.REGISTER_WITH_INFOS;
+
 public class HttpResponseMaker {
 
     public static final String CRLF = "\r\n";
     public static final String SPACE = " ";
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
     public static final String STATIC_RESOURCE_DIR = "static";
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponseMaker.class);
@@ -24,9 +28,14 @@ public class HttpResponseMaker {
     public static String makeFrom(HttpRequestParser httpRequestParser) throws IOException {
         HttpRequestFirstLineInfo firstLineInfo = httpRequestParser.getHttpRequestFirstLineInfo();
         RequestMapper mapper = RequestMapper.findMapper(firstLineInfo);
+        Map<String, String> body = httpRequestParser.getBody();
 
-        if (mapper == RequestMapper.LOG_IN_WITH_INFOS) {
-            return handleLoginRequest(firstLineInfo, mapper);
+        if (mapper == LOG_IN_WITH_INFOS) {
+            return handleLoginRequest(firstLineInfo, body, mapper);
+        }
+
+        if (mapper == REGISTER_WITH_INFOS) {
+            return handleRegisterRequest(firstLineInfo, body, mapper);
         }
 
         String responseBody = "Hello world!";
@@ -38,18 +47,35 @@ public class HttpResponseMaker {
         return buildResponse(firstLineInfo, mapper, responseBody);
     }
 
-    private static String handleLoginRequest(HttpRequestFirstLineInfo firstLineInfo, RequestMapper mapper) {
-        Map<String, String> paramAndValues = firstLineInfo.getQueryStringParser().getParamAndValues();
-
-        User user = InMemoryUserRepository.findByAccount(paramAndValues.get(ACCOUNT))
+    private static String handleLoginRequest(
+            HttpRequestFirstLineInfo firstLineInfo,
+            Map<String, String> body,
+            RequestMapper mapper
+    ) {
+        User user = InMemoryUserRepository.findByAccount(body.get(ACCOUNT))
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
 
-        if (!user.checkPassword(paramAndValues.get(PASSWORD))) {
+        if (!user.checkPassword(body.get(PASSWORD))) {
             return buildRedirectResponse(firstLineInfo, RedirectLocation.LOG_IN_FAIL, mapper);
         }
         log.info("user: {}", user);
 
         return buildRedirectResponse(firstLineInfo, RedirectLocation.LOG_IN_SUCCESS, mapper);
+    }
+
+    private static String handleRegisterRequest(
+            HttpRequestFirstLineInfo firstLineInfo,
+            Map<String, String> body,
+            RequestMapper mapper
+    ) {
+        if (InMemoryUserRepository.findByAccount(body.get(ACCOUNT)).isPresent()) {
+            throw new IllegalArgumentException("이미 가입된 회원입니다.");
+        }
+
+        User user = new User(body.get(ACCOUNT), body.get(PASSWORD), body.get(EMAIL));
+        InMemoryUserRepository.save(user);
+
+        return buildRedirectResponse(firstLineInfo, RedirectLocation.REGISTER, mapper);
     }
 
     private static String readStaticResource(RequestMapper mapper) throws IOException {

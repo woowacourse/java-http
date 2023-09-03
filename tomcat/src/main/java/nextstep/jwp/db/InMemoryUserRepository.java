@@ -2,6 +2,7 @@ package nextstep.jwp.db;
 
 import nextstep.jwp.model.User;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,13 +16,20 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
+        database.values().stream()
+                .max(Comparator.comparingLong(User::getId))
+                .ifPresent(maxIdUser -> {
+                    long nextId = maxIdUser.getId() + 1;
+                    user.setId(nextId);
+                });
         database.put(user.getAccount(), user);
     }
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
-
-    private InMemoryUserRepository() {}
 }

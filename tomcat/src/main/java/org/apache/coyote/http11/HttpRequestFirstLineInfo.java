@@ -13,13 +13,11 @@ public class HttpRequestFirstLineInfo {
     private final HttpMethod httpMethod;
     private final String uri;
     private final String versionOfTheProtocol;
-    private final QueryStringParser queryStringParser;
 
-    private HttpRequestFirstLineInfo(HttpMethod httpMethod, String uri, String versionOfTheProtocol, QueryStringParser queryStringParser) {
+    private HttpRequestFirstLineInfo(HttpMethod httpMethod, String uri, String versionOfTheProtocol) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.versionOfTheProtocol = versionOfTheProtocol;
-        this.queryStringParser = queryStringParser;
     }
 
     public static HttpRequestFirstLineInfo from(String firstLine) {
@@ -35,11 +33,10 @@ public class HttpRequestFirstLineInfo {
         int indexOfQueryStringDelimiter = uriWithQueryString.indexOf(QUERY_STRING_DELIMITER);
         if (indexOfQueryStringDelimiter != -1) {
             String uri = uriWithQueryString.substring(0, indexOfQueryStringDelimiter);
-            QueryStringParser queryStringParser = QueryStringParser.from(uriWithQueryString.substring(indexOfQueryStringDelimiter + 1));
-            return new HttpRequestFirstLineInfo(httpMethod, uri, versionOfTheProtocol, queryStringParser);
+            return new HttpRequestFirstLineInfo(httpMethod, uri, versionOfTheProtocol);
         }
 
-        return new HttpRequestFirstLineInfo(httpMethod, uriWithQueryString, versionOfTheProtocol, null);
+        return new HttpRequestFirstLineInfo(httpMethod, uriWithQueryString, versionOfTheProtocol);
     }
 
     private static HttpMethod parseHttpMethod(String method) {
@@ -60,9 +57,5 @@ public class HttpRequestFirstLineInfo {
 
     public String getVersionOfTheProtocol() {
         return versionOfTheProtocol;
-    }
-
-    public QueryStringParser getQueryStringParser() {
-        return queryStringParser;
     }
 }

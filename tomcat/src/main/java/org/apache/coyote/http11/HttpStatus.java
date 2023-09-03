@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 public enum HttpStatus {
     OK("OK", 200),
+    CREATED("Created", 201),
     FOUND("Found", 302),
     UNAUTHORIZED("Unauthorized", 401),
     NOT_FOUND("Not Found", 404),
-    INTERNAL_SERVER_ERROR("Internal Server Error", 500),
-    ;
+    INTERNAL_SERVER_ERROR("Internal Server Error", 500);
 
     private final String status;
     private final int statusCode;

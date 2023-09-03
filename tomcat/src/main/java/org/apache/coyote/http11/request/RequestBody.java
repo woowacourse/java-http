@@ -17,21 +17,26 @@ public class RequestBody {
     }
 
     public static RequestBody of(final RequestHeader requestHeader, final BufferedReader bufferedReader) throws IOException {
+        if (!requestHeader.containsKey("Content-Length")) {
+            return EMPTY;
+        }
         final Map<String, String> result = new HashMap<>();
+        final int contentLength = Integer.parseInt(requestHeader.getHeaderValue("Content-Length"));
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String body = new String(buffer);
 
-        int contentLength = Integer.parseInt(requestHeader.getHeaderValue("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String body = new String(buffer);
-
-        final StringTokenizer token = new StringTokenizer(body, "&");
-        while (token.hasMoreTokens()) {
-            final String param = token.nextToken();
-            final String[] split = param.split("=");
-            result.put(split[0], split[1]);
+            final StringTokenizer token = new StringTokenizer(body, "&");
+            while (token.hasMoreTokens()) {
+                final String param = token.nextToken();
+                final String[] split = param.split("=");
+                result.put(split[0], split[1]);
+            }
+            return new RequestBody(result);
         }
 
-        return new RequestBody(result);
+        return EMPTY;
     }
 
     public String getParamValue(final String key) {

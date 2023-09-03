@@ -6,28 +6,33 @@ import org.slf4j.LoggerFactory;
 public class Response {
     private static final Logger log = LoggerFactory.getLogger(Response.class);
 
-    //    private final ResponseHeader responseHeader;
+    private final StatusLine statusLine;
+    private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
-    private final HttpStatus httpStatus;
 
-    private Response(final ResponseBody responseBody, final HttpStatus httpStatus) {
-//        this.responseHeader = parseResponseHeader(responseBody);
+    public Response(final StatusLine statusLine, final ResponseHeader responseHeader, final ResponseBody responseBody) {
+        this.statusLine = statusLine;
+        this.responseHeader = responseHeader;
         this.responseBody = responseBody;
-        this.httpStatus = httpStatus;
     }
 
+
     public static Response of(final ResponseBody responseBody, final HttpStatus httpStatus) {
-        return new Response(responseBody, httpStatus);
+        return new Response(StatusLine.of(httpStatus), ResponseHeader.basic(responseBody), responseBody);
+    }
+
+    public static Response redirect(final String redirectPath, final ResponseBody responseBody, final HttpStatus httpStatus) {
+        return new Response(StatusLine.of(httpStatus), ResponseHeader.redirect(responseBody, redirectPath), responseBody);
     }
 
     @Override
     public String toString() {
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.name() + " ",
-                "Content-Type: " + responseBody.getContentType().getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getContent().getBytes().length + " ",
-                "",
-                responseBody.getContent());
+        final String result = statusLine.getStatusLine() + "\r\n" +
+                responseHeader.toString() + "\r\n" +
+                "" + "\r\n" +
+                responseBody.getContent();
+        log.info("result = {}", result);
+        return result;
     }
 }
 

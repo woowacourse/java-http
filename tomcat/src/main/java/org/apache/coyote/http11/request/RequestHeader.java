@@ -26,12 +26,12 @@ public class RequestHeader {
         return new RequestHeader(result);
     }
 
-    public boolean hasBody() {
-        return header.containsKey("content-length");
-    }
-
     public String getHeaderValue(final String key) {
         return header.get(key);
+    }
+
+    public boolean containsKey(final String key) {
+        return header.containsKey(key);
     }
 
     public Map<String, String> getHeader() {

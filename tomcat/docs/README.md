@@ -18,6 +18,6 @@ Accept: text/css,*/*;q=0.1
 Connection: keep-alive
 ```
 
-- [ ] Query String을 파싱한다.
-  - [ ] Login Page를 반환한다.
-  - [ ] 로그인이 가능(아이디, 비밀번호 일치)하면, 콘솔 로그에 회원 정보를 출력한다.
+- [X] Query String을 파싱한다.
+  - [X] Login Page를 반환한다.
+  - [X] 로그인이 가능(아이디, 비밀번호 일치)하면, 콘솔 로그에 회원 정보를 출력한다.

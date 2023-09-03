@@ -1,66 +1,47 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String target;
+    private final RequestLine requestLine;
     private final Map<String, String> header;
     private final Map<String, String> body;
 
-    private HttpRequest(final String method, final String target, final Map<String, String> header, final Map<String, String> body) {
-        this.method = method;
-        this.target = target;
+    private HttpRequest(final RequestLine requestLine, final Map<String, String> header, final Map<String, String> body) {
+        this.requestLine = requestLine;
         this.header = header;
         this.body = body;
     }
 
-    public static HttpRequest of(final BufferedReader reader) {
-        final String method;
-        final String target;
-        final Map<String, String> header = new HashMap<>();
-        final Map<String, String> body = new HashMap<>();
-
+    public static HttpRequest of(final InputStream inputStream) {
+        final HttpRequestParser httpRequestParser = new HttpRequestParser(inputStream);
         try {
-            final String request = reader.readLine();
-            method = request.split(" ")[0];
-            target = request.split(" ")[1];
-
-            String line;
-            while (!"".equals(line = reader.readLine())) {
-                String[] value = line.split(": ");
-                header.put(value[0], value[1]);
-            }
-
-
+            final RequestLine requestLine = httpRequestParser.parseRequestLine();
+            final Map<String, String> header = httpRequestParser.parseRequestHeader();
             if (header.get("Content-Length") != null) {
-                int contentLength = Integer.parseInt(header.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-
-                for (String temp : new String(buffer).split("&")) {
-                    String[] value = temp.split("=");
-                    body.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
-                }
+                final Map<String, String> body = httpRequestParser.parseRequestBody(header.get("Content-Length"));
+                return new HttpRequest(requestLine, header, body);
             }
-
+            return new HttpRequest(requestLine, header, new HashMap<>());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new HttpRequest(method, target, header, body);
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getTarget() {
-        return target;
+        return requestLine.getTarget();
+    }
+
+    public String getVersion() {
+        return requestLine.getVersion();
     }
 
     public Map<String, String> getHeader() {

@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = HttpRequest.of(new BufferedReader(new InputStreamReader(inputStream)));
+            final HttpRequest httpRequest = HttpRequest.of(inputStream);
             final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
             final HttpResponse httpResponse = handleRequest(httpRequest);
             outputStream.write(httpResponse.stringify().getBytes());

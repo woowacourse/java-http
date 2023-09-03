@@ -15,13 +15,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int INDEX_URI = 1;
 
     private final Socket connection;
 
@@ -46,9 +48,8 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            List<String> requests = Arrays.stream(request.split(" ")).collect(Collectors.toList());
-            String requestURI = requests.get(INDEX_URI);
-            String response = createResponse(requestURI);
+            RequestStartLine requestStartLine = RequestStartLine.from(request);
+            String response = createResponse(requestStartLine.getRequestURI());
 
             outputStream.write(response.getBytes());
             outputStream.flush();

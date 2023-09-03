@@ -40,16 +40,20 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream();
 			 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-			final var requestLine = readRequestLine(reader);
-			final var requestHeader = readRequestHeader(reader);
-			final var requestBody = readRequestBody(reader, requestHeader);
-			final var request = new Request(requestLine, requestHeader, requestBody);
+			final Request request = readRequest(reader);
 			final var response = HandlerMapping.handle(request);
 			outputStream.write(response.format().getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	private Request readRequest(final BufferedReader reader) throws IOException {
+		final var requestLine = readRequestLine(reader);
+		final var requestHeader = readRequestHeader(reader);
+		final var requestBody = readRequestBody(reader, requestHeader);
+		return new Request(requestLine, requestHeader, requestBody);
 	}
 
 	private RequestLine readRequestLine(final BufferedReader reader) throws IOException {

@@ -7,6 +7,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.StatusCode;
@@ -21,6 +22,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static org.apache.coyote.http11.request.RequestMethod.GET;
+import static org.apache.coyote.http11.request.RequestMethod.POST;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -71,11 +75,11 @@ public class Http11Processor implements Runnable, Processor {
         final String requestPath = request.getRequestLine().getRequestPath();
         final RequestParameters requestParameters = request.getRequestParameters();
 
-        if ("/".equals(requestPath)) {
+        if ("/".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
             return new Response("Hello world!");
         }
 
-        if ("/login".equals(requestPath)) {
+        if ("/login".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
             final String account = requestParameters.getValue("account");
             if (account == null) {
                 return findStaticResource("/login.html");
@@ -91,6 +95,24 @@ public class Http11Processor implements Runnable, Processor {
             log.info("user: {}", user);
             final Headers headers = new Headers();
             headers.addHeader(ResponseHeader.LOCATION, "/index.html");
+            return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+        }
+
+        if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
+            return findStaticResource("/register.html");
+        }
+
+        if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == POST) {
+            final String account = requestParameters.getValue("account");
+            final String password = requestParameters.getValue("password");
+            final String email = requestParameters.getValue("email");
+
+            final User user = new User(account, password, email);
+
+            InMemoryUserRepository.save(user);
+
+            final Headers headers = new Headers();
+            headers.addHeader(ResponseHeader.LOCATION, "/login");
             return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
 

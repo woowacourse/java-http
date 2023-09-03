@@ -25,7 +25,6 @@ public class RequestLine {
 
         final String path = getString(requestUriValue);
         final RequestMethod requestMethod = RequestMethod.from(requestMethodValue);
-        System.out.println(requestProtocolValue);
         final Protocol protocol = Protocol.from(requestProtocolValue);
 
         return new RequestLine(requestMethod, path, protocol);

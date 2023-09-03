@@ -11,21 +11,11 @@ public class RequestParameters {
         this.requestParameters = requestParameters;
     }
 
-    public static RequestParameters from(final String requestFirstLine) {
-        final String[] requestFirstLineElements = requestFirstLine.split(" ");
-        final String requestUriValue = requestFirstLineElements[1];
-
-        final Map<String, String> requestParameters = getRequestParameters(requestUriValue);
-
-        return new RequestParameters(requestParameters);
-    }
-
-    private static Map<String, String> getRequestParameters(final String requestUriValue) {
+    public static RequestParameters from(final String queryStrings) {
         final Map<String, String> requestQueryParameters = new HashMap<>();
-        if (!requestUriValue.contains("?")) {
-            return requestQueryParameters;
+        if (queryStrings == null || "".equals(queryStrings)){
+            return new RequestParameters(requestQueryParameters);
         }
-        final String queryStrings = requestUriValue.substring(requestUriValue.indexOf("?") + 1);
         final String[] queryStringsNameAndValue = queryStrings.split("&");
         for (String queryString : queryStringsNameAndValue) {
             final String[] queryStringNameAndValue = queryString.split("=");
@@ -33,7 +23,7 @@ public class RequestParameters {
             final String value = queryStringNameAndValue[1];
             requestQueryParameters.put(name, value);
         }
-        return requestQueryParameters;
+        return new RequestParameters(requestQueryParameters);
     }
 
     public String getValue(final String key) {

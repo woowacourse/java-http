@@ -1,23 +1,16 @@
 package org.apache.coyote.http11.request;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.header.Headers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 
 public class Request {
-
-    private static final Logger log = LoggerFactory.getLogger(Request.class);
 
     private final RequestLine requestLine;
     private final Headers headers;
@@ -48,7 +41,6 @@ public class Request {
         final RequestLine requestLine = RequestLine.from(requestFirstLine);
         final Headers headers = new Headers();
         headers.addRequestHeaders(requestHeaderLines);
-        final RequestParameters requestParameters = RequestParameters.from(requestFirstLine);
 
         final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
         final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
@@ -56,7 +48,27 @@ public class Request {
         bufferedReader.read(buffer, 0, contentLength);
         final String body = new String(buffer);
 
+        final String queryStrings = extractQueryStrings(requestFirstLine, body, headers);
+        final RequestParameters requestParameters = RequestParameters.from(queryStrings);
+
         return new Request(requestLine, headers, body, requestParameters);
+    }
+
+    private static String extractQueryStrings(final String requestFirstLine,
+                                              final String body,
+                                              final Headers headers) {
+
+        final String[] requestFirstLineElements = requestFirstLine.split(" ");
+        final String requestUriValue = requestFirstLineElements[1];
+
+        if (requestUriValue.contains("?")) {
+            return requestUriValue.substring(requestUriValue.indexOf("?") + 1);
+        }
+
+        if ("application/x-www-form-urlencoded".equalsIgnoreCase(headers.getValue(CONTENT_TYPE))) {
+            return body;
+        }
+        return "";
     }
 
     public RequestLine getRequestLine() {

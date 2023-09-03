@@ -16,7 +16,6 @@ public class FileHandler implements Handler {
     @Override
     public ResponseEntity handle(HttpRequest request) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        System.out.println("handler: " + request.getEndPoint());
         URL resource = classLoader.getResource("static" + request.getEndPoint());
 
         File file = new File(resource.getFile());

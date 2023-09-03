@@ -1,11 +1,6 @@
-package nextstep.jwp.protocol.request_line;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nextstep.jwp.protocol.request.line;
 
 public class RequestLine {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
 
     private final HttpMethod method;
     private final Path path;

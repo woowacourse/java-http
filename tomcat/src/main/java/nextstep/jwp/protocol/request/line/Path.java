@@ -1,8 +1,8 @@
-package nextstep.jwp.protocol.request_line;
+package nextstep.jwp.protocol.request.line;
 
 import java.util.Map;
-import nextstep.jwp.protocol.request_line.vo.DefaultPath;
-import nextstep.jwp.protocol.request_line.vo.QueryString;
+import nextstep.jwp.protocol.request.line.vo.DefaultPath;
+import nextstep.jwp.protocol.request.line.vo.QueryString;
 
 public class Path {
 

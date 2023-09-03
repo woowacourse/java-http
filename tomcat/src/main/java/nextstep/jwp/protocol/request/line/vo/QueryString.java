@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request_line.vo;
+package nextstep.jwp.protocol.request.line.vo;
 
 import java.util.Arrays;
 import java.util.List;

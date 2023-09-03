@@ -1,8 +1,6 @@
 package nextstep.jwp.protocol.http;
 
-import nextstep.jwp.protocol.request_line.Path;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import nextstep.jwp.protocol.request.line.Path;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

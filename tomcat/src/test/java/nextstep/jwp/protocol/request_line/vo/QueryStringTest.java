@@ -1,5 +1,6 @@
 package nextstep.jwp.protocol.request_line.vo;
 
+import nextstep.jwp.protocol.request.line.vo.QueryString;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package nextstep.jwp.protocol.request_line;
+package nextstep.jwp.protocol.request.line;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

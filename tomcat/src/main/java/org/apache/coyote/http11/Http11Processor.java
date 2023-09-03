@@ -14,6 +14,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,47 +43,71 @@ public class Http11Processor implements Runnable, Processor {
                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             final var uri = bufferedReader.readLine().split(" ")[1];
-            final String response = buildResponse(uri);
+            log.info("request uri: {}", uri);
+            final var response = handleRequest(uri);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.buildResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private File resolveFile(String uri) {
-        if (uri.contains("/login")) {
-            final var params = queryParams(uri);
-            validateUser(params);
-            return getFile("/login.html");
+    private HttpResponse handleLogin(final String uri) throws IOException {
+        final var params = queryParams(uri);
+        final var user = findUser(params);
+        if (user.isEmpty()) {
+            File page = getFile("/401.html");
+            String contentType = getContentType(page);
+            String body = buildResponseBody(page);
+            return new HttpResponse("401 Unauthorized", contentType, body);
         }
-        return getFile(uri);
+        log.info("user: {}", user);
+        return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
+                Map.of("Location", "/index.html"));
     }
 
-    private void validateUser(Map<String, String> params) {
-        InMemoryUserRepository.findByAccount(params.get("account"))
+    private String getContentType(final File file) throws IOException {
+        if (file == null) {
+            return "Content-Type: text/plain;charset=utf-8 ";
+        }
+        final var urlConnection = file.toURI().toURL().openConnection();
+        final var mimeType = urlConnection.getContentType();
+        return "Content-Type: " + mimeType + ";charset=utf-8 ";
+
+    }
+
+    private String buildResponseBody(final File file) throws IOException {
+        if (file == null) {
+            return "Hello world!";
+        }
+        return new String(Files.readAllBytes(file.toPath()));
+    }
+
+
+    private Optional<User> findUser(Map<String, String> params) {
+        return InMemoryUserRepository.findByAccount(params.get("account"))
                 .filter(user -> user.checkPassword(params.get("password")))
-                .ifPresent(user -> log.info("user: {}", user));
+                .stream().findFirst();
     }
 
-    private String buildResponse(final String uri) throws IOException {
-        final File file = resolveFile(uri);
-        final String response = buildResponse(file);
-        return response;
-    }
+    private HttpResponse handleRequest(final String uri) throws IOException {
+        if (uri.contains("/login")) {
+            return handleLogin(uri);
+        }
 
-    private String buildResponse(final File file) throws IOException {
-        final String contentType = getContentType(file);
-        final String responseBody = buildResponseBody(file);
+        try {
+            File file = getFile(uri);
+            String contentType = getContentType(file);
+            String body = buildResponseBody(file);
+            return new HttpResponse("200 OK", contentType, body);
+        } catch (Exception e) {
+            File page = getFile("/404.html");
+            String contentType = getContentType(page);
+            String body = buildResponseBody(page);
+            return new HttpResponse("404 Not Found", contentType, body);
+        }
 
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                contentType,
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return response;
     }
 
     private Map<String, String> queryParams(String uri) {
@@ -98,24 +123,6 @@ public class Http11Processor implements Runnable, Processor {
             queryString = split[split.length - 1];
         }
         return params;
-    }
-
-    private String getContentType(final File file) throws IOException {
-        if (file == null) {
-            return "Content-Type: text/plain;charset=utf-8 ";
-        }
-        final var urlConnection = file.toURI().toURL().openConnection();
-        final var mimeType = urlConnection.getContentType();
-        return "Content-Type: " + mimeType + ";charset=utf-8 ";
-
-
-    }
-
-    private String buildResponseBody(final File file) throws IOException {
-        if (file == null) {
-            return "Hello world!";
-        }
-        return new String(Files.readAllBytes(file.toPath()));
     }
 
     @Nullable

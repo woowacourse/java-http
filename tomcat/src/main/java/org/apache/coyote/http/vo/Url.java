@@ -24,6 +24,10 @@ public class Url {
         return QueryStrings.getEmptyQueryStrings();
     }
 
+    public boolean isContainSubString(final String subString) {
+        return this.urlPath.contains(subString);
+    }
+
     public String getUrlPath() {
         return urlPath;
     }

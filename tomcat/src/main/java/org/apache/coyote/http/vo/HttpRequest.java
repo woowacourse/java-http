@@ -43,8 +43,12 @@ public class HttpRequest {
     }
 
     private static HttpHeaders getHeaders(final String fullRawRequest) {
-        final String rawHeaders = fullRawRequest.substring(fullRawRequest.indexOf(REQUEST_LINE_DELIMITER)+1);
+        final String rawHeaders = fullRawRequest.substring(fullRawRequest.indexOf(REQUEST_LINE_DELIMITER) + 1);
         return new HttpHeaders(rawHeaders);
+    }
+
+    public boolean isContainsSubStringInUrl(final String subString) {
+        return url.isContainSubString(subString);
     }
 
     public HttpMethod getMethod() {

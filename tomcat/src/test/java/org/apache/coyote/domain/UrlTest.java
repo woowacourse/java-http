@@ -29,4 +29,16 @@ class UrlTest {
                 )
         );
     }
+
+    @Test
+    void Url_객체는_특정_값이_들어있는지_검사할_수_있다() {
+        // given
+        final String rawUrl = "/login.html";
+
+        // when
+        Url url = new Url(rawUrl);
+
+        // then
+        assertThat(url.isContainSubString(".html")).isTrue();
+    }
 }

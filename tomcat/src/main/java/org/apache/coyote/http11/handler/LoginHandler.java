@@ -9,14 +9,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 
+import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParam;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.util.QueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,10 +66,12 @@ public class LoginHandler implements HttpHandler {
 	}
 
 	private static HttpResponse loginProcess(final HttpRequest request) {
-		final QueryParam queryParam = request.getQueryParam();
-		final String account = queryParam.get(ACCOUNT_PARAM_KEY);
+		final Map<String, String> parsedQuery = request.getBody()
+			.map(QueryParser::parse)
+			.orElseThrow(EmptyBodyException::new);
+		final String account = parsedQuery.get(ACCOUNT_PARAM_KEY);
 		return InMemoryUserRepository.findByAccount(account)
-			.map(user -> checkPasswordProcess(queryParam.get(PASSWORD_PARAM_KEY), user))
+			.map(user -> checkPasswordProcess(parsedQuery.get(PASSWORD_PARAM_KEY), user))
 			.orElseThrow(UnauthorizedException::new);
 	}
 

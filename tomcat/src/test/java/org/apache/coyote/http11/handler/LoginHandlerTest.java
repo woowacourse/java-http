@@ -56,7 +56,7 @@ class LoginHandlerTest {
 			final URL resource = getClass().getClassLoader().getResource("static" + file);
 			final String expected = "HTTP/1.1 200 OK \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
-				"Content-Length: 3796 \r\n" +
+				"Content-Length: 3797 \r\n" +
 				"\r\n" +
 				new String(readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -66,13 +66,13 @@ class LoginHandlerTest {
 
 		@Test
 		@DisplayName("Post메서드고, 로그인에 성공하는 경우 302 상태코드와 Location index.html을 반환한다.")
-		void loginSuccess() throws IOException {
+		void loginSuccess() {
 			final String plainRequest = String.join("\r\n",
-				"POST /login?account=gugu&password=password HTTP/1.1 ",
+				"POST /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
 				"",
-				"");
+				"account=gugu&password=password");
 			final HttpRequest request = HttpRequest.from(plainRequest);
 
 			final HttpResponse actual = HANDLER.handleTo(request);
@@ -91,11 +91,11 @@ class LoginHandlerTest {
 		@DisplayName("Post 메서드고, 로그인에 실패하는 경우 UnauthorizedException을 반환한다.")
 		void loginFail() {
 			final String plainRequest = String.join("\r\n",
-				"POST /login?account=gugu&password=invalid HTTP/1.1 ",
+				"POST /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
 				"",
-				"");
+				"account=gugu&password=invalid");
 			final HttpRequest request = HttpRequest.from(plainRequest);
 
 			assertThatThrownBy(() -> HANDLER.handleTo(request))

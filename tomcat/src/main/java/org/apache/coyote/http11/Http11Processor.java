@@ -128,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String controllerResponse(Request request) {
         Controller handler = handlerMapper.getHandler(request);
-        Response<Object> response = handler.handle(request);
+        Response<Object> response = (Response<Object>) handler.handle(request);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(requestLine(response));
         Optional<String> body = bodyOf(response);

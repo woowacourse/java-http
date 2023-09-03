@@ -24,7 +24,7 @@ public class ResourceProvider {
             }
             return Optional.of(resourceURL);
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            return Optional.empty();
         }
     }
 
@@ -37,7 +37,7 @@ public class ResourceProvider {
             }
             throw new IllegalArgumentException("파일이 존재하지 않습니다.");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 

@@ -9,7 +9,7 @@ public class SignUpViewController implements Controller {
     private static final String LOCATION_HEADER = "Location";
 
     @Override
-    public Response handle(Request request) {
+    public Response<Object> handle(Request request) {
         if (SessionManager.loggedIn(request)) {
             return Response.status(302)
                 .addHeader(LOCATION_HEADER, "/index.html")

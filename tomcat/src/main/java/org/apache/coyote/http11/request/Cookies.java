@@ -6,23 +6,23 @@ import java.util.Optional;
 public class Cookies {
 
     private static final String SESSION_COOKIE = "JSESSIONID";
-    private Map<String, String> cookies;
+    private final Map<String, String> cookieValues;
 
-    public Cookies(Map<String, String> cookies) {
-        this.cookies = cookies;
+    public Cookies(Map<String, String> cookieValues) {
+        this.cookieValues = cookieValues;
     }
 
     public Optional<String> getCookieOf(String cookieName) {
-        if (!cookies.containsKey(cookieName)) {
+        if (!cookieValues.containsKey(cookieName)) {
             return Optional.empty();
         }
-        return Optional.of(cookies.get(cookieName));
+        return Optional.of(cookieValues.get(cookieName));
     }
 
     public Optional<String> getSessionCookie() {
-        if (!cookies.containsKey(SESSION_COOKIE)) {
+        if (!cookieValues.containsKey(SESSION_COOKIE)) {
             return Optional.empty();
         }
-        return Optional.of(cookies.get(SESSION_COOKIE));
+        return Optional.of(cookieValues.get(SESSION_COOKIE));
     }
 }

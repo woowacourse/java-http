@@ -5,5 +5,5 @@ import org.apache.coyote.http11.response.Response;
 
 public interface Controller {
 
-    Response handle(Request request);
+    Response<? extends Object> handle(Request request);
 }

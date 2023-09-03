@@ -1,16 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.request.HttpRequest;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,22 +33,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final InputStreamReader reader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(reader);
-            final List<String> request = new ArrayList<>();
-            String line;
-            do {
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    return;
-                }
-                request.add(line);
-            } while (!"".equals(line));
+            final HttpRequest httpRequest = HttpRequest.of(inputStream);
 
             String responseBody = "Hello world!";
-            final String requestFileName = request.get(0).split(" ")[1];
-            if (requestFileName.length() > 1) {
-                final URL url = getClass().getClassLoader().getResource("static/" + requestFileName);
+            final String uri = httpRequest.getRequestUri();
+            if (uri.length() > 1) {
+                final URL url = getClass().getClassLoader().getResource("static/" + uri);
                 if (url != null) {
                     final var path = Paths.get(url.toURI());
                     responseBody = Files.readString(path);
@@ -59,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String response;
-            if (request.get(0).split(" ")[1].endsWith(".css")) {
+            if (uri.endsWith(".css")) {
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/css",

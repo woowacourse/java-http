@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.request.Method.GET;
 import static org.apache.coyote.http11.request.Method.POST;
 import static org.apache.coyote.http11.response.Status.FOUND;
-import static org.apache.coyote.http11.response.Status.NOT_FOUND;
 import static org.apache.coyote.http11.response.Status.OK;
 import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
 
@@ -31,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
+    public static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String LINE_SEPARATOR = "\r\n";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
 
@@ -104,11 +103,16 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response makeResponseOf(final Http11Request request) {
         final Method method = request.getMethod();
         final String path = request.getPath();
-        Status status;
+        final Status status;
         final Http11Response response;
 
         if (method == GET) {
             status = OK;
+            if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
+
+                return makeAuthResponse(FOUND, request, request.getCookie(SESSION_COOKIE_NAME));
+            }
+
             final String responseBody = getResponseBodyFromResource(OK, path);
             response = new Http11Response(status, responseBody);
             final String accept = request.getHeader("Accept");
@@ -118,46 +122,54 @@ public class Http11Processor implements Runnable, Processor {
             return response;
         }
         if (method == POST) {
-            status = NOT_FOUND;
             if (path.equals("/login")) {
-                status = logIn(request);
+                return logIn(request);
             }
             if (path.equals("/register")) {
-                status = register(request);
+                return register(request);
             }
-
-            final String responseBody = getResponseBodyFromResource(status, path);
-
-            response = new Http11Response(status, responseBody);
-            if (status == FOUND) {
-                response.addHeader("Location", "/index.html");
-                if (!request.isCookieExist("JSESSIONID")) {
-                    final UUID uuid = UUID.randomUUID();
-                    response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
-                }
-            }
-            return response;
         }
         throw new IllegalArgumentException("Invalid Request Uri");
     }
 
-    private Status logIn(final Http11Request request) {
+    private Http11Response logIn(final Http11Request request) {
         final Map<String, String> bodyFields = parseFormData(request.getBody());
         final String account = bodyFields.get("account");
         final String password = bodyFields.get("password");
 
+        // TODO: 유저가 존재하지 않는 경우 예외 처리
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
 
+        Status status = UNAUTHORIZED;
+        String id = null;
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            return FOUND;
+
+            id = UUID.randomUUID().toString();
+            final Session session = new Session(id);
+            session.setAttribute("user", user);
+            SessionManager.add(session);
+            status = FOUND;
         }
 
-        return UNAUTHORIZED;
+        return makeAuthResponse(status, request, id);
     }
 
-    private Status register(final Http11Request request) {
+    private Http11Response makeAuthResponse(final Status status, final Http11Request request, final String uuid) {
+        final String responseBody = getResponseBodyFromResource(status, request.getPath());
+        final Http11Response response = new Http11Response(status, responseBody);
+
+        if (status == FOUND) {
+            response.addHeader("Location", "/index.html");
+            if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+            }
+        }
+        return response;
+    }
+
+    private Http11Response register(final Http11Request request) {
         final Map<String, String> bodyFields = parseFormData(request.getBody());
 
         final String account = bodyFields.get("account");
@@ -167,7 +179,13 @@ public class Http11Processor implements Runnable, Processor {
         final User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        return FOUND;
+
+        final String id = UUID.randomUUID().toString();
+        final Session session = new Session(id);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+
+        return makeAuthResponse(FOUND, request, id);
     }
 
     private Map<String, String> parseFormData(final String body) {

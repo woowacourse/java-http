@@ -88,6 +88,9 @@ public class Http11Request {
 
     private static Map<String, String> parseCookies(final String cookieFields) {
         final Map<String, String> cookies = new HashMap<>();
+        if (cookieFields == null) {
+            return cookies;
+        }
 
         for (final String field : cookieFields.split("; ")) {
             final String[] cookie = field.split("=", 2);
@@ -122,6 +125,10 @@ public class Http11Request {
 
     public boolean isCookieExist(final String cookieName) {
         return cookies.containsKey(cookieName);
+    }
+
+    public String getCookie(final String cookieName) {
+        return cookies.get(cookieName);
     }
 
     public String getBody() {

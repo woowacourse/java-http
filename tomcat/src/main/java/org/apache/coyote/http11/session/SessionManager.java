@@ -16,6 +16,6 @@ public class SessionManager {
     }
 
     public void remove(Session session) {
-        SESSIONS.remove(session);
+        SESSIONS.remove(session.getId());
     }
 }

@@ -26,9 +26,9 @@ class Http11ProcessorTest {
         // then
 
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "Hello world!"
         );
     }
@@ -37,10 +37,10 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -52,10 +52,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
+        var expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8" + System.lineSeparator() +
+                "Content-Length: 5564" + System.lineSeparator() +
+                System.lineSeparator() +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -65,7 +65,7 @@ class Http11ProcessorTest {
     @Test
     void login() {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -81,11 +81,11 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(
-                "HTTP/1.1 302 FOUND ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Location: /index.html ",
-                "Set-Cookie: "
+                "HTTP/1.1 302 FOUND",
+                "Content-Type: text/html;charset=utf-8",
+                "Location: /index.html",
+                "Set-Cookie:"
         );
     }
-    
+
 }

@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 public class Headers {
 
+    private static final String LINE_SEPARATOR = System.lineSeparator();
+
     private final Map<String, String> values;
 
     public Headers() {
@@ -52,6 +54,6 @@ public class Headers {
         return values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .collect(Collectors.joining(" \r\n", "", " \r\n"));
+                .collect(Collectors.joining(LINE_SEPARATOR, "", LINE_SEPARATOR));
     }
 }

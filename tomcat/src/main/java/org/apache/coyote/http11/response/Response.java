@@ -10,6 +10,8 @@ import org.apache.coyote.http11.common.Status;
 
 public class Response {
 
+    private static final String LINE_SEPARATOR = System.lineSeparator();
+
     private final Status status;
     private final ContentType contentType;
     private final Headers headers;
@@ -40,7 +42,7 @@ public class Response {
     public static Response redirect(String location) {
         Response response = Response.of(FOUND, HTML.toString(), "");
         response.addLocation(location);
-        
+
         return response;
     }
 
@@ -74,11 +76,11 @@ public class Response {
 
     @Override
     public String toString() {
-        return "HTTP/1.1 " + status.getCode() + " " + status.name() + " \r\n"
-                + "Content-Type: " + contentType.withCharset("utf-8") + " \r\n"
-                + "Content-Length: " + body.getBytes().length + " \r\n"
+        return "HTTP/1.1 " + status.getCode() + " " + status.name() + LINE_SEPARATOR
+                + "Content-Type: " + contentType.withCharset("utf-8") + LINE_SEPARATOR
+                + "Content-Length: " + body.getBytes().length + LINE_SEPARATOR
                 + headers
-                + "\r\n"
+                + LINE_SEPARATOR
                 + body;
     }
 }

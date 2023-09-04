@@ -24,17 +24,13 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final InputStream inputStream) {
-        try (final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-            final HttpRequestLine httpRequestLine = makeHttpRequestLine(bufferedReader.readLine());
-            final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-            final RequestBody requestBody = RequestBody.from(bufferedReader);
-            return new HttpRequest(httpRequestLine, requestHeaders, requestBody);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e.getMessage());
-        }
+    public static HttpRequest from(final InputStream inputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        final HttpRequestLine httpRequestLine = makeHttpRequestLine(bufferedReader.readLine());
+        final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
+        final RequestBody requestBody = RequestBody.from(bufferedReader);
+        return new HttpRequest(httpRequestLine, requestHeaders, requestBody);
     }
 
     private static HttpRequestLine makeHttpRequestLine(final String line) {

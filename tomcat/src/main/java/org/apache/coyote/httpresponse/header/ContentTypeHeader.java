@@ -1,12 +1,11 @@
 package org.apache.coyote.httpresponse.header;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 
 public enum ContentTypeHeader implements ResponseHeader {
     TEXT_HTML("text/html;charset=utf-8", ".html"),
     TEXT_CSS("text/css;charset=utf-8", ".css"),
-    TEXT_JS("text/js;charset=utf-8", ".js");
+    APPLICATION_JAVASCRIPT("application/javascript;charset=utf-8", ".js");
 
     private static final String DELIMITER = ": ";
 

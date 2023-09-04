@@ -1,6 +1,5 @@
 package org.apache.coyote.httprequest.header;
 
-import org.apache.coyote.httprequest.exception.InvalidRequestHeaderNameException;
 import org.apache.coyote.httprequest.exception.UnsupportedHeaderTypeException;
 
 import java.util.Arrays;

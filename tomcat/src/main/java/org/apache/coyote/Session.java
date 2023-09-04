@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;

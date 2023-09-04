@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
@@ -14,6 +15,7 @@ import java.util.Objects;
 public class HttpRequest {
 
     private static final String NEW_LINE = "\r\n";
+    private static final String COOKIE = "Cookie";
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -78,6 +80,17 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public boolean hasSessionId() {
+        return requestHeaders.getRequestHeader().containsKey(COOKIE);
+    }
+
+    public String findSessionIdFromRequestHeaders(final String sessionKey) {
+        final String cookieValue = requestHeaders.search(COOKIE);
+        final HttpCookie cookie = HttpCookie.from(cookieValue);
+
+        return cookie.search(sessionKey);
     }
 
     @Override

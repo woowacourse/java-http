@@ -36,6 +36,10 @@ public class HttpCookie {
         return cookie.isEmpty();
     }
 
+    public String search(final String cookieKey) {
+        return cookie.get(cookieKey);
+    }
+
     public String convertToString() {
         return cookie.keySet().stream()
                      .map(key -> key + COOKIE_VALUE_SEPARATOR + cookie.get(key))

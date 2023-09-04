@@ -43,6 +43,10 @@ public class RequestHeaders {
         return Integer.parseInt(requestHeader.get("Content-Length"));
     }
 
+    public String search(final String key) {
+        return requestHeader.get(key);
+    }
+
     public Map<String, String> getRequestHeader() {
         return requestHeader;
     }

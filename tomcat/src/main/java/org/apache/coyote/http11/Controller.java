@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
@@ -57,6 +59,17 @@ public class Controller {
         }
 
         if (httpRequest.isRequestOf(HttpMethod.GET)) {
+            if (httpRequest.hasSessionId()) {
+                final String jsessionId = httpRequest.findSessionIdFromRequestHeaders(JSESSIONID);
+                final Session session = SessionManager.findSession(jsessionId);
+                if (session == null) {
+                    final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;
+                    return ResponseEntity.of(HttpStatus.OK, loginPath);
+                }
+
+                return loginSuccess((User) session.getAttribute("user"));
+            }
+
             final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;
             return ResponseEntity.of(HttpStatus.OK, loginPath);
         }
@@ -77,7 +90,11 @@ public class Controller {
     private ResponseEntity loginSuccess(final User findUser) {
         log.info("user: {}", findUser);
 
-        final HttpCookie httpCookie = new HttpCookie(Map.of(JSESSIONID, UUID.randomUUID().toString()));
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", findUser);
+        SessionManager.add(session);
+
+        final HttpCookie httpCookie = new HttpCookie(Map.of(JSESSIONID, session.getId()));
         final String indexPath = DIRECTORY_SEPARATOR + INDEX_FILE;
 
         return ResponseEntity.of(HttpStatus.FOUND, httpCookie, indexPath);

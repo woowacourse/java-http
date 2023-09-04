@@ -22,6 +22,15 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
+    public static HttpHeaders createSimpleText() {
+        final Map<String, String> headers = new HashMap<>();
+
+        headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
+        headers.put(CONTENT_LENGTH, "12");
+
+        return new HttpHeaders(headers);
+    }
+
     public static HttpHeaders parse(final List<String> lines) {
         final Map<String, String> headers = new HashMap<>();
 

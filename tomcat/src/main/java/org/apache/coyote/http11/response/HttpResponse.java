@@ -31,6 +31,12 @@ public class HttpResponse {
     public static HttpResponse parse(final HttpRequest request) throws IOException {
         Path path;
         String uri = request.getUri();
+        if (uri.equals("/")) {
+            return new HttpResponse(ResponseLine.create(HttpStatus.OK),
+                    HttpHeaders.createSimpleText(),
+                    "Hello world!");
+        }
+
         final String[] queryUri = uri.split("\\?");
 
         if (queryUri.length == 1) {

@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import org.apache.coyote.handler.mapping.HandlerMapping;
 import org.apache.coyote.handler.mapping.LoginMapping;
 import org.apache.coyote.handler.mapping.LoginPageMapping;
+import org.apache.coyote.handler.mapping.RegisterMapping;
 import org.apache.coyote.handler.mapping.RegisterPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
 
@@ -19,6 +20,7 @@ public class FrontHandler {
         handlerMapping.add(new StaticFileMapping());
         handlerMapping.add(new LoginMapping());
         handlerMapping.add(new LoginPageMapping());
+        handlerMapping.add(new RegisterMapping());
         handlerMapping.add(new RegisterPageMapping());
     }
 

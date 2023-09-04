@@ -24,7 +24,7 @@ public class RequestLine {
         return requestMethod;
     }
 
-    public String getRequestUrl() {
+    public String getRequestURI() {
         return requestUrl;
     }
 

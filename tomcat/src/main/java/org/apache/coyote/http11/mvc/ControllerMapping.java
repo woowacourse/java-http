@@ -24,7 +24,7 @@ public class ControllerMapping {
 
     private String removeHtmlExtension(final String requestURI) {
         if (requestURI.endsWith(HTML_EXTENSION)) {
-            return requestURI.substring(0, requestURI.length() - HTML_EXTENSION.length());
+            return requestURI.substring(requestURI.lastIndexOf(HTML_EXTENSION));
         }
 
         return requestURI;

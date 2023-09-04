@@ -10,7 +10,8 @@ public enum FileResolver {
 
     INDEX_HTML("/index.html", "index.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     CSS("/css/styles.css", "css/styles.css", Constants.TEXT_CSS_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
-    LOGIN_API("/login", "login.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
+    LOGIN("/login", "login.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
+    REGISTER("/register", "register.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     HTML_401("/401.html", "/401.html", Constants.TEXT_HTML_CHARSET_UTF_8, Constants.RESPONSE_HEADER),
     ;
 
@@ -30,6 +31,13 @@ public enum FileResolver {
         return parsedUri.contains(Constants.CSS_EXTENSION)
                 || parsedUri.contains(Constants.HTML_EXTENSION)
                 || parsedUri.contains(Constants.JS_EXTENSION);
+    }
+
+    public static FileResolver findFile(final String parsedUri) {
+        return Arrays.stream(FileResolver.values())
+                     .filter(file -> file.requestPath.equals(parsedUri))
+                     .findFirst()
+                     .orElseThrow(() -> new IllegalArgumentException("잘못된 파일명이 매핑되었습니다."));
     }
 
     public String getFilePath() {

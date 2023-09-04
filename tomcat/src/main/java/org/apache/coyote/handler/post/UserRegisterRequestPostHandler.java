@@ -12,9 +12,9 @@ import org.apache.coyote.response.ResponseBody;
 import java.util.Map;
 
 import static org.apache.coyote.common.CharacterSet.UTF_8;
-import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.common.HttpHeader.CONTENT_TYPE;
-import static org.apache.coyote.common.HttpHeader.LOCATION;
+import static org.apache.coyote.common.HeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.common.HeaderType.CONTENT_TYPE;
+import static org.apache.coyote.common.HeaderType.LOCATION;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
 import static org.apache.coyote.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.response.HttpStatus.FOUND;
@@ -34,7 +34,7 @@ public class UserRegisterRequestPostHandler implements RequestHandler {
 
         final Headers homePageResponseHeader = new Headers(Map.of(
                 CONTENT_TYPE.source(), TEXT_HTML.source() + ";" + UTF_8.source(),
-                CONTENT_LENGTH.source(), "0",
+                CONTENT_LENGTH.source(), String.valueOf(ResponseBody.EMPTY.length()),
                 LOCATION.source(), REGISTER_SUCCESS_REDIRECT_URI)
         );
 

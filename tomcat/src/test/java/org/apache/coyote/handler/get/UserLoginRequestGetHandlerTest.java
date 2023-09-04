@@ -10,7 +10,7 @@ import support.StubSocket;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -65,6 +65,7 @@ class UserLoginRequestGetHandlerTest {
                 .contentLength("0").enter()
                 .contentType("text/html;charset=utf-8").enter()
                 .location("/index.html").enter()
+                .setCookie("")
                 .enter()
                 .build();
 

@@ -1,6 +1,6 @@
 package org.apache.coyote.common;
 
-public enum HttpHeader {
+public enum HeaderType {
 
     ACCEPT("Accept"),
     CONTENT_TYPE("Content-Type"),
@@ -8,12 +8,12 @@ public enum HttpHeader {
     HOST("Host"),
     CONNECTION("Connection"),
     LOCATION("Location"),
-    COOKIE("Cookies"),
+    COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie");
 
     private final String source;
 
-    HttpHeader(final String source) {
+    HeaderType(final String source) {
         this.source = source;
     }
 

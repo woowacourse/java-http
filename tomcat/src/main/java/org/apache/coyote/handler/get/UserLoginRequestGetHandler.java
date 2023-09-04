@@ -22,10 +22,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.coyote.common.CharacterSet.UTF_8;
-import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.common.HttpHeader.CONTENT_TYPE;
-import static org.apache.coyote.common.HttpHeader.LOCATION;
-import static org.apache.coyote.common.HttpHeader.SET_COOKIE;
+import static org.apache.coyote.common.HeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.common.HeaderType.CONTENT_TYPE;
+import static org.apache.coyote.common.HeaderType.LOCATION;
+import static org.apache.coyote.common.HeaderType.SET_COOKIE;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
 import static org.apache.coyote.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.response.HttpStatus.FOUND;
@@ -49,6 +49,7 @@ public class UserLoginRequestGetHandler implements RequestHandler {
         if (queryParams.isEmpty()) {
             return responseLoginPage();
         }
+        
 
         final String account = queryParams.getParamValue("account");
         final String password = queryParams.getParamValue("password");

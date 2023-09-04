@@ -10,8 +10,8 @@ import org.apache.coyote.util.ResourceReader;
 import java.util.Map;
 
 import static org.apache.coyote.common.CharacterSet.UTF_8;
-import static org.apache.coyote.common.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.common.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.common.HeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.common.HeaderType.CONTENT_TYPE;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
 import static org.apache.coyote.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.response.HttpStatus.OK;

@@ -16,7 +16,7 @@ class HttpCookieTest {
         String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
 
         // when
-        HttpCookie httpCookie = HttpCookie.from("Cookie: yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        HttpCookie httpCookie = HttpCookie.from("yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
 
         // then
         assertThat(httpCookie.getValue("JSESSIONID")).isEqualTo(jSessionId);

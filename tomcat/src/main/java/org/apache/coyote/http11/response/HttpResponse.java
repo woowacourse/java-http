@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import com.sun.net.httpserver.Headers;
-import java.io.IOException;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpHeaders;
 
@@ -32,10 +30,6 @@ public class HttpResponse {
 
     public void addHeader(final String name, final String value) {
         headers.add(name, value);
-    }
-
-    public boolean isNotRedirect(){
-        return httpResponseStartLine==null || httpResponseStartLine.getStatusCode()!=StatusCode.FOUND;
     }
 
     public void setHttpResponseStartLine(final StatusCode statusCode) {

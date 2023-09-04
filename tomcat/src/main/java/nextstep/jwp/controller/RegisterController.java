@@ -1,9 +1,12 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import java.util.Optional;
+import nextstep.jwp.FileIOUtils;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -11,10 +14,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class RegisterController extends HttpServlet {
 
     @Override
-    public void doGet(final HttpRequest req, final HttpResponse resp) {
-        if (req.getSession().containskey("user")) {
-            resp.sendRedirect("/index.html");
-        }
+    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
+        byte[] file = FileIOUtils.getFileInBytes(req.getPath());
+        resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
+        resp.setResponseBody(file);
     }
 
     @Override

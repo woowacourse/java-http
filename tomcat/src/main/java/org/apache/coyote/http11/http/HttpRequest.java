@@ -33,12 +33,12 @@ public class HttpRequest {
         String[] requestLine = validateRequestFirstLine(request);
 
         RequestMethod requestMethod = RequestMethod.find(requestLine[METHOD_INDEX]);
-        String requestUri = requestLine[URI_INDEX];
         HttpVersion httpVersion = HttpVersion.find(requestLine[HTTP_VERSION_INDEX]);
 
+        String requestUri = requestLine[URI_INDEX];
         String endPoint = parseEndPoint(requestUri);
-        RequestHeader requestHeader = RequestHeader.from(request);
 
+        RequestHeader requestHeader = RequestHeader.from(request);
         String requestBody = parseRequestBody(request, requestHeader);
         RequestData requestData = RequestData.of(requestUri, requestBody);
         return new HttpRequest(

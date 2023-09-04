@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -70,8 +69,9 @@ public class Http11Processor implements Runnable, Processor {
         Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
         session.addUser(user);
-        return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + session.getId()));
+        return new HttpResponse("302 Found")
+                .addHeader("Location", "/index.html")
+                .setCookie("JSESSIONID", session.getId());
     }
 
     private HttpResponse postRegister(HttpRequest request) {
@@ -81,8 +81,8 @@ public class Http11Processor implements Runnable, Processor {
         final var email = form.get("email");
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                Map.of("Location", "/index.html"));
+        return new HttpResponse("302 Found")
+                .addHeader("Location", "/index.html");
     }
 
     private String getContentType(final File file) throws IOException {
@@ -131,8 +131,8 @@ public class Http11Processor implements Runnable, Processor {
             return postLogin(request);
         }
         if (isAlreadyLoggedIn(request)) {
-            return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                    Map.of("Location", "/index.html"));
+            return new HttpResponse("302 Found")
+                    .addHeader("Location", "/index.html");
         }
         return getResource("/login.html");
     }

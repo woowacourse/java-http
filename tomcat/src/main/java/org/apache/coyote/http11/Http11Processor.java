@@ -8,10 +8,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +40,25 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            String[] content = readFromInputStream(inputStream).split(" ");
+            HttpRequest httpRequest = getHttpRequest(inputStream);
+            Map<String, String> queryStrings = httpRequest.getQueryStrings();
+            String contentType = "text/" + httpRequest.extractExtension();
             String responseBody = "Hello world!";
 
-            if (!content[1].equals("/")) {
-                responseBody = readForFilePath(convertAbsolutePath(content[1]));
+            if (!httpRequest.path.equals("/")) {
+                responseBody = readForFilePath(convertAbsoluteUrl(httpRequest));
             }
 
-            String contentType = "text/" + extractExtension(content[1]);
+            if (httpRequest.path.equals("/login")) {
+                String account = queryStrings.get("account");
+                String password = queryStrings.get("password");
+                User savedUser = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 유저입니다."));
+
+                if (savedUser.checkPassword(password)) {
+                    log.info("user : {}", savedUser);
+                }
+            }
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -62,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readFromInputStream(InputStream inputStream) throws IOException {
+    private HttpRequest getHttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder content = new StringBuilder();
         String line;
@@ -75,19 +87,27 @@ public class Http11Processor implements Runnable, Processor {
             content.append(line).append("\n");
         } while (!"".equals(line));
 
-        return content.toString();
+        return extractHttpRequest(content);
+    }
+
+    private HttpRequest extractHttpRequest(final StringBuilder content) {
+        String firstLine = content.toString()
+                .split("\n")[0];
+        String[] methodAndRequestUrl = firstLine.split(" ");
+
+        return HttpRequest.of(methodAndRequestUrl[0], methodAndRequestUrl[1]);
     }
 
     private String readForFilePath(URL path) {
         try (FileInputStream fileInputStream = new FileInputStream(path.getPath())) {
-            return readFileFromInputStream(fileInputStream);
+            return readFile(fileInputStream);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return "";
         }
     }
 
-    private String readFileFromInputStream(FileInputStream inputStream) throws IOException {
+    private String readFile(FileInputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder fileContent = new StringBuilder();
         while (true) {
@@ -100,19 +120,9 @@ public class Http11Processor implements Runnable, Processor {
         return fileContent.toString();
     }
 
-    private String extractExtension(String path) {
-        int lastIndexOfComma = path.lastIndexOf(".");
-
-        if (lastIndexOfComma == -1) {
-            return "html";
-        }
-
-        return path.substring(lastIndexOfComma + 1);
-    }
-
-    private URL convertAbsolutePath(String requestPath) {
+    private URL convertAbsoluteUrl(HttpRequest httpRequest) {
         return getClass().getClassLoader()
-                .getResource("static" + requestPath);
+                .getResource("static" + httpRequest.getFilePath());
     }
 
 }

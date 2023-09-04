@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum RequestHeader implements Header {
     ACCEPT("Accept"),
+    COOKIE("Cookie"),
     ;
 
     final String value;

@@ -7,8 +7,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.request.RequestParameters;
+import org.apache.coyote.http11.request.Session;
+import org.apache.coyote.http11.request.SessionManager;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.response.StatusLine;
@@ -16,15 +17,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
+import static org.apache.coyote.http11.header.ResponseHeader.*;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
+import static org.apache.coyote.http11.response.Response.UNAUTHORIZED_RESPONSE;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -71,7 +72,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response mapPath(final Request request) throws IOException, URISyntaxException {
-
         final String requestPath = request.getRequestLine().getRequestPath();
         final RequestParameters requestParameters = request.getRequestParameters();
 
@@ -80,21 +80,47 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
+            final String jSessionIdName = "JSESSIONID";
+            final String userSessionKey = "user";
+            if (request.getHttpCookie().existCookie(jSessionIdName)) {
+                final String jSessionIdValue = request.getHttpCookie().findCookie(jSessionIdName);
+                if (!SessionManager.existSession(jSessionIdValue)) {
+                    final Session session = new Session(jSessionIdValue);
+                    SessionManager.add(session);
+                }
+                final Session session = SessionManager.findSession(jSessionIdValue);
+                final User user = (User) session.getAttribute(userSessionKey);
+                if (user == null) {
+                    final Headers headers = new Headers();
+                    // TODO: 9/4/23 쿠키 삭제하는 작업 추가해야 함
+                    headers.addHeader(LOCATION, "/index.html");
+                    return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+                }
+                final Headers headers = new Headers();
+                headers.addHeader(LOCATION, "/index.html");
+                return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+            }
+
             final String account = requestParameters.getValue("account");
             if (account == null) {
                 return findStaticResource("/login.html");
             }
             final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
             if (maybeUser.isEmpty()) {
-                return Response.UNAUTHORIZED_RESPONSE;
+                return UNAUTHORIZED_RESPONSE;
             }
             final User user = maybeUser.get();
             if (!user.checkPassword(requestParameters.getValue("password"))) {
-                return Response.UNAUTHORIZED_RESPONSE;
+                return UNAUTHORIZED_RESPONSE;
             }
             log.info("user: {}", user);
+
             final Headers headers = new Headers();
-            headers.addHeader(ResponseHeader.LOCATION, "/index.html");
+            headers.addHeader(LOCATION, "/index.html");
+
+            final Session session = getSession(request, headers);
+            session.setAttribute(userSessionKey, user);
+
             return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
 
@@ -112,11 +138,24 @@ public class Http11Processor implements Runnable, Processor {
             InMemoryUserRepository.save(user);
 
             final Headers headers = new Headers();
-            headers.addHeader(ResponseHeader.LOCATION, "/login");
+            headers.addHeader(LOCATION, "/login");
             return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
 
         return Response.NOT_FOUND_RESPONSE;
+    }
+
+    private Session getSession(final Request request, final Headers headers) {
+        final String jSessionIdName = "JSESSIONID";
+        if (!request.getHttpCookie().existCookie(jSessionIdName)) {
+            final String sessionId = UUID.randomUUID().toString();
+            final Session session = new Session(sessionId);
+            SessionManager.add(session);
+            headers.addHeader(SET_COOKIE, jSessionIdName + "=" + sessionId);
+            return session;
+        }
+        final String name = request.getHttpCookie().findCookie(jSessionIdName);
+        return SessionManager.findSession(request.getHttpCookie().findCookie(name));
     }
 
     private Response findStaticResource(final String requestUri) throws IOException, URISyntaxException {

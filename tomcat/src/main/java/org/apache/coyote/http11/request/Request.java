@@ -9,25 +9,60 @@ import java.util.List;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.header.RequestHeader.COOKIE;
 
 public class Request {
 
     private final RequestLine requestLine;
+
     private final Headers headers;
+
     private final RequestParameters requestParameters;
+
+    private final HttpCookie httpCookie;
+
     private final String body;
 
-    private Request(final RequestLine requestLine,
-                    final Headers headers,
-                    final String body,
-                    final RequestParameters requestParameters) {
+    public Request(final RequestLine requestLine,
+                   final Headers headers,
+                   final RequestParameters requestParameters,
+                   final HttpCookie httpCookie,
+                   final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
         this.requestParameters = requestParameters;
+        this.httpCookie = httpCookie;
+        this.body = body;
     }
 
     public static Request from(final BufferedReader bufferedReader) throws IOException {
+        final List<String> requestHeaderLines = getHeader(bufferedReader);
+
+        final String requestFirstLine = requestHeaderLines.get(0);
+        final RequestLine requestLine = RequestLine.from(requestFirstLine);
+        final Headers headers = new Headers();
+        headers.addRequestHeaders(requestHeaderLines);
+
+        final String body = getBody(bufferedReader, headers);
+
+        final String queryStrings = extractQueryStrings(requestFirstLine, body, headers);
+        final RequestParameters requestParameters = RequestParameters.from(queryStrings);
+
+        final String cookieHeader = headers.getValue(COOKIE);
+        final HttpCookie httpCookie = HttpCookie.from(cookieHeader);
+
+        return new Request(requestLine, headers, requestParameters, httpCookie, body);
+    }
+
+    private static String getBody(final BufferedReader bufferedReader, final Headers headers) throws IOException {
+        final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
+        final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    private static List<String> getHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> requestHeaderLines = new ArrayList<>();
         String nextLine;
         while (!"".equals(nextLine = bufferedReader.readLine())) {
@@ -36,22 +71,7 @@ public class Request {
             }
             requestHeaderLines.add(nextLine);
         }
-
-        final String requestFirstLine = requestHeaderLines.get(0);
-        final RequestLine requestLine = RequestLine.from(requestFirstLine);
-        final Headers headers = new Headers();
-        headers.addRequestHeaders(requestHeaderLines);
-
-        final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
-        final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        final String body = new String(buffer);
-
-        final String queryStrings = extractQueryStrings(requestFirstLine, body, headers);
-        final RequestParameters requestParameters = RequestParameters.from(queryStrings);
-
-        return new Request(requestLine, headers, body, requestParameters);
+        return requestHeaderLines;
     }
 
     private static String extractQueryStrings(final String requestFirstLine,
@@ -83,6 +103,10 @@ public class Request {
         return requestParameters;
     }
 
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
+    }
+
     public String getBody() {
         return body;
     }
@@ -93,6 +117,7 @@ public class Request {
                 "requestLine=" + requestLine +
                 ", headers=" + headers +
                 ", requestParameters=" + requestParameters +
+                ", httpCookie=" + httpCookie +
                 ", body='" + body + '\'' +
                 '}';
     }

@@ -7,8 +7,8 @@ public class RequestParam {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    public static final String KEY_VALUE_DELIMITER = "=";
-    public static final String QUERY_STRING_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String QUERY_STRING_DELIMITER = "&";
 
     private final Map<String, String> params;
 

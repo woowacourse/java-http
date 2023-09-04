@@ -10,7 +10,7 @@ public abstract class HttpServlet {
     private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
 
-    protected void service(HttpRequest req, HttpResponse res) throws IOException, URISyntaxException {
+    protected void service(final HttpRequest req, final HttpResponse res) throws IOException, URISyntaxException {
         if (req.isSameMethod(METHOD_GET)) {
             doGet(req, res);
         }
@@ -19,11 +19,11 @@ public abstract class HttpServlet {
         }
     }
 
-    public void doGet(HttpRequest req, HttpResponse resp) throws IOException, URISyntaxException {
-        throw new IllegalArgumentException("method get not supported");
+    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
-    public void doPost(HttpRequest req, HttpResponse resp) {
-        throw new IllegalArgumentException("method post not supported");
+    public void doPost(final HttpRequest req, final HttpResponse resp) {
+        throw new UnsupportedOperationException();
     }
 }

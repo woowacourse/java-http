@@ -15,7 +15,7 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class LoginController extends HttpServlet {
 
-    public static final String JSESSIONID = "JSESSIONID";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final String PREFIX = "static";
     private static final String SUFFIX = ".html";
 

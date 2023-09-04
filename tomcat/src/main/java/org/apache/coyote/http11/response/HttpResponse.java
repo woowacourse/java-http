@@ -5,8 +5,11 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
 
-    public static final String EMPTY_LINE = "";
-    public static final String NEW_LINE = "\r\n";
+    private static final String EMPTY_LINE = "";
+    private static final String NEW_LINE = "\r\n";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+
     private final HttpResponseHeaders headers;
     private HttpResponseStartLine httpResponseStartLine;
     private String responseBody;
@@ -15,22 +18,22 @@ public class HttpResponse {
         this.headers = HttpResponseHeaders.empty();
     }
 
-    public void sendRedirect(String location) {
-        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", StatusCode.FOUND);
+    public void sendRedirect(final String location) {
+        httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, StatusCode.FOUND);
         headers.add("Location", location);
     }
 
     //FIXME: 쿠키를 여러개 설정할 수 있도록 수정
-    public void addCookie(String key, String value) {
-        headers.add("Set-Cookie", key + "=" + value);
+    public void addCookie(final String key, final String value) {
+        headers.add("Set-Cookie", key + KEY_VALUE_DELIMITER + value);
     }
 
-    public void addHeader(String name, String value) {
+    public void addHeader(final String name, final String value) {
         headers.add(name, value);
     }
 
-    public void setHttpResponseStartLine(StatusCode statusCode) {
-        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", statusCode);
+    public void setHttpResponseStartLine(final StatusCode statusCode) {
+        httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, statusCode);
     }
 
     public void setResponseBody(final byte[] responseBody) {

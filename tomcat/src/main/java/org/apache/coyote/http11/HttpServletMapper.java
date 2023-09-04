@@ -13,7 +13,7 @@ public class HttpServletMapper {
     );
     private static final HttpServlet DEFAULT_SERVLET = new ResourceController();
 
-    public HttpServlet get(String path) {
+    public HttpServlet get(final String path) {
         return servletMap.getOrDefault(path, DEFAULT_SERVLET);
     }
 }

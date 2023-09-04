@@ -17,7 +17,7 @@ public class HttpResponseHeaders {
         return new HttpResponseHeaders(new LinkedHashMap<>());
     }
 
-    public HttpResponseHeaders add(String key, String value) {
+    public HttpResponseHeaders add(final String key, final String value) {
         headers.put(key, value);
         return new HttpResponseHeaders(headers);
     }

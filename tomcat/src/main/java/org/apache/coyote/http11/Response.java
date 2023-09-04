@@ -35,42 +35,49 @@ public class Response {
     private final String method;
     private final ContentType contentType;
     private final Map<String, String> parameters;
+    private final Cookies cookies;
 
-    public Response(final Path path, final String method, final ContentType contentType, final Map<String, String> parameters) {
+    public Response(final Path path, final String method, final ContentType contentType, final Map<String, String> parameters, final Cookies cookies) {
         this.path = path;
         this.method = method;
         this.contentType = contentType;
         this.parameters = parameters;
+        this.cookies = cookies;
     }
 
     public static Response from(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-        final List<String> header = new ArrayList<>();
-        while (!header.contains("")) {
-            header.add(br.readLine());
+        final List<String> headers = new ArrayList<>();
+        while (!headers.contains("")) {
+            headers.add(br.readLine());
         }
 
-        final int contentLength = Integer.parseInt(getContentLength(header));
-        final String[] request = header.get(0).split(HTTP_HEADER_DELIMITER);
+        final int contentLength = Integer.parseInt(getContentLength(headers));
+        final String[] request = headers.get(0).split(HTTP_HEADER_DELIMITER);
         final String method = request[METHOD_INDEX];
         final String location = request[LOCATION_INDEX];
+        final Cookies cookies = Cookies.from(getCookieHeader(headers));
 
         if (method.equals("POST")) {
             final char[] buffer = new char[contentLength];
             br.read(buffer, 0, contentLength);
             final Map<String, String> parameters = parseParameters(String.valueOf(buffer));
-            return createInstance(location, method, parameters);
+            return createInstance(location, method, parameters, cookies);
         }
 
         if (location.contains(QUERY)) {
             final int queryIndex = location.indexOf(QUERY);
             final String locationWithoutParameters = location.substring(0, queryIndex);
             final Map<String, String> parameters = parseParameters(location.substring(queryIndex + 1));
-            return createInstance(locationWithoutParameters, method, parameters);
+            return createInstance(locationWithoutParameters, method, parameters, cookies);
         }
 
-        return createInstance(location, method, new HashMap<>());
+        return createInstance(location, method, new HashMap<>(), cookies);
+    }
+
+    private static String getCookieHeader(final List<String> headers) {
+        return headers.stream().filter(header -> header.contains("Cookie")).findAny().orElse(null);
     }
 
     private static String getContentLength(final List<String> header) {
@@ -93,11 +100,11 @@ public class Response {
     }
 
     private static Response createInstance(final String location, final String method,
-                                           final Map<String, String> parameters) {
+                                           final Map<String, String> parameters, final Cookies cookies) {
         final ContentType contentType = ContentType.from(location);
         final Path path = getPath(location, contentType);
 
-        return new Response(path, method, contentType, parameters);
+        return new Response(path, method, contentType, parameters, cookies);
     }
 
     private static Path getPath(final String location, final ContentType contentType) {
@@ -139,19 +146,27 @@ public class Response {
     }
 
     private String makeResponseForRedirect(final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location,
-                "");
+        final List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 302 Found ");
+        headers.add("Location: " + location);
+        headers.add("");
+
+        return String.join("\r\n", headers);
     }
 
     private String makeResponseForGet(final String body) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                contentType.toHeader(),
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+        final List<String> responses = new ArrayList<>();
+        responses.add("HTTP/1.1 200 OK ");
+        responses.add(contentType.toHeader());
+        responses.add("Content-Length: " + body.getBytes().length + " ");
+        if (cookies.notExist()) {
+            responses.add(cookies.createNewCookieHeader());
+        }
+
+        responses.add("");
+        responses.add(body);
+
+        return String.join("\r\n", responses);
     }
 
     private void login() {

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class QueryStringParser {
 
-    private static final Pattern QUERY_STRING_PATTERN = Pattern.compile("([^&=]+)=([^&]*)");
+    private static final Pattern QUERY_STRING_PATTERN = Pattern.compile("([^&=]++)=([^&]*+)");
 
     private QueryStringParser() {
     }

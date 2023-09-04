@@ -113,6 +113,33 @@ class Http11ProcessorTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
 
+        @Test
+        void postUnauthorized() throws IOException {
+            //given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 35",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "",
+                    "account=gugu&password=wrongPassword");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            //when
+            processor.process(socket);
+
+            //then
+            final var URI = getClass().getClassLoader().getResource("static/401.html");
+            final var expected = "HTTP/1.1 401 Unauthorized \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: 5564 \r\n" +
+                    "\r\n" +
+                    new String(Files.readAllBytes(new File(URI.getFile()).toPath()));
+        }
+
     }
 
     @Nested

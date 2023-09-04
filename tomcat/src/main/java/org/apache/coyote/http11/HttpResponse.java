@@ -15,9 +15,10 @@ public class HttpResponse {
 
     public String extractResponse() {
         return new StringBuilder()
-                .append(convertStatusLine()).append("\r\n")
-                .append(convertContentType()).append("\r\n")
-                .append(convertContentLength()).append("\r\n\r\n")
+                .append(convertStatusLine()).append(System.lineSeparator())
+                .append(convertContentType()).append(System.lineSeparator())
+                .append(convertContentLength()).append(System.lineSeparator())
+                .append(System.lineSeparator())
                 .append(responseBody)
                 .toString();
     }

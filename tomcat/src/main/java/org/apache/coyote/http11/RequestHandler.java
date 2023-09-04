@@ -14,12 +14,8 @@ public class RequestHandler {
 
     private final HttpRequest httpRequest;
 
-    private RequestHandler(final HttpRequest httpRequest) {
+    public RequestHandler(final HttpRequest httpRequest) {
         this.httpRequest = httpRequest;
-    }
-
-    public static RequestHandler from(final HttpRequest httpRequest) {
-        return new RequestHandler(httpRequest);
     }
 
     public String execute() {

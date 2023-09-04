@@ -51,16 +51,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String response = null;
-            final String[] parsedFirstLine = firstLine.split(" ");
 
             final Map<String, String> headers = parseHeader(bufferedReader);
-            String requestBody = "";
-            if ("POST".equals(parsedFirstLine[0])) {
-                final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-            }
+
+            final String[] parsedFirstLine = firstLine.split(" ");
+            final String requestBody = parseRequestBody(parsedFirstLine[0], headers, bufferedReader);
 
             response = frontHandler.handle(firstLine, headers, requestBody);
 
@@ -73,6 +68,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String parseRequestBody(final String httpMethod, final Map<String, String> headers, final BufferedReader bufferedReader) throws IOException {
+        String requestBody = "";
+        if ("POST".equals(httpMethod)) {
+            final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            requestBody = new String(buffer);
+        }
+        return requestBody;
     }
 
     private Map<String, String> parseHeader(final BufferedReader bufferedReader) throws IOException {

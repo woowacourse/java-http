@@ -9,13 +9,14 @@ import java.nio.file.Path;
 public class StaticFileMapping implements HandlerMapping {
 
     @Override
-    public boolean supports(final String url) {
-        return ("/".equals(url) ||
-                "/index.html".equals(url) ||
-                url.endsWith(".js") ||
-                url.endsWith(".css") ||
-                url.endsWith(".ico")
-        );
+    public boolean supports(final String httpMethod, final String requestUri) {
+        return "GET".equals(httpMethod) &&
+                ("/".equals(requestUri) ||
+                        "/index.html".equals(requestUri) ||
+                        requestUri.endsWith(".js") ||
+                        requestUri.endsWith(".css") ||
+                        requestUri.endsWith(".ico")
+                );
     }
 
     @Override

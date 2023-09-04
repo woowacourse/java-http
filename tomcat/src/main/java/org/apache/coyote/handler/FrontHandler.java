@@ -20,8 +20,9 @@ public class FrontHandler {
         String response = "";
         final String[] parsedFirstLine = firstLine.split(" ");
         for (final HandlerMapping mapping : handlerMapping) {
+            final String httpMethod = parsedFirstLine[0];
             final String requestUri = parsedFirstLine[1];
-            if (mapping.supports(requestUri)) {
+            if (mapping.supports(httpMethod, requestUri)) {
                 response = mapping.handle(parsedFirstLine[1]);
                 break;
             }

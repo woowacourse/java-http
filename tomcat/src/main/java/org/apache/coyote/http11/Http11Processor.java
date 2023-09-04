@@ -155,14 +155,14 @@ public class Http11Processor implements Runnable, Processor {
         return stringJoiner.toString();
     }
 
-    private static String toHeaderFormat(String name, String value) {
+    private String toHeaderFormat(String name, String value) {
         return String.format("%s: %s ", name, value);
     }
 
     private HttpResponse doLogin(RequestHeader requestHeader, RequestBody requestBody) throws IOException {
         String query = requestBody.getItem();
         if (query.isBlank()) {
-            return ViewResolver.resolveView(LOGIN_URI);
+            return new HttpResponse(LOGIN_URI, HttpStatus.FOUND, TEXT_HTML);
         }
 
         String account = "";

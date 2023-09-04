@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.apache.coyote.http11.ContentType.CSS;
 import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 
 public class ViewResolver {
@@ -27,15 +26,13 @@ public class ViewResolver {
             final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
             File notFound = new File(notFoundUrl.getPath());
             String body = new String(Files.readAllBytes(notFound.toPath()));
-            return new HttpResponse(body, HttpStatus.NOT_FOUND, TEXT_HTML);
+            return new HttpResponse(body, HttpStatus.NOT_FOUND, ContentType.from(notFound.getName()));
         }
 
         File file = new File(resource.getPath());
         String body = new String(Files.readAllBytes(file.toPath()));
-        if (file.getName().endsWith(".css")) {
-            return new HttpResponse(body, HttpStatus.OK, CSS);
-        }
-        return new HttpResponse(body, HttpStatus.OK, TEXT_HTML);
+
+        return new HttpResponse(body, HttpStatus.OK, ContentType.from(file.getName()));
     }
 
     public static HttpResponse routePath(String path) throws IOException {

@@ -10,5 +10,5 @@
 - step2
   - [x] 로그인 성공 시 HTTP Status Code 302를 반환하고 리다이렉트 하는 기능 구현
   - [x] POST 방식으로 회원가입하는 기능 구현
-  - [ ] Cookie에 JSESSIONID 값 저장하는 기능 구현
+  - [x] Cookie에 JSESSIONID 값 저장하는 기능 구현
   - [ ] Session 구현

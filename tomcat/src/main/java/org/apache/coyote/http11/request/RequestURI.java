@@ -16,6 +16,7 @@ public class RequestURI {
     private static final int URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
 
+    private final String oldUri;
     private final String uri;
     private final RequestBody requestBody;
     private final String httpMethod;
@@ -27,6 +28,17 @@ public class RequestURI {
             final String httpMethod,
             final String httpVersion
     ) {
+        this(uri, uri, requestBody, httpMethod, httpVersion);
+    }
+
+    private RequestURI(
+            final String oldUri,
+            final String uri,
+            final RequestBody requestBody,
+            final String httpMethod,
+            final String httpVersion
+    ) {
+        this.oldUri = oldUri;
         this.uri = uri;
         this.requestBody = requestBody;
         this.httpMethod = httpMethod;
@@ -73,13 +85,28 @@ public class RequestURI {
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
                     logProcessor.accept(user);
-                    return parseRequestURI(INDEX_PAGE, requestBody, requestURIElements);
+                    return parseRequestURI(LOGIN_PAGE, INDEX_PAGE, requestBody, requestURIElements);
                 })
-                .orElseGet(() -> parseRequestURI(LOGIN_FAIL_PAGE, RequestBody.empty(), requestURIElements));
+                .orElseGet(() -> parseRequestURI(LOGIN_PAGE, LOGIN_FAIL_PAGE, RequestBody.empty(), requestURIElements));
     }
 
     private static boolean isExistQueryString(final int index) {
         return index != -1;
+    }
+
+    private static RequestURI parseRequestURI(
+            final String oldPage,
+            final String page,
+            final RequestBody requestBody,
+            final List<String> requestURIElements
+    ) {
+        return new RequestURI(
+                oldPage,
+                page,
+                requestBody,
+                requestURIElements.get(HTTP_METHOD_INDEX),
+                requestURIElements.get(HTTP_VERSION_INDEX)
+        );
     }
 
     private static RequestURI parseRequestURI(
@@ -110,17 +137,25 @@ public class RequestURI {
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            return parseRequestURI(INDEX_PAGE, parsedRequestBody, requestURIElements);
+            return parseRequestURI(REGISTER_PAGE, INDEX_PAGE, parsedRequestBody, requestURIElements);
         }
 
         return parseLoginRequestURI(parsedRequestBody, requestURIElements, logProcessor);
+    }
+
+    public boolean isLoginSuccess() {
+        return this.oldUri.equals(LOGIN_PAGE) && this.uri.equals(INDEX_PAGE);
+    }
+
+    public String getOldUri() {
+        return oldUri;
     }
 
     public String getUri() {
         return uri;
     }
 
-    public RequestBody getQueryString() {
+    public RequestBody getRequestBody() {
         return requestBody;
     }
 
@@ -131,5 +166,4 @@ public class RequestURI {
     public String getHttpVersion() {
         return httpVersion;
     }
-
 }

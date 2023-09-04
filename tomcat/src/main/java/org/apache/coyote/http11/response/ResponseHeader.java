@@ -13,7 +13,7 @@ public class ResponseHeader {
 
     public static ResponseHeader from(final RequestURI requestURI) {
         final var uri = requestURI.getUri();
-        final var queryString = requestURI.getQueryString();
+        final var queryString = requestURI.getRequestBody();
 
         if (uri.startsWith("/index") && !queryString.isEmpty()) {
             return new ResponseHeader(HttpStatus.FOUND);

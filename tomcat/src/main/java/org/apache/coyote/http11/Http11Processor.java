@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.auth.HttpCookie;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestURI;
@@ -47,9 +48,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestHeader = readHeader(bufferedReader);
             final var requestURI = readRequestURI(firstLine, requestHeader, bufferedReader);
+            final var httpCookie = HttpCookie.from(requestHeader.get("Cookie"));
 
             final var responseEntity = ResponseEntity.from(requestURI);
-            final var response = responseEntity.getResponse();
+            final var response = responseEntity.getResponse(httpCookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

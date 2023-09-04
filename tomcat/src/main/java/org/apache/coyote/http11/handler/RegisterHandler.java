@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class RegisterHandler extends Handler {
     }
 
     private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
-        String absolutePath = "register.html";
+        String absolutePath = REGISTER_PAGE.path();
 
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(
@@ -45,7 +46,7 @@ public class RegisterHandler extends Handler {
 
     private Response responseWhenHttpMethodIsPost(Request request) {
         saveUser(request);
-        String absolutePath = "index.html";
+        String absolutePath = INDEX_PAGE.path();
 
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath

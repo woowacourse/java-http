@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class LoginHandler extends Handler {
     }
 
     private Response responseForLoggedIn(Request request) {
-        String absolutePath = "index.html";
+        String absolutePath = INDEX_PAGE.path();
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath
         ));
@@ -52,7 +53,7 @@ public class LoginHandler extends Handler {
     }
 
     private Response responseForNotLoggedIn(Request request) throws IOException {
-        String absolutePath = "login.html";
+        String absolutePath = LOGIN_PAGE.path();
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(
                 CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
@@ -78,7 +79,7 @@ public class LoginHandler extends Handler {
     private Response responseWhenLoginSuccess(Request request) {
         UUID sessionId = saveSession(request);
 
-        String absolutePath = "index.html";
+        String absolutePath = INDEX_PAGE.path();
         Headers headers = Headers.fromMap(Map.of(
                 SET_COOKIE, "JSESSIONID=" + sessionId,
                 LOCATION, absolutePath
@@ -89,7 +90,7 @@ public class LoginHandler extends Handler {
     }
 
     private Response responseWhenLoginFail(Request request) {
-        String absolutePath = "401.html";
+        String absolutePath = UNAUTHORIZED_PAGE.path();
 
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath

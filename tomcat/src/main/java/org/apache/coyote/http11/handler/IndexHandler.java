@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
 
@@ -16,7 +17,7 @@ public class IndexHandler extends Handler {
 
     @Override
     public Response handle(Request request) throws IOException {
-        String absolutePath = "index.html";
+        String absolutePath = INDEX_PAGE.path();
 
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(

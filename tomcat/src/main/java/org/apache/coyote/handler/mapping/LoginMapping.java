@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class LoginMapping implements HandlerMapping {
@@ -46,6 +47,7 @@ public class LoginMapping implements HandlerMapping {
 
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ");
+                "Location: /index.html ",
+                "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + " ");
     }
 }

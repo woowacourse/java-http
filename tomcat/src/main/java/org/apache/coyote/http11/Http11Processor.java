@@ -15,6 +15,8 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.Request;
 import org.slf4j.Logger;
@@ -26,6 +28,9 @@ public class Http11Processor implements Runnable, Processor {
   private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
   private static final String PREFIX_STATIC_PATH = "static";
   private static final String NEW_LINE = "\r\n";
+  private static final String INDERX_PAGE = "/index.html";
+  private static final String LOGIN_PAGE = "/login.html";
+  private static final String JSESSIONID = "JSESSIONID";
 
   private final Socket connection;
 
@@ -49,12 +54,15 @@ public class Http11Processor implements Runnable, Processor {
       final Request request = new Request(inputStream.readLine());
       final Map<String, String> headers = extractHeaders(inputStream);
       final Map<String, String> params = extractParams(request.getQueryString());
+      final Map<String, String> cookies = extractCookies(headers.get("Cookie"));
 
+      final SessionManager sessionManager = new SessionManager();
       final String response;
 
       if (request.getUrl().equals("/login")) {
         final String account = params.get("account");
-        response = login(account);
+        final String sessionId = cookies.get(JSESSIONID);
+        response = login(sessionId, sessionManager, account);
       } else if (request.getUrl().equals("/register")) {
         final int contentLength = Integer.parseInt(headers.get("Content-Length"));
         final Map<String, String> body = readBody(inputStream, contentLength);
@@ -72,6 +80,34 @@ public class Http11Processor implements Runnable, Processor {
     }
   }
 
+  private String login(
+      final String sessionId,
+      final SessionManager sessionManager,
+      final String account
+  ) {
+    if (isAuthorized(sessionId, sessionManager)) {
+      return response302(INDERX_PAGE);
+    } else if (account == null) {
+      return response302(LOGIN_PAGE);
+    }
+    return authorize(account, sessionManager);
+  }
+
+  private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
+    return sessionId != null && sessionManager.findSession(sessionId) != null;
+  }
+
+  private Map<String, String> extractCookies(final String requestCookie) {
+    final Map<String, String> cookies = new HashMap<>();
+    if (requestCookie != null) {
+      for (final String cookie : requestCookie.split(";")) {
+        final String[] tokens = cookie.split("=");
+        cookies.put(tokens[0], tokens[1]);
+      }
+    }
+    return cookies;
+  }
+
   private Map<String, String> readBody(
       final BufferedReader inputStream,
       final int contentLength
@@ -84,15 +120,18 @@ public class Http11Processor implements Runnable, Processor {
   private String register(final Map<String, String> body) {
     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
     InMemoryUserRepository.save(user);
-    return response302("/index.html");
+    return response302(INDERX_PAGE);
   }
 
-  private String login(final String account) {
+  private String authorize(final String account, final SessionManager sessionManager) {
     final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
     if (user.isPresent()) {
       log.debug(user.toString());
-      return response302("/index.html", "JSESSIONID=" + UUID.randomUUID());
+      final String uuid = UUID.randomUUID().toString();
+      final Session session = new Session(uuid);
+      sessionManager.add(session);
+      return response302(INDERX_PAGE, "JSESSIONID=" + uuid);
     }
     return response302("/401.html");
   }

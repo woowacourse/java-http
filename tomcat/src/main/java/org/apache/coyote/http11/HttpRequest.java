@@ -60,6 +60,10 @@ public class HttpRequest {
         return parseResultOfQueryString;
     }
 
+    public String getContentType() {
+        return "text/" + extractExtension();
+    }
+
     public String getFilePath() {
         return requestUrlToFilePath.getOrDefault(path, path);
     }
@@ -72,6 +76,14 @@ public class HttpRequest {
         }
 
         return path.substring(lastIndexOfComma + 1);
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public Map<String, String> getQueryStrings() {

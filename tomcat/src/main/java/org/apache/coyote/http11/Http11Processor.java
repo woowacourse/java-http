@@ -39,9 +39,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = httpRequestParser.accept(inputStream);
-
-            log.info("request uri: {}", request.getUri());
+            final var request = httpRequestParser.accept(inputStream);
             final var response = handleRequest(request);
 
             outputStream.write(response.buildResponse().getBytes());

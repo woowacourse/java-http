@@ -28,6 +28,8 @@ public class RequestHandler {
     private static final String INDEX_HTML = "/index.html";
     private static final String LOGIN = "/login";
     private static final String UNAUTHORIZED_HTML = "/401.html";
+    private static final String REGISTER = "/register";
+    private static final String REGISTER_HTML = "/register.html";
     private final Request request;
 
     public RequestHandler(final Request request) {
@@ -42,6 +44,10 @@ public class RequestHandler {
 
         if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(GET)) {
             return handleLoginPage();
+        }
+
+        if (requestPath.equals(REGISTER) && request.getHttpMethod().equals(GET)) {
+            return getStaticPateResponse(REGISTER_HTML, OK);
         }
 
         return getStaticPateResponse(requestPath, OK);

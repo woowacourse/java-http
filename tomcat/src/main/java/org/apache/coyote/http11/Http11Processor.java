@@ -15,6 +15,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.domain.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,18 +45,17 @@ public class Http11Processor implements Runnable, Processor {
         final var inputStream = bufferingInputStream(connection.getInputStream());
         final var outputStream = connection.getOutputStream()
     ) {
-      final String request = inputStream.readLine();
-      final String url = request.split(" ")[1];
+      final Request request = new Request(inputStream.readLine());
       final Map<String, String> headers = extractHeaders(inputStream);
-      final Map<String, String> params = extractParams(url);
+      final Map<String, String> params = extractParams(request.getQueryString());
 
       final String response;
 
-      if (url.startsWith("/login?")) {
+      if (request.getUrl().startsWith("/login")) {
         final String account = params.get("account");
         response = loginResponse(account);
       } else {
-        final String responseBody = readContentsFromFile(url);
+        final String responseBody = readContentsFromFile(request.getUrl());
         final String contentType = getContentType(headers);
         response = response200(contentType, responseBody);
       }
@@ -93,13 +93,12 @@ public class Http11Processor implements Runnable, Processor {
         "");
   }
 
-  private Map<String, String> extractParams(final String url) {
+  private Map<String, String> extractParams(final String queryString) {
     final Map<String, String> params = new HashMap<>();
-    if (!url.contains("?")) {
+    if (queryString.isEmpty()) {
       return params;
     }
 
-    final String queryString = url.split("\\?")[1];
     for (final String query : queryString.split("&")) {
       final String[] tokens = query.split("=");
       params.put(tokens[0], tokens[1]);

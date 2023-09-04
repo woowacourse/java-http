@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,9 +55,12 @@ public class Http11Processor implements Runnable, Processor {
 
             String responseBody = renderResponseBody(requestMethod, requestUri);
 
+            String requestAcceptHeader = findAcceptHeader(headers);
+            String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
+
             List<String> responseHeaders = new ArrayList<>();
             responseHeaders.add("HTTP/1.1 200 OK ");
-            responseHeaders.add("Content-Type: text/html;charset=utf-8 ");
+            responseHeaders.add(contentTypeHeader);
             responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
             String responseHeader = String.join("\r\n", responseHeaders);
 
@@ -69,6 +73,25 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String findAcceptHeader(List<String> headers) {
+        return headers.stream()
+                      .filter(it -> it.startsWith("Accept"))
+                      .findFirst()
+                      .orElseThrow(() -> new IllegalArgumentException("해당 헤더가 존재하지 않습니다."));
+    }
+
+    private static String getContentTypeHeaderFrom(String requestAcceptHeader) {
+        String[] splitAcceptHeader = requestAcceptHeader.split(" ");
+        String headerValue = splitAcceptHeader[1];
+        String[] acceptTypes = headerValue.split(";");
+        String[] splitAcceptTypes = acceptTypes[0].split(",");
+
+        if (Arrays.asList(splitAcceptTypes).contains("text/css")) {
+            return  "Content-Type: text/css;charset=utf-8 ";
+        }
+        return "Content-Type: text/html;charset=utf-8 ";
     }
 
     private String renderResponseBody(String requestMethod, String requestUri) {

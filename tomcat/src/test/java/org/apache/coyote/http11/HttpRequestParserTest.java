@@ -56,10 +56,12 @@ class HttpRequestParserTest {
                     .containsEntry("account", "gugu")
                     .containsEntry("password", "password");
         });
+
+        reader.close();
     }
 
     @Test
-    void 요청에_헤더가_없으면_예외를_발생시킨다() {
+    void 요청에_헤더가_없으면_예외를_발생시킨다() throws IOException {
         // given
         final String httpRequest = "";
 
@@ -69,10 +71,12 @@ class HttpRequestParserTest {
         assertThatThrownBy(() -> HttpRequestParser.from(reader))
                 .isInstanceOf(IOException.class)
                 .hasMessage("요청에 헤더가 존재하지 않습니다.");
+
+        reader.close();
     }
 
     @Test
-    void 요청에_바디_중_잘못된_값이_있으면_예외를_발생시킨다() {
+    void 요청에_바디_중_잘못된_값이_있으면_예외를_발생시킨다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -89,5 +93,7 @@ class HttpRequestParserTest {
         assertThatThrownBy(() -> HttpRequestParser.from(reader))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("요청의 바디가 잘못되었습니다.");
+
+        reader.close();;
     }
 }

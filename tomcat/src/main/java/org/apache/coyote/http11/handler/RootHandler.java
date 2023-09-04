@@ -8,7 +8,7 @@ import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class DefaultHandler extends Handler {
+public class RootHandler extends Handler {
 
     @Override
     public Response handle(Request request) {

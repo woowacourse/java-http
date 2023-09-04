@@ -13,7 +13,7 @@ public class Handlers {
 
     static {
         mappings = new HashMap<>();
-        mappings.put("/", new DefaultHandler());
+        mappings.put("/", new RootHandler());
         mappings.put("/index", new IndexHandler());
         mappings.put("/login", new LoginHandler());
         mappings.put("/register", new RegisterHandler());
@@ -24,22 +24,14 @@ public class Handlers {
 
     public static Response handle(Request request) throws IOException {
         RequestURI requestURI = request.getRequestURI();
-        String absolutePathWithoutExtension = removeExtension(requestURI.absolutePath());
+        String absolutePath = requestURI.absolutePath();
 
         Handler handler = mappings.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(absolutePathWithoutExtension))
+                .filter(entry -> entry.getKey().equals(absolutePath))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElseGet(StaticResourceHandler::new);
 
         return handler.handle(request);
-    }
-
-
-    private static String removeExtension(String target) {
-        if (target.contains(".")) {
-            return target.substring(0, target.indexOf("."));
-        }
-        return target;
     }
 }

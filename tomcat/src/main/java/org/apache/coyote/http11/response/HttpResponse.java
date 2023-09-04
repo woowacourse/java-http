@@ -6,12 +6,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
 
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NEW_LINE = "\r\n";
     private static final String STATIC = "static";
     private final ResponseLine responseLine;
@@ -41,6 +45,13 @@ public class HttpResponse {
             }
 
             path = new File(url.getPath()).toPath();
+
+            final byte[] content = Files.readAllBytes(path);
+
+            final HttpHeaders headers = HttpHeaders.createResponse(path);
+            final String responseBody = new String(content);
+
+            return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
         }
         else {
             uri = queryUri[0];
@@ -61,7 +72,7 @@ public class HttpResponse {
 
             path = new File(url.getPath()).toPath();
 
-            if (!InMemoryUserRepository.findByAccount(username).isPresent()) {
+            if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + "/401" + ".html");
                 path = new File(url.getPath()).toPath();
@@ -73,54 +84,16 @@ public class HttpResponse {
 
                 return new HttpResponse(ResponseLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
             } else {
+                final User user = InMemoryUserRepository.findByAccountAndPassword(username, password).get();
+                log.info(user.toString());
 
+                final byte[] content = Files.readAllBytes(path);
+
+                final HttpHeaders headers = HttpHeaders.createResponse(path);
+                final String responseBody = new String(content);
+
+                return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
             }
-        }
-
-        final byte[] content = Files.readAllBytes(path);
-
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
-    }
-
-    private static Path findPath(final HttpRequest request) {
-        String uri = request.getUri();
-        final String[] queryUri = uri.split("\\?");
-
-        if (queryUri.length == 1) {
-            final String[] splitUri = uri.split("\\.");
-            URL url;
-            if (splitUri.length == 1) {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri + ".html");
-            } else {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri);
-            }
-
-            return new File(url.getPath()).toPath();
-        }
-        else {
-            uri = queryUri[0];
-            final String[] parseQuery = queryUri[1].split("&");
-            final String username = parseQuery[0];
-            final String password = parseQuery[1];
-            System.out.println("@@@ " + InMemoryUserRepository.findByAccount(username).isPresent());
-
-            final String[] splitUri = uri.split("\\.");
-
-            URL url;
-            if (splitUri.length == 1) {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri + ".html");
-            } else {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri);
-            }
-
-            return new File(url.getPath()).toPath();
         }
     }
 

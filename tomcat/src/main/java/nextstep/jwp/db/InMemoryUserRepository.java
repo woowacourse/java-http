@@ -19,8 +19,17 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public static Optional<User> findByAccountAndPassword(String account, String password) {
+        final Optional<User> optionalUser = Optional.ofNullable(database.get(account));
+
+        if (optionalUser.isPresent()) {
+            final User user = optionalUser.get();
+            if (user.checkPassword(password)) {
+                return optionalUser;
+            }
+        }
+
+        return Optional.empty();
     }
 
     private InMemoryUserRepository() {}

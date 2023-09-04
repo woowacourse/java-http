@@ -19,7 +19,7 @@ public class RequestLine {
 
 	public static RequestLine from(String requestLine) {
 		final var parts = requestLine.split(DELIMITER);
-		final var method = HttpMethod.valueOf(parts[0]);
+		final var method = HttpMethod.from(parts[0]);
 		final var uri = RequestUri.from(parts[1]);
 		final var version = HttpProtocolVersion.version(parts[2]);
 

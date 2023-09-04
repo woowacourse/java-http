@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
@@ -17,19 +14,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest of(final InputStream inputStream) {
-        final HttpRequestParser httpRequestParser = new HttpRequestParser(inputStream);
-        try {
-            final RequestLine requestLine = httpRequestParser.parseRequestLine();
-            final Map<String, String> header = httpRequestParser.parseRequestHeader();
-            if (header.get("Content-Length") != null) {
-                final Map<String, String> body = httpRequestParser.parseRequestBody(header.get("Content-Length"));
-                return new HttpRequest(requestLine, header, body);
-            }
-            return new HttpRequest(requestLine, header, new HashMap<>());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static HttpRequest of(final RequestLine requestLine, final Map<String, String> header, final Map<String, String> body) {
+        return new HttpRequest(requestLine, header, body);
     }
 
     public String getMethod() {

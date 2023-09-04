@@ -25,7 +25,7 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         String response = String.join("\r\n",
-                httpVersion.getValue() + " " + httpStatus.getValue(),
+                httpVersion.getValue() + " " + httpStatus.getValue() + " ",
                 httpHeaders.getHeaders(),
                 "",
                 httpBody.getHttpBody());

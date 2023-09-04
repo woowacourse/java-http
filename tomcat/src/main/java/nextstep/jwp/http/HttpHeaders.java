@@ -1,6 +1,6 @@
 package nextstep.jwp.http;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,10 +22,10 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders createDefaultHeaders(String requestNativePath, HttpBody httpBody) {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
 
         headers.put("Content-Type", ContentType.extractValueFromPath(requestNativePath));
-        headers.put("ContentLength", String.valueOf(httpBody.getBytesLength()));
+        headers.put("Content-Length", String.valueOf(httpBody.getBytesLength()));
 
         return new HttpHeaders(headers);
     }
@@ -45,7 +45,7 @@ public class HttpHeaders {
     public String getHeaders() {
         return httpHeaders.keySet()
                 .stream()
-                .map(key -> key + ": " + httpHeaders.get(key))
+                .map(key -> key + ": " + httpHeaders.get(key) + " ")
                 .collect(Collectors.joining("\r\n"));
     }
 

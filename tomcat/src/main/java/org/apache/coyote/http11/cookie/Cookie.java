@@ -1,8 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Cookie {
 
@@ -27,9 +26,5 @@ public class Cookie {
 
     public String getAttribute(final String name) {
         return values.get(name);
-    }
-
-    public void setJsessionid() {
-        values.put("JSESSIONID", UUID.randomUUID().toString());
     }
 }

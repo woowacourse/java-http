@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 public class Cookie {
 
     private static final String COOKIE_DELIMITER = ";";
+    public static final String COOKIE_VALUE_DELIMITER = "=";
+    public static final int COOKIE_KEY_INDEX = 0;
+    public static final int COOKIE_VALUE_INDEX = 1;
 
     private final Map<String, String> cookies;
 
@@ -20,8 +23,8 @@ public class Cookie {
         }
 
         Map<String, String> cookies = Arrays.stream(cookieValue.split(COOKIE_DELIMITER))
-                .map(cookieElement -> cookieElement.trim().split("="))
-                .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
+                .map(cookieElement -> cookieElement.trim().split(COOKIE_VALUE_DELIMITER))
+                .collect(Collectors.toMap(cookie -> cookie[COOKIE_KEY_INDEX], cookie -> cookie[COOKIE_VALUE_INDEX]));
         return new Cookie(cookies);
     }
 

@@ -161,13 +161,13 @@ public class Http11Processor implements Runnable, Processor {
         boolean isCorrectPassword = findAccount.checkPassword(password);
 
         if (!isCorrectPassword) {
-            return hanldeLoginFail(requestURI, findAccount);
+            return handleLoginFail(requestURI, findAccount);
         }
 
-        return hanldeLoginSuccess(requestURI, findAccount);
+        return handleLoginSuccess(requestURI, findAccount);
     }
 
-    private ResponseEntity hanldeLoginFail(String requestURI, User findAccount) {
+    private ResponseEntity handleLoginFail(String requestURI, User findAccount) {
         log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
         return ResponseEntity
                 .builder()
@@ -177,7 +177,7 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private ResponseEntity hanldeLoginSuccess(String requestURI, User findAccount) {
+    private ResponseEntity handleLoginSuccess(String requestURI, User findAccount) {
         log.info("account {} 로그인 성공", findAccount.getAccount());
         ResponseEntity responseEntity = ResponseEntity
                 .builder()

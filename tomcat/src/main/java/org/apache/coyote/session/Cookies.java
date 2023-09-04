@@ -50,12 +50,12 @@ public class Cookies {
         cookie.putAll(other.cookie);
     }
 
-    public List<String> names() {
+    public List<String> cookieNames() {
         return new ArrayList<>(cookie.keySet());
     }
 
-    public String getCookieValue(final String name) {
-        return cookie.getOrDefault(name, null);
+    public String getCookieValue(final String cookieName) {
+        return cookie.getOrDefault(cookieName, null);
     }
 
     @Override

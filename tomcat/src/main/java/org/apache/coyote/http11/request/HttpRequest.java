@@ -13,12 +13,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
-    private final String body;
+    private final RequestBody body;
 
     private HttpRequest(
             final RequestLine requestLine,
             final RequestHeaders headers,
-            final String body
+            final RequestBody body
     ) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -27,11 +27,10 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader br) throws IOException {
         final String firstLine = br.readLine();
+
         final RequestLine requestLine = RequestLine.from(firstLine);
-
         final RequestHeaders headers = getRequestHeaders(br);
-
-        final String requestBody = getRequestBody(br, headers);
+        final RequestBody requestBody = getRequestBody(br, headers);
 
         return new HttpRequest(requestLine, headers, requestBody);
     }
@@ -46,14 +45,14 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String getRequestBody(final BufferedReader br, final RequestHeaders headers) throws IOException {
+    private static RequestBody getRequestBody(final BufferedReader br, final RequestHeaders headers) throws IOException {
         if (!headers.contains(CONTENT_LENGTH)) {
             return null;
         }
         final int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
         final char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
-        return new String(buffer);
+        return RequestBody.from(new String(buffer));
     }
 
     public String getMethod() {

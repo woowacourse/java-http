@@ -20,21 +20,21 @@ public class LoginController implements Controller{
 
     @Override
     public Response handle(final Request request){
-        if(request.hasQueryString()){
+        if(request.isPost()){
             return login(request);
         }
         return new StaticResponse("html", "/login.html", 200, "OK");
     }
 
     private static PathResponse login(Request request) {
-        Map<String, String> queryMap = request.getQueryParaMap();
+        Map<String, String> requestBody = request.getRequestBody();
 
-        if(!queryMap.containsKey(QUERY_ACCOUNT_KEY) || !queryMap.containsKey(QUERY_PASSWORD_KEY)){
+        if(!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY)){
             throw new IllegalArgumentException();
         }
 
-        final String account = queryMap.get(QUERY_ACCOUNT_KEY);
-        final String password = queryMap.get(QUERY_PASSWORD_KEY);
+        final String account = requestBody.get(QUERY_ACCOUNT_KEY);
+        final String password = requestBody.get(QUERY_PASSWORD_KEY);
 
         User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
         if(user.checkPassword(password)){

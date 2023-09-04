@@ -25,15 +25,15 @@ public class RegisterController implements Controller {
     }
 
     private Response join(Request request) {
-        Map<String, String> queryMap = request.getQueryParaMap();
+        Map<String, String> requestBody = request.getRequestBody();
 
-        if (!queryMap.containsKey(QUERY_ACCOUNT_KEY) || !queryMap.containsKey(QUERY_PASSWORD_KEY)) {
+        if (!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY) || !requestBody.containsKey(QUERY_EMAIL_KEY)) {
             throw new IllegalArgumentException();
         }
 
-        final String account = queryMap.get(QUERY_ACCOUNT_KEY);
-        final String password = queryMap.get(QUERY_PASSWORD_KEY);
-        final String email = queryMap.get(QUERY_EMAIL_KEY);
+        final String account = requestBody.get(QUERY_ACCOUNT_KEY);
+        final String password = requestBody.get(QUERY_PASSWORD_KEY);
+        final String email = requestBody.get(QUERY_EMAIL_KEY);
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {

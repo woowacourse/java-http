@@ -15,38 +15,38 @@ public class Request {
     private final String path;
     private final String fileType;
     private final Map<String, String> queryParmap;
+    private final Map<String, String> requestBody;
 
     private Request(
             final RequestMethod method,
             final String path,
             final String fileType,
-            final Map<String, String> queryParmap
+            final Map<String, String> queryParmap,
+            Map<String, String> requestBody
     ) {
         this.method = method;
         this.path = path;
         this.fileType = fileType;
         this.queryParmap = queryParmap;
+        this.requestBody = requestBody;
     }
 
     public static Request from(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = makeReader(inputStream);
-        String firstLine = bufferedReader.readLine();
-        String[] splitFirstLine = splitLine(firstLine);
+        String[] splitFirstLine = splitLine(bufferedReader.readLine());
         String pathFromStartLine = getPath(splitFirstLine);
         RequestMethod method = getMethod(splitFirstLine[0]);
+        RequestMessage header = RequestMessage.from(bufferedReader);
 
-        if (method.isGet()) {
-            return getRequest(method, pathFromStartLine);
-        }
-        return getPostRequest(bufferedReader, pathFromStartLine, method);
+        return getRequest(method, pathFromStartLine, header.getRequestBody());
+    }
+
+    private static BufferedReader makeReader(InputStream inputStream) {
+        return new BufferedReader(new InputStreamReader(inputStream));
     }
 
     private static String[] splitLine(String firstLine) {
         return firstLine.split(" ");
-    }
-
-    private static RequestMethod getMethod(String method) {
-        return RequestMethod.get(method);
     }
 
     private static String getPath(String[] startLine) {
@@ -56,20 +56,24 @@ public class Request {
                 .orElse("/");
     }
 
-    private static Request getRequest(RequestMethod method, String path) {
+    private static RequestMethod getMethod(String method) {
+        return RequestMethod.get(method);
+    }
+
+    private static Request getRequest(RequestMethod method, String path, Map<String, String> requestBody) {
         if (isStaticFile(path)) {
             final String fileType = getFileType(path);
-            return new Request(method, path, fileType, new HashMap<>());
+            return new Request(method, path, fileType, new HashMap<>(), requestBody);
         }
 
         if (hasQuery(path)) {
             String query = getQueryLine(path);
             Map<String, String> queryFromLine = getQuery(query);
             path = findRealPath(path);
-            return new Request(method, path, null, queryFromLine);
+            return new Request(method, path, null, queryFromLine, requestBody);
         }
 
-        return new Request(method, path, null, new HashMap<>());
+        return new Request(method, path, null, new HashMap<>(), requestBody);
     }
 
     private static boolean isStaticFile(String path) {
@@ -114,35 +118,6 @@ public class Request {
         return splitQuery.substring(splitQuery.indexOf(regex) + 1);
     }
 
-    private static Request getPostRequest(BufferedReader reader, String pathFromStartLine, RequestMethod method) throws IOException {
-        String line = "";
-        Map<String, String> headerMap = new HashMap<>();
-        while (true) {
-            line = reader.readLine();
-            if("".equals(line)){
-                return getRequestBody(reader, pathFromStartLine, method, headerMap);
-            }
-            getKeyAndValue(line, headerMap, ": ");
-        }
-    }
-
-    private static Request getRequestBody(BufferedReader reader, String pathFromStartLine, RequestMethod method, Map<String, String> headerMap) throws IOException {
-        int contentLength = Integer.parseInt(headerMap.get("Content-Length").strip());
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-
-        if(hasQuery(requestBody)){
-            Map<String, String> queryFromLine = getQuery(requestBody);
-            return new Request(method, pathFromStartLine, null, queryFromLine);
-        }
-        return new Request(method, pathFromStartLine, null, new HashMap<>());
-    }
-
-    private static BufferedReader makeReader(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream));
-    }
-
     public boolean isFile() {
         return Objects.nonNull(this.fileType);
     }
@@ -172,5 +147,9 @@ public class Request {
 
     public boolean isGet() {
         return this.method.isGet();
+    }
+
+    public Map<String, String> getRequestBody() {
+        return this.requestBody;
     }
 }

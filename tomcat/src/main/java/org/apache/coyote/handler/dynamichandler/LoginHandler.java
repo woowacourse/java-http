@@ -24,7 +24,7 @@ public class LoginHandler implements Handler {
         if (HttpMethod.GET == HttpMethod.valueOf(httpRequest.method())) {
             return handleGetMapping(httpRequest);
         }
-        return null;
+        return handlePostMapping(httpRequest);
     }
 
     private HttpResponse handleGetMapping(HttpRequest httpRequest) {
@@ -50,6 +50,20 @@ public class LoginHandler implements Handler {
             response.setBody(body);
             return response;
         } catch (IOException e) {
+        }
+        return null;
+    }
+
+    private HttpResponse handlePostMapping(HttpRequest httpRequest) {
+        String body = httpRequest.body();
+        if (body != null) {
+            String account = parseAccount(body);
+            String password = parsePassword(body);
+            if (isExistUser(account, password)) {
+                log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
+                return handleRedirectPage();
+            }
+            return handleUnAuthorizedPage();
         }
         return null;
     }

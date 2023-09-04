@@ -1,7 +1,8 @@
 package org.apache.coyote.handlermapping;
 
-import org.apache.coyote.handler.*;
+import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.dynamichandler.LoginHandler;
+import org.apache.coyote.handler.dynamichandler.RegisterHandler;
 import org.apache.coyote.handler.statichandler.CssHandler;
 import org.apache.coyote.handler.statichandler.HelloHandler;
 import org.apache.coyote.handler.statichandler.HtmlHandler;
@@ -46,7 +47,10 @@ public class HandlerMapping {
 
         // Dynamic
         handlerMap.put(new HandlerMatcher(HttpMethod.GET, "/login"), new LoginHandler());
+        handlerMap.put(new HandlerMatcher(HttpMethod.POST, "/login"), new LoginHandler());
 
+        handlerMap.put(new HandlerMatcher(HttpMethod.GET, "/register"), new RegisterHandler());
+        handlerMap.put(new HandlerMatcher(HttpMethod.POST, "/register"), new RegisterHandler());
     }
 
     public static Handler getHandler(HandlerMatcher handlerMatcher) {

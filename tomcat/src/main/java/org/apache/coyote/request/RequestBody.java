@@ -23,9 +23,13 @@ public class RequestBody {
     }
 
     public static RequestBody from(final String requestBodyValue) {
+        if (requestBodyValue.isBlank()) {
+            return EMPTY;
+        }
+
         final Map<String, String> mapping = Arrays.asList(requestBodyValue.split(REQUEST_DELIMITER))
                 .stream()
-                .map(a -> a.split(KEY_VALUE_DELIMITER))
+                .map(bodyEntry -> bodyEntry.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(keyValue -> keyValue[NAME_INDEX], keyValue -> keyValue[VALUE_INDEX]));
 
         return new RequestBody(mapping);

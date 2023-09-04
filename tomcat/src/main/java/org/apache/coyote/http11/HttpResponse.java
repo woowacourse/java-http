@@ -6,15 +6,12 @@ public class HttpResponse {
     private final FileExtension fileExtension;
     private final String responseBody;
 
-    private HttpResponse(HttpStatus httpStatus, FileExtension fileExtension, String responseBody) {
+    public HttpResponse(HttpStatus httpStatus, FileExtension fileExtension, String responseBody) {
         this.httpStatus = httpStatus;
         this.fileExtension = fileExtension;
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(FileExtension fileExtension, String responseBody) {
-        return new HttpResponse(HttpStatus.OK, fileExtension, responseBody);
-    }
 
     public String extractResponse() {
         return new StringBuilder()

@@ -9,24 +9,30 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class RequestHandler {
+public class ViewResolver {
 
     private static final String DEFAULT_RESPONSE = "Hello world!";
 
-    private final RequestLine requestLine;
+    private final ResponseEntity responseEntity;
 
-    public RequestHandler(RequestLine requestLine) {
-        this.requestLine = requestLine;
+    public ViewResolver(ResponseEntity responseEntity) {
+        this.responseEntity = responseEntity;
     }
 
     public HttpResponse extractHttpResponse() {
-        String path = requestLine.getPath();
-        String responseBody = extractResponseBody();
+        return new HttpResponse(responseEntity.getHttpStatus(), getFileExtension(), extractResponseBody());
+    }
 
-        if (path.equals("/")) {
-            return HttpResponse.of(FileExtension.HTML, responseBody);
+    private FileExtension getFileExtension() {
+        try {
+            File file = findPath().toFile();
+            String fileName = file.getName();
+            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+            return FileExtension.from(fileExtension);
+        } catch (URISyntaxException | NullPointerException e) {
+            return FileExtension.HTML;
         }
-        return HttpResponse.of(getFileExtension(), responseBody);
     }
 
     private String extractResponseBody() {
@@ -44,8 +50,8 @@ public class RequestHandler {
         return Paths.get(Objects.requireNonNull(resource).toURI());
     }
 
-    public String findResourcePath() {
-        String path = requestLine.getPath();
+    private String findResourcePath() {
+        String path = responseEntity.getPath();
         String fileName = path.substring(1);
 
         if (fileName.contains(".")) {
@@ -54,15 +60,5 @@ public class RequestHandler {
         return fileName + ".html";
     }
 
-    private FileExtension getFileExtension() {
-        try {
-            File file = findPath().toFile();
-            String fileName = file.getName();
-            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-            return FileExtension.from(fileExtension);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("해당 파일을 찾을 수 없습니다.");
-        }
-    }
 }

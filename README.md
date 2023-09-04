@@ -6,12 +6,12 @@
 - [x] Query String 파싱
 
 ## 2단계 - 로그인 구현하기
-- [ ] HTTP Status Code 302
-  - [ ] 로그인 성공 시, 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트
-  - [ ] 로그인 실패 시,  `401.html`로 리다이렉트
+- [x] HTTP Status Code 302
+  - [x] 로그인 성공 시, 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트
+  - [x] 로그인 실패 시,  `401.html`로 리다이렉트
 - [ ] POST 방식으로 회원가입
-  - [ ] `http://localhost:8080/register` 으로 접속하면 회원가입 페이지(`register.html`)를 보여준다.
-  - [ ] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
+  - [x] `http://localhost:8080/register` 으로 접속하면 회원가입 페이지(`register.html`)를 보여준다.
+  - [x] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
   - [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
   - [ ] 회원가입을 완료하면 `index.html`로 리다이렉트한다.
   - [ ] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.

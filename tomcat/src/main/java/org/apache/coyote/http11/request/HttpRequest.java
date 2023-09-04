@@ -44,6 +44,14 @@ public class HttpRequest {
 		return Optional.ofNullable(body);
 	}
 
+	public boolean isExistJSessionId() {
+		return headers.isExistJSessionId();
+	}
+
+	public Optional<String> getJSessionId() {
+		return headers.findJSessionId();
+	}
+
 	public static class HttpRequestBuilder {
 		private final HttpMethod httpMethod;
 		private final String endPoint;

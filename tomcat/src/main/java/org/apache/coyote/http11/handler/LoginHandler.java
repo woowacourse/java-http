@@ -74,32 +74,39 @@ public class LoginHandler implements HttpHandler {
 			.orElseThrow(EmptyBodyException::new);
 		final String account = parsedQuery.get(ACCOUNT_PARAM_KEY);
 		return InMemoryUserRepository.findByAccount(account)
-			.map(user -> checkPasswordProcess(parsedQuery.get(PASSWORD_PARAM_KEY), user))
+			.map(user -> checkPasswordProcess(parsedQuery.get(PASSWORD_PARAM_KEY), user, request))
 			.orElseThrow(UnauthorizedException::new);
 	}
 
-	private static HttpResponse checkPasswordProcess(final String password, final User user) {
+	private static HttpResponse checkPasswordProcess(final String password, final User user,
+		final HttpRequest request) {
 		if (user.checkPassword(password)) {
 			log.info(user.toString());
-			return loginSuccessResponse(user);
+			return loginSuccessResponse(user, request);
 		}
 		throw new UnauthorizedException();
 	}
 
-	private static HttpResponse loginSuccessResponse(final User user) {
+	private static HttpResponse loginSuccessResponse(final User user, final HttpRequest request) {
 		final String body = "";
 		final HttpHeaders headers = resolveHeader(body);
-		final String jSessionId = UUID.randomUUID().toString();
-		final Session session = new Session(jSessionId);
-		session.setAttributes("user", user);
-		SessionManager.add(session);
-		headers.put(SET_COOKIE.getValue(), jSessionId);
 		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
+		if (!request.isExistJSessionId()) {
+			issueJSessionId(user, headers);
+		}
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,
 			body,
 			headers
 		);
+	}
+
+	private static void issueJSessionId(User user, HttpHeaders headers) {
+		final String jSessionId = UUID.randomUUID().toString();
+		final Session session = new Session(jSessionId);
+		session.setAttributes("user", user);
+		SessionManager.add(session);
+		headers.put(SET_COOKIE.getValue(), jSessionId);
 	}
 
 	private static HttpHeaders resolveHeader(final String body) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
+import org.apache.coyote.http11.request.requestLine.HttpMethod;
 import org.apache.coyote.http11.request.requestLine.RequestLine;
 
 import java.io.BufferedReader;
@@ -44,7 +45,7 @@ public class HttpRequest {
         List<String> requestHeaders = new ArrayList<>();
 
         String nextRequestHeaderLine = bufferedReader.readLine();
-        while (nextRequestHeaderLine != null && !nextRequestHeaderLine.isBlank()) {
+        while (nextRequestHeaderLine != null && !nextRequestHeaderLine.equals("")) {
             requestHeaders.add(nextRequestHeaderLine);
             nextRequestHeaderLine = bufferedReader.readLine();
         }
@@ -53,11 +54,18 @@ public class HttpRequest {
     }
 
     private static String readRequestBody(final BufferedReader bufferedReader, final RequestHeaders requestHeaders) throws IOException {
-        if (requestHeaders.isContentLengthNull()) {
+        final int contentLength = requestHeaders.getContentLength();
+        char[] buffer = new char[contentLength];
+        final int bytesRead = bufferedReader.read(buffer, 0, contentLength);
+        if (bytesRead == -1) {
             return "";
         }
 
-        return readNextChunk(bufferedReader);
+        return new String(buffer);
+    }
+
+    public boolean isRequestOf(final HttpMethod httpMethod) {
+        return requestLine.getHttpMethod() == httpMethod;
     }
 
     public RequestLine getRequestLine() {

@@ -35,6 +35,14 @@ public class RequestHeaders {
         return !requestHeader.containsKey("Content-Length");
     }
 
+    public int getContentLength() {
+        if (isContentLengthNull()) {
+            return 0;
+        }
+
+        return Integer.parseInt(requestHeader.get("Content-Length"));
+    }
+
     public Map<String, String> getRequestHeader() {
         return requestHeader;
     }

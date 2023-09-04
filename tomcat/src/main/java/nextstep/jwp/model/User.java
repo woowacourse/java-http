@@ -1,6 +1,10 @@
 package nextstep.jwp.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class User {
+
+    private static final AtomicInteger count = new AtomicInteger(1);
 
     private final Long id;
     private final String account;
@@ -15,7 +19,7 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this(null, account, password, email);
+        this((long) count.incrementAndGet(), account, password, email);
     }
 
     public boolean checkPassword(String password) {

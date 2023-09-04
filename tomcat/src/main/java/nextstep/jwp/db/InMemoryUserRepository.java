@@ -1,5 +1,6 @@
 package nextstep.jwp.db;
 
+import java.util.Set;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -17,6 +18,10 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
+    }
+
+    public static Optional<User> findByAccount(String account) {
+        return Optional.ofNullable(database.get(account));
     }
 
     public static Optional<User> findByAccountAndPassword(String account, String password) {

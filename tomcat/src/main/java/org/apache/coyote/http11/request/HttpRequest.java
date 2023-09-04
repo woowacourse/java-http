@@ -24,47 +24,30 @@ public class HttpRequest {
 
     public static HttpRequest parse(final BufferedReader reader) throws IOException {
         final RequestLine requestLine = RequestLine.parse(reader.readLine());
-        if (requestLine.getMethod().equals("GET")) {
-            final List<String> lines = readAllLines(reader);
-            final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
-            final String requestBody = findRequestBody(reader, headers);
-
-            return new HttpRequest(requestLine, headers, requestBody);
-        }
-
-        final List<String> lines = readAllLines(reader);
-        final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
+        final HttpHeaders headers = HttpHeaders.parse(readHeaders(reader));
         final String requestBody = findRequestBody(reader, headers);
 
         return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    private static List<String> readAllLines(final BufferedReader reader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        while (reader.ready()) {
-            final String line = reader.readLine();
-            lines.add(line);
-        }
-        return lines;
-    }
-
-    private static List<String> readHeaders(final List<String> lines) {
+    private static List<String> readHeaders(final BufferedReader reader) throws IOException {
         final List<String> headers = new ArrayList<>();
 
-        for (final String line : lines) {
-            if (line.isEmpty()) {
-                break;
-            }
-            headers.add(line);
+        String readLine = reader.readLine();
+        while (readLine != null && !readLine.isEmpty()) {
+            headers.add(readLine);
+            readLine = reader.readLine();
         }
-
         return headers;
     }
 
     private static String findRequestBody(final BufferedReader reader, final HttpHeaders headers)
             throws IOException {
         if (headers.hasContentLength()) {
-            return reader.readLine();
+            final int contentLength = headers.getContentLength();
+            final char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
         }
         return "";
     }

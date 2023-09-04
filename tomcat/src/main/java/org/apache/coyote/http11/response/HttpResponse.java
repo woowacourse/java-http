@@ -11,6 +11,7 @@ import org.apache.coyote.http11.common.FileContent;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +32,35 @@ public class HttpResponse {
     }
 
     public static HttpResponse parse(final HttpRequest request) throws IOException {
-        if (request.getRequestLine().getMethod().equals("POST")) {
-            System.out.println("123421423");
+        final RequestLine requestLine = request.getRequestLine();
+        if (requestLine.getUri().equals("/register") && requestLine.getMethod().equals("POST")) {
+            final URL url = HttpResponse.class.getClassLoader()
+                    .getResource(STATIC + "/index" + ".html");
+            final Path path = new File(url.getPath()).toPath();
+
+            final String[] splitUserInfo = request.getRequestBody().split("&");
+            if (splitUserInfo.length != 3) {
+                throw new IllegalArgumentException("아이디, 이메일, 비밀번호가 전부 들어와야 합니다.");
+            }
+
+            final String account = splitUserInfo[0].split("=")[1];
+            final String password = splitUserInfo[1].split("=")[1];
+            final String email = splitUserInfo[2].split("=")[1];
+            if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+                throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            }
+            final User user = new User(account, email, password);
+            InMemoryUserRepository.save(user);
+
+            final byte[] content = Files.readAllBytes(path);
+
+            final HttpHeaders headers = HttpHeaders.createResponse(path);
+            headers.setHeader("Location", "/index.html");
+            final String responseBody = new String(content);
+
+            return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, responseBody);
         }
 
-        Path path;
         String uri = request.getUri();
         if (uri.equals("/")) {
             return new HttpResponse(ResponseLine.create(HttpStatus.OK),
@@ -43,16 +68,14 @@ public class HttpResponse {
                     "Hello world!");
         }
 
-        final String[] queryUri = uri.split("\\?");
-
-        if (queryUri.length == 1) {
+        if (requestLine.getMethod().equals("GET")) {
             final String[] splitUri = uri.split("\\.");
             URL url;
             if (splitUri.length == 1) {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + FileContent.findPage(uri) + ".html");
 
-                path = new File(url.getPath()).toPath();
+                final Path path = new File(url.getPath()).toPath();
 
                 final byte[] content = Files.readAllBytes(path);
 
@@ -67,7 +90,7 @@ public class HttpResponse {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + uri);
 
-                path = new File(url.getPath()).toPath();
+                final Path path = new File(url.getPath()).toPath();
 
                 final byte[] content = Files.readAllBytes(path);
 
@@ -77,20 +100,18 @@ public class HttpResponse {
                 return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
             }
         }
-        else {
-            uri = queryUri[0];
-            final String[] parseQuery = queryUri[1].split("&");
+        else if (requestLine.getMethod().equals("POST")) {
+            final String body = request.getRequestBody();
+            final String[] parseQuery = body.split("&");
             final String username = parseQuery[0].split("=")[1];
             final String password = parseQuery[1].split("=")[1];
-
-            final String[] splitUri = uri.split("\\.");
 
             URL url;
 
             if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + "/401" + ".html");
-                path = new File(url.getPath()).toPath();
+                final Path path = new File(url.getPath()).toPath();
 
                 final byte[] content = Files.readAllBytes(path);
 
@@ -101,7 +122,7 @@ public class HttpResponse {
             } else {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + "/index" + ".html");
-                path = new File(url.getPath()).toPath();
+                final Path path = new File(url.getPath()).toPath();
 
                 final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
                         .orElseThrow(() -> new IllegalArgumentException("알 수 없는 에러입니다."));
@@ -116,6 +137,14 @@ public class HttpResponse {
                 return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, responseBody);
             }
         }
+        final URL url = HttpResponse.class.getClassLoader()
+                .getResource(STATIC + "/404" + ".html");
+
+        final Path path = new File(url.getPath()).toPath();
+
+        final HttpHeaders headers = HttpHeaders.createResponse(path);
+
+        return new HttpResponse(ResponseLine.create(HttpStatus.NOT_FOUND), headers, "");
     }
 
     @Override

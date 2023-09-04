@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -113,7 +114,11 @@ public class HttpRequest {
     }
 
     public String getQuery(String name) {
-        return queries.getOrDefault(name, "");
+        return queries.getOrDefault(name, null);
+    }
+
+    public Map<String, String> getQueries() {
+        return new HashMap<>(queries);
     }
 
     public String getBody() {

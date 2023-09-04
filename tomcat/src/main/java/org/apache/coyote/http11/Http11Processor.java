@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
@@ -39,15 +40,16 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(inputStream);
 
             HttpResponse httpResponse = handle(httpRequest);
-            String responseBody = httpResponse.getBody();
-            String contentType = httpResponse.getContentType();
+            String headerLines = httpResponse.getHeaders().stream()
+                    .map(HttpHeader::toLine)
+                    .collect(Collectors.joining(CRLF));
 
             final var response = String.join(CRLF,
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "HTTP/1.1 " + httpResponse.getStatus().toLine(),
+                    headerLines,
                     "",
-                    responseBody);
+                    httpResponse.getBody()
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();

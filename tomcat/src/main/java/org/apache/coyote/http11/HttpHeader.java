@@ -25,6 +25,10 @@ public class HttpHeader {
         return value;
     }
 
+    public String toLine() {
+        return name + SEPARATOR + value;
+    }
+
     @Override
     public String toString() {
         return "HttpHeader{" +

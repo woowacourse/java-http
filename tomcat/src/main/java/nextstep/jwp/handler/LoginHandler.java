@@ -11,17 +11,21 @@ public class LoginHandler extends FileHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
+        if (httpRequest.getQueries().isEmpty()) {
+            return super.handle(httpRequest);
+        }
+
         String account = httpRequest.getQuery("account");
         String password = httpRequest.getQuery("password");
 
         Optional<User> found = InMemoryUserRepository.findByAccount(account);
         if (found.isEmpty()) {
-            return super.handle(httpRequest);
+            return HttpResponse.redirectTo("/401");
         }
         User user = found.get();
         if (user.checkPassword(password)) {
-            System.out.println("user = " + user);
+            return HttpResponse.redirectTo("/index");
         }
-        return super.handle(httpRequest);
+        return HttpResponse.redirectTo("/401");
     }
 }

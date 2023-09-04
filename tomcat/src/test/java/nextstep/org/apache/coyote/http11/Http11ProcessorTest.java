@@ -54,7 +54,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        File file = new File(resource.getPath());
+        File file = new File(resource.getFile());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
 //                "Content-Length: 5564 \r\n" +
@@ -84,7 +84,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        File file = new File(resource.getPath());
+        File file = new File(resource.getFile());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 String.format("Content-Length: %d \r\n", file.length()) +
@@ -112,7 +112,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        File file = new File(resource.getPath());
+        File file = new File(resource.getFile());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 String.format("Content-Length: %d \r\n", file.length()) +
@@ -140,7 +140,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        File file = new File(resource.getPath());
+        File file = new File(resource.getFile());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 String.format("Content-Length: %d \r\n", file.length()) +
@@ -257,7 +257,6 @@ class Http11ProcessorTest {
         List<String> splited = Arrays.asList(output.split("\r\n"));
         List<String> headers = splited.subList(1, splited.size());
         for (String line : headers) {
-            System.out.println("line: " + line);
             String[] splitedLine = line.split(": ");
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }
@@ -318,7 +317,6 @@ class Http11ProcessorTest {
         List<String> splited = Arrays.asList(preOutput.split("\r\n"));
         List<String> headers = splited.subList(1, splited.size());
         for (String line : headers) {
-            System.out.println("line: " + line);
             String[] splitedLine = line.split(": ");
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }

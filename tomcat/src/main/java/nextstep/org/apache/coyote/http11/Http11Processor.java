@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,8 +10,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +94,8 @@ public class Http11Processor implements Runnable, Processor {
             if (Objects.nonNull(handler) && httpMethod.equals("POST")
                     && requestedUrl.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.login(httpCookie, parsedBody.get("account"),
+                LoginResponseDto loginDto = loginController.login(httpCookie,
+                        parsedBody.get("account"),
                         parsedBody.get("password"));
 
                 response = String.join("\r\n",
@@ -194,10 +194,9 @@ public class Http11Processor implements Runnable, Processor {
             resourceName += ".html";
         }
         URL resource = getClass().getClassLoader().getResource(resourceName);
-        Path path = Paths.get(resource.getPath().substring(1));
 
         try {
-            return Files.readString(path);
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException | NullPointerException e) {
             throw new RuntimeException(e);
         }

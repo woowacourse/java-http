@@ -1,25 +1,36 @@
 package org.apache.coyote.http11;
 
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.User;
+import org.apache.catalina.Manager;
 
-public class SessionManager {
+public class SessionManager implements Manager {
+
+    private static final SessionManager instance = new SessionManager();
+
+    private final Map<String, HttpSession> sessions = new HashMap<>();
 
     private SessionManager() {
     }
 
-    private static final Map<String, User> sessions = new HashMap<>();
-
-    public static void addSession(String sessionId, User user) {
-        sessions.put(sessionId, user);
+    public static SessionManager getInstance() {
+        return instance;
     }
 
-    public static User getUser(String sessionId) {
-        return sessions.get(sessionId);
+    @Override
+    public void add(HttpSession session) {
+        sessions.put(session.getId(), session);
     }
 
-    public static boolean containsKey(String sessionId) {
-        return sessions.containsKey(sessionId);
+    @Override
+    public HttpSession findSession(String id) throws IOException {
+        return sessions.get(id);
+    }
+
+    @Override
+    public void remove(HttpSession session) {
+        sessions.remove(session.getId());
     }
 }

@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.FrontHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final FrontHandler frontHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.frontHandler = new FrontHandler();
     }
 
     @Override
@@ -49,7 +52,6 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = null;
             final String[] parsedFirstLine = firstLine.split(" ");
-            response = parseStaticFiles(parsedFirstLine, response);
 
             final Map<String, String> headers = parseHeader(bufferedReader);
             String requestBody = "";
@@ -59,6 +61,9 @@ public class Http11Processor implements Runnable, Processor {
                 bufferedReader.read(buffer, 0, contentLength);
                 requestBody = new String(buffer);
             }
+
+            response = frontHandler.handle(firstLine, headers, requestBody);
+
             if (parsedFirstLine[1].contains("login")) {
                 response = parseLoginPage(parsedFirstLine, response, requestBody);
             }
@@ -80,77 +85,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return headers;
-    }
-
-    private String parseStaticFiles(final String[] parsedFirstLine, String response) throws IOException {
-        if ("/".equals(parsedFirstLine[1])) {
-            final var responseBody = "Hello world!";
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if ("/index.html".equals(parsedFirstLine[1])) {
-            final String filePath = "static" + parsedFirstLine[1];
-            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
-            final Path path = new File(fileUrl.getPath()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (parsedFirstLine[1].endsWith(".js")) {
-            final String filePath = "static" + parsedFirstLine[1];
-            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
-            final Path path = new File(fileUrl.getPath()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/javascript ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (parsedFirstLine[1].endsWith(".css")) {
-            final String filePath = "static" + parsedFirstLine[1];
-            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
-            final Path path = new File(fileUrl.getPath()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (parsedFirstLine[1].endsWith(".ico")) {
-            final String filePath = "static" + parsedFirstLine[1];
-            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
-            final Path path = new File(fileUrl.getPath()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: image/x-icon ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        return null;
     }
 
     private String parseLoginPage(final String[] parsedFirstLine, String response, final String requestBody) throws IOException {

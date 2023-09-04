@@ -1,0 +1,92 @@
+package org.apache.coyote.handler.mapping;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class StaticFileMapping implements HandlerMapping {
+
+    @Override
+    public boolean supports(final String url) {
+        return ("/".equals(url) ||
+                "/index.html".equals(url) ||
+                url.endsWith(".js") ||
+                url.endsWith(".css") ||
+                url.endsWith(".ico")
+        );
+    }
+
+    @Override
+    public String handle(final String requestUri) throws IOException {
+        if ("/".equals(requestUri)) {
+            final var responseBody = "Hello world!";
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if ("/index.html".equals(requestUri)) {
+            final String filePath = "static" + requestUri;
+            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
+            final Path path = new File(fileUrl.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (requestUri.endsWith(".js")) {
+            final String filePath = "static" + requestUri;
+            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
+            final Path path = new File(fileUrl.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/javascript ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (requestUri.endsWith(".css")) {
+            final String filePath = "static" + requestUri;
+            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
+            final Path path = new File(fileUrl.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (requestUri.endsWith(".ico")) {
+            final String filePath = "static" + requestUri;
+            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
+            final Path path = new File(fileUrl.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: image/x-icon ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        return null;
+    }
+}

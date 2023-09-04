@@ -17,8 +17,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -53,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("uri : {}", uri);
 
             if ("GET".equals(method)) {
-                final var response = getResponse(uri);
+                final var response = getResponse(bufferedReader, uri);
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -125,10 +127,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response loginSuccess(final User user) {
         log.info("User{id={}, account={}, email={}, pasword={}", user.getId(), user.getAccount(), user.getEmail(), user.getPassword());
-        return new Response(HttpStatus.FOUND, "/index.html");
+        final var uuid = UUID.randomUUID();
+        final Map<String, String> cookie = new HashMap<>();
+        cookie.put("JSESSIONID", uuid.toString());
+        return new Response(HttpStatus.FOUND, "/index.html", cookie);
     }
 
-    private String getResponse(final String uri) throws IOException {
+    private String getResponse(final BufferedReader bufferedReader, final String uri) throws IOException {
         if ("/".equals(uri)) {
             final var content = "Hello world!";
             return String.join("\r\n",
@@ -139,29 +144,73 @@ public class Http11Processor implements Runnable, Processor {
                     content);
         }
 
-        final var responseBody = getResponseBody(uri);
+        final var responseBody = getResponseBody(bufferedReader, uri);
 
         return getContent(uri, responseBody);
     }
 
     private String getContent(final String uri, final Response responseBody) throws IOException {
+        if (responseBody.getCookies().isEmpty()) {
+            final URL resource = ClassLoader.getSystemClassLoader().getResource("static/" + responseBody.getContent());
+            final File file = new File(URLDecoder.decode(Objects.requireNonNull(resource)
+                                                                .getPath(), StandardCharsets.UTF_8));
+            final String content = new String(Files.readAllBytes(file.toPath()));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus().name() + " ",
+                    getContentType(uri),
+                    getContentLength(content),
+                    "",
+                    content);
+        }
+
+        return getContentWithCookie(uri, responseBody);
+    }
+
+    private String getContentWithCookie(final String uri, final Response responseBody) throws IOException {
         final URL resource = ClassLoader.getSystemClassLoader().getResource("static/" + responseBody.getContent());
-        final File file = new File(URLDecoder.decode(Objects.requireNonNull(resource).getPath(), StandardCharsets.UTF_8));
+        final File file = new File(URLDecoder.decode(Objects.requireNonNull(resource)
+                                                            .getPath(), StandardCharsets.UTF_8));
         final String content = new String(Files.readAllBytes(file.toPath()));
 
-        return String.join("\r\n",
+        final String test = String.join("\r\n",
                 "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus().name() + " ",
+                getCookies(responseBody.getCookies()),
                 getContentType(uri),
                 getContentLength(content),
                 "",
                 content);
+        System.out.println(test);
+        return test;
     }
 
-    private Response getResponseBody(final String uri) {
+    private String getCookies(final Map<String, String> cookies) {
+        if (cookies.isEmpty()) {
+            return null;
+        }
+
+        return "Set-Cookie: JSESSIONID=" + cookies.get("JSESSIONID");
+    }
+
+    private Response getResponseBody(final BufferedReader bufferedReader, final String uri) throws IOException {
         if ("/register".equals(uri)) {
             return new Response(HttpStatus.OK, "register.html");
         }
         if ("/login".equals(uri)) {
+            var request = bufferedReader.readLine();
+            while (request != null && !"".equals(request)) {
+                if (request.contains("Cookie")) {
+                    request = request.replaceAll(" ", "");
+                    final var cookie = request.split(":")[1];
+                    final Map<String, String> cookies = Arrays.stream(cookie.split(","))
+                                                              .map(value -> value.split("="))
+                                                              .collect(toMap(key -> key[0], value -> value[1]));
+                    if (cookies.containsKey("JSESSIONID")) {
+                        return new Response(HttpStatus.OK, "index.html");
+                    }
+                }
+                request = bufferedReader.readLine();
+            }
             return new Response(HttpStatus.OK, "login.html");
         }
 

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.cookie.Cookie;
 
 import nextstep.jwp.model.User;
 
@@ -14,21 +15,25 @@ public class Request {
     private final RequestLine line;
     private final RequestHeader header;
     private final RequestBody body;
+    private final Cookie cookie;
 
-    private Request(final RequestLine line, final RequestHeader header, final RequestBody body) {
+    private Request(final RequestLine line, final RequestHeader header, final RequestBody body, final Cookie cookie) {
         this.line = line;
         this.header = header;
         this.body = body;
+        this.cookie = cookie;
     }
 
     public static Request convert(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.convert(bufferedReader.readLine());
         RequestHeader requestHeader = RequestHeader.convert(bufferedReader);
         final String contentLength = requestHeader.getHeader().get(CONTENT_LENGTH);
+        final Cookie cookie = Cookie.from(requestHeader.getCookie());
         if (Objects.isNull(contentLength)) {
-            return new Request(requestLine, requestHeader, RequestBody.EMPTY_REQUEST_BODY);
+            return new Request(requestLine, requestHeader, RequestBody.EMPTY_REQUEST_BODY, cookie);
         }
-        return new Request(requestLine, requestHeader, RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)));
+        return new Request(requestLine, requestHeader, RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)),
+                cookie);
     }
 
     public boolean hasQueryString() {

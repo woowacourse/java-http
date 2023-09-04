@@ -42,4 +42,8 @@ public class Response {
                 "",
                 responseBody.getContent());
     }
+
+    public void setCookie(final String cookie) {
+        responseHeader.setCookie(cookie);
+    }
 }

@@ -39,4 +39,8 @@ public class ResponseHeader {
                 .map(key -> String.join(DELIMITER, key, header.get(key) + " "))
                 .collect(Collectors.joining("\r\n"));
     }
+
+    public void setCookie(String cookie) {
+        header.put("Set-Cookie", cookie);
+    }
 }

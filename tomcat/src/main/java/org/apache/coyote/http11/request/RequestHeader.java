@@ -8,6 +8,7 @@ public class RequestHeader {
     private static final String DELIMITER = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String COOKIE = "Cookie";
     private final Map<String, String> header;
 
     private RequestHeader(final Map<String, String> header) {
@@ -27,5 +28,9 @@ public class RequestHeader {
 
     public Map<String, String> getHeader() {
         return header;
+    }
+
+    public String getCookie() {
+        return header.get(COOKIE);
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.cookie.Cookie.KEY_VALUE_DELIMITER;
 import static org.apache.coyote.http11.request.HttpMethod.GET;
 import static org.apache.coyote.http11.request.HttpMethod.POST;
 import static org.apache.coyote.http11.response.StatusCode.OK;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.exception.LoginException;
@@ -31,6 +33,7 @@ public class RequestHandler {
     private static final String UNAUTHORIZED_HTML = "/401.html";
     private static final String REGISTER = "/register";
     private static final String REGISTER_HTML = "/register.html";
+    private static final String JSESSIONID = "JSESSIONID";
     private final Request request;
 
     public RequestHandler(final Request request) {
@@ -101,7 +104,9 @@ public class RequestHandler {
 
             if (user.checkPassword(password)) {
                 LOGGER.info("user {}", user);
-                return Response.generateRedirectResponse(INDEX_HTML);
+                final Response response = Response.generateRedirectResponse(INDEX_HTML);
+                response.setCookie(String.join(KEY_VALUE_DELIMITER, JSESSIONID, String.valueOf(UUID.randomUUID())));
+                return response;
             }
             throw new LoginException("로그인에 실패했습니다.");
         } catch (LoginException exception) {

@@ -49,10 +49,11 @@ public class LoginHandler implements Handler {
     }
 
     private boolean isLoggedIn(HttpRequest request) {
-        User userInSession = (User) request.getSession().getAttribute("user"); // TODO : 세션 새로만들었을 경우..?
-        if (userInSession == null) {
+        Object value = request.getSession().getAttribute("user"); // TODO : 세션 새로만들었을 경우..?
+        if (value == null) {
             return false;
         }
+        User userInSession = (User) value;
         return InMemoryUserRepository.findByAccount(userInSession.getAccount())
                 .filter(user -> user.checkPassword(userInSession.getPassword()))
                 .isPresent();

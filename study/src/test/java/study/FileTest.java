@@ -34,7 +34,6 @@ class FileTest {
         // TODO
         URL resource = getClass().getClassLoader().getResource(fileName);
         String actual = resource.getFile();
-        System.out.println("actual = " + actual);
 
         assertThat(actual).endsWith(fileName);
     }

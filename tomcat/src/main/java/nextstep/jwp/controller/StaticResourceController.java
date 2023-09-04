@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 import nextstep.jwp.controller.rest.ResponseEntity;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpMethod;
@@ -59,12 +60,14 @@ public class StaticResourceController implements Controller {
     }
 
     private Path findAbsolutePath(String resourcePath, String fileName) throws IOException {
-        return Files.find(
-                            Path.of(resourcePath),
-                            MAX_DEPTH,
-                            (path, basicFileAttributes) -> basicFileAttributes.isRegularFile() && path.toFile().getName().contains(fileName)
-                    )
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchFileException(fileName + "에 해당 하는 파일을 찾을 수 없습니다."));
+        final var pathStream = Files.find(
+                Path.of(resourcePath),
+                MAX_DEPTH,
+                (path, basicFileAttributes) -> basicFileAttributes.isRegularFile() && path.toFile().getName().contains(fileName)
+        );
+        try (pathStream) {
+            return pathStream.findFirst()
+                             .orElseThrow(() -> new NoSuchFileException(fileName + "에 해당 하는 파일을 찾을 수 없습니다."));
+        }
     }
 }

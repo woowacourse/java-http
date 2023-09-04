@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static String makeResponse(Response response, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusValue(),
+                "HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusValue() +" ",
                 "Content-Type: text/" + response.getFileType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

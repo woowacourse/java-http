@@ -4,13 +4,16 @@ import org.apache.coyote.http11.request.line.Path;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PathTest {
 
     @Nested
     class Path를_검증한다 {
+
         @Test
         void URI가_유효하면_생성한다() {
             // given

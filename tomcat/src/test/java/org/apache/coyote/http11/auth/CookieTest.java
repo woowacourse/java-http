@@ -2,7 +2,6 @@ package org.apache.coyote.http11.auth;
 
 import java.util.List;
 import org.apache.coyote.http11.request.body.RequestBody;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +12,7 @@ class CookieTest {
 
     @Nested
     class 쿠키_생성_검증 {
+
         @Test
         void 쿠키_값이_유효하다면_생성한다() {
             // given
@@ -24,10 +24,12 @@ class CookieTest {
             // then
             assertThat(cookie.get("JSESSIONID")).isEqualTo("5669d1ea-eb70-4881-b17e-c7ab8cfd10b8");
         }
+
     }
 
     @Nested
     class 쿠키_저장_검증 {
+
         @Test
         void key와_value를_입력받아_저장한다() {
             // given
@@ -53,5 +55,7 @@ class CookieTest {
                     () -> assertThat(requestBody.getBy("email")).isEqualTo("rltgjqmduftlagl@gmail.com")
             );
         }
+
     }
+
 }

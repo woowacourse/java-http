@@ -9,6 +9,7 @@ class ProtocolTest {
 
     @Nested
     class Protocol을_검증한다 {
+
         @Test
         void 프로토콜이_유효하면_생성한다() {
             // given
@@ -31,6 +32,7 @@ class ProtocolTest {
                     () -> Protocol.from(protocol)
             );
         }
+
     }
 
 }

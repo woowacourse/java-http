@@ -7,11 +7,11 @@ import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
+import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 import static org.apache.coyote.http11.response.HttpStatus.CONFLICT;
 import static org.apache.coyote.http11.response.HttpStatus.FOUND;
 import static org.apache.coyote.http11.response.HttpStatus.OK;
 import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
-import static org.apache.coyote.http11.request.line.HttpMethod.*;
 
 public class AuthService {
 

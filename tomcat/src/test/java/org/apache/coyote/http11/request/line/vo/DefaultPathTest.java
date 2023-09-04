@@ -1,11 +1,10 @@
 package org.apache.coyote.http11.request.line.vo;
 
-import org.apache.coyote.http11.request.line.vo.DefaultPath;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DefaultPathTest {
 

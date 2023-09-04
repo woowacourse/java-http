@@ -61,6 +61,7 @@ class RequestHandlerTest {
 
             @Nested
             class HTTP_METHOD_GET {
+
                 @Test
                 @DisplayName("LOGIN Response를 반환한다.")
                 void getLoginResponseEntity() {
@@ -78,10 +79,12 @@ class RequestHandlerTest {
                             () -> assertThat(response.getUri()).isEqualTo("/login.html")
                     );
                 }
+
             }
 
             @Nested
             class HTTP_METHOD_POST {
+
                 @Test
                 @DisplayName("FOUND Response를 반환한다.")
                 void getFoundResponseEntity() {
@@ -121,6 +124,7 @@ class RequestHandlerTest {
                             () -> assertThat(response.getUri()).isEqualTo("/401.html")
                     );
                 }
+
             }
 
         }
@@ -130,6 +134,7 @@ class RequestHandlerTest {
 
             @Nested
             class HTTP_METHOD_GET {
+
                 @Test
                 @DisplayName("REGISTER Response를 반환한다.")
                 void getRegisterResponseEntity() {
@@ -147,10 +152,12 @@ class RequestHandlerTest {
                             () -> assertThat(response.getUri()).isEqualTo("/register.html")
                     );
                 }
+
             }
 
             @Nested
             class HTTP_METHOD_POST {
+
                 @Test
                 @DisplayName("CONFLICT Response를 반환한다.")
                 void getConflictResponseEntity() {
@@ -188,9 +195,11 @@ class RequestHandlerTest {
                             () -> assertThat(response.getUri()).isEqualTo("/index.html")
                     );
                 }
+
             }
 
         }
 
     }
+
 }

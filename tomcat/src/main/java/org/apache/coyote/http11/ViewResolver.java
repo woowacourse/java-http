@@ -11,6 +11,9 @@ import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 public class ViewResolver {
     private static final String DEFAULT_FILE_ROUTE = "static";
 
+    private ViewResolver() {
+    }
+
     public static HttpResponse resolveView(String path) throws IOException {
         String filePath = path;
         if (!filePath.contains(".")) {
@@ -35,8 +38,7 @@ public class ViewResolver {
         return new HttpResponse(body, HttpStatus.OK, TEXT_HTML);
     }
 
-
-    public static HttpResponse routePath(String path, String query) throws IOException {
+    public static HttpResponse routePath(String path) throws IOException {
         if (path.equals("/")) {
             return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
         }

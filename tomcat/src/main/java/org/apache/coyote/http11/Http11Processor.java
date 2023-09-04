@@ -88,7 +88,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse routePost(String uri, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
-
         if (REGISTER_URI.equals(uri)) {
             return doRegister(requestBody);
         }
@@ -120,12 +119,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createHttpResponse(String uri, RequestHeader requestHeader) throws IOException {
-        int index = uri.indexOf("?");
         String path = uri;
-        String query = "";
+        int index = uri.indexOf("?");
         if (index != -1) {
             path = uri.substring(0, index);
-            query = uri.substring(index + 1);
         }
 
         HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
@@ -134,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
                 && sessionManager.findSession(cookie.getJSessionId(false)) != null) {
             return ViewResolver.resolveView(INDEX_URI);
         }
-        return ViewResolver.routePath(path, query);
+        return ViewResolver.routePath(path);
     }
 
     private String createHeader(HttpResponse response) {
@@ -142,9 +139,11 @@ public class Http11Processor implements Runnable, Processor {
         HttpStatus httpStatus = response.getHttpStatus();
 
         stringJoiner.add(String.format("%s %d %s ", HTTP_11, httpStatus.getCode(), httpStatus.getMessage()));
+
         for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
             stringJoiner.add(String.format("%s: %s ", entry.getKey(), entry.getValue()));
         }
+
         if (httpStatus.equals(HttpStatus.FOUND)) {
             stringJoiner.add(toHeaderFormat("Location", response.getBody()));
             stringJoiner.add("\r\n");

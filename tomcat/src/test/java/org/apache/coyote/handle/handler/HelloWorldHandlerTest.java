@@ -22,7 +22,6 @@ class HelloWorldHandlerTest {
                 "GET / HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
-                "Content-Length: 12",
                 "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
         );
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());

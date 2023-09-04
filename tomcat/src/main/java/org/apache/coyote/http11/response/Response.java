@@ -30,6 +30,10 @@ public class Response {
 		return of(StatusCode.OK, responseBody, mimeType);
 	}
 
+	public static Response badRequest() {
+		return code(StatusCode.BAD_REQUEST);
+	}
+
 	public static Response unauthorized() {
 		return code(StatusCode.UNAUTHORIZED);
 	}
@@ -54,7 +58,11 @@ public class Response {
 	}
 
 	private static Response code(final StatusCode code) {
-		return of(code, ResourceProvider.provide(code.getResourcePath()), MimeType.HTML);
+		final var resourcePath = code.getResourcePath();
+		if (resourcePath.isEmpty()) {
+			return of(code, resourcePath, MimeType.HTML);
+		}
+		return of(code, ResourceProvider.provide(resourcePath), MimeType.HTML);
 	}
 
 	public static Response of(final StatusCode code, final String responseBody, final MimeType mimeType) {

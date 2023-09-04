@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-/**
- * TODO: JSESSIONID이 없을 때 Set-Cookie 해주도록 수정
- */
 public class LoginRequestHandler extends RequestHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
@@ -48,32 +45,29 @@ public class LoginRequestHandler extends RequestHandler {
 	protected Response doPost(final Request request) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
-		validateFields(account, password);
 		return login(account, password);
 	}
 
-	private void validateFields(final String account, final String password) {
-		if (account == null || password == null) {
-			throw new IllegalArgumentException("필요한 정보가 없습니다.");
-		}
-	}
-
 	private Response login(final String account, final String password) {
-		final var optionalUser = InMemoryUserRepository.findByAccount(account);
-		if (optionalUser.isEmpty()) {
-			return Response.unauthorized();
+		if (isInvalidInput(account, password)) {
+			return Response.badRequest();
 		}
-		final var user = optionalUser.get();
-		if (!user.checkPassword(password)) {
+
+		final var user = InMemoryUserRepository.findByAccount(account);
+		if (user.isEmpty() || !user.get().checkPassword(password)) {
 			return Response.unauthorized();
 		}
 
 		final var cookies = Cookies.empty();
-		final var session = createSession(user);
+		final var session = createSession(user.get());
 		cookies.addSession(session.getId());
 
 		log.info("[LOGIN SUCCESS] account: {}", account);
 		return Response.redirectWithCookie(REDIRECT_LOCATION, cookies);
+	}
+
+	private boolean isInvalidInput(final String account, final String password) {
+		return account == null || password == null || account.isBlank() || password.isBlank();
 	}
 
 	private Session createSession(final User user) {

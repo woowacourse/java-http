@@ -57,7 +57,7 @@ public class HttpRequest {
                     .filter(s -> s.startsWith(key))
                     .map(s -> s.substring(s.indexOf('=') + 1))
                     .findFirst()
-                    .orElseGet(null);
+                    .orElse("");
         }
         return null;
     }

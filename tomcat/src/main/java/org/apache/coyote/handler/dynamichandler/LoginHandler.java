@@ -25,7 +25,7 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
-        if (httpRequest.session() != null) {
+        if (httpRequest.session() != null && !"".equals(httpRequest.session())) {
             return handleAlreadyLogin();
         }
         if (HttpMethod.GET == HttpMethod.valueOf(httpRequest.method())) {
@@ -42,10 +42,10 @@ public class LoginHandler implements Handler {
         if (quiryString != null) {
             String account = parseAccount(quiryString);
             String password = parsePassword(quiryString);
-            if (isExistUser(account, password)) {
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isPresent() && user.get().checkPassword(password)) {
                 log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
-                User user = InMemoryUserRepository.findByAccount(account).get();
-                return handleRedirectPage(user);
+                return handleRedirectPage(user.get());
             }
             return handleUnAuthorizedPage(httpRequest);
         }
@@ -70,10 +70,10 @@ public class LoginHandler implements Handler {
         if (body != null) {
             String account = parseAccount(body);
             String password = parsePassword(body);
-            if (isExistUser(account, password)) {
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isPresent() && user.get().checkPassword(password)) {
                 log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
-                User user = InMemoryUserRepository.findByAccount(account).get();
-                return handleRedirectPage(user);
+                return handleRedirectPage(user.get());
             }
             return handleUnAuthorizedPage(httpRequest);
         }

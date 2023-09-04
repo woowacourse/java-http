@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum ContentType {
-
     HTML("text/html"),
     CSS("text/css"),
     JS("application/javascript");

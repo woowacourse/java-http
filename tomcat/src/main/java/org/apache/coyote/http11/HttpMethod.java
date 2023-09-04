@@ -12,5 +12,4 @@ public enum HttpMethod {
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
     }
-
 }

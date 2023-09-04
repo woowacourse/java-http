@@ -1,6 +1,9 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.handler;
 
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponseParser {
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private Map<String, String> headers = new LinkedHashMap<>();
+    private Map<String, String> headers;
     private final HttpStatus httpStatus;
     private final String body;
     private final HttpCookie httpCookie = new HttpCookie();

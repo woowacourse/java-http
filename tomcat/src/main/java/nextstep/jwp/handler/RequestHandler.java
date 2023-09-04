@@ -105,7 +105,6 @@ public class RequestHandler {
         response.addCookie("JSESSIONID", uuid);
     }
 
-
     private HttpResponse signUp(HttpRequest request) {
         Map<String, String> body = request.getBody();
         InMemoryUserRepository.save(new User(

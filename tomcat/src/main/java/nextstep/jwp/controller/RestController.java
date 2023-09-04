@@ -7,7 +7,7 @@ public abstract class RestController implements Controller {
 
     protected final String path;
 
-    public RestController(final String path) {
+    protected RestController(final String path) {
         this.path = path;
     }
 

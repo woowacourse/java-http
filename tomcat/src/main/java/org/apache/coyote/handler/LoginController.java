@@ -18,7 +18,11 @@ public class LoginController {
                 return false;
             }
             String password = request.getQueryStringValue(PASSWORD);
-            return user.get().checkPassword(password);
+            if (user.get().checkPassword(password)) {
+                System.out.println(user);
+                return true;
+            }
+            return false;
         } catch (IllegalArgumentException e) {
             throw new LoginException(LOGIN_EXCEPTION_MESSAGE);
         }

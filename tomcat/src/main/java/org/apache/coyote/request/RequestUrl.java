@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 
 public class RequestUrl {
 
@@ -47,15 +48,15 @@ public class RequestUrl {
         return queryString.get(key);
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public URL getUrl() {
         return url;
     }
 
     public Map<String, String> getQueryString() {
         return queryString;
+    }
+
+    public boolean isSamePath(String urlPath) {
+        return Objects.equals(this.path, urlPath);
     }
 }

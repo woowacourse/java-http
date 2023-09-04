@@ -29,8 +29,8 @@ public class Request {
         return url.getQueryValue(key);
     }
 
-    public String getPath() {
-        return url.getPath();
+    public boolean isSamePath(String urlPath) {
+        return url.isSamePath(urlPath);
     }
 
     public URL getUrl() {

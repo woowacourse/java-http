@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.LoginController;
 import org.apache.coyote.request.RequestParser;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseWriter;
@@ -34,11 +35,18 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             RequestParser requestParser = new RequestParser(inputStream);
             Request request = requestParser.getResource();
-
+            doHandler(request);
             ResponseWriter responseWriter = new ResponseWriter(outputStream);
             responseWriter.writeResponse(request);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void doHandler(Request request) {
+        if (request.isSamePath("/login")) {
+            LoginController loginController = new LoginController();
+            loginController.login(request);
         }
     }
 }

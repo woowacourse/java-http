@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -42,11 +45,12 @@ class Http11ProcessorTest {
         );
     }
 
-    @Test
-    void 인덱스_페이지를_조회할_수_있다() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"index.html", "login.html", "register.html"})
+    void HTML_파일을_조회할_수_있다(String target) throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /" + target + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -59,7 +63,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/" + target);
 
         String output = socket.output();
 
@@ -100,41 +104,6 @@ class Http11ProcessorTest {
                 .collect(Collectors.toList());
 
         assertThat(lines.get(0)).isEqualTo("HTTP/1.1 200 OK ");
-    }
-
-    @Test
-    void 로그인_페이지를_조회할_수_있다() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-
-        String output = socket.output();
-
-        List<String> lines = Arrays.stream(output.split("\r\n"))
-                .collect(Collectors.toList());
-
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(lines).contains(
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body
-        );
     }
 
     @Test
@@ -223,41 +192,6 @@ class Http11ProcessorTest {
         assertThat(lines).contains(
                 "HTTP/1.1 302 FOUND ",
                 "Location: index.html "
-        );
-    }
-
-    @Test
-    void 회원가입_페이지를_조회할_수_있다() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-
-        String output = socket.output();
-
-        List<String> lines = Arrays.stream(output.split("\r\n"))
-                .collect(Collectors.toList());
-
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(lines).contains(
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body
         );
     }
 

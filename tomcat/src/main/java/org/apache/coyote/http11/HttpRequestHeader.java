@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.catalina.HttpSession;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequestHeader {
 
@@ -14,25 +17,30 @@ public class HttpRequestHeader {
     private String path;
     private Map<String, String> extraContents;
     private Map<String, String> queryStrings;
+    private Map<String, String> cookies;
 
     private HttpRequestHeader(
             HttpMethod method,
             String path,
             Map<String, String> extraContents,
-            Map<String, String> queryStrings
+            Map<String, String> queryStrings,
+            Map<String, String> cookies
     ) {
         this.method = method;
         this.path = path;
         this.extraContents = extraContents;
         this.queryStrings = queryStrings;
+        this.cookies = cookies;
     }
 
     public static HttpRequestHeader of(String method, String path, String[] extraContents) {
+        Map<String, String> parseExtraContents = parseExtraContents(extraContents);
         return new HttpRequestHeader(
                 HttpMethod.from(method),
                 getUrlRemovedQueryString(path),
-                parseExtraContents(extraContents),
-                parseQueryStrings(path)
+                parseQueryStrings(path),
+                parseExtraContents,
+                parseCookies(parseExtraContents.get("Cookie"))
         );
     }
 
@@ -74,6 +82,16 @@ public class HttpRequestHeader {
         return parseResultOfExtraContents;
     }
 
+    private static Map<String, String> parseCookies(String cookies) {
+        Map<String, String> parseResultOfCookies = new HashMap<>();
+
+        for (String cookie : cookies.split(";")) {
+            putParseResultOfComponent(parseResultOfCookies, cookie, "=");
+        }
+
+        return parseResultOfCookies;
+    }
+
     private static void putParseResultOfComponent(
             Map<String, String> parseResultOfRequestBody,
             String component,
@@ -107,6 +125,10 @@ public class HttpRequestHeader {
 
     public String get(String key) {
         return extraContents.getOrDefault(key, "");
+    }
+
+    public Map<String, String> getCookies() {
+        return cookies;
     }
 
     public String getQueryString(String key) {

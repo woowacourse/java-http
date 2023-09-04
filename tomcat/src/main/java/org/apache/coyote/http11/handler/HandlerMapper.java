@@ -105,34 +105,21 @@ public class HandlerMapper {
     public Response loginWithQueryParameterHandler(final Request request) {
         final RequestLine requestLine = request.getRequestLine();
         final var queryParameter = requestLine.getRequestURI().getQueryParameter();
+        final User user = InMemoryUserRepository.findByAccountAndPassword(
+                queryParameter.get("account"), queryParameter.get("password"))
+                .orElseThrow(() -> new IllegalArgumentException("아이디와 비밀번호가 일치하는 사용자가 존재하지 않습니다."));
+        log.info("user : " + user);
 
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+
+        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        final URL resource = classLoader.getResource("static/" + "index.html");
         final String responseBody;
         try {
             responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("login.html이 존재하지 않습니다.");
+        } catch (final IOException e) {
+            throw new IllegalArgumentException("index.html" + "이 존재하지 않습니다.");
         }
-
-        final User user = InMemoryUserRepository.findByAccount(queryParameter.get("account"))
-                .orElseGet(null);
-
-        if (user != null) {
-            if (!user.checkPassword(queryParameter.get("password"))) {
-                log.error("유저의 아이디와 비밀번호가 일치하지않습니다.");
-            } else {
-                log.info("user : " + user);
-            }
-        }
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        return new Response(response);
+        return new Response(responseBody);
     }
 
     public Response loginFormHandler(final Request request) {

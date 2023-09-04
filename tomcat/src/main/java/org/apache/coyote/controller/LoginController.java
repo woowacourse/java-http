@@ -20,7 +20,8 @@ public class LoginController implements Controller {
     public String run(final String parsedUri) throws IOException {
         final Map<String, String> queryStrings = parseQueryStrings(parsedUri);
         if (queryStrings.isEmpty()) {
-            return FileResolver.LOGIN_API.getResponse();
+            final FileResolver file = FileResolver.findFile(parsedUri);
+            return file.getResponse();
         }
         return login(queryStrings);
     }

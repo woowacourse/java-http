@@ -14,7 +14,7 @@ public class HttpResponseBuilder {
     private static final String STATIC_DIRECTORY = "static";
     private static final String LINE_FEED = "\r\n";
     private static final String SPACE = " ";
-    private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico");
+    private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico", ".html", ".svg");
 
     public String buildStaticFileOkResponse(HttpRequestParser httpRequestParser, String path) throws IOException {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();

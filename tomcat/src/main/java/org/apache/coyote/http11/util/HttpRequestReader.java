@@ -108,9 +108,9 @@ public class HttpRequestReader {
 
     private static String getFilePath(String uri) {
         String filePath = uri.split("\\?")[0];
-        if (!filePath.matches(".+\\.[a-zA-Z]+$")) {
-            return filePath + ".html";
+        if (filePath.matches(".+\\.[a-zA-Z]+$") || filePath.equals("/")) {
+            return filePath;
         }
-        return filePath;
+        return filePath + ".html";
     }
 }

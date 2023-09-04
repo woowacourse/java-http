@@ -14,9 +14,6 @@ public class HttpHeaders {
 
     private final Map<String, String> headers = new HashMap<>();
 
-    public HttpHeaders() {
-    }
-
     public boolean containsHeader(String headerName) {
         return this.headers.containsKey(headerName);
     }

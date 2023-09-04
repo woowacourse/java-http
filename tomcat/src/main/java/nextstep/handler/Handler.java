@@ -13,13 +13,10 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Handler {
 
     public static final String INDEX_HTML = "/index.html";
-    private static final Logger log = LoggerFactory.getLogger(Handler.class);
     private static final String TEXT_HTML = "text/html;charset=utf-8";
 
     private Handler() {

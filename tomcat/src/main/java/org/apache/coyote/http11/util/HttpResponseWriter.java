@@ -40,22 +40,17 @@ public class HttpResponseWriter {
     }
 
     private static String createOkResponse(HttpResponse httpResponse, String contentType) {
-        return String.join("\r\n",
-                createStatusLine(httpResponse),
+        return String.join("\r\n", createStatusLine(httpResponse) + " ",
                 String.join(HEADER_DELIMITER, HttpHeaders.CONTENT_TYPE, contentType) + " ",
                 String.join(HEADER_DELIMITER, HttpHeaders.CONTENT_LENGTH,
-                        String.valueOf(httpResponse.getBody().getBytes().length)) + " ",
-                "",
+                        String.valueOf(httpResponse.getBody().getBytes().length)) + " ", "",
                 httpResponse.getBody());
     }
 
     private static String createFoundResponse(HttpResponse httpResponse) {
-        return String.join("\r\n",
-                createStatusLine(httpResponse) + " ",
-                setCookie(httpResponse) + " ",
-                String.join(HEADER_DELIMITER, HttpHeaders.LOCATION, httpResponse.getHeader("Location")) + " ",
-                "",
-                httpResponse.getBody());
+        return String.join("\r\n", createStatusLine(httpResponse) + " ",
+                setCookie(httpResponse) + " ", String.join(HEADER_DELIMITER, HttpHeaders.LOCATION,
+                        httpResponse.getHeader("Location")) + " ", "", httpResponse.getBody());
     }
 
     private static String createStatusLine(HttpResponse httpResponse) {

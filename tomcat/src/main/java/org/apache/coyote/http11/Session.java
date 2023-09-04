@@ -16,15 +16,7 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return this.values.get(name);
-    }
-
     public void setAttribute(final String name, final Object value) {
         this.values.put(name, value);
-    }
-
-    public void removeAttribute(final String name) {
-        this.values.remove(name);
     }
 }

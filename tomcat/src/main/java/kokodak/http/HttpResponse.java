@@ -96,6 +96,12 @@ public class HttpResponse {
             return this;
         }
 
+        public HttpResponseMessageBuilder redirect(final String redirectUrl) {
+            this.httpStatusCode = HttpStatusCode.FOUND;
+            header.put("Location", redirectUrl);
+            return this;
+        }
+
         public HttpResponse build() {
             return new HttpResponse(this);
         }

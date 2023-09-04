@@ -4,6 +4,8 @@ import static kokodak.Constants.BLANK;
 import static kokodak.Constants.COLON;
 import static kokodak.Constants.CRLF;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +36,13 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest of(final List<String> primitiveRequest) {
+    public static HttpRequest of(final BufferedReader bufferedReader, final List<String> primitiveRequest) throws IOException {
         final String startLine = getStartLine(primitiveRequest);
         final HttpMethod httpMethod = HttpMethod.from(startLine);
         final RequestTarget requestTarget = RequestTarget.from(startLine);
         final HttpVersion httpVersion = HttpVersion.from(startLine);
         final Map<String, String> header = getHeader(primitiveRequest);
-        final String body = getBody(primitiveRequest);
+        final String body = getBody(bufferedReader, header);
         return new HttpRequest(httpMethod, requestTarget, httpVersion, header, body);
     }
 
@@ -70,21 +72,14 @@ public class HttpRequest {
         return header;
     }
 
-    private static String getBody(final List<String> primitiveRequest) {
-        boolean isBody = false;
-        final int size = primitiveRequest.size();
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 1; i < size; i++) {
-            final String request = primitiveRequest.get(i);
-            if (isBody) {
-                stringBuilder.append(request)
-                             .append(CRLF.getValue());
-            }
-            if (!isBody && request.equals(CRLF.getValue())) {
-                isBody = true;
-            }
+    private static String getBody(final BufferedReader bufferedReader, final Map<String, String> header) throws IOException {
+        if (header.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(header.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
         }
-        return stringBuilder.toString();
+        return "";
     }
 
     public boolean hasQueryString() {

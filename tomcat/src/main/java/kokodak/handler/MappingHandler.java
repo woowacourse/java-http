@@ -14,9 +14,9 @@ public class MappingHandler {
 
     static {
         handlers = new HashMap<>();
-        handlers.put("resource", new ResourceHandler());
         handlers.put("/", new BasicHandler());
         handlers.put("/login", new LoginHandler());
+        handlers.put("/register", new RegisterHandler());
     }
 
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
@@ -28,7 +28,7 @@ public class MappingHandler {
             if (resourceUrl == null) {
                 return new NotFoundHandler().handle(httpRequest);
             }
-            final Handler handler = handlers.get("resource");
+            final Handler handler = new ResourceHandler();
             return handler.handle(httpRequest);
         }
         final Handler handler = handlers.getOrDefault(path, new NotFoundHandler());
@@ -37,10 +37,7 @@ public class MappingHandler {
 
     private boolean hasResource(final String path) {
         final String lastPathSnippet = getLastPathSnippet(path);
-        if (lastPathSnippet.contains(".")) {
-            return true;
-        }
-        return false;
+        return lastPathSnippet.contains(".");
     }
 
     private String getLastPathSnippet(final String path) {

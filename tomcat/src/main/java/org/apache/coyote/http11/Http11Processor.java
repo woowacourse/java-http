@@ -44,7 +44,6 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader);
 
             final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
-            log.info("Request-Header: {}", requestHeader);
             final String httpMethod = requestHeader.get("Request-Line").split(" ")[0];
             final String uri = requestHeader.get("Request-Line").split(" ")[1];
             final String cookieHeader = requestHeader.getOrDefault("Cookie", null);

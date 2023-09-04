@@ -151,4 +151,46 @@ class HandlerTest {
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, headers));
     }
+
+    @Test
+    void 회원가입_페이지_요청_핸들러는_GET_요청과_register_경로를_지원한다() {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.GET)
+                .url(Url.from("/register"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // when
+        RegisterPageHandler registerPageHandler = new RegisterPageHandler();
+        boolean supported = registerPageHandler.isSupported(request);
+
+        //then
+        assertThat(supported).isTrue();
+    }
+
+    @Test
+    void 회원가입_페이지_요청_핸들러는_GET_요청시_회원가입_페이지를_반환한다() throws IOException {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.GET)
+                .url(Url.from("/register"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // when
+        RegisterPageHandler registerPageHandler = new RegisterPageHandler();
+        HttpResponse response = registerPageHandler.handle(request);
+
+        //then
+
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
+
+        assertThat(response)
+                .usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(HttpStatus.OK, headers, expectedBody));
+    }
 }

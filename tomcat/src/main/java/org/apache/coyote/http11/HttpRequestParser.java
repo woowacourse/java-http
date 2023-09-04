@@ -22,13 +22,14 @@ public class HttpRequestParser {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String startLine = bufferedReader.readLine();
-        String method = startLine.split(START_LINE_DELIMITER)[0];
-        String path = getPath(startLine);
-        Map<String, String> headers = readHeader(bufferedReader);
-        String body = readMessageBody(bufferedReader, headers);
+        final var startLine = bufferedReader.readLine();
+        final var method = startLine.split(START_LINE_DELIMITER)[0];
+        final var path = getPath(startLine);
+        final var headers = readHeader(bufferedReader);
+        final var body = readMessageBody(bufferedReader, headers);
+        final var cookies = findCookies(headers);
 
-        return new HttpRequest(method, path, headers, body);
+        return new HttpRequest(method, path, headers, body, cookies);
     }
 
     private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -24,10 +23,10 @@ public class Http11Processor implements Runnable, Processor {
     private final HttpRequestParser httpRequestParser;
     private final Session session;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Session session) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
-        session = new Session(new HashMap<>());
+        this.session = session;
     }
 
     @Override
@@ -67,11 +66,12 @@ public class Http11Processor implements Runnable, Processor {
 
         User user = optionalUser.get();
         log.info("user: {}", user);
+        String sessionId = session.addUser(user);
         return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + session.addUser(user)));
+                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + sessionId));
     }
 
-    private HttpResponse postRegister(HttpRequest request) throws IOException {
+    private HttpResponse postRegister(HttpRequest request) {
         final var form = request.getForm();
         final var account = form.get("account");
         final var password = form.get("password");
@@ -112,10 +112,7 @@ public class Http11Processor implements Runnable, Processor {
             return getResource("/");
         }
         if (uri.equals("/login")) {
-            if (request.isPost()) {
-                return postLogin(request);
-            }
-            return getResource("/login.html");
+            return handleLogin(request);
         }
         if (uri.equals("/register")) {
             if (request.isPost()) {
@@ -124,6 +121,22 @@ public class Http11Processor implements Runnable, Processor {
             return getResource("/register.html");
         }
         return getResource(uri);
+    }
+
+    private HttpResponse handleLogin(final HttpRequest request) throws IOException {
+        if (request.isPost()) {
+            return postLogin(request);
+        }
+        if (isAlreadyLoggedIn(request)) {
+            return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
+                    Map.of("Location", "/index.html"));
+        }
+        return getResource("/login.html");
+    }
+
+    private boolean isAlreadyLoggedIn(final HttpRequest request) {
+        String sessionId = request.getCookie("JSESSIONID");
+        return session.exists(sessionId);
     }
 
     private HttpResponse getResource(String uri) throws IOException {
@@ -146,7 +159,7 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return Optional.ofNullable(resource.getFile()).map(File::new).get();
+        return Optional.ofNullable(resource.getFile()).map(File::new).orElse(null);
     }
 
 }

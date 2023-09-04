@@ -1,9 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -11,25 +9,16 @@ public class HttpRequest {
     private String method;
     private String uri;
     private String messageBody;
-
     private Map<String, String> headers;
+    private Cookie cookie;
 
-    public static HttpRequest from(List<String> lines) {
-        System.out.println(lines);
-        final var requestLine = lines.get(0).split(" ");
-        return new HttpRequest(requestLine[0], requestLine[1]);
-    }
-
-    public HttpRequest(final String method, final String uri) {
-        this.method = method;
-        this.uri = uri;
-    }
-
-    public HttpRequest(final String method, final String uri, final Map<String, String> headers, final String messageBody) {
+    public HttpRequest(final String method, final String uri, final Map<String, String> headers,
+                       final String messageBody, final Map<String, String> cookie) {
         this.method = method;
         this.uri = uri;
         this.headers = headers;
         this.messageBody = messageBody;
+        this.cookie = new Cookie(cookie);
     }
 
     public boolean isGet() {
@@ -52,12 +41,20 @@ public class HttpRequest {
         return messageBody;
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     public Map<String, String> getForm() {
         String[] split = messageBody.split("&");
         return Arrays.asList(split)
                 .stream()
                 .map(s -> s.split("="))
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
+    }
+
+    public String getCookie(String key) {
+        return cookie.getCookie(key);
     }
 
 }

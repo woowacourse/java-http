@@ -5,32 +5,26 @@ import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler {
+import java.util.Optional;
 
-    private static final String QUERY_START_CHARACTER = "?";
-    private static final int INVALID_INDEX = -1;
+public class LoginHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     public LoginHandler() {
     }
 
-    public boolean login(final String requestUrl) {
-        final int index = requestUrl.indexOf("?");
+    public boolean login(final String requestBody) {
+        final QueryParams queryParams = QueryParams.from(requestBody);
+        final String account = queryParams.getValueFromKey("account");
 
-        if (index == -1) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
             return false;
         }
 
-        String queryString = requestUrl.substring(index + 1);
-        final QueryParams queryParams = QueryParams.from(queryString);
-        final String account = queryParams.getValueFromKey("account");
-
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-
-        final String userInformation = user.toString();
+        final String userInformation = user.get().toString();
         log.info(userInformation);
-        return user.checkPassword(queryParams.getValueFromKey("password"));
+        return user.get().checkPassword(queryParams.getValueFromKey("password"));
     }
 }

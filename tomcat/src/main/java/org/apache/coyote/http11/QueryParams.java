@@ -1,31 +1,36 @@
 package org.apache.coyote.http11;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class QueryParams {
 
-    private static final String QUERY_STRING_DELIMITER = "&";
+    private Map<String, String> queryMap;
 
-    private final List<QueryParam> queryParams;
-
-    public QueryParams(final List<QueryParam> queryParams) {
-        this.queryParams = queryParams;
+    public QueryParams(final Map<String, String> queryMap) {
+        this.queryMap = queryMap;
     }
 
-    public static QueryParams from(String queryParams) {
-        return new QueryParams(Stream.of(queryParams.split("&"))
-                .map(QueryParam::from)
-                .collect(toList()));
+    public static QueryParams from(String queryString) {
+        final Map<String, String> queryMap = new HashMap<>();
+        final String[] params = queryString.split("&");
+
+        for (String param : params) {
+            final String[] keyValue = param.split("=");
+            if (keyValue.length == 2) {
+                final String key = keyValue[0];
+                final String value = keyValue[1];
+                queryMap.put(key, value);
+            }
+        }
+        return new QueryParams(queryMap);
     }
 
     public String getValueFromKey(String key) {
-        return queryParams.stream()
-                .filter(it -> it.isSameKey(key))
-                .findAny()
-                .map(QueryParam::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 키입니다."));
+        return queryMap.get(key);
+    }
+
+    public Map<String, String> getQueryMap() {
+        return queryMap;
     }
 }

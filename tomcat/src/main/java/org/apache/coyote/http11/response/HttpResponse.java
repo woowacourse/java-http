@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.StatusCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,21 +18,8 @@ public class HttpResponse {
         this.responseBody = responseBody;
 
         header = new HashMap<>();
-        header.put("Content-Type: ",contentType.getContentType());
-        header.put("Content-Length: ",String.valueOf(responseBody.getBytes().length));
-    }
-
-    public HttpResponse(final StatusCode statusCode,
-                        final ContentType contentType,
-                        final String responseBody,
-                        final String redirectUrl) {
-        this.statusCode = statusCode;
-        this.responseBody = responseBody;
-
-        header = new HashMap<>();
-        header.put("Location: ",redirectUrl);
-        header.put("Content-Type: ",contentType.getContentType());
-        header.put("Content-Length: ",String.valueOf(responseBody.getBytes().length));
+        header.put("Content-Type: ", contentType.getContentType());
+        header.put("Content-Length: ", String.valueOf(responseBody.getBytes().length));
     }
 
     public String getResponse() {

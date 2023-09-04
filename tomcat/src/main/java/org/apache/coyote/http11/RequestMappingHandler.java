@@ -1,7 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.*;
+
 import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.regex.Pattern;
@@ -12,7 +13,8 @@ public enum RequestMappingHandler {
     FILE(RequestMappingHandler::isFileGetUrl, new FileGetResponseMaker()),
     LOGIN_GET(RequestMappingHandler::isLoginGetUrl, new LoginGetResponseMaker()),
     LOGIN_POST(RequestMappingHandler::isLoginPostUrl, new LoginPostResponseMaker()),
-    REGISTER_POST(RequestMappingHandler::isRegisterGetUrl, new RegisterGetResponseMaker());
+    REGISTER_GET(RequestMappingHandler::isRegisterGetUrl, new RegisterGetResponseMaker()),
+    REGISTER_POST(RequestMappingHandler::isRegisterPostUrl, new RegisterPostResponseMaker());
 
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
 
@@ -24,20 +26,10 @@ public enum RequestMappingHandler {
         this.responseMaker = responseMaker;
     }
 
-    public static ResponseMaker findResponseMaker(final String request) throws URISyntaxException {
-        String[] requestLines = request.split("\\s+");
-        System.out.println("size: "+requestLines.length);
+    public static ResponseMaker findResponseMaker(final HttpRequest request) {
+        String resourcePath = request.getRequestLine().getRequestUrl();
+        String requestMethod = request.getRequestLine().getHttpMethod();
 
-//        if (requestLines.length < 2) {
-//            throw new UncheckedServletException(new Exception("예외"));
-//        }
-
-        URI uri = new URI(requestLines[1]);
-        String resourcePath = uri.getPath();
-        String requestMethod = requestLines[0];
-
-        System.out.println("resourcePath: "+resourcePath);
-        System.out.println("requestMethod: "+requestMethod);
         return Arrays.stream(values())
                 .filter(value -> value.condition.test(resourcePath, requestMethod))
                 .findFirst()
@@ -65,7 +57,12 @@ public enum RequestMappingHandler {
         return requestUrl.startsWith("/register") && requestMethod.equals("GET");
     }
 
+    public static boolean isRegisterPostUrl(final String requestUrl, final String requestMethod) {
+        return requestUrl.startsWith("/register") && requestMethod.equals("POST");
+    }
+
     public ResponseMaker getResponseMaker() {
         return responseMaker;
     }
+
 }

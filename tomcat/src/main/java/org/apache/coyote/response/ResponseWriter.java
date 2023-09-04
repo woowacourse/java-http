@@ -20,7 +20,7 @@ public class ResponseWriter {
     }
 
     public void writeResponse(Request request) throws URISyntaxException, IOException {
-        BufferedReader bufferedReader = getBufferedReader(request.getPath());
+        BufferedReader bufferedReader = getBufferedReader(request.getUrl());
         String response = getResponse(request, bufferedReader);
 
         outputStream.write(response.getBytes());

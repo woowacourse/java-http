@@ -29,8 +29,12 @@ public class Request {
         return url.getQueryValue(key);
     }
 
-    public URL getPath() {
+    public String getPath() {
         return url.getPath();
+    }
+
+    public URL getUrl() {
+        return url.getUrl();
     }
 
     public Map<String, String> getQueryString() {

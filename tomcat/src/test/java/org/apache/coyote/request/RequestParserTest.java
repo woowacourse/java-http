@@ -20,7 +20,7 @@ class RequestParserTest {
         Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
                 () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
                 () -> assertThat(request.isExists()).isTrue()
         );
@@ -35,7 +35,7 @@ class RequestParserTest {
         Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
                 () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
                 () -> assertThat(request.isExists()).isTrue()
         );
@@ -51,7 +51,7 @@ class RequestParserTest {
         Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(request.getPath().getFile()).contains("/404.html"),
+                () -> assertThat(request.getUrl().getFile()).contains("/404.html"),
                 () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
                 () -> assertThat(request.isExists()).isFalse()
         );
@@ -67,7 +67,7 @@ class RequestParserTest {
         Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
                 () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
                 () -> assertThat(request.getQueryString().get("account")).isEqualTo("123"),
                 () -> assertThat(request.getQueryString().get("password")).isEqualTo("password1234!"),

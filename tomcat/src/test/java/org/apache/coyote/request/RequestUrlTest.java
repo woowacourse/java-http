@@ -14,7 +14,7 @@ class RequestUrlTest {
     void init_test() {
         RequestUrl requestUrl = RequestUrl.of("/index.html", new HashMap<>());
 
-        assertThat(requestUrl.getPath().getPath()).contains("/index.html");
+        assertThat(requestUrl.getUrl().getPath()).contains("/index.html");
     }
 
     @Test
@@ -22,7 +22,7 @@ class RequestUrlTest {
     void home_url() {
         RequestUrl requestUrl = RequestUrl.of("/", new HashMap<>());
 
-        assertThat(requestUrl.getPath().getPath()).contains("/index.html");
+        assertThat(requestUrl.getUrl().getPath()).contains("/index.html");
     }
 
     @Test
@@ -31,8 +31,19 @@ class RequestUrlTest {
         RequestUrl requestUrl = RequestUrl.of("/없는주소/입니다/ㅎㅎ", new HashMap<>());
 
         assertAll(
-                () -> assertThat(requestUrl.getPath().getPath()).contains("/404.html"),
+                () -> assertThat(requestUrl.getUrl().getPath()).contains("/404.html"),
                 () -> assertThat(requestUrl.isNullPath()).isTrue()
+        );
+    }
+
+    @Test
+    @DisplayName("url의 값이 존재하지않지만 html 문서는 존재할 때 해당 html 문서를 url로.")
+    void no_url_html() {
+        RequestUrl requestUrl = RequestUrl.of("/index", new HashMap<>());
+
+        assertAll(
+                () -> assertThat(requestUrl.getUrl().getPath()).contains("/index.html"),
+                () -> assertThat(requestUrl.isNullPath()).isFalse()
         );
     }
 }

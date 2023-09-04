@@ -43,7 +43,7 @@ public class HttpRequestParser {
     private static HttpRequestFirstLineInfo parseFirstLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         if (requestLine == null) {
-            throw new IOException("요청에 헤더가 존재하지 않습니다.");
+            throw new IOException("요청에 Reqeust-line이 없습니다.");
         }
         return HttpRequestFirstLineInfo.from(requestLine);
     }

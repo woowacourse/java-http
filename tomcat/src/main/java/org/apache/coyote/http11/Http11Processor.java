@@ -64,12 +64,14 @@ public class Http11Processor implements Runnable, Processor {
 
         if (uriPath.equals("/login")) {
             final String path = LOGIN_PAGE;
-            if (request.containsQuery()) {
+            if (request.getMethod().equals("GET")) {
+                return HttpResponse.of(HttpStatus.OK, path);
+            }
+            if (request.getMethod().equals("POST")) {
                 final boolean isAuthenticated = processLogin(request);
                 final String redirectUrlPath = isAuthenticated ? INDEX_PAGE : UNAUTHORIZED_PAGE;
                 return HttpResponse.of(HttpStatus.FOUND, redirectUrlPath);
             }
-            return HttpResponse.of(HttpStatus.OK, path);
         }
 
         if (uriPath.equals("/register")) {
@@ -87,11 +89,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public boolean processLogin(final HttpRequest request) {
-        if (!request.containsQuery(ACCOUNT_KEY) || !request.containsQuery(PASSWORD_KEY)) {
+        if (!request.containsBody(ACCOUNT_KEY) || !request.containsBody(PASSWORD_KEY)) {
             return false;
         }
-        final String account = request.getQueryParameter(ACCOUNT_KEY);
-        final String password = request.getQueryParameter(PASSWORD_KEY);
+        final String account = request.getBody(ACCOUNT_KEY);
+        final String password = request.getBody(PASSWORD_KEY);
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
 
         if (userOptional.isPresent()) {

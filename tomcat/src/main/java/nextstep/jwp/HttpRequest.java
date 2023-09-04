@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class HttpRequest {
 
     private final Map<String, String> values = new ConcurrentHashMap<>();
+    private Session session;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -82,4 +83,5 @@ public class HttpRequest {
     public boolean hasNotCookie() {
         return values.containsKey("Cookie");
     }
+
 }

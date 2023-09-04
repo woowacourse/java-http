@@ -26,4 +26,8 @@ public class HttpCookie {
     public String get(String key) {
         return cookies.get(key);
     }
+
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
 }

@@ -47,6 +47,10 @@ public class HttpResponse {
         return body;
     }
 
+    public HttpCookie getCookie() {
+        return httpCookie;
+    }
+
     public String getCookieValue(String key) {
         return httpCookie.get(key);
     }

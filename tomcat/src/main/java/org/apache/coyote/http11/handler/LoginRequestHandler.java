@@ -63,7 +63,8 @@ public class LoginRequestHandler extends RequestHandler {
 		cookies.addSession(session.getId());
 
 		log.info("[LOGIN SUCCESS] account: {}", account);
-		return Response.redirectWithCookie(REDIRECT_LOCATION, cookies);
+		return Response.redirect(REDIRECT_LOCATION)
+			.addCookie(cookies);
 	}
 
 	private boolean isInvalidInput(final String account, final String password) {

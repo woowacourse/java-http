@@ -42,14 +42,6 @@ public class Response {
 		return code(StatusCode.NOT_FOUND);
 	}
 
-	public static Response redirectWithCookie(final String location, final Cookies cookies) {
-		final var statusLine = new StatusLine(StatusCode.FOUND);
-		final var header = getHeader();
-		header.add(ResponseHeaderType.LOCATION, location);
-		header.addCookies(cookies);
-		return new Response(statusLine, header, null);
-	}
-
 	public static Response redirect(final String location) {
 		final var statusLine = new StatusLine(StatusCode.FOUND);
 		final var header = getHeader();
@@ -65,7 +57,7 @@ public class Response {
 		return of(code, ResourceProvider.provide(resourcePath), MimeType.HTML);
 	}
 
-	public static Response of(final StatusCode code, final String responseBody, final MimeType mimeType) {
+	private static Response of(final StatusCode code, final String responseBody, final MimeType mimeType) {
 		final var statusLine = new StatusLine(code);
 		final var header = getHeader(responseBody, mimeType);
 		return new Response(statusLine, header, responseBody);
@@ -80,6 +72,11 @@ public class Response {
 		headers.put(ResponseHeaderType.CONTENT_TYPE, mimeType.formatMimeType());
 		headers.put(ResponseHeaderType.CONTENT_LENGTH, Integer.toString(responseBody.getBytes().length));
 		return new ResponseHeader(headers);
+	}
+
+	public Response addCookie(final Cookies cookies) {
+		header.addCookies(cookies);
+		return this;
 	}
 
 	public String format() {

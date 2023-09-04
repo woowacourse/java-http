@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -91,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
 
     if (user.isPresent()) {
       log.debug(user.toString());
-      return response302("/index.html");
+      return response302("/index.html", "JSESSIONID=" + UUID.randomUUID());
     }
     return response302("/401.html");
   }
@@ -109,6 +110,14 @@ public class Http11Processor implements Runnable, Processor {
     return String.join(NEW_LINE,
         "HTTP/1.1 302 FOUND ",
         "Location: " + location,
+        "");
+  }
+
+  private String response302(final String location, final String cookie) {
+    return String.join(NEW_LINE,
+        "HTTP/1.1 302 FOUND ",
+        "Location: " + location,
+        "Set-Cookie: " + cookie,
         "");
   }
 

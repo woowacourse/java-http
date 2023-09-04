@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String controller(final Map<String, String> httpRequestHeader, final String method, final String path, final Map<String, String> queryString, Map<String, String> requestBody) throws IOException {
         if ("GET".equals(method) && "/".equals(path)) {
-            return generateResponseBody("OK", "html", "Hello world!", Cookie.parse(""));
+            return generateResponseBody("OK", "html", "Hello world!");
         }
         if ("GET".equals(method) && "/index.html".equals(path)) {
             return generateResult(path, "OK");
@@ -131,13 +131,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateRedirect(final String location, final String statusCode) {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
                 "Location: " + location + " ");
     }
 
     private String generateRedirect(final String location, final String statusCode, final Cookie cookie) {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
                 "Set-Cookie: " + cookie.generateCookieHeaderValue() + " ",
                 "Location: " + location + " ");
@@ -165,7 +165,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody) {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
                 "Content-Type: " + CONTENT_TYPE.get(fileExtension) + " ",
                 "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
@@ -174,7 +174,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody, final Cookie cookie) {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
                 "Set-Cookie: " + cookie.generateCookieHeaderValue() + " ",
                 "Content-Type: " + CONTENT_TYPE.get(fileExtension) + " ",

@@ -5,8 +5,19 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +37,51 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (var inputStream = connection.getInputStream();
+             var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            List<String> headers = new ArrayList<>();
+            String header = "";
+            while (!(header = bufferedReader.readLine()).equals("")) {
+                headers.add(header);
+            }
+            String[] splitFirstLine = Objects.requireNonNull(headers.get(0)).split(" ");
+            String requestMethod = splitFirstLine[0];
+            String requestUri = splitFirstLine[1];
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            String responseBody = renderResponseBody(requestMethod, requestUri);
+
+            List<String> responseHeaders = new ArrayList<>();
+            responseHeaders.add("HTTP/1.1 200 OK ");
+            responseHeaders.add("Content-Type: text/html;charset=utf-8 ");
+            responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
+            String responseHeader = String.join("\r\n", responseHeaders);
+
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+
+            var response = String.join("\r\n", responseHeader, "", responseBody);
+
+            bufferedOutputStream.write(response.getBytes());
+            bufferedOutputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private String renderResponseBody(String requestMethod, String requestUri) {
+        if (!requestMethod.equalsIgnoreCase("GET")) {
+            throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
+        }
+
+        String fileName = "static" + requestUri;
+        String path = getClass().getClassLoader().getResource(fileName).getPath();
+        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+            return lines.collect(Collectors.joining("\n", "", "\n"));
+        } catch (IOException | UncheckedIOException e) {
+            return "Hello world!";
         }
     }
 }

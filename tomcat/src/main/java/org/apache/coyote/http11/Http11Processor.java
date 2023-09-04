@@ -10,6 +10,9 @@ import org.apache.coyote.Session;
 import org.apache.coyote.request.HttpRequestBody;
 import org.apache.coyote.request.HttpRequestHeader;
 import org.apache.coyote.request.HttpRequestLine;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseHeader;
+import org.apache.coyote.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -98,7 +102,8 @@ public class Http11Processor implements Runnable, Processor {
                 statusCode = 302;
                 statusMessage = "Found";
 
-                HttpCookie cookie = getCookie(requestHeader.toString());
+                HttpCookie cookie = httpRequestHeader.getCookie();
+
 
                 if (cookie == null || !cookie.existJSESSIONID()) {
                     path = "/login.html";
@@ -162,8 +167,6 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            HttpCookie requestCookie = getCookie(requestHeader.toString());
-
             var responseBody = "";
 
             if (uri.length() == 0) {
@@ -174,13 +177,12 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(filePath));
             }
 
+            StatusLine statusLine = StatusLine.from(statusCode, statusMessage);
+            HttpResponseHeader responseHeader = new HttpResponseHeader(new HashMap<>());
+            responseHeader.add("Content-Type", "text/" + contentType + ";charset=utf-8");
+            responseHeader.add("Content-Length", responseBody.getBytes().length);
 
-            String response = String.join("\r\n",
-                    "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-                    "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = new HttpResponse(statusLine, responseHeader, responseBody).getResponse();
 
             if (setCookie.length() != 0) {
                 response = String.join("\r\n",
@@ -215,16 +217,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "";
-    }
-
-    private HttpCookie getCookie(String requestHeader) {
-        String[] headerLines = requestHeader.split("\r\n");
-        for (String line : headerLines) {
-            if (line.startsWith("Cookie:")) {
-                String[] parts = line.split(" ");
-                return HttpCookie.parseCookieString(parts[1]);
-            }
-        }
-        return null;
     }
 }

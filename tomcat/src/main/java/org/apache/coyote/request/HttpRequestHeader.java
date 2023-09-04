@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.HttpCookie;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -39,5 +41,10 @@ public class HttpRequestHeader {
         } catch (NumberFormatException e) {
         }
         return 0;
+    }
+
+    public HttpCookie getCookie() {
+        String cookie = headers.get("Cookie");
+        return HttpCookie.parseCookieString(cookie);
     }
 }

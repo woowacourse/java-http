@@ -11,6 +11,9 @@ import java.util.StringJoiner;
 
 public class ResponseEntity {
 
+    public static final String EXTENSION_DELIMITER = ".";
+    public static final String RESPONSE_DELIMITER = " ";
+
     private final HttpVersion httpVersion;
     private final ResponseStatus responseStatus;
     private final List<String> responseHeaders;
@@ -25,12 +28,12 @@ public class ResponseEntity {
     }
 
     public static ResponseEntity redirect(String redirectionFile) {
-        List<String> headers = List.of(String.join(" ", "Location:", redirectionFile));
+        List<String> headers = List.of(String.join(RESPONSE_DELIMITER, "Location:", redirectionFile));
         return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
     }
 
     public static ResponseEntity ok(String fileData, String endPoint) {
-        int fileTypeStartIndex = endPoint.indexOf('.');
+        int fileTypeStartIndex = endPoint.indexOf(EXTENSION_DELIMITER);
         String fileExtension = endPoint.substring(fileTypeStartIndex + 1);
 
         List<String> headers = List.of(
@@ -56,7 +59,7 @@ public class ResponseEntity {
 
     private String generateStatus() {
         return String.join(
-                " ",
+                RESPONSE_DELIMITER,
                 httpVersion.getVersion(),
                 String.valueOf(responseStatus.getStatusCode()),
                 responseStatus.name(),
@@ -68,7 +71,7 @@ public class ResponseEntity {
         StringJoiner headers = new StringJoiner("\r\n");
         for (String header : responseHeaders) {
             headers.add(
-                    String.join(" ", header, "")
+                    String.join(RESPONSE_DELIMITER, header, "")
             );
         }
         if (cookies.containsKey("JSESSIONID")) {

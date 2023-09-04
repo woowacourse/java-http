@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -47,7 +51,9 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = null;
             final String[] parsedFirstLine = firstLine.split(" ");
+
             response = parseStaticFiles(parsedFirstLine, response);
+            response = parseLoginPage(parsedFirstLine, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -132,6 +138,43 @@ public class Http11Processor implements Runnable, Processor {
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: image/x-icon ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        return null;
+    }
+
+    private String parseLoginPage(final String[] parsedFirstLine, String response) throws IOException {
+        final String requestUri = parsedFirstLine[1];
+
+        if (requestUri.contains("login")) {
+            final String[] parsedRequestUri = requestUri.split("\\?");
+            final String uri = parsedRequestUri[0];
+            final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
+                    .map(param -> param.split("="))
+                    .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+
+            final String account = queryStrings.get("account");
+            final String password = queryStrings.get("password");
+            final User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+
+            if (!user.checkPassword(password)) {
+                throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
+            }
+
+            log.info("로그인 성공! user = {}", user);
+
+            final String filePath = "static/login.html";
+            final URL fileUrl = getClass().getClassLoader().getResource(filePath);
+            final Path path = new File(fileUrl.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

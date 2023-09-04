@@ -10,6 +10,7 @@ import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.LoginPageHandler;
 import org.apache.coyote.handler.ResourceHandler;
 import org.apache.coyote.handler.WelcomeHandler;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -19,11 +20,13 @@ import org.apache.coyote.http.util.exception.UnsupportedHttpMethodException;
 
 public class HelloWorldContext implements Container {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String DEFAULT_STATIC_RESOURCE_PATH_PREFIX = "static/";
 
     private final String rootContextPath;
     private final String staticResourcePath;
     private final List<Handler> handlers = new ArrayList<>();
+    private final Handler resourceHandler;
 
     public HelloWorldContext(final String rootContextPath) {
         this(rootContextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
@@ -36,13 +39,13 @@ public class HelloWorldContext implements Container {
 
         this.rootContextPath = rootContextPath;
         this.staticResourcePath = staticResourcePath;
+        this.resourceHandler = new ResourceHandler(staticResourcePath);
 
         initHandlers();
     }
 
     private void initHandlers() {
         handlers.add(new WelcomeHandler(rootContextPath));
-        handlers.add(new ResourceHandler(staticResourcePath));
         handlers.add(new LoginHandler("/login", rootContextPath));
         handlers.add(new LoginPageHandler("/login", rootContextPath, "login.html", staticResourcePath));
     }
@@ -64,8 +67,17 @@ public class HelloWorldContext implements Container {
     private Response process(final Request request) throws IOException {
         for (final Handler handler : handlers) {
             if (handler.supports(request)) {
+                request.initSessionManager(SESSION_MANAGER);
                 return handler.service(request);
             }
+        }
+
+        return processStaticResources(request);
+    }
+
+    private Response processStaticResources(final Request request) throws IOException {
+        if (resourceHandler.supports(request)) {
+            return resourceHandler.service(request);
         }
 
         return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, "존재하지 않는 api 입니다.");

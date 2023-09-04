@@ -2,6 +2,7 @@ package org.apache.coyote.http.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.QueryParameters;
@@ -25,8 +26,9 @@ public class RequestGenerator {
         final HttpRequestHeaders headers = readRequestHeaders(bufferedReader);
         final HttpRequestBody body = readRequestBody(bufferedReader, headers);
         final QueryParameters queryParameters = readQueryParameters(url, body);
+        final HttpCookie cookie = convertCookie(headers);
 
-        return new Request(headers, httpMethod, httpVersion, url, body,queryParameters);
+        return new Request(headers, httpMethod, httpVersion, url, body, queryParameters, cookie);
     }
 
     private HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -75,5 +77,15 @@ public class RequestGenerator {
         }
 
         return QueryParameters.fromBodyContent(body.body());
+    }
+
+    private HttpCookie convertCookie(final HttpRequestHeaders headers) {
+        final String cookieValue = headers.findValue(HttpHeaderConsts.COOKIE);
+
+        if (cookieValue == null) {
+            return HttpCookie.EMPTY;
+        }
+
+        return HttpCookie.fromCookieHeaderValue(cookieValue);
     }
 }

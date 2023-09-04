@@ -1,12 +1,12 @@
 package org.apache.coyote.handler;
 
 import java.io.IOException;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements Handler {
 
-    private static final String ACCOUNT_KEY = "account";
+    public static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
@@ -60,10 +60,9 @@ public class LoginHandler implements Handler {
 
             validatePassword(password, user);
 
-            log.info("login success : {}", user);
-
-            final String sessionId = UUID.randomUUID().toString();
-            final HttpCookie cookie = HttpCookie.fromSessionId(sessionId);
+            final HttpSession session = request.getSession(true);
+            session.setAttribute(ACCOUNT_KEY, user);
+            final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
 
             return Response.of(
                     request,

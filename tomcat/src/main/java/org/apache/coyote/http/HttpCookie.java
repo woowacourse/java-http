@@ -11,6 +11,7 @@ import org.apache.coyote.http.util.HttpConsts;
 public class HttpCookie {
 
     public static final HttpCookie EMPTY = new HttpCookie(Collections.emptyMap());
+    public static final String SESSION_ID_KEY = "JSESSIONID";
 
     private static final String HEADER_DELIMITER = ";";
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -18,7 +19,6 @@ public class HttpCookie {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private static final String SESSION_ID_KEY = "JSESSIONID";
     private static final String SET_COOKIE_HEADER_KEY = "Set-Cookie: ";
 
     private final Map<String, String> headers;

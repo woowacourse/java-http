@@ -1,5 +1,8 @@
 package org.apache.coyote.http.request;
 
+import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.HttpSession;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.util.HttpMethod;
 import org.apache.coyote.http.util.HttpVersion;
 
@@ -11,6 +14,8 @@ public class Request {
     private final Url url;
     private final HttpRequestBody body;
     private final QueryParameters queryParameters;
+    private final HttpCookie cookie;
+    private SessionManager sessionManager;
 
     public Request(
             final HttpRequestHeaders headers,
@@ -20,12 +25,29 @@ public class Request {
             final HttpRequestBody body,
             final QueryParameters queryParameters
     ) {
+        this(headers, method, version, url, body, queryParameters, HttpCookie.EMPTY);
+    }
+
+    public Request(
+            final HttpRequestHeaders headers,
+            final HttpMethod method,
+            final HttpVersion version,
+            final Url url,
+            final HttpRequestBody body,
+            final QueryParameters queryParameters,
+            final HttpCookie cookie
+    ) {
         this.headers = headers;
         this.method = method;
         this.version = version;
         this.url = url;
         this.body = body;
         this.queryParameters = queryParameters;
+        this.cookie = cookie;
+    }
+
+    public void initSessionManager(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     public String findHeaderValue(final String headerKey) {
@@ -70,5 +92,22 @@ public class Request {
 
     public String resourceName() {
         return url.resourceName();
+    }
+
+    public HttpSession getSession(final boolean create) {
+        final String sessionId = cookie.findValue(HttpCookie.SESSION_ID_KEY);
+
+        if (create && sessionId == null) {
+            final HttpSession httpSession = new HttpSession();
+            sessionManager.add(httpSession);
+
+            return httpSession;
+        }
+
+        return sessionManager.findSession(sessionId);
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

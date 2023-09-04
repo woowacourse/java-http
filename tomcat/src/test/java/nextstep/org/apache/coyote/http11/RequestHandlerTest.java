@@ -1,7 +1,7 @@
-package nextstep.jwp;
+package nextstep.org.apache.coyote.http11;
 
-import static nextstep.jwp.HttpStatus.FOUND;
-import static nextstep.jwp.SessionManager.findSession;
+import static org.apache.coyote.http11.HttpStatus.FOUND;
+import static nextstep.jwp.session.SessionManager.findSession;
 import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -10,6 +10,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import nextstep.jwp.handler.RequestHandler;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

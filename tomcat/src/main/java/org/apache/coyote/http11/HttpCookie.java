@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

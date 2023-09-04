@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,8 +7,15 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.session.Session;
+import nextstep.jwp.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

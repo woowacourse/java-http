@@ -2,8 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.Handler;
-import nextstep.jwp.HttpRequest;
+import nextstep.jwp.handler.Handler;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

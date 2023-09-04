@@ -11,9 +11,6 @@ public class HttpResponse {
     private String body;
     private Map<HttpHeader, String> headers = new LinkedHashMap<>();
 
-    public HttpResponse() {
-    }
-
     public String httpVersion() {
         return httpVersion;
     }

@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.QueryParameters;
@@ -29,8 +30,8 @@ class LoginHandlerTest {
     void supports_메서드는_지원하는_요청인_경우_true를_반환한다() {
         final LoginHandler handler = new LoginHandler("/login", "/");
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/login?user=gugu&password=password");
+        final HttpMethod method = HttpMethod.findMethod("post");
+        final Url url = Url.from("/login");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
         final Request request = new Request(
                 headers,
@@ -38,7 +39,7 @@ class LoginHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                QueryParameters.fromBodyContent("account=gugu&password=password")
         );
 
         final boolean actual = handler.supports(request);
@@ -82,9 +83,10 @@ class LoginHandlerTest {
                 HttpRequestBody.EMPTY,
                 QueryParameters.fromUrlContent("?account=gugu&password=password")
         );
+        request.initSessionManager(new SessionManager());
 
         final Response actual = handler.service(request);
 
-        assertThat(actual.convertResponseMessage()).contains("200 OK");
+        assertThat(actual.convertResponseMessage()).contains("302 Found");
     }
 }

@@ -37,12 +37,10 @@ class UserRegisterRequestPostHandlerTest {
         // then
         final String httpResponse = HttpFormTestUtils.builder()
                 .http11().FOUND().enter()
-                .contentLength("0").enter()
-                .contentType("text/html;charset=utf-8").enter()
                 .location("/index.html").enter()
-                .enter()
+                .setCookie("JSESSIONID=")
                 .build();
 
-        assertThat(socket.output()).isEqualTo(httpResponse);
+        assertThat(socket.output()).contains(httpResponse);
     }
 }

@@ -2,22 +2,17 @@ package org.apache.coyote.handler.post;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.common.Headers;
 import org.apache.coyote.handler.RequestHandler;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.ResponseBody;
+import org.apache.coyote.session.Cookies;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
-import java.util.Map;
+import java.util.UUID;
 
-import static org.apache.coyote.common.CharacterSet.UTF_8;
-import static org.apache.coyote.common.HeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.common.HeaderType.CONTENT_TYPE;
-import static org.apache.coyote.common.HeaderType.LOCATION;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
-import static org.apache.coyote.common.MediaType.TEXT_HTML;
-import static org.apache.coyote.response.HttpStatus.FOUND;
 
 public class UserRegisterRequestPostHandler implements RequestHandler {
 
@@ -32,12 +27,14 @@ public class UserRegisterRequestPostHandler implements RequestHandler {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        final Headers homePageResponseHeader = new Headers(Map.of(
-                CONTENT_TYPE.source(), TEXT_HTML.source() + ";" + UTF_8.source(),
-                CONTENT_LENGTH.source(), String.valueOf(ResponseBody.EMPTY.length()),
-                LOCATION.source(), REGISTER_SUCCESS_REDIRECT_URI)
-        );
+        final Session newSession = new Session(UUID.randomUUID().toString());
+        newSession.setAttribute("account", account);
+        SessionManager.add(newSession);
 
-        return new HttpResponse(HTTP_1_1, FOUND, homePageResponseHeader, ResponseBody.EMPTY);
+        return HttpResponse.builder()
+                .setHttpVersion(HTTP_1_1)
+                .setCookies(Cookies.ofJSessionId(newSession.id()))
+                .sendRedirect(REGISTER_SUCCESS_REDIRECT_URI)
+                .build();
     }
 }

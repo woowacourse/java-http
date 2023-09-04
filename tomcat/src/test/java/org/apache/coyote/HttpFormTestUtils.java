@@ -83,7 +83,7 @@ public class HttpFormTestUtils {
     }
 
     public HttpFormTestUtils setCookie(final String cookie) {
-        sb.append(cookie).append(" ");
+        sb.append("Set-Cookie: ").append(cookie);
         return this;
     }
 

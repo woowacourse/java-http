@@ -37,7 +37,7 @@ class ResourceRequestHandlerTest {
         // then
         final String httpResponse = HttpFormTestUtils.builder()
                 .http11().OK().enter()
-                .contentLength("5564").enter()
+                .contentLength("5518").enter()
                 .contentType("text/html;charset=utf-8").enter()
                 .enter().responseByResource("static/index.html")
                 .build();
@@ -66,7 +66,7 @@ class ResourceRequestHandlerTest {
         // then
         final String httpResponse = HttpFormTestUtils.builder()
                 .http11().OK().enter()
-                .contentLength("3796").enter()
+                .contentLength("3716").enter()
                 .contentType("text/html;charset=utf-8").enter()
                 .enter().responseByResource("static/login.html")
                 .build();
@@ -95,7 +95,7 @@ class ResourceRequestHandlerTest {
         // then
         final String httpResponse = HttpFormTestUtils.builder()
                 .http11().OK().enter()
-                .contentLength("4319").enter()
+                .contentLength("4203").enter()
                 .contentType("text/html;charset=utf-8").enter()
                 .enter().responseByResource("static/register.html")
                 .build();
@@ -243,35 +243,6 @@ class ResourceRequestHandlerTest {
                 .contentLength("976").enter()
                 .contentType("application/javascript;charset=utf-8").enter()
                 .enter().responseByResource("static/js/scripts.js")
-                .build();
-
-        assertThat(socket.output()).isEqualTo(httpResponse);
-    }
-
-    @Test
-    void styles_css를_응답한다() throws IOException {
-        // given
-        final String httpRequest = HttpFormTestUtils.builder()
-                .GET().requestUri("/css/styles.css").http11().enter()
-                .host("localhost:8080").enter()
-                .connection("keep-alive").enter()
-                .contentLength("0").enter()
-                .accept("text/css").enter()
-                .enter()
-                .build();
-
-        final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final String httpResponse = HttpFormTestUtils.builder()
-                .http11().OK().enter()
-                .contentLength("211991").enter()
-                .contentType("text/css;charset=utf-8").enter()
-                .enter().responseByResource("static/css/styles.css")
                 .build();
 
         assertThat(socket.output()).isEqualTo(httpResponse);

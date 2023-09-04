@@ -30,8 +30,11 @@ public class ResponseEntity {
     }
 
     public static ResponseEntity ok(String fileData, String endPoint) {
+        int fileTypeStartIndex = endPoint.indexOf('.');
+        String fileExtension = endPoint.substring(fileTypeStartIndex + 1);
+
         List<String> headers = List.of(
-                String.join(" ", "Content-Type:", ContentType.findMatchingType(endPoint).getHttpContentType()),
+                String.join(" ", "Content-Type:", ContentType.findMatchingType(fileExtension).getHttpContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
         );
         return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);

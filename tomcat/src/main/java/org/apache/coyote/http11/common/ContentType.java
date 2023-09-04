@@ -25,14 +25,8 @@ public enum ContentType {
         this.extension = extension;
     }
 
-    public static ContentType findMatchingType(String uri) {
-        int fileTypeStartIndex = uri.indexOf('.');
-        String uriType = uri.substring(fileTypeStartIndex + 1);
-
-        if (contentTypes.containsKey(uriType)) {
-            return contentTypes.get(uriType);
-        }
-        return contentTypes.get(HTML.extension);
+    public static ContentType findMatchingType(String extension) {
+        return contentTypes.getOrDefault(extension, HTML);
     }
 
     public String getHttpContentType() {

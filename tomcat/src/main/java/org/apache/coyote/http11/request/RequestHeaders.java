@@ -12,7 +12,7 @@ public class RequestHeaders {
     private static final String COOKIE = "Cookie";
     private static final String COOKIE_SPLITER = ";";
     private static final String COOKIE_VALUE_SPLITER = "=";
-    Map<String, String> headers;
+    private final Map<String, String> headers;
 
     public RequestHeaders(String headers) {
         this.headers = extractHeader(headers);

@@ -27,6 +27,9 @@ import static java.util.stream.Collectors.toMap;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String JSESSIONID = "JSESSIONID";
+    public static final String ACCOUNT = "account";
+    public static final String BLANK = " ";
 
     private final Socket connection;
 
@@ -48,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             var request = bufferedReader.readLine();
 
-            final String[] header = request.split(" ");
+            final String[] header = request.split(BLANK);
             final var method = header[0];
             final var uri = header[1];
 
@@ -61,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if ("POST".equals(method)) {
                 final var responseBody = getPostResponse(bufferedReader, request, uri);
-                final String response = getContent(uri, responseBody);
+                final String response = getContent(uri, Objects.requireNonNull(responseBody));
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -72,55 +75,42 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getPostResponse(final BufferedReader bufferedReader, String request, final String uri) throws IOException {
+        final Map<String, String> queries = getRequestHeaders(bufferedReader, request);
+
         if ("/register".equals(uri)) {
-            Integer contentLength = null;
-            while (request != null && !"".equals(request)) {
-                request = bufferedReader.readLine();
-                if (request.contains("Content-Length")) {
-                    request = request.replaceAll(" ", "");
-                    contentLength = Integer.parseInt(request.split(":")[1]);
-                }
-            }
-
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            String requestBody = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8.toString());
-
-            final Map<String, String> queries = Arrays.stream(requestBody.split("&"))
-                                                      .map(query -> query.split("="))
-                                                      .collect(toMap(query -> query[0], query -> query[1]));
-
-            if (InMemoryUserRepository.isExistAccount(queries.get("account"))) {
+            if (InMemoryUserRepository.isExistAccount(queries.get(ACCOUNT))) {
                 return new Response(HttpStatus.OK, "login.html");
             }
 
-            InMemoryUserRepository.save(new User(queries.get("account"), queries.get("password"), queries.get("email")));
+            InMemoryUserRepository.save(new User(queries.get(ACCOUNT), queries.get("password"), queries.get("email")));
             return new Response(HttpStatus.CREATED, "index.html");
         }
         if ("/login".equals(uri)) {
-            Integer contentLength = null;
-            while (request != null && !"".equals(request)) {
-                request = bufferedReader.readLine();
-                if (request.contains("Content-Length")) {
-                    request = request.replaceAll(" ", "");
-                    contentLength = Integer.parseInt(request.split(":")[1]);
-                }
-            }
-
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            String requestBody = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8.toString());
-
-            final Map<String, String> queries = Arrays.stream(requestBody.split("&"))
-                                                      .map(query -> query.split("="))
-                                                      .collect(toMap(query -> query[0], query -> query[1]));
-
-            return InMemoryUserRepository.findByAccount(queries.get("account"))
+            return InMemoryUserRepository.findByAccount(queries.get(ACCOUNT))
                                          .filter(user -> user.checkPassword(queries.get("password")))
                                          .map(this::loginSuccess)
                                          .orElseGet(() -> new Response(HttpStatus.UNAUTHORIZED, "/401.html"));
         }
         return null;
+    }
+
+    private static Map<String, String> getRequestHeaders(final BufferedReader bufferedReader, String request) throws IOException {
+        Integer contentLength = null;
+        while (request != null && !"".equals(request)) {
+            request = bufferedReader.readLine();
+            if (request.contains("Content-Length")) {
+                request = request.replaceAll(" ", "");
+                contentLength = Integer.parseInt(request.split(":")[1]);
+            }
+        }
+
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
+
+        return Arrays.stream(requestBody.split("&"))
+                     .map(query -> query.split("="))
+                     .collect(toMap(query -> query[0], query -> query[1]));
     }
 
     private Response loginSuccess(final User user) {
@@ -130,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", user);
         SessionManager.add(session);
         final Map<String, String> cookie = new HashMap<>();
-        cookie.put("JSESSIONID", uuid);
+        cookie.put(JSESSIONID, uuid);
         return new Response(HttpStatus.FOUND, "/index.html", cookie);
     }
 
@@ -189,7 +179,7 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
 
-        return "Set-Cookie: JSESSIONID=" + cookies.get("JSESSIONID");
+        return "Set-Cookie: JSESSIONID=" + cookies.get(JSESSIONID);
     }
 
     private Response getResponseBody(final BufferedReader bufferedReader, final String uri) throws IOException {

@@ -130,6 +130,10 @@ public class Http11Processor implements Runnable, Processor {
                 response = createResponse("text/javascript", readFile("static/js", requestFileName));
             }
 
+            if (requestMethod.equals("GET") && requestFileName.equals("favicon.ico")) {
+                response = createResponse("text/javascript", "Hello world!");
+            }
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

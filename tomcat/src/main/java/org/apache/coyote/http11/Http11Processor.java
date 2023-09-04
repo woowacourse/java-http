@@ -49,7 +49,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestBody getRequestBody(final RequestHeader requestHeader, final BufferedReader bufferedReader) {
+    private RequestBody getRequestBody(final RequestHeader requestHeader, final BufferedReader bufferedReader)
+            throws IOException {
         if (requestHeader.hasHeader("Content-Length")) {
             final String contentLength = requestHeader.getHeader("Content-Length");
             final String requestBody = parseRequestBody(contentLength, bufferedReader);
@@ -58,15 +59,12 @@ public class Http11Processor implements Runnable, Processor {
         return RequestBody.emptyBody();
     }
 
-    private String parseRequestBody(final String contentLength, final BufferedReader bufferedReader) {
+    private String parseRequestBody(final String contentLength, final BufferedReader bufferedReader)
+            throws IOException {
         final int length = Integer.parseInt(contentLength);
         final char[] buffer = new char[length];
-        try {
-            bufferedReader.read(buffer, 0, length);
-            return new String(buffer);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("알 수 없는 에러입니다.");
-        }
+        bufferedReader.read(buffer, 0, length);
+        return new String(buffer);
     }
 
     private RequestHeader getRequestHeader(final BufferedReader bufferedReader) throws IOException {

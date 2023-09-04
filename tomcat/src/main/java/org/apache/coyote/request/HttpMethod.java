@@ -12,7 +12,7 @@ public enum HttpMethod {
         return Arrays.stream(HttpMethod.values())
                 .filter(httpMethod -> httpMethod.contains(source))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException());
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HttpMethod 값입니다."));
     }
 
     private boolean contains(final String source) {

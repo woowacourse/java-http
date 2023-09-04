@@ -17,11 +17,14 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestURI;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Handler {
     private static final Logger log = LoggerFactory.getLogger(Handler.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private Handler() {
     }
@@ -63,6 +66,7 @@ public class Handler {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
+
             return new HttpResponse.Builder()
                     .httpStatus(HttpStatus.FOUND)
                     .responseBody(parseResponseBody("static/register.html"))
@@ -94,12 +98,27 @@ public class Handler {
                     .redirectPage("401.html")
                     .build();
         }
+        HttpCookie cookie = HttpCookie.from(httpRequest.getHeaderValue("Cookie"));
+        Session foundSession = sessionManager.findSession(cookie.getValue("JSESSIONID"));
+        if (foundSession == null) {
+            return new HttpResponse.Builder()
+                    .httpStatus(HttpStatus.FOUND)
+                    .responseBody(parseResponseBody("static/index.html"))
+                    .contentType(httpRequest.contentType())
+                    .redirectPage("index.html")
+                    .httpCookie(HttpCookie.jSessionId(UUID.randomUUID().toString()))
+                    .build();
+        }
+        String uuid = UUID.randomUUID().toString();
+        Session session = new Session(uuid);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
         return new HttpResponse.Builder()
                 .httpStatus(HttpStatus.FOUND)
                 .responseBody(parseResponseBody("static/index.html"))
                 .contentType(httpRequest.contentType())
                 .redirectPage("index.html")
-                .httpCookie(HttpCookie.jSessionId(UUID.randomUUID().toString()))
+                .httpCookie(HttpCookie.jSessionId(uuid))
                 .build();
     }
 

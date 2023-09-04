@@ -62,4 +62,8 @@ public class HttpRequest {
         return requestBody;
     }
 
+    public String getHeaderValue(String key) {
+        return headers.get(key);
+    }
+
 }

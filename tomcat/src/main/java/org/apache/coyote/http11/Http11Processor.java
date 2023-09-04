@@ -33,8 +33,10 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest request = HttpRequest.from(bufferedReader);
-            final String response = HttpResponse.getResponse(request.getPath(), request.getProtocolVersion());
+            final HttpRequestHandler requestHandler = new HttpRequestHandler(request);
+            final HttpResponseEntity responseEntity = requestHandler.handle();
 
+            final String response = HttpResponse.getResponse(responseEntity);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

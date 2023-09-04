@@ -23,6 +23,10 @@ public class QueryString {
         this.params = params;
     }
 
+    public boolean hasNoQueryString() {
+        return params.isEmpty();
+    }
+
     public String get(final String key) {
         return params.get(key);
     }

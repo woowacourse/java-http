@@ -28,12 +28,26 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String getPath() {
-        return firstLine.getHttpPath().getPath();
+    public boolean isLogin() {
+        final HttpPath httpPath = firstLine.getHttpPath();
+        return httpPath.isLogin();
+    }
+
+    public boolean isRegister() {
+        final HttpPath httpPath = firstLine.getHttpPath();
+        return httpPath.isRegister();
+    }
+
+    public HttpPath getPath() {
+        return firstLine.getHttpPath();
     }
 
     public String getProtocolVersion() {
         return firstLine.getProtocolVersion();
+    }
+
+    public String getMethod() {
+        return firstLine.getMethod();
     }
 
 }

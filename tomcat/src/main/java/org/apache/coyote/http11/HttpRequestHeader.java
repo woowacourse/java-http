@@ -27,10 +27,6 @@ public class HttpRequestHeader {
         this.headers = headers;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public String get(final String key) {
         return headers.get(key);
     }

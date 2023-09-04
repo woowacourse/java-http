@@ -20,6 +20,14 @@ public class HttpPath {
         this.queryString = QueryString.from(queryString);
     }
 
+    public boolean isLogin() {
+        return path.equals("/login");
+    }
+
+    public boolean isRegister() {
+        return path.equals("/register");
+    }
+
     public String getPath() {
         return path;
     }

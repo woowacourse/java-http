@@ -10,6 +10,7 @@ public class HttpRequestFirstLine {
     private final String protocolVersion;
 
     public static HttpRequestFirstLine from(final String firstLine) {
+        System.out.println("firstLine = " + firstLine);
         final List<String> firstLines = Arrays.asList(firstLine.split(" "));
         return new HttpRequestFirstLine(firstLines.get(0), firstLines.get(1), firstLines.get(2));
     }

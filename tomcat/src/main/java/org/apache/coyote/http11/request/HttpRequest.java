@@ -16,10 +16,10 @@ public class HttpRequest {
     }
 
     public static HttpRequest makeRequest(BufferedReader inputReader) {
-        return new HttpRequest(
-            new RequestLine(readRequestLine(inputReader)),
-            new RequestHeaders(readHeaders(inputReader)),
-            new ResponseBody(readBody(inputReader, new RequestHeaders(readHeaders(inputReader)))));
+        RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
+        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
+        ResponseBody responseBody = new ResponseBody(readBody(inputReader, requestHeaders));
+        return new HttpRequest(requestLine, requestHeaders, responseBody);
     }
 
     private static String readRequestLine(BufferedReader inputReader) {

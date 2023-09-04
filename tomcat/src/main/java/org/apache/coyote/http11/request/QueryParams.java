@@ -21,7 +21,7 @@ public class QueryParams {
         return Parser.parseToQueryParams(paramLine);
     }
 
-    private static QueryParams empty() {
+    public static QueryParams empty() {
         return new QueryParams(null);
     }
 

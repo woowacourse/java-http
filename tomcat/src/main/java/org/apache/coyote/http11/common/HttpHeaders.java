@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.util.Parser;
 
 public class HttpHeaders {
     private Map<String, String> headers;
@@ -35,12 +34,9 @@ public class HttpHeaders {
         return headers.get(name);
     }
 
-    public Cookie getCookie() {
+    public Cookies getCookies() {
         String cookieLine = headers.get("Cookie");
-        if (cookieLine == null) {
-            throw new IllegalArgumentException("Cookie가 존재하지 않습니다");
-        }
-        return Parser.parseToCookie(cookieLine);
+        return Cookies.create(cookieLine);
     }
 
     @Override

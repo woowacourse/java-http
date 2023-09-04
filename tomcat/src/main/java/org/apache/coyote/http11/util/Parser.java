@@ -3,11 +3,14 @@ package org.apache.coyote.http11.util;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.request.QueryParams;
 
 public class Parser {
     public static QueryParams parseToQueryParams(String line) {
+        if (line == null) {
+            return QueryParams.empty();
+        }
         String[] split = line.split("&");
 
         Map<String, String> params = new HashMap<>();
@@ -19,7 +22,10 @@ public class Parser {
         return new QueryParams(params);
     }
 
-    public static Cookie parseToCookie(String line) {
+    public static Cookies parseToCookie(String line) {
+        if (line == null) {
+            return Cookies.empty();
+        }
         String[] split = line.split("; ");
 
         Map<String, String> cookies = new LinkedHashMap<>();
@@ -28,6 +34,6 @@ public class Parser {
             cookies.put(piece.substring(0, idx), piece.substring(idx+1));
         }
 
-        return new Cookie(cookies);
+        return new Cookies(cookies);
     }
 }

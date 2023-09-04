@@ -2,6 +2,10 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.controller.ErrorController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticController;
 
 public class ControllerAdapter {
 

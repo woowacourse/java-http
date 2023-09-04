@@ -7,7 +7,7 @@ public class StatusLine {
         this.statusLine = statusLine;
     }
 
-    public static StatusLine of(final HttpStatus httpStatus) {
+    public static StatusLine from(final HttpStatus httpStatus) {
         return new StatusLine("HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.name() + " ");
     }
 

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.exception.MemberAlreadyExistException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
@@ -28,7 +29,7 @@ public class Handler {
         final RequestLine requestLine = request.getRequestLine();
 
         if (requestLine.getHttpMethod() == HttpMethod.GET && requestLine.getPath().startsWith("/login")) {
-            if (request.hasSession() && SessionManager.has(request.getCookieValue("JSESSIONID"))) {
+            if (isLoggedIn(request)) {
                 final Session session = request.getSession(false);
                 final User user = (User) session.getAttribute("user");
                 log.info("user = {}", user);
@@ -38,6 +39,9 @@ public class Handler {
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/login")) {
+            if (isLoggedIn(request)) {
+                return redirect(INDEX_HTML);
+            }
             final RequestBody requestBody = request.getRequestBody();
             final String account = requestBody.getParamValue("account");
             final String password = requestBody.getParamValue("password");
@@ -55,13 +59,18 @@ public class Handler {
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/register")) {
             final RequestBody requestBody = request.getRequestBody();
-            InMemoryUserRepository.save(
-                    new User(
-                            requestBody.getParamValue("account"),
-                            requestBody.getParamValue("password"),
-                            requestBody.getParamValue("email")
-                    )
-            );
+            final String accountValue = requestBody.getParamValue("account");
+            InMemoryUserRepository.findByAccount(accountValue)
+                    .ifPresentOrElse(
+                            (member) -> new MemberAlreadyExistException(accountValue),
+                            () -> InMemoryUserRepository.save(
+                                    new User(
+                                            requestBody.getParamValue("account"),
+                                            requestBody.getParamValue("password"),
+                                            requestBody.getParamValue("email")
+                                    )
+                            ));
+
             return redirect(INDEX_HTML);
         }
 
@@ -72,22 +81,24 @@ public class Handler {
         return Response.of(HttpStatus.OK, ResponseBody.noContent(ContentType.HTML));
     }
 
-    private static Response render(final String path) throws IOException {
+    private boolean isLoggedIn(final Request request) {
+        return request.hasSession() && SessionManager.has(request.getCookieValue("JSESSIONID"));
+    }
+
+    private Response render(final String path) throws IOException {
         final StaticResource staticResource = StaticResource.from(path);
         final ResponseBody responseBody = ResponseBody.from(staticResource);
         return Response.of(HttpStatus.OK, responseBody);
     }
 
-    private static Response redirect(final String path) throws IOException {
+    private Response redirect(final String path) throws IOException {
         final StaticResource staticResource = StaticResource.from(path);
         final ResponseBody responseBody = ResponseBody.from(staticResource);
         return Response.redirect(HttpStatus.FOUND, path, responseBody);
     }
 
-    private static Response redirectWithSession(final String path, final String sessionId) throws IOException {
-        final StaticResource staticResource = StaticResource.from(path);
-        final ResponseBody responseBody = ResponseBody.from(staticResource);
-        final Response response = Response.redirect(HttpStatus.FOUND, path, responseBody);
+    private Response redirectWithSession(final String path, final String sessionId) throws IOException {
+        final Response response = redirect(path);
         response.addSession(sessionId);
         return response;
     }

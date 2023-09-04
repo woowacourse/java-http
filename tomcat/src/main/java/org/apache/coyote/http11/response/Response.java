@@ -16,8 +16,8 @@ public class Response {
     public static Response of(final HttpStatus httpStatus,
                               final ResponseBody responseBody) {
         return new Response(
-                StatusLine.of(httpStatus),
-                ResponseHeader.of(responseBody),
+                StatusLine.from(httpStatus),
+                ResponseHeader.from(responseBody),
                 responseBody
         );
     }
@@ -26,7 +26,7 @@ public class Response {
                                     final String redirectPath,
                                     final ResponseBody responseBody) {
         return new Response(
-                StatusLine.of(httpStatus),
+                StatusLine.from(httpStatus),
                 ResponseHeader.redirect(redirectPath),
                 responseBody
         );

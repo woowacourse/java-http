@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public class StaticResource {
             return Files.readString(path);
         } catch (final NullPointerException e) {
             log.error("error fileName = {}", fileName, e);
-            return "";
+            throw new FileNotFoundException(fileName, e);
         }
     }
 

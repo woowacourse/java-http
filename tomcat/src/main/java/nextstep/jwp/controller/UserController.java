@@ -1,8 +1,5 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.common.ContentType.HTML;
-import static org.apache.coyote.http11.common.Status.FOUND;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,20 +25,13 @@ public class UserController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            Response redirect = redirect("/index.html");
-
-            Session session = request.getSession();
+            Response redirect = Response.redirect("/index.html");
+            Session session = request.getOrCreateSession();
             session.setAttribute("user", user.get());
             redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));
             return redirect;
         }
-        return redirect("/401.html");
-    }
-
-    private static Response redirect(String location) {
-        Response response = Response.of(FOUND, HTML.toString(), "");
-        response.addLocation(location);
-        return response;
+        return Response.redirect("/401.html");
     }
 
     public static Response register(Request request) {
@@ -53,10 +43,10 @@ public class UserController {
         String password = formContents.get("password").get(0);
 
         if (InMemoryUserRepository.isExistByAccount(account)) {
-            return redirect("/401.html");
+            return Response.redirect("/401.html");
         }
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return redirect("/index.html");
+        return Response.redirect("/index.html");
     }
 }

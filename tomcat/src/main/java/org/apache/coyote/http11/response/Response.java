@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.apache.coyote.http11.common.ContentType.TEXT;
+import static org.apache.coyote.http11.common.Status.FOUND;
 
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Headers;
@@ -31,7 +33,15 @@ public class Response {
     ) {
         ContentType contentType = ContentType.from(contentTypeString)
                 .orElse(TEXT);
+
         return new Response(status, contentType, body);
+    }
+
+    public static Response redirect(String location) {
+        Response response = Response.of(FOUND, HTML.toString(), "");
+        response.addLocation(location);
+        
+        return response;
     }
 
     public void addLocation(String location) {

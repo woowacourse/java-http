@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -85,13 +87,7 @@ public class Request {
             bufferedReader.read(buffer, 0, contentLength);
             body = new String(buffer);
         }
-
         return body;
-    }
-
-    public boolean hasCookieByName(String name) {
-        return headers.getCookie()
-                .isExistByName(name);
     }
 
     public String getPath() {
@@ -106,13 +102,21 @@ public class Request {
         return uri;
     }
 
-    public Session getSession() {
+    public Session getOrCreateSession() {
+        return findSession()
+                .orElseGet(this::createSession);
+    }
+
+    private Session createSession() {
+        Session session = new Session();
+        SESSION_MANAGER.add(session);
+        return session;
+    }
+
+    private Optional<Session> findSession() {
         Cookies cookies = headers.getCookie();
-        try {
-            return (Session) SESSION_MANAGER.findSession(cookies.findByName("JSESSIONID"));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
+        return Optional.ofNullable((Session) SESSION_MANAGER.findSession(sessionId));
     }
 
     public String getBody() {
@@ -129,5 +133,4 @@ public class Request {
                 '}';
     }
 
-    // TODO Builder 패턴 적용
 }

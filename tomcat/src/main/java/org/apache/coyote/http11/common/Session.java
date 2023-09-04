@@ -7,12 +7,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.coyote.http11.SessionManager;
 
 public class Session implements HttpSession {
 
+    private static final SessionManager SESSION_MANGER = new SessionManager();
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
-    
+
     public Session() {
         this.id = UUID.randomUUID().toString();
     }
@@ -96,6 +99,10 @@ public class Session implements HttpSession {
 
     @Override
     public boolean isNew() {
-        throw new UnsupportedOperationException("unsupported");
+        return !SESSION_MANGER.contains(this.id);
+    }
+
+    public boolean isSaved() {
+        return !isNew();
     }
 }

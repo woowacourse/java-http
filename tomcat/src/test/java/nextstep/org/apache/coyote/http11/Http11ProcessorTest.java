@@ -29,7 +29,6 @@ class Http11ProcessorTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
-                "Set-Cookie:",
                 "Hello world!"
         );
     }
@@ -42,7 +41,6 @@ class Http11ProcessorTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=4e9341e9-fb1f-4630-b8ff-803e9cc26404 ",
                 "",
                 "");
 
@@ -63,16 +61,17 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("요청 헤더의 Cookie에 JSESSIONID 값이 존재하지 않으면 추가한다.")
+    @DisplayName("로그인 성공 시 응답 헤더에 JSESSIONID 값을 반환한다.")
     @Test
-    void checkSessionId() throws IOException {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -81,14 +80,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-
         assertThat(socket.output()).contains(
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 302 FOUND ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "Set-Cookie:",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+                "Location: /index.html ",
+                "Set-Cookie: "
         );
     }
+    
 }

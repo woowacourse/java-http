@@ -3,7 +3,7 @@ package org.apache.coyote.http11.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-import org.apache.coyote.http11.request.RequestBody;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -42,10 +42,22 @@ class HttpCookieTest {
     @Test
     void key를_입력받아_값을_반환한다() {
         // given
-        final String body = "account=gugu&password=password&email=hkkang@woowahan.com";
-        final RequestBody requestBody = RequestBody.from(body);
+        final String uuid = UUID.randomUUID().toString();
+        final String body = "JSESSIONID=" + uuid;
+        final HttpCookie cookie = HttpCookie.from(body);
 
         // expect
-        assertThat(requestBody.get("account")).isEqualTo("gugu");
+        assertThat(cookie.get("JSESSIONID")).isEqualTo(uuid);
+    }
+
+    @Test
+    void jSessionId를_가져온다() {
+        // given
+        final String uuid = UUID.randomUUID().toString();
+        final String body = "JSESSIONID=" + uuid;
+        final HttpCookie cookie = HttpCookie.from(body);
+
+        // expect
+        assertThat(cookie.getJSessionId()).isEqualTo(uuid);
     }
 }

@@ -32,6 +32,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String LOGIN_PAGE = "/login.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private final Socket connection;
     private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
@@ -112,14 +115,14 @@ public class Http11Processor implements Runnable, Processor {
     ) {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
             final HttpCookie httpCookie = requestHeader.parseCookie();
-            final Session session = sessionManager.findSession(httpCookie.get("JSESSIONID"));
+            final Session session = sessionManager.findSession(httpCookie.getJSessionId());
             if (session != null) {
                 return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
             }
             return new ResponseEntity(HttpStatus.OK, LOGIN_PAGE);
         }
-        final String account = requestBody.get("account");
-        final String password = requestBody.get("password");
+        final String account = requestBody.get(ACCOUNT);
+        final String password = requestBody.get(PASSWORD);
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(this::loginSuccess)
@@ -129,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseEntity loginSuccess(final User user) {
         final String uuid = UUID.randomUUID().toString();
         final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
-        responseEntity.setCookie("JSESSIONID", uuid);
+        responseEntity.setJSessionId(uuid);
         final Session session = new Session(uuid);
         session.setAttribute("user", user);
         sessionManager.add(session);
@@ -140,14 +143,14 @@ public class Http11Processor implements Runnable, Processor {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
             return new ResponseEntity(HttpStatus.OK, REGISTER_PAGE);
         }
-        final String account = requestBody.get("account");
+        final String account = requestBody.get(ACCOUNT);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return new ResponseEntity(HttpStatus.CONFLICT, "/409.html");
         }
 
-        final String password = requestBody.get("password");
-        final String email = requestBody.get("email");
+        final String password = requestBody.get(PASSWORD);
+        final String email = requestBody.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
         return new ResponseEntity(HttpStatus.FOUND, INDEX_PAGE);
     }

@@ -11,6 +11,7 @@ public class HttpCookie {
 
     private static final String SEPARATOR = "; ";
     private static final String DELIMITER = "=";
+    private static final String JSESSION_ID = "JSESSIONID";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -41,6 +42,10 @@ public class HttpCookie {
 
     public String get(final String key) {
         return items.get(key);
+    }
+
+    public String getJSessionId() {
+        return items.get(JSESSION_ID);
     }
 
     public Map<String, String> getItems() {

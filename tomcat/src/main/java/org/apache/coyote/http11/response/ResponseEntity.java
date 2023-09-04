@@ -5,6 +5,8 @@ import org.apache.coyote.http11.common.HttpStatus;
 
 public class ResponseEntity {
 
+    private static final String JSESSION_ID = "JSESSIONID";
+
     private final HttpStatus httpStatus;
     private final String uri;
     private final HttpCookie httpCookie;
@@ -21,6 +23,10 @@ public class ResponseEntity {
 
     public void setCookie(final String key, final String value) {
         httpCookie.put(key, value);
+    }
+
+    public void setJSessionId(final String id) {
+        httpCookie.put(JSESSION_ID, id);
     }
 
     public HttpStatus getHttpStatus() {

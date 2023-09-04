@@ -74,6 +74,6 @@ public class RequestURI {
     }
 
     public Map<String, String> getQueryParameter() {
-        return queryParameter.getQueryParameter();
+        return queryParameter.getParameters();
     }
 }

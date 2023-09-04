@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QueryParameter {
-    public static QueryParameter EMPTY = new QueryParameter(new HashMap<>());
-    private Map<String, String> queryParameter = new HashMap<>();
+    public static final QueryParameter EMPTY = new QueryParameter(new HashMap<>());
+    private Map<String, String> parameters = new HashMap<>();
 
-    public QueryParameter(Map<String, String> queryParameter) {
-        this.queryParameter = queryParameter;
+    public QueryParameter(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
     public QueryParameter(final String uri) {
@@ -17,11 +17,11 @@ public class QueryParameter {
         final String[] splitedQueryStrings = queryString.split("&"); // account=gugu
         for (final String str : splitedQueryStrings) {
             final int strIndex = str.indexOf("=");
-            queryParameter.put(str.substring(0, strIndex), str.substring(strIndex + 1));
+            parameters.put(str.substring(0, strIndex), str.substring(strIndex + 1));
         }
     }
 
-    public Map<String, String> getQueryParameter() {
-        return queryParameter;
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 }

@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 public enum HttpStatus {
 
-    OK(200, "Ok"),
-    CREATED(201, "Created"),
-    FOUND(302, "Found"),
-    BAD_REQUEST(400, "Bad Request"),
-    UNAUTHORIZED(401, "Unauthorized"),
+    OK(200, "OK"),
+    CREATED(201, "CREATED"),
+    FOUND(302, "FOUND"),
+    BAD_REQUEST(400, "BAD REQUEST"),
+    UNAUTHORIZED(401, "UNAUTHORIZED"),
     NOT_FOUND(404, "NOT FOUND");
 
     private int statusCode;

@@ -7,6 +7,7 @@ import nextstep.jwp.exception.InvalidSessionException;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.Session;
 
 public class LoginInterceptor implements Interceptor {
 
@@ -22,7 +23,7 @@ public class LoginInterceptor implements Interceptor {
     @Override
     public boolean preHandle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.containsCookieAndJSessionID()) {
-            SessionManager.getInstance().findSession(httpRequest.getCookie().getJSessionID())
+            final Session session = SessionManager.getInstance().findSession(httpRequest.getCookie().getJSessionID())
                 .orElseThrow(InvalidSessionException::new);
             httpResponse.sendRedirect(INDEX_PAGE);
             return false;

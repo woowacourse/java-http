@@ -16,6 +16,7 @@
   * [x] Request URI에서 QueryString을 파싱해 저장한다.
   * [x] QueryString에서 유저의 정보를 추출해 콘솔로 출력한다.
 * [x] 로그인에 성공하면 index 페이지로 리다이렉트한다.
+  * [x] Cookie에 JSESSIONID가 없다면 추가한다.
 * [x] 로그인에 실패하면 401 페이지로 리다이렉트한다.
 
 ### 회원가입 

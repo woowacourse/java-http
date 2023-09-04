@@ -17,10 +17,14 @@ public class ResponseHeaders {
     }
 
     public void add(final String key, final String value) {
-        if(headers.putIfAbsent(key, value) != null) {
+        if (headers.putIfAbsent(key, value) != null) {
             final String originalValue = headers.get(key);
             headers.replace(key, originalValue + "; " + value);
         }
+    }
+
+    public void addAll(Map<String, String> headers) {
+        headers.keySet().forEach(key -> add(key, headers.get(key)));
     }
 
     public Map<String, String> getHeaders() {

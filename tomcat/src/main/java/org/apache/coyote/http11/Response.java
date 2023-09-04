@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Response {
     private final String httpVersion;
@@ -21,7 +23,11 @@ public class Response {
         this.responseBody = responseBody;
     }
 
-    public static Response createByTemplate(final HttpStatus httpStatus, final String templateName) {
+    public static Response createByTemplate(
+            final HttpStatus httpStatus,
+            final String templateName,
+            Map<String, String> headers
+    ) {
         final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         final URL resource = classLoader.getResource("static/" + templateName);
         final String responseBody;
@@ -35,7 +41,12 @@ public class Response {
         final ContentType contentType = ContentType.findByFileName(templateName);
         responseHeaders.add("Content-Type", contentType.getHeaderValue() + ";charset=utf-8");
         responseHeaders.add("Content-Length", String.valueOf(responseBody.getBytes().length));
+        responseHeaders.addAll(headers);
         return new Response("HTTP/1.1", httpStatus, responseHeaders, responseBody);
+    }
+
+    public static Response createByTemplate(final HttpStatus httpStatus, final String templateName) {
+        return createByTemplate(httpStatus, templateName, new HashMap<>());
     }
 
     public static Response createByTemplate(final RequestURI requestURI) {

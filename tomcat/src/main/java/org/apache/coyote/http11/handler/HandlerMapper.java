@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -53,12 +54,18 @@ public class HandlerMapper {
         final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
         Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
         if (user.isPresent()) {
-            return loginSuccess();
+            return loginSuccess(request);
         }
         return loginFail();
     }
 
-    private Response loginSuccess() {
+    private Response loginSuccess(final Request request) {
+        if (request.getSessionId() == null) {
+            final Map<String, String> header = new HashMap<>();
+            final String sessionId = String.valueOf(UUID.randomUUID());
+            header.put("Set-Cookie", "JSESSIONID=" + sessionId);
+            return Response.createByTemplate(HttpStatus.FOUND, "index.html", header);
+        }
         return Response.createByTemplate(HttpStatus.FOUND, "index.html");
     }
 

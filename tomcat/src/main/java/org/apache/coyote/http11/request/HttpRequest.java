@@ -6,46 +6,46 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequest {
 
-    private final HttpRequestStartLine httpRequestStartLine;
+    private final HttpRequestLine httpRequestLine;
     private final HttpHeaders httpRequestHeaders;
     private final Map<String, String> queryParams;
     private final Map<String, String> payload;
     private final HttpCookie cookie;
 
     public HttpRequest(
-            final HttpRequestStartLine httpRequestStartLine,
+            final HttpRequestLine httpRequestLine,
             final HttpHeaders httpRequestHeaders,
             final Map<String, String> payload
     ) {
-        this.httpRequestStartLine = httpRequestStartLine;
+        this.httpRequestLine = httpRequestLine;
         this.httpRequestHeaders = httpRequestHeaders;
-        this.queryParams = httpRequestStartLine.getQueryParams();
+        this.queryParams = httpRequestLine.getQueryParams();
         this.payload = payload;
         this.cookie = HttpCookie.from(httpRequestHeaders.get("Cookie"));
     }
 
-    public static HttpRequest of(final HttpRequestStartLine httpRequestStartLine, final Map<String, String> headers) {
+    public static HttpRequest of(final HttpRequestLine httpRequestLine, final Map<String, String> headers) {
         return new HttpRequest(
-                httpRequestStartLine,
+                httpRequestLine,
                 HttpHeaders.from(headers),
                 Map.of()
         );
     }
 
     public static HttpRequest of(
-            final HttpRequestStartLine httpRequestStartLine,
+            final HttpRequestLine httpRequestLine,
             final Map<String, String> headers,
             final Map<String, String> payload
     ) {
         return new HttpRequest(
-                httpRequestStartLine,
+                httpRequestLine,
                 HttpHeaders.from(headers),
                 payload
         );
     }
 
-    public HttpRequestStartLine getHttpStartLine() {
-        return httpRequestStartLine;
+    public HttpRequestLine getHttpStartLine() {
+        return httpRequestLine;
     }
 
     public String getHeader(final String header) {

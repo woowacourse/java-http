@@ -3,14 +3,14 @@ package org.apache.coyote.http11.request;
 import java.util.Map;
 import org.apache.coyote.http11.common.HttpMethod;
 
-public class HttpRequestStartLine {
+public class HttpRequestLine {
 
     private final HttpMethod httpMethod;
     private final String requestURI;
     private final String httpVersion;
     private final Map<String, String> queryParams;
 
-    public HttpRequestStartLine(
+    public HttpRequestLine(
             final HttpMethod httpMethod,
             final String requestURI,
             final String httpVersion,

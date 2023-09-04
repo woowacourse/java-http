@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.request.HttpRequestLine;
 
 public class HttpRequestMessageReader {
 
@@ -30,7 +30,7 @@ public class HttpRequestMessageReader {
 
     public static HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final HttpRequestStartLine startLine = readStartLine(br.readLine());
+        final HttpRequestLine startLine = readStartLine(br.readLine());
         final Map<String, String> headers = readHeaders(br);
         if (startLine.getHttpRequestMethod() == HttpMethod.POST) {
             return httpRequestWithBody(headers, br, startLine);
@@ -38,7 +38,7 @@ public class HttpRequestMessageReader {
         return HttpRequest.of(startLine, headers);
     }
 
-    public static HttpRequestStartLine readStartLine(final String requestLine) {
+    public static HttpRequestLine readStartLine(final String requestLine) {
         final String[] startLineTokens = requestLine.split(DELIMITER);
         validateStartLineTokenSize(startLineTokens);
         final HttpMethod httpMethod = HttpMethod.from(startLineTokens[HTTP_METHOD_INDEX]);
@@ -46,7 +46,7 @@ public class HttpRequestMessageReader {
         final String requestURI = parseURI(URIWithQueryStrings);
         final Map<String, String> queryParams = parseQueryParams(URIWithQueryStrings);
         final String httpVersion = startLineTokens[HTTP_VERSION_INDEX];
-        return new HttpRequestStartLine(httpMethod, requestURI, httpVersion, queryParams);
+        return new HttpRequestLine(httpMethod, requestURI, httpVersion, queryParams);
     }
 
     private static Map<String, String> parseQueryParams(final String URIWithQueryStrings) {
@@ -104,7 +104,7 @@ public class HttpRequestMessageReader {
     private static HttpRequest httpRequestWithBody(
             final Map<String, String> headers,
             final BufferedReader br,
-            final HttpRequestStartLine startLine
+            final HttpRequestLine startLine
     ) throws IOException {
         final ContentTypePayloadParserMapper contentTypePayloadParserMapper =
                 ContentTypePayloadParserMapper.from(headers.get("Content-Type"));

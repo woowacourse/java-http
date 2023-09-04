@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.http11.session.HttpCookie;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +19,6 @@ public class HttpResponse {
     private final String response;
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
-        HttpStatus httpStatus = responseEntity.getHttpStatus();
-        String status = httpStatus.getStatusCode() + " " + httpStatus.name();
-
         String location = responseEntity.getLocation();
         String responseBody = responseEntity.getResponseBody();
 
@@ -30,7 +28,7 @@ public class HttpResponse {
 
         String formatResponse = String.join(
                 DELIMITER,
-                generateHttpStatus(status),
+                generateHttpStatus(responseEntity.getHttpStatus()),
                 generateContentType(responseEntity.getRequestURI()),
                 generateContentLength(responseBody),
                 BLANK_LINE,
@@ -47,8 +45,16 @@ public class HttpResponse {
         return responseBody;
     }
 
-    private static String generateHttpStatus(String status) {
-        return "HTTP/1.1 " + status + " ";
+    private static String generateHttpStatus(HttpStatus status) {
+        return "HTTP/1.1 " + status.getStatusCode() + " " + status.name() + " ";
+    }
+
+    private static String generateLocation(ResponseEntity responseEntity) {
+        String location = responseEntity.getLocation();
+        if (location == null) {
+            return "";
+        }
+        return "Location: " + location + " ";
     }
 
     private static String generateContentType(String requestURI) {
@@ -60,5 +66,17 @@ public class HttpResponse {
 
     private static String generateContentLength(String responseBody) {
         return "Content-Length: " + responseBody.getBytes().length + " ";
+    }
+
+    private static String generateCookie(ResponseEntity responseEntity) {
+        HttpCookie httpCookie = responseEntity.getHttpCookie();
+        if (httpCookie == null) {
+            return "";
+        }
+        String jSessionId = httpCookie.findJSessionId();
+        if (jSessionId == null) {
+            return "";
+        }
+        return "Set-Cookie: JSESSIONID=" + jSessionId + " ";
     }
 }

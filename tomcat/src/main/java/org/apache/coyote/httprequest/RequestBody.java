@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class RequestBody {
 
@@ -17,10 +18,14 @@ public class RequestBody {
     }
 
     public static RequestBody from(final BufferedReader bufferedReader, final int contentLength) throws IOException {
-        log.debug("Request body:");
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        final String requestBody = new String(buffer);
-        return new RequestBody(requestBody);
+        final String content = new String(buffer);
+        log.debug("Request body: " + content);
+        return new RequestBody(content);
+    }
+
+    public String getContents() {
+        return contents;
     }
 }

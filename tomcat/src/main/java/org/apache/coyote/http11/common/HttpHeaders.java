@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +27,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders createSimpleText() {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
 
         headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
         headers.put(CONTENT_LENGTH, "12");
@@ -35,7 +36,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders parse(final List<String> lines) {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
 
         for (final String line : lines) {
             final String[] splitLine = line.split(DELIMITER);
@@ -50,7 +51,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders createResponse(final Path path) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         final byte[] bytes = Files.readAllBytes(path);
 
         headers.put(CONTENT_TYPE, findContentType(path));
@@ -104,7 +105,7 @@ public class HttpHeaders {
 
     @Override
     public String toString() {
-        final StringJoiner joiner = new StringJoiner("\r\n");
+        final StringJoiner joiner = new StringJoiner(" \r\n");
         final Set<String> keys = headers.keySet();
         for (String key : keys) {
             joiner.add(key + DELIMITER + headers.get(key));

@@ -66,4 +66,14 @@ public class ResourceProvider {
         }
 
     }
+
+    public String staticResourceResponse(String resourcePath) {
+        String responseBody = resourceBodyOf(resourcePath);
+        return String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            contentTypeOf(resourcePath),
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+    }
 }

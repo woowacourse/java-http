@@ -38,7 +38,6 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 
         final String[] parsedRequestUri = requestUri.split("\\?");
         if (requestUri.contains("?")) {
-            final String uri = parsedRequestUri[0];
             final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
                     .map(param -> param.split("="))
                     .collect(Collectors.toMap(param -> param[0], param -> param[1]));

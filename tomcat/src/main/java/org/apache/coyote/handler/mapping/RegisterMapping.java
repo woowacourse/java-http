@@ -3,7 +3,6 @@ package org.apache.coyote.handler.mapping;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ public class RegisterMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
+    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) {
         final Map<String, String> bodyParams = Arrays.stream(requestBody.split("&"))
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(param -> param[0], param -> param[1]));

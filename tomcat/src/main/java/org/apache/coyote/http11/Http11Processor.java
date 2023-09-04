@@ -41,13 +41,18 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader br = new BufferedReader(inputStreamReader)) {
 
+            //읽기
             String requestLine = br.readLine();
             if (Objects.isNull(requestLine)) {
                 throw new IllegalArgumentException(ILLEGAL_REQUEST);
             }
             log.info(requestLine);
 
-            ResponseInfo responseInfo = handleRequest(requestLine);
+            RequestHeader requestHeader = readHeader(br);
+            RequestBody requestBody = readBody(br, requestHeader);
+
+            //요청 처리
+            ResponseInfo responseInfo = handleRequest(requestLine, requestHeader, requestBody);
 
             String response = buildResponse(responseInfo);
             outputStream.write(response.getBytes());
@@ -57,15 +62,38 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseInfo handleRequest(String requestLine) {
+    private ResponseInfo handleRequest(String requestLine, RequestHeader header, RequestBody body) {
         String requestUri = requestLine.split(" ")[URL_INDEX];
 
         if (requestUri.contains("/login")) {
             return handleLoginRequest(requestUri);
         }
 
+        if (requestUri.contains("/register")) {
+            return handleMemberRegistRequest(requestLine, header, body);
+        }
+
         String resourcePath = RESOURCE_PATH + requestUri;
         return new ResponseInfo(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
+    }
+
+    private ResponseInfo handleMemberRegistRequest(String requestLine, RequestHeader header, RequestBody body) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        String requestMethod = requestLine.split(" ")[0];
+
+        if (requestMethod.equals("POST")) {
+            String account = body.getByKey("account");
+            String password = body.getByKey("password");
+            String email = body.getByKey("email");
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+            log.info("User create - "+ user);
+            String resourcePath = RESOURCE_PATH + "/index.html";
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+        }
+
+        String resourcePath = RESOURCE_PATH + "/register.html";
+        return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
     }
 
     private ResponseInfo handleLoginRequest(String requestUri) {
@@ -130,5 +158,41 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
+    }
+//
+//    private Map<String, List<String>> getHttpHeaders(BufferedReader bufferedReader) throws IOException {
+//        Map<String, List<String>> httpHeaders = new HashMap<>();
+//        while (true) {
+//            String line = bufferedReader.readLine();
+//            if (line == null || line.isBlank()) {
+//                break;
+//            }
+//            String[] header = line.split(":");
+//            String key = header[0].trim();
+//            List<String> values = Arrays.asList(header[1].trim().split(","));
+//            httpHeaders.put(key, values);
+//        }
+//        return httpHeaders;
+//    }
+//
+
+    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
+            stringBuilder.append(line).append("\r\n");
+        }
+        return RequestHeader.from(stringBuilder.toString());
+    }
+
+    private RequestBody readBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
+            throws IOException {
+        final String contentLength = requestHeader.getByKey("Content-Length");
+        if (contentLength == null) {
+            return null;
+        }
+        final int length = Integer.parseInt(contentLength.trim());
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        return RequestBody.from(new String(buffer));
     }
 }

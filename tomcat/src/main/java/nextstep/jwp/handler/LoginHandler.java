@@ -40,15 +40,15 @@ public class LoginHandler extends FileHandler {
             session.addAttribute("user", user);
             SessionManager.add(session);
 
-            return createResponseWithSession(httpRequest, session);
+            Cookies cookies = httpRequest.getCookies();
+            cookies.add(SESSION_KEY, session.getId());
+
+            return redirectToMainWith(cookies);
         }
         return HttpResponse.redirectTo(UNAUTHORIZED_LOCATION);
     }
 
-    private HttpResponse createResponseWithSession(final HttpRequest httpRequest, final Session session) {
-        Cookies cookies = httpRequest.getCookies();
-        cookies.add(SESSION_KEY, session.getId());
-
+    private HttpResponse redirectToMainWith(Cookies cookies) {
         HttpResponse httpResponse = HttpResponse.redirectTo(MAIN_LOCATION);
         httpResponse.putHeader(cookies.toHeader("Set-Cookie"));
         return httpResponse;

@@ -3,8 +3,7 @@ package nextstep.jwp.http;
 public enum ContentType {
     TEXT_HTML("text/html"),
     TEXT_CSS("text/css"),
-    APPLICATION_JAVASCRIPT("application/javascript")
-    ;
+    APPLICATION_JAVASCRIPT("application/javascript");
 
     private final String value;
 
@@ -12,7 +11,7 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static String extractValueFromPath(String nativePath){
+    public static String extractValueFromPath(String nativePath) {
         if (nativePath.endsWith(".css")) {
             return TEXT_CSS.value;
         }
@@ -24,7 +23,4 @@ public enum ContentType {
         return TEXT_HTML.value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

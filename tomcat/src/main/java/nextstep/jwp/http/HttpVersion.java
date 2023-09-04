@@ -12,15 +12,15 @@ public enum HttpVersion {
         this.value = value;
     }
 
-    // TODO: 2023/09/04 예외처리 구현
-
     public static HttpVersion from(String input) {
         return Arrays.stream(values())
                 .filter(value -> value.getValue().equals(input))
                 .findAny()
                 .orElseThrow(IllegalArgumentException::new);
     }
+
     public String getValue() {
         return value;
     }
+
 }

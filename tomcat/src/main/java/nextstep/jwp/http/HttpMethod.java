@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import java.util.Arrays;
+import nextstep.jwp.exception.InvalidRequestMethod;
 
 public enum HttpMethod {
     GET("GET"),
@@ -13,12 +14,11 @@ public enum HttpMethod {
         this.value = value;
     }
 
-    // TODO: 2023/09/04 예외 클래스 변경
     public static HttpMethod from(String input) {
         return Arrays.stream(values())
                 .filter(value -> value.name().equals(input))
                 .findAny()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(InvalidRequestMethod::new);
     }
 
     public String getValue() {

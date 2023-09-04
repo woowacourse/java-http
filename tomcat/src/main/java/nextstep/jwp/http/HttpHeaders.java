@@ -20,13 +20,8 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    // TODO: 2023/09/04 예외처리 수정
-    public String get(String key) {
-        if (containsKey(key)) {
-            return httpHeaders.get(key);
-        }
-
-        throw new IllegalArgumentException();
+    public void addHeader(String key, String value) {
+        httpHeaders.put(key, value);
     }
 
     public boolean containsKey(String key) {
@@ -40,8 +35,12 @@ public class HttpHeaders {
                 .collect(Collectors.joining("\r\n"));
     }
 
-    public void addHeader(String key, String value) {
-        httpHeaders.put(key, value);
+    public String get(String key) {
+        if (containsKey(key)) {
+            return httpHeaders.get(key);
+        }
+
+        return null;
     }
 
 }

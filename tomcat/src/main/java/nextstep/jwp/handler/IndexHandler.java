@@ -14,13 +14,13 @@ import nextstep.jwp.http.HttpVersion;
 
 public class IndexHandler implements RequestHandler {
 
-    private static final RequestHandler handler = new IndexHandler();
+    private static final RequestHandler HANDLER = new IndexHandler();
 
     private IndexHandler() {
     }
 
     public static RequestHandler getInstance() {
-        return handler;
+        return HANDLER;
     }
 
     @Override
@@ -29,12 +29,12 @@ public class IndexHandler implements RequestHandler {
         HttpVersion httpVersion = request.getHttpVersion();
         URL url = getClass().getClassLoader().getResource("static/index.html");
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
-        HttpHeaders httpHeaders = createHeaders(httpBody);
+        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
 
-    private HttpHeaders createHeaders(HttpBody httpBody) {
+    private HttpHeaders createDefaultHeaders(HttpBody httpBody) {
         List<String> headers = List.of(
                 "Content-Type: text/html;charset=utf-8",
                 "ContentLength: " + httpBody.getBytesLength()

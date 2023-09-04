@@ -22,8 +22,12 @@ public class HttpRequest {
         this.httpBody = httpBody;
     }
 
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
+    public boolean hasCookie() {
+        return httpHeaders.containsKey("Cookie");
+    }
+
+    public boolean hasQueryString() {
+        return httpUri.hasQueryString();
     }
 
     public HttpMethod getHttpMethod() {
@@ -34,16 +38,20 @@ public class HttpRequest {
         return httpVersion;
     }
 
-    public HttpUri getHttpUri() {
-        return httpUri;
-    }
-
     public HttpBody getHttpBody() {
         return httpBody;
     }
 
     public String getNativePath() {
         return httpUri.getNativePath();
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(httpHeaders.get("Cookie"));
+    }
+
+    public QueryString getQueryString() {
+        return httpUri.getQueryString();
     }
 
 }

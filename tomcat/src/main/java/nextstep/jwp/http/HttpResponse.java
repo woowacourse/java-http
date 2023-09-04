@@ -19,6 +19,10 @@ public class HttpResponse {
         this.httpBody = httpBody;
     }
 
+    public void addHeader(String key, String value) {
+        httpHeaders.addHeader(key, value);
+    }
+
     public byte[] getBytes() {
         String response = String.join("\r\n",
                 httpVersion.getValue() + " " + httpStatus.getValue(),

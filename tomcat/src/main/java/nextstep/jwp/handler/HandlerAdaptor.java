@@ -8,12 +8,12 @@ import nextstep.jwp.http.HttpResponse;
 
 public class HandlerAdaptor {
 
-    private static final Map<String, RequestHandler> handlers = new ConcurrentHashMap<>();
+    private static final Map<String, RequestHandler> HANDLERS = new ConcurrentHashMap<>();
 
     static {
-        handlers.put("/index", IndexHandler.getInstance());
-        handlers.put("/login", LoginHandler.getInstance());
-        handlers.put("/register", RegisterHandler.getInstance());
+        HANDLERS.put("/index", IndexHandler.getInstance());
+        HANDLERS.put("/login", LoginHandler.getInstance());
+        HANDLERS.put("/register", RegisterHandler.getInstance());
     }
 
     private HandlerAdaptor() {
@@ -30,11 +30,11 @@ public class HandlerAdaptor {
             return HomeHandler.getInstance();
         }
 
-        return handlers.keySet()
+        return HANDLERS.keySet()
                 .stream()
                 .filter(nativePath::startsWith)
                 .findAny()
-                .map(handlers::get)
+                .map(HANDLERS::get)
                 .orElseGet(ResourceHandler::getInstance);
     }
 }

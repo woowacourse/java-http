@@ -5,9 +5,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.InvalidRequestMethod;
+import nextstep.jwp.http.FormData;
 import nextstep.jwp.http.HttpBody;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeaders;
@@ -15,7 +17,6 @@ import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.HttpUri;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.QueryString;
 import nextstep.jwp.model.User;
@@ -27,119 +28,86 @@ import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
-    private static final RequestHandler handler = new LoginHandler();
-    private static final Manager sessionManager = SessionManager.getInstance();
+    private static final RequestHandler HANDLER = new LoginHandler();
+    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
+    private static final Logger LOG = LoggerFactory.getLogger(LoginHandler.class);
 
     private LoginHandler() {
     }
 
     public static RequestHandler getInstance() {
-        return handler;
+        return HANDLER;
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        if (request.getHttpMethod().equals(HttpMethod.GET)) {
-            HttpHeaders requestHeaders = request.getHttpHeaders();
-
-            if (requestHeaders.containsKey("Cookie")) {
-                HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-                String jSessionId = cookie.getJSessionId();
-                Session session = sessionManager.findSession(jSessionId);
-                User user = (User) session.getAttribute("user");
-                InMemoryUserRepository.save(user);
-
-                return redirectToIndexPage(request);
-            }
-
-            HttpUri httpUri = request.getHttpUri();
-            if (httpUri.hasQueryString()) {
-                QueryString queryString = httpUri.getQueryString();
-
-                if (login(queryString)) {
-                    return redirectToIndexPage(request);
-                }
-
-                return redirectToUnauthorizedPage(request);
-            }
-
-            HttpStatus httpStatus = HttpStatus.OK;
-            HttpVersion httpVersion = request.getHttpVersion();
-            URL url = getClass().getClassLoader().getResource("static/login.html");
-            HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
-            HttpHeaders httpHeaders = createHeaders(httpBody);
-
-            return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+        if (HttpMethod.GET.equals(request.getHttpMethod())) {
+            return handleGetMethod(request);
         }
 
-        if (request.getHttpMethod().equals(HttpMethod.POST)) {
-            HttpBody httpBody = request.getHttpBody();
-            QueryString queryString = QueryString.from(httpBody.getHttpBody());
-
-            if (login(queryString)) {
-                return redirectToIndexPage(request);
-            }
-
-            return redirectToUnauthorizedPage(request);
+        if (HttpMethod.POST.equals(request.getHttpMethod())) {
+            return handlePostMethod(request);
         }
 
-        throw new NoSuchElementException();
+        throw new InvalidRequestMethod();
     }
 
-    private HttpResponse redirectToUnauthorizedPage(HttpRequest request) {
-        HttpStatus httpStatus = HttpStatus.FOUND;
+    private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
+        if (request.hasCookie()) {
+            HttpCookie cookie = request.getCookie();
+            String jSessionId = cookie.getJSessionId();
+            Session session = SESSION_MANAGER.findSession(jSessionId);
+            User user = (User) session.getAttribute("user");
+
+            return createLoginResponse(request, user);
+        }
+
+        if (request.hasQueryString()) {
+            QueryString queryString = request.getQueryString();
+            User user = login(queryString.get("account"), queryString.get("password"));
+
+            if (user != null) {
+                return createLoginResponse(request, user);
+            }
+
+            return createLoginFailResponse(request);
+        }
+
+        HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
-        HttpBody httpBody = HttpBody.from("");
-        HttpHeaders httpHeaders = createHeadersWithLocation(httpBody, "/401.html");
+        URL url = getClass().getClassLoader().getResource("static/login.html");
+        HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
+        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
 
-    private HttpResponse redirectToIndexPage(HttpRequest request) {
+    private HttpResponse createLoginResponse(HttpRequest request, User user) {
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        SESSION_MANAGER.add(session);
+        HttpResponse response = createRedirectingIndexResponse(request);
+
+        setCookie(request, response, session);
+
+        return response;
+    }
+
+    private HttpResponse createRedirectingIndexResponse(HttpRequest request) {
+        return createRedirectResponse(request, "/index.html");
+    }
+
+    private HttpResponse createRedirectResponse(HttpRequest request, String location) {
         HttpStatus httpStatus = HttpStatus.FOUND;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpBody httpBody = HttpBody.from("");
-        HttpHeaders httpHeaders = createHeadersWithLocation(httpBody, "/index.html");
-
-        setCookie(request, httpHeaders);
+        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
+        httpHeaders.addHeader("Location", location);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
 
-    private void setCookie(HttpRequest request, HttpHeaders httpHeaders) {
-        HttpHeaders requestHeaders = request.getHttpHeaders();
-
-        if (requestHeaders.containsKey("Cookie")) {
-            HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
-            if (cookie.containsKey("JSESSIONID")) {
-                return;
-            }
-        }
-
-        httpHeaders.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-    }
-
-    private boolean login(QueryString queryString) {
-        if (queryString.containsKey("account") && queryString.containsKey("password")) {
-            User user = InMemoryUserRepository.findByAccount(queryString.get("account"))
-                    .orElseThrow(IllegalArgumentException::new);
-
-            if (user.checkPassword(queryString.get("password"))) {
-                log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
-                Session session = new Session(UUID.randomUUID().toString());
-                session.setAttribute("user", user);
-                sessionManager.add(session);
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private HttpHeaders createHeaders(HttpBody httpBody) {
+    private HttpHeaders createDefaultHeaders(HttpBody httpBody) {
         List<String> headers = List.of(
                 "Content-Type: text/html;charset=utf-8",
                 "ContentLength: " + httpBody.getBytesLength()
@@ -148,14 +116,44 @@ public class LoginHandler implements RequestHandler {
         return HttpHeaders.from(headers);
     }
 
-    private HttpHeaders createHeadersWithLocation(HttpBody httpBody, String location) {
-        List<String> headers = List.of(
-                "Content-Type: text/html;charset=utf-8",
-                "ContentLength: " + httpBody.getBytesLength(),
-                "Location: " + location
-        );
+    private void setCookie(HttpRequest request, HttpResponse response, Session session) {
+        if (request.hasCookie()) {
+            HttpCookie cookie = request.getCookie();
+            if (cookie.containsKey("JSESSIONID")) {
+                return;
+            }
+        }
 
-        return HttpHeaders.from(headers);
+        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+    }
+
+    private User login(String account, String password) {
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.checkPassword(password)) {
+                LOG.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+    private HttpResponse createLoginFailResponse(HttpRequest request) {
+        return createRedirectResponse(request, "/401.html");
+    }
+
+    private HttpResponse handlePostMethod(HttpRequest request) {
+        FormData formData = FormData.from(request.getHttpBody());
+        User user = login(formData.get("account"), formData.get("password"));
+
+        if (user != null) {
+            return createLoginResponse(request, user);
+        }
+
+        return createLoginFailResponse(request);
     }
 
 }

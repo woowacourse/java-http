@@ -5,8 +5,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.InvalidRequestMethod;
+import nextstep.jwp.http.FormData;
 import nextstep.jwp.http.HttpBody;
 import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpMethod;
@@ -14,18 +15,17 @@ import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
-import nextstep.jwp.http.QueryString;
 import nextstep.jwp.model.User;
 
 public class RegisterHandler implements RequestHandler {
 
-    private static final RequestHandler handler = new RegisterHandler();
+    private static final RequestHandler HANDLER = new RegisterHandler();
 
     private RegisterHandler() {
     }
 
     public static RequestHandler getInstance() {
-        return handler;
+        return HANDLER;
     }
 
     @Override
@@ -33,46 +33,29 @@ public class RegisterHandler implements RequestHandler {
         HttpMethod httpMethod = request.getHttpMethod();
 
         if (httpMethod.equals(HttpMethod.GET)) {
-            HttpStatus httpStatus = HttpStatus.OK;
-            HttpVersion httpVersion = request.getHttpVersion();
-            URL url = getClass().getClassLoader().getResource("static/register.html");
-            HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
-            HttpHeaders httpHeaders = createHeaders(httpBody);
-
-            return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+            return handleGetMethod(request);
         }
 
         if (httpMethod.equals(HttpMethod.POST)) {
-            HttpStatus httpStatus = HttpStatus.FOUND;
-            HttpVersion httpVersion = request.getHttpVersion();
-            HttpBody httpBody = request.getHttpBody();
-            HttpHeaders httpHeaders = createHeadersWithLocation(httpBody, "/index.html");
-
-            join(httpBody);
-
-            return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+            return handlePostMethod(request);
         }
 
-        throw new NoSuchElementException();
+        throw new InvalidRequestMethod();
     }
 
-    private void join(HttpBody httpBody) {
-        QueryString queryString = QueryString.from(httpBody.getHttpBody());
+    private HttpResponse handlePostMethod(HttpRequest request) {
+        HttpStatus httpStatus = HttpStatus.FOUND;
+        HttpVersion httpVersion = request.getHttpVersion();
+        HttpBody httpBody = request.getHttpBody();
+        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
+        httpHeaders.addHeader("Location", "/index.html");
 
-        if (queryString.containsKey("account") &&
-                queryString.containsKey("password") &&
-                queryString.containsKey("email")) {
-            User user = new User(queryString.get("account"), queryString.get("password"), queryString.get("email"));
+        join(httpBody);
 
-            InMemoryUserRepository.save(user);
-
-            return;
-        }
-
-        throw new IllegalArgumentException();
+        return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
 
-    private HttpHeaders createHeaders(HttpBody httpBody) {
+    private HttpHeaders createDefaultHeaders(HttpBody httpBody) {
         List<String> headers = List.of(
                 "Content-Type: text/html;charset=utf-8",
                 "ContentLength: " + httpBody.getBytesLength()
@@ -81,13 +64,25 @@ public class RegisterHandler implements RequestHandler {
         return HttpHeaders.from(headers);
     }
 
-    private HttpHeaders createHeadersWithLocation(HttpBody httpBody, String location) {
-        List<String> headers = List.of(
-                "Content-Type: text/html;charset=utf-8",
-                "ContentLength: " + httpBody.getBytesLength(),
-                "Location: " + location
-        );
+    private void join(HttpBody httpBody) {
+        FormData formData = FormData.from(httpBody);
 
-        return HttpHeaders.from(headers);
+        String account = formData.get("account");
+        String password = formData.get("password");
+        String email = formData.get("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
     }
+
+    private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
+        HttpStatus httpStatus = HttpStatus.OK;
+        HttpVersion httpVersion = request.getHttpVersion();
+        URL url = getClass().getClassLoader().getResource("static/register.html");
+        HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
+        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
+
+        return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+    }
+
 }

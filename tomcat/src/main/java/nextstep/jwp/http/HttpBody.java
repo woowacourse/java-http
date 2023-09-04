@@ -12,11 +12,12 @@ public class HttpBody {
         return new HttpBody(httpBody);
     }
 
+    public int getBytesLength() {
+        return httpBody.getBytes().length;
+    }
+
     public String getHttpBody() {
         return httpBody;
     }
 
-    public int getBytesLength(){
-        return httpBody.getBytes().length;
-    }
 }

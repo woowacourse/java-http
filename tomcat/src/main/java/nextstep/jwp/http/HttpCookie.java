@@ -3,7 +3,6 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -35,7 +34,7 @@ public class HttpCookie {
             return cookies.get("JSESSIONID");
         }
 
-        throw new NoSuchElementException();
+        return null;
     }
 
 }

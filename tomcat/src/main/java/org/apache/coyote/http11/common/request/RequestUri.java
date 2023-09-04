@@ -18,6 +18,9 @@ public class RequestUri {
 
     public String getExtension() {
         int idx = detail.indexOf(".");
+        if (idx == -1) {
+            return "";
+        }
         return detail.substring(idx);
     }
 

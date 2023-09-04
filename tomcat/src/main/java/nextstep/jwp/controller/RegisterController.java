@@ -20,16 +20,15 @@ public class RegisterController extends HttpServlet {
 
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        if (req.getQuery() == null) {
-            if (getUser(req.getSession()) != null) {
-                resp.sendRedirect("/index.html");
-            }else{
-                resp.setHttpResponseStartLine(StatusCode.OK);
-                Path path = FileIOUtils.getPath(PREFIX + req.getPath() + SUFFIX);
-                resp.setResponseBody(Files.readAllBytes(path));
-                resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
-            }
+        if (req.getSession()==null || req.getSession().containskey("user")) {
+            resp.sendRedirect("/index.html");
+            return;
         }
+
+        resp.setHttpResponseStartLine(StatusCode.OK);
+        Path path = FileIOUtils.getPath(PREFIX + req.getPath() + SUFFIX);
+        resp.setResponseBody(Files.readAllBytes(path));
+        resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
     }
 
     @Override
@@ -39,21 +38,17 @@ public class RegisterController extends HttpServlet {
 
         if (findAccount.isPresent()) {
             resp.sendRedirect("/401.html");
-        } else {
-            User user = new User(
-                    requestParam.get("account"),
-                    requestParam.get("password"),
-                    requestParam.get("email")
-            );
-            InMemoryUserRepository.save(user);
-            final var session = req.getSession(true);
-            session.setAttribute("user", user);
-
-            resp.sendRedirect("/index.html");
+            return;
         }
-    }
+        User user = new User(
+                requestParam.get("account"),
+                requestParam.get("password"),
+                requestParam.get("email")
+        );
+        InMemoryUserRepository.save(user);
+        Session session = req.getSession(true);
+        session.setAttribute("user", user);
 
-    private User getUser(Session session) {
-        return (User) session.getAttribute("user");
+        resp.sendRedirect("/index.html");
     }
 }

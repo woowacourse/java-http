@@ -7,6 +7,8 @@ public class RequestParam {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    public static final String KEY_VALUE_DELIMITER = "=";
+    public static final String QUERY_STRING_DELIMITER = "&";
 
     private final Map<String, String> params;
 
@@ -14,12 +16,16 @@ public class RequestParam {
         this.params = params;
     }
 
+    //FIXME: URLDecoder.decode URL 인코딩된 문자열을 그대로 저장하면, 이후 문제가 발생할 가능성이 있습니다.
     public static RequestParam of(String queryString) {
         Map<String, String> params = new HashMap<>();
-        String[] partQuery = queryString.split("&");
-        for (String query : partQuery) {
-            String[] split = query.split("=");
-            params.put(split[KEY_INDEX], split[VALUE_INDEX]);
+        String[] pairs = queryString.split(QUERY_STRING_DELIMITER);
+        for (String pair : pairs) {
+            String[] query = pair.split(KEY_VALUE_DELIMITER);
+            params.put(
+                    query[KEY_INDEX],
+                    query[VALUE_INDEX]
+            );
         }
         return new RequestParam(params);
     }

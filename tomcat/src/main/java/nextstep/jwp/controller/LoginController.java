@@ -21,34 +21,33 @@ public class LoginController extends HttpServlet {
 
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        if (req.getQuery() == null) {
-            if (getUser(req.getSession()) != null) {
-                resp.sendRedirect("/index.html");
-            } else {
-                resp.setHttpResponseStartLine(StatusCode.OK);
-                Path path = FileIOUtils.getPath(PREFIX + req.getPath() + SUFFIX);
-                resp.setResponseBody(Files.readAllBytes(path));
-                resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
-            }
+        if (req.getSession()==null || req.getSession().containskey("user")) {
+            resp.sendRedirect("/index.html");
+            return;
         }
+
+        resp.setHttpResponseStartLine(StatusCode.OK);
+        Path path = FileIOUtils.getPath(PREFIX + req.getPath() + SUFFIX);
+        resp.setResponseBody(Files.readAllBytes(path));
+        resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
     }
 
     @Override
     public void doPost(final HttpRequest req, final HttpResponse resp) {
         RequestParam requestParam = RequestParam.of(req.getRequestBody());
+
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
-        if (findAccount.isPresent() && findAccount.get().checkPassword(requestParam.get("password"))) {
-            final var session = req.getSession(true);
-            session.setAttribute("user", findAccount.get());
-            resp.addCookie(JSESSIONID, req.getSession().getId());
-            resp.sendRedirect("/index.html");
-        } else {
-            resp.sendRedirect("/401.html");
+        if (findAccount.isPresent()) {
+            User user = findAccount.get();
+            if (user.checkPassword(requestParam.get("password"))) {
+                Session session = req.getSession(true);
+                session.setAttribute("user", user);
+                resp.addCookie(JSESSIONID, req.getSession().getId());
+                resp.sendRedirect("/index.html");
+                return;
+            }
         }
-    }
-
-    private User getUser(Session session) {
-        return (User) session.getAttribute("user");
+        resp.sendRedirect("/401.html");
     }
 }

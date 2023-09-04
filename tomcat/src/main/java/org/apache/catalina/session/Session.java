@@ -38,4 +38,8 @@ public class Session {
     public void invalidate() {
         values.clear();
     }
+
+    public boolean containskey(String key){
+        return values.containsKey(key);
+    }
 }

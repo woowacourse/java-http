@@ -30,12 +30,8 @@ public class Cookie {
         return new Cookie(namesWithValue);
     }
 
-    public void create(final String name, final String value) {
-        namesWithValue.put(name, value);
-    }
-
-    public String findNameWithValueByName(final String name) {
-        return String.join(COOKIE_NAME_VALUE_DELIMITER, name, namesWithValue.get(name));
+    public String findByName(final String name) {
+        return namesWithValue.get(name);
     }
 
     public String getAllNamesWithValue() {

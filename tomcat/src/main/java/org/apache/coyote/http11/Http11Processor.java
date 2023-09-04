@@ -13,6 +13,7 @@ import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpResponse;
 import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,17 +58,23 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.ofText(HttpStatus.OK, "Hello world!", httpRequest);
         }
         if (httpRequest.isRequestOf(HttpMethod.GET, "/login")) {
-            return HttpResponse.ofFile(HttpStatus.OK, getFilePath("/login.html"), httpRequest);
+            final Session session = httpRequest.getSession(false);
+            if (session == null) {
+                return HttpResponse.ofFile(HttpStatus.FOUND, getFilePath("/login.html"), httpRequest);
+            }
+            return HttpResponse.ofFile(HttpStatus.FOUND, getFilePath("/index.html"), httpRequest);
         }
 
         if (httpRequest.isRequestOf(HttpMethod.POST, "/login")) {
+            Session session;
             try {
-                login(httpRequest);
+                session = login(httpRequest);
             } catch (IllegalArgumentException e) {
                 return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
             }
             final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, httpRequest);
             httpResponse.setHeader("Location", "/index.html");
+            httpResponse.setCookie(session);
             return httpResponse;
         }
 
@@ -89,12 +96,15 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.ofFile(HttpStatus.OK, getFilePath(httpRequest.getPath()), httpRequest);
     }
 
-    private void login(final HttpRequest httpRequest) throws IllegalArgumentException {
+    private Session login(final HttpRequest httpRequest) throws IllegalArgumentException {
         final User user = InMemoryUserRepository.findByAccount(httpRequest.getBodyOf("account"))
             .filter(foundUser -> foundUser.checkPassword(httpRequest.getBodyOf("password")))
             .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
 
         log.info(user.toString());
+        final Session session = httpRequest.getSession(true);
+        session.setAttribute("user", user);
+        return session;
     }
 
     private void register(final HttpRequest httpRequest) {

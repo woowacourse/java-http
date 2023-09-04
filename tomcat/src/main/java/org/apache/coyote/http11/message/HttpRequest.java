@@ -6,8 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.coyote.http11.session.Cookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
+
+    private static final String COOKIE_HEADER = "Cookie";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
@@ -42,12 +49,12 @@ public class HttpRequest {
         return HttpHeaders.from(readHeaderLines);
     }
 
-    private static RequestBody readBody(final BufferedReader reader, final HttpHeaders httpHeaders) throws IOException {
-        final Optional<String> contentLengthValue = httpHeaders.findFirstValueOfField("Content-Length");
+    private static RequestBody readBody(final BufferedReader reader, final HttpHeaders httpHeaders)
+        throws IOException {
+        final Optional<String> contentLengthValue = httpHeaders.findFirstValueOfField(CONTENT_LENGTH_HEADER);
         if (contentLengthValue.isEmpty()) {
             return RequestBody.empty();
         }
-
         final int contentLength = Integer.parseInt(contentLengthValue.get());
 
         char[] buffer = new char[contentLength];
@@ -63,8 +70,25 @@ public class HttpRequest {
         return headers.findFirstValueOfField(field);
     }
 
-    public boolean hasHeader(final String field) {
-        return headers.getValuesOfField(field).isPresent();
+    public Session getSession(boolean createIfNotExist) {
+        Optional<Cookie> foundCookie = getCookie();
+        String sessionId = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
+            .orElse(null);
+
+        if (sessionId != null) {
+            return SessionManager.findSession(sessionId);
+        }
+        if (createIfNotExist) {
+            Session session = new Session(UUID.randomUUID().toString());
+            SessionManager.add(session);
+            return session;
+        }
+        return null;
+    }
+
+    private Optional<Cookie> getCookie() {
+        final Optional<String> cookiesInHeaderLine = headers.getValuesOfField(COOKIE_HEADER);
+        return cookiesInHeaderLine.map(Cookie::fromHeaderCookie);
     }
 
     public RequestLine getRequestLine() {

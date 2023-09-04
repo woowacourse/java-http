@@ -14,7 +14,7 @@ public class HttpResponse {
     private final Map<String, HttpHeader> headers = new HashMap<>();
 
     public HttpResponse(final String body, final String contentType) {
-        this(HttpStatus.OK, body, List.of(new HttpHeader("Content-Type", contentType)));
+        this(HttpStatus.OK, body, List.of(new ContentType(contentType)));
     }
 
     public HttpResponse(final HttpStatus status, final List<HttpHeader> headers) {
@@ -24,10 +24,10 @@ public class HttpResponse {
     public HttpResponse(final HttpStatus status, final String body, final List<HttpHeader> headers) {
         this.status = status;
         this.body = body;
+        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
         for (HttpHeader header : headers) {
             putHeader(header);
         }
-        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
     }
 
     public static HttpResponse redirectTo(final String location) {

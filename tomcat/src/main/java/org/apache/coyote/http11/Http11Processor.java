@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +17,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String CRLF = "\r\n";
     private static final Handler DEFAULT_HANDLER = new FileHandler();
+    private static final LoginHandler LOGIN_HANDLER = new LoginHandler();
+    private static final RegisterHandler REGISTER_HANDLER = new RegisterHandler();
+
     private static final Map<String, Handler> PREDEFINED_HANDLERS = Map.of(
             "/", httpRequest -> new HttpResponse("Hello world!", "text/html"),
-            "/login", new LoginHandler()
+            "/login", LOGIN_HANDLER,
+            "/login.html", LOGIN_HANDLER,
+            "/register", REGISTER_HANDLER,
+            "/register.html", REGISTER_HANDLER
     );
 
     private final Socket connection;
@@ -54,6 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
+            e.printStackTrace();
             log.error(e.getMessage(), e);
         }
     }

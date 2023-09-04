@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpHeader {
 
+    public static final HttpHeader EMPTY = new HttpHeader("", "");
+
     private static final String SEPARATOR = ": ";
 
     private final String name;

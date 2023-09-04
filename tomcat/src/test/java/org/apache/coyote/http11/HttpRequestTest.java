@@ -14,9 +14,10 @@ class HttpRequestTest {
     @Test
     void HTTP_메시지를_해석한다() {
         String message = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 4",
                 "",
                 "body");
 
@@ -28,7 +29,8 @@ class HttpRequestTest {
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
                         new HttpHeader("Host", "localhost:8080"),
-                        new HttpHeader("Connection", "keep-alive")
+                        new HttpHeader("Connection", "keep-alive"),
+                        new HttpHeader("Content-Length", "4")
                 );
         assertThat(httpRequest.getBody()).isEqualTo("body");
     }
@@ -36,9 +38,10 @@ class HttpRequestTest {
     @Test
     void 바디_안의_CRLF는_바디의_일부로_취급한다() {
         String message = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "POST /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 12",
                 "",
                 "line1\r\nline2");
 
@@ -49,9 +52,9 @@ class HttpRequestTest {
     @Test
     void 헤더의_앞_뒤_공백을_무시한다() {
         String message = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
         HttpRequest httpRequest = HttpRequest.from(toInputStream(message));

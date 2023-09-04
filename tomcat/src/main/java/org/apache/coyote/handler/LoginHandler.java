@@ -1,10 +1,12 @@
 package org.apache.coyote.handler;
 
 import java.io.IOException;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.handler.exception.LoginFailureException;
+import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -60,11 +62,15 @@ public class LoginHandler implements Handler {
 
             log.info("login success : {}", user);
 
+            final String sessionId = UUID.randomUUID().toString();
+            final HttpCookie cookie = HttpCookie.fromSessionId(sessionId);
+
             return Response.of(
                     request,
                     HttpStatusCode.FOUND,
                     ContentType.JSON,
                     user.toString(),
+                    cookie,
                     new HeaderDto("Location", "/index.html")
             );
         } catch (LoginFailureException ex) {

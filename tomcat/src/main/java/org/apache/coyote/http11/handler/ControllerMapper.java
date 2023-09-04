@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.LoginPageController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RegisterPageController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerMapper {
@@ -13,6 +15,8 @@ public class ControllerMapper {
     static {
         controllers.add(new LoginController());
         controllers.add(new LoginPageController());
+        controllers.add(new RegisterPageController());
+        controllers.add(new RegisterController());
     }
 
     private ControllerMapper() {

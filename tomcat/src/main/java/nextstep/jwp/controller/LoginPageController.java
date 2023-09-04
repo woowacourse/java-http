@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,7 +14,8 @@ public class LoginPageController implements Controller {
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return "/login".equals(httpRequest.getPath());
+        return "/login".equals(httpRequest.getPath())
+                && HttpMethod.GET == httpRequest.getHttpMethod();
     }
 
     @Override

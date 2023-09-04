@@ -39,8 +39,8 @@ public class HttpRequestReader {
         if (contentLength != null) {
             cbufSize = Integer.parseInt(contentLength);
         }
-        final char[] cbuf = new char[cbufSize];
-        bufferedReader.read(cbuf);
-        return new String(cbuf);
+        char[] buffer = new char[cbufSize];
+        bufferedReader.read(buffer, 0, cbufSize);
+        return new String(buffer);
     }
 }

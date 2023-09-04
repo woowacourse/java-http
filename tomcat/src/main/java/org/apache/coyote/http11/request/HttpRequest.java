@@ -35,12 +35,13 @@ public class HttpRequest {
 
     private Session generateSession() throws IOException {
         Manager manager = new SessionManager();
-        if (httpCookies.get("JSESSIONID") != null) {
-            return manager.findSession(httpCookies.get("JSESSIONID"));
+        String jsessionId = httpCookies.get("JSESSIONID");
+        if (jsessionId != null && manager.findSession(jsessionId) != null) {
+            return manager.findSession(jsessionId);
         }
-        Session jsessionid = new Session(String.valueOf(UUID.randomUUID()));
-        manager.add(jsessionid);
-        return jsessionid;
+        Session newSession = new Session(String.valueOf(UUID.randomUUID()));
+        manager.add(newSession);
+        return newSession;
     }
 
     private HttpCookies generateHttpCookies(final HttpRequestHeaders httpRequestHeaders) {

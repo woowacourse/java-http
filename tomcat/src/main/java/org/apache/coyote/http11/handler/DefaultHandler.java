@@ -14,7 +14,7 @@ public class DefaultHandler extends Handler {
     public Response handle(Request request) {
         String resource = "Hello world!";
 
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Content-Type", ContentTypeParser.parse(resource),
                 "Content-Length", String.valueOf(resource.getBytes().length)
         ));

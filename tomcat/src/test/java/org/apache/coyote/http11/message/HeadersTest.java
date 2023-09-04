@@ -20,7 +20,7 @@ class HeadersTest {
         );
 
         // when
-        Headers headers = Headers.from(lines);
+        Headers headers = Headers.fromLines(lines);
 
         // then
         assertThat(headers.get("Content-Type")).isEqualTo("content-type");
@@ -36,7 +36,7 @@ class HeadersTest {
         );
 
         // when
-        Headers headers = Headers.from(lines);
+        Headers headers = Headers.fromLines(lines);
         Cookie cookie = headers.getCookie();
 
         // then
@@ -53,7 +53,7 @@ class HeadersTest {
         );
 
         // when
-        Headers headers = Headers.from(lines);
+        Headers headers = Headers.fromLines(lines);
 
         String contentType = "Content-Type: content-type ";
         String contentLength = "Content-Length: content-length ";

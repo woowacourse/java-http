@@ -18,7 +18,7 @@ public class StaticResourceHandler extends Handler {
         String absolutePath = requestURI.absolutePath();
 
         String resource = findResourceWithPath(absolutePath);
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Content-Type", ContentTypeParser.parse(absolutePath),
                 "Content-Length", String.valueOf(resource.getBytes().length)
         ));

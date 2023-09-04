@@ -33,7 +33,7 @@ public class RequestExtractor {
         while (!(line = reader.readLine()).isBlank()) {
             headers.add(line);
         }
-        return Headers.from(headers);
+        return Headers.fromLines(headers);
     }
 
     private static RequestBody extractBodyIfExists(BufferedReader reader,

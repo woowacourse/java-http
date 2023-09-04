@@ -10,7 +10,11 @@ public class Headers {
         this.mappings = mappings;
     }
 
-    public static Headers from(List<String> lines) {
+    public static Headers fromMap(Map<String, String> mappings) {
+        return new Headers(mappings);
+    }
+
+    public static Headers fromLines(List<String> lines) {
         Map<String, String> headers = new HashMap<>();
         lines.stream()
                 .map(each -> each.split(": "))

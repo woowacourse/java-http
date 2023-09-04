@@ -31,7 +31,7 @@ public class RegisterHandler extends Handler {
         String absolutePath = "register.html";
 
         String resource = findResourceWithPath(absolutePath);
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Content-Type", ContentTypeParser.parse(absolutePath),
                 "Content-Length", String.valueOf(resource.getBytes().length)
         ));
@@ -45,7 +45,7 @@ public class RegisterHandler extends Handler {
         saveUser(request);
         String absolutePath = "index.html";
 
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Location", absolutePath
         ));
 

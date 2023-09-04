@@ -45,7 +45,7 @@ public class LoginHandler extends Handler {
 
     private Response responseForLoggedIn(Request request) {
         String absolutePath = "index.html";
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Location", absolutePath
         ));
 
@@ -56,7 +56,7 @@ public class LoginHandler extends Handler {
     private Response responseForNotLoggedIn(Request request) throws IOException {
         String absolutePath = "login.html";
         String resource = findResourceWithPath(absolutePath);
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
                 CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
@@ -81,7 +81,7 @@ public class LoginHandler extends Handler {
         UUID sessionId = saveSession(request);
 
         String absolutePath = "index.html";
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 SET_COOKIE, "JSESSIONID=" + sessionId,
                 "Location", absolutePath
         ));
@@ -93,7 +93,7 @@ public class LoginHandler extends Handler {
     private Response responseWhenLoginFail(Request request) {
         String absolutePath = "401.html";
 
-        Headers headers = new Headers(Map.of(
+        Headers headers = Headers.fromMap(Map.of(
                 "Location", absolutePath
         ));
 

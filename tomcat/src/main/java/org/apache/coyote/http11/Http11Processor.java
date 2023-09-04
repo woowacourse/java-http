@@ -39,8 +39,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             String startLine = bufferedReader.readLine();
+            if (startLine == null) {
+                return;
+            }
 
-            HttpRequest request = new HttpRequest(startLine);
+            HttpRequest request = createRequest(startLine, bufferedReader);
             HandlerMatcher handlerMatcher = new HandlerMatcher(HttpMethod.valueOf(request.method()), request.uri());
             HandlerMapping.init();
             if (!HandlerMapping.canHandle(handlerMatcher)) {
@@ -64,5 +67,27 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest createRequest(String startLine, BufferedReader bufferedReader) throws IOException {
+        HttpRequest request = new HttpRequest(startLine);
+        String header = "";
+        boolean haveToReadBody = false;
+        int contentLength = 0;
+        while (!(header = bufferedReader.readLine()).isBlank()) {
+            String[] splitHeader = header.split(": ");
+            request.setHeader(splitHeader[0], splitHeader[1]);
+            if (HttpHeader.CONTENT_LENGTH.value().equals(splitHeader[0])) {
+                haveToReadBody = true;
+                contentLength = Integer.valueOf(splitHeader[1]);
+            }
+        }
+        if (haveToReadBody) {
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String body = new String(buffer);
+            request.setBody(body);
+        }
+        return request;
     }
 }

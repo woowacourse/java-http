@@ -1,14 +1,17 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.apache.catalina.HttpSession;
+import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
     private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final Manager manager = new SessionManager();
+
 
     public HttpRequest(
             HttpRequestHeader httpRequestHeader,
@@ -27,16 +30,36 @@ public class HttpRequest {
     }
 
     public HttpSession getHttpSession() {
+        return getHttpSession(false);
+    }
+
+    public HttpSession getHttpSession(boolean create) {
         String jsessionId = httpRequestHeader.getCookies()
-                .get("JSESSIONID");
+                .getOrDefault("JSESSIONID", "");
+
+        HttpSession session = null;
 
         try {
-            return sessionManager.findSession(jsessionId);
+            session = manager.findSession(jsessionId);
         } catch (IOException e) {
             // ignored
         }
 
-        return null;
+        if (session == null) {
+            String uuid = UUID.randomUUID().toString();
+            session = new HttpSession(uuid);
+            manager.add(session);
+        }
+
+        if (create) {
+            session.invalidate();
+            manager.remove(session);
+            String uuid = UUID.randomUUID().toString();
+            session = new HttpSession(uuid);
+            manager.add(session);
+        }
+
+        return session;
     }
 
 }

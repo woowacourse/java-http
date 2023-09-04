@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.catalina.HttpSession;
-import org.apache.catalina.SessionManager;
 
 public class HttpRequestHeader {
 
@@ -38,8 +36,8 @@ public class HttpRequestHeader {
         return new HttpRequestHeader(
                 HttpMethod.from(method),
                 getUrlRemovedQueryString(path),
-                parseQueryStrings(path),
                 parseExtraContents,
+                parseQueryStrings(path),
                 parseCookies(parseExtraContents.get("Cookie"))
         );
     }
@@ -55,7 +53,7 @@ public class HttpRequestHeader {
     }
 
     private static Map<String, String> parseQueryStrings(String path) {
-        Map<String, String> parseResultOfQueryStrings = new ConcurrentHashMap<>();
+        Map<String, String> parseResultOfQueryStrings = new HashMap<>();
         int questionMarkIndex = path.lastIndexOf("?");
 
         if (questionMarkIndex == -1) {
@@ -73,7 +71,7 @@ public class HttpRequestHeader {
     }
 
     private static Map<String, String> parseExtraContents(String[] extraContents) {
-        Map<String, String> parseResultOfExtraContents = new ConcurrentHashMap<>();
+        Map<String, String> parseResultOfExtraContents = new HashMap<>();
 
         for (String component : extraContents) {
             putParseResultOfComponent(parseResultOfExtraContents, component, ":");
@@ -83,6 +81,10 @@ public class HttpRequestHeader {
     }
 
     private static Map<String, String> parseCookies(String cookies) {
+        if (cookies == null) {
+            return Collections.emptyMap();
+        }
+
         Map<String, String> parseResultOfCookies = new HashMap<>();
 
         for (String cookie : cookies.split(";")) {

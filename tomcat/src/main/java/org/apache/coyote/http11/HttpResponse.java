@@ -1,13 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1";
-    private final Map<String, String> attribute = new HashMap<>();
+    private final Map<String, String> attribute = new LinkedHashMap<>();
     private final Integer status;
     private final String code;
     private final String responseBody;

@@ -10,11 +10,13 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.HttpSession;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Map<String, Function<HttpRequest, String>> getMethodControllerMapper = Map.of(
-            "/", this::loadRootPage
+            "/", this::loadRootPage,
+            "/login", this::loadLoginPage
     );
     private final Map<String, Function<HttpRequest, String>> postMethodControllerMapper = Map.of(
             "/register", this::register,
@@ -92,12 +95,13 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private HttpRequestBody getHttpRequestBody(HttpRequestHeader header, BufferedReader bufferedReader) throws IOException {
-        if (header.getMethod() == HttpMethod.GET) {
+    private HttpRequestBody getHttpRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader bufferedReader) throws IOException {
+        String header = httpRequestHeader.get("Content-Length");
+        if (header.isBlank()) {
             return HttpRequestBody.from("");
         }
 
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
+        int contentLength = Integer.parseInt(header);
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
@@ -119,6 +123,24 @@ public class Http11Processor implements Runnable, Processor {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
+        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
+        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
+
+        return httpResponse.toString();
+    }
+
+    private String loadLoginPage(HttpRequest httpRequest) {
+        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
+        HttpSession httpSession = httpRequest.getHttpSession();
+        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
+        HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
+
+        User user = (User) httpSession.get("user");
+
+        if (!Objects.isNull(user)) {
+            httpResponse = new HttpResponse(302, "FOUND");
+            httpResponse.setAttribute("Location", "/index.html");
+        }
 
         return httpResponse.toString();
     }
@@ -157,7 +179,9 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             redirectionUrl = "/index.html";
-            httpResponse.setAttribute("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+            HttpSession httpSession = httpRequest.getHttpSession(true);
+            httpResponse.setAttribute("Set-Cookie", "JSESSIONID=" + httpSession.getId());
+            httpSession.add("user", user.get());
             log.info("로그인 성공! 아이디 : {}", account);
         }
 

@@ -10,7 +10,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
-import org.apache.coyote.http11.util.QueryParser;
+import org.apache.coyote.http11.util.Parser;
 import org.apache.coyote.http11.util.StaticFileLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class LoginHandler implements Handler {
     }
 
     private boolean loginSuccess(final HttpRequest request) {
-        QueryParams params = QueryParser.parse(request.getBody().getContent());
+        QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
         String account = params.getParam("account");
         String password = params.getParam("password");
 

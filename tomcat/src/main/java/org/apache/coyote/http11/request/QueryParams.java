@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Map;
-import org.apache.coyote.http11.util.QueryParser;
+import org.apache.coyote.http11.util.Parser;
 
 public class QueryParams {
 
@@ -18,7 +18,7 @@ public class QueryParams {
             return QueryParams.empty();
         }
         String paramLine = line.substring(questionMarkIdx + 1);
-        return QueryParser.parse(paramLine);
+        return Parser.parseToQueryParams(paramLine);
     }
 
     private static QueryParams empty() {

@@ -11,7 +11,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
-import org.apache.coyote.http11.util.QueryParser;
+import org.apache.coyote.http11.util.Parser;
 import org.apache.coyote.http11.util.StaticFileLoader;
 
 public class RegisterHandler implements Handler {
@@ -27,7 +27,7 @@ public class RegisterHandler implements Handler {
             return HttpResponse.create(StatusCode.OK, headers, content);
         }
         if (request.getMethod() == HttpMethod.POST) {
-            QueryParams params = QueryParser.parse(request.getBody().getContent());
+            QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
 
             User user = new User(params.getParam("account"), params.getParam("password"), params.getParam("email"));
             InMemoryUserRepository.save(user);

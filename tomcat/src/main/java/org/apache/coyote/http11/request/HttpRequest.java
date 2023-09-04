@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
 
@@ -61,5 +62,9 @@ public class HttpRequest {
 
     public MessageBody getBody() {
         return body;
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
     }
 }

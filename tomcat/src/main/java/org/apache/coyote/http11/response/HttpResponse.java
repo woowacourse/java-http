@@ -23,21 +23,20 @@ public class HttpResponse {
     }
 
     public static HttpResponse parse(final HttpRequest request) throws IOException {
-        final byte[] content = readAllByte(request);
-        final HttpHeaders headers = HttpHeaders.createResponse(content);
+        final Path path = findPath(request);
+        final byte[] content = Files.readAllBytes(path);
+
+        final HttpHeaders headers = HttpHeaders.createResponse(path);
         final String responseBody = new String(content);
 
         return new HttpResponse(ResponseLine.create(), headers, responseBody);
     }
 
-    private static byte[] readAllByte(final HttpRequest request) throws IOException {
+    private static Path findPath(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
         final URL url = HttpResponse.class.getClassLoader()
                 .getResource(STATIC + uri);
-        final Path path = new File(url.getPath())
-                .toPath();
-
-        return Files.readAllBytes(path);
+        return new File(url.getPath()).toPath();
     }
 
     @Override

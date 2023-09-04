@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.common;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +37,22 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    public static HttpHeaders createResponse(final byte[] bytes) {
+    public static HttpHeaders createResponse(final Path path) throws IOException {
         final Map<String, String> headers = new HashMap<>();
+        final byte[] bytes = Files.readAllBytes(path);
 
-        headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
+        headers.put(CONTENT_TYPE, findContentType(path));
         headers.put(CONTENT_LENGTH, String.valueOf(bytes.length));
 
         return new HttpHeaders(headers);
+    }
+
+    private static String findContentType(final Path path) {
+        final String fileName = path.getFileName()
+                .toString();
+        final String[] splieFileName = fileName.split("\\.");
+
+        return ContentType.findMimeType(splieFileName[1]);
     }
 
     public boolean hasContentLength() {

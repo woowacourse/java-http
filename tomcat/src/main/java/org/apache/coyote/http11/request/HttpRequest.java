@@ -36,7 +36,8 @@ public class HttpRequest {
     private static List<String> readAllLines(final BufferedReader reader) throws IOException {
         final List<String> lines = new ArrayList<>();
         while (reader.ready()) {
-            lines.add(reader.readLine());
+            final String line = reader.readLine();
+            lines.add(line);
         }
         return lines;
     }

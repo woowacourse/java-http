@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import nextstep.jwp.model.User;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Session {
+public class UserSession {
 
     private static final Map<String, User> users = new ConcurrentHashMap<>();
 
-    private Session() {
+    private UserSession() {
     }
 
     public static boolean exist(final String sessionId) {

@@ -49,11 +49,6 @@ public class Http11Processor implements Runnable, Processor {
             String requestBody = httpRequest.getBody();
             Map<String, String> headers = httpRequest.getHeaders();
 
-            log.info("requestMethod: {}", requestMethod);
-            log.info("requestPath: {}", requestPath);
-            log.info("requestFileName: {}", requestFileName);
-            log.info("requestBody: {}", requestBody);
-
             String response = null;
             HttpResponse httpResponse = new HttpResponse();
 

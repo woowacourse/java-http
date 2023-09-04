@@ -11,7 +11,6 @@ import java.util.StringJoiner;
 
 public class ResponseEntity {
 
-    public static final String EXTENSION_DELIMITER = ".";
     public static final String RESPONSE_DELIMITER = " ";
 
     private final HttpVersion httpVersion;
@@ -32,12 +31,9 @@ public class ResponseEntity {
         return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
     }
 
-    public static ResponseEntity ok(String fileData, String endPoint) {
-        int fileTypeStartIndex = endPoint.indexOf(EXTENSION_DELIMITER);
-        String fileExtension = endPoint.substring(fileTypeStartIndex + 1);
-
+    public static ResponseEntity ok(String fileData, ContentType contentType) {
         List<String> headers = List.of(
-                String.join(" ", "Content-Type:", ContentType.findMatchingType(fileExtension).getHttpContentType()),
+                String.join(" ", "Content-Type:", contentType.getHttpContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(fileData.getBytes().length))
         );
         return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);

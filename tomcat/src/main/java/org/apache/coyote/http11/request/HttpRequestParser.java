@@ -6,6 +6,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.coyote.http11.HttpHeaderType.CONTENT_LENGTH;
+
 public class HttpRequestParser {
 
     private final BufferedReader reader;
@@ -17,12 +19,12 @@ public class HttpRequestParser {
     public HttpRequest parse() {
         try {
             final RequestLine requestLine = parseRequestLine();
-            final Map<String, String> requestHeader = parseRequestHeader();
-            if (requestHeader.get("Content-Length") != null) {
-                final Map<String, String> body = parseRequestBody(requestHeader.get("Content-Length"));
-                return HttpRequest.of(requestLine, requestHeader, body);
+            final HttpHeaders requestHeaders = parseRequestHeader();
+            if (requestHeaders.getHeaderValue(CONTENT_LENGTH) != null) {
+                final Map<String, String> body = parseRequestBody(requestHeaders.getHeaderValue(CONTENT_LENGTH));
+                return HttpRequest.from(requestLine, requestHeaders, body);
             }
-            return HttpRequest.of(requestLine, requestHeader, new HashMap<>());
+            return HttpRequest.from(requestLine, requestHeaders, new HashMap<>());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -34,15 +36,15 @@ public class HttpRequestParser {
         return RequestLine.from(s[0], s[1], s[2]);
     }
 
-    private Map<String, String> parseRequestHeader() throws IOException {
+    private HttpHeaders parseRequestHeader() throws IOException {
         // TODO: Change to MultiValueMap
-        final Map<String, String> header = new HashMap<>();
+        final HttpHeaders httpHeaders = new HttpHeaders();
         String line;
         while (!"".equals(line = reader.readLine())) {
             String[] value = line.split(": ");
-            header.put(value[0], value[1]);
+            httpHeaders.setHeaderValue(value[0], value[1]);
         }
-        return header;
+        return httpHeaders;
     }
 
     private Map<String, String> parseRequestBody(final String contentLengthHeader) throws IOException {

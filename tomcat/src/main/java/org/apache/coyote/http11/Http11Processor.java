@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequestParser httpRequestParser = new HttpRequestParser(reader);
             final HttpRequest httpRequest = httpRequestParser.parse();
-            final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
+            final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeaders().get("Cookie"));
 
             // TODO: generate RequestHandler
             final HttpResponse httpResponse = handleRequest(httpRequest);
@@ -103,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleLoginRequest(final HttpRequest httpRequest) throws IOException {
-        final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeader().get("Cookie"));
+        final HttpCookie httpCookie = HttpCookie.of(httpRequest.getHeaders().get("Cookie"));
         String sessionId = httpCookie.getCookie("JSESSIONID");
 
         if (httpRequest.getMethod().equals("GET")) {
@@ -162,8 +162,8 @@ public class Http11Processor implements Runnable, Processor {
         final HttpResponse httpResponse = HttpResponse.init();
         String contentType = "text/html;charset=utf-8";
 
-        if (httpRequest.getHeader().get("Accept") != null) {
-            contentType = httpRequest.getHeader().get("Accept").split(",")[0];
+        if (httpRequest.getHeaders().get("Accept") != null) {
+            contentType = httpRequest.getHeaders().get("Accept").split(",")[0];
         }
 
         URL resource = getClass().getClassLoader().getResource("static/" + resourceUrl);

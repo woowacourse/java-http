@@ -5,16 +5,16 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> header;
+    private final HttpHeaders headers;
     private final Map<String, String> body;
 
-    private HttpRequest(final RequestLine requestLine, final Map<String, String> header, final Map<String, String> body) {
+    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final Map<String, String> body) {
         this.requestLine = requestLine;
-        this.header = header;
+        this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest of(final RequestLine requestLine, final Map<String, String> header, final Map<String, String> body) {
+    public static HttpRequest from(final RequestLine requestLine, final HttpHeaders header, final Map<String, String> body) {
         return new HttpRequest(requestLine, header, body);
     }
 
@@ -30,8 +30,9 @@ public class HttpRequest {
         return requestLine.getVersion();
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public Map<String, String> getHeaders() {
+        // TODO: refactoring
+        return headers.getHeaders();
     }
 
     public Map<String, String> getBody() {

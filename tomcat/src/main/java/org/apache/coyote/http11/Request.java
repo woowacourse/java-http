@@ -38,8 +38,9 @@ public class Request {
         return RequestForms.from(requestBody);
     }
 
-    public String getSessionId() {
-        return requestHeaders.getCookieValue("JSESSIONID");
+    public Session getSession() {
+        final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
+        return SessionManager.findSession(sessionId);
     }
 
     public RequestHeaders getRequestHeaders() {

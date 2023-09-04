@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -14,6 +13,8 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.RequestLine;
 import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 
 public class HandlerMapper {
     private static final Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();
@@ -37,10 +38,18 @@ public class HandlerMapper {
     }
 
     public Response loginHandler(final Request request) {
+        if (request.getSession() != null) {
+            return Response.createByTemplate(HttpStatus.FOUND, "index.html");
+        }
+
         return Response.createByTemplate(HttpStatus.OK, "login.html");
     }
 
     public Response loginWithQueryParameterHandler(final Request request) {
+        if (request.getSession() != null) {
+            return Response.createByTemplate(HttpStatus.FOUND, "index.html");
+        }
+
         final RequestLine requestLine = request.getRequestLine();
         final var queryParameter = requestLine.getRequestURI().getQueryParameter();
         final User user = InMemoryUserRepository.findByAccountAndPassword(
@@ -54,16 +63,19 @@ public class HandlerMapper {
         final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
         Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
         if (user.isPresent()) {
-            return loginSuccess(request);
+            return loginSuccess(request, user.get());
         }
         return loginFail();
     }
 
-    private Response loginSuccess(final Request request) {
-        if (request.getSessionId() == null) {
+    private Response loginSuccess(final Request request, final User user) {
+        if (request.getSession() == null) {
+            final Session session = new Session();
+            session.setAttribute("user", user);
+            SessionManager.add(session);
+
             final Map<String, String> header = new HashMap<>();
-            final String sessionId = String.valueOf(UUID.randomUUID());
-            header.put("Set-Cookie", "JSESSIONID=" + sessionId);
+            header.put("Set-Cookie", "JSESSIONID=" + session.getId());
             return Response.createByTemplate(HttpStatus.FOUND, "index.html", header);
         }
         return Response.createByTemplate(HttpStatus.FOUND, "index.html");

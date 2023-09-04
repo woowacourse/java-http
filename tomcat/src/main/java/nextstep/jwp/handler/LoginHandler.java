@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -77,7 +76,7 @@ public class LoginHandler implements RequestHandler {
         HttpVersion httpVersion = request.getHttpVersion();
         URL url = getClass().getClassLoader().getResource("static/login.html");
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
-        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
+        HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
@@ -101,19 +100,10 @@ public class LoginHandler implements RequestHandler {
         HttpStatus httpStatus = HttpStatus.FOUND;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpBody httpBody = HttpBody.from("");
-        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
-        httpHeaders.addHeader("Location", location);
+        HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
+        httpHeaders.setLocation(location);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
-    }
-
-    private HttpHeaders createDefaultHeaders(HttpBody httpBody) {
-        List<String> headers = List.of(
-                "Content-Type: text/html;charset=utf-8",
-                "ContentLength: " + httpBody.getBytesLength()
-        );
-
-        return HttpHeaders.from(headers);
     }
 
     private void setCookie(HttpRequest request, HttpResponse response, Session session) {
@@ -124,7 +114,7 @@ public class LoginHandler implements RequestHandler {
             }
         }
 
-        response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.setCookie("JSESSIONID=" + session.getId());
     }
 
     private User login(String account, String password) {

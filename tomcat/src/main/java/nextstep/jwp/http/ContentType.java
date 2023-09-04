@@ -1,9 +1,9 @@
 package nextstep.jwp.http;
 
 public enum ContentType {
-    TEXT_HTML("text/html"),
-    TEXT_CSS("text/css"),
-    APPLICATION_JAVASCRIPT("application/javascript");
+    TEXT_HTML("text/html;charset=utf-8"),
+    TEXT_CSS("text/css;charset=utf-8"),
+    APPLICATION_JAVASCRIPT("application/javascript;charset=utf-8");
 
     private final String value;
 

@@ -29,17 +29,9 @@ public class IndexHandler implements RequestHandler {
         HttpVersion httpVersion = request.getHttpVersion();
         URL url = getClass().getClassLoader().getResource("static/index.html");
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
-        HttpHeaders httpHeaders = createDefaultHeaders(httpBody);
+        HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
     }
 
-    private HttpHeaders createDefaultHeaders(HttpBody httpBody) {
-        List<String> headers = List.of(
-                "Content-Type: text/html;charset=utf-8",
-                "ContentLength: " + httpBody.getBytesLength()
-        );
-
-        return HttpHeaders.from(headers);
-    }
 }

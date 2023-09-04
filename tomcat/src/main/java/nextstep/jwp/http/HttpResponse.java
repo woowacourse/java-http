@@ -19,8 +19,8 @@ public class HttpResponse {
         this.httpBody = httpBody;
     }
 
-    public void addHeader(String key, String value) {
-        httpHeaders.addHeader(key, value);
+    public void setCookie(String value) {
+        httpHeaders.addHeader("Set-Cookie", value);
     }
 
     public byte[] getBytes() {

@@ -26,7 +26,6 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    // TODO Request, Response 객체를 전달하고 set하는 방식으로 수정하기
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();

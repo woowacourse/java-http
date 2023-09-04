@@ -35,7 +35,6 @@ public class UserController {
     }
 
     public static Response register(Request request) {
-        /// TODO: 2023/09/04 request body 형식 확인
         String form = request.getBody();
         Map<String, List<String>> formContents = QueryStringParser.parse(form);
         String account = formContents.get("account").get(0);

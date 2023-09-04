@@ -82,8 +82,6 @@ public class RequestHandler {
 
     private static Response getResponseForStaticResource(String uri) throws IOException {
         final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
-        /// TODO: 2023/09/04 register.html, login.html에 직접 접근할 수 있다. (/login, /register)가 아니라
-        /// TODO: 2023/09/04 이 경우도 로그인 사용자에 대해 막아야 함
 
         return createStaticResourceResponse(url);
     }

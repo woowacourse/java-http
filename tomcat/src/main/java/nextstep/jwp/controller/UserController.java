@@ -34,7 +34,7 @@ public class UserController {
             password = requestBody.get("password");
             email = requestBody.get("email");
         }catch (Exception e) {
-            throw new IllegalArgumentException(HttpStatus.BAD_REQUEST.toString());
+            throw new IllegalArgumentException(HttpStatus.BAD_REQUEST.getStatusName());
         }
         final UUID session = userService.register(account, password, email);
         final Response response = new Response(HttpStatus.CREATED);

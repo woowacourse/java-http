@@ -19,12 +19,15 @@ public class LogicHandler {
 
     public HandleResponse handle(final HttpRequest request) {
         final HttpMethod httpMethod = request.getHttpStartLine().getHttpMethod();
-        final Response loginVerification = UserFilter.verifyLogin(request.getHttpHeadersLine().getHeaders());
+        final Response loginVerification = UserFilter.verifyLogin(request.getHttpStartLine().getRequestTarget().getResources(),request.getHttpHeadersLine().getHeaders());
 
         if (httpMethod.equals(GET) && loginVerification.getHttpStatus().equals(NOT)) {
             return new HandleResponse(NOT, Collections.emptyMap());
         }
         if (httpMethod.equals(GET) && loginVerification.getHttpStatus().equals(FOUND)) {
+            return new HandleResponse(FOUND, Collections.emptyMap());
+        }
+        if (httpMethod.equals(GET)) {
             return new HandleResponse(FOUND, Collections.emptyMap());
         }
         return HandleResponse.from(executionLogic(request.getHttpStartLine(), request.getHttpBodyLine()));

@@ -8,7 +8,6 @@ public enum HttpExtension {
     HTML(".html"),
     CSS(".css"),
     JS(".js"),
-    QUERY("?"),
     ICO(".ico"),
     DEFAULT("")
     ;

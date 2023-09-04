@@ -20,7 +20,7 @@ public class UserService {
     }
 
     public UUID register(final String account, final String password, final String email) {
-        if (!InMemoryUserRepository.findByAccount(account).isPresent()) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             throw new IllegalArgumentException(HttpStatus.UNAUTHORIZED.name());
         }
         final long saveId = InMemoryUserRepository.save(new User(account, password, email));

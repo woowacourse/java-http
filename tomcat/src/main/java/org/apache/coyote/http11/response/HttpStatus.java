@@ -20,6 +20,8 @@ public enum HttpStatus {
     }
 
     public static HttpStatus from(final String message) {
+        System.out.println(message);
+
         return Arrays.stream(HttpStatus.values())
                 .filter(status -> status.getStatusName().equalsIgnoreCase(message))
                 .findAny()

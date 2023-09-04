@@ -48,12 +48,18 @@ public class DispatcherServlet {
     private static HttpResponse handleLogicRequest(final HttpRequest request) {
         final HandleResponse handleResponse = logicHandler.handle(request);
         if (handleResponse.getHttpStatus().equals(OK)
-                || handleResponse.getHttpStatus().equals(FOUND)) {
-            return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), handleResponse.getBody(), "/index.html");
+                || handleResponse.getHttpStatus().equals(FOUND)
+                || handleResponse.getHttpStatus().equals(CREATED)) {
+            if (request.getHttpStartLine().getRequestTarget().getResources().equals("/login")
+                    || request.getHttpStartLine().getRequestTarget().getResources().equals("/register") && handleResponse.getHttpStatus().equals(CREATED)) {
+                return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), handleResponse.getBody(), "/index.html");
+            }
+            return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), request.getHttpStartLine().getResources() + ".html");
         }
+
         if (handleResponse.getHttpStatus().equals(NOT)) {
             return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), "/login.html");
         }
-        return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), "/login.html");
+        return HttpResponse.of(request.getHttpStartLine().getHttpVersion(), FOUND.getStatusName(), "/" + request.getHttpStartLine().getResources() + ".html");
     }
 }

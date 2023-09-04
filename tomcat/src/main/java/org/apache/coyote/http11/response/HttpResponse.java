@@ -49,6 +49,8 @@ public class HttpResponse {
             final String httpStatus,
             final String redirectUri
     ) {
+        System.out.println(redirectUri);
+
         return new HttpResponse(
                 httpVersion.getVersion() + " " + httpStatus + " \r\n",
                 "Location: " + redirectUri + " \r\n",

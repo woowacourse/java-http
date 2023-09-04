@@ -15,31 +15,39 @@ public class HttpRequest {
     public HttpRequest(
             final HttpRequestLine httpRequestLine,
             final HttpHeaders httpRequestHeaders,
+            final HttpCookie cookie,
             final Map<String, String> payload
     ) {
         this.httpRequestLine = httpRequestLine;
         this.httpRequestHeaders = httpRequestHeaders;
         this.queryParams = httpRequestLine.getQueryParams();
+        this.cookie = cookie;
         this.payload = payload;
-        this.cookie = HttpCookie.from(httpRequestHeaders.get("Cookie"));
     }
 
-    public static HttpRequest of(final HttpRequestLine httpRequestLine, final Map<String, String> headers) {
+    public static HttpRequest of(
+            final HttpRequestLine httpRequestLine,
+            final HttpHeaders headers,
+            final HttpCookie cookie
+    ) {
         return new HttpRequest(
                 httpRequestLine,
-                HttpHeaders.from(headers),
+                headers,
+                cookie,
                 Map.of()
         );
     }
 
     public static HttpRequest of(
             final HttpRequestLine httpRequestLine,
-            final Map<String, String> headers,
+            final HttpHeaders headers,
+            final HttpCookie cookie,
             final Map<String, String> payload
     ) {
         return new HttpRequest(
                 httpRequestLine,
-                HttpHeaders.from(headers),
+                headers,
+                cookie,
                 payload
         );
     }

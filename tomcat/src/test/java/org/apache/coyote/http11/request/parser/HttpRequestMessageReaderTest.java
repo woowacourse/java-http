@@ -119,4 +119,31 @@ class HttpRequestMessageReaderTest {
         });
         stubSocket.close();
     }
+
+    @Test
+    void 요청시_Cookie를_저장한다() throws IOException {
+        // given
+        final String requestBody = "name=royce&password=p1234";
+        final String httpRequestMessage = String.join("\r\n",
+                "POST /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; newjeans_cookie=newjeans; JSESSIONID=randomUUID",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: " + requestBody.length() + " ",
+                "",
+                requestBody);
+        final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+
+        // when
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(httpRequest.getCookie("yummy_cookie")).isEqualTo("choco");
+            softly.assertThat(httpRequest.getCookie("newjeans_cookie")).isEqualTo("newjeans");
+            softly.assertThat(httpRequest.getCookie("JSESSIONID")).isEqualTo("randomUUID");
+        });
+        stubSocket.close();
+    }
 }

@@ -14,7 +14,7 @@ public class ResponseEntity {
     private final String requestURI;
     private final String location;
     private final String responseBody;
-    private final HttpCookie httpCookie;
+    private final HttpCookie httpCookie = HttpCookie.empty();
 
     public void setCookie(String key, String value) {
         httpCookie.put(key, value);

@@ -12,6 +12,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.session.JSessionIdGenerator;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +34,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REGISTER_PAGE_URI = "/register.html";
     private static final String UNAUTHORIZED_PAGE_URI = "/401.html";
     private static final String INDEX_PAGE_URI = "/index.html";
-    private static final int NO_QUERY_STRING = -1;
 
+    private final SessionManager sessionManager = new SessionManager();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -157,15 +159,23 @@ public class Http11Processor implements Runnable, Processor {
         boolean isCorrectPassword = findAccount.checkPassword(password);
 
         if (!isCorrectPassword) {
-            log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
-            return ResponseEntity
-                    .builder()
-                    .httpStatus(HttpStatus.UNAUTHORIZED)
-                    .requestURI(requestURI)
-                    .location(UNAUTHORIZED_PAGE_URI)
-                    .build();
+            return hanldeLoginFail(requestURI, findAccount);
         }
 
+        return hanldeLoginSuccess(requestURI, findAccount);
+    }
+
+    private ResponseEntity hanldeLoginFail(String requestURI, User findAccount) {
+        log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
+        return ResponseEntity
+                .builder()
+                .httpStatus(HttpStatus.UNAUTHORIZED)
+                .requestURI(requestURI)
+                .location(UNAUTHORIZED_PAGE_URI)
+                .build();
+    }
+
+    private ResponseEntity hanldeLoginSuccess(String requestURI, User findAccount) {
         log.info("account {} 로그인 성공", findAccount.getAccount());
         ResponseEntity responseEntity = ResponseEntity
                 .builder()
@@ -173,7 +183,10 @@ public class Http11Processor implements Runnable, Processor {
                 .requestURI(requestURI)
                 .location(INDEX_PAGE_URI)
                 .build();
-        responseEntity.setCookie("JSESSIONID", JSessionIdGenerator.generateRandomSessionId());
+        String jSessionId = JSessionIdGenerator.generateRandomSessionId();
+        responseEntity.setCookie("JSESSIONID", jSessionId);
+        Session session = new Session(jSessionId);
+        sessionManager.add(session);
         return responseEntity;
     }
 

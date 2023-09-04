@@ -15,14 +15,13 @@ public class HttpCookie {
     private static final String SEPARATOR = "; ";
     private static final String DELIMITER = "=";
 
-    private Map<String, String> cookies;
+    private final Map<String, String> cookies = new HashMap<>();
 
     public HttpCookie(Map<String, String> cookies) {
-        this.cookies = new HashMap<>(cookies);
+        cookies.putAll(cookies);
     }
 
     private HttpCookie() {
-        this.cookies = new HashMap<>();
     }
 
     public static HttpCookie from(String cookies) {

@@ -63,12 +63,18 @@ public class RequestHandler {
             if (user.checkPassword(queryString.get("password"))) {
                 log.info(user.toString());
                 HttpResponse response = HttpResponse.found("/index.html");
-                response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+                addCookie(request, response);
                 return response;
             }
         }
 
         return HttpResponse.found("/401.html");
+    }
+
+    private void addCookie(HttpRequest request, HttpResponse response) {
+        if (request.hasNotCookie()) {
+            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+        }
     }
 
     private HttpResponse signUp(HttpRequest request) {

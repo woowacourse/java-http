@@ -78,4 +78,8 @@ public class HttpRequest {
     public HttpMethod getMethod() {
         return HttpMethod.from(values.get("method"));
     }
+
+    public boolean hasNotCookie() {
+        return values.containsKey("Cookie");
+    }
 }

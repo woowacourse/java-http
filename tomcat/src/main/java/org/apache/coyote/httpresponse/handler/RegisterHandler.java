@@ -7,7 +7,7 @@ import org.apache.coyote.httprequest.RequestBody;
 import org.apache.coyote.httprequest.RequestMethod;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;
-import org.apache.coyote.httpresponse.handler.util.RegisterRequestBodyResolver;
+import org.apache.coyote.httpresponse.handler.util.RequestBodyParser;
 
 public class RegisterHandler implements Handler {
 
@@ -33,7 +33,7 @@ public class RegisterHandler implements Handler {
     }
 
     private void saveUser(final RequestBody requestBody) {
-        final User user = RegisterRequestBodyResolver.parse(requestBody);
+        final User user = RequestBodyParser.parse(requestBody);
         InMemoryUserRepository.save(user);
     }
 

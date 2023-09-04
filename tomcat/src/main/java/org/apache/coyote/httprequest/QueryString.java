@@ -35,4 +35,8 @@ public class QueryString {
     public String getValue(final String key) {
         return queries.get(key);
     }
+
+    public boolean isEmpty() {
+        return queries.isEmpty();
+    }
 }

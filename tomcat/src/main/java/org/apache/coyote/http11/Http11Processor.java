@@ -38,6 +38,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
+        log.info("=============================================================================");
+        log.info("=======             요청    🐳 🐳 🐳 🐳 🐳    하나                     =======");
+        log.info("=============================================================================");
+        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }

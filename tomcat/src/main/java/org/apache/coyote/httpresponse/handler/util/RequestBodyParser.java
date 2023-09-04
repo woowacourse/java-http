@@ -4,7 +4,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.httprequest.QueryString;
 import org.apache.coyote.httprequest.RequestBody;
 
-public class RegisterRequestBodyResolver {
+public class RequestBodyParser {
 
     public static User parse(final RequestBody requestBody) {
         final String content = requestBody.getContents();

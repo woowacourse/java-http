@@ -34,12 +34,12 @@ public class RequestHeaders {
             if (line == null || line.isBlank()) {
                 break;
             }
-            log.debug("\t" + line);
             final List<String> parsedHeader = parseByDelimiter(line);
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
             if (headerType.isUnsupportedHeader()) {
                 continue;
             }
+            log.debug("\t" + line);
             headers.put(headerType, headerType.saveRequestHeader(parsedHeader.get(HEADER_VALUE_INDEX).trim()));
         }
         return new RequestHeaders(headers);

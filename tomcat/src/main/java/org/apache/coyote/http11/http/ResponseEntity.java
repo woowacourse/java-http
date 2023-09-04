@@ -20,7 +20,7 @@ public class ResponseEntity {
     private final String responseBody;
     private final Map<String, String> cookies = new HashMap<>();
 
-    public ResponseEntity(HttpVersion httpVersion, ResponseStatus responseStatus, List<String> responseHeaders, String responseBody) {
+    private ResponseEntity(HttpVersion httpVersion, ResponseStatus responseStatus, List<String> responseHeaders, String responseBody) {
         this.httpVersion = httpVersion;
         this.responseStatus = responseStatus;
         this.responseHeaders = responseHeaders;

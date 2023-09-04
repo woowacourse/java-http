@@ -5,6 +5,7 @@ import nextstep.jwp.controller.dto.Response;
 import nextstep.jwp.controller.UserController;
 import org.apache.coyote.http11.handle.logic.dto.HandleResponse;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.start.HttpMethod;
 import org.apache.coyote.http11.request.start.HttpStartLine;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -13,22 +14,20 @@ import java.util.Map;
 
 import static org.apache.coyote.http11.request.start.HttpMethod.GET;
 import static org.apache.coyote.http11.response.HttpStatus.*;
-import static org.apache.coyote.http11.response.HttpStatus.NOT_FOUND;
 
 public class LogicHandler {
 
     public HandleResponse handle(final HttpRequest request) {
+        final HttpMethod httpMethod = request.getHttpStartLine().getHttpMethod();
+        final Response loginVerification = UserFilter.verifyLogin(request.getHttpHeadersLine().getHeaders());
 
-        if (request.getHttpStartLine().getHttpMethod().equals(GET)
-                && UserFilter.verifyLogin(request.getHttpHeadersLine().getHeaders()).getHttpStatus().equals(NOT)) {
+        if (httpMethod.equals(GET) && loginVerification.getHttpStatus().equals(NOT)) {
             return new HandleResponse(NOT, Collections.emptyMap());
         }
-        if (request.getHttpStartLine().getHttpMethod().equals(GET)
-                && UserFilter.verifyLogin(request.getHttpHeadersLine().getHeaders()).getHttpStatus().equals(FOUND)) {
+        if (httpMethod.equals(GET) && loginVerification.getHttpStatus().equals(FOUND)) {
             return new HandleResponse(FOUND, Collections.emptyMap());
         }
-        final Response response = executionLogic(request.getHttpStartLine(), request.getHttpBodyLine());
-        return new HandleResponse(response.getHttpStatus(), response.getResponseHeader());
+        return HandleResponse.from(executionLogic(request.getHttpStartLine(), request.getHttpBodyLine()));
     }
 
     private static Response executionLogic(final HttpStartLine httpStartLine, final Map<String, String> requestBody) {

@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestUri = requestLine.split(" ")[URL_INDEX];
 
         if (requestUri.contains("/login")) {
-            return handleLoginRequest(requestUri);
+            return handleLoginRequest(requestLine, header, body);
         }
 
         if (requestUri.contains("/register")) {
@@ -96,16 +97,29 @@ public class Http11Processor implements Runnable, Processor {
         return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
     }
 
-    private ResponseInfo handleLoginRequest(String requestUri) {
+    private ResponseInfo handleLoginRequest(String requestLine, RequestHeader header, RequestBody body) {
         ClassLoader classLoader = getClass().getClassLoader();
+        String requestUri = requestLine.split(" ")[URL_INDEX];
+
+        String httpMethod = requestLine.split(" ")[0];
+        if (httpMethod.equals("POST")) {
+            String account = body.getByKey("account");
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                String resourcePath = RESOURCE_PATH + "/401.html";
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+            }
+            Session session = new Session(user.get());
+            String resourcePath = RESOURCE_PATH + "/index.html";
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found",  session.getSessionId());
+        }
+
         int index = requestUri.indexOf("?");
         if (index == -1) {
             String resourcePath = RESOURCE_PATH + "/login.html";
             return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
         }
-
         String queryString = requestUri.substring(index + 1);
-
         String[] queryParams = queryString.split("&");
         String account = getParamValueWithKey(queryParams, "account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
@@ -115,9 +129,12 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (user.get().checkPassword(getParamValueWithKey(queryParams, "password"))) {
             log.info("User: " + user);
+
             String resourcePath = RESOURCE_PATH + "/index.html";
             return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
         }
+
+
 
         String resourcePath = RESOURCE_PATH + "/401.html";
         return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
@@ -144,6 +161,15 @@ public class Http11Processor implements Runnable, Processor {
         if (location.isFile()) {
             responseBody = new String(Files.readAllBytes(location.toPath()));
         }
+        if (responseInfo.getCookie() != null) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
+                    "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Set-Cookie: " + "JSESSIONID=" + responseInfo.getCookie() + " ",
+                    "",
+                    responseBody);
+        }
 
         return String.join("\r\n",
                 "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
@@ -151,6 +177,7 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+
     }
 
     private String contentType(final String resourcePath) {
@@ -159,22 +186,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         return "text/html";
     }
-//
-//    private Map<String, List<String>> getHttpHeaders(BufferedReader bufferedReader) throws IOException {
-//        Map<String, List<String>> httpHeaders = new HashMap<>();
-//        while (true) {
-//            String line = bufferedReader.readLine();
-//            if (line == null || line.isBlank()) {
-//                break;
-//            }
-//            String[] header = line.split(":");
-//            String key = header[0].trim();
-//            List<String> values = Arrays.asList(header[1].trim().split(","));
-//            httpHeaders.put(key, values);
-//        }
-//        return httpHeaders;
-//    }
-//
 
     private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();

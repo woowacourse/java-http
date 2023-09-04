@@ -7,10 +7,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +24,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
-    private final Session session;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final Session session) {
+    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
-        this.session = session;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -64,9 +67,11 @@ public class Http11Processor implements Runnable, Processor {
 
         User user = optionalUser.get();
         log.info("user: {}", user);
-        String sessionId = session.addUser(user);
+        Session session = new Session(UUID.randomUUID().toString());
+        sessionManager.add(session);
+        session.addUser(user);
         return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + sessionId));
+                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + session.getId()));
     }
 
     private HttpResponse postRegister(HttpRequest request) {
@@ -134,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isAlreadyLoggedIn(final HttpRequest request) {
         String sessionId = request.getCookie("JSESSIONID");
-        return session.exists(sessionId);
+        return sessionManager.findSession(sessionId) != null;
     }
 
     private HttpResponse getResource(String uri) throws IOException {

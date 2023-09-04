@@ -29,7 +29,7 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
-    public Boolean containsKey(String key) {
+    public boolean containsKey(String key) {
         return cookies.containsKey(key);
     }
 

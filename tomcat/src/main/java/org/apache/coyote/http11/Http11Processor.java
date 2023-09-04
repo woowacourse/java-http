@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.sun.security.jgss.GSSUtil;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -127,9 +128,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response loginSuccess(final User user) {
         log.info("User{id={}, account={}, email={}, pasword={}", user.getId(), user.getAccount(), user.getEmail(), user.getPassword());
-        final var uuid = UUID.randomUUID();
+        final var uuid = UUID.randomUUID().toString();
+        final var session = new Session(uuid);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
         final Map<String, String> cookie = new HashMap<>();
-        cookie.put("JSESSIONID", uuid.toString());
+        cookie.put("JSESSIONID", uuid);
         return new Response(HttpStatus.FOUND, "/index.html", cookie);
     }
 
@@ -157,7 +161,8 @@ public class Http11Processor implements Runnable, Processor {
             final String content = new String(Files.readAllBytes(file.toPath()));
 
             return String.join("\r\n",
-                    "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus().name() + " ",
+                    "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus()
+                                                                                             .name() + " ",
                     getContentType(uri),
                     getContentLength(content),
                     "",
@@ -173,15 +178,13 @@ public class Http11Processor implements Runnable, Processor {
                                                             .getPath(), StandardCharsets.UTF_8));
         final String content = new String(Files.readAllBytes(file.toPath()));
 
-        final String test = String.join("\r\n",
+        return String.join("\r\n",
                 "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus().name() + " ",
                 getCookies(responseBody.getCookies()),
                 getContentType(uri),
                 getContentLength(content),
                 "",
                 content);
-        System.out.println(test);
-        return test;
     }
 
     private String getCookies(final Map<String, String> cookies) {
@@ -204,8 +207,9 @@ public class Http11Processor implements Runnable, Processor {
                     final var cookie = request.split(":")[1];
                     final Map<String, String> cookies = Arrays.stream(cookie.split(","))
                                                               .map(value -> value.split("="))
-                                                              .collect(toMap(key -> key[0], value -> value[1]));
-                    if (cookies.containsKey("JSESSIONID")) {
+                                                              .collect(toMap(value -> value[0], value -> value[1]));
+
+                    if (cookies.containsKey("JSESSIONID") && SessionManager.findSession(cookies.get("JSESSIONID")) != null) {
                         return new Response(HttpStatus.OK, "index.html");
                     }
                 }

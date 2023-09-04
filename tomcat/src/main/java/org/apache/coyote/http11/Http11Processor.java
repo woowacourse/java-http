@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -109,21 +110,27 @@ public class Http11Processor implements Runnable, Processor {
 
     private String loadLoginPage(HttpRequest httpRequest) {
         Map<String, String> queryStrings = httpRequest.getQueryStrings();
-        String account = queryStrings.get("account");
-        String password = queryStrings.get("password");
-        User savedUser = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 유저입니다."));
+        String account = queryStrings.getOrDefault("account", "");
+        String password = queryStrings.getOrDefault("password", "");
+        Optional<User> savedUser = InMemoryUserRepository.findByAccount(account);
+        int status = 302;
+        String redirectionUrl = "401.html";
 
-        if (savedUser.checkPassword(password)) {
-            log.info("user : {}", savedUser);
+        if (queryStrings.isEmpty()) {
+            status = 200;
+        }
+
+        if (savedUser.isPresent() && savedUser.get().checkPassword(password)) {
+            redirectionUrl = "index.html";
         }
 
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequest));
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status + " OK ",
                 "Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
+                "Location: " + redirectionUrl + " ",
                 "",
                 responseBody);
     }

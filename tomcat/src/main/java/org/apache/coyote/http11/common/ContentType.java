@@ -15,15 +15,15 @@ public enum ContentType {
     private final String httpContentType;
     private final String extension;
 
-    ContentType(String httpContentType, String extension) {
-        this.httpContentType = httpContentType;
-        this.extension = extension;
-    }
-
     private static final Map<String, ContentType> contentTypes =
             Collections.unmodifiableMap(Stream.of(values())
                     .collect(Collectors.toMap(ContentType::getExtension, Function.identity()))
             );
+
+    ContentType(String httpContentType, String extension) {
+        this.httpContentType = httpContentType;
+        this.extension = extension;
+    }
 
     public static ContentType findMatchingType(String uri) {
         int fileTypeStartIndex = uri.indexOf('.');

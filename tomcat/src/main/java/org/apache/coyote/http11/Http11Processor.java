@@ -23,7 +23,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -178,7 +178,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             StatusLine statusLine = StatusLine.from(statusCode, statusMessage);
-            HttpResponseHeader responseHeader = new HttpResponseHeader(new HashMap<>());
+            HttpResponseHeader responseHeader = new HttpResponseHeader(new LinkedHashMap<>());
             responseHeader.add("Content-Type", "text/" + contentType + ";charset=utf-8");
             responseHeader.add("Content-Length", responseBody.getBytes().length);
 

@@ -1,30 +1,24 @@
 package org.apache.catalina.session;
 
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
 
-public class SessionManager implements Manager {
+public class SessionManager {
 
-    private static final Map<String, Session> SESSION = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private SessionManager() {
     }
 
-    @Override
-    public void add(final HttpSession session) {
-
+    public static void add(final String id, final Session session) {
+        SESSIONS.put(id, session);
     }
 
-    @Override
-    public HttpSession findSession(final String id) throws IOException {
-        return null;
+    public static Session findSession(final String id) {
+        return SESSIONS.get(id);
     }
 
-    @Override
-    public void remove(final HttpSession session) {
-
+    public static void remove(final String id) {
+        SESSIONS.remove(id);
     }
 }

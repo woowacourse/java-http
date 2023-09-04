@@ -36,7 +36,7 @@ public class RegisterHandler implements Handler {
 
         } catch (AlreadyRegisteredUserException e) {
             final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-            
+
             return new HttpResponse.Builder().status(HttpStatus.BAD_REQUEST)
                     .headers(headers)
                     .body("중복된 계정입니다.")

@@ -35,9 +35,17 @@ public class Cookie {
         return new Cookie(new HashMap<>());
     }
 
+    public String getCookie(final String key) {
+        return cookie.get(key);
+    }
+
     public String toRawCookie() {
-        return cookie.entrySet().stream().map(it -> {
-            return String.join("=", it.getKey(), it.getValue());
-        }).collect(Collectors.joining("; "));
+        return cookie.entrySet().stream()
+                .map(it -> String.join("=", it.getKey(), it.getValue()))
+                .collect(Collectors.joining("; "));
+    }
+
+    public int getSize(){
+        return cookie.size();
     }
 }

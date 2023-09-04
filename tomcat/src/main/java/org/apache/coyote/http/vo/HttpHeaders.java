@@ -41,7 +41,7 @@ public class HttpHeaders {
         Map<HttpHeader, List<String>> multiValueMap = headers.getMultiValueMap();
         return multiValueMap.entrySet().stream()
                 .map(HttpHeaders::getHeaderFormat)
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\r\n"));
     }
 
     private static String getHeaderFormat(final Entry<HttpHeader, List<String>> it) {

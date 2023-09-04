@@ -6,8 +6,11 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.body.FormData;
 import org.apache.coyote.http11.handler.FileHandler;
+import org.apache.coyote.http11.handler.Handler;
 
-public class RegisterHandler extends FileHandler {
+public class RegisterHandler implements Handler {
+
+    private final FileHandler fileHandler = new FileHandler();
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
@@ -21,6 +24,6 @@ public class RegisterHandler extends FileHandler {
             InMemoryUserRepository.save(new User(account, password, email));
             return HttpResponse.redirectTo("/index");
         }
-        return super.handle(httpRequest);
+        return fileHandler.handle(httpRequest);
     }
 }

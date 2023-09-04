@@ -7,15 +7,18 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.body.FormData;
 import org.apache.coyote.http11.handler.FileHandler;
+import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
-public class LoginHandler extends FileHandler {
+public class LoginHandler implements Handler {
 
     private static final String SESSION_KEY = "JSESSIONID";
     private static final String UNAUTHORIZED_LOCATION = "/401";
     private static final String MAIN_LOCATION = "/index";
+
+    private final FileHandler fileHandler = new FileHandler();
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
@@ -31,7 +34,7 @@ public class LoginHandler extends FileHandler {
             User user = found.get();
             return signIn(httpRequest, user, password);
         }
-        return super.handle(httpRequest);
+        return fileHandler.handle(httpRequest);
     }
 
     private HttpResponse signIn(final HttpRequest httpRequest, final User user, final String password) {

@@ -1,11 +1,9 @@
 package org.apache.coyote.handler;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.detector.FileDetector;
 import org.apache.coyote.parser.StaticFileParser;
+import org.apache.coyote.request.HttpRequest;
 
 public class StaticFileHandler implements StaticHandler {
 
@@ -18,12 +16,7 @@ public class StaticFileHandler implements StaticHandler {
   public String handle(final HttpRequest httpRequest) throws IOException {
     final String path = httpRequest.getPath();
 
-    final URL resource = getClass()
-        .getClassLoader()
-        .getResource("static" + path);
-
-    final String responseBody = new String(
-        Files.readAllBytes(new File(resource.getFile()).toPath()));
+    final String responseBody = FileDetector.detect("static" + path);
 
     return String.join("\r\n",
         "HTTP/1.1 200 OK ",

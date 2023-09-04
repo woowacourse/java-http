@@ -72,8 +72,8 @@ class LoginHandlerTest {
     void service_메서드는_요청을_처리하고_Response를_반환한다() throws IOException {
         final LoginHandler handler = new LoginHandler("/login", "/");
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/login?account=gugu&password=password");
+        final HttpMethod method = HttpMethod.findMethod("post");
+        final Url url = Url.from("/login");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
         final Request request = new Request(
                 headers,

@@ -22,12 +22,12 @@ public class HttpRequestHeaders {
         final Map<String, String> requestHeaders = new LinkedHashMap<>();
 
         String line;
-        while (!(line = bufferedReader.readLine()).isBlank()) {
-            if (line == null) {
-                throw new HttpMessageNotReadableException("HTTP 헤더 필드는 'null'일 수 없습니다.");
-            }
-
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
             String[] requestHeaderParts = line.split(HEADER_DELIMITER);
+
+            if (requestHeaderParts.length < 2) {
+                throw new HttpMessageNotReadableException("잘못된 HTTP 헤더 형식");
+            }
 
             requestHeaders.put(
                     requestHeaderParts[REQUEST_HEADER_KEY_INDEX].strip().toLowerCase(),

@@ -14,6 +14,10 @@ public class HttpCookie {
     public static HttpCookie from(final String cookieHeader) {
         final Map<String, String> httpCookie = new HashMap<>();
 
+        if (cookieHeader == null || cookieHeader.equals("")) {
+            return new HttpCookie(httpCookie);
+        }
+
         final String[] cookies = cookieHeader.split(";");
         for (String cookie : cookies) {
             final String[] cookieNameAndValue = cookie.trim().split("=");

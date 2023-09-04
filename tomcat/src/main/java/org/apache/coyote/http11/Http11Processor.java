@@ -27,7 +27,8 @@ public class Http11Processor implements Runnable, Processor {
             "/login", this::loadLoginPage
     );
     private final Map<String, Function<HttpRequest, String>> postMethodControllerMapper = Map.of(
-            "/register", this::register
+            "/register", this::register,
+            "/login", this::login
     );
     private final Map<HttpMethod, Map<String, Function<HttpRequest, String>>> controllerMapperByMethod = Map.of(
             HttpMethod.GET, getMethodControllerMapper,
@@ -154,7 +155,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (savedUser.isPresent() && savedUser.get().checkPassword(password)) {
-            redirectionUrl = "index.html";
+            redirectionUrl = "/index.html";
         }
 
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
@@ -186,6 +187,26 @@ public class Http11Processor implements Runnable, Processor {
                 "Location: " + redirectionUrl + " ",
                 "",
                 responseBody);
+    }
+
+    private String login(HttpRequest httpRequest) {
+        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
+        HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        String redirectionUrl = "/401.html";
+
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            redirectionUrl = "/index.html";
+            log.info("로그인 성공! 아이디 : {}", account);
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 302 OK ",
+                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
+                "Location: " + redirectionUrl + " ",
+                "");
     }
 
     private URL convertAbsoluteUrl(HttpRequestHeader httpRequestHeader) {

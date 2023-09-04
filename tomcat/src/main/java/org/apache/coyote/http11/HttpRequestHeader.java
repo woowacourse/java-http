@@ -110,7 +110,7 @@ public class HttpRequestHeader {
     }
 
     public String getQueryString(String key) {
-        return queryStrings.get(key);
+        return queryStrings.getOrDefault(key, "");
     }
 
     public HttpMethod getMethod() {

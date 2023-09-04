@@ -6,5 +6,5 @@ public interface HandlerMapping {
 
     boolean supports(final String httpMethod, final String requestUri);
 
-    String handle(String requestUri) throws IOException;
+    String handle(final String requestUri, final String requestBody) throws IOException;
 }

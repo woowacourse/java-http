@@ -20,7 +20,7 @@ public class StaticFileMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri) throws IOException {
+    public String handle(final String requestUri, final String requestBody) throws IOException {
         if ("/".equals(requestUri)) {
             final var responseBody = "Hello world!";
 

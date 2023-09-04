@@ -1,6 +1,8 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.handler.mapping.HandlerMapping;
+import org.apache.coyote.handler.mapping.LoginMapping;
+import org.apache.coyote.handler.mapping.LoginPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
 
 import java.io.IOException;
@@ -14,6 +16,8 @@ public class FrontHandler {
 
     static {
         handlerMapping.add(new StaticFileMapping());
+        handlerMapping.add(new LoginMapping());
+        handlerMapping.add(new LoginPageMapping());
     }
 
     public String handle(final String firstLine, final Map<String, String> headers, final String requestBody) throws IOException {
@@ -23,7 +27,7 @@ public class FrontHandler {
             final String httpMethod = parsedFirstLine[0];
             final String requestUri = parsedFirstLine[1];
             if (mapping.supports(httpMethod, requestUri)) {
-                response = mapping.handle(parsedFirstLine[1]);
+                response = mapping.handle(parsedFirstLine[1], requestBody);
                 break;
             }
         }

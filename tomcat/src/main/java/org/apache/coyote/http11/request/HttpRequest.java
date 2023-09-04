@@ -75,4 +75,12 @@ public class HttpRequest {
     public String getQueryParameter(final String queryKey) {
         return requestLine.getQueryParameter(queryKey);
     }
+
+    public boolean containsBody(final String key) {
+        return body.contains(key);
+    }
+
+    public String getBody(final String key) {
+        return body.get(key);
+    }
 }

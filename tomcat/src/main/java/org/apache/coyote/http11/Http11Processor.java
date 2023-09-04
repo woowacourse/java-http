@@ -23,6 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    private static final String EMAIL_KEY = "email";
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String REGISTER_PAGE = "/register.html";
 
     private final Socket connection;
 
@@ -58,19 +63,23 @@ public class Http11Processor implements Runnable, Processor {
         final String uriPath = request.getPath();
 
         if (uriPath.equals("/login")) {
-            final String path = "/login.html";
+            final String path = LOGIN_PAGE;
             if (request.containsQuery()) {
                 final boolean isAuthenticated = processLogin(request);
-                final String redirectUrlPath = isAuthenticated ? "/index.html" : "/401.html";
+                final String redirectUrlPath = isAuthenticated ? INDEX_PAGE : UNAUTHORIZED_PAGE;
                 return HttpResponse.of(HttpStatus.FOUND, redirectUrlPath);
             }
             return HttpResponse.of(HttpStatus.OK, path);
         }
 
         if (uriPath.equals("/register")) {
-            final String path = "/register.html";
+            final String path = REGISTER_PAGE;
             if (request.getMethod().equals("GET")) {
                 return HttpResponse.of(HttpStatus.OK, path);
+            }
+            if (request.getMethod().equals("POST")) {
+                processRegister(request);
+                return HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
             }
         }
 
@@ -95,4 +104,18 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
+    public void processRegister(final HttpRequest request) {
+        if (!request.containsBody(ACCOUNT_KEY) || !request.containsBody(PASSWORD_KEY) || !request.containsBody(EMAIL_KEY)) {
+            return;
+        }
+        final String account = request.getBody(ACCOUNT_KEY);
+        final String password = request.getBody(PASSWORD_KEY);
+        final String email = request.getBody(EMAIL_KEY);
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return;
+        }
+        final User registeredUser = new User(account, password, email);
+        InMemoryUserRepository.save(registeredUser);
+    }
 }

@@ -17,7 +17,11 @@ public class Http11Request {
     }
 
     public boolean notContainJsessionId() {
-        return !httpHeader.containsJsessionId();
+        return httpHeader.notContainJsessionId();
+    }
+
+    public String findJsessionId() {
+        return httpHeader.findJsessionId();
     }
 
     public HttpMethod getHttpMethod() {

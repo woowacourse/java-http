@@ -3,7 +3,10 @@ package nextstep.jwp.handler.post;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BusinessException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.Http11Request;
@@ -16,10 +19,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 public class LoginPostHandler implements Handler {
 
     private static final String STATIC = "static";
+
+    private final SessionManager sessionManager;
+
+    public LoginPostHandler(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public Http11Response resolve(final Http11Request request) throws IOException {
@@ -30,7 +40,19 @@ public class LoginPostHandler implements Handler {
             return makeHttp11Response(resource, StatusCode.UNAUTHORIZED);
         }
         final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
-        return makeHttp11Response(resource, StatusCode.FOUND);
+        final Http11Response response = makeHttp11Response(resource, StatusCode.FOUND);
+        if (request.notContainJsessionId()) {
+            final Session session = new Session(String.valueOf(UUID.randomUUID()));
+            session.addAttribute("user", user);
+            sessionManager.add(session);
+            response.addCookie(Cookies.ofJSessionId(session.getId()));
+            return response;
+        }
+        final String jsessionId = request.findJsessionId();
+        final Session session = sessionManager.findSession(jsessionId);
+        validateSession(user, session);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
+        return response;
     }
 
     private User findUser(final RequestBody requestBody) {
@@ -64,5 +86,15 @@ public class LoginPostHandler implements Handler {
         final var fileBytes = Files.readAllBytes(actualFilePath);
         final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
         return new Http11Response(statusCode, ContentType.findByPath(resource.getPath()), responseBody);
+    }
+
+    private void validateSession(final User user, final Session session) {
+        if (session == null) {
+            throw new BusinessException("세션이 적절하지 않습니다.");
+        }
+        final User sessionUser = (User) session.getAttribute("user");
+        if (!user.equals(sessionUser)) {
+            throw new BusinessException("세션이 적절하지 않습니다.");
+        }
     }
 }

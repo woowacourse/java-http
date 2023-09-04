@@ -9,6 +9,7 @@ import nextstep.jwp.handler.post.LoginPostHandler;
 import nextstep.jwp.handler.post.RegisterPostHandler;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,10 @@ public class Connector implements Runnable {
 
     private final Map<String, Handler> httpGetHandlers =
             Map.of("/", new RootGetHandler(),
-                    "/login", new LoginGetHandler(),
+                    "/login", new LoginGetHandler(new SessionManager()),
                     "/register", new RegisterGetHandler());
     private final Map<String, Handler> httpPostHandlers =
-            Map.of("/login", new LoginPostHandler(),
+            Map.of("/login", new LoginPostHandler(new SessionManager()),
                     "/register", new RegisterPostHandler());
 
     private final ServerSocket serverSocket;

@@ -24,7 +24,7 @@ public enum ContentType {
                 .orElseThrow(() -> new HttpException("지원하지 않는 확장자입니다."));
     }
 
-    public String getResponse() {
+    public String getType() {
         return response;
     }
 }

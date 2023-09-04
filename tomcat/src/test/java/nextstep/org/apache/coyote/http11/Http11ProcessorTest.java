@@ -10,6 +10,7 @@ import nextstep.jwp.handler.get.RootGetHandler;
 import nextstep.jwp.handler.post.LoginPostHandler;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -23,10 +24,10 @@ class Http11ProcessorTest {
 
     private final Map<String, Handler> httpGetHandlers =
             Map.of("/", new RootGetHandler(),
-                    "/login", new LoginGetHandler(),
+                    "/login", new LoginGetHandler(new SessionManager()),
                     "/register", new RegisterGetHandler());
     private final Map<String, Handler> httpPostHandlers =
-            Map.of("/login", new LoginPostHandler());
+            Map.of("/login", new LoginPostHandler(new SessionManager()));
 
     @Test
     void process() {
@@ -43,7 +44,6 @@ class Http11ProcessorTest {
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 12",
-                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "",
                 "Hello world!");
 
@@ -72,7 +72,6 @@ class Http11ProcessorTest {
         final var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
                 "Content-Length: 5564\r\n" +
-                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

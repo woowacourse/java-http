@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ public class Http11Response {
     private final ContentType contentType;
     private final String responseBody;
     private final Map<String, String> otherHeader = new HashMap<>();
+    private Cookie cookie;
 
     public Http11Response(final StatusCode statusCode, final ContentType contentType, final String responseBody) {
         this.statusCode = statusCode;
@@ -18,8 +20,12 @@ public class Http11Response {
         this.responseBody = responseBody;
     }
 
-    public void addHeader(final String key, final String value) {
-        this.otherHeader.put(key, value);
+    public void addCookie(final String cookie) {
+        this.cookie = new Cookie(cookie);
+    }
+
+    public boolean containJessionId() {
+        return cookie != null && cookie.containsJsessionId();
     }
 
     public StatusCode getStatusCode() {
@@ -36,5 +42,9 @@ public class Http11Response {
 
     public Map<String, String> getOtherHeader() {
         return otherHeader;
+    }
+
+    public Cookie getCookie() {
+        return cookie;
     }
 }

@@ -5,9 +5,12 @@ import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -33,14 +36,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var request = httpRequestParser.parse(inputStream);
+            final var request = httpRequestParser.parse(reader);
             final var response = httpDispatcher.handle(request);
-
-            if (request.notContainJsessionId()) {
-                response.addHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
-            }
 
             sendResponse(outputStream, response);
         } catch (final IOException | UncheckedServletException exception) {
@@ -58,8 +58,13 @@ public class Http11Processor implements Runnable, Processor {
         final StringBuilder httpResponse = new StringBuilder();
 
         httpResponse.append("HTTP/1.1 ").append(response.getStatusCode().getResponse()).append("\r\n");
-        httpResponse.append("Content-Type: ").append(response.getContentType().getResponse()).append(";charset=utf-8\r\n");
+        httpResponse.append("Content-Type: ").append(response.getContentType().getType()).append(";charset=utf-8\r\n");
         httpResponse.append("Content-Length: ").append(response.getResponseBody().getBytes().length).append("\r\n");
+
+        if (response.containJessionId()) {
+            final Map<String, String> value = response.getCookie().getValue();
+            httpResponse.append("Set-Cookie: ").append("JSESSIONID" + "=" + value.get("JSESSIONID")).append("\r\n");
+        }
 
         if (!response.getOtherHeader().isEmpty()) {
             final String additionalHeaders = response.getOtherHeader().entrySet().stream()

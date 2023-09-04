@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.common.Constants.CRLF;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +16,8 @@ import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
@@ -38,6 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
+    private final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
@@ -55,16 +56,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final String firstLine = bufferedReader.readLine();
-            if (firstLine == null) {
-                return;
-            }
-            final RequestLine requestLine = RequestLine.from(firstLine);
-            final RequestHeader requestHeader = readHeader(bufferedReader);
-            final RequestBody requestBody = readBody(bufferedReader, requestHeader);
-
-            final ResponseEntity responseEntity = handleRequest(requestLine, requestHeader, requestBody);
-
+            final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
+            final ResponseEntity responseEntity = handleRequest(httpRequest);
             final String response = httpResponseGenerator.generate(responseEntity);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -73,31 +66,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
-            stringBuilder.append(line).append(CRLF);
-        }
-        return RequestHeader.from(stringBuilder.toString());
-    }
-
-    private RequestBody readBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
-            throws IOException {
-        final String contentLength = requestHeader.get("Content-Length");
-        if (contentLength == null) {
-            return RequestBody.empty();
-        }
-        final int length = Integer.parseInt(contentLength);
-        char[] buffer = new char[length];
-        bufferedReader.read(buffer, 0, length);
-        return RequestBody.from(new String(buffer));
-    }
-
-    private ResponseEntity handleRequest(
-            final RequestLine requestLine,
-            final RequestHeader requestHeader,
-            final RequestBody requestBody
-    ) {
+    private ResponseEntity handleRequest(final HttpRequest httpRequest) {
+        final RequestLine requestLine = httpRequest.getRequestLine();
+        final RequestHeader requestHeader = httpRequest.getRequestHeader();
+        final RequestBody requestBody = httpRequest.getRequestBody();
         final String uri = requestLine.parseUri();
         if (uri.equals("/login")) {
             return login(requestLine, requestHeader, requestBody);

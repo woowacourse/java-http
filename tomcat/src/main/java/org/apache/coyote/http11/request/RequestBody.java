@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,25 +17,19 @@ public class RequestBody {
 
     private final Map<String, String> items = new HashMap<>();
 
-    private RequestBody() {
-    }
-
     private RequestBody(final Map<String, String> items) {
         this.items.putAll(items);
     }
 
     public static RequestBody empty() {
-        return new RequestBody();
+        return new RequestBody(Collections.emptyMap());
     }
 
     public static RequestBody from(final String body) {
-        if (body.isEmpty()) {
-            return new RequestBody();
-        }
         return Arrays.stream(body.split(SEPARATOR))
                 .map(field -> field.split(DELIMITER))
                 .collect(collectingAndThen(
-                        toMap(field -> field[KEY_INDEX], field -> field[VALUE_INDEX]),
+                        toMap(field -> field[KEY_INDEX].strip(), field -> field[VALUE_INDEX].strip()),
                         RequestBody::new
                 ));
     }

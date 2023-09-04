@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.coyote.http11.common.Constants.CRLF;
+import static org.apache.coyote.http11.common.Constants.EMPTY;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,13 +27,13 @@ public class RequestHeader {
         return Arrays.stream(headers.split(CRLF))
                 .map(header -> header.split(DELIMITER))
                 .collect(collectingAndThen(
-                        toMap(header -> header[KEY_INDEX], header -> header[VALUE_INDEX]),
+                        toMap(header -> header[KEY_INDEX].strip(), header -> header[VALUE_INDEX].strip()),
                         RequestHeader::new
                 ));
     }
 
     public HttpCookie parseCookie() {
-        final String cookie = items.getOrDefault(COOKIE_HEADER, "");
+        final String cookie = items.getOrDefault(COOKIE_HEADER, EMPTY);
         return HttpCookie.from(cookie);
     }
 

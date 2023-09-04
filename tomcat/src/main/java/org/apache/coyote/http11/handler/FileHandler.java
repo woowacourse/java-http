@@ -25,12 +25,12 @@ public class FileHandler implements Handler {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
         try {
-            String target = fillExtensionIfDoesNotExist(httpRequest.getTarget());
+            String targetPath = fillExtensionIfDoesNotExist(httpRequest.getTarget().getPath());
 
-            File resource = getResourceFileFrom(target);
+            File resource = getResourceFileFrom(targetPath);
             String body = Files.readString(resource.toPath());
             String contentType = getContentTypeOrElse(
-                    target,
+                    targetPath,
                     httpRequest.getHeader("Accept").getValue()
             );
             return new HttpResponse(body, contentType);
@@ -59,7 +59,7 @@ public class FileHandler implements Handler {
         URL resource = CLASS_LOADER.getResource(relativePath);
         validatePresenceOf(resource);
 
-        String absolutePath = resource.getFile();
+        String absolutePath = resource.getPath();
         return new File(absolutePath);
     }
 

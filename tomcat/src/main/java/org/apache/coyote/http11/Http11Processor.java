@@ -32,7 +32,6 @@ public class Http11Processor implements Runnable, Processor {
             "/register.html", REGISTER_HANDLER
     );
 
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -71,8 +70,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget())) {
-            return PREDEFINED_HANDLERS.get(httpRequest.getTarget()).handle(httpRequest);
+        if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget().getPath())) {
+            return PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath()).handle(httpRequest);
         }
         return DEFAULT_HANDLER.handle(httpRequest);
     }

@@ -4,14 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpRequest {
@@ -19,21 +14,18 @@ public class HttpRequest {
     private static final String WHITE_SPACE = " ";
 
     private final HttpMethod method;
-    private final String target;
+    private final HttpTarget target;
     private final String version;
-    private final Map<String, HttpHeader> headers;
-    private final Map<String, String> queries;
+    private final Headers headers;
     private final String body;
 
     private HttpRequest(final String method, final String target, final String version,
-                        final Map<String, HttpHeader> headers,
-                        final Map<String, String> queries,
+                        final Headers headers,
                         final String body) {
         this.method = new HttpMethod(method);
-        this.target = target;
+        this.target = new HttpTarget(target);
         this.version = version;
         this.headers = headers;
-        this.queries = queries;
         this.body = body;
     }
 
@@ -42,65 +34,37 @@ public class HttpRequest {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String[] requestLineElements = reader.readLine().split(WHITE_SPACE);
 
-            Map<String, HttpHeader> headers = new HashMap<>();
+            Headers headers = new Headers();
             String next;
             while (reader.ready() && !(next = reader.readLine()).isEmpty()) {
-                HttpHeader header = new HttpHeader(next);
-                headers.put(header.getName(), header);
+                headers.add(next);
             }
 
-            HttpHeader contentLengthHeader = headers.getOrDefault("Content-Length", HttpHeader.EMPTY);
-            int contentLength = 0;
-            if (contentLengthHeader != HttpHeader.EMPTY) {
-                contentLength = Integer.parseInt(contentLengthHeader.getValue());
-            }
-            char[] buffer = new char[contentLength];
+            int contentLength = headers.getContentLength();
+            char[] bodyBuffer = new char[contentLength];
             while (contentLength > 0) {
-                int readCount = reader.read(buffer, 0, contentLength);
+                int readCount = reader.read(bodyBuffer, 0, contentLength);
                 contentLength -= readCount;
             }
-            String body = new String(buffer);
 
             return new HttpRequest(
                     requestLineElements[0],
-                    removeQueriesFrom(requestLineElements[1]),
+                    requestLineElements[1],
                     requestLineElements[2],
                     headers,
-                    getQueriesFrom(requestLineElements[1]),
-                    body
+                    new String(bodyBuffer)
             );
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP 요청을 잘 읽지 못했습니다");
         }
     }
 
-    private static Map<String, String> getQueriesFrom(String target) {
-        int queryStringStart = target.indexOf('?');
-        if (queryStringStart == -1) {
-            return Collections.emptyMap();
-        }
-        String rawQueryString = target.substring(queryStringStart + 1);
-        String[] rawQueries = rawQueryString.split("&");
-        return Arrays.stream(rawQueries)
-                .collect(Collectors.toMap(
-                        rawQuery -> rawQuery.split("=")[0],
-                        rawQuery -> rawQuery.split("=")[1]
-                ));
-    }
-
-    private static String removeQueriesFrom(String target) {
-        int queryStringStart = target.indexOf('?');
-        if (queryStringStart == -1) {
-            return target;
-        }
-        return target.substring(0, queryStringStart);
-    }
 
     public HttpMethod getMethod() {
         return method;
     }
 
-    public String getTarget() {
+    public HttpTarget getTarget() {
         return target;
     }
 
@@ -109,27 +73,15 @@ public class HttpRequest {
     }
 
     public List<HttpHeader> getHeaders() {
-        return new ArrayList<>(headers.values());
+        return headers.getHeaders();
     }
 
     public Cookies getCookies() {
         return Cookies.from(getHeader("Cookie"));
     }
 
-    public String getCookie(String key) {
-        return getCookies().get(key);
-    }
-
     public HttpHeader getHeader(String name) {
-        return headers.getOrDefault(name, HttpHeader.EMPTY);
-    }
-
-    public String getQuery(String name) {
-        return queries.getOrDefault(name, null);
-    }
-
-    public Map<String, String> getQueries() {
-        return new HashMap<>(queries);
+        return headers.get(name);
     }
 
     public String getBody() {

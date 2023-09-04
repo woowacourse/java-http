@@ -28,6 +28,10 @@ public class HttpHeader {
         return value;
     }
 
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
+    }
+
     public String toLine() {
         return getName() + SEPARATOR + getValue();
     }

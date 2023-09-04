@@ -44,6 +44,31 @@ public class HandlerMapper {
         return new Response(response);
     }
 
+
+    public Response cssHandler(final Request request) {
+        final var responseBody = request.getRequestLine().readFile();
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
+    public Response jsHandler(final Request request) {
+        final var responseBody = request.getRequestLine().readFile();
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/javascript;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
     public Response handle(final Request request) {
         final RequestLine requestLine = request.getRequestLine();
         final String path = requestLine.getPath();
@@ -59,6 +84,10 @@ public class HandlerMapper {
 
         if (requestLine.getPath().endsWith(".html")) {
             return htmlHandler(request);
+        } else if (requestLine.getPath().endsWith(".css")) {
+            return cssHandler(request);
+        } else if (requestLine.getPath().endsWith(".js")) {
+            return jsHandler(request);
         }
         throw new IllegalArgumentException("매핑되는 핸들러가 존재하지 않습니다.");
     }

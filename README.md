@@ -9,7 +9,7 @@
 * [x] Request URI에 해당하는 파일을 responseBody로 돌려준다.
 
 ### CSS 지원하기
-* [ ] 요청 리소스가 CSS or JS인 경우 Response Header에 적절한 Content-Type을 보낸다. 
+* [x] 요청 리소스가 CSS or JS인 경우 Response Header에 적절한 Content-Type을 보낸다. 
 
 ### Query String 파싱
 * [ ] Request URI에서 QueryString을 파싱해 저장한다.

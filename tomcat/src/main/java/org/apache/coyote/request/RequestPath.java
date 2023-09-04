@@ -1,21 +1,33 @@
 package org.apache.coyote.request;
 
-public class RequestPath {
+import java.util.Objects;
 
-    private static final String DEFAULT_REQUEST_PATH = "/";
+public class RequestPath {
 
     private final String source;
 
     public RequestPath(final String source) {
+        if (Objects.isNull(source)) {
+            throw new IllegalArgumentException("RequestPath 에 null 이 들어올 수 없습니다.");
+        }
         this.source = source;
-    }
-
-    public boolean isDefault() {
-        return source.equals(DEFAULT_REQUEST_PATH);
     }
 
     public String source() {
         return source;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RequestPath that = (RequestPath) o;
+        return Objects.equals(source, that.source);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source);
     }
 
     @Override

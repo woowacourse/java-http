@@ -18,10 +18,6 @@ public class User {
         return this.account.equals(account) && this.password.equals(password);
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

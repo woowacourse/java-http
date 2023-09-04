@@ -6,7 +6,7 @@ public class Headers {
 
     private final Map<String, String> mappings;
 
-    public Headers(Map<String, String> mappings) {
+    private Headers(Map<String, String> mappings) {
         this.mappings = mappings;
     }
 

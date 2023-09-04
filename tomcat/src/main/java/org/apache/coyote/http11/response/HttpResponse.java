@@ -9,28 +9,37 @@ public class HttpResponse {
 
     private static final ClassLoader classLoader = HttpResponse.class.getClassLoader();
     private static final String HTTP_VERSION = "HTTP/1.1 ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String CONTENT_LENGTH = "Content-Length: ";
     private static final String BLANK = "";
     private static final String SPACE = " ";
     private static final String CRLF = "\r\n";
 
     private final String responseStatus;
-    private final String contentType;
+    private final ResponseHeaders headers;
     private final String responseBody;
 
     public HttpResponse(
             final String responseStatus,
-            final String contentType,
+            final ResponseHeaders headers,
             final String responseBody
     ) {
         this.responseStatus = responseStatus;
-        this.contentType = contentType;
+        this.headers = headers;
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(final String status, final String filePath) {
-        return new HttpResponse(status, getContentType(filePath), readStaticFile(filePath));
+    public static HttpResponse of(final HttpStatus status, final String filePath) {
+        final ResponseHeaders headers = new ResponseHeaders();
+
+        if (status == HttpStatus.FOUND) {
+            headers.setLocation(filePath);
+            return new HttpResponse(status.getCode(), headers, null);
+        }
+
+        final String body = readStaticFile(filePath);
+        headers.setContentType(getContentType(filePath));
+        headers.setContentLength(body.getBytes().length);
+
+        return new HttpResponse(status.getCode(), headers, body);
     }
 
     private static String getContentType(final String filePath) {
@@ -65,11 +74,9 @@ public class HttpResponse {
     public String toString() {
         return String.join(CRLF,
                 HTTP_VERSION + responseStatus + SPACE,
-                CONTENT_TYPE + contentType + SPACE,
-                CONTENT_LENGTH + responseBody.getBytes().length + SPACE,
-                BLANK,
-                responseBody
-                );
+                headers.toString(),
+                (responseBody != null) ? responseBody : BLANK
+        );
     }
 
     public byte[] getBytes() {

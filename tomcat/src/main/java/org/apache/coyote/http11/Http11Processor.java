@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -53,29 +55,37 @@ public class Http11Processor implements Runnable, Processor {
 
     public HttpResponse handleRequest(final HttpRequest request) throws URISyntaxException {
 
-        final String httpStatusOk = "200 OK";
-
         final String uriPath = request.getPath();
 
         if (uriPath.equals("/login")) {
             final String path = "/login.html";
-            processLogin(request);
-            return HttpResponse.of(httpStatusOk, path);
+            if (request.containsQuery()) {
+                final boolean isAuthenticated = processLogin(request);
+                final String redirectUrlPath = isAuthenticated ? "/index.html" : "/401.html";
+                return HttpResponse.of(HttpStatus.FOUND, redirectUrlPath);
+            }
+            return HttpResponse.of(HttpStatus.OK, path);
         }
 
-        return HttpResponse.of(httpStatusOk, uriPath);
+        return HttpResponse.of(HttpStatus.OK, uriPath);
     }
 
-    public void processLogin(final HttpRequest request) {
-        if (request.containsQuery(ACCOUNT_KEY) && request.containsQuery(PASSWORD_KEY)) {
-            final String account = request.getQueryParameter(ACCOUNT_KEY);
-            final String password = request.getQueryParameter(PASSWORD_KEY);
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .get();
+    public boolean processLogin(final HttpRequest request) {
+        if (!request.containsQuery(ACCOUNT_KEY) || !request.containsQuery(PASSWORD_KEY)) {
+            return false;
+        }
+        final String account = request.getQueryParameter(ACCOUNT_KEY);
+        final String password = request.getQueryParameter(PASSWORD_KEY);
+        Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
             if (user.checkPassword(password)) {
                 log.info(user.toString());
+                return true;
             }
         }
+        return false;
     }
 
 }

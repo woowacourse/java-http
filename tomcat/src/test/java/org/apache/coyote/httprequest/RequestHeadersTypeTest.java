@@ -1,21 +1,22 @@
 package org.apache.coyote.httprequest;
 
-import org.apache.coyote.httprequest.exception.InvalidRequestHeaderNameException;
 import org.apache.coyote.httprequest.header.RequestHeaderType;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 class RequestHeadersTypeTest {
 
     @Test
-    void 잘못된_이름의_헤더로_요청을_보내면_예외가_발생한다() {
+    void 잘못된_이름의_헤더로_요청을_보내면_지원하지_않는_헤더_요소가_반환된다() {
         // given
         final String invalidHeaderName = "BEBE";
 
-        // when, then
-        assertThatThrownBy(() -> RequestHeaderType.from(invalidHeaderName))
-                .isInstanceOf(InvalidRequestHeaderNameException.class);
+        // when
+        final RequestHeaderType unsupportedHeaderType = RequestHeaderType.from(invalidHeaderName);
+
+        // then
+        assertThat(unsupportedHeaderType).isEqualTo(RequestHeaderType.UNSUPPORTED_HEADER);
     }
 }

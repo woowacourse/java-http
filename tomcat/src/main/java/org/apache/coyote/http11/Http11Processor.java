@@ -40,19 +40,8 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = HttpResponse.from(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getResponse() {
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        try {
-            final Path path = Paths.get(resource.toURI());
-
-        } catch (URISyntaxException | NullPointerException e) {
-            log.error(e.getMessage(), e);
-        }
-        return "";
     }
 }

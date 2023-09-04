@@ -10,7 +10,9 @@ public enum RequestHeaderType {
     CONNECTION("Connection"),
     ACCEPT("Accept"),
     PRAGMA("Pragma"),
-    CACHE_CONTROL("Cache-Control");
+    CACHE_CONTROL("Cache-Control"),
+    SEC_CH_UA("sec-ch-ua"),
+    UNSUPPORTED_HEADER("지원하지 않는 타입");
 
     private final String headerName;
 
@@ -22,7 +24,11 @@ public enum RequestHeaderType {
         return Arrays.stream(values())
                 .filter(requestHeaderType -> requestHeaderType.headerName.equals(headerName))
                 .findFirst()
-                .orElseThrow(InvalidRequestHeaderNameException::new);
+                .orElse(UNSUPPORTED_HEADER);
+    }
+
+    public boolean isUnsupportedHeader() {
+        return this == UNSUPPORTED_HEADER;
     }
 
     public RequestHeader saveRequestHeader(final String value) {
@@ -36,6 +42,8 @@ public enum RequestHeaderType {
             return PragmaHeader.from(value);
         } else if (this == CACHE_CONTROL) {
             return CacheControlHeader.from(value);
+        } else if (this == SEC_CH_UA) {
+            return new SecChUaHeader(value);
         } else {
             throw new UnsupportedHeaderTypeException();
         }

@@ -24,9 +24,11 @@ public class RequestHeaders {
         final Map<RequestHeaderType, RequestHeader> headers = new HashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            System.out.println(line);
             final List<String> parsedHeader = parseByDelimiter(line);
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
+            if (headerType.isUnsupportedHeader()) {
+                continue;
+            }
             headers.put(headerType, headerType.saveRequestHeader(parsedHeader.get(HEADER_VALUE_INDEX).trim()));
         }
         return new RequestHeaders(headers);

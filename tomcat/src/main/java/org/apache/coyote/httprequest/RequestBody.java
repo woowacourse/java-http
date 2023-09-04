@@ -14,6 +14,9 @@ public class RequestBody {
     public static RequestBody from(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
         String line;
+        if (!bufferedReader.ready()) {
+            return new RequestBody("");
+        }
         while ((line = bufferedReader.readLine()) != null) {
             stringBuilder.append(line).append("\r\n");
         }

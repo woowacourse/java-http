@@ -26,9 +26,12 @@ public class HandlerMapper {
 
     public void init() {
         HANDLERS.put(new HandlerStatus("GET", "/"), this::rootHandler);
+        HANDLERS.put(new HandlerStatus("GET", "/login"), this::loginHandler);
         HANDLERS.put(new HandlerStatus("GET", "/login", Set.of("account", "password")),
                 this::loginWithQueryParameterHandler);
         HANDLERS.put(new HandlerStatus("POST", "/login"), this::loginFormHandler);
+        HANDLERS.put(new HandlerStatus("GET", "/register"), this::registerHandler);
+        HANDLERS.put(new HandlerStatus("POST", "/register"), this::registerFormHandler);
     }
 
     public Response rootHandler(final Request request) {
@@ -80,6 +83,25 @@ public class HandlerMapper {
         return new Response(response);
     }
 
+    public Response loginHandler(final Request request) {
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("login.html이 존재하지 않습니다.");
+        }
+
+        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
     public Response loginWithQueryParameterHandler(final Request request) {
         final RequestLine requestLine = request.getRequestLine();
         final var queryParameter = requestLine.getRequestURI().getQueryParameter();
@@ -114,14 +136,11 @@ public class HandlerMapper {
     }
 
     public Response loginFormHandler(final Request request) {
-        // request form에서 loginRequest생성
         final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
         Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
-        if (user.isPresent()) { // 성공 301 & index.html
+        if (user.isPresent()) {
             return loginSuccess();
         }
-
-        // 실패 401html
         return loginFail();
     }
 
@@ -164,6 +183,49 @@ public class HandlerMapper {
 
     private Optional<User> login(final String account, final String password) {
         return InMemoryUserRepository.findByAccountAndPassword(account, password);
+    }
+
+    public Response registerHandler(final Request request) {
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("register.html이 존재하지 않습니다.");
+        }
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
+    public Response registerFormHandler(final Request request) {
+        final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
+        final String account = requestForms.get("account");
+        final String email = requestForms.get("email");
+        final String password = requestForms.get("password");
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
+        }
+
+        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
     }
 
     public Response handle(final Request request) {

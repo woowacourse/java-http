@@ -26,6 +26,10 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
+    public static HttpHeaders create(final Map<String, String> headers) {
+        return new HttpHeaders(new LinkedHashMap<>(headers));
+    }
+
     public void addHeader(HttpHeaderName header, String value) {
         headers.put(header.getName(), value); // map의 key로 string? httpheader?
     }

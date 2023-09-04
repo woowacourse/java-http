@@ -39,18 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final String firstLine = bufferedReader.readLine();
-
             if (firstLine == null) {
                 return;
             }
 
-            final Map<String, String> headers = new HashMap<>();
-            String header = bufferedReader.readLine();
-            while (!"".equals(header)) {
-                final String[] parsedHeader = header.split(": ");
-                headers.put(parsedHeader[0], parsedHeader[1]);
-                header = bufferedReader.readLine();
-            }
+            final Map<String, String> headers = parseHeader(bufferedReader);
 
             String response = null;
             final String[] parsedFirstLine = firstLine.split(" ");
@@ -62,6 +55,18 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseHeader(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        String header = bufferedReader.readLine();
+        while (!"".equals(header)) {
+            final String[] parsedHeader = header.split(": ");
+            headers.put(parsedHeader[0], parsedHeader[1]);
+            header = bufferedReader.readLine();
+        }
+
+        return headers;
     }
 
     private String parseStaticFiles(final String[] parsedFirstLine, String response) throws IOException {

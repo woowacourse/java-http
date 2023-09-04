@@ -37,6 +37,10 @@ public class HttpPath {
         return resource.equals("/");
     }
 
+    public boolean isParamEmpty() {
+        return queryParameter.getParams().isEmpty();
+    }
+
     public String getResource() {
         return resource;
     }

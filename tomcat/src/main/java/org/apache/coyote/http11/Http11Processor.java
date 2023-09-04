@@ -66,9 +66,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final HttpPath httpPath) {
-        Map<String, String> params = httpPath.getQueryParameter();
-        if (!params.isEmpty() && httpPath.getResource().contains("login")) {
-            executeLogin(params);
+        if (!httpPath.isParamEmpty() && httpPath.getResource().contains("login")) {
+            executeLogin(httpPath.getQueryParameter());
         }
 
         URL url = getClass().getClassLoader().getResource("static" + httpPath.getResource() + httpPath.getExtension());

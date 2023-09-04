@@ -182,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         User user = InMemoryUserRepository.findByAccount(account)
-                .orElseGet(() -> null);
+                .orElse(null);
 
         if (user != null && user.checkPassword(password)) {
             HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
@@ -195,6 +195,7 @@ public class Http11Processor implements Runnable, Processor {
                 session.setAttribute("user", user);
                 sessionManager.add(session);
             }
+
             if (log.isInfoEnabled()) {
                 log.info(String.format("%s %s", "로그인 성공!", user));
             }

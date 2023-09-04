@@ -18,8 +18,4 @@ public class SessionManager {
     public void remove(final String id) {
         SESSIONS.remove(id);
     }
-
-    public Map<String, Session> getSessions() {
-        return SESSIONS;
-    }
 }

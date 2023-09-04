@@ -31,5 +31,4 @@ public class Session {
     public void invalidate() {
         this.values.clear();
     }
-
 }

@@ -28,7 +28,7 @@ public class HttpRequest {
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         final HttpRequestLine httpRequestLine = makeHttpRequestLine(bufferedReader.readLine());
         final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-        final RequestBody requestBody = RequestBody.from(bufferedReader);
+        final RequestBody requestBody = RequestBody.from(bufferedReader, requestHeaders.getContentLength());
         return new HttpRequest(httpRequestLine, requestHeaders, requestBody);
     }
 

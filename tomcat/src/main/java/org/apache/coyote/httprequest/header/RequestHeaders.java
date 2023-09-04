@@ -1,4 +1,5 @@
 package org.apache.coyote.httprequest.header;
+
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.exception.InvalidHeaderException;
 import org.slf4j.Logger;
@@ -27,10 +28,13 @@ public class RequestHeaders {
 
     public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<RequestHeaderType, RequestHeader> headers = new HashMap<>();
-        log.debug("Request Header:\n");
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            log.debug("\t" + line + "\n");
+        log.debug("Request Header:");
+        while (true) {
+            final String line = bufferedReader.readLine();
+            if (line == null || line.isBlank()) {
+                break;
+            }
+            log.debug("\t" + line);
             final List<String> parsedHeader = parseByDelimiter(line);
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
             if (headerType.isUnsupportedHeader()) {
@@ -47,5 +51,12 @@ public class RequestHeaders {
             throw new InvalidHeaderException();
         }
         return parsedRequestHeader;
+    }
+
+    public int getContentLength() {
+        if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
+            return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH).getValue());
+        }
+        return 0;
     }
 }

@@ -16,17 +16,11 @@ public class RequestBody {
         this.contents = contents;
     }
 
-    public static RequestBody from(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        log.debug("Request body: \n");
-        String line;
-        if (!bufferedReader.ready()) {
-            return new RequestBody("");
-        }
-        while ((line = bufferedReader.readLine()) != null) {
-            log.debug("\t" + line + "\n");
-            stringBuilder.append(line).append("\r\n");
-        }
-        return new RequestBody(stringBuilder.toString());
+    public static RequestBody from(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        log.debug("Request body:");
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        final String requestBody = new String(buffer);
+        return new RequestBody(requestBody);
     }
 }

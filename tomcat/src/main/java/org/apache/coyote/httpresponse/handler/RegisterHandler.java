@@ -6,6 +6,7 @@ import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;
 
 public class RegisterHandler implements Handler {
+
     @Override
     public HttpResponse handle(final HttpRequest request) {
         final RequestMethod requestMethod = request.getRequestMethod();
@@ -19,7 +20,11 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpResponse handlePost(final HttpRequest request) {
-        return null;
+        final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
+        final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.CREATED);
+        final HttpResponse afterSetContent = afterSetHttpStatus.setBlankContent();
+        final HttpResponse afterSetLocationHeader = afterSetContent.setLocationHeader("/index.html");
+        return afterSetLocationHeader;
     }
 
     private HttpResponse handleGet(final HttpRequest request) {

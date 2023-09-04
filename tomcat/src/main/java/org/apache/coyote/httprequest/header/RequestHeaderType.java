@@ -11,7 +11,8 @@ public enum RequestHeaderType {
     PRAGMA("Pragma"),
     CACHE_CONTROL("Cache-Control"),
     SEC_CH_UA("sec-ch-ua"),
-    UNSUPPORTED_HEADER("지원하지 않는 타입");
+    UNSUPPORTED_HEADER("지원하지 않는 타입"),
+    CONTENT_LENGTH("Content-Length");
 
     private final String headerName;
 
@@ -43,6 +44,8 @@ public enum RequestHeaderType {
             return CacheControlHeader.from(value);
         } else if (this == SEC_CH_UA) {
             return new SecChUaHeader(value);
+        } else if (this == CONTENT_LENGTH) {
+            return new ContentLengthHeader(value);
         } else {
             throw new UnsupportedHeaderTypeException();
         }

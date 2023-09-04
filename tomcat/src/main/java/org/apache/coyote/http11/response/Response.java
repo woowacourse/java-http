@@ -16,10 +16,9 @@ import static org.apache.coyote.http11.response.Method.POST;
 
 public class Response {
 
-    private static final int LOCATION_INDEX = 1;
-    private static final String HTTP_REQUEST_DELIMITER = " ";
     private static final String ROOT_RESPONSE = "Hello world!";
     private static final String COOKIE_KEY = "Cookie";
+    private static final int FIRST = 0;
 
     private final Location location;
     private final Method method;
@@ -35,21 +34,17 @@ public class Response {
 
     public static Response from(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
         final List<String> headers = readHeaders(br);
-        final String locationHeader = headers.get(0).split(HTTP_REQUEST_DELIMITER)[LOCATION_INDEX];
 
-        final Method method = Method.from(headers.get(0));
-        final Location location = Location.from(locationHeader);
+        final Method method = Method.from(headers.get(FIRST));
+        final Location location = Location.from(headers.get(FIRST));
         final Cookies cookies = Cookies.from(findHeader(headers, COOKIE_KEY));
 
         if (POST.equals(method)) {
-            final char[] body = readBody(br, headers);
-            return new Response(location, method, Parameters.from(body), cookies);
+            return new Response(location, method, readFromBody(br, headers), cookies);
         }
 
-        final Parameters parameters = Parameters.from(locationHeader);
-        return new Response(location, method, parameters, cookies);
+        return new Response(location, method, Parameters.empty(), cookies);
     }
 
     private static List<String> readHeaders(final BufferedReader br) throws IOException {
@@ -61,20 +56,20 @@ public class Response {
         return headers;
     }
 
-    private static char[] readBody(final BufferedReader br, final List<String> headers) throws IOException {
-        final int contentLength = getContentLength(headers);
-
-        final char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-
-        return buffer;
-    }
-
     private static String findHeader(final List<String> headers, final String key) {
         return headers.stream()
                 .filter(header -> header.contains(key))
                 .findAny()
                 .orElse(null);
+    }
+
+    private static Parameters readFromBody(final BufferedReader br, final List<String> headers) throws IOException {
+        final int contentLength = getContentLength(headers);
+
+        final char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+
+        return Parameters.from(buffer);
     }
 
     private static int getContentLength(final List<String> headers) {

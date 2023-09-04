@@ -10,12 +10,15 @@ public class Parameters {
     private static final String ENTRY_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final String QUERY = "?";
 
     private final Map<String, String> entries;
 
     public Parameters(final Map<String, String> entries) {
         this.entries = entries;
+    }
+
+    public static Parameters empty() {
+        return new Parameters(new HashMap<>());
     }
 
     public static Parameters from(final char[] buffer) {
@@ -31,18 +34,6 @@ public class Parameters {
                 .forEach(query -> result.put(query[KEY_INDEX], query[VALUE_INDEX]));
 
         return result;
-    }
-
-    public static Parameters from(final String uri) {
-        if (uri.contains(QUERY)) {
-            final int queryIndex = uri.indexOf(QUERY) + 1;
-            final String queryParameters = uri.substring(queryIndex);
-
-            final Map<String, String> parsed = parse(queryParameters);
-            return new Parameters(parsed);
-        }
-
-        return new Parameters(new HashMap<>());
     }
 
     public String getParameter(final String key) {

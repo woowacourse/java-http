@@ -7,11 +7,11 @@ import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryParams;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusCode;
+import org.apache.coyote.http11.common.request.HttpMethod;
+import org.apache.coyote.http11.common.request.HttpRequest;
+import org.apache.coyote.http11.common.request.QueryParams;
+import org.apache.coyote.http11.common.response.HttpResponse;
+import org.apache.coyote.http11.common.response.StatusCode;
 import org.apache.coyote.http11.util.Parser;
 import org.apache.coyote.http11.util.StaticFileLoader;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse loginSuccess(HttpRequest request, User user) {
-        log.info("로그인 성공 : {}", user.toString());
+        log.info("로그인 성공 : {}", user);
         Session session = request.getSession();
         session.setAttribute("user", user);
 

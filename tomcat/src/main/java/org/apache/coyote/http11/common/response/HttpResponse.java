@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.common.response;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.http11.common.HttpHeaders;

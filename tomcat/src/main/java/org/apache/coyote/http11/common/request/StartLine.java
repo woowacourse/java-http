@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common.request;
 
 import org.apache.coyote.http11.common.HttpVersion;
 
@@ -9,7 +9,7 @@ public class StartLine {
     private final HttpVersion version;
 
     private StartLine(final HttpMethod method, final RequestUri uri, final QueryParams params,
-                     final HttpVersion version) {
+                      final HttpVersion version) {
         this.method = method;
         this.uri = uri;
         this.params = params;

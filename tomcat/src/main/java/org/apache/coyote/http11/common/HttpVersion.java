@@ -10,7 +10,7 @@ public enum HttpVersion {
 
     private final String detail;
 
-    HttpVersion(String detail){
+    HttpVersion(String detail) {
         this.detail = detail;
     }
 

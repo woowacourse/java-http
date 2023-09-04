@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common.request;
 
 public class RequestUri {
     private final String detail;
@@ -9,7 +9,7 @@ public class RequestUri {
 
     public static RequestUri create(String line) {
         int idx = line.indexOf("?");
-        if (idx==-1) {
+        if (idx == -1) {
             return new RequestUri(line);
         }
 

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.common.request.HttpRequest;
 
 public class HandlerFinder {
     private static final Handler DEFAULT_HANDLER;

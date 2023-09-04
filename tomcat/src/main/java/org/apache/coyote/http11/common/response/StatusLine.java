@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.common.response;
 
 import org.apache.coyote.http11.common.HttpVersion;
 
 public class StatusLine {
     private static HttpVersion DEFAULT_VERSION = HttpVersion.ONE_POINT_ONE;
-
     private final HttpVersion version;
     private final StatusCode code;
 

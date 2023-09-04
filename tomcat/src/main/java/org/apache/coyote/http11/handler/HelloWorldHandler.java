@@ -3,9 +3,9 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StatusCode;
+import org.apache.coyote.http11.common.request.HttpRequest;
+import org.apache.coyote.http11.common.response.HttpResponse;
+import org.apache.coyote.http11.common.response.StatusCode;
 
 public class HelloWorldHandler implements Handler {
 

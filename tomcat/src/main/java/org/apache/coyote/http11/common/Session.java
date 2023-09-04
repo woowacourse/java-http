@@ -12,6 +12,7 @@ import org.apache.coyote.http11.SessionManager;
 public class Session implements HttpSession {
 
     private static final SessionManager SESSION_MANGER = new SessionManager();
+    private static final String EXCEPTION_UNSUPPORTED_OPERATION = "unsupoorted";
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
@@ -32,27 +33,31 @@ public class Session implements HttpSession {
 
     @Override
     public long getLastAccessedTime() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
     public ServletContext getServletContext() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
     public int getMaxInactiveInterval() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
     public void setMaxInactiveInterval(int interval) {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated(forRemoval = true)
     @Override
     public HttpSessionContext getSessionContext() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     public Object getAttribute(String name) {
@@ -61,12 +66,12 @@ public class Session implements HttpSession {
 
     @Override
     public Object getValue(String name) {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
@@ -80,7 +85,7 @@ public class Session implements HttpSession {
 
     @Override
     public void putValue(String name, Object value) {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     public void removeAttribute(String name) {
@@ -89,12 +94,12 @@ public class Session implements HttpSession {
 
     @Override
     public void removeValue(String name) {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override
     public void invalidate() {
-        throw new UnsupportedOperationException("unsupported");
+        throw new UnsupportedOperationException(EXCEPTION_UNSUPPORTED_OPERATION);
     }
 
     @Override

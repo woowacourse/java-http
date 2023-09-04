@@ -2,11 +2,16 @@ package org.apache.coyote.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpSession {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
+
+    public HttpSession() {
+        this(UUID.randomUUID().toString());
+    }
 
     public HttpSession(final String id) {
         this.id = id;

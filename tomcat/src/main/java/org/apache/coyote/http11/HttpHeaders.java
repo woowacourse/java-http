@@ -19,4 +19,8 @@ public class HttpHeaders {
         final String value = headers.get("Accept");
         return value.split(",")[0];
     }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 }

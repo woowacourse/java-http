@@ -10,14 +10,19 @@ public class HttpRequestParser {
     private static final String EMPTY_LINE = "";
     private static final String HEADER_DELIMITER = ": ";
     private static final int EXIST_HEADER_VALUE = 2;
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final int NON_EXIST = -1;
+    private static final String QUERY_STRING_VALUE_DELIMITER = "&";
+    private static final String KEY_AND_VALUE_DELIMITER = "=";
 
     public HttpRequest parse(final BufferedReader reader) {
         final String firstLine = readLine(reader);
         final HttpMethod httpMethod = parseHttpMethod(firstLine);
         final String requestUri = parseRequestUri(firstLine);
+        final QueryStrings queryStrings = parseQueryStrings(firstLine);
         final HttpHeaders httpHeaders = parseHttpHeaders(reader);
 
-        return new HttpRequest(httpMethod, requestUri, httpHeaders);
+        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders);
     }
 
     private String readLine(final BufferedReader reader) {
@@ -33,7 +38,30 @@ public class HttpRequestParser {
     }
 
     private String parseRequestUri(final String line) {
-        return line.split(DELIMITER)[1];
+        final String requestUri = line.split(DELIMITER)[1];
+        final int queryStringBeginIndex = requestUri.indexOf(QUERY_STRING_DELIMITER);
+        if (queryStringBeginIndex == NON_EXIST) {
+            return requestUri;
+        }
+        return requestUri.substring(0, queryStringBeginIndex);
+    }
+
+    private QueryStrings parseQueryStrings(final String line) {
+        final QueryStrings queryStrings = new QueryStrings();
+        final String requestUri = line.split(DELIMITER)[1];
+        final int queryStringBeginIndex = requestUri.indexOf(QUERY_STRING_DELIMITER);
+        if (queryStringBeginIndex == NON_EXIST) {
+            return queryStrings;
+        }
+        final String[] splitQueryStrings = requestUri.substring(queryStringBeginIndex + 1)
+                .split(QUERY_STRING_VALUE_DELIMITER);
+        for (final String splitQueryString : splitQueryStrings) {
+            final String[] splitKeyValue = splitQueryString.split(KEY_AND_VALUE_DELIMITER);
+            final String key = splitKeyValue[0];
+            final String value = splitKeyValue[1];
+            queryStrings.add(key, value);
+        }
+        return queryStrings;
     }
 
     private HttpHeaders parseHttpHeaders(final BufferedReader reader) {

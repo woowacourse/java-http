@@ -1,9 +1,13 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.joining;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,21 +40,55 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.equals("/")) {
                 requestUri = "/index.html";
             }
+            if (requestUri.equals("/login")) {
+                requestUri = "/login.html";
+                login(httpRequest);
+            }
 
             final FileReader fileReader = new FileReader();
             final String responseBody = fileReader.read(requestUri);
-            
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
 
-            outputStream.write(response.getBytes());
+            final ResponseEntity<String> responseEntity = new ResponseEntity<>(responseBody).ok();
+
+            final HttpResponseMaker httpResponseMaker = new HttpResponseMaker();
+            final HttpResponse httpResponse = httpResponseMaker.make(responseEntity);
+            httpResponse.setHeader("Content-Type", httpRequest.getContentType());
+
+            final var responseString = makeResponseString(httpResponse);
+            outputStream.write(responseString.getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void login(final HttpRequest httpRequest) {
+        final String account = httpRequest.getParameter("account");
+        final String password = httpRequest.getParameter("password");
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresent(user -> log.info(user.toString()));
+    }
+
+    private String makeResponseString(final HttpResponse httpResponse) {
+        return String.join("\r\n",
+                makeResponseCode(httpResponse),
+                makeResponseHeaders(httpResponse),
+                "",
+                httpResponse.getResponseBody());
+    }
+
+    private String makeResponseCode(final HttpResponse httpResponse) {
+        final int code = httpResponse.getStatusCode().getCode();
+        final String message = httpResponse.getStatusCode().getMessage();
+        return "HTTP/1.1 " + code + " " + message + " ";
+    }
+
+    private String makeResponseHeaders(final HttpResponse httpResponse) {
+        final Map<String, String> headers = httpResponse.getHeaders();
+        return headers.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(joining("\r\n"));
     }
 }

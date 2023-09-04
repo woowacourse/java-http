@@ -2,7 +2,8 @@ package org.apache.coyote.http11.common;
 
 public enum HttpStatus {
 
-    OK(200, "OK")
+    OK(200, "OK"),
+    UNAUTHORIZED(401, "UNAUTHORIZED")
     ;
 
     private final Integer value;

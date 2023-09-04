@@ -18,7 +18,7 @@ public class ResponseLine {
         this.statusText = statusText;
     }
 
-    public static ResponseLine create() {
+    public static ResponseLine create(final HttpStatus httpStatus) {
         final String statusCode = String.valueOf(HttpStatus.OK.getValue());
         final String statusText = HttpStatus.OK.getReasonPhrase();
 

@@ -16,4 +16,6 @@
 
 - [x] POST 방식으로 회원가입
 - [x] Cookie에 JSESSIONID 값 저장하기
-- [ ] Session 구현하기
+- [x] Session 구현하기
+  - [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
+  - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장해보자.

@@ -27,4 +27,11 @@ public class LoginHandler {
         log.info(userInformation);
         return user.get().checkPassword(queryParams.getValueFromKey("password"));
     }
+
+    public User getUser(final String requestBody) {
+        final QueryParams queryParams = QueryParams.from(requestBody);
+        final String account = queryParams.getValueFromKey("account");
+
+        return InMemoryUserRepository.findByAccount(account).get();
+    }
 }

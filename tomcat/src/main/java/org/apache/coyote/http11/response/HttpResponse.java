@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.LoginHandler;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
@@ -21,7 +23,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
 
         header = new HashMap<>();
-        header.put("Content-Type", contentType.getContentType()+";charset=utf-8");
+        header.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
         header.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
@@ -45,8 +47,12 @@ public class HttpResponse {
 
     public void addJSessionId(final HttpRequest httpRequest) {
         if (!httpRequest.hasJSessionId()) {
-            System.out.println("쿠키를 담았다.");
-            header.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            final Session session = new Session();
+            final LoginHandler loginHandler = new LoginHandler();
+            session.addAttribute("user", loginHandler.getUser(httpRequest.getRequestBody()));
+            SessionManager.add(session);
+
+            header.put("Set-Cookie", "JSESSIONID=" + session.getId());
         }
     }
 

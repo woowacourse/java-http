@@ -33,4 +33,10 @@ public class RequestHeader {
         }
         return HttpCookie.from(headers.get("Cookie")).hasJSessionId();
     }
+
+    public String getJSessionId() {
+        final String cookie = headers.get("Cookie");
+        final String[] parts = cookie.split("=");
+        return parts[1];
+    }
 }

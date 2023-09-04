@@ -72,8 +72,12 @@ public class HttpRequest {
         return 0;
     }
 
-    public boolean hasJSessionId(){
+    public boolean hasJSessionId() {
         return requestHeader.hasJSessionId();
+    }
+
+    public String getJSessionId() {
+        return requestHeader.getJSessionId();
     }
 
     public RequestLine getRequestLine() {

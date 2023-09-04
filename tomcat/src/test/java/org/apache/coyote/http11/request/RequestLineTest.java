@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.common.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
@@ -38,7 +39,7 @@ class RequestLineTest {
         assertAll(
                 () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(requestLine.getUri()).isEqualTo("/index.html"),
-                () -> assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1")
+                () -> assertThat(requestLine.getHttpVersion()).isEqualTo(HTTP_1_1)
         );
     }
 

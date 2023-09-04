@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.Http11Exception;
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
 
@@ -15,9 +16,9 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
     private final String uri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    private RequestLine(final HttpMethod httpMethod, final String uri, final String httpVersion) {
+    private RequestLine(final HttpMethod httpMethod, final String uri, final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -29,7 +30,7 @@ public class RequestLine {
         return new RequestLine(
                 HttpMethod.from(requestLine[HTTP_METHOD_INDEX]),
                 requestLine[URI_INDEX],
-                requestLine[HTTP_VERSION_INDEX]
+                HttpVersion.from(requestLine[HTTP_VERSION_INDEX])
         );
     }
 
@@ -59,7 +60,7 @@ public class RequestLine {
         return uri;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 }

@@ -1,10 +1,15 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.ContentType.ALL;
+import static org.apache.coyote.http11.ContentType.HTML;
+import static org.apache.coyote.http11.ContentType.URL_ENCODED;
+import static org.apache.coyote.http11.Header.ACCEPT;
+import static org.apache.coyote.http11.Header.CONTENT_TYPE;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 
 public class RequestReader {
@@ -26,26 +31,29 @@ public class RequestReader {
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
-        if (requestUri.getMethod().equals("POST")) {
+        if (URL_ENCODED.getType().equals(headers.get(CONTENT_TYPE.getName()))) {
             readBody();
         }
     }
 
     private void readBody() throws IOException {
-        String line;
-        StringBuilder sb = new StringBuilder();
-        while (!(line = bufferedReader.readLine()).isBlank()) {
-            sb.append(line).append(System.lineSeparator());
-        }
-        String[] split = sb.toString().split("&");
+        char[] chars = new char[getContentLength()];
+        bufferedReader.read(chars, 0, getContentLength());
+        putBody(new String(chars));
+    }
+
+    private void putBody(String line) {
+        String[] split = line.split("&");
         for (String s : split) {
             String[] keyValue = s.split("=");
             bodies.put(keyValue[0], keyValue[1]);
         }
-        bodies.forEach((key, value) -> System.out.println(key + " : " + value));
     }
 
     public void putHeader(String line) {
+        if (line.isEmpty()) {
+            return;
+        }
         String[] split = line.split(" ");
         String name = split[0].substring(0, split[0].length() - 1);
         String content = split[1];
@@ -53,15 +61,19 @@ public class RequestReader {
     }
 
     public String getContentType() {
-        String accept = headers.getOrDefault(Header.ACCEPT.getName(), ContentType.HTML.getType());
+        String accept = headers.getOrDefault(ACCEPT.getName(), HTML.getType());
         if (!accept.contains(",")) {
             return accept + CHARSET_UTF_8;
         }
         String[] split = accept.split(",");
-        if (split[0].equals(ContentType.ALL.getType())) {
-            return ContentType.HTML.getType() + CHARSET_UTF_8;
+        if (split[0].equals(ALL.getType())) {
+            return HTML.getType() + CHARSET_UTF_8;
         }
         return split[0] + CHARSET_UTF_8;
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.get(Header.CONTENT_LENGTH.getName()));
     }
 
     public String getBodyValue(String key) {

@@ -12,9 +12,11 @@ import org.apache.coyote.http11.request.RequestReader;
 public class Response {
 
     private static final String STATIC = "static";
+
     private final RequestReader requestReader;
     private final StatusCode statusCode;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    
     private String body;
 
     public Response(RequestReader requestReader, StatusCode statusCode) {

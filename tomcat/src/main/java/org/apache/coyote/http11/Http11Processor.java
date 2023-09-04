@@ -42,8 +42,13 @@ public class Http11Processor implements Runnable, Processor {
             final var inputStreamReader = new InputStreamReader(inputStream);
             final var bufferedReader = new BufferedReader(inputStreamReader);
 
-            final String uri = readRequestHeader(bufferedReader);
-            final String response = handleRequest(Objects.requireNonNull(uri));
+            final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
+            log.info("Request-Header: {}", requestHeader);
+            final String httpMethod = requestHeader.get("Request-Line").split(" ")[0];
+            final String uri = requestHeader.get("Request-Line").split(" ")[1];
+
+            final String requestBody = readRequestBody(bufferedReader, requestHeader, httpMethod);
+            final String response = handleRequest(uri, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -52,7 +57,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handleRequest(final String uri) throws IOException {
+    private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> requestHeader, final String httpMethod) throws IOException {
+        if (!httpMethod.equals("POST")) {
+            return null;
+        }
+        final int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        final String requestBody = new String(buffer);
+
+        log.info("Request-Body: {}", requestBody);
+        return requestBody;
+    }
+
+    private String handleRequest(final String uri, final String requestBody) throws IOException {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
@@ -66,8 +84,27 @@ public class Http11Processor implements Runnable, Processor {
             final String responseBody = findResponseBody(path + ".html");
             return handleLoginRequest(uri, responseBody);
         }
+        if (path.equals("/register")) {
+            final String responseBody = findResponseBody(path + ".html");
+            return handleRegisterRequest(requestBody, responseBody);
+        }
         final String responseBody = findResponseBody(path);
         return getResponseMessage(200, responseBody, "text/html;");
+    }
+
+    private String handleRegisterRequest(final String requestBody, final String responseBody) throws IOException {
+        if (requestBody == null) {
+            return getResponseMessage(200, responseBody, "text/html;");
+        }
+        final Map<String, String> requestBodyValues = new HashMap<>();
+        final String[] splitRequestBody = requestBody.split("&");
+        for (String value : splitRequestBody) {
+            final String[] splitValue = value.split("=");
+            requestBodyValues.put(splitValue[0], splitValue[1]);
+        }
+        final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"), requestBodyValues.get("email"));
+        InMemoryUserRepository.save(user);
+        return getResponseMessage(302, findResponseBody("/index.html"), "text/html;");
     }
 
     private String handleLoginRequest(final String uri, final String responseBody) throws IOException {
@@ -113,16 +150,19 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(new File(filePath).toPath());
     }
 
-    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> readRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> requestHeader = new HashMap<>();
+
         String line = bufferedReader.readLine();
         if (line == null) {
-            return null;
+            return Map.of();
         }
-        final String uri = line.split(" ")[1];
+        requestHeader.put("Request-Line", line);
 
-        while (!"".equals(line)) {
-            line = bufferedReader.readLine();
+        while (!"".equals(line = bufferedReader.readLine())) {
+            final String[] splitLine = line.split(": ");
+            requestHeader.put(splitLine[0], splitLine[1]);
         }
-        return uri;
+        return requestHeader;
     }
 }

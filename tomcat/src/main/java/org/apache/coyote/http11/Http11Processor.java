@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.Cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
@@ -47,9 +48,18 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = startLine.getPath();
             HttpStatusCode httpStatusCode = HttpStatusCode.OK;
+            HttpCookie cookie = HttpCookie.empty();
+
+            if (httpRequest.hasCookie()) {
+                cookie = HttpCookie.from(httpRequest.getCookie());
+            }
 
             if (startLine.getHttpMethod().equals(HttpMethod.POST)) {
                 if (startLine.getPath().startsWith("/login")) {
+                    if (cookie.hasJSESSIONID()) {
+                        path = INDEX_HTML;
+
+                    }
                     final String body = httpRequest.getBody();
                     Map<String, String> loginData = Arrays.stream(body.split("&"))
                             .map(data -> data.split("="))
@@ -62,6 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                     if (user.checkPassword(loginData.get("password"))) {
                         path = INDEX_HTML;
                         httpStatusCode = HttpStatusCode.FOUND;
+                        cookie = HttpCookie.create();
                     }
                     if (!user.checkPassword(loginData.get("password"))) {
                         path = UNAUTHORIZED_HTML;
@@ -80,9 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final String responseBody = makeResponseBody(path);
-            final String contentType = makeContentType(path);
-            final String response = makeResponse(responseBody, contentType, HttpStatusCode.message(httpStatusCode));
+            final String response = makeResponse(makeResponseBody(path), makeContentType(path), HttpStatusCode.message(httpStatusCode), cookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -108,7 +117,16 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String makeResponse(final String responseBody, final String contentType, final String httpStatusCode) {
+    private String makeResponse(final String responseBody, final String contentType, final String httpStatusCode, final HttpCookie cookie) {
+        if (cookie.hasJSESSIONID()) {
+            return String.join("\r\n",
+                    "HTTP/1.1 " + httpStatusCode,
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Set-Cookie: JSESSIONID=" + cookie.getJSESSIONID() + " ",
+                    "",
+                    responseBody);
+        }
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatusCode,
                 "Content-Type: " + contentType + ";charset=utf-8 ",

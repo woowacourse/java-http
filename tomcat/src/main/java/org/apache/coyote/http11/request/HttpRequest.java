@@ -45,6 +45,10 @@ public class HttpRequest {
         return new HttpRequest(startLine, requestHeader, requestBody);
     }
 
+    public boolean hasCookie() {
+        return header.hasCookie();
+    }
+
     public HttpRequestStartLine getStartLine() {
         return startLine;
     }
@@ -55,5 +59,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body.getHttpRequestBodys();
+    }
+
+    public String getCookie() {
+        return header.getCookie();
     }
 }

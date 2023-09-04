@@ -23,11 +23,19 @@ public class HttpRequestHeader {
         );
     }
 
+    public boolean hasCookie() {
+        return httpRequestHeaders.containsKey("Cookie");
+    }
+
     public Map<String, String> getHttpRequestHeaders() {
         return httpRequestHeaders;
     }
 
     public String getContentLength() {
         return httpRequestHeaders.get("Content-Length");
+    }
+
+    public String getCookie() {
+        return httpRequestHeaders.get("Cookie");
     }
 }

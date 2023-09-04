@@ -15,5 +15,5 @@
   - [x] 로그인에 성공하면 http status code를 302로 반환하고 /index.html 로 리다이렉트 한다.
 
 - [x] POST 방식으로 회원가입
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기

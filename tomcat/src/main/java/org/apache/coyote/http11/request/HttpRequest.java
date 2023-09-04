@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.response.RequestHeader;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -10,12 +12,19 @@ import java.util.List;
 public class HttpRequest {
 
     private final RequestLine requestLine;
+    private final RequestHeader requestHeader;
     private final String requestBody;
 
     public HttpRequest(final BufferedReader reader) throws IOException, URISyntaxException {
         final List<String> lines = readAllLines(reader);
+
         requestLine = createRequestLine(lines);
+        requestHeader = createRequestHeader(lines);
         requestBody = addRequestBody(lines, reader);
+    }
+
+    private RequestHeader createRequestHeader(final List<String> lines) {
+        return RequestHeader.from(lines.subList(1, lines.size()));
     }
 
     private RequestLine createRequestLine(List<String> lines) throws URISyntaxException {
@@ -63,8 +72,16 @@ public class HttpRequest {
         return 0;
     }
 
+    public boolean hasJSessionId(){
+        return requestHeader.hasJSessionId();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
+    }
+
+    public RequestHeader getRequestHeader() {
+        return requestHeader;
     }
 
     public String getRequestBody() {

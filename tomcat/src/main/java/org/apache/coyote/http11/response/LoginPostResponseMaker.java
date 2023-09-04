@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.LoginHandler;
-import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.io.IOException;
@@ -17,14 +17,15 @@ public class LoginPostResponseMaker implements ResponseMaker {
     public String createResponse(final HttpRequest request) throws Exception {
         final LoginHandler loginHandler = new LoginHandler();
         if (loginHandler.login(request.getRequestBody())) {
-            return successLoginResponse();
+            return successLoginResponse(request);
         }
 
         return failLoginResponse();
     }
 
-    private String successLoginResponse() throws IOException {
+    private String successLoginResponse(final HttpRequest request) throws IOException {
         final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.HTML, new String(getResponseBodyBytes("/index.html"), UTF_8));
+        httpResponse.addJSessionId(request);
         return httpResponse.getResponse();
     }
 

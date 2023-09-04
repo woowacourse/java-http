@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class HttpResponse {
 
@@ -18,16 +21,14 @@ public class HttpResponse {
         this.responseBody = responseBody;
 
         header = new HashMap<>();
-        header.put("Content-Type: ", contentType.getContentType());
-        header.put("Content-Length: ", String.valueOf(responseBody.getBytes().length));
+        header.put("Content-Type", contentType.getContentType()+";charset=utf-8");
+        header.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
     public String getResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + header.get("Content-Type: ") + ";charset=utf-8 ",
-                "Content-Length: " + header.get("Content-Length: ") + " ",
-                "",
+                printHeader() + "\n",
                 responseBody);
     }
 
@@ -37,7 +38,20 @@ public class HttpResponse {
                 "HTTP/1.1 " + statusCode + "\r",
                 "Location: " + header.get("Location: ") + "\r",
                 "Content-Type: " + header.get("Content-Type: ") + "\r",
-                "Content-Length: " + header.get("Content-Length: ") + "\r\n",
+                "Content-Length: " + header.get("Content-Length: ") + "\r",
+                "Set-Cookie: " + header.get("Set-Cookie: ") + "\r\n",
                 responseBody);
+    }
+
+    public void addJSessionId(final HttpRequest httpRequest) {
+        if (!httpRequest.hasJSessionId()) {
+            header.put("Set-Cookie: ", "JSESSIONID=" + UUID.randomUUID());
+        }
+    }
+
+    public String printHeader() {
+        return header.entrySet().stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }

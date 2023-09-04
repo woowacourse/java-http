@@ -49,7 +49,7 @@ public class HttpResponse {
         return headers.get(name);
     }
 
-    private void putHeader(HttpHeader header) {
+    public void putHeader(HttpHeader header) {
         this.headers.put(header.getName(), header);
     }
 

@@ -43,7 +43,7 @@ public class HttpRequest {
             Map<String, HttpHeader> headers = new HashMap<>();
             String next;
             while (reader.ready() && !(next = reader.readLine()).isEmpty()) {
-                HttpHeader header = HttpHeader.of(next);
+                HttpHeader header = new HttpHeader(next);
                 headers.put(header.getName(), header);
             }
 
@@ -108,6 +108,14 @@ public class HttpRequest {
 
     public List<HttpHeader> getHeaders() {
         return new ArrayList<>(headers.values());
+    }
+
+    public Cookies getCookies() {
+        return Cookies.from(getHeader("Cookie"));
+    }
+
+    public String getCookie(String key) {
+        return getCookies().get(key);
     }
 
     public HttpHeader getHeader(String name) {

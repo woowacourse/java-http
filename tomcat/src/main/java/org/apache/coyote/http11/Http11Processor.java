@@ -15,11 +15,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String CRLF = "\r\n";
+
     private static final Handler DEFAULT_HANDLER = new FileHandler();
     private static final LoginHandler LOGIN_HANDLER = new LoginHandler();
     private static final RegisterHandler REGISTER_HANDLER = new RegisterHandler();
-
     private static final Map<String, Handler> PREDEFINED_HANDLERS = Map.of(
             "/", httpRequest -> new HttpResponse("Hello world!", "text/html"),
             "/login", LOGIN_HANDLER,
@@ -27,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
             "/register", REGISTER_HANDLER,
             "/register.html", REGISTER_HANDLER
     );
+
 
     private final Socket connection;
 
@@ -45,14 +47,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.from(inputStream);
-
             HttpResponse httpResponse = handle(httpRequest);
+
             String headerLines = httpResponse.getHeaders().stream()
                     .map(HttpHeader::toLine)
                     .collect(Collectors.joining(CRLF));
-
             final var response = String.join(CRLF,
-                    "HTTP/1.1 " + httpResponse.getStatus().toLine(),
+                    HTTP_VERSION + httpResponse.getStatus().toLine(),
                     headerLines,
                     "",
                     httpResponse.getBody()

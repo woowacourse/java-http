@@ -14,9 +14,10 @@ public class HttpHeader {
         this.value = value;
     }
 
-    public static HttpHeader of(String line) {
+    public HttpHeader(String line) {
         String[] pair = line.split(SEPARATOR);
-        return new HttpHeader(pair[0].trim(), pair[1].trim());
+        this.name = pair[0].trim();
+        this.value = pair[1].trim();
     }
 
     public String getName() {
@@ -28,7 +29,7 @@ public class HttpHeader {
     }
 
     public String toLine() {
-        return name + SEPARATOR + value;
+        return getName() + SEPARATOR + getValue();
     }
 
     @Override

@@ -5,9 +5,11 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.PathResponse;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.response.StaticResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.HttpURLConnection;
 import java.util.Map;
 
 public class LoginController implements Controller{
@@ -18,6 +20,13 @@ public class LoginController implements Controller{
 
     @Override
     public Response handle(final Request request){
+        if(request.hasQueryString()){
+            return login(request);
+        }
+        return new StaticResponse("html", "/login.html", 200, "OK");
+    }
+
+    private static PathResponse login(Request request) {
         Map<String, String> queryMap = request.getQueryParaMap();
 
         if(!queryMap.containsKey(QUERY_ACCOUNT_KEY) || !queryMap.containsKey(QUERY_PASSWORD_KEY)){
@@ -30,8 +39,9 @@ public class LoginController implements Controller{
         User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
         if(user.checkPassword(password)){
             log.info("user : {}", user);
+            return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
         }
 
-        return new PathResponse(request.getPath());
+        return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
     }
 }

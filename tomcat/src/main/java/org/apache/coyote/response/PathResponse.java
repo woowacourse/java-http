@@ -7,10 +7,14 @@ public class PathResponse implements Response{
 
     private final String path;
     private final String fileType;
+    private final int statusCode;
+    private final String statusValue;
 
-    public PathResponse(final String path) {
+    public PathResponse(final String path, int statusCode, String statusValue) {
         this.path = path + FILE_EXTENSION_DELIMITER + FILE_TYPE_FIXTURE;
         this.fileType = FILE_TYPE_FIXTURE;
+        this.statusCode = statusCode;
+        this.statusValue = statusValue;
     }
 
     @Override
@@ -26,5 +30,15 @@ public class PathResponse implements Response{
     @Override
     public String getBodyString() {
         return "";
+    }
+
+    @Override
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    @Override
+    public String getStatusValue() {
+        return statusValue;
     }
 }

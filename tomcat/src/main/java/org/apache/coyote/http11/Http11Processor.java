@@ -7,15 +7,17 @@ import org.apache.coyote.response.PathResponse;
 import org.apache.coyote.response.Response;
 import org.apache.coyote.response.StaticResponse;
 import org.apache.coyote.response.StringResponse;
-import org.apache.front.*;
+import org.apache.front.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -52,51 +54,54 @@ public class Http11Processor implements Runnable, Processor {
 
     private void writeResponse(OutputStream outputStream, Response response) throws IOException {
         if (response instanceof StaticResponse) {
-            final BufferedReader fileReader = findView(response.getPath());
-            final String responseField = writeResponse(response, fileReader);
-
-            outputStream.write(responseField.getBytes());
+            final String viewResponse = writeView(response);
+            outputStream.write(viewResponse.getBytes());
             outputStream.flush();
         }
 
         if (response instanceof PathResponse) {
-            final BufferedReader fileReader = findView(response.getPath());
-            final String responseField = writeResponse(response, fileReader);
-
-            outputStream.write(responseField.getBytes());
+            final String viewResponse = writeView(response);
+            outputStream.write(viewResponse.getBytes());
             outputStream.flush();
         }
 
-        if(response instanceof StringResponse){
+        if (response instanceof StringResponse) {
             final String responseField = makeResponse(response, response.getBodyString());
-
             outputStream.write(responseField.getBytes());
             outputStream.flush();
         }
     }
 
-    private static String writeResponse(Response response, BufferedReader fileReader) {
+    private String writeView(Response response) throws FileNotFoundException {
+        URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
+
+        if(Objects.isNull(resource)){
+            response = new PathResponse("/404", HttpURLConnection.HTTP_NOT_FOUND, "Not Found");
+            resource = getClass().getClassLoader().getResource("static" + response.getPath());
+        }
+
+        final String responseBody = getResponseBody(resource);
+        return makeResponse(response, responseBody);
+    }
+
+    private String getResponseBody(URL resource) throws FileNotFoundException {
+        final Path path = Paths.get(resource.getPath());
+        final BufferedReader fileReader =  new BufferedReader(new FileReader(path.toFile()));
+
         final StringBuilder actual = new StringBuilder();
         fileReader.lines()
                 .forEach(br -> actual.append(br)
                         .append(System.lineSeparator()));
-        final var responseBody = actual.toString();
 
-        return makeResponse(response, responseBody);
+        return actual.toString();
     }
 
     private static String makeResponse(Response response, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusValue(),
                 "Content-Type: text/" + response.getFileType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-    }
-
-    private BufferedReader findView(String viewPath) throws FileNotFoundException {
-        final URL resource = getClass().getClassLoader().getResource("static" + viewPath);
-        final Path path = Paths.get(resource.getPath());
-        return new BufferedReader(new FileReader(path.toFile()));
     }
 }

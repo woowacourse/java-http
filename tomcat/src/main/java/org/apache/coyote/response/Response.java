@@ -7,4 +7,8 @@ public interface Response {
     String getFileType();
 
     String getBodyString();
+
+    int getStatusCode();
+
+    String getStatusValue();
 }

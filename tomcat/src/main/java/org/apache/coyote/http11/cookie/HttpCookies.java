@@ -4,7 +4,9 @@ import org.apache.coyote.http11.exception.NotFoundCookieException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 public class HttpCookies {
 
@@ -15,12 +17,11 @@ public class HttpCookies {
     }
 
     public static HttpCookies parse(String cookieHeader) {
-        List<HttpCookie> collect = Arrays.stream(cookieHeader.split(";"))
+        return Arrays.stream(cookieHeader.split(";"))
                 .map(String::trim)
                 .map(it -> it.split("="))
                 .map(it -> new HttpCookie(it[0], it[1]))
-                .collect(Collectors.toList());
-        return new HttpCookies(collect);
+                .collect(collectingAndThen(toList(), HttpCookies::new));
     }
 
     public String getCookieValue(String key) {

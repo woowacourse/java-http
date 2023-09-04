@@ -41,6 +41,14 @@ public class RequestLine {
         return requestUri.getRequestParam(key);
     }
 
+    public boolean existsQueryParam() {
+        return requestUri.existsQueryParam();
+    }
+
+    public boolean isMatchMethod(HttpMethod httpMethod) {
+        return method == httpMethod;
+    }
+
     @Override
     public String toString() {
         return "RequestLine{" +
@@ -48,13 +56,5 @@ public class RequestLine {
                 ", requestUri='" + requestUri + '\'' +
                 ", httpVersion=" + httpVersion +
                 '}';
-    }
-
-    public boolean existsQueryParam() {
-        return requestUri.existsQueryParam();
-    }
-
-    public boolean isMatchMethod(HttpMethod httpMethod) {
-        return method == httpMethod;
     }
 }

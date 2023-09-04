@@ -2,7 +2,9 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
 
 public class RequestBody {
 
@@ -15,11 +17,9 @@ public class RequestBody {
     }
 
     public static RequestBody parse(String requestBody) {
-        Map<String, String> body = Arrays.stream(requestBody.split("&"))
+        return Arrays.stream(requestBody.split("&"))
                 .map(query -> query.split("="))
-                .collect(Collectors.toMap(query -> query[0], query -> query[1]));
-
-        return new RequestBody(body);
+                .collect(collectingAndThen(toMap(query -> query[0], query -> query[1]), RequestBody::new));
     }
 
     public String getBody(String key) {

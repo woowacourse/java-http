@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
@@ -11,7 +12,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.sasl.AuthenticationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
             HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
 
-            String response = createResponse(httpRequestStartLine.getRequestURI());
+            String response = createResponse(httpRequestStartLine, httpRequestHeader, httpRequestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,7 +85,12 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequestHeader.from(stringBuilder.toString());
     }
 
-    private String createResponse(String requestURI) throws IOException {
+    private String createResponse(
+            HttpRequestStartLine httpRequestStartLine,
+            HttpRequestHeader httpRequestHeader,
+            HttpRequestBody httpRequestBody
+    ) throws IOException {
+        String requestURI = httpRequestStartLine.getRequestURI();
         log.info("REQUEST URI: {}", requestURI);
 
         if (requestURI.equals("/")) {
@@ -95,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURI.equals("/login")) {
-            return login(requestURI);
+            return login(requestURI, httpRequestStartLine, httpRequestHeader, httpRequestBody);
         }
 
         URL resource = getClass()
@@ -106,7 +111,11 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.of("200 OK", requestURI, responseBody).getResponse();
     }
 
-    private String login(String requestURI) throws IOException {
+    private String login(String requestURI, HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
+        HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
+        if (httpMethod == HttpMethod.GET) {
+            return HttpResponse.of("200 OK", "/login.html", null).getResponse();
+        }
         Map<String, String> queryStrings = parseQueryString(requestURI);
         User account = findAccount(queryStrings);
 
@@ -114,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
         boolean isCorrectPassword = account.checkPassword(password);
         if (!isCorrectPassword) {
             log.info("accout {} 비밀번호 불일치로 로그인 실패", account.getAccount());
-            throw new AuthenticationException();
+            return HttpResponse.of("401 UNAUTHORIZED", "/401.html", null).getResponse();
         }
 
         URL resource = getClass()
@@ -122,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI + ".html");
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponse.of("200 OK", requestURI, responseBody).getResponse();
+        return HttpResponse.of("302 FOUND", "/index.html", responseBody).getResponse();
     }
 
     private User findAccount(Map<String, String> queryStrings) {

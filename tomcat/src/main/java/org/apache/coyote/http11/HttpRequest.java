@@ -49,6 +49,10 @@ public class HttpRequest {
         return this.headers.get(headerName);
     }
 
+    public boolean containsHeader(String headerName) {
+        return this.headers.containsHeader(headerName);
+    }
+
     public void addParameter(String parameterName, String value) {
         this.parameters.put(parameterName, value);
     }

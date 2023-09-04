@@ -20,6 +20,10 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
+    public boolean containsHeader(String headerName) {
+        return this.headers.containsKey(headerName);
+    }
+
     public void put(String key, String value) {
         headers.put(key, value);
     }

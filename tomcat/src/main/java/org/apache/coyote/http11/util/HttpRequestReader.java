@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.exception.InvalidHttpFormException;
@@ -21,6 +22,7 @@ public class HttpRequestReader {
 
         readRequestLine(httpRequest, bufferedReader);
         readRequestHeaders(httpRequest, bufferedReader);
+        readRequestBody(httpRequest, bufferedReader);
 
         return httpRequest;
     }
@@ -49,6 +51,16 @@ public class HttpRequestReader {
         }
     }
 
+    private static void readRequestBody(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
+        if (!httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
+            return;
+        }
+        int contentLength = Integer.parseInt(httpRequest.getHeader(HttpHeaders.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        httpRequest.setBody(requestBody);
+    }
     private static void parseUri(HttpRequest httpRequest, String uri) {
         if (uri.contains("?")) {
             final var queryStartIndex = uri.indexOf("?");

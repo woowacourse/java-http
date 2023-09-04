@@ -178,7 +178,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 존재하지_않는_페이지_조회시_404페이지로_이동한다() throws IOException {
+    void 존재하지_않는_페이지_조회시_404페이지를_반환한다() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /notexistpage12312.html HTTP/1.1 ",
@@ -206,7 +206,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인이_성공하면_인덱스_페이지로_이동한다() throws IOException {
+    void 로그인이_성공하면_인덱스_페이지로_이동한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -223,15 +223,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = List.of(
                 "HTTP/1.1 302 FOUND \r\n",
-                "Content-Type: text/html;charset=utf-8 \r\n",
                 "Location: /index.html \r\n",
-                "Content-Length: " + body.getBytes().length + " \r\n",
-                "\r\n",
-                body
+                "\r\n"
         );
 
         assertThat(socket.output()).contains(expected);
@@ -267,7 +262,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 회원가입후_인덱스_페이지로_이동한다() throws IOException {
+    void 회원가입후_인덱스_페이지로_이동한다() {
         // given
         final String requestBody = "account=royce&email=roro@gmail.com&password=newpassword";
         final String httpRequest = String.join("\r\n",
@@ -285,14 +280,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Location: /index.html \r\n" +
-                "Content-Length: " + body.getBytes().length + " \r\n" +
-                "\r\n" +
-                body;
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

@@ -10,6 +10,7 @@ public class HttpResponse {
     private static final String SUPPORTED_HTTP_VERSION = "HTTP/1.1";
     private static final HttpResponseStatusLine DEFAULT_RESPONSE_STATUS =
             HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, HttpStatus.OK);
+    private static final String NO_CONTENT = "";
 
     private final HttpHeaders httpHeaders = HttpHeaders.getInstance();
     private HttpResponseStatusLine httpResponseStatusLine = DEFAULT_RESPONSE_STATUS;
@@ -20,10 +21,19 @@ public class HttpResponse {
     }
 
     public void updateByResponseEntity(final ResponseEntity response) throws IOException {
-        updateHttpResponseStatusLineByStatus(response.getHttpStatus());
-        setHeader("Content-Type", response.getView().getContentType());
+        final HttpStatus httpStatus = response.getHttpStatus();
+        updateHttpResponseStatusLineByStatus(httpStatus);
         response.getHeaders().forEach(this::setHeader);
+        if (httpStatus == HttpStatus.FOUND) {
+            noContentResponse();
+            return;
+        }
+        setHeader("Content-Type", response.getView().getContentType());
         setBody(response.getView().renderView());
+    }
+
+    private void noContentResponse() {
+        this.body = NO_CONTENT;
     }
 
     public HttpResponseStatusLine getHttpResponseStatusLine() {

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -19,9 +20,9 @@ public class UserController {
 
         try {
             userService.login(account, password);
-            return ResponseEntity.of(HttpStatus.FOUND, "/index");
+            return new ResponseEntity(HttpMethod.POST, HttpStatus.FOUND, "/index");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.UNAUTHORIZED, "/401");
+            return new ResponseEntity(HttpMethod.POST, HttpStatus.FOUND, "/401");
         }
     }
 
@@ -32,6 +33,6 @@ public class UserController {
 
         userService.save(account, password, email);
 
-        return ResponseEntity.of(HttpStatus.FOUND, "/index");
+        return new ResponseEntity(HttpMethod.POST, HttpStatus.FOUND, "/index");
     }
 }

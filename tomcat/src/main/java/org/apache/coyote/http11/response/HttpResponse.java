@@ -14,8 +14,7 @@ public class HttpResponse {
         this.fileExtension = fileExtension;
         this.responseBody = responseBody;
     }
-
-
+    
     public String extractResponse() {
         return new StringBuilder()
                 .append(convertStatusLine()).append(System.lineSeparator())

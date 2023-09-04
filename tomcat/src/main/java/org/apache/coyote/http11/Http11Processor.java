@@ -43,16 +43,34 @@ public class Http11Processor implements Runnable, Processor {
             HandlerMapping handlerMapping = new HandlerMapping();
             ResponseEntity responseEntity = handlerMapping.extractResponseEntity(httpRequest);
 
-            ViewResolver viewResolver = new ViewResolver(responseEntity);
-
-            HttpResponse httpResponse = viewResolver.extractHttpResponse();
-            String response = httpResponse.extractResponse();
+            String response = extractResponse(responseEntity);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractResponse(ResponseEntity responseEntity) {
+        if (responseEntity.isEqualTo(HttpMethod.GET)) {
+            ViewResolver viewResolver = new ViewResolver(responseEntity);
+            HttpResponse httpResponse = viewResolver.extractHttpResponse();
+
+            return httpResponse.extractResponse();
+        }
+        return redirect(responseEntity);
+    }
+
+    private String redirect(ResponseEntity responseEntity) {
+        HttpStatus httpStatus = responseEntity.getHttpStatus();
+
+        return new StringBuilder()
+                .append(String.format("HTTP/1.1 %s %s ", httpStatus.getStatusCode(), httpStatus.name()))
+                .append(String.format("Content-Type: %s;charset=utf-8 ", FileExtension.HTML)).append(System.lineSeparator())
+                .append(String.format("Location: %s.html", responseEntity.getPath())).append(System.lineSeparator())
+                .append(System.lineSeparator())
+                .toString();
     }
 
 

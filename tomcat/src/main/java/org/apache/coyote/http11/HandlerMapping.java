@@ -25,7 +25,7 @@ public class HandlerMapping {
             }
         }
 
-        return ResponseEntity.of(HttpStatus.OK, path);
+        return new ResponseEntity(HttpMethod.GET, HttpStatus.OK, path);
     }
 
 }

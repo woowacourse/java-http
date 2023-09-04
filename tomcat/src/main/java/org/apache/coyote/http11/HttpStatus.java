@@ -17,4 +17,5 @@ public enum HttpStatus {
     public int getStatusCode() {
         return statusCode;
     }
+
 }

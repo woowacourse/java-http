@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -36,7 +37,14 @@ public class LoginController implements Controller {
             }
 
             log.info("login success!");
+
             Map<String, String> headers = new LinkedHashMap<>();
+            final String cookieHeader = httpRequest.getHeaders().get("Cookie");
+            final Cookie cookie = Cookie.from(cookieHeader);
+            if(cookie.getAttribute("JSESSIONID") == null) {
+                cookie.setJsessionid();
+            }
+            headers.put("Set-Cookie", "JSESSIONID=" + cookie.getAttribute("JSESSIONID"));
             headers.put("Location", "/index.html");
             return new HttpResponse(
                     "HTTP/1.1",

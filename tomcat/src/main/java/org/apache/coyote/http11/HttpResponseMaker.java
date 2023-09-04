@@ -38,7 +38,7 @@ public class HttpResponseMaker {
         if (mapper == LOG_IN) {
             HttpCookie cookie = HttpCookie.from(headers.get(COOKIE));
 
-            if (cookie.hasJSessionId() && sessionManager.findSession(cookie.getJSessionId()) != null) {
+            if (hasValidCookie(sessionManager, cookie)) {
                 return buildRedirectResponse(firstLineInfo, RedirectLocation.LOG_IN_SUCCESS, mapper);
             }
 
@@ -60,6 +60,10 @@ public class HttpResponseMaker {
         }
 
         return buildResponse(firstLineInfo, mapper, responseBody);
+    }
+
+    private static boolean hasValidCookie(SessionManager sessionManager, HttpCookie cookie) {
+        return cookie.hasJSessionId() && sessionManager.findSession(cookie.getJSessionId()) != null;
     }
 
     private static String handleLoginRequest(

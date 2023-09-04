@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequestBody {
 
@@ -23,6 +26,12 @@ public class HttpRequestBody {
 
     private HttpRequestBody(final String body) {
         this.body = body;
+    }
+
+    public Map<String, String> parseUserInfos() {
+        return Arrays.stream(body.split("&"))
+                .map(info -> Arrays.asList(info.split("=")))
+                .collect(Collectors.toMap(infos -> infos.get(0), infos -> infos.get(1), (a, b) -> b));
     }
 
     public String getBody() {

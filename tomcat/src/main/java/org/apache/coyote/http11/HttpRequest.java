@@ -50,4 +50,12 @@ public class HttpRequest {
         return firstLine.getMethod();
     }
 
+    public HttpRequestHeader getHeaders() {
+        return headers;
+    }
+
+    public HttpRequestBody getBody() {
+        return body;
+    }
+
 }

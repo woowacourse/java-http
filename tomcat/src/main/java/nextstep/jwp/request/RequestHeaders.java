@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestHeaders {
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
 
     private RequestHeaders(final Map<String, String> headers) {
         this.headers = headers;
@@ -21,5 +21,9 @@ public class RequestHeaders {
             line = bufferedReader.readLine();
         }
         return new RequestHeaders(headers);
+    }
+
+    public String getHeaderValue(final String header) {
+        return headers.get(header);
     }
 }

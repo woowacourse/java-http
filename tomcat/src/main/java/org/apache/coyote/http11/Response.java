@@ -13,8 +13,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
@@ -22,6 +24,7 @@ import static java.util.Objects.isNull;
 public class Response {
 
     private static final int LOCATION_INDEX = 1;
+    private static final int METHOD_INDEX = 0;
     private static final String HTTP_HEADER_DELIMITER = " ";
     private static final String BASE_PATH = "static";
     private static final String ROOT_RESPONSE = "Hello world!";
@@ -29,44 +32,72 @@ public class Response {
     private static final Logger LOGGER = LoggerFactory.getLogger(Response.class);
 
     private final Path path;
+    private final String method;
     private final ContentType contentType;
     private final Map<String, String> parameters;
 
-    public Response(final Path path, final ContentType contentType, final Map<String, String> parameters) {
+    public Response(final Path path, final String method, final ContentType contentType, final Map<String, String> parameters) {
         this.path = path;
+        this.method = method;
         this.contentType = contentType;
         this.parameters = parameters;
     }
 
     public static Response from(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        final String request = br.readLine().split(HTTP_HEADER_DELIMITER)[LOCATION_INDEX];
 
-        if (request.contains(QUERY)) {
-            final int queryIndex = request.indexOf(QUERY);
-            return createInstanceWithParameters(request, queryIndex);
+        final List<String> header = new ArrayList<>();
+        while (!header.contains("")) {
+            header.add(br.readLine());
         }
 
-        return createInstance(request, new HashMap<>());
+        final int contentLength = Integer.parseInt(getContentLength(header));
+        final String[] request = header.get(0).split(HTTP_HEADER_DELIMITER);
+        final String method = request[METHOD_INDEX];
+        final String location = request[LOCATION_INDEX];
+
+        if (method.equals("POST")) {
+            final char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+            final Map<String, String> parameters = parseParameters(String.valueOf(buffer));
+            return createInstance(location, method, parameters);
+        }
+
+        if (location.contains(QUERY)) {
+            final int queryIndex = location.indexOf(QUERY);
+            final String locationWithoutParameters = location.substring(0, queryIndex);
+            final Map<String, String> parameters = parseParameters(location.substring(queryIndex + 1));
+            return createInstance(locationWithoutParameters, method, parameters);
+        }
+
+        return createInstance(location, method, new HashMap<>());
     }
 
-    private static Response createInstanceWithParameters(final String request, final int queryIndex) {
-        final String location = request.substring(0, queryIndex);
+    private static String getContentLength(final List<String> header) {
+        final String contentLengthKey = "Content-Length: ";
 
+        return header.stream()
+                .filter(contentLength -> contentLength.contains(contentLengthKey))
+                .map(contentLength -> contentLength.replace(contentLengthKey, ""))
+                .findAny()
+                .orElse("0");
+    }
+
+    private static Map<String, String> parseParameters(final String queries) {
         final Map<String, String> parameters = new HashMap<>();
-        final String queries = request.substring(queryIndex + 1);
         Arrays.stream(queries.split("&"))
                 .map(query -> query.split("="))
                 .forEach(query -> parameters.put(query[0], query[1]));
 
-        return createInstance(location, parameters);
+        return parameters;
     }
 
-    private static Response createInstance(final String location, final Map<String, String> parameters) {
+    private static Response createInstance(final String location, final String method,
+                                           final Map<String, String> parameters) {
         final ContentType contentType = ContentType.from(location);
         final Path path = getPath(location, contentType);
 
-        return new Response(path, contentType, parameters);
+        return new Response(path, method, contentType, parameters);
     }
 
     private static Path getPath(final String location, final ContentType contentType) {
@@ -81,22 +112,40 @@ public class Response {
     }
 
     public String get() throws IOException {
+        if (path.endsWith("register.html") && method.equals("POST")) {
+            register();
+            return makeResponseForRedirect("/index");
+        }
+
         if (path.endsWith("login.html") && !parameters.isEmpty()) {
             try {
                 login();
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /index",
-                        "");
+                return makeResponseForRedirect("/index");
             } catch (Exception e) {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /401",
-                        "");
+                return makeResponseForRedirect("/401");
             }
         }
 
         final String body = makeResponseBody();
+        return makeResponseForGet(body);
+    }
+
+    private void register() {
+        final String account = parameters.get("account");
+        final String email = parameters.get("email");
+        final String password = parameters.get("password");
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+    }
+
+    private String makeResponseForRedirect(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location,
+                "");
+    }
+
+    private String makeResponseForGet(final String body) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 contentType.toHeader(),

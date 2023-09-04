@@ -100,10 +100,17 @@ class HandlerTest {
     @Test
     void 로그인_요청_핸들러는_GET_요청과_쿼리_파라미터를_지원한다() {
         // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu");
+        body.put("password", "password");
         HttpRequest request = new HttpRequest.Builder()
-                .httpMethod(HttpMethod.GET)
-                .url(Url.from("/login?account=gugu&password=password"))
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/login"))
                 .headers(HttpHeaders.getEmptyHeaders())
+                .body(body)
                 .build();
 
         // when
@@ -116,10 +123,17 @@ class HandlerTest {
     @Test
     void 로그인_요청_핸들러는_계정과_패스워드가_맞으면_index_리다이렉트를_반환한다() {
         // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu");
+        body.put("password", "password");
         HttpRequest request = new HttpRequest.Builder()
-                .httpMethod(HttpMethod.GET)
-                .url(Url.from("/login?account=gugu&password=password"))
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/login"))
                 .headers(HttpHeaders.getEmptyHeaders())
+                .body(body)
                 .build();
 
         // when
@@ -127,19 +141,26 @@ class HandlerTest {
         HttpResponse response = loginHandler.handle(request);
 
         // then
-        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.LOCATION, "/index.html");
+        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
+        expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, headers));
+                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
     }
 
     @Test
     void 로그인_요청_핸들러는_계정과_패스워드가_틀리면_401_리다이렉트를_반환한다() {
         // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu2");
+        body.put("password", "password");
         HttpRequest request = new HttpRequest.Builder()
-                .httpMethod(HttpMethod.GET)
-                .url(Url.from("/login?account=gugu&password=pass2word"))
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/login"))
                 .headers(HttpHeaders.getEmptyHeaders())
+                .body(body)
                 .build();
 
         // when
@@ -147,10 +168,10 @@ class HandlerTest {
         HttpResponse response = loginHandler.handle(request);
 
         // then
-        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.LOCATION, "/401.html");
+        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
+        expectedHeaders.put(HttpHeader.LOCATION, "/401.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, headers));
+                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
     }
 
     @Test

@@ -25,8 +25,8 @@ public class LoginHandler implements Handler {
     @Override
     public HttpResponse handle(final HttpRequest request) {
         try {
-            final String account = request.getQueryStringValue(ACCOUNT_QUERY_KEY);
-            final String password = request.getQueryStringValue(PASSWORD_QUERY_KEY);
+            final String account = request.getBodyValueOf(ACCOUNT_QUERY_KEY);
+            final String password = request.getBodyValueOf(PASSWORD_QUERY_KEY);
             final User user = authService.login(account, password);
             log.info("User ={}", user);
 
@@ -38,14 +38,13 @@ public class LoginHandler implements Handler {
             headers.put(HttpHeader.LOCATION, "/401.html");
             return new HttpResponse(HttpStatus.REDIRECT, headers);
         }
-
     }
 
     @Override
     public boolean isSupported(final HttpRequest request) {
-        return request.isRequestMethodOf(HttpMethod.GET) &&
+        return request.isRequestMethodOf(HttpMethod.POST) &&
                 request.isUrl(Url.from("/login")) &&
-                request.hasQueryStringOf(ACCOUNT_QUERY_KEY) &&
-                request.hasQueryStringOf(PASSWORD_QUERY_KEY);
+                request.hasBodyValueOf(ACCOUNT_QUERY_KEY) &&
+                request.hasBodyValueOf(PASSWORD_QUERY_KEY);
     }
 }

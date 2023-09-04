@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.vo.HttpRequest;
+import org.apache.coyote.util.HttpRequestParser;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;

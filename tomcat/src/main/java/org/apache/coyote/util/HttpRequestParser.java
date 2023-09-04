@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.vo.HttpBody;
@@ -65,7 +66,7 @@ public class HttpRequestParser {
         try {
             bufferedReader.read(chars);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedServletException(e);
         }
 
         return parseRawBody(new String(chars));
@@ -88,7 +89,7 @@ public class HttpRequestParser {
         try {
             return URLDecoder.decode(value, encoding);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedServletException(e);
         }
     }
 
@@ -96,7 +97,7 @@ public class HttpRequestParser {
         try {
             return bufferedReader.readLine();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedServletException(e);
         }
     }
 }

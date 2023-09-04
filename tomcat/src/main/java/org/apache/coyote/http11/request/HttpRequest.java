@@ -1,8 +1,6 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.Cookie;
-import org.apache.coyote.http11.common.HttpVersion;
-import org.apache.coyote.http11.common.RequestMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;

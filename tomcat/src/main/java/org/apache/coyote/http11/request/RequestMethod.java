@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.request;
 
 import java.util.Collections;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.common;
 
+import org.apache.coyote.http11.request.RequestMethod;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

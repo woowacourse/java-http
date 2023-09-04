@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class ViewLoader {
 
@@ -15,6 +16,10 @@ public class ViewLoader {
 
     public static String from(String viewName) {
         URL resource = classLoader.getResource(STATIC_DIRECTORY + viewName);
+
+        if (Objects.isNull(resource)) {
+            return toNotFound();
+        }
         final File file = new File(resource.getFile());
         try{
             return new String(Files.readAllBytes(file.toPath()));

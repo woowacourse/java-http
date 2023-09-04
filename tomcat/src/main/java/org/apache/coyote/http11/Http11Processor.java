@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,11 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.toMap;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,10 +42,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = new BufferedReader(new InputStreamReader(inputStream)).readLine();
-            System.out.println(request);
+            log.info("request : {}", request);
 
             final var uri = request.split(" ")[1];
-            System.out.println(uri);
+            log.info("uri : {}", uri);
 
             final var responseBody = getResponseBody(uri);
 
@@ -60,6 +66,22 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponseBody(final String uri) throws IOException {
         if ("/".equals(uri)) {
             return "Hello world!";
+        }
+        if (uri.startsWith("/login?")) {
+            int index = uri.indexOf("?");
+            String queryString = uri.substring(index + 1);
+            final Map<String, String> queries = Arrays.stream(queryString.split("&"))
+                                                      .map(query -> query.split("="))
+                                                      .collect(toMap(query -> query[0], query -> query[1]));
+            final User userInfo = InMemoryUserRepository.findByAccount(queries.get("account"))
+                                                        .filter(user -> user.checkPassword(queries.get("password")))
+                                                        .orElseThrow(() -> new IllegalArgumentException("사용자 정보가 없습니다."));
+
+            log.info("User{id={}, account={}, email={}, pasword={}", userInfo.getId(), userInfo.getAccount(), userInfo.getEmail(), userInfo.getPassword());
+
+            final URL resource = ClassLoader.getSystemClassLoader().getResource("static/login.html");
+            final String file = Objects.requireNonNull(resource).getFile();
+            return new String(Files.readAllBytes(new File(file).toPath()));
         }
 
         final URL resource = ClassLoader.getSystemClassLoader().getResource("static" + uri);

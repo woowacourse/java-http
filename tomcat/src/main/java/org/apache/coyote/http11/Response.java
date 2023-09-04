@@ -1,88 +1,78 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
-
-import static org.apache.coyote.http11.ContentType.*;
-import static org.apache.coyote.http11.Header.*;
-import static org.apache.coyote.http11.StatusCode.*;
 
 public class Response {
 
-    private static final String SPACE = " ";
-    private static final String CRLF = "\r\n";
-    private static final String SPACE_CRLF = " \r\n";
-    private static final String COLON = ": ";
-    private static final String HELLO_WORLD = "Hello world!";
-    private static final String ROOT = "/";
+    private static final String STATIC = "static";
+    public static final String SPACE_CRLF = " \r\n";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String PERIOD = ".";
+    public static final String SPACE = " ";
+    public static final String CRLF = "\r\n";
+    public static final String COLON = ": ";
+
     private final RequestReader requestReader;
+    private final StatusCode statusCode;
     private final Map<String, String> headers = new LinkedHashMap<>();
+
     private String body;
-    private String responseFormat;
 
-    public Response(RequestReader requestReader) throws IOException {
+    public Response(RequestReader requestReader, StatusCode statusCode) {
         this.requestReader = requestReader;
-        setResponse();
+        this.statusCode = statusCode;
     }
 
-    private void setResponse() throws IOException {
-        String resource = requestReader.read();
-        String accept = requestReader.getAccept();
+    public String format() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(requestReader.getProtocol()).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
+        headers.forEach((key, value) -> sb.append(key).append(COLON).append(value).append(SPACE_CRLF));
+        sb.append(CRLF).append(body);
 
-        if (TEXT_HTML.in(accept)) {
-            read(TEXT_HTML, resource);
-        } else if (TEXT_CSS.in(accept)) {
-            read(TEXT_CSS, resource);
-        } else if (APPLICATION_JAVASCRIPT.in(accept)) {
-            read(APPLICATION_JAVASCRIPT, resource);
-        } else {
-            read(ALL, resource);
+        return sb.toString();
+    }
+
+    public Response createBodyByPlainText(String text) {
+        this.body = text;
+        headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
+        return this;
+    }
+
+    public Response createResponseBodyByFile(String url) throws IOException {
+        url = resolveExtension(url);
+        String path = getClass().getClassLoader().getResource(STATIC + url).getPath();
+        File file = new File(path);
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line).append(System.lineSeparator());
+            }
+            this.body = sb.toString();
         }
+        headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(file.length()));
+        return this;
     }
 
-    public void read(ContentType contentType, String resource) throws IOException {
-        body = getBody(resource);
-        String typeValue = contentType.getValue();
-        if (contentType.equals(TEXT_CSS) || contentType.equals(TEXT_HTML)) {
-            typeValue += ";charset=utf-8";
+    private String resolveExtension(String url) {
+        if (url.contains(PERIOD)) {
+            return url;
         }
-        join(typeValue, body);
+        return url + HTML_EXTENSION;
     }
 
-    private void join(String typeValue, String body) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(requestReader.getProtocol()).append(SPACE).append(OK.status()).append(SPACE_CRLF);
-        addBaseHeaders(typeValue);
-        headers.forEach((key, value) -> stringBuilder.append(key).append(COLON).append(value).append(SPACE_CRLF));
-        stringBuilder.append(CRLF).append(body);
-
-        responseFormat = stringBuilder.toString();
+    public Response addBaseHeaders() {
+        headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
+        return this;
     }
 
-    private void addBaseHeaders(String typeValue){
-        headers.put(CONTENT_TYPE.getName(), typeValue);
-        headers.put(CONTENT_LENGTH.getName(), String.valueOf(body.getBytes().length));
-    }
-
-    private static String getBody(String resource) throws IOException {
-        if (resource.equals(ROOT)) {
-            return HELLO_WORLD;
-        }
-        RequestUrl requestUrl = new RequestUrl(resource);
-        URL url = requestUrl.getUrl();
-
-        Path path = new File(Objects.requireNonNull(url).getFile()).toPath();
-        return new String(Files.readAllBytes(path));
-    }
-
-    public byte[] getResponse() {
-        return responseFormat.getBytes();
+    public Response addHeader(String key, String value) {
+        headers.put(key, value);
+        return this;
     }
 }

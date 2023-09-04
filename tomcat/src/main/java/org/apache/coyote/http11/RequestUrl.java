@@ -1,22 +1,25 @@
 package org.apache.coyote.http11;
 
-import java.net.URL;
+import java.util.HashMap;
 
 public class RequestUrl {
 
-    private final URL url;
+    private final String url;
+    private final HashMap<String, String> params = new HashMap<>();
 
-    public RequestUrl(String resource) {
-        this.url = makeUrl(resource);
+    public RequestUrl(String url) {
+        String[] urlSplit = url.split("\\?");
+        this.url = urlSplit[0];
+        if (urlSplit.length > 1) {
+            String[] paramsSplit = urlSplit[1].split("&");
+            for (String param : paramsSplit) {
+                String[] keyValue = param.split("=");
+                params.put(keyValue[0], keyValue[1]);
+            }
+        }
     }
 
-    public URL getUrl() {
+    public String getUrl() {
         return url;
-    }
-
-    private URL makeUrl(String resource) {
-        return getClass()
-                .getClassLoader()
-                .getResource("static" + resource);
     }
 }

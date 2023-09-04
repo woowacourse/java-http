@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpResponseHeader {
+public class HttpResponseHeaders {
     private final Map<ResponseHeaderType, String> headers;
 
-    public HttpResponseHeader() {
+    public HttpResponseHeaders() {
         this(new LinkedHashMap<>());
     }
 
-    public HttpResponseHeader(final Map<ResponseHeaderType, String> headers) {
+    public HttpResponseHeaders(final Map<ResponseHeaderType, String> headers) {
         this.headers = headers;
     }
 
@@ -22,7 +22,7 @@ public class HttpResponseHeader {
     @Override
     public String toString() {
         return headers.entrySet().stream()
-                .map(entry -> String.format("%s: %s ", entry.getKey().toString(), entry.getValue()))
+                .map(entry -> String.format("%s: %s ", entry.getKey().getType(), entry.getValue()))
                 .collect(Collectors.joining("\r\n"));
     }
 }

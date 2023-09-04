@@ -13,7 +13,7 @@ import org.apache.coyote.http11.handler.HandlerAdapter;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestHeaders;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    public static final String EMPTY_INPUT = "";
 
     private final Socket connection;
 
@@ -60,27 +62,34 @@ public class Http11Processor implements Runnable, Processor {
         InputStreamReader reader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String startLine = bufferedReader.readLine();
+        HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
+        HttpRequestHeaders httpRequestHeaders = getRequestHeader(bufferedReader);
 
+        if (!httpRequestHeaders.contains(CONTENT_LENGTH_HEADER)) {
+            return HttpRequest.of(requestStartLine, httpRequestHeaders);
+        }
+
+        HttpRequestBody httpRequestBody = getRequestBody(bufferedReader, httpRequestHeaders);
+        return HttpRequest.of(requestStartLine, httpRequestHeaders, httpRequestBody);
+    }
+
+    private HttpRequestHeaders getRequestHeader(final BufferedReader bufferedReader) throws IOException {
         String line;
         List<String> headers = new ArrayList<>();
-        while (!(line = bufferedReader.readLine()).equals("")) {
+        while (!(line = bufferedReader.readLine()).equals(EMPTY_INPUT)) {
             headers.add(line);
         }
+        return HttpRequestHeaders.from(headers);
+    }
 
-        HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
-        HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(headers);
-
-        if (!httpRequestHeader.contains("Content-Length")) {
-            return HttpRequest.of(requestStartLine, httpRequestHeader);
-        }
-
-        int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
+    private HttpRequestBody getRequestBody(final BufferedReader bufferedReader,
+                                           final HttpRequestHeaders httpRequestHeaders)
+            throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeaders.getValue(CONTENT_LENGTH_HEADER));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
 
-        HttpRequestBody httpRequestBody = new HttpRequestBody(requestBody);
-
-        return HttpRequest.of(requestStartLine, httpRequestHeader, httpRequestBody);
+        return new HttpRequestBody(requestBody);
     }
 }

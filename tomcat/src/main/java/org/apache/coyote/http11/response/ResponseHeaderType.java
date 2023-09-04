@@ -3,8 +3,7 @@ package org.apache.coyote.http11.response;
 public enum ResponseHeaderType {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    LOCATION("Location")
-    ;
+    LOCATION("Location");
 
     private final String type;
 
@@ -12,8 +11,7 @@ public enum ResponseHeaderType {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
+    public String getType() {
         return type;
     }
 }

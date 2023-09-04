@@ -10,14 +10,6 @@ public class HttpResponseStatusLine {
         this.statusCode = statusCode;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public HttpStatusCode getStatusCode() {
-        return statusCode;
-    }
-
     @Override
     public String toString() {
         return String.format("%s %s ", httpVersion, statusCode.toString());

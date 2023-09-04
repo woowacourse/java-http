@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatusCode {
 
     OK(200),
-    FOUND(302);
+    FOUND(302),
+    BAD_REQUEST(400);
 
     private final int statusCode;
 

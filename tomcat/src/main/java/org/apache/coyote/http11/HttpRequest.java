@@ -60,12 +60,14 @@ public class HttpRequest {
         }
         this.headers = headers;
 
-        StringBuilder bodyBuilder = new StringBuilder();
-        while (bufferedReader.ready()) {
-            bodyBuilder.append(line);
+        String body = "";
+        if (headers.containsKey("Content-Length")) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length").split(": ")[1]);
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            body = new String(buffer);
         }
-
-        this.body = bodyBuilder.toString();
+        this.body = body;
     }
 
     public HttpMethod getHttpMethod() {

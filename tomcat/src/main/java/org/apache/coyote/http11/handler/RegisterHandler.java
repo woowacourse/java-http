@@ -8,22 +8,22 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MemberService;
 
-public class LoginHandler implements Handler {
+public class RegisterHandler implements Handler {
 
     private static final ClassLoader SYSTEM_CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
     @Override
     public boolean supports(HttpRequest request) {
-        return request.getUrl().equals("/login");
+        return request.getUrl().equals("/register");
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) {
         if (request.getHeaders().containsKey("Content-Type") && request.getHeaders()
                 .get("Content-Type").contains("application/x-www-form-urlencoded")) {
-            return MemberService.login(request);
+            return MemberService.register(request);
         }
-        String url = "/login.html";
+        String url = "/register.html";
         try (
                 FileInputStream fileStream = new FileInputStream(
                         findStaticResourceURL(url).getFile())

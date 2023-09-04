@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +15,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
-    private final Controller controller;
+    private final HttpResponseBuilder httpResponseBuilder;
+    private final FrontController frontController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.httpRequestParser = new HttpRequestParser();
-        this.controller = new Controller();
+        this.httpResponseBuilder = new HttpResponseBuilder();
+        this.frontController = new FrontController();
     }
 
     @Override
@@ -34,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             httpRequestParser.accept(inputStream);
-            final String response = controller.handle(httpRequestParser);
+            String response = frontController.process(httpRequestParser, httpResponseBuilder);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -3,6 +3,7 @@ package org.apache.front;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HelloWorldController;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.PathResponse;
 import org.apache.coyote.response.Response;
@@ -19,6 +20,7 @@ public class DynamicController implements FrontController {
     static {
         urlMapper.put("/", new HelloWorldController());
         urlMapper.put("/login", new LoginController());
+        urlMapper.put("/register", new RegisterController());
     }
 
     @Override

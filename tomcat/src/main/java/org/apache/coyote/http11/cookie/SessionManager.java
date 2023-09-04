@@ -4,24 +4,17 @@ import nextstep.jwp.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<User, String> sessions = new HashMap<>();
+    private static final Map<String, User> SESSIONS = new ConcurrentHashMap<>();
 
-    public static void add(final User user, HttpCookie httpCookie) {
-        sessions.put(user, httpCookie.getJSessionId());
+    public static void add(String sessionId, User user) {
+        SESSIONS.put(sessionId, user);
     }
 
-    public static boolean isValidUser(final User user, final String jsessionId) {
-        return sessions.entrySet().stream()
-                .anyMatch(userStringEntry ->
-                        userStringEntry.getKey().equals(user)
-                        && userStringEntry.getValue().equals(jsessionId)
-                );
-    }
-
-    public static boolean isValidHttpCookie(final HttpCookie httpCookie) {
-        return sessions.containsValue(httpCookie.getJSessionId());
+    public static boolean isAlreadyLogin(String sessionId) {
+        return SESSIONS.containsKey(sessionId);
     }
 }

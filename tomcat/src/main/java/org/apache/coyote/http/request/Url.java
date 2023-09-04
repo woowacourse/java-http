@@ -38,7 +38,7 @@ public class Url {
             return new Url(url, url, Collections.emptyList(), HttpConsts.BLANK);
         }
 
-        final String resourceName = urlTokens[urlTokens.length - 1];
+        final String resourceName = findResourceName(urlTokens[urlTokens.length - 1]);
         final List<String> hierarchy = Arrays.asList(Arrays.copyOf(urlTokens, urlTokens.length - 1));
 
         return new Url(url, path, hierarchy, resourceName);
@@ -50,6 +50,13 @@ public class Url {
         }
 
         return url.substring(0, queryParameterDelimiterIndex);
+    }
+
+    private static String findResourceName(final String target) {
+        if (target.contains(QUERY_PARAMETER_DELIMITER)) {
+            return target.substring(0, target.indexOf(QUERY_PARAMETER_DELIMITER));
+        }
+        return target;
     }
 
     public boolean matchesByPath(final String targetPath, final String rootContextPath) {

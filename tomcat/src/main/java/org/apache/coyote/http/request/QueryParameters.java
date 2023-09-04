@@ -25,7 +25,7 @@ public class QueryParameters {
     }
 
     public static QueryParameters fromUrlContent(final String urlContent) {
-        if (isEmptyUrlContent(urlContent)) {
+        if (isNotQueryParameterUrlContent(urlContent)) {
             return EMPTY;
         }
 
@@ -35,7 +35,7 @@ public class QueryParameters {
         return new QueryParameters(parameters);
     }
 
-    private static boolean isEmptyUrlContent(final String urlContent) {
+    private static boolean isNotQueryParameterUrlContent(final String urlContent) {
         return urlContent == null ||
                 urlContent.isEmpty() ||
                 urlContent.isBlank() ||
@@ -88,9 +88,7 @@ public class QueryParameters {
     }
 
     private static boolean isEmptyContent(final String content) {
-        return content == null ||
-                content.isEmpty() ||
-                content.isBlank();
+        return content == null || content.isEmpty() || content.isBlank();
     }
 
     public String findValue(final String queryParameterKey) {

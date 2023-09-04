@@ -69,8 +69,8 @@ public class RequestGenerator {
     }
 
     private QueryParameters readQueryParameters(final Url url, final HttpRequestBody body) {
-        final String path = url.url();
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent(path);
+        final String content = url.url();
+        final QueryParameters queryParameters = QueryParameters.fromUrlContent(content);
 
         if (queryParameters != QueryParameters.EMPTY || body.isEmpty()) {
             return queryParameters;

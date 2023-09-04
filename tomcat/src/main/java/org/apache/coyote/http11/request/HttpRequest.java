@@ -7,8 +7,6 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 
 public class HttpRequest {
 
-	private static final String BODY_DELIMITER = System.lineSeparator() + System.lineSeparator();
-
 	private final HttpMethod httpMethod;
 	private final String endPoint;
 	private final QueryParam queryParam;
@@ -92,13 +90,6 @@ public class HttpRequest {
 			return new HttpRequest(
 				httpMethod, endPoint, queryParam, headers, body
 			);
-		}
-
-		private static String extractBody(final String[] requestSplitByBodyDelimiter) {
-			if (requestSplitByBodyDelimiter.length == 1) {
-				return null;
-			}
-			return requestSplitByBodyDelimiter[1];
 		}
 
 		private static String extractEndPoint(final String uri) {

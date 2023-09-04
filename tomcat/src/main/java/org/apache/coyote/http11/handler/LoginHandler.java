@@ -30,7 +30,7 @@ import nextstep.jwp.model.User;
 public class LoginHandler implements HttpHandler {
 
 	private static final Map<HttpMethod, HttpHandle> HANDLE_MAP = Map.of(
-		HttpMethod.GET, request -> servingStaticResource(),
+		HttpMethod.GET, LoginHandler::servingStaticResource,
 		HttpMethod.POST, LoginHandler::loginProcess
 	);
 	private static final String END_POINT = "/login";
@@ -38,7 +38,8 @@ public class LoginHandler implements HttpHandler {
 	private static final String ACCOUNT_PARAM_KEY = "account";
 	private static final String PASSWORD_PARAM_KEY = "password";
 	private static final String LOGIN_SUCCESS_LOCATION = "http://localhost:8080/index.html";
-	private static final String STATIC_RESOURCE_FILE_PATH = "static/login.html";
+	private static final String LOGIN_STATIC_RESOURCE_FILE_PATH = "static/login.html";
+	private static final String SESSION_USER_KEY = "user";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
@@ -53,17 +54,38 @@ public class LoginHandler implements HttpHandler {
 			.handle(request);
 	}
 
-	private static HttpResponse servingStaticResource() {
+	private static HttpResponse servingStaticResource(final HttpRequest request) {
+		return request.getJSessionId()
+			.map(LoginHandler::indexHtmlRedirect)
+			.orElseGet(LoginHandler::loginHtmlResponse);
+	}
+
+	private static HttpResponse indexHtmlRedirect(final String jSessionId) {
+		final Session session = SessionManager.findSession(jSessionId);
+		final User user = (User)session.getAttributes(SESSION_USER_KEY);
+		//user가 없는 경우 예외처리 고민하기
+		log.info(user.toString());
+		final String body = "";
+		final HttpHeaders headers = resolveHeader(body);
+		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
+		return new HttpResponse(
+			TEMPORARILY_MOVED_302,
+			body,
+			headers
+		);
+	}
+
+	private static HttpResponse loginHtmlResponse() {
 		try {
 			final URL url = LoginHandler.class.getClassLoader()
-				.getResource(STATIC_RESOURCE_FILE_PATH);
+				.getResource(LOGIN_STATIC_RESOURCE_FILE_PATH);
 			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 			return new HttpResponse(
 				OK_200,
 				body,
 				resolveHeader(body)
 			);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -104,7 +126,7 @@ public class LoginHandler implements HttpHandler {
 	private static void issueJSessionId(User user, HttpHeaders headers) {
 		final String jSessionId = UUID.randomUUID().toString();
 		final Session session = new Session(jSessionId);
-		session.setAttributes("user", user);
+		session.setAttributes(SESSION_USER_KEY, user);
 		SessionManager.add(session);
 		headers.put(SET_COOKIE.getValue(), jSessionId);
 	}

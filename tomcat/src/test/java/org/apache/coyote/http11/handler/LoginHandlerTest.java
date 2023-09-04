@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import nextstep.jwp.model.User;
+
 class LoginHandlerTest {
 
 	private static final LoginHandler HANDLER = new LoginHandler();
@@ -47,7 +49,7 @@ class LoginHandlerTest {
 	class HandleTo {
 
 		@Test
-		@DisplayName("쿼리파람이 없는 경우 login.html을 반환한다")
+		@DisplayName("get 요청이고, JSessionId가 없다면, login.html을 반환한다")
 		void resolveLoginHtml() throws IOException {
 			final String plainRequest = String.join("\r\n",
 				"GET /login HTTP/1.1 ",
@@ -72,27 +74,28 @@ class LoginHandlerTest {
 		}
 
 		@Test
-		@DisplayName("쿼리파람이 없는 경우 login.html을 반환한다")
+		@DisplayName("get으로 요청하고 JSessionId가 있는 경우, 302 리다이렉트를한다.")
 		void resolveIndexHtml() throws IOException {
-			SessionManager.add(new Session("id"));
+			final User user = new User("hong", "password", "hong@naver.com");
+			final Session session = new Session("id");
+			session.setAttributes("user", user);
+			SessionManager.add(session);
 			final String plainRequest = String.join("\r\n",
 				"GET /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
-				"Cookies: JSESSIONID=id ",
+				"Cookie: JSESSIONID=id ",
 				"",
 				"");
-			final String file = "/login.html";
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
 			final HttpResponse actual = HANDLER.handleTo(request);
 
-			final URL resource = getClass().getClassLoader().getResource("static" + file);
-			final String expected = "HTTP/1.1 200 OK \r\n" +
+			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
-				"Content-Length: 3797 \r\n" +
-				"\r\n" +
-				new String(readAllBytes(new File(resource.getFile()).toPath()));
+				"Content-Length: 0 \r\n" +
+				"Location: http://localhost:8080/index.html \r\n" +
+				"\r\n";
 
 			assertThat(actual.buildResponse())
 				.isEqualTo(expected);

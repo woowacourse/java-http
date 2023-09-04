@@ -84,7 +84,7 @@ class RequestHandlerTest {
     void 정상적으로_로그인_성공() {
         // given
         String request = String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login?account=gugu&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "",
@@ -106,7 +106,7 @@ class RequestHandlerTest {
     void 로그인시_쿠키를_반환하고_세션에_담는다() {
         // given
         String request = String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login?account=gugu&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "",
@@ -127,7 +127,7 @@ class RequestHandlerTest {
     void 존재하지_않는_아이디로_로그인_요청() {
         // given
         String request = String.join("\r\n",
-            "GET /login?account=noUser&password=password HTTP/1.1 ",
+            "POST /login?account=noUser&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "",
@@ -149,7 +149,7 @@ class RequestHandlerTest {
     void 잘못된_비밀번호로_로그인_요청() {
         // given
         String request = String.join("\r\n",
-            "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+            "POST /login?account=gugu&password=invalidPassword HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "",

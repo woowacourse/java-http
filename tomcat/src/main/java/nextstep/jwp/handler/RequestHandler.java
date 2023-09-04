@@ -33,7 +33,7 @@ public class RequestHandler {
             return getFile(request);
         }
 
-        if (request.getUri().equals("/login")) {
+        if (request.getUri().equals("/login") && request.getMethod() == HttpMethod.POST) {
             return login(request);
         }
 

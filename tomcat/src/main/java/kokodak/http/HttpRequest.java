@@ -108,6 +108,9 @@ public class HttpRequest {
     }
 
     public String header(final String key) {
+        if (!header.containsKey(key)) {
+            return "";
+        }
         return header.get(key);
     }
 

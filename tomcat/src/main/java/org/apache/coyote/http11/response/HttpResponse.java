@@ -18,6 +18,12 @@ public class HttpResponse {
     private final Headers headers;
     private final String body;
 
+    private HttpResponse(final Status status, final Headers headers, final String body) {
+        this.status = status;
+        this.headers = headers;
+        this.body = body;
+    }
+
     private HttpResponse(final ContentType contentType, final Status status, final Map<Header, String> headers,
                          final String body) {
         this.status = status;
@@ -38,12 +44,20 @@ public class HttpResponse {
         return new HttpResponse(contentType, status, headers, body);
     }
 
+    public static HttpResponse found(final ContentType contentType, final Status status, final Map<Header, String> headers, final String body) {
+        return new HttpResponse(contentType, status, headers, body);
+    }
+
     public static HttpResponse ok(final String body) {
         return new HttpResponse(Status.OK, body);
     }
 
     public static HttpResponse unAuthorized(final String path) throws NotFoundException, IOException, URISyntaxException {
         return new HttpResponse(ContentType.of(path), Status.UNAUTHORIZED, ResourceFinder.getStaticResource(path));
+    }
+
+    public static HttpResponse badRequest(final String path) throws NotFoundException, IOException, URISyntaxException {
+        return new HttpResponse(ContentType.of(path), Status.BAD_REQUEST, ResourceFinder.getStaticResource(path));
     }
 
     public static HttpResponse okWithResource(final String path) throws IOException, URISyntaxException, NotFoundException {

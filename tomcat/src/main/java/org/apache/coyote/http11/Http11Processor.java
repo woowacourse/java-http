@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -14,7 +15,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Status;
-import org.apache.catalina.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +80,7 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
             Map<String, String> params = httpRequest.getBody().getParams();
             userService.register(params.get("account"), params.get("password"), params.get("email"));
-            return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            return HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
         }
 
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
@@ -91,12 +91,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (queryParams.isEmpty() && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             if (httpRequest.getSessionAttribute("user").isPresent()) {
-                return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+                return HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
             }
             return HttpResponse.okWithResource("/login.html");
         }
 
-        if (queryParams.isEmpty() && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+        if (queryParams.isEmpty() && httpRequest.isPostMethod()) {
             Map<String, String> params = httpRequest.getBody().getParams();
 
             if (params.isEmpty()) {
@@ -105,14 +105,19 @@ public class Http11Processor implements Runnable, Processor {
 
             User user;
             try {
+                if (!params.containsKey("account") || !params.containsKey("password")) {
+                    throw new IllegalArgumentException("queryParameter가 잘못되었습니다.");
+                }
                 user = userService.login(params.get("account"), params.get("password"));
+            } catch (IllegalArgumentException e) {
+                return HttpResponse.badRequest("/index.html");
             } catch (UnAuthorizedException e) {
                 return HttpResponse.unAuthorized("/401.html");
             }
 
             Session session = httpRequest.createSession();
             session.setAttribute("user", user);
-            HttpResponse response = HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            HttpResponse response = HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
             response.setCookie(Cookie.fromUserJSession(session.getId()));
             return response;
         }

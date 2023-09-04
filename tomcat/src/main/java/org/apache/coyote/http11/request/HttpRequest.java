@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.cookie.Cookie;
-import org.apache.coyote.http11.response.header.Header;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionHolder;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.response.header.Header;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -103,10 +103,12 @@ public class HttpRequest {
     private Session getSession() {
         final Cookie cookie = headers.getCookie();
         final Optional<String> jSessionId = cookie.getJSessionId();
-        if (jSessionId.isEmpty()) {
-            return null;
-        }
-        return SESSION_MANAGER.findSession(jSessionId.get());
+        return jSessionId.map(SESSION_MANAGER::findSession)
+                .orElse(null);
+    }
+
+    public boolean isPostMethod() {
+        return uri.isPostMethod();
     }
 
     public HttpMethod getHttpMethod() {

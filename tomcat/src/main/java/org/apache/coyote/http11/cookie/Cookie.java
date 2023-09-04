@@ -16,11 +16,14 @@ public class Cookie {
     }
 
     public static Cookie from(final String input) {
-        Map<String, String> cookie = Arrays.stream(input.split("; "))
+        Map<String, String> holder = Arrays.stream(input.split("; "))
                 .map(cookies -> cookies.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+                .collect(Collectors.toMap(
+                        cookie -> cookie[0],
+                        cookie -> cookie[1])
+                );
 
-        return new Cookie(cookie);
+        return new Cookie(holder);
     }
 
     public static Cookie fromUserJSession(final String sessionId) {

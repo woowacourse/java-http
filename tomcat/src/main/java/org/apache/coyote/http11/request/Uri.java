@@ -41,6 +41,10 @@ public class Uri {
         return path.contains(".");
     }
 
+    public boolean isPostMethod() {
+        return this.httpMethod.equals(HttpMethod.POST);
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

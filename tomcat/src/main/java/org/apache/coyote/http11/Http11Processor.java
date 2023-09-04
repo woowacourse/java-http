@@ -40,8 +40,22 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+            generateDefaultResponse(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void generateDefaultResponse(final OutputStream outputStream) throws IOException {
+        final var responseBody = "Hello world!";
+
+        final var response = new HttpResponse(HttpStatus.OK)
+                .addContentType(ContentType.HTML)
+                .addContentLength(responseBody.length())
+                .build(responseBody);
+
+        log.info("response: {}", response);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

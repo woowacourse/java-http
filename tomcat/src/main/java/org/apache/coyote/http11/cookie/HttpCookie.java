@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookie;
 
     private HttpCookie(final Map<String, String> cookie) {
@@ -28,12 +30,11 @@ public class HttpCookie {
     }
 
     public static HttpCookie create() {
-        return new HttpCookie(Map.of("JSESSIONID", String.valueOf(UUID.randomUUID())));
+        return new HttpCookie(Map.of(JSESSIONID, String.valueOf(UUID.randomUUID())));
     }
 
-
     public boolean hasJSESSIONID() {
-        return this.cookie.containsKey("JSESSIONID");
+        return this.cookie.containsKey(JSESSIONID);
     }
 
     public Map<String, String> getCookie() {
@@ -41,6 +42,6 @@ public class HttpCookie {
     }
 
     public String getJSESSIONID() {
-        return this.cookie.get("JSESSIONID");
+        return this.cookie.get(JSESSIONID);
     }
 }

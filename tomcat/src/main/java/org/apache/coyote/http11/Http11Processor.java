@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = SessionManager.create();
     private static final String STATIC = "static";
     private static final String INDEX_HTML = "/index.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
@@ -75,23 +75,21 @@ public class Http11Processor implements Runnable, Processor {
                 return login(httpRequest);
             }
             if (startLine.getPath().startsWith("/register")) {
-                return register(httpRequest, cookie);
+                return register(httpRequest);
             }
         }
-        if (startLine.getHttpMethod().equals(HttpMethod.GET)) {
-            if (startLine.getPath().startsWith("/login") && cookie.hasJSESSIONID()) {
-                final String jsessionid = cookie.getJSESSIONID();
-                HttpSession httpSession = sessionManager.findSession(jsessionid);
-                if (Objects.isNull(httpSession)) {
-                    return HttpResponseEntity.ok(LOGIN_HTML);
-                }
-                return HttpResponseEntity.found(INDEX_HTML);
+        if (startLine.getPath().startsWith("/login") && cookie.hasJSESSIONID()) {
+            final String jsessionid = cookie.getJSESSIONID();
+            HttpSession httpSession = sessionManager.findSession(jsessionid);
+            if (Objects.isNull(httpSession)) {
+                return HttpResponseEntity.ok(LOGIN_HTML);
             }
+            return HttpResponseEntity.found(INDEX_HTML);
         }
         return HttpResponseEntity.ok(startLine.getPath());
     }
 
-    private HttpResponseEntity register(final HttpRequest httpRequest, final HttpCookie cookie) {
+    private HttpResponseEntity register(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
         final Map<String, String> registerData = Arrays.stream(body.split("&"))
                 .map(data -> data.split("="))
@@ -103,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponseEntity.ok(INDEX_HTML);
     }
 
-    private HttpResponseEntity login(final HttpRequest httpRequest) throws IOException {
+    private HttpResponseEntity login(final HttpRequest httpRequest) {
         final String body = httpRequest.getBody();
         final Map<String, String> loginData = Arrays.stream(body.split("&"))
                 .map(data -> data.split("="))

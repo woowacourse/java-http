@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
+import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.httpmessage.response.StatusCode;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +24,7 @@ class HandlerTest {
     @DisplayName("handlerMapping이 존재하지 않으면 404.html을 제공한다.")
     void not_found_response() throws IOException {
         // given
-        final Handler handler = new Handler(null, null);
+        final Handler handler = new Handler(null, null, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -44,7 +45,7 @@ class HandlerTest {
     @DisplayName("handlerMapping이 main 요청이면 Hello world!를 반환한다.")
     void main_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.MAIN, null);
+        final Handler handler = new Handler(HandlerMapping.MAIN, null, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -63,7 +64,7 @@ class HandlerTest {
     @DisplayName("handlerMapping이 index.html요청이면 index.html을 반환한다.")
     void index_html_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.INDEX, null);
+        final Handler handler = new Handler(HandlerMapping.INDEX, null, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -84,7 +85,7 @@ class HandlerTest {
     @DisplayName("handlerMapping이 /login요청이면 login.html을 반환한다.")
     void login_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.LOGIN, null);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, null, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -110,7 +111,7 @@ class HandlerTest {
         queryStrings[1] = "password=password";
         final QueryString queryString = QueryString.fromRequest(queryStrings);
 
-        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -138,7 +139,7 @@ class HandlerTest {
         queryStrings[1] = "password=" + password;
         final QueryString queryString = QueryString.fromRequest(queryStrings);
 
-        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -159,8 +160,34 @@ class HandlerTest {
     private static Stream<Arguments> getWrongMember() {
         return Stream.of(
             Arguments.of("gugu", "password1234"),
-            Arguments.of("ako", "password"),
+            Arguments.of("ako1", "password"),
             Arguments.of("ako", "password1234")
         );
     }
+
+    @Test
+    @DisplayName("회원가입을 진행하면 /index.html로 리다이랙트 합니다.")
+    void register_request_response() throws IOException {
+        // given
+        final String registerMemberInfo = "account=ako&password=password&email=ako.com";
+        final RequestBody requestBody = RequestBody.fromRequest(registerMemberInfo);
+
+        final Handler handler = new Handler(HandlerMapping.REGISTER_POST, null, requestBody);
+
+        // when
+        final HttpResponse result = handler.makeResponse();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String expectBody = new String(
+            Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+
+        assertThat(result.getBody()).isEqualTo(expectBody);
+        assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
+        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
+        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
+            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+    }
+
 }

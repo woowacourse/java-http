@@ -13,6 +13,7 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
+import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.ContentType;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.httpmessage.response.StatusCode;
@@ -27,10 +28,16 @@ public class Handler {
 
     private final HandlerMapping handlerMapping;
     private final QueryString queryString;
+    private final RequestBody requestBody;
 
-    public Handler(final HandlerMapping handlerMapping, final QueryString queryString) {
+    public Handler(
+        final HandlerMapping handlerMapping,
+        final QueryString queryString,
+        final RequestBody requestBody
+    ) {
         this.handlerMapping = handlerMapping;
         this.queryString = queryString;
+        this.requestBody = requestBody;
     }
 
     public HttpResponse makeResponse() throws IOException {
@@ -43,6 +50,9 @@ public class Handler {
         }
         if (handlerMapping == HandlerMapping.LOGIN) {
             return makeLoginResponse(split[FILE_EXTENSION_INDEX]);
+        }
+        if (handlerMapping == HandlerMapping.REGISTER_POST) {
+            return makeRegisterResponse(split[FILE_EXTENSION_INDEX]);
         }
         return makeFileResponse(split[FILE_EXTENSION_INDEX]);
     }
@@ -92,6 +102,19 @@ public class Handler {
 
         log.info("user : " + user);
         headers.put("Location", "/index.html");
+        return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
+    }
+
+    private HttpResponse makeRegisterResponse(final String fileType) throws IOException {
+        Map<String, String> headers = new LinkedHashMap<>();
+        final String body = findFile(handlerMapping.getResponse());
+        headers.put("Content-Type",
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put("Location", "/index.html");
+        final User registerUser = new User(requestBody.getAccount(), requestBody.getPassword(),
+            requestBody.getEmail());
+        InMemoryUserRepository.save(registerUser);
         return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
     }
 

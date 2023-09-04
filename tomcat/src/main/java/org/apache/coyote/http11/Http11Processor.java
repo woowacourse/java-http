@@ -34,22 +34,18 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream();
             final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while (!("".equals(line = reader.readLine()))) {
-                if (line == null) {
-                    break;
-                }
-                stringBuilder.append(line).append(CRLF);
-            }
-            final String request = stringBuilder.toString();
+            final String request = readRequest(reader);
+
             final HttpRequest httpRequest = HttpRequest.from(request);
 
             final HandlerMapping handlerMapping = HandlerMapping.find(
                 httpRequest.getPath(),
                 httpRequest.getHttpMethod());
 
-            final Handler handler = new Handler(handlerMapping, httpRequest.getQueryString());
+            final Handler handler = new Handler(
+                handlerMapping,
+                httpRequest.getQueryString(),
+                httpRequest.getRequestBody());
             final HttpResponse httpResponse = handler.makeResponse();
 
             outputStream.write(httpResponse.makeToString().getBytes());
@@ -57,5 +53,26 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String readRequest(final BufferedReader reader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        String line;
+        int contentLength = 0;
+        while (!("".equals(line = reader.readLine()))) {
+            if (line == null) {
+                break;
+            }
+            stringBuilder.append(line).append(CRLF);
+            if (line.contains("Content-Length")) {
+                contentLength = Integer.parseInt(line.split("Content-Length: ")[1]);
+            }
+        }
+        if (contentLength > 0) {
+            final char[] contents = new char[contentLength];
+            reader.read(contents, 0, contentLength);
+            stringBuilder.append(new String(contents));
+        }
+        return stringBuilder.toString();
     }
 }

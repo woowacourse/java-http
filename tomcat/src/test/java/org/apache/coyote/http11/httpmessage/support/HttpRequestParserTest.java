@@ -3,9 +3,11 @@ package org.apache.coyote.http11.httpmessage.support;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.Map;
+import java.util.Objects;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
+import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -105,7 +107,7 @@ class HttpRequestParserTest {
         final QueryString result = HttpRequestParser.getQueryString(request);
 
         // then
-        final Map<String, String> queryString = result.getQueryString();
+        final Map<String, String> queryString = Objects.requireNonNull(result).getQueryString();
 
         assertThat(queryString.size()).isEqualTo(1);
         assertThat(queryString.get("account")).isEqualTo("ako");
@@ -123,6 +125,45 @@ class HttpRequestParserTest {
 
         // when
         final QueryString result = HttpRequestParser.getQueryString(request);
+
+        // then
+        assertThat(result).isNull();
+    }
+
+    @Test
+    @DisplayName("POST 요청이면 들어오면 요청 body 정보를 담은 RequestBody 객체를 반환한다.")
+    void get_request_body_from_request() {
+        // given
+        final String request = String.join("\r\n",
+            "POST /register.html HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Accept: */*",
+            "",
+            "account=ako&password=password");
+
+        // when
+        final RequestBody result = HttpRequestParser.getRequestBody(request);
+
+        // then
+        final Map<String, String> body = Objects.requireNonNull(result).getBody();
+
+        assertThat(body.get("account")).isEqualTo("ako");
+        assertThat(body.get("password")).isEqualTo("password");
+    }
+
+    @Test
+    @DisplayName("POST 요청이 아닌 다른 메소드의 요청이 들어오면 null을 반환한다.")
+    void get_no_request_body_from_request() {
+        // given
+        final String request = String.join("\r\n",
+            "GET /login.html HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Accept: */*");
+
+        // when
+        final RequestBody result = HttpRequestParser.getRequestBody(request);
 
         // then
         assertThat(result).isNull();

@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.httpmessage.support;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
+import org.apache.coyote.http11.httpmessage.request.RequestBody;
 
 public class HttpRequestParser {
 
@@ -40,6 +43,12 @@ public class HttpRequestParser {
     }
 
     public static HttpHeader getHeader(final String request) {
+        if (request.contains("Content-Type")) {
+            final String[] splitRequest = request.split(CRLF);
+            final String[] headers = Arrays.copyOfRange(splitRequest, HEADER_START,
+                splitRequest.length - 1);
+            return HttpHeader.fromRequest(headers);
+        }
         final String[] splitRequest = request.split(CRLF);
         final String[] headers = Arrays.copyOfRange(splitRequest, HEADER_START,
             splitRequest.length);
@@ -55,5 +64,21 @@ public class HttpRequestParser {
         }
         return QueryString.fromRequest(
             queryString[Query_String_index].split(MANY_QUERY_STRING_INDEX));
+    }
+
+    public static RequestBody getRequestBody(final String request) {
+//        System.out.println(request);
+        if (getHttpMethod(request) == HttpMethod.POST) {
+            final String[] splitRequest = request.split(CRLF);
+//            final int requestBodyDelimiterIndex = Arrays.asList(splitRequest).indexOf("");
+
+            final String decodedRequestBody = URLDecoder.decode(
+                splitRequest[splitRequest.length - 1],
+                StandardCharsets.UTF_8);
+            System.out.println("gg " + decodedRequestBody);
+            return RequestBody.fromRequest(decodedRequestBody);
+
+        }
+        return null;
     }
 }

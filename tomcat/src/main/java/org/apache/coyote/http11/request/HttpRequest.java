@@ -24,9 +24,9 @@ public class HttpRequest {
     }
 
     public static HttpRequest parse(final BufferedReader reader) throws IOException {
-        final List<String> lines = readAllLines(reader);
+        final RequestLine requestLine = RequestLine.parse(reader.readLine());
 
-        final RequestLine requestLine = RequestLine.parse(lines.get(HTTP_REQUEST_LINE_INDEX));
+        final List<String> lines = readAllLines(reader);
         final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
         final String requestBody = findRequestBody(reader, headers);
 

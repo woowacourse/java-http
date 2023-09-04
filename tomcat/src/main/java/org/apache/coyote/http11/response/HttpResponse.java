@@ -32,10 +32,19 @@ public class HttpResponse {
         return new HttpResponse(ResponseLine.create(), headers, responseBody);
     }
 
-    private static Path findPath(final HttpRequest request) throws IOException {
+    private static Path findPath(final HttpRequest request) {
         final String uri = request.getUri();
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + uri);
+        final String[] splitUri = uri.split("\\.");
+
+        URL url;
+        if (splitUri.length == 1) {
+            url = HttpResponse.class.getClassLoader()
+                    .getResource(STATIC + uri + ".html");
+        } else {
+            url = HttpResponse.class.getClassLoader()
+                    .getResource(STATIC + uri);
+        }
+
         return new File(url.getPath()).toPath();
     }
 

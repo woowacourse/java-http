@@ -65,6 +65,17 @@ public class Http11Processor implements Runnable, Processor {
                 Map.of("Location", "/index.html"));
     }
 
+    private HttpResponse postRegister(HttpRequest request) throws IOException {
+        final var form = request.getForm();
+        final var account = form.get("account");
+        final var password = form.get("password");
+        final var email = form.get("email");
+        final var user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
+                Map.of("Location", "/index.html"));
+    }
+
     private String getContentType(final File file) throws IOException {
         if (file == null) {
             return "Content-Type: text/plain;charset=utf-8 ";
@@ -91,18 +102,19 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleRequest(final HttpRequest request) throws IOException {
         final var uri = request.getUri();
-        if (request.isPost()) {
-            if (uri.startsWith("/login")) {
-                return postLogin(request);
-            }
-        }
         if (uri.equals("/")) {
             return getResource("/");
         }
         if (uri.equals("/login")) {
+            if (request.isPost()) {
+                return postLogin(request);
+            }
             return getResource("/login.html");
         }
         if (uri.equals("/register")) {
+            if (request.isPost()) {
+                return postRegister(request);
+            }
             return getResource("/register.html");
         }
         return getResource(uri);

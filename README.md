@@ -17,8 +17,8 @@
 - [x] http://localhost:8080/register 로 접속하면 회원가입 페이지를 보옂ㄴ다.
 - [x] 페이지를 보여줄 때는 GET을 사용한다.
 - 
-- [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
-- [ ] 회원가입을 완료하면 index.html로 리다이렉트한다.
+- [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+- [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
 - [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경
 
 - [ ] Cookie 클래스를 추가

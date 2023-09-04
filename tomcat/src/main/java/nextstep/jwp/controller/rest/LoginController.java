@@ -21,12 +21,12 @@ public class LoginController implements RestController {
 
     @Override
     public ResponseEntity handle(HttpRequest request) {
-        final var headers = HttpHeaders.defaultHeaders();
         try {
             final User user = InMemoryUserRepository.findByAccount(request.getJsonProperty("account"))
                                                     .orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다."));
             if (user.checkPassword(request.getJsonProperty("password"))) {
                 final var session = SessionManager.getInstance().create();
+                final var headers = HttpHeaders.defaultHeaders();
                 session.setAttribute("user", user);
                 headers.setCookie("JSESSIONID", session.getId());
                 headers.put(HttpHeaders.LOCATION, HOME_PAGE);

@@ -50,6 +50,9 @@ public class HttpHeaders {
     }
 
     private static String getContentTypeFrom(String accept) {
+        if (accept == null) {
+            return CONTENT_TYPE_UTF_8;
+        }
         if (accept.contains(CONTENT_TYPE_CSS)) {
             return CONTENT_TYPE_CSS;
         }

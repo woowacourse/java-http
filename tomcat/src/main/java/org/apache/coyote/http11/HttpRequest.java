@@ -33,22 +33,18 @@ public class HttpRequest {
         String line;
         var body = "";
         JsonProperties properties = null;
-        var contentLength = 0;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            if (line.startsWith(HttpHeaders.CONTENT_LENGTH)) {
-                contentLength = Integer.parseInt(line.split(":")[1].trim());
-            }
             request.add(line);
         }
         request.add(HEADER_BODY_DELIMITER);
         final HttpHeaders header = HttpHeaders.createBasicRequestHeadersFrom(request);
 
         if (header.getContentLength() > 0) {
-            var bodyChars = new char[contentLength];
-            reader.read(bodyChars, 0, contentLength);
+            var bodyChars = new char[header.getContentLength()];
+            reader.read(bodyChars, 0, bodyChars.length);
             body = new String(bodyChars);
-            properties = JsonProperties.from(body, header);
+            properties = JsonProperties.from(body.trim(), header);
         }
 
         final String[] uri = request.get(0).split(" ");
@@ -58,7 +54,7 @@ public class HttpRequest {
         if (fullPath.contains("?")) {
             final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
             final var path = pathAndQueryParams[0].trim();
-            final var queryStrings = new QueryStrings(pathAndQueryParams[1]);
+            final var queryStrings = new QueryStrings(pathAndQueryParams[1].trim());
             return new HttpRequest(method, path, header, queryStrings, body, properties);
         }
 

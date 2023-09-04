@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HttpRequest {
+public class HttpRequestHeader {
     private final HttpMethod method;
     private final String requestUri;
     private final String path;
@@ -12,7 +12,7 @@ public class HttpRequest {
     private final QueryString queryString;
     private final Map<String, String> headers = new HashMap<>();
 
-    public HttpRequest(final List<String> request) {
+    public HttpRequestHeader(final List<String> request) {
         final String[] firstLine = request.get(0).split(" ");
         this.method = HttpMethod.of(firstLine[0]);
         this.requestUri = firstLine[1];
@@ -25,6 +25,10 @@ public class HttpRequest {
                 .takeWhile(line -> !line.isEmpty())
                 .map(line -> line.split(": "))
                 .forEach(line -> headers.put(line[0], line[1]));
+    }
+
+    public boolean hasCookie() {
+        return headers.containsKey("Cookie");
     }
 
     @Override
@@ -57,5 +61,9 @@ public class HttpRequest {
 
     public ContentType getContentType() {
         return ContentType.of(headers.getOrDefault("Content-Type", ""));
+    }
+
+    public List<Cookie> getCookies() {
+        return CookieParser.parse(headers.getOrDefault("Cookie", ""));
     }
 }

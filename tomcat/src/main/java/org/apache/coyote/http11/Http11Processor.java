@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -53,41 +54,74 @@ public class Http11Processor implements Runnable, Processor {
                     .takeWhile(line -> !line.isEmpty())
                     .collect(Collectors.toList());
 
-            final HttpRequest httpRequest = new HttpRequest(request);
-            log.info("request: {}", httpRequest);
+            final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(request);
+            log.info(httpRequestHeader.getMethod().name() + " " + httpRequestHeader.getRequestUri());
 
+            final String path = httpRequestHeader.getPath();
 
-            if (httpRequest.getMethod() == HttpMethod.GET && httpRequest.getRequestUri().contains(".")) {
-                generateResourceResponse(httpRequest, outputStream);
-                return;
+            if (httpRequestHeader.getMethod() == HttpMethod.GET) {
+                if (path.equals("/index.html")) {
+                    if (httpRequestHeader.hasCookie()) {
+                        final String content = getResourceContent(path);
+                        final String response = new HttpResponse(HttpStatus.OK)
+                                .addContentType(ContentType.HTML)
+                                .addContentLength(content.length())
+                                .build(content);
+                        writeResponse(outputStream, response);
+                        return;
+                    }
+                    final String response = redirectResponse("/login.html");
+                    writeResponse(outputStream, response);
+                    return;
+                }
+                if (path.equals("/login")) {
+                    if (httpRequestHeader.hasCookie()) {
+                        final String response = redirectResponse("/index.html");
+                        writeResponse(outputStream, response);
+                        return;
+                    }
+                    final String response = redirectResponse("/login.html");
+                    writeResponse(outputStream, response);
+                    return;
+                }
+                if (path.equals("/register")) {
+                    final String response = redirectResponse("/register.html");
+                    writeResponse(outputStream, response);
+                    return;
+                }
+                if (httpRequestHeader.getRequestUri().contains(".")) {
+                    generateResourceResponse(httpRequestHeader, outputStream);
+                    return;
+                }
+                final String response = redirectResponse("/404.html");
+                writeResponse(outputStream, response);
             }
 
-            final String path = httpRequest.getPath();
-            if (httpRequest.getMethod() == HttpMethod.POST && path.equals("/login")) {
-                final HttpRequestBody httpRequestBody = parseBody(httpRequest, bufferedReader);
+            if (httpRequestHeader.getMethod() == HttpMethod.POST && path.equals("/login")) {
+                final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
                 generateLoginResponse(httpRequestBody, outputStream);
                 return;
             }
 
-            if (httpRequest.getMethod() == HttpMethod.POST && path.equals("/register")) {
-                final HttpRequestBody httpRequestBody = parseBody(httpRequest, bufferedReader);
+            if (httpRequestHeader.getMethod() == HttpMethod.POST && path.equals("/register")) {
+                final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
                 generateRegisterResponse(httpRequestBody, outputStream);
                 return;
             }
             generateDefaultResponse(outputStream);
         } catch (IllegalArgumentException e) {
+            final String response = new HttpResponse(HttpStatus.BAD_REQUEST).build();
             log.error(e.getMessage(), e);
-            outputStream.write(new HttpResponse(HttpStatus.BAD_REQUEST).build().getBytes());
-            outputStream.flush();
+            writeResponse(outputStream, response);
         }
     }
 
-    private static HttpRequestBody parseBody(final HttpRequest httpRequest, final BufferedReader bufferedReader) throws IOException {
-        if (httpRequest.getContentLength() != 0) {
-            final int contentLength = httpRequest.getContentLength();
+    private static HttpRequestBody parseBody(final HttpRequestHeader httpRequestHeader, final BufferedReader bufferedReader) throws IOException {
+        if (httpRequestHeader.getContentLength() != 0) {
+            final int contentLength = httpRequestHeader.getContentLength();
             final char[] buffers = new char[contentLength];
             bufferedReader.read(buffers, 0, contentLength);
-            return HttpRequestBody.of(httpRequest.getContentType(), new String(buffers));
+            return HttpRequestBody.of(httpRequestHeader.getContentType(), new String(buffers));
         }
         return HttpRequestBody.empty();
     }
@@ -102,19 +136,25 @@ public class Http11Processor implements Runnable, Processor {
         final String email = body.get("email");
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        outputStream.write(redirectResponse("/index.html").getBytes());
-        outputStream.flush();
+        final String response = redirectResponse("/login.html");
+        writeResponse(outputStream, response);
     }
 
     private void generateLoginResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
         final String account = body.get("account");
         final String password = body.get("password");
-        InMemoryUserRepository.findByAccount(account)
+        final String response = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-        final String response = redirectResponse("/index.html");
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+                .map(user -> loginResponse())
+                .orElseGet(() -> redirectResponse("/401.html"));
+        writeResponse(outputStream, response);
+    }
+
+    private String loginResponse() {
+        return new HttpResponse(HttpStatus.FOUND)
+                .addLocation("/index.html")
+                .addSetCookie(Cookie.ofJSessionId("1234567890"))
+                .build();
     }
 
     private String redirectResponse(final String location) {
@@ -123,7 +163,7 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private static void generateDefaultResponse(final OutputStream outputStream) throws IOException {
+    private void generateDefaultResponse(final OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
         final var response = new HttpResponse(HttpStatus.OK)
@@ -131,28 +171,31 @@ public class Http11Processor implements Runnable, Processor {
                 .addContentLength(responseBody.length())
                 .build(responseBody);
 
-        log.info("response: {}", response);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        writeResponse(outputStream, response);
     }
 
-    private void generateResourceResponse(final HttpRequest request, final OutputStream outputStream) throws IOException {
+    private void generateResourceResponse(final HttpRequestHeader request, final OutputStream outputStream) throws IOException {
         final String requestUri = request.getRequestUri();
         final String extension = requestUri.substring(requestUri.lastIndexOf(".") + 1);
         final ContentType contentType = ContentType.from(extension);
-        final var resource = getClass().getClassLoader().getResource("static/" + requestUri);
+        final String content = getResourceContent(requestUri);
+        final String response = new HttpResponse(HttpStatus.OK)
+                .addContentType(contentType)
+                .addContentLength(content.length())
+                .build(content);
+        writeResponse(outputStream, response);
+    }
+
+    private String getResourceContent(final String resourcePath) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + resourcePath);
 
         if (Objects.isNull(resource)) {
             throw new IllegalArgumentException("존재하지 않는 파일입니다.");
         }
-        final String responseBody = Files.readString(Path.of(resource.getPath()));
+        return Files.readString(Path.of(resource.getPath()));
+    }
 
-        final var response = new HttpResponse(HttpStatus.OK)
-                .addContentType(contentType)
-                .addContentLength(responseBody.length())
-                .build(responseBody);
-
-        log.info("response: {}", response);
+    private void writeResponse(final OutputStream outputStream, final String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }

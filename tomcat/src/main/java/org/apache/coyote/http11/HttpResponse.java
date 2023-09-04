@@ -45,4 +45,9 @@ public class HttpResponse {
         response.add(body);
         return String.join("\r\n", response);
     }
+
+    public HttpResponse addSetCookie(final String cookie) {
+        headers.put("Set-Cookie", cookie);
+        return this;
+    }
 }

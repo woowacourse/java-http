@@ -23,8 +23,9 @@ public class HttpRequestBody {
                 final List<String> keyValues = List.of(token.split("="));
                 if (keyValues.size() == 2) {
                     parameters.put(keyValues.get(0), keyValues.get(1));
+                } else {
+                    parameters.put(keyValues.get(0), "");
                 }
-                parameters.put(keyValues.get(0), "");
             }
             return new HttpRequestBody(parameters);
         }

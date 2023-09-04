@@ -34,6 +34,16 @@ public class LoginHandler implements Handler {
             User user = found.get();
             return signIn(httpRequest, user, password);
         }
+        if (httpRequest.getMethod().isGet()) {
+            String jsessionId = httpRequest.getCookies().get(SESSION_KEY);
+            if (jsessionId == null) {
+                return fileHandler.handle(httpRequest);
+            }
+            Session session = SessionManager.findSession(jsessionId);
+            if (session != null) {
+                return HttpResponse.redirectTo("/index");
+            }
+        }
         return fileHandler.handle(httpRequest);
     }
 

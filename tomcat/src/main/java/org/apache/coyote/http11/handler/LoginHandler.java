@@ -10,7 +10,7 @@ import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestData;
 import org.apache.coyote.http11.request.RequestMethod;
-import org.apache.coyote.http11.request.ResponseEntity;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 import java.io.IOException;
 import java.util.Optional;

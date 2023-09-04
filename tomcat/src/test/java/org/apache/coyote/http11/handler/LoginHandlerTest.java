@@ -3,7 +3,7 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.ResponseEntity;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;

@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.response.ResponseStatus;
+import org.apache.coyote.http11.request.HttpVersion;
 
 import java.util.HashMap;
 import java.util.Map;

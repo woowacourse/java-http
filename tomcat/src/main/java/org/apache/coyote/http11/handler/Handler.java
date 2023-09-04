@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.ResponseEntity;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 import java.io.IOException;
 

@@ -43,19 +43,61 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var request = new BufferedReader(new InputStreamReader(inputStream)).readLine();
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            var request = bufferedReader.readLine();
             log.info("request : {}", request);
 
-            final var uri = request.split(" ")[1];
+            final String[] header = request.split(" ");
+            final var method = header[0];
+            final var uri = header[1];
             log.info("uri : {}", uri);
 
-            final var response = getResponse(uri);
+            if ("GET".equals(method)) {
+                final var response = getResponse(uri);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
+
+            if ("POST".equals(method)) {
+                final var responseBody = getPostResponse(bufferedReader, request, uri);
+                final String response = getContent(uri, responseBody);
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static Response getPostResponse(final BufferedReader bufferedReader, String request, final String uri) throws IOException {
+        if ("/register".equals(uri)) {
+            Integer contentLength = null;
+            while (request != null && !"".equals(request)) {
+                request = bufferedReader.readLine();
+                if (request.contains("Content-Length")) {
+                    request = request.replaceAll(" ", "");
+                    contentLength = Integer.parseInt(request.split(":")[1]);
+                }
+            }
+
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String requestBody = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8.toString());
+
+            final Map<String, String> queries = Arrays.stream(requestBody.split("&"))
+                                                      .map(query -> query.split("="))
+                                                      .collect(toMap(query -> query[0], query -> query[1]));
+
+            if (InMemoryUserRepository.isExistAccount(queries.get("account"))) {
+                return new Response(HttpStatus.OK, "login.html");
+            }
+
+            InMemoryUserRepository.save(new User(queries.get("account"), queries.get("password"), queries.get("email")));
+            return new Response(HttpStatus.CREATED, "index.html");
+        }
+        return null;
     }
 
     private String getResponse(final String uri) throws IOException {
@@ -71,6 +113,10 @@ public class Http11Processor implements Runnable, Processor {
 
         final var responseBody = getResponseBody(uri);
 
+        return getContent(uri, responseBody);
+    }
+
+    private String getContent(final String uri, final Response responseBody) throws IOException {
         final URL resource = ClassLoader.getSystemClassLoader().getResource("static/" + responseBody.getContent());
         final File file = new File(URLDecoder.decode(Objects.requireNonNull(resource).getPath(), StandardCharsets.UTF_8));
         final String content = new String(Files.readAllBytes(file.toPath()));
@@ -83,12 +129,12 @@ public class Http11Processor implements Runnable, Processor {
                 content);
     }
 
-    private Response getResponseBody(final String uri) throws IOException {
+    private Response getResponseBody(final String uri) {
+        if ("/register".equals(uri)) {
+            return new Response(HttpStatus.OK, "register.html");
+        }
         if ("/login".equals(uri)) {
-            final URL resource = ClassLoader.getSystemClassLoader().getResource("static/login.html");
-            final String file = URLDecoder.decode(Objects.requireNonNull(resource).getPath(), StandardCharsets.UTF_8);
-            final String responseBody = new String(Files.readAllBytes(new File(file).toPath()));
-            return new Response(HttpStatus.OK, responseBody);
+            return new Response(HttpStatus.OK, "login.html");
         }
         if (uri.startsWith("/login?")) {
             int index = uri.indexOf("?");

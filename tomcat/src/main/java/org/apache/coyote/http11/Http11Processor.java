@@ -44,13 +44,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String request = bufferedReader.readLine();
+            String requestStartLine = bufferedReader.readLine();
 
-            if (request == null) {
+            if (requestStartLine == null) {
                 return;
             }
 
-            HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(request);
+            HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(requestStartLine);
             String response = createResponse(httpRequestStartLine.getRequestURI());
 
             outputStream.write(response.getBytes());

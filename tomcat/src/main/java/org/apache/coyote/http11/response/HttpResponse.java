@@ -14,13 +14,13 @@ public class HttpResponse {
         this.fileExtension = fileExtension;
         this.responseBody = responseBody;
     }
-    
+
     public String extractResponse() {
         return new StringBuilder()
-                .append(convertStatusLine()).append(System.lineSeparator())
-                .append(convertContentType()).append(System.lineSeparator())
-                .append(convertContentLength()).append(System.lineSeparator())
-                .append(System.lineSeparator())
+                .append(convertStatusLine()).append("\r\n")
+                .append(convertContentType()).append("\r\n")
+                .append(convertContentLength()).append("\r\n")
+                .append("\r\n")
                 .append(responseBody)
                 .toString();
     }

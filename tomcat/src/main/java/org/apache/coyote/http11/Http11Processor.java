@@ -66,10 +66,10 @@ public class Http11Processor implements Runnable, Processor {
         HttpStatus httpStatus = responseEntity.getHttpStatus();
 
         return new StringBuilder()
-                .append(String.format("HTTP/1.1 %s %s ", httpStatus.getStatusCode(), httpStatus.name()))
-                .append(String.format("Content-Type: %s;charset=utf-8 ", FileExtension.HTML)).append(System.lineSeparator())
-                .append(String.format("Location: %s.html", responseEntity.getPath())).append(System.lineSeparator())
-                .append(System.lineSeparator())
+                .append(String.format("HTTP/1.1 %s %s ", httpStatus.getStatusCode(), httpStatus.name())).append("\r\n")
+                .append(String.format("Content-Type: %s;charset=utf-8 ", FileExtension.HTML)).append("\r\n")
+                .append(String.format("Location: %s.html", responseEntity.getPath())).append("\r\n")
+                .append("\r\n")
                 .toString();
     }
 

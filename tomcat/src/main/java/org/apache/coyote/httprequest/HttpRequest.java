@@ -33,6 +33,7 @@ public class HttpRequest {
     }
 
     private static HttpRequestLine makeHttpRequestLine(final String line) {
+        log.debug("Request line : " + line);
         return HttpRequestLine.from(line);
     }
 
@@ -46,5 +47,9 @@ public class HttpRequest {
 
     public String getHttpVersion() {
         return httpRequestLine.getHttpVersion();
+    }
+
+    public RequestMethod getRequestMethod() {
+        return httpRequestLine.getRequestMethod();
     }
 }

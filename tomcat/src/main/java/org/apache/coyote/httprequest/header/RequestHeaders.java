@@ -1,5 +1,8 @@
 package org.apache.coyote.httprequest.header;
+import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.exception.InvalidHeaderException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RequestHeaders {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private static final String DELIMITER = ": ";
     private static final int PARSED_HEADER_SIZE = 2;
@@ -22,8 +27,10 @@ public class RequestHeaders {
 
     public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<RequestHeaderType, RequestHeader> headers = new HashMap<>();
+        log.debug("Request Header:\n");
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            log.debug("\t" + line + "\n");
             final List<String> parsedHeader = parseByDelimiter(line);
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
             if (headerType.isUnsupportedHeader()) {

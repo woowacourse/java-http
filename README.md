@@ -35,3 +35,6 @@
 ### 3. Cookie에 JSESSIONID 값 저장
 
 ### 4. Session 구현
+
+- [x] 세션 클래스 구현
+- [ ] 연결

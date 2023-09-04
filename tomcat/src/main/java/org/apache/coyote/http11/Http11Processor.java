@@ -53,7 +53,9 @@ public class Http11Processor implements Runnable, Processor {
             final String[] parsedFirstLine = firstLine.split(" ");
 
             response = parseStaticFiles(parsedFirstLine, response);
-            response = parseLoginPage(parsedFirstLine, response);
+            if (parsedFirstLine[1].contains("login")) {
+                response = parseLoginPage(parsedFirstLine, response);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -151,21 +153,37 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestUri.contains("login")) {
             final String[] parsedRequestUri = requestUri.split("\\?");
-            final String uri = parsedRequestUri[0];
-            final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
-                    .map(param -> param.split("="))
-                    .collect(Collectors.toMap(param -> param[0], param -> param[1]));
 
-            final String account = queryStrings.get("account");
-            final String password = queryStrings.get("password");
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+            if (requestUri.contains("?")) {
 
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
+                final String uri = parsedRequestUri[0];
+                final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
+                        .map(param -> param.split("="))
+                        .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+
+                final String account = queryStrings.get("account");
+                final String password = queryStrings.get("password");
+
+                try {
+                    final User user = InMemoryUserRepository.findByAccount(account)
+                            .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+
+                    if (!user.checkPassword(password)) {
+                        throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
+                    }
+                    log.info("로그인 성공! user = {}", user);
+                } catch (final IllegalArgumentException e) {
+                    log.warn("login error = {}", e);
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: /401.html ");
+                }
+
+
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /index.html ");
             }
-
-            log.info("로그인 성공! user = {}", user);
 
             final String filePath = "static/login.html";
             final URL fileUrl = getClass().getClassLoader().getResource(filePath);
@@ -178,6 +196,7 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
+
         }
 
         return null;

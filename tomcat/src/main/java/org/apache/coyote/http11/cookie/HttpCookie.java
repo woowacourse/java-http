@@ -24,16 +24,14 @@ public class HttpCookie {
         return new HttpCookie(values);
     }
 
-    public static HttpCookie empty() {
-        return new HttpCookie(new HashMap<>());
+    public static HttpCookie jSessionId(String id) {
+        Map<String, String> values = new HashMap<>();
+        values.put("JSESSIONID", id);
+        return new HttpCookie(values);
     }
 
     public String getValue(String key) {
         return values.get(key);
-    }
-
-    public boolean isEmpty() {
-        return values.isEmpty();
     }
 
 }

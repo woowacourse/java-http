@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryString;
 import org.apache.coyote.http11.request.RequestBody;
@@ -85,20 +87,19 @@ public class Handler {
         log.info(user.toString());
         String password = queryString.getValueOf("password");
         if (!user.checkPassword(password)) {
-            String responseBody = parseResponseBody("static/401.html");
             return new HttpResponse.Builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
-                    .responseBody(responseBody)
+                    .responseBody(parseResponseBody("static/401.html"))
                     .contentType(httpRequest.contentType())
                     .redirectPage("401.html")
                     .build();
         }
-        String responseBody = parseResponseBody("static/index.html");
         return new HttpResponse.Builder()
                 .httpStatus(HttpStatus.FOUND)
-                .responseBody(responseBody)
+                .responseBody(parseResponseBody("static/index.html"))
                 .contentType(httpRequest.contentType())
                 .redirectPage("index.html")
+                .httpCookie(HttpCookie.jSessionId(UUID.randomUUID().toString()))
                 .build();
     }
 

@@ -7,7 +7,7 @@ public class RequestBody {
 
     private final Map<String, String> values;
 
-    public RequestBody(){
+    public RequestBody() {
         this(new HashMap<>());
     }
 
@@ -28,6 +28,10 @@ public class RequestBody {
         return new RequestBody(values);
     }
 
+    public static RequestBody empty() {
+        return new RequestBody();
+    }
+
     public String getValueOf(String key) {
         return values.get(key);
     }
@@ -36,4 +40,5 @@ public class RequestBody {
     public boolean isEmpty() {
         return values.isEmpty();
     }
+
 }

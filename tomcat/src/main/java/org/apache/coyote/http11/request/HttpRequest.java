@@ -27,7 +27,7 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(List<String> requestHeader, RequestBody requestBody) {
+    public static HttpRequest of(List<String> requestHeader, RequestBody requestBody) {
         String uri = requestHeader.get(0).split(" ")[1];
         String method = requestHeader.get(0).split(" ")[0];
         Map<String, String> headers = parseHeaders(requestHeader);

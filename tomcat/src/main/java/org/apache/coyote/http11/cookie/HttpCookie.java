@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.Cookie;
+package org.apache.coyote.http11.cookie;
 
 import java.util.Arrays;
 import java.util.Collections;

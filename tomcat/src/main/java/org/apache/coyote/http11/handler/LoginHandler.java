@@ -2,7 +2,11 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.*;
+import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.common.FileReader;
+import org.apache.coyote.http11.common.RequestMethod;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.RequestData;
 import org.apache.coyote.http11.http.ResponseEntity;
@@ -65,7 +69,6 @@ public class LoginHandler implements Handler {
         UUID uuid = UUID.randomUUID();
         Session session = new Session(uuid);
         session.setAttribute("user", user);
-        SessionManager.add(session);
         SessionManager.add(session);
         return uuid;
     }

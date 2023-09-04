@@ -30,11 +30,9 @@ public class RequestHandler {
 
     public static Response handle(Request request) throws IOException {
         if (request.getMethod() == GET) {
-            log.info("get request: {}", request);
             return get(request);
         }
         if (request.getMethod() == POST) {
-            log.info("post request: {}", request);
             return post(request);
         }
         return Response.of(BAD_REQUEST, "text/plain", "");

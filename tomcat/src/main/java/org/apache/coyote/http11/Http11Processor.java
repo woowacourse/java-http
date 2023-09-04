@@ -1,12 +1,20 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.HandlerAdapter;
+import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +37,34 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = createHttpRequest(inputStream);
+            RequestHandler requestHandler = findHandler(httpRequest);
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private RequestHandler findHandler(final HttpRequest httpRequest) {
+        HandlerAdapter handlerAdapter = new HandlerAdapter();
+        RequestHandler requestHandler = handlerAdapter.find(httpRequest);
+        return requestHandler;
+    }
+
+    private HttpRequest createHttpRequest(final InputStream inputStream) throws IOException {
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String startLine = bufferedReader.readLine();
+
+        String line;
+        List<String> headers = new ArrayList<>();
+        while (!(line = bufferedReader.readLine()).equals("")) {
+            headers.add(line);
+        }
+        HttpRequest httpRequest = HttpRequest.of(startLine, headers);
+        return httpRequest;
     }
 }

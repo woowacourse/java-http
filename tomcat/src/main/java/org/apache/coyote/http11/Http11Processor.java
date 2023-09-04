@@ -74,11 +74,11 @@ public class Http11Processor implements Runnable, Processor {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
-            return getResponseMessage(200, "Hello world!", "text/html;");
+            return get200ResponseMessage("Hello world!", "text/html;");
         }
         if (path.endsWith(".css")) {
             final String responseBody = findResponseBody(path);
-            return getResponseMessage(200, responseBody, "text/css;");
+            return get200ResponseMessage(responseBody, "text/css;");
         }
         if (path.equals("/login")) {
             final String responseBody = findResponseBody(path + ".html");
@@ -89,12 +89,12 @@ public class Http11Processor implements Runnable, Processor {
             return handleRegisterRequest(requestBody, responseBody);
         }
         final String responseBody = findResponseBody(path);
-        return getResponseMessage(200, responseBody, "text/html;");
+        return get200ResponseMessage(responseBody, "text/html;");
     }
 
-    private String handleRegisterRequest(final String requestBody, final String responseBody) throws IOException {
+    private String handleRegisterRequest(final String requestBody, final String responseBody) {
         if (requestBody == null) {
-            return getResponseMessage(200, responseBody, "text/html;");
+            return get200ResponseMessage(responseBody, "text/html;");
         }
         final Map<String, String> requestBodyValues = new HashMap<>();
         final String[] splitRequestBody = requestBody.split("&");
@@ -104,20 +104,20 @@ public class Http11Processor implements Runnable, Processor {
         }
         final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"), requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
-        return getResponseMessage(302, findResponseBody("/index.html"), "text/html;");
+        return get302ResponseMessage("/index.html");
     }
 
-    private String handleLoginRequest(final String uri, final String responseBody) throws IOException {
+    private String handleLoginRequest(final String uri, final String responseBody) {
         if (!uri.contains("?")) {
-            return getResponseMessage(200, responseBody, "text/html;");
+            return get200ResponseMessage(responseBody, "text/html;");
         }
         final Map<String, String> queryStrings = getQueryStrings(uri);
         final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
         if (user.isEmpty() || !user.get().checkPassword(queryStrings.get("password"))) {
-            return getResponseMessage(401, findResponseBody("/401.html"), "text/html;");
+            return get302ResponseMessage("/401.html");
         }
         log.info("User: {}", user.get());
-        return getResponseMessage(302, findResponseBody("/index.html"), "text/html;");
+        return get302ResponseMessage("/index.html");
     }
 
     private Map<String, String> getQueryStrings(final String uri) {
@@ -135,13 +135,19 @@ public class Http11Processor implements Runnable, Processor {
         return queryStrings;
     }
 
-    private String getResponseMessage(final int statusCode, final String responseBody, final String contentType) {
+    private String get200ResponseMessage(final String responseBody, final String contentType) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " OK ",
+                "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + "charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String get302ResponseMessage(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location);
     }
 
     private String findResponseBody(final String uri) throws IOException {

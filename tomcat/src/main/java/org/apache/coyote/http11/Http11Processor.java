@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals("/login")) {
             final String responseBody = findResponseBody(path + ".html");
-            return handleLoginRequest(uri, responseBody);
+            return handleLoginRequest(requestBody, responseBody);
         }
         if (path.equals("/register")) {
             final String responseBody = findResponseBody(path + ".html");
@@ -96,43 +96,33 @@ public class Http11Processor implements Runnable, Processor {
         if (requestBody == null) {
             return get200ResponseMessage(responseBody, "text/html;");
         }
+        final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
+        final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"), requestBodyValues.get("email"));
+        InMemoryUserRepository.save(user);
+        return get302ResponseMessage("/index.html");
+    }
+
+    private Map<String, String> parseRequestBody(final String requestBody) {
         final Map<String, String> requestBodyValues = new HashMap<>();
         final String[] splitRequestBody = requestBody.split("&");
         for (String value : splitRequestBody) {
             final String[] splitValue = value.split("=");
             requestBodyValues.put(splitValue[0], splitValue[1]);
         }
-        final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"), requestBodyValues.get("email"));
-        InMemoryUserRepository.save(user);
-        return get302ResponseMessage("/index.html");
+        return requestBodyValues;
     }
 
-    private String handleLoginRequest(final String uri, final String responseBody) {
-        if (!uri.contains("?")) {
+    private String handleLoginRequest(final String requestBody, final String responseBody) {
+        if (requestBody == null) {
             return get200ResponseMessage(responseBody, "text/html;");
         }
-        final Map<String, String> queryStrings = getQueryStrings(uri);
+        final Map<String, String> queryStrings = parseRequestBody(requestBody);
         final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
         if (user.isEmpty() || !user.get().checkPassword(queryStrings.get("password"))) {
             return get302ResponseMessage("/401.html");
         }
         log.info("User: {}", user.get());
         return get302ResponseMessage("/index.html");
-    }
-
-    private Map<String, String> getQueryStrings(final String uri) {
-        if (!uri.contains("?")) {
-            return Map.of();
-        }
-        final Map<String, String> queryStrings = new HashMap<>();
-        final String queryString = uri.split("\\?")[1];
-
-        final String[] splitQueryStrings = queryString.split("&");
-        for (String value : splitQueryStrings) {
-            final String[] splitValue = value.split("=");
-            queryStrings.put(splitValue[0], splitValue[1]);
-        }
-        return queryStrings;
     }
 
     private String get200ResponseMessage(final String responseBody, final String contentType) {

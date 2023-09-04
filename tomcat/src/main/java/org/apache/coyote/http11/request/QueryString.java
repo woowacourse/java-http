@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
@@ -17,18 +18,14 @@ public class QueryString {
 
     private final Map<String, String> items = new HashMap<>();
 
-    private QueryString() {
-        this(Map.of());
-    }
-
-    public QueryString(final Map<String, String> items) {
+    private QueryString(final Map<String, String> items) {
         this.items.putAll(items);
     }
 
     public static QueryString from(final String uri) {
         int queryStringIndex = uri.indexOf(QUERY_STRING_BEGIN);
         if (queryStringIndex == EMPTY) {
-            return new QueryString();
+            return new QueryString(emptyMap());
         }
         return new QueryString(parseQueryString(uri, queryStringIndex));
     }

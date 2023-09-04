@@ -11,16 +11,14 @@ public class RequestLine {
     private static final int HTTP_VERSION_INDEX = 2;
     private static final String DELIMITER = " ";
     private static final int VALID_REQUEST_LINE_SIZE = 3;
-    private static final String QUERY_STRING_BEGIN = "?";
-    private static final int EMPTY_QUERY_STRING = -1;
 
     private final HttpMethod httpMethod;
-    private final String uri;
+    private final Path path;
     private final HttpVersion httpVersion;
 
-    private RequestLine(final HttpMethod httpMethod, final String uri, final HttpVersion httpVersion) {
+    private RequestLine(final HttpMethod httpMethod, final Path path, final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
-        this.uri = uri;
+        this.path = path;
         this.httpVersion = httpVersion;
     }
 
@@ -29,7 +27,7 @@ public class RequestLine {
         validate(requestLine);
         return new RequestLine(
                 HttpMethod.from(requestLine[HTTP_METHOD_INDEX]),
-                requestLine[URI_INDEX],
+                Path.from(requestLine[URI_INDEX]),
                 HttpVersion.from(requestLine[HTTP_VERSION_INDEX])
         );
     }
@@ -40,24 +38,20 @@ public class RequestLine {
         }
     }
 
-    public String parseUriWithOutQueryString() {
-        final int queryStringIndex = uri.indexOf(QUERY_STRING_BEGIN);
-        if (queryStringIndex == EMPTY_QUERY_STRING) {
-            return uri;
-        }
-        return uri.substring(0, queryStringIndex);
+    public String parseUri() {
+        return path.parseUri();
     }
 
     public QueryString parseQueryString() {
-        return QueryString.from(uri);
+        return path.parseQueryString();
     }
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public String getUri() {
-        return uri;
+    public Path getPath() {
+        return path;
     }
 
     public HttpVersion getHttpVersion() {

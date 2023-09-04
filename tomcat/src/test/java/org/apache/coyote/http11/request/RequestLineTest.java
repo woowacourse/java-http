@@ -38,7 +38,7 @@ class RequestLineTest {
         // then
         assertAll(
                 () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(requestLine.getUri()).isEqualTo("/index.html"),
+                () -> assertThat(requestLine.parseUri()).isEqualTo("/index.html"),
                 () -> assertThat(requestLine.getHttpVersion()).isEqualTo(HTTP_1_1)
         );
     }
@@ -50,7 +50,7 @@ class RequestLineTest {
         final RequestLine requestLine = RequestLine.from(line);
 
         // when
-        final String result = requestLine.parseUriWithOutQueryString();
+        final String result = requestLine.parseUri();
 
         // then
         assertThat(result).isEqualTo("/login");

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -13,7 +14,7 @@ public class StaticController implements Controller {
     @Override
     public HttpResponse handle(HttpRequest request) {
         if (request.getUri().equals(INDEX_URI)) {
-            request = HttpRequest.toIndex();
+            return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML.getValue(), "Hello world!");
         }
 
         return new HttpResponse(StatusCode.OK, "text/" + request.getExtension(),

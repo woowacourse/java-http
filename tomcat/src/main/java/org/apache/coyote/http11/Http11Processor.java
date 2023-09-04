@@ -11,6 +11,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.request.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -46,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
             String url = httpRequest.getTarget();
-            String content = readContent(url);
+            String content = PathProcessor.readContent(url);
             HttpResponse httpResponse = new HttpResponse("200 OK", content, url);
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -55,21 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readContent(String path) throws IOException {
-        if (Objects.equals(path, "/")) {
-            return "Hello world!";
-        }
-        URI uri = convertPathToUri(path);
 
-        return Files.readString(Paths.get(uri));
-    }
 
-    private URI convertPathToUri(String path) {
-        URL url = getClass().getClassLoader().getResource("static" + path);
-        try {
-            return url.toURI();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 }

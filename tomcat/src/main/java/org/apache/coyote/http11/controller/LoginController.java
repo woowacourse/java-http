@@ -33,13 +33,13 @@ public class LoginController implements Controller {
             final Session session = request.getSession(false);
             final User user = (User) session.getAttribute("user");
             if (Objects.nonNull(user)) {
-                HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML.getValue(),
+                HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML,
                         ViewLoader.toIndex());
                 httpResponse.sendRedirect("/index.html");
                 return httpResponse;
             }
         }
-        return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML.getValue(), ViewLoader.from("/login.html"));
+        return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML, ViewLoader.from("/login.html"));
     }
 
     private HttpResponse handlePostMethod(final HttpRequest request) {
@@ -52,7 +52,7 @@ public class LoginController implements Controller {
         final User user = login(account, password);
 
         if (Objects.nonNull(user)) {
-            HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML.getValue(),
+            HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.TEXT_HTML,
                     ViewLoader.toIndex());
             final Session session = request.getSession(true);
             session.setAttribute("user", user);

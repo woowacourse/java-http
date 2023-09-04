@@ -14,10 +14,10 @@ public class StaticController implements Controller {
     @Override
     public HttpResponse handle(HttpRequest request) {
         if (request.getUri().equals(INDEX_URI)) {
-            return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML.getValue(), "Hello world!");
+            return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML, "Hello world!");
         }
 
-        return new HttpResponse(StatusCode.OK, "text/" + request.getExtension(),
+        return new HttpResponse(StatusCode.OK, ContentType.from(request.getExtension()),
                 ViewLoader.from(request.getUri()));
     }
 }

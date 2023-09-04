@@ -15,20 +15,20 @@ public class RegisterController implements Controller {
     @Override
     public HttpResponse handle(final HttpRequest request) {
         if (request.isGetRequest()) {
-            return handleGetMethod(request);
+            return handleGetMethod();
         }
         return handlePostMethod(request);
     }
 
-    private HttpResponse handleGetMethod(final HttpRequest request) {
-        return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML.getValue(), ViewLoader.from("/register.html"));
+    private HttpResponse handleGetMethod() {
+        return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML, ViewLoader.from("/register.html"));
     }
 
     private HttpResponse handlePostMethod(final HttpRequest request) {
         if (request.hasRequestBody()) {
             final Map<String, String> requestBody = request.getRequestBody();
             register(requestBody);
-            return new HttpResponse(StatusCode.CREATED, ContentType.TEXT_HTML.getValue(), ViewLoader.toIndex());
+            return new HttpResponse(StatusCode.CREATED, ContentType.TEXT_HTML, ViewLoader.toIndex());
         }
         return HttpResponse.toNotFound();
     }

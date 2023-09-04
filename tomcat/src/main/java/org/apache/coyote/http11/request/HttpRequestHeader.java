@@ -1,0 +1,33 @@
+package org.apache.coyote.http11.request;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class HttpRequestHeader {
+    private final Map<String, String> httpRequestHeaders;
+
+    private HttpRequestHeader(final Map<String, String> httpRequestHeaders) {
+        this.httpRequestHeaders = httpRequestHeaders;
+    }
+
+    public static HttpRequestHeader from(final List<String> httpRequestHeader) {
+        return new HttpRequestHeader(
+                httpRequestHeader
+                        .stream()
+                        .map(line -> line.split(": "))
+                        .collect(Collectors.toMap(
+                                line -> line[0],
+                                line -> line[1])
+                        )
+        );
+    }
+
+    public Map<String, String> getHttpRequestHeaders() {
+        return httpRequestHeaders;
+    }
+
+    public String getContentLength() {
+        return httpRequestHeaders.get("Content-Length");
+    }
+}

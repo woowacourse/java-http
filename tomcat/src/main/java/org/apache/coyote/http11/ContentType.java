@@ -6,6 +6,7 @@ public enum ContentType {
     JS("application/javascript"),
     FORM_URLENCODED("application/x-www-form-urlencoded"),
     ICO("image/x-icon"),
+    SVG("image/svg+xml"),
     PNG("image/png"),
     WOFF("font/woff"),
     WOFF2("font/woff2");

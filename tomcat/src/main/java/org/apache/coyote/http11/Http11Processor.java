@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
         } catch (AuthenticationException e) {
-            writeRedirectResponse(outputStream, "/login.html");
+            writeRedirectResponse(outputStream, "/401.html");
         } catch (IllegalArgumentException e) {
             final String response = new HttpResponse(HttpStatus.BAD_REQUEST).build();
             log.error(e.getMessage(), e);

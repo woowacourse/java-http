@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -13,12 +14,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private final InMemoryUserRepository userRepository;
+
+    private Http11ProcessorTest(final InMemoryUserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
 
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, userRepository);
 
         // when
         processor.process(socket);
@@ -45,7 +52,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, userRepository);
 
         // when
         processor.process(socket);

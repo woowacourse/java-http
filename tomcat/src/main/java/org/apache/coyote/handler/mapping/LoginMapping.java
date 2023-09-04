@@ -21,7 +21,7 @@ public class LoginMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final String requestBody) throws IOException {
+    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
         final Map<String, String> bodyParams = Arrays.stream(requestBody.split("&"))
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(param -> param[0], param -> param[1]));

@@ -31,7 +31,7 @@ public class FrontHandler {
             final String httpMethod = parsedFirstLine[0];
             final String requestUri = parsedFirstLine[1];
             if (mapping.supports(httpMethod, requestUri)) {
-                response = mapping.handle(parsedFirstLine[1], requestBody);
+                response = mapping.handle(parsedFirstLine[1], headers, requestBody);
                 break;
             }
         }

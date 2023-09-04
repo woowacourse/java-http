@@ -25,7 +25,7 @@ public class LoginPageMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final String requestBody) throws IOException {
+    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
         final String[] parsedRequestUri = requestUri.split("\\?");
         if (requestUri.contains("?")) {
             final String uri = parsedRequestUri[0];

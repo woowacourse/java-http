@@ -9,29 +9,60 @@ public class HttpResponse {
     private final HttpStatus status;
     private final HttpHeaders headers;
     private final String body;
+    private final Cookie cookie;
 
-    public HttpResponse(final HttpStatus status, final HttpHeaders headers) {
-        this.status = status;
-        this.headers = headers;
-        this.body = null;
-    }
-
-    public HttpResponse(final HttpStatus status, final HttpHeaders headers, final String body) {
+    private HttpResponse(final HttpStatus status, final HttpHeaders headers, final String body, final Cookie cookie) {
         this.status = status;
         this.headers = headers;
         this.body = body;
-        setContentType();
+        this.cookie = cookie;
+        setContentLength();
     }
 
-    private void setContentType() {
-        headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    private void setContentLength() {
+        int size = body.getBytes().length;
+        if (size > 0) {
+            headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(size));
+        }
     }
 
     public String getRawResponse() {
         return String.join("\r\n",
                 SUPPORT_HTTP_VERSION + status.getStatus(),
                 headers.getRawHeaders(),
+                HttpHeader.SET_COOKIE + ": " + cookie.toRawCookie(),
                 "\r\n" + body
         );
+    }
+
+    public static class Builder {
+        private HttpStatus status;
+        private HttpHeaders headers;
+        private String body = "";
+        private Cookie cookie = Cookie.emptyCookie();
+
+        public Builder status(final HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder headers(final HttpHeaders headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public Builder body(final String body) {
+            this.body = body;
+            return this;
+        }
+
+        public Builder cookie(final Cookie cookie) {
+            this.cookie = cookie;
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(status, headers, body, cookie);
+        }
     }
 }

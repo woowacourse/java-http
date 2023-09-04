@@ -2,6 +2,7 @@ package nextstep.jwp.handler;
 
 import static org.apache.coyote.http.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +95,12 @@ class HandlerTest {
 
         assertThat(response)
                 .usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.OK, headers, expectedBody));
+                .isEqualTo(new HttpResponse.Builder()
+                        .status(HttpStatus.OK)
+                        .headers(headers)
+                        .body(expectedBody)
+                        .build()
+                );
     }
 
     @Test
@@ -121,7 +127,7 @@ class HandlerTest {
     }
 
     @Test
-    void 로그인_요청_핸들러는_계정과_패스워드가_맞으면_index_리다이렉트를_반환한다() {
+    void 로그인_요청_핸들러는_계정과_패스워드가_맞으면_세션값과_index_리다이렉트를_반환한다() {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -143,8 +149,15 @@ class HandlerTest {
         // then
         final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
         expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
-        assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
+        assertAll(
+                () -> assertThat(response).usingRecursiveComparison()
+                        .ignoringFields("cookie")
+                        .isEqualTo(new HttpResponse.Builder()
+                                .status(HttpStatus.REDIRECT)
+                                .headers(expectedHeaders)
+                        ),
+                () -> assertThat(response.getRawResponse()).contains("JSESSIONID")
+        );
     }
 
     @Test
@@ -171,7 +184,10 @@ class HandlerTest {
         final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
         expectedHeaders.put(HttpHeader.LOCATION, "/401.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
+                .isEqualTo(new HttpResponse.Builder()
+                        .status(HttpStatus.REDIRECT)
+                        .headers(expectedHeaders)
+                );
     }
 
     @Test
@@ -213,11 +229,16 @@ class HandlerTest {
 
         assertThat(response)
                 .usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.OK, headers, expectedBody));
+                .isEqualTo(new HttpResponse.Builder()
+                        .status(HttpStatus.OK)
+                        .headers(headers)
+                        .body(expectedBody)
+                        .build()
+                );
     }
 
     @Test
-    void 유저_생성_요청_핸들러는_POST와_적절한_Body를_가진_요청을_지원한다(){
+    void 유저_생성_요청_핸들러는_POST와_적절한_Body를_가진_요청을_지원한다() {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -233,7 +254,6 @@ class HandlerTest {
                 .headers(headers)
                 .body(body)
                 .build();
-
 
         // when
         final RegisterHandler registerHandler = new RegisterHandler();
@@ -243,7 +263,7 @@ class HandlerTest {
     }
 
     @Test
-    void 유저_생성_요청_핸들러는_성공시_index_페이지를_반환한다(){
+    void 유저_생성_요청_핸들러는_성공시_index_페이지를_반환한다() {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -260,7 +280,6 @@ class HandlerTest {
                 .body(body)
                 .build();
 
-
         // when
         final RegisterHandler registerHandler = new RegisterHandler();
         HttpResponse response = registerHandler.handle(request);
@@ -269,11 +288,15 @@ class HandlerTest {
         final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
         expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
+                .isEqualTo(new HttpResponse.Builder()
+                        .status(HttpStatus.REDIRECT)
+                        .headers(expectedHeaders)
+                        .build()
+                );
     }
 
     @Test
-    void 유저_생성_요청_핸들러는_실패시_Bad_Request_를_반환한다(){
+    void 유저_생성_요청_핸들러는_실패시_Bad_Request_를_반환한다() {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -290,17 +313,17 @@ class HandlerTest {
                 .body(body)
                 .build();
 
-
         // when
         final RegisterHandler registerHandler = new RegisterHandler();
         HttpResponse response = registerHandler.handle(request);
 
         // then
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse(
-                        HttpStatus.BAD_REQUEST,
-                        HttpHeaders.getEmptyHeaders(),
-                        "중복된 계정입니다.")
+                .isEqualTo(new HttpResponse.Builder()
+                        .status(HttpStatus.BAD_REQUEST)
+                        .headers(HttpHeaders.getEmptyHeaders())
+                        .body("중복된 계정입니다.")
+                        .build()
                 );
     }
 }

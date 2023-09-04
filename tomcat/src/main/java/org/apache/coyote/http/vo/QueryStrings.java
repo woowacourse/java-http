@@ -32,7 +32,7 @@ public class QueryStrings {
         return queryStrings;
     }
 
-    public boolean isContain(final String key){
+    public boolean isContain(final String key) {
         return queryStrings.isContain(key);
     }
 
@@ -40,7 +40,7 @@ public class QueryStrings {
         return queryStrings.getRecentValue(key);
     }
 
-    public static QueryStrings getEmptyQueryStrings(){
+    public static QueryStrings getEmptyQueryStrings() {
         return new QueryStrings(new MultiValueMap<>());
     }
 }

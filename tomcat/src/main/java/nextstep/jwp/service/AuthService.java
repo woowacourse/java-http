@@ -20,7 +20,7 @@ public class AuthService {
     }
 
     public void register(final String account, final String email, final String password) {
-        if(InMemoryUserRepository.isPresentAccount(account)){
+        if (InMemoryUserRepository.isPresentAccount(account)) {
             throw new AlreadyRegisteredUserException();
         }
         final User user = new User(account, email, password);

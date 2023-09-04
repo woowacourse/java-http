@@ -3,11 +3,7 @@ package org.apache.catalina.servlet;
 import java.util.List;
 import nextstep.jwp.exception.NotSupportedRequestException;
 import nextstep.jwp.handler.DispatcherServlet;
-import org.apache.coyote.http.HttpHeader;
-import org.apache.coyote.http.HttpStatus;
-import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
-import org.apache.coyote.http.vo.HttpResponse;
 
 public class ServletMapping {
 

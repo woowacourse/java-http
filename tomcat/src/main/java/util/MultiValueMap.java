@@ -1,7 +1,6 @@
 package util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +42,14 @@ public class MultiValueMap<K, V> {
         if (values == null) {
             return null;
         }
-        return values.get(values.size()-1);
+        return values.get(values.size() - 1);
     }
 
     public List<V> getValues(final K key) {
         return multiValueMap.get(key);
     }
 
-    public boolean isContain(final K key){
+    public boolean isContain(final K key) {
         return this.multiValueMap.containsKey(key);
     }
 

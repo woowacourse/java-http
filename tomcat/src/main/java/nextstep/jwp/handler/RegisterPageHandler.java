@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import org.apache.catalina.util.ResourceFileReader;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
@@ -8,7 +9,6 @@ import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
 import org.apache.coyote.http.vo.HttpResponse;
 import org.apache.coyote.http.vo.Url;
-import org.apache.catalina.util.ResourceFileReader;
 
 public class RegisterPageHandler implements Handler {
 
@@ -18,7 +18,11 @@ public class RegisterPageHandler implements Handler {
         headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
         final String body = ResourceFileReader.readFile("/register.html");
 
-        return new HttpResponse(HttpStatus.OK, headers, body);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .body(body)
+                .build();
     }
 
     @Override

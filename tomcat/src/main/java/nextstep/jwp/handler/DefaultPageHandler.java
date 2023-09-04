@@ -17,7 +17,11 @@ public class DefaultPageHandler implements Handler {
     public HttpResponse handle(final HttpRequest request) {
         final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
-        return new HttpResponse(HttpStatus.OK, headers, "Hello world!");
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .body("Hello world!")
+                .build();
     }
 
     @Override

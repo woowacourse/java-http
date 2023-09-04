@@ -1,5 +1,6 @@
 package org.apache.coyote.http.vo;
 
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 
 public class HttpRequest {
@@ -8,6 +9,7 @@ public class HttpRequest {
     private final Url url;
     private final HttpHeaders headers;
     private final HttpBody body;
+    private final Cookie cookie;
 
     private HttpRequest(
             final HttpMethod method,
@@ -19,6 +21,16 @@ public class HttpRequest {
         this.url = url;
         this.headers = headers;
         this.body = body;
+        this.cookie = parseCookie();
+    }
+
+    private Cookie parseCookie() {
+        String rawCookie = this.headers.getRecentHeaderValue(HttpHeader.COOKIE);
+        if (rawCookie != null) {
+            return Cookie.from(rawCookie);
+        }
+
+        return Cookie.emptyCookie();
     }
 
     public boolean isContainsSubStringInUrl(final String subString) {
@@ -63,6 +75,10 @@ public class HttpRequest {
 
     public HttpBody getBody() {
         return body;
+    }
+
+    public boolean hasCookie(final String cookieKey) {
+        return cookie.hasCookie(cookieKey);
     }
 
     public static class Builder {

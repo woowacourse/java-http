@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.util.UUID;
 import nextstep.jwp.exception.UnAuthorizationException;
 import nextstep.jwp.exception.UnRegisteredUserException;
 import nextstep.jwp.model.User;
@@ -7,6 +8,7 @@ import nextstep.jwp.service.AuthService;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
+import org.apache.coyote.http.vo.Cookie;
 import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
 import org.apache.coyote.http.vo.HttpResponse;
@@ -30,14 +32,30 @@ public class LoginHandler implements Handler {
             final User user = authService.login(account, password);
             log.info("User ={}", user);
 
-            final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-            headers.put(HttpHeader.LOCATION, "/index.html");
-            return new HttpResponse(HttpStatus.REDIRECT, headers);
+            final HttpResponse.Builder responseBuilder = getHttpResponse("/index.html");
+
+            if (!request.hasCookie("JSESSIONID")) {
+                final Cookie cookie = Cookie.emptyCookie();
+                final String uuid = UUID.randomUUID().toString();
+                cookie.put("JSESSIONID", uuid);
+
+                return responseBuilder
+                        .cookie(cookie)
+                        .build();
+            }
+            return responseBuilder.build();
+
         } catch (UnAuthorizationException | UnRegisteredUserException e) {
-            final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-            headers.put(HttpHeader.LOCATION, "/401.html");
-            return new HttpResponse(HttpStatus.REDIRECT, headers);
+            return getHttpResponse("/401.html").build();
         }
+    }
+
+    private HttpResponse.Builder getHttpResponse(final String value) {
+        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        headers.put(HttpHeader.LOCATION, value);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.REDIRECT)
+                .headers(headers);
     }
 
     @Override

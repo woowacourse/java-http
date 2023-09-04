@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -44,7 +44,8 @@ class HttpRequestParserTest {
                 () -> assertThat(parsed.getUrl().getUrlPath()).isEqualTo("/login"),
                 () -> assertThat(parsed.getUrl().getQueryStrings().getQueryString("name")).isEqualTo("gugu"),
                 () -> assertThat(parsed.getUrl().getQueryStrings().getQueryString("password")).isEqualTo("1234"),
-                () -> assertThat(parsed.getHeaders().getHeaderValues(HttpHeader.ACCEPT)).isEqualTo(List.of("text/html")),
+                () -> assertThat(parsed.getHeaders().getHeaderValues(HttpHeader.ACCEPT)).isEqualTo(
+                        List.of("text/html")),
                 () -> assertThat(parsed.getBody().getValue("account")).isEqualTo("gugu"),
                 () -> assertThat(parsed.getBody().getValue("email")).isEqualTo("gugu@mail.com"),
                 () -> assertThat(parsed.getBody().getValue("password")).isEqualTo("password")

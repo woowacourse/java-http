@@ -33,15 +33,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static HttpResponse initInternalServerErrorResponse() {
-        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.LOCATION, "/500.html");
-        return new HttpResponse(HttpStatus.REDIRECT, headers);
+        return getRedirectResponse("/500.html");
     }
 
     private static HttpResponse initNotSupportedResponse() {
+        return getRedirectResponse("/404.html");
+    }
+
+    private static HttpResponse getRedirectResponse(final String path) {
         final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.LOCATION, "/404.html");
-        return new HttpResponse(HttpStatus.REDIRECT, headers);
+        headers.put(HttpHeader.LOCATION, path);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.REDIRECT)
+                .headers(headers)
+                .build();
     }
 
     @Override

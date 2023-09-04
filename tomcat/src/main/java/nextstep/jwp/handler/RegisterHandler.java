@@ -25,12 +25,22 @@ public class RegisterHandler implements Handler {
                     request.getBodyValueOf(EMAIL_BODY),
                     request.getBodyValueOf(PASSWORD_BODY)
             );
+
             final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
             headers.put(HttpHeader.LOCATION, "/index.html");
-            return new HttpResponse(HttpStatus.REDIRECT, headers);
+
+            return new HttpResponse.Builder()
+                    .status(HttpStatus.REDIRECT)
+                    .headers(headers)
+                    .build();
+
         } catch (AlreadyRegisteredUserException e) {
             final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-            return new HttpResponse(HttpStatus.BAD_REQUEST, headers, "중복된 계정입니다.");
+            
+            return new HttpResponse.Builder().status(HttpStatus.BAD_REQUEST)
+                    .headers(headers)
+                    .body("중복된 계정입니다.")
+                    .build();
         }
     }
 

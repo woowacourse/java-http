@@ -1,7 +1,7 @@
 package org.apache.coyote.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http.vo.QueryStrings;
 import org.apache.coyote.http.vo.Url;

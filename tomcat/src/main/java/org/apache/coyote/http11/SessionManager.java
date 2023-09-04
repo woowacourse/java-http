@@ -23,4 +23,8 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
+    public boolean isExist(final String id) {
+        return SESSIONS.containsKey(id);
+    }
+
 }

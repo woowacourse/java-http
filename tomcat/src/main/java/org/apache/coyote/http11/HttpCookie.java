@@ -9,7 +9,7 @@ public class HttpCookie {
 
     public HttpCookie(String fieldValue) {
         if (fieldValue == null) {
-            this.cookie = null;
+            this.cookie = new HashMap<>();
             return;
         }
         this.cookie = init(fieldValue);

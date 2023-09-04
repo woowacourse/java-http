@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -21,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -52,12 +54,14 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> header = parseToHeader(bufferedReader);
 
+            HttpResponse httpResponse = new HttpResponse();
+
             if (httpMethod.equals("POST") && httpUrl.equals("/login")) {
                 int contentLength = Integer.parseInt(header.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
-                log.info("reqeustBody: {}", requestBody);
+                log.info("requestBody: {}", requestBody);
 
                 Map<String, String> queryParms = parseToQueryParms(requestBody);
 
@@ -69,20 +73,19 @@ public class Http11Processor implements Runnable, Processor {
                         throw new IllegalArgumentException("비밀번호 불일치");
                     }
                     log.info("user: {}", user);
-                    response = createRedirectResponse("/index.html");
+
+                    Session session = new Session(UUID.randomUUID().toString());
+                    session.setAttribute("user", user);
+                    sessionManager.add(session);
+                    httpResponse.setStatus("302 Found");
+                    httpResponse.setRedirectUrl("/index.html");
+                    httpResponse.setCookie("JSESSIONID=" + session.getId());
+
+                    response = httpResponse.createResponse();
                 } catch (IllegalArgumentException e) {
                     log.error("error : {}", e);
                     response = createRedirectResponse("/401.html");
                 }
-
-            }
-
-            if (httpMethod.equals("GET") && httpUrl.equals("/login")) {
-                response = createResponse("text/html", readFile("static", "login.html"));
-            }
-
-            if (httpMethod.equals("GET") && httpUrl.equals("/register")) {
-                response = createResponse("text/html", readFile("static", "register.html"));
             }
 
             if (httpMethod.equals("POST") && httpUrl.equals("/register")) {
@@ -101,6 +104,21 @@ public class Http11Processor implements Runnable, Processor {
 
                 response = createRedirectResponse("/index.html");
                 log.info(response);
+            }
+
+            if (httpMethod.equals("GET") && httpUrl.equals("/login")) {
+                HttpCookie cookie = new HttpCookie(header.get("Cookie"));
+
+                String sessionId = cookie.findValue("JSESSIONID");
+                if (sessionManager.isExist(sessionId)) {
+                    response = createRedirectResponse("/index.html");
+                } else {
+                    response = createResponse("text/html", readFile("static", "login.html"));
+                }
+            }
+
+            if (httpMethod.equals("GET") && httpUrl.equals("/register")) {
+                response = createResponse("text/html", readFile("static", "register.html"));
             }
 
             if (httpMethod.equals("GET") && httpUrl.equals("/")) {

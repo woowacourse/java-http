@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LOGIN_PAGE_URI = "/login.html";
+    private static final String UNAUTHORIZED_PAGE_URI = "/401.html";
+    private static final String INDEX_PAGE_URI = "/index.html";
 
     private final Socket connection;
 
@@ -102,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURI.equals("/login")) {
-            return login(requestURI, httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            return login(httpRequestStartLine, httpRequestHeader, httpRequestBody);
         }
 
         URL resource = getClass()
@@ -113,10 +116,15 @@ public class Http11Processor implements Runnable, Processor {
         return ResponseEntity.of(HttpStatus.OK, requestURI, responseBody);
     }
 
-    private ResponseEntity login(String requestURI, HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
+    private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
+        String requestURI = httpRequestStartLine.getRequestURI();
         if (httpMethod == HttpMethod.GET) {
-            return ResponseEntity.of(HttpStatus.OK, requestURI, null);
+            return ResponseEntity.builder()
+                    .httpStatus(HttpStatus.OK)
+                    .requestURI(requestURI)
+                    .location(LOGIN_PAGE_URI)
+                    .build();
         }
         Map<String, String> queryStrings = parseQueryString(requestURI);
         User account = findAccount(queryStrings);
@@ -124,16 +132,21 @@ public class Http11Processor implements Runnable, Processor {
         String password = queryStrings.get("password");
         boolean isCorrectPassword = account.checkPassword(password);
         if (!isCorrectPassword) {
-            log.info("accout {} 비밀번호 불일치로 로그인 실패", account.getAccount());
-            return ResponseEntity.of(HttpStatus.UNAUTHORIZED, requestURI, null);
+            log.info("account {} 비밀번호 불일치로 로그인 실패", account.getAccount());
+            return ResponseEntity
+                    .builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .requestURI(requestURI)
+                    .location(UNAUTHORIZED_PAGE_URI)
+                    .build();
         }
 
-        URL resource = getClass()
-                .getClassLoader()
-                .getResource("static" + requestURI + ".html");
-        File file = new File(resource.getFile());
-        String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return ResponseEntity.of(HttpStatus.FOUND, requestURI, responseBody);
+        return ResponseEntity
+                .builder()
+                .httpStatus(HttpStatus.FOUND)
+                .requestURI(requestURI)
+                .location(INDEX_PAGE_URI)
+                .build();
     }
 
     private User findAccount(Map<String, String> queryStrings) {

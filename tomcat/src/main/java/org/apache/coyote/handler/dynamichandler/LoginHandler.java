@@ -3,6 +3,9 @@ package org.apache.coyote.handler.dynamichandler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.session.Session;
+import org.apache.coyote.handler.session.SessionManager;
+import org.apache.coyote.handler.statichandler.ExceptionHandler;
 import org.apache.coyote.http11.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 
 public class LoginHandler implements Handler {
 
@@ -21,10 +25,16 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
+        if (httpRequest.session() != null) {
+            return handleAlreadyLogin();
+        }
         if (HttpMethod.GET == HttpMethod.valueOf(httpRequest.method())) {
             return handleGetMapping(httpRequest);
         }
-        return handlePostMapping(httpRequest);
+        if (HttpMethod.POST == HttpMethod.valueOf(httpRequest.method())) {
+            return handlePostMapping(httpRequest);
+        }
+        return null;
     }
 
     private HttpResponse handleGetMapping(HttpRequest httpRequest) {
@@ -34,9 +44,10 @@ public class LoginHandler implements Handler {
             String password = parsePassword(quiryString);
             if (isExistUser(account, password)) {
                 log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
-                return handleRedirectPage();
+                User user = InMemoryUserRepository.findByAccount(account).get();
+                return handleRedirectPage(user);
             }
-            return handleUnAuthorizedPage();
+            return handleUnAuthorizedPage(httpRequest);
         }
         try {
             Path path = Paths.get(getClass().getClassLoader().getResource("static" + httpRequest.uri() + ".html").getPath());
@@ -61,9 +72,10 @@ public class LoginHandler implements Handler {
             String password = parsePassword(body);
             if (isExistUser(account, password)) {
                 log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
-                return handleRedirectPage();
+                User user = InMemoryUserRepository.findByAccount(account).get();
+                return handleRedirectPage(user);
             }
-            return handleUnAuthorizedPage();
+            return handleUnAuthorizedPage(httpRequest);
         }
         return null;
     }
@@ -95,25 +107,24 @@ public class LoginHandler implements Handler {
         return false;
     }
 
-    private HttpResponse handleUnAuthorizedPage() {
-        try {
-            Path path = Paths.get(getClass().getClassLoader().getResource("static" + "/" + "401.html").getPath());
-            byte[] bytes = Files.readAllBytes(path);
-            String body = new String(bytes);
-            HttpResponse response = new HttpResponse();
-            response.setHttpVersion(HttpVersion.HTTP11.value());
-            response.setHttpStatus(HttpStatus.UNAUTHORIZED);
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_HTML.value())
-                    .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-            response.setBody(body);
-            return response;
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
+    private HttpResponse handleUnAuthorizedPage(HttpRequest httpRequest) {
+        return new ExceptionHandler(HttpStatus.UNAUTHORIZED).handle(httpRequest);
     }
 
-    private HttpResponse handleRedirectPage() {
+    private HttpResponse handleRedirectPage(User user) {
+        UUID uuid = UUID.randomUUID();
+        Session session = new Session(uuid.toString());
+        session.setAttribute("user", user);
+        new SessionManager().add(session);
+        HttpResponse response = new HttpResponse();
+        response.setHttpVersion(HttpVersion.HTTP11.value());
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setHeader(HttpHeader.LOCATION, "/index.html")
+                .setHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid);
+        return response;
+    }
+
+    private HttpResponse handleAlreadyLogin() {
         HttpResponse response = new HttpResponse();
         response.setHttpVersion(HttpVersion.HTTP11.value());
         response.setHttpStatus(HttpStatus.FOUND);

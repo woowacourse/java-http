@@ -2,19 +2,11 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.StaticFileHandler;
 import org.apache.coyote.handler.WelcomePageHandler;
-import org.reflections.Configuration;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

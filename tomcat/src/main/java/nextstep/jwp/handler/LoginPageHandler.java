@@ -37,7 +37,6 @@ public class LoginPageHandler implements Handler {
     }
 
     private boolean AuthenticationUser(final HttpRequest request) {
-        System.out.println(request.getCookie("JSESSIONID"));
         return request.hasCookie("JSESSIONID") && SessionManager.findSession(request.getCookie("JSESSIONID")) != null;
     }
 

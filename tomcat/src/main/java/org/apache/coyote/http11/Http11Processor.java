@@ -23,8 +23,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Map<String, Function<HttpRequest, String>> getMethodControllerMapper = Map.of(
-            "/", this::loadRootPage,
-            "/login", this::loadLoginPage
+            "/", this::loadRootPage
     );
     private final Map<String, Function<HttpRequest, String>> postMethodControllerMapper = Map.of(
             "/register", this::register,
@@ -118,95 +117,53 @@ public class Http11Processor implements Runnable, Processor {
 
     private String loadExtraPage(HttpRequest httpRequest) {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        log.info("path {}", httpRequestHeader.getPath());
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
+        HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return httpResponse.toString();
     }
 
     private String loadRootPage(HttpRequest httpRequest) {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         String responseBody = "Hello world!";
+        HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
+        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
+        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String loadLoginPage(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        Map<String, String> queryStrings = httpRequestHeader.getQueryStrings();
-        String account = httpRequestHeader.getQueryString("account");
-        String password = httpRequestHeader.getQueryString("password");
-        Optional<User> savedUser = InMemoryUserRepository.findByAccount(account);
-        int status = 302;
-        String redirectionUrl = "401.html";
-
-        if (queryStrings.isEmpty()) {
-            status = 200;
-        }
-
-        if (savedUser.isPresent() && savedUser.get().checkPassword(password)) {
-            redirectionUrl = "/index.html";
-        }
-
-        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " OK ",
-                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "Location: " + redirectionUrl + " ",
-                "",
-                responseBody);
+        return httpResponse.toString();
     }
 
     private String register(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");
-        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
         String redirectionUrl = "/index.html";
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+        HttpResponse httpResponse = new HttpResponse(302, "FOUND");
+        httpResponse.setAttribute("Location", redirectionUrl);
 
-        return String.join("\r\n",
-                "HTTP/1.1 302 OK ",
-                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "Location: " + redirectionUrl + " ",
-                "",
-                responseBody);
+        return httpResponse.toString();
     }
 
     private String login(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        HttpResponse httpResponse = new HttpResponse(302, "FOUND");
         String redirectionUrl = "/401.html";
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             redirectionUrl = "/index.html";
+            httpResponse.setAttribute("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
             log.info("로그인 성공! 아이디 : {}", account);
         }
 
-        return String.join("\r\n",
-                "HTTP/1.1 302 OK ",
-                "Content-Type: " + httpRequestHeader.getContentType() + ";charset=utf-8 ",
-                "Location: " + redirectionUrl + " ",
-                "");
+        httpResponse.setAttribute("Location", redirectionUrl);
+
+        return httpResponse.toString();
     }
 
     private URL convertAbsoluteUrl(HttpRequestHeader httpRequestHeader) {

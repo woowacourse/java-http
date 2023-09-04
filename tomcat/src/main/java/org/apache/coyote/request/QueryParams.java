@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class QueryParams {
 
@@ -46,6 +47,19 @@ public class QueryParams {
 
     public String getParamValue(final String name) {
         return params.getOrDefault(name, null);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final QueryParams that = (QueryParams) o;
+        return Objects.equals(params, that.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(params);
     }
 
     @Override

@@ -94,18 +94,37 @@ public class RequestProcessor {
 
         if (method.equals(HttpMethod.POST)) {
             final String requestBody = httpRequest.getRequestBody();
-            final Map<String, String> logInfo = Arrays.stream(requestBody.split("&"))
-                    .map(input -> input.split("="))
-                    .collect(Collectors.toMap(info -> info[0], info -> info[1]));
 
             if (requestUri.equals("register")) {
-                if (InMemoryUserRepository.findByAccount(logInfo.get("account")).isPresent()) {
+                final Map<String, String> registerInfo = Arrays.stream(requestBody.split("&"))
+                        .map(input -> input.split("="))
+                        .collect(Collectors.toMap(info -> info[0], info -> info[1]));
+
+                if (InMemoryUserRepository.findByAccount(registerInfo.get("account")).isPresent()) {
                     return ResponseEntity.of(version, HttpStatus.FOUND, content,
                             Map.of(LOCATION_HEADER, SERVER_ERROR_PAGE));
                 }
-                final User newUser = new User(logInfo.get("account"), logInfo.get("password"), logInfo.get("email"));
+                final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"), registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
                 return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, REGISTER_PAGE));
+            }
+
+            if (requestUri.equals("login")) {
+                String redirectedPage = UNAUTHORIZED_PAGE;
+                final Map<String, String> logInfo = Arrays.stream(requestBody.split("&"))
+                        .map(input -> input.split("="))
+                        .collect(Collectors.toMap(info -> info[0], info -> info[1]));
+
+                final Optional<User> findedUser = InMemoryUserRepository.findByAccount(logInfo.get("account"));
+                if (findedUser.isPresent()) {
+                    User user = findedUser.get();
+                    if (user.checkPassword(logInfo.get("password"))) {
+                        log.debug(user.toString());
+                        redirectedPage = INDEX_PAGE;
+                    }
+                }
+
+                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, redirectedPage));
             }
         }
 

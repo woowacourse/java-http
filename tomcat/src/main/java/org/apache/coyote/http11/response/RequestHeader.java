@@ -28,11 +28,9 @@ public class RequestHeader {
     }
 
     public boolean hasJSessionId() {
-        System.out.println("RequestHeader까지 들어옴");
-        if (!headers.containsKey("Set-Cookie")) {
-            System.out.println("Set-Cookie가 없음");
+        if (!headers.containsKey("Cookie")) {
             return false;
         }
-        return HttpCookie.from(headers.get("Set-Cookie")).hasJSessionId();
+        return HttpCookie.from(headers.get("Cookie")).hasJSessionId();
     }
 }

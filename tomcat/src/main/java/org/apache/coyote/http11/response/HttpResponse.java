@@ -32,26 +32,27 @@ public class HttpResponse {
                 responseBody);
     }
 
-    public String getRedirectResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "HTTP/1.1 " + statusCode + "\r",
-                "Location: " + header.get("Location: ") + "\r",
-                "Content-Type: " + header.get("Content-Type: ") + "\r",
-                "Content-Length: " + header.get("Content-Length: ") + "\r",
-                "Set-Cookie: " + header.get("Set-Cookie: ") + "\r\n",
-                responseBody);
-    }
+//    public String getRedirectResponse() {
+//        return String.join("\r\n",
+//                "HTTP/1.1 " + statusCode + " ",
+//                "HTTP/1.1 " + statusCode + "\r",
+//                "Location: " + header.get("Location: ") + "\r",
+//                "Content-Type: " + header.get("Content-Type: ") + "\r",
+//                "Content-Length: " + header.get("Content-Length: ") + "\r",
+//                "Set-Cookie: " + header.get("Set-Cookie: ") + "\r\n",
+//                responseBody);
+//    }
 
     public void addJSessionId(final HttpRequest httpRequest) {
         if (!httpRequest.hasJSessionId()) {
-            header.put("Set-Cookie: ", "JSESSIONID=" + UUID.randomUUID());
+            System.out.println("쿠키를 담았다.");
+            header.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
         }
     }
 
     public String printHeader() {
         return header.entrySet().stream()
-                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 }

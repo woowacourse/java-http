@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static Response getPostResponse(final BufferedReader bufferedReader, String request, final String uri) throws IOException {
+    private Response getPostResponse(final BufferedReader bufferedReader, String request, final String uri) throws IOException {
         if ("/register".equals(uri)) {
             Integer contentLength = null;
             while (request != null && !"".equals(request)) {
@@ -97,7 +97,35 @@ public class Http11Processor implements Runnable, Processor {
             InMemoryUserRepository.save(new User(queries.get("account"), queries.get("password"), queries.get("email")));
             return new Response(HttpStatus.CREATED, "index.html");
         }
+        if ("/login".equals(uri)) {
+            Integer contentLength = null;
+            while (request != null && !"".equals(request)) {
+                request = bufferedReader.readLine();
+                if (request.contains("Content-Length")) {
+                    request = request.replaceAll(" ", "");
+                    contentLength = Integer.parseInt(request.split(":")[1]);
+                }
+            }
+
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            String requestBody = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8.toString());
+
+            final Map<String, String> queries = Arrays.stream(requestBody.split("&"))
+                                                      .map(query -> query.split("="))
+                                                      .collect(toMap(query -> query[0], query -> query[1]));
+
+            return InMemoryUserRepository.findByAccount(queries.get("account"))
+                                         .filter(user -> user.checkPassword(queries.get("password")))
+                                         .map(this::loginSuccess)
+                                         .orElseGet(() -> new Response(HttpStatus.UNAUTHORIZED, "/401.html"));
+        }
         return null;
+    }
+
+    private Response loginSuccess(final User user) {
+        log.info("User{id={}, account={}, email={}, pasword={}", user.getId(), user.getAccount(), user.getEmail(), user.getPassword());
+        return new Response(HttpStatus.FOUND, "/index.html");
     }
 
     private String getResponse(final String uri) throws IOException {
@@ -136,24 +164,8 @@ public class Http11Processor implements Runnable, Processor {
         if ("/login".equals(uri)) {
             return new Response(HttpStatus.OK, "login.html");
         }
-        if (uri.startsWith("/login?")) {
-            int index = uri.indexOf("?");
-            String queryString = uri.substring(index + 1);
-            final Map<String, String> queries = Arrays.stream(queryString.split("&"))
-                                                      .map(query -> query.split("="))
-                                                      .collect(toMap(query -> query[0], query -> query[1]));
-            return InMemoryUserRepository.findByAccount(queries.get("account"))
-                                         .filter(user -> user.checkPassword(queries.get("password")))
-                                         .map(this::loginSuccess)
-                                         .orElseGet(() -> new Response(HttpStatus.UNAUTHORIZED, "/401.html"));
-        }
 
         return new Response(HttpStatus.OK, uri);
-    }
-
-    private Response loginSuccess(final User user) {
-        log.info("User{id={}, account={}, email={}, pasword={}", user.getId(), user.getAccount(), user.getEmail(), user.getPassword());
-        return new Response(HttpStatus.FOUND, "/index.html");
     }
 
     private String getContentType(final String uri) {

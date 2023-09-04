@@ -28,8 +28,6 @@ public class Session {
     }
 
     public void removeAttribute(final String name) {
-        if (values.containsKey(name)) {
-            values.remove(name);
-        }
+        values.remove(name);
     }
 }

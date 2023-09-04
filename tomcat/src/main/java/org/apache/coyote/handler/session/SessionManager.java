@@ -25,8 +25,6 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(Session session) {
-        if (SESSIONS.containsKey(session.getId())) {
-            SESSIONS.remove(session);
-        }
+        SESSIONS.remove(session.getId());
     }
 }

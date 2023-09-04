@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return stringBuilder.toString();
         } catch (IOException e) {
-            return null;
+            throw new IllegalArgumentException("RequestLine 을 읽을 수 없습니다.");
         }
     }
 
@@ -97,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
             inputReader.read(buffer, 0, contentLength);
             return new String(buffer);
         } catch (IOException e) {
-            return null;
+            throw new IllegalArgumentException("RequestBody 를 읽을 수 없습니다.");
         }
     }
 
@@ -166,10 +166,8 @@ public class Http11Processor implements Runnable, Processor {
             .collect(Collectors.joining("\r\n"));
     }
 
-    private String makeHeader(Object headerName, Object value) {
-        String headerKey = (String) headerName;
-        String headerValue = (String) value;
-        return headerKey + ": " + headerValue;
+    private String makeHeader(String headerName, String value) {
+        return headerName + ": " + value;
     }
 
     private Optional<String> bodyOf(HttpResponse<Object> httpResponse) {

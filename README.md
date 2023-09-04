@@ -11,5 +11,5 @@
 - [x] HTTP Status Code 302
 - [x] POST 방식으로 회원가입
 - [x] Login 도 POST 로 변경
-- [] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기

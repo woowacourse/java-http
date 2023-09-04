@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -81,17 +79,22 @@ public class Http11Processor implements Runnable, Processor {
 
             System.out.println("path = " + path);
 
-            if (path.equals("login") && !queryString.equals("")) {
+            Map<String, String> requestBodyMap = parseQueryParams(requestBody.toString());
+
+            String setCookie = "";
+
+            if (path.equals("login") && requestHeader.indexOf("POST") != -1) {
                 statusCode = 302;
                 statusMessage = "Found";
 
-                Map<String, String> queryParams = parseQueryParams(queryString);
-                String account = queryParams.get("account");
-                String password = queryParams.get("password");
+                String account = requestBodyMap.get("account");
+                String password = requestBodyMap.get("password");
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
                 if (user.isPresent()) {
                     log.info(user.toString());
+                    UUID uuid = UUID.randomUUID();
+                    setCookie = "Set-Cookie: JSESSIONID=" + uuid;
 
                     path = "/index.html";
                 } else {
@@ -100,8 +103,6 @@ public class Http11Processor implements Runnable, Processor {
                     path = "/401.html";
                 }
             }
-
-            Map<String, String> requestBodyMap = parseQueryParams(requestBody.toString());
 
             if (path.equals("register") && requestHeader.indexOf("POST") != -1) {
                 String account = requestBodyMap.get("account");
@@ -123,6 +124,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            HttpCookie requestCookie = getCookie(requestHeader.toString());
+
             var responseBody = "";
 
             if (uri.length() == 0) {
@@ -133,12 +136,23 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(filePath));
             }
 
-            final var response = String.join("\r\n",
+
+            String response = String.join("\r\n",
                     "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
                     "Content-Type: text/" + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
+
+            if (setCookie.length() != 0) {
+                response = String.join("\r\n",
+                        "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
+                        setCookie,
+                        "Content-Type: text/" + contentType + ";charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -195,5 +209,16 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         return 0;
+    }
+
+    private HttpCookie getCookie(String requestHeader) {
+        String[] headerLines = requestHeader.split("\r\n");
+        for (String line : headerLines) {
+            if (line.startsWith("Cookie:")) {
+                String[] parts = line.split(" ");
+                return HttpCookie.parseCookieString(parts[1]);
+            }
+        }
+        return null;
     }
 }

@@ -26,7 +26,7 @@ public class HttpRequestFirstLineInfo {
             throw new IllegalArgumentException("유효하지 않은 요청 헤더 첫 줄 입니다.");
         }
 
-        HttpMethod httpMethod = parseHttpMethod(infos[HTTP_METHOD_INDEX]);
+        HttpMethod httpMethod = HttpMethod.parseHttpMethod(infos[HTTP_METHOD_INDEX]);
         String uriWithQueryString = infos[URI_INDEX];
         String versionOfTheProtocol = infos[PROTOCOL_VERSION_INDEX];
 
@@ -37,14 +37,6 @@ public class HttpRequestFirstLineInfo {
         }
 
         return new HttpRequestFirstLineInfo(httpMethod, uriWithQueryString, versionOfTheProtocol);
-    }
-
-    private static HttpMethod parseHttpMethod(String method) {
-        try {
-            return HttpMethod.valueOf(method);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("유효하지 않은 HTTP 메서드입니다.");
-        }
     }
 
     public HttpMethod getHttpMethod() {

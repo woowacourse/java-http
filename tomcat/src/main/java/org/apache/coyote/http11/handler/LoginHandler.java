@@ -43,17 +43,14 @@ public class LoginHandler extends Handler {
         return responseForNotLoggedIn(request);
     }
 
-    private Response responseForLoggedIn(Request request) throws IOException {
+    private Response responseForLoggedIn(Request request) {
         String absolutePath = "index.html";
-        String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
+                "Location", absolutePath
         ));
-        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
-                headers, responseBody);
+                headers, ResponseBody.ofEmpty());
     }
 
     private Response responseForNotLoggedIn(Request request) throws IOException {
@@ -69,7 +66,7 @@ public class LoginHandler extends Handler {
                 headers, responseBody);
     }
 
-    private Response responseWhenHttpMethodIsPost(Request request) throws IOException {
+    private Response responseWhenHttpMethodIsPost(Request request) {
         RequestBody requestBody = request.getBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
@@ -80,34 +77,28 @@ public class LoginHandler extends Handler {
         return responseWhenLoginFail(request);
     }
 
-    private Response responseWhenLoginSuccess(Request request) throws IOException {
+    private Response responseWhenLoginSuccess(Request request) {
         UUID sessionId = saveSession(request);
 
         String absolutePath = "index.html";
-        String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length),
-                SET_COOKIE, "JSESSIONID=" + sessionId
+                SET_COOKIE, "JSESSIONID=" + sessionId,
+                "Location", absolutePath
         ));
-        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
-                headers, responseBody);
+                headers, ResponseBody.ofEmpty());
     }
 
-    private Response responseWhenLoginFail(Request request) throws IOException {
+    private Response responseWhenLoginFail(Request request) {
         String absolutePath = "401.html";
 
-        String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
+                "Location", absolutePath
         ));
-        ResponseBody responseBody = new ResponseBody(resource);
 
-        return Response.from(request.getHttpVersion(), HttpStatus.UNAUTHORIZED,
-                headers, responseBody);
+        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+                headers, ResponseBody.ofEmpty());
     }
 
     private UUID saveSession(Request request) {

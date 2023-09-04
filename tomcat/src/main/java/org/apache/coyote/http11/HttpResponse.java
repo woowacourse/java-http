@@ -27,22 +27,27 @@ public class HttpResponse {
     }
 
     private String getHeaders() {
-        String joined = "";
-        if (headers != null) {
-            joined = headers.entrySet().stream()
-                    .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                    .collect(Collectors.joining("\r\n"));
-        }
+        String joined = joinHeaders();
         if (body == null) {
             return joined;
         }
-        if (joined == "") {
+        if (joined.isBlank()) {
             return contentType + "\r\n" + "Content-Length: " + body.getBytes().length + " ";
         }
         return join("\r\n",
                 joined,
                 contentType,
                 "Content-Length: " + body.getBytes().length + " ");
+    }
+
+    private String joinHeaders() {
+        String joined = "";
+        if (headers != null) {
+            joined = headers.entrySet().stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                    .collect(Collectors.joining("\r\n"));
+        }
+        return joined;
     }
 
     private String getBody() {
@@ -53,13 +58,12 @@ public class HttpResponse {
     }
 
     public String buildResponse() {
-        String headers = getHeaders();
+        String joinedHeader = getHeaders();
 
         String startLine = "HTTP/1.1 " + httpStatus + " ";
-        String withHeader = join("\r\n", startLine, headers);
+        String withHeader = join("\r\n", startLine, joinedHeader);
 
-        String body = getBody();
-        return join("\r\n", withHeader, body);
+        return join("\r\n", withHeader, getBody());
     }
 
 }

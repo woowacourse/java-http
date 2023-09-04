@@ -3,18 +3,18 @@ package org.apache.coyote.http11.response;
 import java.util.Arrays;
 
 public enum ContentType {
-    HTML("html", "text/html"),
+    HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     JS("js", "application/js"),
     ICO("ico", "image/vnd.microsoft.icon"),
     SVG("svg", "image/svg+xml");
 
     private final String fileExtension;
-    private final String contentType;
+    private final String type;
 
-    ContentType(final String fileExtension, final String contentType) {
+    ContentType(final String fileExtension, final String type) {
         this.fileExtension = fileExtension;
-        this.contentType = contentType;
+        this.type = type;
     }
 
     public static ContentType from(final String fileExtension) {
@@ -28,7 +28,7 @@ public enum ContentType {
         return fileExtension;
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getType() {
+        return type;
     }
 }

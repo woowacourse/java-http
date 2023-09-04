@@ -16,6 +16,10 @@ public class ResponseBody {
         );
     }
 
+    public static ResponseBody noContent(final ContentType contentType) {
+        return new ResponseBody("Hello world!", contentType);
+    }
+
     public String getContent() {
         return content;
     }

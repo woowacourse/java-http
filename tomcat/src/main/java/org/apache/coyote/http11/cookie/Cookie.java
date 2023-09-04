@@ -1,6 +1,4 @@
-package org.apache.coyote.http11.response.cookie;
-
-import java.util.UUID;
+package org.apache.coyote.http11.cookie;
 
 public class Cookie {
     private final String key;
@@ -14,10 +12,6 @@ public class Cookie {
     public static Cookie from(final String value) {
         final String[] split = value.split("=");
         return new Cookie(split[0], split[1]);
-    }
-
-    public static Cookie generateJsessionId() {
-        return new Cookie("JSESSIONID", UUID.randomUUID().toString());
     }
 
     public String getKey() {

@@ -1,9 +1,16 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 public class Request {
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -35,7 +42,20 @@ public class Request {
         return requestBody;
     }
 
-    public String getAccessType() {
-        return requestHeader.getHeaderValue("AccessType");
+    public Session getSession(final boolean create) {
+        if (!create) {
+            final Optional<Cookie> cookieOptional = requestHeader.getCookieValue(JSESSIONID);
+            if (cookieOptional.isPresent()) {
+                return SessionManager.findSession(cookieOptional.get().getValue());
+            }
+            return null;
+        }
+        final Session session = Session.create();
+        SessionManager.add(session);
+        return session;
+    }
+
+    public boolean hasSession() {
+        return requestHeader.getCookieValue(JSESSIONID).isPresent();
     }
 }

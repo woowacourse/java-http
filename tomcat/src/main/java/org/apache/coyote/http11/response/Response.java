@@ -1,13 +1,8 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.response.cookie.Cookie;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http11.cookie.Cookie;
 
 public class Response {
-    private static final Logger log = LoggerFactory.getLogger(Response.class);
-
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
@@ -20,11 +15,10 @@ public class Response {
 
 
     public static Response of(final HttpStatus httpStatus,
-                              final ResponseBody responseBody,
-                              final RequestHeader requestHeader) {
+                              final ResponseBody responseBody) {
         return new Response(
                 StatusLine.of(httpStatus),
-                ResponseHeader.basic(requestHeader, responseBody),
+                ResponseHeader.basic(responseBody),
                 responseBody
         );
     }
@@ -39,18 +33,16 @@ public class Response {
         );
     }
 
-    public void addCookie(final Cookie cookie) {
-        responseHeader.addCookie(cookie);
+    public void addSession(final String sessionId) {
+        responseHeader.addCookie(new Cookie("JSESSIONID", sessionId));
     }
 
     @Override
     public String toString() {
-        final String result = statusLine.getStatusLine() + "\r\n" +
-                responseHeader.toString() + "\r\n" +
+        return statusLine.getStatusLine() + "\r\n" +
+                responseHeader.toString() +
                 "" + "\r\n" +
                 responseBody.getContent();
-        log.info("result = {}", result);
-        return result;
     }
 }
 

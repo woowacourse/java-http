@@ -1,7 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    @Disabled
     @Test
     void process() {
         // given
@@ -60,7 +58,7 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         String str = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(str.getBytes().length).isEqualTo(5564);
+        assertThat(str.getBytes()).hasSize(5564);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

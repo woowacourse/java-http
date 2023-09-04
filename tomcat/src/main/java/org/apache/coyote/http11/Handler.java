@@ -5,11 +5,12 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
-import org.apache.coyote.http11.response.cookie.Cookie;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +20,24 @@ import java.util.Optional;
 public class Handler {
     private static final Logger log = LoggerFactory.getLogger(Handler.class);
     private static final String INDEX_HTML = "/index.html";
+    private static final String LOGIN_HTML = "/login.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
 
     public Response handle(final Request request) throws IOException {
         final RequestLine requestLine = request.getRequestLine();
 
-        if (requestLine.getHttpMethod() == HttpMethod.GET) {
-            final StaticResource staticResource = StaticResource.from(requestLine.getPath());
+        if (requestLine.getHttpMethod() == HttpMethod.GET && requestLine.getPath().startsWith("/login")) {
+            if (request.hasSession()) {
+                final Session session = request.getSession(false);
+                final User user = (User) session.getAttribute("user");
+                log.info("user = {}", user);
+                final StaticResource staticResource = StaticResource.from(INDEX_HTML);
+                final ResponseBody responseBody = ResponseBody.from(staticResource);
+                return Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
+            }
+            final StaticResource staticResource = StaticResource.from(LOGIN_HTML);
             final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.of(HttpStatus.OK, responseBody, request.getRequestHeader());
+            return Response.of(HttpStatus.OK, responseBody);
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/login")) {
@@ -37,11 +47,14 @@ public class Handler {
             final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
 
             if (userOptional.isPresent() && userOptional.get().checkPassword(password)) {
-                log.info("user = {}", userOptional.get());
+                final User user = userOptional.get();
+                log.info("user = {}", user);
+                final Session session = request.getSession(true);
+                session.setAttribute("user", user);
                 final StaticResource staticResource = StaticResource.from(INDEX_HTML);
                 final ResponseBody responseBody = ResponseBody.from(staticResource);
                 final Response response = Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
-                response.addCookie(Cookie.generateJsessionId());
+                response.addSession(session.getId());
                 return response;
             }
             final StaticResource staticResource = StaticResource.from(UNAUTHORIZED_HTML);
@@ -64,6 +77,12 @@ public class Handler {
             return Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
         }
 
-        return null;
+        if (requestLine.getHttpMethod() == HttpMethod.GET && !requestLine.getPath().equals("/")) {
+            final StaticResource staticResource = StaticResource.from(requestLine.getPath());
+            final ResponseBody responseBody = ResponseBody.from(staticResource);
+            return Response.of(HttpStatus.OK, responseBody);
+        }
+
+        return Response.of(HttpStatus.OK, ResponseBody.noContent(ContentType.HTML));
     }
 }

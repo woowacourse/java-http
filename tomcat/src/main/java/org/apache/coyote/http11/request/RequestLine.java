@@ -29,13 +29,12 @@ public class RequestLine {
 
     public String getPath() {
         final String path = requestUri.getPath();
-        if (path.indexOf(".") == -1) {
+        if (path.equals("/")) {
+            return path;
+        }
+        if (!path.contains(".")) {
             return path + ".html";
         }
         return path;
-    }
-
-    public String getQueryParamValue(final String key) {
-        return requestUri.getQueryParams().get(key);
     }
 }

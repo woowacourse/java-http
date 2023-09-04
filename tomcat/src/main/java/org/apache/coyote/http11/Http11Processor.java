@@ -56,7 +56,6 @@ public class Http11Processor implements Runnable, Processor {
             if (Objects.isNull(requestLine)) {
                 throw new IllegalArgumentException(ILLEGAL_REQUEST);
             }
-            log.info(requestLine);
 
             RequestHeader requestHeader = readHeader(br);
             RequestBody requestBody = readBody(br, requestHeader);

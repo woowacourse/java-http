@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.ResponseEntity;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class UserController {
 

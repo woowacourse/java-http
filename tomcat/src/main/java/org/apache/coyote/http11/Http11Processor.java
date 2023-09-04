@@ -8,6 +8,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +38,11 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream();
                 final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
-            String firstLine = reader.readLine();
-            if (firstLine == null) {
-                return;
-            }
+            HttpRequest httpRequest = HttpRequestParser.extract(reader);
 
-            RequestLine requestLine = RequestLine.from(firstLine);
             HandlerMapping handlerMapping = new HandlerMapping();
+            ResponseEntity responseEntity = handlerMapping.extractResponseEntity(httpRequest.getRequestLine());
 
-            ResponseEntity responseEntity = handlerMapping.extractResponseEntity(requestLine);
             ViewResolver viewResolver = new ViewResolver(responseEntity);
 
             HttpResponse httpResponse = viewResolver.extractHttpResponse();

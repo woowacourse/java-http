@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.FileExtension;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 

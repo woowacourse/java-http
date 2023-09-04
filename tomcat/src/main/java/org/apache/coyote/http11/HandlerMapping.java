@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class HandlerMapping {
 

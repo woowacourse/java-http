@@ -42,7 +42,6 @@ public class HttpRequestStartLine {
 
     private static void validateRequestStartLineSize(String request, List<String> requests) {
         if (requests.size() != REQUEST_START_LINE_SIZE) {
-            log.warn("Request Start Line {}이 형식에 맞지 않음", request);
             throw new IllegalStateException();
         }
     }

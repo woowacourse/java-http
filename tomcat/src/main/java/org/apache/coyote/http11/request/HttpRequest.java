@@ -41,6 +41,7 @@ public class HttpRequest {
         while (!BLANK.equals(line)) {
             String[] header = line.split(HEADER_DELIMITER);
             headers.set(header[KEY_INDEX], header[VALUE_INDEX]);
+            line = br.readLine();
         }
         return headers;
     }

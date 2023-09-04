@@ -101,7 +101,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestURI.equals("/")) {
             final var responseBody = "Hello world!";
-            return ResponseEntity.of(HttpStatus.OK, requestURI, responseBody);
+            return ResponseEntity
+                    .builder()
+                    .httpStatus(HttpStatus.OK)
+                    .requestURI(requestURI)
+                    .responseBody(responseBody)
+                    .build();
         }
 
         if (requestURI.equals("/login")) {
@@ -113,7 +118,12 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI);
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return ResponseEntity.of(HttpStatus.OK, requestURI, responseBody);
+        return ResponseEntity
+                .builder()
+                .httpStatus(HttpStatus.OK)
+                .requestURI(requestURI)
+                .responseBody(responseBody)
+                .build();
     }
 
     private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {

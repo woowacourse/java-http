@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpRequest {
 

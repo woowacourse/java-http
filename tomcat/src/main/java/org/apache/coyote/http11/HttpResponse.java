@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpResponse {
 

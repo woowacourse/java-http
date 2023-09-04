@@ -8,6 +8,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.FileHandler;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.header.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

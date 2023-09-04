@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 public class HttpHeader {
 
@@ -9,7 +9,7 @@ public class HttpHeader {
     private final String name;
     private final String value;
 
-    protected HttpHeader(final String name, final String value) {
+    public HttpHeader(final String name, final String value) {
         this.name = name;
         this.value = value;
     }

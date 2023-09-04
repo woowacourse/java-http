@@ -30,7 +30,7 @@ public enum StaticResourceContentType {
                 "요청한 리소스의 확장자와 일치하는 Content-Type 이 없습니다. 요청한 리소스 :" + targetUrl)
             );
         if (findType == HTML) {
-            return findType.value + ";charset=" + StandardCharsets.UTF_8;
+            return findType.value + ";charset=" + StandardCharsets.UTF_8.toString().toLowerCase();
         }
         return findType.value;
     }

@@ -25,6 +25,10 @@ public class HttpHeaders {
         this.headers.putAll(key, values);
     }
 
+    public String getRecentHeaderValue(final HttpHeader header) {
+        return headers.getRecentValue(header);
+    }
+
     public List<String> getHeaderValues(final HttpHeader header) {
         return headers.getValues(header);
     }

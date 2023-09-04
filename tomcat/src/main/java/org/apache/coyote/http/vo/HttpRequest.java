@@ -7,15 +7,18 @@ public class HttpRequest {
     private final HttpMethod method;
     private final Url url;
     private final HttpHeaders headers;
+    private final HttpBody body;
 
     private HttpRequest(
             final HttpMethod method,
             final Url url,
-            final HttpHeaders headers
+            final HttpHeaders headers,
+            final HttpBody body
     ) {
         this.method = method;
         this.url = url;
         this.headers = headers;
+        this.body = body;
     }
 
     public boolean isContainsSubStringInUrl(final String subString) {
@@ -50,10 +53,15 @@ public class HttpRequest {
         return url.getQueryStringOf(queryString);
     }
 
+    public HttpBody getBody() {
+        return body;
+    }
+
     public static class Builder {
         private HttpMethod method;
         private Url url;
         private HttpHeaders headers;
+        private HttpBody body;
 
         public Builder httpMethod(final HttpMethod method) {
             this.method = method;
@@ -70,8 +78,13 @@ public class HttpRequest {
             return this;
         }
 
+        public Builder body(final HttpBody body) {
+            this.body = body;
+            return this;
+        }
+
         public HttpRequest build() {
-            return new HttpRequest(method, url, headers);
+            return new HttpRequest(method, url, headers, body);
         }
     }
 }

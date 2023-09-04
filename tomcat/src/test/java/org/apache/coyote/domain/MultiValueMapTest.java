@@ -52,10 +52,8 @@ class MultiValueMapTest {
     }
 
     @Test
-    void multiValueMap_없는_키에_대한_값을_가져올_시_예외가_발생한다() {
-        assertThatThrownBy(() -> new MultiValueMap<String, String>().getValues("Key"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 키가 존재하지 않습니다.");
+    void multiValueMap_없는_키에_대한_값을_가져올_시_null을_반환한다() {
+        assertThat(new MultiValueMap<String, String>().getValues("Key")).isEqualTo(null);
     }
 
     @Test

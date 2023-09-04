@@ -21,12 +21,13 @@ class HttpRequestParserTest {
     void HTTP요청을_받아서_HttpRequest_객체를_생성한다() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login?name=gugu&password=1234 HTTP/1.1 ",
+                "POST /login?name=gugu&password=1234 HTTP/1.1",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 50",
                 "Accept: text/html",
                 "",
-                "");
+                "account=gugu&email=gugu@mail.com&password=password");
 
         // when
         HttpRequest parsed = HttpRequestParser.parse(
@@ -42,7 +43,10 @@ class HttpRequestParserTest {
                 () -> assertThat(parsed.getUrl().getUrlPath()).isEqualTo("/login"),
                 () -> assertThat(parsed.getUrl().getQueryStrings().getQueryString("name")).isEqualTo("gugu"),
                 () -> assertThat(parsed.getUrl().getQueryStrings().getQueryString("password")).isEqualTo("1234"),
-                () -> assertThat(parsed.getHeaders().getHeaderValues(HttpHeader.ACCEPT)).isEqualTo(List.of("text/html"))
+                () -> assertThat(parsed.getHeaders().getHeaderValues(HttpHeader.ACCEPT)).isEqualTo(List.of("text/html")),
+                () -> assertThat(parsed.getBody().getValue("account")).isEqualTo("gugu"),
+                () -> assertThat(parsed.getBody().getValue("email")).isEqualTo("gugu@mail.com"),
+                () -> assertThat(parsed.getBody().getValue("password")).isEqualTo("password")
         );
     }
 }

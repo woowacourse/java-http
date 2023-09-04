@@ -39,15 +39,14 @@ public class MultiValueMap<K, V> {
     }
 
     public V getRecentValue(final K key) {
-        validateKey(key);
-
-        List<? extends V> values = multiValueMap.get(key);
+        List<V> values = multiValueMap.get(key);
+        if (values == null) {
+            return null;
+        }
         return values.get(values.size()-1);
     }
 
     public List<V> getValues(final K key) {
-        validateKey(key);
-
         return multiValueMap.get(key);
     }
 
@@ -57,12 +56,6 @@ public class MultiValueMap<K, V> {
 
     private boolean isNotContain(final K key) {
         return !multiValueMap.containsKey(key);
-    }
-
-    private void validateKey(final K key) {
-        if(isNotContain(key)) {
-            throw new IllegalArgumentException("해당 키가 존재하지 않습니다.");
-        }
     }
 
     public Map<K, List<V>> getMultiValueMap() {

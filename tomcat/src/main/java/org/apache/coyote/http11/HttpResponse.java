@@ -8,26 +8,14 @@ public class HttpResponse {
     private final Map<String, String> headers = new HashMap<>();
     private final StringBuilder body = new StringBuilder();
 
-    public String createResponse(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
     public String createResponse() {
         StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append("HTTP/1.1 ").append(status).append("\r\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             responseBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
         }
-        responseBuilder.append("\r\n"); // 빈 줄로 헤더와 바디 구분
-
-        // HTTP 응답 바디 추가
+        responseBuilder.append("\r\n");
         responseBuilder.append(body);
-
         return responseBuilder.toString();
     }
 
@@ -51,5 +39,5 @@ public class HttpResponse {
     public void setRedirectUrl(String value) {
         headers.put("Location", value);
     }
-    
+
 }

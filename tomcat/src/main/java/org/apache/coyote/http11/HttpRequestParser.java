@@ -2,8 +2,10 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequestParser {
 
@@ -63,8 +65,6 @@ public class HttpRequestParser {
     }
 
     private static Map<String, String> parseBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        Map<String, String> body = new HashMap<>();
-
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
         if (contentLength > 0) {
@@ -72,19 +72,19 @@ public class HttpRequestParser {
             reader.read(buffer, 0, contentLength);
             String requestBody = new String(buffer);
 
-            String[] bodyProperties = requestBody.split(PARAMS_DELIMITER);
-            for (String property : bodyProperties) {
-                String[] propertyAndValue = property.split(PARAM_VALUE_DELIMITER);
+            Map<String, String> body = Arrays.stream(requestBody.split(PARAMS_DELIMITER))
+                    .map(property -> property.split(PARAM_VALUE_DELIMITER))
+                    .filter(propertyAndValue -> propertyAndValue.length == 2)
+                    .collect(Collectors.toMap(data -> data[PROPERTY_INDEX], data -> data[VALUE_INDEX]));
 
-                if (propertyAndValue.length != 2) {
-                    throw new IllegalArgumentException("요청의 바디가 잘못되었습니다.");
-                }
-
-                body.put(propertyAndValue[PROPERTY_INDEX], propertyAndValue[VALUE_INDEX]);
+            if (body.size() != requestBody.split(PARAMS_DELIMITER).length) {
+                throw new IllegalArgumentException("요청의 바디가 잘못되었습니다.");
             }
+
+            return body;
         }
 
-        return body;
+        return new HashMap<>();
     }
 
     public HttpRequestFirstLineInfo getHttpRequestFirstLineInfo() {

@@ -53,4 +53,21 @@ class HttpHeadersTest {
 		assertThat(headers.isExistJSessionId())
 			.isTrue();
 	}
+
+	@Test
+	@DisplayName("JsessionId 값을 Optional로 반환해줄 수 있다.")
+	void findJSessionId() {
+		final String jSessionId = "str";
+		final String httpRequest = String.join("\r\n",
+			"GET /index.html HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Cookie: JSESSIONID=" + jSessionId,
+			"",
+			"");
+		final HttpHeaders headers = HttpHeaders.from(httpRequest);
+
+		assertThat(headers.findJSessionId())
+			.contains(jSessionId);
+	}
 }

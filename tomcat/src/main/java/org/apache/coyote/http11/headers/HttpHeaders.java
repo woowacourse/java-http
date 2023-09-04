@@ -60,7 +60,11 @@ public class HttpHeaders {
 		return Optional.ofNullable(headers.get(key));
 	}
 
-	public boolean isExistJSessionId(){
+	public boolean isExistJSessionId() {
 		return cookie.isExistJSessionId();
+	}
+
+	public Optional<String> findJSessionId() {
+		return cookie.getJSessionId();
 	}
 }

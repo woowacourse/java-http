@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class HttpCookie {
@@ -38,5 +39,9 @@ public class HttpCookie {
 
 	public boolean isExistJSessionId() {
 		return cookies.containsKey(JSESSOIN_ID_KEY);
+	}
+
+	public Optional<String> getJSessionId() {
+		return Optional.ofNullable(cookies.get(JSESSOIN_ID_KEY));
 	}
 }

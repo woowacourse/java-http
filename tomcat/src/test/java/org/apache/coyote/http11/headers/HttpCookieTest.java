@@ -36,4 +36,16 @@ class HttpCookieTest {
 		assertThat(cookie.isExistJSessionId())
 			.isTrue();
 	}
+
+	@Test
+	@DisplayName("쿠키에서 JsessionId를 가져올 수 있다.")
+	void getJSessionId() {
+		final String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+		final String cookieValue
+			= "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + jSessionId;
+		final HttpCookie cookie = HttpCookie.from(cookieValue);
+
+		assertThat(cookie.getJSessionId().get())
+			.isEqualTo(jSessionId);
+	}
 }

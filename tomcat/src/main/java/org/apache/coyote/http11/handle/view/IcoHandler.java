@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handle;
+package org.apache.coyote.http11.handle.view;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.start.HttpVersion;
@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-public class CssHandler extends Handler{
-    public static final String CONTENT_TYPE = "text/css";
-    public static final String HTTP_STATUS_OK = "200 OK";
+public class IcoHandler implements ViewHandler {
+    private static final String CONTENT_TYPE = "image/x-icon";
+    private static final String HTTP_STATUS_OK = "200 OK";
 
     @Override
-    HttpResponse handle(final HttpRequest request) throws IOException {
+    public HttpResponse handle(final HttpRequest request) throws IOException {
         final HttpVersion httpVersion = request.getHttpStartLine().getHttpVersion();
         final String responseBody = makeResponseBody(request.getHttpStartLine().getRequestTarget());
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handle;
+package org.apache.coyote.http11.handle.view;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.start.HttpVersion;
@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-public class JSHandler extends HtmlHandler {
-    public static final String CONTENT_TYPE = "text/javascript";
-    public static final String HTTP_STATUS_OK = "200 OK";
+public class CssHandler implements ViewHandler {
+    private static final String CONTENT_TYPE = "text/css";
+    private static final String HTTP_STATUS_OK = "200 OK";
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {

@@ -17,7 +17,7 @@ public class QueryString {
 
     private final Map<String, String> items = new HashMap<>();
 
-    public QueryString() {
+    private QueryString() {
         this(Map.of());
     }
 

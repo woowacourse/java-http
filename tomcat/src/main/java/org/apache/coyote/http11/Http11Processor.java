@@ -58,6 +58,9 @@ public class Http11Processor implements Runnable, Processor {
             String path;
             String queryString = "";
 
+            int statusCode = 200;
+            String statusMessage = "OK";
+
             if (index != -1) {
                 path = uri.substring(0, index);
                 queryString = uri.substring(index + 1);
@@ -66,6 +69,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals("login") && !queryString.equals("")) {
+                statusCode = 302;
+                statusMessage = "Found";
+
                 Map<String, String> queryParams = parseQueryParams(queryString);
                 String account = queryParams.get("account");
                 String password = queryParams.get("password");
@@ -73,8 +79,12 @@ public class Http11Processor implements Runnable, Processor {
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
                 if (user.isPresent()) {
                     log.info(user.toString());
+
+                    path = "/index.html";
                 } else {
                     log.warn("미가입회원입니다");
+
+                    path = "/401.html";
                 }
             }
 
@@ -101,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
                     "Content-Type: text/" + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",

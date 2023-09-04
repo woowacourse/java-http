@@ -269,4 +269,62 @@ class Http11ProcessorTest {
 
         assertThat(user).isNotNull();
     }
+
+    @Test
+    void loginRedirectionWithSessionTest() {
+        // given
+        String jSessionId = loginAndGetSessionId();
+
+        final String httpGetRequest = String.join("\r\n",
+                "GET /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                String.format("Cookie: JSESSIONID=%s", jSessionId),
+                "",
+                "");
+
+        // when
+        final var socket = new StubSocket(httpGetRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String loginAndGetSessionId() {
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                String.format("Content-Length: %d ", requestBody.getBytes().length),
+                "",
+                requestBody);
+
+        var preSocket = new StubSocket(httpRequest);
+        Http11Processor preProcessor = new Http11Processor(preSocket);
+
+        preProcessor.process(preSocket);
+        String preOutput = preSocket.output();
+
+        // Todo : httpHeaderParser 구현해서 분리하기
+        Map<String, String> requestHeaders = new HashMap<>();
+        List<String> splited = Arrays.asList(preOutput.split("\r\n"));
+        List<String> headers = splited.subList(1, splited.size());
+        for (String line : headers) {
+            System.out.println("line: " + line);
+            String[] splitedLine = line.split(": ");
+            requestHeaders.put(splitedLine[0], splitedLine[1].strip());
+        }
+
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        return httpCookie.get("JSESSIONID");
+    }
 }

@@ -34,6 +34,10 @@ public class HttpCookie {
         return cookie.isEmpty();
     }
 
+    public boolean hasCookie(String key) {
+        return cookie.containsKey(key);
+    }
+
     public String createSetCookieHeader() {
         String cookies = cookie.entrySet().stream()
                 .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())

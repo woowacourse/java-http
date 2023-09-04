@@ -8,8 +8,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequest {
 
-    private static final int HTTP_REQUEST_LINE_INDEX = 0;
-    private static final int HTTP_REQUEST_HEADER_START_INDEX = 1;
+    private static final int HTTP_REQUEST_HEADER_START_INDEX = 0;
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
@@ -25,6 +24,13 @@ public class HttpRequest {
 
     public static HttpRequest parse(final BufferedReader reader) throws IOException {
         final RequestLine requestLine = RequestLine.parse(reader.readLine());
+        if (requestLine.getMethod().equals("GET")) {
+            final List<String> lines = readAllLines(reader);
+            final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
+            final String requestBody = findRequestBody(reader, headers);
+
+            return new HttpRequest(requestLine, headers, requestBody);
+        }
 
         final List<String> lines = readAllLines(reader);
         final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
@@ -43,13 +49,11 @@ public class HttpRequest {
     }
 
     private static List<String> readHeaders(final List<String> lines) {
-        final int linesSize = lines.size();
-        final List<String> headerLines = lines.subList(HTTP_REQUEST_HEADER_START_INDEX, linesSize);
         final List<String> headers = new ArrayList<>();
 
-        for (final String line : headerLines) {
+        for (final String line : lines) {
             if (line.isEmpty()) {
-                continue;
+                break;
             }
             headers.add(line);
         }
@@ -60,10 +64,7 @@ public class HttpRequest {
     private static String findRequestBody(final BufferedReader reader, final HttpHeaders headers)
             throws IOException {
         if (headers.hasContentLength()) {
-            final int contentLength = headers.getContentLength();
-            final char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
+            return reader.readLine();
         }
         return "";
     }

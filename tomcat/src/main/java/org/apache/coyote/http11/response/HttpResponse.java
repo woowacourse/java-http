@@ -31,6 +31,10 @@ public class HttpResponse {
     }
 
     public static HttpResponse parse(final HttpRequest request) throws IOException {
+        if (request.getRequestLine().getMethod().equals("POST")) {
+            System.out.println("123421423");
+        }
+
         Path path;
         String uri = request.getUri();
         if (uri.equals("/")) {
@@ -99,7 +103,8 @@ public class HttpResponse {
                         .getResource(STATIC + "/index" + ".html");
                 path = new File(url.getPath()).toPath();
 
-                final User user = InMemoryUserRepository.findByAccountAndPassword(username, password).get();
+                final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
+                        .orElseThrow(() -> new IllegalArgumentException("알 수 없는 에러입니다."));
                 log.info(user.toString());
 
                 final byte[] content = Files.readAllBytes(path);

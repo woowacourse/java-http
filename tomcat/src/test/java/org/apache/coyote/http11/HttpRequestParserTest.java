@@ -70,7 +70,7 @@ class HttpRequestParserTest {
         // expect
         assertThatThrownBy(() -> HttpRequestParser.from(reader))
                 .isInstanceOf(IOException.class)
-                .hasMessage("요청에 헤더가 존재하지 않습니다.");
+                .hasMessage("요청에 Reqeust-line이 없습니다.");
 
         reader.close();
     }

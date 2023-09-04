@@ -35,7 +35,7 @@ class HttpRequestFirstLineInfoTest {
         // expect
         assertThatThrownBy(() -> HttpRequestFirstLineInfo.from(firstLine))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("유효하지 않은 요청 헤더 첫 줄 입니다.");
+                .hasMessage("유효하지 않은 Request-line 입니다.");
     }
 
     @Test

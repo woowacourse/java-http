@@ -49,7 +49,7 @@ public class HandlerMapper {
             .anyMatch(mapper -> mapper.canHandle(httpRequest));
     }
 
-    public Controller getHandler(HttpRequest httpRequest) {
+    private Controller getHandler(HttpRequest httpRequest) {
         Mapper mapper = controllerByMapper.keySet().stream()
             .filter(mp -> mp.canHandle(httpRequest))
             .findFirst()

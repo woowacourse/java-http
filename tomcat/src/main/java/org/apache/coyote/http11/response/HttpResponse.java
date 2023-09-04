@@ -51,6 +51,7 @@ public class HttpResponse {
                         .getResource(STATIC + uri);
             }
 
+            System.out.println(url);
             path = new File(url.getPath()).toPath();
 
             final byte[] content = Files.readAllBytes(path);
@@ -69,13 +70,6 @@ public class HttpResponse {
             final String[] splitUri = uri.split("\\.");
 
             URL url;
-            if (splitUri.length == 1) {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri + ".html");
-            } else {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri);
-            }
 
             if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
                 url = HttpResponse.class.getClassLoader()

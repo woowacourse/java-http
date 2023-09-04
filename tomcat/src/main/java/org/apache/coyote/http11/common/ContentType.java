@@ -6,7 +6,8 @@ public enum ContentType {
 
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
-    JS("js", "text/javascript")
+    JS("js", "text/javascript"),
+    ICON("ico", "image/x-icon"),
     ;
 
     private String fileExtension;

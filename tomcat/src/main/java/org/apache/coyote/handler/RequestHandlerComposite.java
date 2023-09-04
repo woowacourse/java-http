@@ -14,6 +14,9 @@ import static org.apache.coyote.request.HttpMethod.POST;
 
 public class RequestHandlerComposite {
 
+    private RequestHandlerComposite() {
+    }
+
     private static final Map<MappingInfo, RequestHandler> mapping = new HashMap<>();
 
     static {

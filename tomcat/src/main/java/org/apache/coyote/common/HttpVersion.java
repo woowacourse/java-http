@@ -16,7 +16,7 @@ public enum HttpVersion {
         return Arrays.stream(HttpVersion.values())
                 .filter(httpVersion -> httpVersion.source.equals(source))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException());
+                .orElseThrow(() -> new IllegalArgumentException("입력된 값으로 HttpVersion을 조회할 수 없습니다."));
     }
 
     public String version() {

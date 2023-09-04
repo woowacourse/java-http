@@ -1,5 +1,6 @@
 package org.apache.coyote.httprequest;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,5 +26,13 @@ public class QueryString {
             queries.put(keyAndValue.get(KEY_INDEX), keyAndValue.get(VALUE_INDEX));
         }
         return new QueryString(queries);
+    }
+
+    public static QueryString empty() {
+        return new QueryString(Collections.emptyMap());
+    }
+
+    public String getValue(final String key) {
+        return queries.get(key);
     }
 }

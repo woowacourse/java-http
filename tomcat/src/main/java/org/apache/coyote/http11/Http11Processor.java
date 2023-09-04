@@ -4,6 +4,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
+import org.apache.coyote.httpresponse.handler.Handler;
+import org.apache.coyote.httpresponse.handler.IndexHandler;
+import org.apache.coyote.httpresponse.handler.LoginHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,14 +14,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Map<String, Handler> HANDLERS = new HashMap<>();
+
+    static {
+        HANDLERS.put("/", new IndexHandler());
+        HANDLERS.put("/index.html", new IndexHandler());
+        HANDLERS.put("/login", new LoginHandler());
+    }
 
     private final Socket connection;
 
@@ -37,10 +45,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequest request = HttpRequest.from(inputStream);
-            final HttpResponse response = HttpResponse.from(request);
+            Handler handler = HANDLERS.get(request.getPath());
+            if (handler == null) {
+                handler = HANDLERS.get("/");
+            }
+            final HttpResponse response = handler.handle(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }

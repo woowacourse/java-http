@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 
 public class HttpRequest {
 
@@ -37,8 +36,12 @@ public class HttpRequest {
         return HttpRequestLine.from(line);
     }
 
-    public String getRequestUri() {
-        return httpRequestLine.getRequestUri();
+    public String getPath() {
+        return httpRequestLine.getPath();
+    }
+
+    public QueryString getQueryString() {
+        return httpRequestLine.getQueryString();
     }
 
     public String getHttpVersion() {

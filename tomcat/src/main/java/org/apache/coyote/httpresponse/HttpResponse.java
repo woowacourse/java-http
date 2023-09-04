@@ -1,6 +1,7 @@
 package org.apache.coyote.httpresponse;
 
 import org.apache.coyote.httprequest.HttpRequest;
+import org.apache.coyote.httprequest.QueryString;
 import org.apache.coyote.httpresponse.header.ResourceReader;
 import org.apache.coyote.httpresponse.header.ResponseHeaders;
 
@@ -23,16 +24,33 @@ public class HttpResponse {
         this.contentBody = contentBody;
     }
 
+    public static HttpResponse init(final String httpVersion) {
+        return new HttpResponse(httpVersion, null, null, null);
+    }
+
     public static HttpResponse from(final HttpRequest request) throws URISyntaxException {
         final String httpVersion = request.getHttpVersion();
-        final String path = request.getRequestUri();
+        final String path = request.getPath();
+        final QueryString queryString = request.getQueryString();
         final String contentBody = ResourceReader.read(path);
         final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
         return new HttpResponse(httpVersion, HttpStatus.OK, responseHeaders, contentBody);
     }
 
-    private String makeResponseLine() {
-        return httpVersion + DELIMITER + httpStatus.getHttpStatus() + " ";
+    public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
+        return new HttpResponse(this.httpVersion, httpStatus, this.responseHeaders, this.contentBody);
+    }
+
+    public HttpResponse setContent(final String path) {
+        final String contentBody = ResourceReader.read(path);
+        final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
+        return new HttpResponse(this.httpVersion, this.httpStatus, responseHeaders, contentBody);
+    }
+
+    public HttpResponse setContent(final String path, final QueryString queryString) {
+        final String contentBody = ResourceReader.read(path);
+        final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
+        return new HttpResponse(this.httpVersion, this.httpStatus, responseHeaders, contentBody);
     }
 
     public byte[] getBytes() {
@@ -40,5 +58,9 @@ public class HttpResponse {
         final String responseHeaders = this.responseHeaders.getFormattedHeaders();
         return String.join("\r\n", responseLine, responseHeaders, contentBody)
                 .getBytes(StandardCharsets.UTF_8);
+    }
+
+    private String makeResponseLine() {
+        return httpVersion + DELIMITER + httpStatus.getHttpStatus() + " ";
     }
 }

@@ -13,10 +13,10 @@ public class HttpRequestLine {
     public static final int HTTP_VERSION_INDEX = 2;
 
     private final RequestMethod requestMethod;
-    private final String requestUri;
+    private final RequestUri requestUri;
     private final String httpVersion;
 
-    private HttpRequestLine(final RequestMethod requestMethod, final String requestUri, final String httpVersion) {
+    private HttpRequestLine(final RequestMethod requestMethod, final RequestUri requestUri, final String httpVersion) {
         this.requestMethod = requestMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -26,7 +26,7 @@ public class HttpRequestLine {
         final List<String> parsedRequestLine = parseByDelimiter(requestLine);
         return new HttpRequestLine(
                 RequestMethod.from(parsedRequestLine.get(REQUEST_METHOD_INDEX)),
-                parsedRequestLine.get(REQUEST_URI_INDEX),
+                RequestUri.from(parsedRequestLine.get(REQUEST_URI_INDEX)),
                 parsedRequestLine.get(HTTP_VERSION_INDEX));
     }
 
@@ -42,8 +42,12 @@ public class HttpRequestLine {
         return requestMethod;
     }
 
-    public String getRequestUri() {
-        return requestUri;
+    public String getPath() {
+        return requestUri.getPath();
+    }
+
+    public QueryString getQueryString() {
+        return requestUri.getQueryString();
     }
 
     public String getHttpVersion() {

@@ -44,7 +44,11 @@ public class RequestHandler {
         }
 
         if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(GET)) {
-            return handleLoginPage();
+            return getStaticPateResponse(LOGIN_HTML, OK);
+        }
+
+        if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(POST)) {
+            return handleLoginPostRequest();
         }
 
         if (requestPath.equals(REGISTER) && request.getHttpMethod().equals(GET)) {
@@ -83,27 +87,24 @@ public class RequestHandler {
         return Response.of(httpVersion, OK, contentType, responseBody);
     }
 
-    private Response handleLoginPage() {
-        if (request.hasQueryString()) {
-            final Map<String, String> queryString = request.getQueryString();
-            final String account = queryString.get("account");
-            final String password = queryString.get("password");
-            return login(account, password);
-        }
-        return getStaticPateResponse(LOGIN_HTML, OK);
+    private Response handleLoginPostRequest() {
+        final Map<String, String> bodies = request.getBody().getBodies();
+        final String account = bodies.get("account");
+        final String password = bodies.get("password");
+        return login(account, password);
     }
 
     private Response login(final String account, final String password) {
         try {
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new LoginException("로그인에 실패했습니다."));
+
             if (user.checkPassword(password)) {
                 LOGGER.info("user {}", user);
                 return Response.generateRedirectResponse(INDEX_HTML);
-
             }
             throw new LoginException("로그인에 실패했습니다.");
-        } catch(LoginException exception) {
+        } catch (LoginException exception) {
             return getStaticPateResponse(UNAUTHORIZED_HTML, UNAUTHORIZED);
         }
     }

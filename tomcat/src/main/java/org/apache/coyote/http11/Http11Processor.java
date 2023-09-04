@@ -43,10 +43,9 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = HttpRequest.from(bufferedReader);
 
             final String uriPath = request.getUriPath();
-            log.info(uriPath);
 
             final String httpStatusOk = "200 OK";
-            final String contentType = "text/html;charset=utf-8";
+            final String contentType = getContentType(uriPath);
             final String responseBody = readStaticFile(uriPath);
             final HttpResponse response = new HttpResponse(httpStatusOk, contentType, responseBody);
 
@@ -66,6 +65,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             return "Hello world!";
         }
+    }
+
+    public String getContentType(final String fileName) {
+        final String[] fileNameSplit = fileName.split("\\.");
+        final String fileType = fileNameSplit[fileNameSplit.length - 1];
+
+        if (fileType.equals("html")) {
+            return "text/html;charset=utf-8";
+        }
+        if (fileType.equals("css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (fileType.equals("js")) {
+            return "application/javascript";
+        }
+
+        return null;
     }
 
 }

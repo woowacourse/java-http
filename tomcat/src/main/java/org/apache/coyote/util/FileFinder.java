@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.ResponseEntityFactory;
 
@@ -28,11 +29,13 @@ public class FileFinder {
     public static Path findAbsolutePath(final String filePath) throws IOException {
         final String fileName = filePath.substring(filePath.lastIndexOf(PATH_DELIMITER) + 1);
 
-        return Files.find(
-                Path.of(RESOURCE_PATH),
-                MAX_DEPTH,
-                (path, fileAttr) -> fileAttr.isRegularFile() && path.toString().contains(fileName)
-            ).findFirst()
-            .orElseThrow(() -> new NoSuchElementException("파일을 찾을 수 없습니다."));
+        try (final Stream<Path> pathFinder = Files.find(
+            Path.of(RESOURCE_PATH),
+            MAX_DEPTH,
+            (path, fileAttr) -> fileAttr.isRegularFile() && path.toString().contains(fileName)
+        )) {
+            return pathFinder.findFirst()
+                .orElseThrow(() -> new NoSuchElementException("파일을 찾을 수 없습니다."));
+        }
     }
 }

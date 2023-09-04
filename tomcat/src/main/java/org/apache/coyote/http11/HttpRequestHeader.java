@@ -40,16 +40,8 @@ public class HttpRequestHeader {
         headersMap.put("HTTP version", httpInformation.get(2));
     }
 
-    public String httpMethod() {
-        return headersMap.get("HTTP Method");
-    }
-
-    public String url() {
-        return headersMap.get("URL");
-    }
-
-    public String contentLength() {
-        return headersMap.get("Content-Length");
+    public String get(String key) {
+        return headersMap.get(key);
     }
 
     public Map<String, String> headersMap() {

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
@@ -30,8 +31,16 @@ public class HttpRequestHandler {
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
             if (user.checkPassword(password)) {
+                final SessionManager sessionManager = new SessionManager();
+                final Session session = new Session(UUID.randomUUID().toString());
+                session.setAttribute("user", user);
+                sessionManager.add(session);
+
+                final HttpResponseEntity responseEntity = new HttpResponseEntity(HttpStatus.FOUND, "/index.html");
+                responseEntity.addCookie(HttpCookie.ofJSessionId(session.getId()));
+
                 log.info("로그인 성공! 아이디: {}", account);
-                return new HttpResponseEntity(HttpStatus.FOUND, "/index.html");
+                return responseEntity;
             }
             return new HttpResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html");
         }

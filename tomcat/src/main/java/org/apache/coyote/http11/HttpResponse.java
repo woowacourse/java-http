@@ -12,7 +12,7 @@ public class HttpResponse {
     public static String getResponse(final HttpResponseEntity responseEntity) throws IOException {
         String contentType = "text/html;charset=utf-8";
         if (responseEntity.getPath().equals("/")) {
-            return makeResponse(contentType, responseEntity.getHttpStatus(), "Hello world!");
+            return makeResponse(contentType, responseEntity, "Hello world!");
         }
         if (responseEntity.getPath().endsWith(".css")) {
             contentType = "text/css;charset=utf-8";
@@ -20,14 +20,25 @@ public class HttpResponse {
 
         final URL resource = HttpResponse.class.getClassLoader().getResource("static" + responseEntity.getPath());
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return makeResponse(contentType, responseEntity.getHttpStatus(), responseBody);
+        return makeResponse(contentType, responseEntity, responseBody);
     }
 
     private static String makeResponse(
             final String contentType,
-            final HttpStatus status,
+            final HttpResponseEntity responseEntity,
             final String body
     ) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        if (responseEntity.hasCookie()) {
+            return String.join("\r\n",
+                    "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                    "Set-Cookie: " + responseEntity.getHttpCookie().getValues(),
+                    "Content-Type: " + contentType + BLANK,
+                    "Content-Length: " + body.getBytes().length + BLANK,
+                    "",
+                    body
+            );
+        }
         return String.join("\r\n",
                 "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
                 "Content-Type: " + contentType + BLANK,
@@ -36,47 +47,5 @@ public class HttpResponse {
                 body
         );
     }
-
-//    public static String getResponse(final String path, final String protocolVersion) throws IOException {
-//        String contentType = "text/html;charset=utf-8";
-//        if (path.equals("/")) {
-//            return makeResponse(protocolVersion, contentType, HttpStatus.OK, "Hello world!");
-//        }
-//        if (path.endsWith(".css")) {
-//            contentType = "text/css;charset=utf-8";
-//            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + path);
-//            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-//            return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
-//        }
-//        if (path.equals("/login")) {
-//            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + "/login.html");
-//            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-//            return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
-//        }
-//        if (path.equals("/register")) {
-//            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + "/register.html");
-//            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-//            return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
-//        }
-//
-//        final URL resource = HttpResponse.class.getClassLoader().getResource("static" + path);
-//        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-//        return makeResponse(protocolVersion, contentType, HttpStatus.OK, responseBody);
-//    }
-//
-//    private static String makeResponse(
-//            final String protocolVersion,
-//            final String contentType,
-//            final HttpStatus status,
-//            final String body
-//    ) {
-//        return String.join("\r\n",
-//                protocolVersion + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-//                "Content-Type: " + contentType + BLANK,
-//                "Content-Length: " + body.getBytes().length + BLANK,
-//                "",
-//                body
-//        );
-//    }
 
 }

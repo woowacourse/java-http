@@ -48,7 +48,7 @@ public class Handler {
         if (split.length == 1) {
             return makeStringResponse();
         }
-        if (handlerMapping == HandlerMapping.LOGIN) {
+        if (handlerMapping == HandlerMapping.LOGIN || handlerMapping == HandlerMapping.LOGIN_POST) {
             return makeLoginResponse(split[FILE_EXTENSION_INDEX]);
         }
         if (handlerMapping == HandlerMapping.REGISTER_POST) {
@@ -89,20 +89,34 @@ public class Handler {
             ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
 
-        if (queryString == null) {
+        if (queryString == null && requestBody == null) {
             return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
         }
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(queryString.getAccount());
+        final Optional<User> user = getMemberByAccount();
 
-        if (user.isEmpty() || !user.get().checkPassword(queryString.getPassword())) {
-            headers.put("Location", "/401.html");
+        if (isExistMember(user)) {
+            log.info("user : " + user);
+            headers.put("Location", "/index.html");
             return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
-        }
 
-        log.info("user : " + user);
-        headers.put("Location", "/index.html");
+        }
+        headers.put("Location", "/401.html");
         return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
+    }
+
+    private boolean isExistMember(final Optional<User> user) {
+        if (requestBody == null) {
+            return user.isPresent() && user.get().checkPassword(queryString.getPassword());
+        }
+        return user.isPresent() && user.get().checkPassword(requestBody.getPassword());
+    }
+
+    private Optional<User> getMemberByAccount() {
+        if (requestBody == null) {
+            return InMemoryUserRepository.findByAccount(queryString.getAccount());
+        }
+        return InMemoryUserRepository.findByAccount(requestBody.getAccount());
     }
 
     private HttpResponse makeRegisterResponse(final String fileType) throws IOException {

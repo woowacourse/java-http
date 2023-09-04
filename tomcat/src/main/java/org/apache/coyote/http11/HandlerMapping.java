@@ -13,6 +13,7 @@ public enum HandlerMapping {
     CHART_AREA_JS("/assets/chart-area.js", HttpMethod.GET, "assets/chart-area.js"),
     CHART_PIE_JS("/assets/chart-pie.js", HttpMethod.GET, "assets/chart-pie.js"),
     LOGIN("/login", HttpMethod.GET, "login.html"),
+    LOGIN_POST("/login", HttpMethod.POST, "login.html"),
     UNAUTHORIZED("/401.html", HttpMethod.GET, "401.html"),
     REGISTER("/register", HttpMethod.GET, "register.html"),
     REGISTER_POST("/register", HttpMethod.POST, "register.html");

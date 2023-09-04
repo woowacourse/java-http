@@ -103,8 +103,8 @@ class HandlerTest {
     }
 
     @Test
-    @DisplayName("로그인한 사용자가 서비스 회원이면 index.html로 리다이랙트 합니다.")
-    void login_success_response() throws IOException {
+    @DisplayName("쿼리 스트링을 통한 로그인한 사용자가 서비스 회원이면 index.html로 리다이랙트 합니다.")
+    void login_success_response_from_query_string() throws IOException {
         // given
         final String[] queryStrings = new String[2];
         queryStrings[0] = "account=gugu";
@@ -112,6 +112,31 @@ class HandlerTest {
         final QueryString queryString = QueryString.fromRequest(queryStrings);
 
         final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null);
+
+        // when
+        final HttpResponse result = handler.makeResponse();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String expectBody = new String(
+            Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+
+        assertThat(result.getBody()).isEqualTo(expectBody);
+        assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
+        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
+        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
+            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+    }
+
+    @Test
+    @DisplayName("요청 body를 통한 로그인한 사용자가 서비스 회원이면 index.html로 리다이랙트 합니다.")
+    void login_success_response_from_request_body() throws IOException {
+        // given
+        final String requestMemberInfo = "account=gugu&password=password&email=ako@ako.com";
+        final RequestBody requestBody = RequestBody.fromRequest(requestMemberInfo);
+
+        final Handler handler = new Handler(HandlerMapping.LOGIN_POST, null, requestBody);
 
         // when
         final HttpResponse result = handler.makeResponse();

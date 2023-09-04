@@ -36,6 +36,7 @@ class HandlerMappingTest {
             Arguments.of("/assets/chart-pie.js", HttpMethod.GET, HandlerMapping.CHART_PIE_JS),
             Arguments.of("/assets/chart-bar.js", HttpMethod.GET, HandlerMapping.CHART_BAR_JS),
             Arguments.of("/login", HttpMethod.GET, HandlerMapping.LOGIN),
+            Arguments.of("/login", HttpMethod.POST, HandlerMapping.LOGIN_POST),
             Arguments.of("/401.html", HttpMethod.GET, HandlerMapping.UNAUTHORIZED),
             Arguments.of("/register", HttpMethod.GET, HandlerMapping.REGISTER),
             Arguments.of("/register", HttpMethod.POST, HandlerMapping.REGISTER_POST)

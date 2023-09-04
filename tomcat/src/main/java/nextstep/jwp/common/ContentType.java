@@ -2,7 +2,9 @@ package nextstep.jwp.common;
 
 public enum ContentType {
     HTML("text/html;charset=utf-8"),
-    CSS("text/css");
+    CSS("text/css"),
+    JS("Application/javascript"),
+    SVG("image/svg+xml");
 
     private final String type;
 

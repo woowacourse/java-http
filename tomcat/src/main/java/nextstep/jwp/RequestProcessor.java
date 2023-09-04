@@ -22,8 +22,10 @@ public class RequestProcessor {
 
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String LOCATION_HEADER = "Location";
     private static final String DEFAULT_FILE_LOCATION = "static/";
-    private static final String NOT_FOUND_EXCEPTION_MESSAGE = "처리할 수 없는 요청입니다.";
+    private static final String INDEX_PAGE = "index.html";
+    private static final String UNAUTHORIZED_PAGE = "401.html";
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
 
@@ -43,6 +45,7 @@ public class RequestProcessor {
             }
 
             if (requestUri.equals("login") && !queryParams.isEmpty()) {
+                String redirectedPage = UNAUTHORIZED_PAGE;
                 final String account = queryParams.get("account");
                 final String password = queryParams.get("password");
 
@@ -51,8 +54,11 @@ public class RequestProcessor {
                     User user = findedUser.get();
                     if (user.checkPassword(password)) {
                         log.debug(user.toString());
+                        redirectedPage = INDEX_PAGE;
                     }
                 }
+
+                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, redirectedPage));
             }
 
             content = makeResponseBody(requestUri);
@@ -68,9 +74,20 @@ public class RequestProcessor {
                         Map.of(CONTENT_TYPE_HEADER, ContentType.CSS.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
+
+            if (requestUri.endsWith(".js")) {
+                return ResponseEntity.of(version, HttpStatus.OK, content,
+                        Map.of(CONTENT_TYPE_HEADER, ContentType.JS.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+            }
+
+            if (requestUri.endsWith(".svg")) {
+                return ResponseEntity.of(version, HttpStatus.OK, content,
+                        Map.of(CONTENT_TYPE_HEADER, ContentType.SVG.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+            }
         }
 
-        content = NOT_FOUND_EXCEPTION_MESSAGE;
         return ResponseEntity.of(version, HttpStatus.NOT_FOUND, content,
                 Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                         CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
@@ -87,7 +104,9 @@ public class RequestProcessor {
 
         url = getClass().getClassLoader().getResource(DEFAULT_FILE_LOCATION + requestUri);
         if (url == null) {
-            return NOT_FOUND_EXCEPTION_MESSAGE;
+            URL notFoundUrl = getClass().getClassLoader().getResource(DEFAULT_FILE_LOCATION + "404.html");
+            final var path = Paths.get(notFoundUrl.toURI());
+            return Files.readString(path);
         }
         final var path = Paths.get(url.toURI());
         return Files.readString(path);

@@ -64,6 +64,10 @@ public class Request {
         return version;
     }
 
+    public String url() {
+        return url.url();
+    }
+
     public String resourceName() {
         return url.resourceName();
     }

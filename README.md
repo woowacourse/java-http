@@ -3,8 +3,8 @@
 ## 요구사항
 
 - 1단계
-    - [ ] GET /index.html 응답하기
-    - [ ] CSS 지원하기
+    - [x] GET /index.html 응답하기
+    - [x] CSS 지원하기
     - [ ] Query String 파싱
 - 2단계
     - [ ] HTTP Status Code 302 - 로그인 여부에 따라 다른 페이지로 이동

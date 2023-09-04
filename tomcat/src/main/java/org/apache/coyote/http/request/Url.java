@@ -12,18 +12,18 @@ public class Url {
     private static final int INVALID_QUERY_PARAMETER_INDEX = -1;
     private static final int VALID_PATH_TOKEN_LENGTH = 2;
 
-    private final String url;
+    private final String originUrl;
     private final String path;
     private final List<String> hierarchy;
     private final String resourceName;
 
     private Url(
-            final String url,
+            final String originUrl,
             final String path,
             final List<String> hierarchy,
             final String resourceName
     ) {
-        this.url = url;
+        this.originUrl = originUrl;
         this.path = path;
         this.hierarchy = hierarchy;
         this.resourceName = resourceName;
@@ -83,7 +83,7 @@ public class Url {
     }
 
     public String url() {
-        return url;
+        return originUrl;
     }
 
     public String resourceName() {

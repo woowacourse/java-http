@@ -42,7 +42,7 @@ public class ResourceHandler implements Handler {
     @Override
     public Response service(final Request request) throws IOException {
         try {
-            final String resourceUrlPatterns = request.resourceName();
+            final String resourceUrlPatterns = request.url();
             final URL resource = ClassLoader.getSystemClassLoader()
                                             .getResource(prefix + resourceUrlPatterns);
             final File resourceFile = new File(resource.getPath());

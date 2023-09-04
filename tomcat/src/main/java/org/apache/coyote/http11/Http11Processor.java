@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
 
       final String response;
 
-      if (request.getUrl().startsWith("/login")) {
+      if (request.getUrl().equals("/login")) {
         final String account = params.get("account");
         response = loginResponse(account);
       } else {

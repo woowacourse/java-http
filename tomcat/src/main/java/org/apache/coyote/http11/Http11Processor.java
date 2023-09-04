@@ -71,6 +71,21 @@ public class Http11Processor implements Runnable, Processor {
             return httpResponse;
         }
 
+        if (httpRequest.isRequestOf(HttpMethod.GET, "/register")) {
+            return HttpResponse.ofFile(HttpStatus.OK, getFilePath("/register.html"), httpRequest);
+        }
+
+        if (httpRequest.isRequestOf(HttpMethod.POST, "/register")) {
+            try {
+                register(httpRequest);
+            } catch (IllegalArgumentException e) {
+                return HttpResponse.ofFile(HttpStatus.CONFLICT, getFilePath("/login.html"), httpRequest);
+            }
+            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, httpRequest);
+            httpResponse.setHeader("Location", "/index.html");
+            return httpResponse;
+        }
+
         return HttpResponse.ofFile(HttpStatus.OK, getFilePath(httpRequest.getPath()), httpRequest);
     }
 
@@ -79,6 +94,18 @@ public class Http11Processor implements Runnable, Processor {
             .filter(foundUser -> foundUser.checkPassword(httpRequest.getBodyOf("password")))
             .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
 
+        log.info(user.toString());
+    }
+
+    private void register(final HttpRequest httpRequest) {
+        final String account = httpRequest.getBodyOf("account");
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 회원입니다.");
+        }
+        final User user = new User(
+            account, httpRequest.getBodyOf("password"), httpRequest.getBodyOf("email")
+        );
+        InMemoryUserRepository.save(user);
         log.info(user.toString());
     }
 

@@ -5,6 +5,8 @@ import nextstep.jwp.exception.UnAuthorizationException;
 import nextstep.jwp.exception.UnRegisteredUserException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.AuthService;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.apache.coyote.http.vo.Cookie;
 import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
 import org.apache.coyote.http.vo.HttpResponse;
+import org.apache.coyote.http.vo.HttpResponse.Builder;
 import org.apache.coyote.http.vo.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,19 +38,30 @@ public class LoginHandler implements Handler {
             final HttpResponse.Builder responseBuilder = getHttpResponse("/index.html");
 
             if (!request.hasCookie("JSESSIONID")) {
-                final Cookie cookie = Cookie.emptyCookie();
-                final String uuid = UUID.randomUUID().toString();
-                cookie.put("JSESSIONID", uuid);
-
-                return responseBuilder
-                        .cookie(cookie)
-                        .build();
+                return createCookieResponse(user, responseBuilder);
             }
+
             return responseBuilder.build();
 
         } catch (UnAuthorizationException | UnRegisteredUserException e) {
             return getHttpResponse("/401.html").build();
         }
+    }
+
+    private HttpResponse createCookieResponse(final User user, final Builder responseBuilder) {
+        final Cookie cookie = createCookie(user);
+        return responseBuilder
+                .cookie(cookie)
+                .build();
+    }
+
+    private Cookie createCookie(final User user) {
+        final Cookie cookie = Cookie.emptyCookie();
+        Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        SessionManager.add(session.getId(), session);
+        cookie.put("JSESSIONID", session.getId());
+        return cookie;
     }
 
     private HttpResponse.Builder getHttpResponse(final String value) {

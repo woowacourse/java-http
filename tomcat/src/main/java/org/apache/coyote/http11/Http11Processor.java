@@ -70,8 +70,10 @@ public class Http11Processor implements Runnable, Processor {
         try {
             final HttpRequest request = HttpRequestParser.parse(bufferedReader);
             final HttpServlet servlet = ServletMapping.getSupportedServlet(request);
+
             final HttpResponse response = servlet.service(request);
             sendResponse(bufferedWriter, response);
+
         } catch (NotSupportedRequestException e) {
             sendResponse(bufferedWriter, NOT_SUPPORTED_REQUEST_RESPONSE);
         } catch (UncheckedServletException e) {
@@ -81,6 +83,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void sendResponse(final BufferedWriter bufferedWriter, final HttpResponse response) {
         try {
+            System.out.println(response.getRawResponse());
             bufferedWriter.write(response.getRawResponse());
             bufferedWriter.flush();
         } catch (IOException ioError) {

@@ -77,8 +77,12 @@ public class HttpRequest {
         return body;
     }
 
-    public boolean hasCookie(final String cookieKey) {
-        return cookie.hasCookie(cookieKey);
+    public boolean hasCookie(final String cookie) {
+        return this.cookie.hasCookie(cookie);
+    }
+
+    public String getCookie(final String cookie) {
+        return this.cookie.getCookie(cookie);
     }
 
     public static class Builder {

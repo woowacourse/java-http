@@ -30,7 +30,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 SUPPORT_HTTP_VERSION + status.getStatus(),
                 headers.getRawHeaders(),
-                HttpHeader.SET_COOKIE + ": " + cookie.toRawCookie(),
+                HttpHeader.SET_COOKIE.getKey() + ": " + cookie.toRawCookie(),
                 "\r\n" + body
         );
     }

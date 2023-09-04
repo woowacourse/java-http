@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.util.ResourceFileReader;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
@@ -14,14 +15,30 @@ public class LoginPageHandler implements Handler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
+        if (AuthenticationUser(request)) {
+            final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+            headers.put(HttpHeader.LOCATION, "/index.html");
+
+            return new HttpResponse.Builder()
+                    .status(HttpStatus.REDIRECT)
+                    .headers(headers)
+                    .build();
+        }
+
         final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
         final String body = ResourceFileReader.readFile("/login.html");
 
-        return new HttpResponse.Builder().status(HttpStatus.OK)
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
                 .headers(headers)
                 .body(body)
                 .build();
+    }
+
+    private boolean AuthenticationUser(final HttpRequest request) {
+        System.out.println(request.getCookie("JSESSIONID"));
+        return request.hasCookie("JSESSIONID") && SessionManager.findSession(request.getCookie("JSESSIONID")) != null;
     }
 
     @Override

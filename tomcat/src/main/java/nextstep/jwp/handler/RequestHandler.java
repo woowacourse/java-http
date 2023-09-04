@@ -25,11 +25,11 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public HttpResponse handle(HttpRequest request) throws IOException {
-        if (request.getUri().equals("/")) {
+        if (request.getUri().equals("/") && request.getMethod() == HttpMethod.GET) {
             return HttpResponse.ok("Hello world!", ContentType.HTML);
         }
 
-        if (isStaticFile(request.getUri())) {
+        if (isStaticFile(request.getUri()) && request.getMethod() == HttpMethod.GET) {
             return getFile(request);
         }
 

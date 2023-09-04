@@ -3,6 +3,11 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.coyote.http11.request.HttpFormatException;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseUtil;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -11,6 +16,9 @@ import org.slf4j.LoggerFactory;
 public class MemberService {
 
     private static final Logger log = LoggerFactory.getLogger(MemberService.class);
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private MemberService() {
     }
@@ -18,15 +26,13 @@ public class MemberService {
     public static HttpResponse login(HttpRequest request) {
         String body = request.getBody();
         Map<String, String> requestParam = parseForm(body);
-        if (requestParam.containsKey("account") && requestParam.containsKey("password")) {
-            String account = requestParam.get("account");
-            String password = requestParam.get("password");
+        if (doesParamContainsAccountAndPassword(requestParam)) {
+            String account = requestParam.get(ACCOUNT);
+            String password = requestParam.get(PASSWORD);
             Member foundMember = MemberRepository.findMember(account);
-            Session session = new Session();
-            session.setAttribute("member", foundMember);
-            SessionManager.add(session);
+            Session session = addSession(foundMember);
             if (isValidMember(password, foundMember)) {
-                log.info("foundMember.getAccount() = " + foundMember.getAccount() + " logged in");
+                log.info("account: {} logged in", foundMember.getAccount());
                 return new HttpResponse.Builder()
                         .setHttpStatusCode(HttpStatusCode.FOUND)
                         .setLocation("/index.html")
@@ -34,7 +40,6 @@ public class MemberService {
                         .build();
             }
         }
-
         return new HttpResponse.Builder()
                 .setHttpStatusCode(HttpStatusCode.FOUND)
                 .setLocation("/401.html").build();
@@ -43,24 +48,37 @@ public class MemberService {
     public static HttpResponse register(HttpRequest httpRequest) {
         String body = httpRequest.getBody();
         Map<String, String> requestParam = parseForm(body);
-        // TODO: 중복 계정 혹은 형식 관련 예외처리
-        if (requestParam.containsKey("account") && requestParam.containsKey("password") && requestParam.containsKey("email")) {
-            Member member = new Member(requestParam.get("account"), requestParam.get("password"),
-                    requestParam.get("email"));
-            MemberRepository.register(member);
-            Session session = new Session();
-            session.setAttribute("member", member);
-            SessionManager.add(session);
-            log.info("member.getAccount() = " + member.getAccount() + " registered");
-
-            return new HttpResponse.Builder()
-                    .setHttpStatusCode(HttpStatusCode.FOUND)
-                    .setLocation("/index.html")
-                    .setCookie("JSESSIONID=" + session.getId())
-                    .build();
+        if (doesParamContainsAccountPasswordAndEmail(requestParam)) {
+            Member member = new Member(requestParam.get(ACCOUNT), requestParam.get(PASSWORD),
+                    requestParam.get(EMAIL));
+            if (!MemberRepository.exists(member.getAccount())) {
+                MemberRepository.register(member);
+                Session session = addSession(member);
+                log.info("account: {} registered", member.getAccount());
+                return new HttpResponse.Builder()
+                        .setHttpStatusCode(HttpStatusCode.FOUND)
+                        .setLocation("/index.html")
+                        .setCookie("JSESSIONID=" + session.getId())
+                        .build();
+            }
         }
-        return new HttpResponse.Builder()
-                .setHttpStatusCode(HttpStatusCode.BAD_REQUEST).build();
+        return ResponseUtil.buildBadRequest();
+    }
+
+    private static Session addSession(Member foundMember) {
+        Session session = new Session();
+        session.setAttribute("member", foundMember);
+        SessionManager.add(session);
+        return session;
+    }
+
+    private static boolean doesParamContainsAccountPasswordAndEmail(
+            Map<String, String> requestParam) {
+        return doesParamContainsAccountAndPassword(requestParam) && requestParam.containsKey(EMAIL);
+    }
+
+    private static boolean doesParamContainsAccountAndPassword(Map<String, String> requestParam) {
+        return requestParam.containsKey(ACCOUNT) && requestParam.containsKey(PASSWORD);
     }
 
     private static Map<String, String> parseForm(String body) {

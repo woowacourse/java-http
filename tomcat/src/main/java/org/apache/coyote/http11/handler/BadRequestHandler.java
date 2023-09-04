@@ -2,19 +2,18 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class RootHandler implements RestHandler {
+public class BadRequestHandler implements Handler {
 
     @Override
     public boolean supports(HttpRequest request) {
-        return request.getUrl().equals("/");
+        return true;
     }
 
     @Override
     public HttpResponse handle(HttpRequest request) {
         return new HttpResponse.Builder()
-                .setContentType("text/html")
-                .setBody("Hello world!")
-                .build();
+                .setHttpStatusCode(HttpStatusCode.BAD_REQUEST).build();
     }
 }

@@ -1,19 +1,15 @@
 package org.apache.coyote.http11.handler;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Objects;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MemberService;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseUtil;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginHandler implements Handler {
-
-    private static final ClassLoader SYSTEM_CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
     @Override
     public boolean supports(HttpRequest request) {
@@ -22,8 +18,8 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        if (request.getHeaders().containsKey("Cookie")) {
-            String cookies = request.getHeaders().get("Cookie");
+        if (doesRequestContainsCookie(request)) {
+            String cookies = request.getHeader("Cookie");
             for (String cookie : cookies.split(";")) {
                 String[] probableSessionCookie = cookie.split("=");
                 if (probableSessionCookie.length == 2) {
@@ -38,36 +34,23 @@ public class LoginHandler implements Handler {
                 }
             }
         }
-        if (request.getHeaders().containsKey("Content-Type") && request.getHeaders()
-                .get("Content-Type").contains("application/x-www-form-urlencoded")) {
+        if (doesRequestContainsFormData(request)) {
             return MemberService.login(request);
         }
+        return returnLoginPage();
+    }
+
+    private boolean doesRequestContainsCookie(HttpRequest request) {
+        return request.containsHeader("Cookie");
+    }
+
+    private boolean doesRequestContainsFormData(HttpRequest request) {
+        return request.containsHeader("Content-Type") && request.getHeader("Content-Type")
+                .contains("application/x-www-form-urlencoded");
+    }
+
+    private HttpResponse returnLoginPage() {
         String url = "/login.html";
-        try (
-                FileInputStream fileStream = new FileInputStream(
-                        findStaticResourceURL(url).getFile())
-        ) {
-            String path = findStaticResourceURL(url).getFile();
-            String extension = getResourceExtension(path);
-            return new HttpResponse.Builder()
-                    .setHttpStatusCode(HttpStatusCode.OK)
-                    .setContentType(toTextContentType(extension))
-                    .setBody(fileStream.readAllBytes())
-                    .build();
-        } catch (IOException | NullPointerException e) {
-            throw new RuntimeException();
-        }
-    }
-
-    private URL findStaticResourceURL(String url) {
-        return SYSTEM_CLASS_LOADER.getResource("static" + url);
-    }
-
-    private String getResourceExtension(String path) {
-        return path.split("\\.")[1];
-    }
-
-    private String toTextContentType(String extension) {
-        return "text/" + extension;
+        return ResponseUtil.buildStaticFileResponse(url);
     }
 }

@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
+import org.apache.coyote.http11.request.HttpVersion;
 
 public class HttpResponse {
 

@@ -2,8 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
-import static org.apache.coyote.http11.ContentType.HTML;
-import static org.apache.coyote.http11.ContentType.ICO;
+import static org.apache.coyote.http11.ContentType.*;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
@@ -12,10 +11,10 @@ import static org.apache.coyote.http11.HttpStatus.OK;
 public enum RequestMapper {
     HOME("/", "/", GET, OK, HTML),
     INDEX("/index.html", "/index.html", GET, OK, HTML),
-    SCRIPTS_JS("/js/scripts.js", "/js/scripts.js", GET, OK, HTML),
-    CHART_AREA_JS("/assets/chart-area.js", "/assets/chart-area.js", GET, OK, HTML),
-    CHART_BAR_JS("/assets/chart-bar.js", "/assets/chart-bar.js", GET, OK, HTML),
-    CHART_PIE_JS("/assets/chart-pie.js", "/assets/chart-pie.js", GET, OK, HTML),
+    SCRIPTS_JS("/js/scripts.js", "/js/scripts.js", GET, OK, JS),
+    CHART_AREA_JS("/assets/chart-area.js", "/assets/chart-area.js", GET, OK, JS),
+    CHART_BAR_JS("/assets/chart-bar.js", "/assets/chart-bar.js", GET, OK, JS),
+    CHART_PIE_JS("/assets/chart-pie.js", "/assets/chart-pie.js", GET, OK, JS),
     FAVICON("/favicon.ico", "/favicon.ico", GET, OK, ICO),
     CSS("/css/styles.css", "/css/styles.css", GET, OK, ContentType.CSS),
     LOG_IN("/login", "/login.html", GET, FOUND, HTML),

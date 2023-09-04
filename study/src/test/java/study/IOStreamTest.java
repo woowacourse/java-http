@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,15 +134,9 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
+            String actual = new String(inputStream.readAllBytes(), "UTF-8");
+
             InputStreamReader reader = new InputStreamReader(inputStream, UTF_8);
-
-            final StringBuilder stringBuilder = new StringBuilder();
-            int charValue;
-            while ((charValue = reader.read()) != -1) {
-                stringBuilder.append((char) charValue);
-            }
-
-            final String actual = stringBuilder.toString();
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -224,9 +217,9 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
             try (
+                    InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
                     InputStreamReader reader = new InputStreamReader(inputStream, UTF_8);
                     BufferedReader bufferedReader = new BufferedReader(reader);
             ) {
@@ -241,8 +234,6 @@ class IOStreamTest {
                 }
 
                 assertThat(actual).hasToString(emoji);
-
-                inputStream.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

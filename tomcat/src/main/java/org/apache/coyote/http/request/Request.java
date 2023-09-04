@@ -1,9 +1,5 @@
-package org.apache.coyote.http.request.exception;
+package org.apache.coyote.http.request;
 
-import org.apache.coyote.http.request.HttpRequestBody;
-import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
-import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.util.HttpMethod;
 import org.apache.coyote.http.util.HttpVersion;
 
@@ -58,5 +54,9 @@ public class Request {
 
     public boolean hasQueryParameters() {
         return queryParameters.size() > 0;
+    }
+
+    public HttpVersion version() {
+        return version;
     }
 }

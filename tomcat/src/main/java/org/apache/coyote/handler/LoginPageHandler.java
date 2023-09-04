@@ -47,7 +47,7 @@ public class LoginPageHandler implements Handler {
     }
 
     private boolean isLoginPageRequest(final Request request) {
-        return request.matchesByPath(path, rootContextPath) && !request.hasQueryParameters();
+        return request.matchesByPath(path, rootContextPath);
     }
 
     @Override

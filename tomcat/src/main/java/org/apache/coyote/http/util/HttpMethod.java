@@ -5,7 +5,8 @@ import org.apache.coyote.http.util.exception.UnsupportedHttpMethodException;
 
 public enum HttpMethod {
 
-    GET("get");
+    GET("get"),
+    POST("post");
 
     private final String content;
 

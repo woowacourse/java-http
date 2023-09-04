@@ -9,6 +9,7 @@ import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpMethod;
 import org.slf4j.Logger;
@@ -31,11 +32,11 @@ public class LoginHandler implements Handler {
 
     @Override
     public boolean supports(final Request request) {
-        return isGetMethod(request) && isLoginRequest(request) && request.hasQueryParameters();
+        return isPostMethod(request) && isLoginRequest(request) && request.hasQueryParameters();
     }
 
-    private boolean isGetMethod(final Request request) {
-        return request.matchesByMethod(HttpMethod.GET);
+    private boolean isPostMethod(final Request request) {
+        return request.matchesByMethod(HttpMethod.POST);
     }
 
     private boolean isLoginRequest(final Request request) {
@@ -59,11 +60,23 @@ public class LoginHandler implements Handler {
 
             log.info("login success : {}", user);
 
-            return Response.of(request, HttpStatusCode.OK, ContentType.JSON, user.toString());
+            return Response.of(
+                    request,
+                    HttpStatusCode.FOUND,
+                    ContentType.JSON,
+                    user.toString(),
+                    new HeaderDto("Location", "/index.html")
+            );
         } catch (LoginFailureException ex) {
             log.info("login failed : ", ex);
 
-            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, ex.getMessage());
+            return Response.of(
+                    request,
+                    HttpStatusCode.FOUND,
+                    ContentType.JSON,
+                    HttpConsts.BLANK,
+                    new HeaderDto("Location", "/401.html")
+            );
         }
     }
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.http.response;
 
 import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpVersion;
 
@@ -27,9 +28,10 @@ public class Response {
             final Request request,
             final HttpStatusCode statusCode,
             final ContentType contentType,
-            final String body
+            final String body,
+            final HeaderDto... headerContents
     ) {
-        final HttpResponseHeaders headers = HttpResponseHeaders.of(contentType, body);
+        final HttpResponseHeaders headers = HttpResponseHeaders.of(contentType, body, headerContents);
 
         return new Response(request.version(), statusCode, headers, body);
     }

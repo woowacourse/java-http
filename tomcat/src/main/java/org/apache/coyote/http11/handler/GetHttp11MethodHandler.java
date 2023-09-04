@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.apache.coyote.header.ContentType.CHARSET_UTF_8;
 import static org.apache.coyote.header.ContentType.TEXT_CSS;
 import static org.apache.coyote.header.ContentType.TEXT_HTML;
@@ -10,9 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
-import java.util.Optional;
-import nextstep.jwp.model.User;
 import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.util.RequestExtractor;
 import org.slf4j.Logger;
@@ -28,36 +24,16 @@ public class GetHttp11MethodHandler implements Http11MethodHandler {
     }
 
     @Override
-    public String handle(final String request) {
+    public String handle(final String request, final String payload) {
         String targetPath = RequestExtractor.extractTargetPath(request);
         if (targetPath.equals("/")) {
             return defaultContent();
-        }
-
-        if (targetPath.contains("?")) {
-            return login(request);
         }
 
         if (!targetPath.contains(".")) {
             targetPath += ".html";
         }
         return resourceContent(targetPath);
-    }
-
-    private String login(String request) {
-        Map<String, String> queryParams = RequestExtractor.extractQueryParam(request);
-        Optional<User> foundUser = findByAccount(queryParams.get("account"));
-        User user = foundUser.orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-
-        if (user.checkPassword(queryParams.get("password"))) {
-            log.info("user : {}", user);
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found",
-                    "Location: " + "index.html");
-        }
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + "401.html");
     }
 
     private String defaultContent() {

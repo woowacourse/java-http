@@ -10,27 +10,27 @@ public class RequestExtractor {
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int TARGET_PATH_INDEX = 1;
 
-    public static HttpMethod extractHttpMethod(final String request) {
-        String[] startLineInfos = extractStartLineInfos(request);
+    public static HttpMethod extractHttpMethod(final String headers) {
+        String[] startLineInfos = extractStartLineInfos(headers);
         String httpMethod = startLineInfos[HTTP_METHOD_INDEX];
         return HttpMethod.from(httpMethod);
     }
 
-    private static String[] extractStartLineInfos(final String request) {
-        String[] requestLines = request.split("\r\n");
+    private static String[] extractStartLineInfos(final String headers) {
+        String[] requestLines = headers.split("\r\n");
         String requestStartLine = requestLines[START_LINE_INDEX];
         return requestStartLine.split(" ");
     }
 
-    public static String extractTargetPath(final String request) {
-        String[] startLineInfos = extractStartLineInfos(request);
+    public static String extractTargetPath(final String headers) {
+        String[] startLineInfos = extractStartLineInfos(headers);
         return startLineInfos[TARGET_PATH_INDEX];
     }
 
-    public static Map<String, String> extractQueryParam(String request) {
+    public static Map<String, String> extractQueryParam(String headers) {
         Map<String, String> result = new HashMap<>();
 
-        String[] startLineInfos = extractStartLineInfos(request);
+        String[] startLineInfos = extractStartLineInfos(headers);
         String totalTargetPath = startLineInfos[TARGET_PATH_INDEX];
         int startIndexOfQueryString = totalTargetPath.indexOf("?");
         String queryString = totalTargetPath.substring(startIndexOfQueryString + 1);

@@ -6,5 +6,5 @@ public interface Http11MethodHandler {
 
     HttpMethod supportMethod();
 
-    String handle(final String request);
+    String handle(final String request, final String payload);
 }

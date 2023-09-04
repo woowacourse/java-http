@@ -22,7 +22,7 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // when
-        String result = handler.handle(request);
+        String result = handler.handle(request, "");
 
         // then
         assertThat(result).contains("Hello world!");
@@ -38,7 +38,7 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // when
-        String result = handler.handle(request);
+        String result = handler.handle(request, "");
 
         // then
         assertThat(result).contains("<title>대시보드</title>");
@@ -54,7 +54,7 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // when
-        String result = handler.handle(request);
+        String result = handler.handle(request, "");
 
         // then
         assertThat(result).contains("Content-Type: text/html");
@@ -72,7 +72,7 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // when
-        String result = handler.handle(request);
+        String result = handler.handle(request, "");
 
         // then
         assertThat(result).contains("Content-Type: text/css");
@@ -88,7 +88,7 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // when
-        String result = handler.handle(request);
+        String result = handler.handle(request, "");
 
         // then
         assertThat(result).contains("<title>로그인</title>");
@@ -104,40 +104,6 @@ class GetHttp11MethodHandlerTest {
                 "");
 
         // expect
-        assertThrows(RuntimeException.class, () -> handler.handle(request));
-    }
-
-    @Test
-    void 비밀번호가_틀리면_401_페이지로_리다이렉션한다() {
-        // given
-        String request = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "",
-                "");
-
-        // when
-        String result = handler.handle(request);
-
-        // then
-        assertThat(result).contains("HTTP/1.1 302 Found");
-        assertThat(result).contains("Location: 401.html");
-    }
-
-    @Test
-    void 로그인이_정상적으로_처리되면_index_페이지로_리다이렉션한다() {
-        // given
-        String request = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "",
-                "");
-
-        // when
-        String result = handler.handle(request);
-
-        // then
-        assertThat(result).contains("HTTP/1.1 302 Found");
-        assertThat(result).contains("Location: index.html");
+        assertThrows(RuntimeException.class, () -> handler.handle(request, ""));
     }
 }

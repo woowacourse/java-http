@@ -18,8 +18,8 @@ public class Http11MethodHandlerAdaptor {
                 .collect(toMap(Http11MethodHandler::supportMethod, identity()));
     }
 
-    public String handle(final HttpMethod httpMethod, String request) throws IOException {
+    public String handle(final HttpMethod httpMethod, final String request, final String payload) throws IOException {
         Http11MethodHandler handler = handlers.get(httpMethod);
-        return handler.handle(request);
+        return handler.handle(request, payload);
     }
 }

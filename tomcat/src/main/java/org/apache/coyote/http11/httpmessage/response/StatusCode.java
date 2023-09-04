@@ -3,7 +3,8 @@ package org.apache.coyote.http11.httpmessage.response;
 public enum StatusCode {
 
     OK(200, "OK"),
-    NOT_FOUND(404, "NOT_FOUND");
+    NOT_FOUND(404, "NOT_FOUND"),
+    REDIRECT(302, "REDIRECT");
 
     private final int value;
     private final String message;

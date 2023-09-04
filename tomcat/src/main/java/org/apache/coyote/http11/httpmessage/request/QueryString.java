@@ -29,6 +29,10 @@ public class QueryString {
         return queryString.get("account");
     }
 
+    public String getPassword() {
+        return queryString.get("password");
+    }
+
     public Map<String, String> getQueryString() {
         return queryString;
     }

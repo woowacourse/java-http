@@ -12,7 +12,8 @@ public enum HandlerMapping {
     CHART_BAR_JS("/assets/chart-bar.js", HttpMethod.GET, "assets/chart-bar.js"),
     CHART_AREA_JS("/assets/chart-area.js", HttpMethod.GET, "assets/chart-area.js"),
     CHART_PIE_JS("/assets/chart-pie.js", HttpMethod.GET, "assets/chart-pie.js"),
-    LOGIN("/login", HttpMethod.GET, "login.html");
+    LOGIN("/login", HttpMethod.GET, "login.html"),
+    UNAUTHORIZED("/401.html", HttpMethod.GET, "401.html");
 
     private final String path;
     private final HttpMethod httpMethod;

@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
@@ -76,16 +78,21 @@ public class Handler {
         headers.put("Content-Type",
             ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
-        findMember();
-        return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
-    }
 
-    private void findMember() {
         if (queryString == null) {
-            return;
+            return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
         }
-        InMemoryUserRepository.findByAccount(queryString.getAccount())
-            .ifPresent(user -> log.info("user : " + user));
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(queryString.getAccount());
+
+        if (user.isEmpty() || !user.get().checkPassword(queryString.getPassword())) {
+            headers.put("Location", "/401.html");
+            return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
+        }
+
+        log.info("user : " + user);
+        headers.put("Location", "/index.html");
+        return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
     }
 
     private String findFile(final String response) throws IOException {

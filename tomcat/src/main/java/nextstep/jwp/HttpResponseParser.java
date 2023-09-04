@@ -8,10 +8,10 @@ public class HttpResponseParser {
         HttpStatus status = response.getHttpStatus();
         String result = String.join("\r\n",
             "HTTP/1.1 " + status.code + " " + status.name() + " ",
-            parseHeaders(response),
-            parseCookie(response.getCookie()),
+            parseHeaders(response) + parseCookie(response.getCookie()),
             "",
             response.getBody());
+        System.out.println("result = " + result);
         return result.getBytes();
     }
 
@@ -22,7 +22,10 @@ public class HttpResponseParser {
     }
 
     private static String parseCookie(HttpCookie cookie) {
-        return "Cookie: " + cookie.getCookies().entrySet().stream()
+        if (cookie.getCookies().size() == 0) {
+            return "";
+        }
+        return "\nSet-Cookie: " + cookie.getCookies().entrySet().stream()
             .map(it -> String.join("=", it.getKey(), it.getValue() + " "))
             .collect(Collectors.joining());
     }

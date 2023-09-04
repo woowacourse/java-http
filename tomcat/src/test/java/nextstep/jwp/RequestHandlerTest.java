@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import static nextstep.jwp.HttpStatus.FOUND;
+import static nextstep.jwp.SessionManager.findSession;
 import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -94,6 +95,27 @@ class RequestHandlerTest {
         assertAll(
             () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
             () -> assertThat(headers.get("Location")).isEqualTo("/index.html")
+        );
+    }
+
+    @Test
+    void 로그인시_쿠키를_반환하고_세션에_담는다() {
+        // given
+        String request = String.join("\r\n",
+            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        // when
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
+        // then
+        HttpCookie httpCookie = response.getCookie();
+        assertAll(
+            () -> assertThat(findSession(httpCookie.get("JSESSIONID"))).isNotNull(),
+            () -> assertThat(httpCookie.get("JSESSIONID")).isNotNull()
         );
     }
 

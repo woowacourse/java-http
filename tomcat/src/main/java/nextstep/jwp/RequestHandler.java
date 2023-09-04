@@ -56,6 +56,10 @@ public class RequestHandler {
     }
 
     private HttpResponse login(HttpRequest request) {
+        if (isLogin(request)) {
+            return HttpResponse.found("/index.html");
+        }
+
         Map<String, String> queryString = request.getQueryString();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryString.get("account"));
         if (optionalUser.isPresent()) {
@@ -63,7 +67,7 @@ public class RequestHandler {
             if (user.checkPassword(queryString.get("password"))) {
                 log.info(user.toString());
                 HttpResponse response = HttpResponse.found("/index.html");
-                addCookie(request, response);
+                addCookieAndSession(response, user);
                 return response;
             }
         }
@@ -71,11 +75,29 @@ public class RequestHandler {
         return HttpResponse.found("/401.html");
     }
 
-    private void addCookie(HttpRequest request, HttpResponse response) {
-        if (request.hasNotCookie()) {
-            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+    private boolean isLogin(HttpRequest request) {
+        HttpCookie cookie = request.getCookie();
+        if (cookie == null) {
+            return false;
         }
+
+        if (cookie.get("JSESSIONID") != null) {
+            String sessionId = cookie.get("JSESSIONID");
+            Session session = SessionManager.findSession(sessionId);
+            if (session.getAttribute("user") != null) {
+                return true;
+            }
+        }
+        return false;
     }
+
+    private void addCookieAndSession(HttpResponse response, User user) {
+        String uuid = UUID.randomUUID().toString();
+        Session session = SessionManager.createSession(uuid);
+        session.setAttribute("user", user);
+        response.addCookie("JSESSIONID", uuid);
+    }
+
 
     private HttpResponse signUp(HttpRequest request) {
         Map<String, String> body = request.getBody();

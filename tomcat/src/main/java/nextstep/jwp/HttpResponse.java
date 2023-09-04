@@ -51,7 +51,7 @@ public class HttpResponse {
         return httpCookie;
     }
 
-    public String getCookieValue(String key) {
+    public Object getCookieValue(String key) {
         return httpCookie.get(key);
     }
 }

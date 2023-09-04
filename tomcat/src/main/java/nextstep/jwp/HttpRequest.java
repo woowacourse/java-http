@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 public class HttpRequest {
 
     private final Map<String, String> values = new ConcurrentHashMap<>();
-    private Session session;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -70,7 +69,7 @@ public class HttpRequest {
 
     private Map<String, String> parseKeyAndValue(String input) {
         return Arrays.stream(input.split("&"))
-            .map(keyAndValue -> keyAndValue.split("="))
+            .map(it -> it.split("="))
             .collect(Collectors.toMap(
                 keyAndValue -> keyAndValue[0],
                 keyAndValue -> keyAndValue[1]));
@@ -80,8 +79,15 @@ public class HttpRequest {
         return HttpMethod.from(values.get("method"));
     }
 
-    public boolean hasNotCookie() {
-        return values.containsKey("Cookie");
+    public HttpCookie getCookie() {
+        if (values.get("Cookie") == null) {
+            return null;
+        }
+        Map<String, String> cookie = Arrays.stream(values.get("Cookie").split("; "))
+            .map(it -> it.split("="))
+            .collect(Collectors.toMap(
+                keyAndValue -> keyAndValue[0],
+                keyAndValue -> keyAndValue[1]));
+        return new HttpCookie(cookie);
     }
-
 }

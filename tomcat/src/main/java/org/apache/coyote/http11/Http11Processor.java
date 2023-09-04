@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -48,28 +49,48 @@ public class Http11Processor implements Runnable, Processor {
       final Map<String, String> headers = extractHeaders(inputStream);
       final Map<String, String> params = extractParams(url);
 
-      if (url.startsWith("/login")) {
+      final String response;
+
+      if (url.startsWith("/login?")) {
         final String account = params.get("account");
-        final User user = InMemoryUserRepository.findByAccount(account)
-            .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-        log.debug(user.toString());
+        response = loginResponse(account);
+      } else {
+        final String responseBody = readContentsFromFile(url);
+        final String contentType = getContentType(headers);
+        response = response200(contentType, responseBody);
       }
-
-      final String responseBody = readContentsFromFile(url);
-      final String contentType = getContentType(headers);
-
-      final var response = String.join(NEW_LINE,
-          "HTTP/1.1 200 OK ",
-          "Content-Type: " + contentType + ";charset=utf-8 ",
-          "Content-Length: " + responseBody.getBytes().length + " ",
-          "",
-          responseBody);
 
       outputStream.write(response.getBytes());
       outputStream.flush();
     } catch (final IOException | UncheckedServletException e) {
       log.error(e.getMessage(), e);
     }
+  }
+
+  private String loginResponse(final String account) {
+    final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+    if (user.isPresent()) {
+      log.debug(user.toString());
+      return response302("/index.html");
+    }
+    return response302("/401.html");
+  }
+
+  private String response200(final String contentType, final String responseBody) {
+    return String.join(NEW_LINE,
+        "HTTP/1.1 200 OK ",
+        "Content-Type: " + contentType + ";charset=utf-8 ",
+        "Content-Length: " + responseBody.getBytes().length + " ",
+        "",
+        responseBody);
+  }
+
+  private String response302(final String location) {
+    return String.join(NEW_LINE,
+        "HTTP/1.1 302 FOUND ",
+        "Location: " + location,
+        "");
   }
 
   private Map<String, String> extractParams(final String url) {

@@ -13,7 +13,7 @@ public class HttpResponse {
     private final Headers headers;
     private final ResponseBody responseBody;
 
-    public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final Headers headers, final ResponseBody responseBody) {
+    private HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final Headers headers, final ResponseBody responseBody) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.headers = headers;

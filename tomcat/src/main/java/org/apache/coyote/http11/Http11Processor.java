@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
@@ -47,14 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             final var uri = request.split(" ")[1];
             log.info("uri : {}", uri);
 
-            final var responseBody = getResponseBody(uri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    getContentType(uri),
-                    getContentLength(responseBody),
-                    "",
-                    responseBody);
+            final var response = getResponse(uri);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -63,9 +58,37 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(final String uri) throws IOException {
+    private String getResponse(final String uri) throws IOException {
         if ("/".equals(uri)) {
-            return "Hello world!";
+            final var content = "Hello world!";
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    getContentType(uri),
+                    getContentLength(content),
+                    "",
+                    content);
+        }
+
+        final var responseBody = getResponseBody(uri);
+
+        final URL resource = ClassLoader.getSystemClassLoader().getResource("static/" + responseBody.getContent());
+        final File file = new File(URLDecoder.decode(Objects.requireNonNull(resource).getPath(), StandardCharsets.UTF_8));
+        final String content = new String(Files.readAllBytes(file.toPath()));
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + responseBody.getHttpStatus().getCode() + " " + responseBody.getHttpStatus().name() + " ",
+                getContentType(uri),
+                getContentLength(content),
+                "",
+                content);
+    }
+
+    private Response getResponseBody(final String uri) throws IOException {
+        if ("/login".equals(uri)) {
+            final URL resource = ClassLoader.getSystemClassLoader().getResource("static/login.html");
+            final String file = URLDecoder.decode(Objects.requireNonNull(resource).getPath(), StandardCharsets.UTF_8);
+            final String responseBody = new String(Files.readAllBytes(new File(file).toPath()));
+            return new Response(HttpStatus.OK, responseBody);
         }
         if (uri.startsWith("/login?")) {
             int index = uri.indexOf("?");
@@ -73,20 +96,18 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> queries = Arrays.stream(queryString.split("&"))
                                                       .map(query -> query.split("="))
                                                       .collect(toMap(query -> query[0], query -> query[1]));
-            final User userInfo = InMemoryUserRepository.findByAccount(queries.get("account"))
-                                                        .filter(user -> user.checkPassword(queries.get("password")))
-                                                        .orElseThrow(() -> new IllegalArgumentException("사용자 정보가 없습니다."));
-
-            log.info("User{id={}, account={}, email={}, pasword={}", userInfo.getId(), userInfo.getAccount(), userInfo.getEmail(), userInfo.getPassword());
-
-            final URL resource = ClassLoader.getSystemClassLoader().getResource("static/login.html");
-            final String file = Objects.requireNonNull(resource).getFile();
-            return new String(Files.readAllBytes(new File(file).toPath()));
+            return InMemoryUserRepository.findByAccount(queries.get("account"))
+                                         .filter(user -> user.checkPassword(queries.get("password")))
+                                         .map(this::loginSuccess)
+                                         .orElseGet(() -> new Response(HttpStatus.UNAUTHORIZED, "/401.html"));
         }
 
-        final URL resource = ClassLoader.getSystemClassLoader().getResource("static" + uri);
-        final String file = Objects.requireNonNull(resource).getFile();
-        return new String(Files.readAllBytes(new File(file).toPath()));
+        return new Response(HttpStatus.OK, uri);
+    }
+
+    private Response loginSuccess(final User user) {
+        log.info("User{id={}, account={}, email={}, pasword={}", user.getId(), user.getAccount(), user.getEmail(), user.getPassword());
+        return new Response(HttpStatus.FOUND, "/index.html");
     }
 
     private String getContentType(final String uri) {

@@ -45,4 +45,8 @@ public class Cookies {
     public String createNewCookieHeader() {
         return "Set-Cookie: " + JAVA_SESSION_ID + "=" + UUID.randomUUID();
     }
+
+    public String getCookieValue() {
+        return entries.get(JAVA_SESSION_ID);
+    }
 }

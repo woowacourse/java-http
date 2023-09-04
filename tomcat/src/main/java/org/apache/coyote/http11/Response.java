@@ -124,6 +124,10 @@ public class Response {
             return makeResponseForRedirect("/index");
         }
 
+        if (path.endsWith("login.html") && Session.exist(cookies.getCookieValue())) {
+            return makeResponseForRedirect("/index");
+        }
+
         if (path.endsWith("login.html") && !parameters.isEmpty()) {
             try {
                 login();
@@ -159,7 +163,7 @@ public class Response {
         responses.add("HTTP/1.1 200 OK ");
         responses.add(contentType.toHeader());
         responses.add("Content-Length: " + body.getBytes().length + " ");
-        if (cookies.notExist()) {
+        if (path.endsWith("login.html") && cookies.notExist()) {
             responses.add(cookies.createNewCookieHeader());
         }
 
@@ -178,6 +182,7 @@ public class Response {
 
         if (user.checkPassword(password)) {
             LOGGER.info("user : {}", user);
+            Session.login(cookies.getCookieValue(), user);
             return;
         }
 

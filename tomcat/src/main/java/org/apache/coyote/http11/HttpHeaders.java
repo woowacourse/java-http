@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,7 +16,7 @@ public class HttpHeaders {
     private final Map<HttpHeaderName, String> headers;
 
     public HttpHeaders() {
-        this.headers = new HashMap<>();
+        this.headers = new EnumMap<>(HttpHeaderName.class);
     }
 
     public HttpHeaders(final Map<HttpHeaderName, String> headers) {
@@ -30,7 +30,7 @@ public class HttpHeaders {
     }
 
     private static Map<HttpHeaderName, String> parseHeaders(final BufferedReader bufferedReader) {
-        final Map<HttpHeaderName, String> headers = new HashMap<>();
+        final Map<HttpHeaderName, String> headers = new EnumMap<>(HttpHeaderName.class);
 
         try {
             String headerLine;

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.sun.security.jgss.GSSUtil;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;

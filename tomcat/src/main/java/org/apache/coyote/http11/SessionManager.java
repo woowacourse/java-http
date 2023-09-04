@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,5 +24,6 @@ public class SessionManager {
         return SESSIONS;
     }
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 }

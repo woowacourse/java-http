@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
 import static org.apache.coyote.header.ContentType.CHARSET_UTF_8;
 import static org.apache.coyote.header.ContentType.TEXT_CSS;
 import static org.apache.coyote.header.ContentType.TEXT_HTML;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.util.RequestExtractor;
 import org.slf4j.Logger;
@@ -26,9 +28,21 @@ public class GetHttp11MethodHandler implements Http11MethodHandler {
     @Override
     public String handle(final String request) {
         String targetPath = RequestExtractor.extractTargetPath(request);
-
         if (targetPath.equals("/")) {
             return defaultContent();
+        }
+
+        if (targetPath.contains("?")) {
+            Map<String, String> queryParams = RequestExtractor.extractQueryParam(request);
+            log.info("user : {}", findByAccount(queryParams.get("account")).orElseThrow(
+                    () -> new RuntimeException("존재하지 않는 유저입니다.")
+            ));
+
+            targetPath = targetPath.substring(0, targetPath.indexOf("?"));
+        }
+
+        if (!targetPath.contains(".")) {
+            targetPath += ".html";
         }
         return resourceContent(targetPath);
     }

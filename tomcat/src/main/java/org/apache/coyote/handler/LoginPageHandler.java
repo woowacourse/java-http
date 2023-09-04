@@ -52,7 +52,6 @@ public class LoginPageHandler implements Handler {
 
     @Override
     public Response service(final Request request) throws IOException {
-
         try {
             final URL resource = ClassLoader.getSystemClassLoader()
                                             .getResource(prefix + targetResourceName);

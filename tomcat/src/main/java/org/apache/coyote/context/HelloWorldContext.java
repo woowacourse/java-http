@@ -7,6 +7,7 @@ import org.apache.coyote.Container;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.LoginPageHandler;
 import org.apache.coyote.handler.ResourceHandler;
 import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.http.request.Request;
@@ -43,6 +44,7 @@ public class HelloWorldContext implements Container {
         handlers.add(new WelcomeHandler(rootContextPath));
         handlers.add(new ResourceHandler(staticResourcePath));
         handlers.add(new LoginHandler("/login", rootContextPath));
+        handlers.add(new LoginPageHandler("/login", rootContextPath, "login.html", staticResourcePath));
     }
 
     @Override

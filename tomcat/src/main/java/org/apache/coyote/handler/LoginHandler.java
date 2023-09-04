@@ -31,7 +31,7 @@ public class LoginHandler implements Handler {
 
     @Override
     public boolean supports(final Request request) {
-        return isGetMethod(request) && isLoginRequest(request);
+        return isGetMethod(request) && isLoginRequest(request) && request.hasQueryParameters();
     }
 
     private boolean isGetMethod(final Request request) {

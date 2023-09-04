@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -12,8 +11,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class RegisterController extends HttpServlet {
 
     @Override
-    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        if (req.getSession()==null || req.getSession().containskey("user")) {
+    public void doGet(final HttpRequest req, final HttpResponse resp) {
+        if (req.getSession().containskey("user")) {
             resp.sendRedirect("/index.html");
         }
     }

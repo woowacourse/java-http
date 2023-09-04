@@ -15,7 +15,7 @@ public class LoginController extends HttpServlet {
 
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        if (req.getSession()==null || req.getSession().containskey("user")) {
+        if (req.getSession().containskey("user")) {
             resp.sendRedirect("/index.html");
         }
     }

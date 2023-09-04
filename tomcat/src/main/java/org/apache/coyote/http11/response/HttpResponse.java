@@ -33,7 +33,7 @@ public class HttpResponse {
     }
 
     public boolean isNotRedirect(){
-        return httpResponseStartLine.getStatusCode()!=StatusCode.FOUND;
+        return httpResponseStartLine==null || httpResponseStartLine.getStatusCode()!=StatusCode.FOUND;
     }
 
     public void setHttpResponseStartLine(final StatusCode statusCode) {

@@ -29,6 +29,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager sessionManager = new SessionManager();
     private static final String HTTP_11 = "HTTP/1.1";
+    private static final String INDEX_URI = "/index";
+    private static final String REGISTER_URI = "/register";
+    private static final String LOGIN_URI = "/login";
+    private static final String UNAUTHORIZED_URI = "/401.html";
 
     private final Socket connection;
 
@@ -84,11 +88,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse routePost(String uri, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
-        if ("/register".equals(uri)) {
+
+        if (REGISTER_URI.equals(uri)) {
             return doRegister(requestBody);
         }
 
-        if ("/login".equals(uri)) {
+        if (LOGIN_URI.equals(uri)) {
             return doLogin(requestHeader, requestBody);
         }
         return createHttpResponse(uri, requestHeader);
@@ -124,10 +129,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
-        if ("/login".equals(path)
+        if (LOGIN_URI.equals(path)
                 && cookie != null
                 && sessionManager.findSession(cookie.getJSessionId(false)) != null) {
-            return ViewResolver.resolveView("/index");
+            return ViewResolver.resolveView(INDEX_URI);
         }
         return ViewResolver.routePath(path, query);
     }
@@ -141,20 +146,24 @@ public class Http11Processor implements Runnable, Processor {
             stringJoiner.add(String.format("%s: %s ", entry.getKey(), entry.getValue()));
         }
         if (httpStatus.equals(HttpStatus.FOUND)) {
-            stringJoiner.add(String.format("%s %s ", "Location:", response.getBody()));
+            stringJoiner.add(toHeaderFormat("Location", response.getBody()));
             stringJoiner.add("\r\n");
             return stringJoiner.toString();
         }
-        stringJoiner.add(String.format("%s %s ", "Content-Type:", response.getContentType()));
+        stringJoiner.add(toHeaderFormat("Content-Type", response.getContentType()));
         stringJoiner.add(String.format("%s %s ", "Content-Length:", response.getBody().getBytes().length));
         stringJoiner.add("\r\n");
         return stringJoiner.toString();
     }
 
+    private static String toHeaderFormat(String name, String value) {
+        return String.format("%s: %s ", name, value);
+    }
+
     private HttpResponse doLogin(RequestHeader requestHeader, RequestBody requestBody) throws IOException {
         String query = requestBody.getItem();
         if (query.isBlank()) {
-            return ViewResolver.resolveView("/login");
+            return ViewResolver.resolveView(LOGIN_URI);
         }
 
         String account = "";
@@ -177,27 +186,28 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user != null && user.checkPassword(password)) {
             HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
-            HttpResponse httpResponse = new HttpResponse("/index.html", HttpStatus.FOUND, TEXT_HTML);
+            HttpResponse httpResponse = new HttpResponse(INDEX_URI, HttpStatus.FOUND, TEXT_HTML);
 
             if (cookie.getJSessionId(false) == null) {
-                String JSessionId = cookie.getJSessionId(true);
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + JSessionId);
-                Session session = new Session(JSessionId);
+                String jSessionId = cookie.getJSessionId(true);
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+                Session session = new Session(jSessionId);
                 session.setAttribute("user", user);
                 sessionManager.add(session);
             }
-
-            System.out.println("로그인 성공!" + user);
+            if (log.isInfoEnabled()) {
+                log.info(String.format("%s %s", "로그인 성공!", user));
+            }
             return httpResponse;
         }
 
-        return ViewResolver.resolveView("/401.html");
+        return ViewResolver.resolveView(UNAUTHORIZED_URI);
     }
 
     private HttpResponse doRegister(RequestBody requestBody) throws IOException {
         String query = requestBody.getItem();
         if (query.isBlank()) {
-            return ViewResolver.resolveView("/register");
+            return ViewResolver.resolveView(REGISTER_URI);
         }
 
         String account = "";
@@ -221,13 +231,16 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            return ViewResolver.resolveView("/register");
+            return ViewResolver.resolveView(REGISTER_URI);
         }
 
         User registUser = new User(account, password, email);
         InMemoryUserRepository.save(registUser);
-        System.out.println("회원가입 성공! " + registUser);
 
-        return ViewResolver.resolveView("/login.html");
+        if (log.isInfoEnabled()) {
+            log.info(String.format("%s %s", "회원가입 성공!", registUser));
+        }
+
+        return ViewResolver.resolveView(LOGIN_URI);
     }
 }

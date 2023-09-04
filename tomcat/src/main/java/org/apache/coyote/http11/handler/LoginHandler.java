@@ -128,7 +128,7 @@ public class LoginHandler implements HttpHandler {
 		final Session session = new Session(jSessionId);
 		session.setAttributes(SESSION_USER_KEY, user);
 		SessionManager.add(session);
-		headers.put(SET_COOKIE.getValue(), jSessionId);
+		headers.put(SET_COOKIE.getValue(), "JSESSIONID=" + jSessionId);
 	}
 
 	private static HttpHeaders resolveHeader(final String body) {

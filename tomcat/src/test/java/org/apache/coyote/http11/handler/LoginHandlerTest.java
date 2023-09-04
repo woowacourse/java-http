@@ -123,7 +123,7 @@ class LoginHandlerTest {
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 0 \r\n" +
 				"Location: http://localhost:8080/index.html \r\n" +
-				"Set-cookie: " + uuidValue + " \r\n" +
+				"Set-cookie: JSESSIONID=" + uuidValue + " \r\n" +
 				"\r\n";
 
 			assertAll(

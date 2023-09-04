@@ -6,10 +6,6 @@ public enum HttpMethod {
     PUT,
     DELETE;
 
-    public static HttpMethod of(String httpMethod) {
-        return HttpMethod.valueOf(httpMethod.toUpperCase());
-    }
-
     public boolean isGet() {
         return this.equals(GET);
     }

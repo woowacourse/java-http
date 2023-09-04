@@ -26,12 +26,6 @@ public class HttpRequest {
     private HttpCookie cookie;
     private Map<String, String> requestBody;
 
-    private HttpRequest(final HttpMethod method, final String uri, final String version) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
-    }
-
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         final String requestApi = bufferedReader.readLine();
         final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
@@ -78,10 +72,6 @@ public class HttpRequest {
                 this.requestBody.put(requestBodyName, requestBodyValue);
             }
         }
-    }
-
-    public static HttpRequest toIndex() {
-        return new HttpRequest(HttpMethod.GET, "/index.html", "HTTP/1.1");
     }
 
     public String getUri() {

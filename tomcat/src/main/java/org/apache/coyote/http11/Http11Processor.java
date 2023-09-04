@@ -31,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String LOGIN_PAGE_URI = "/login.html";
+    private static final String REGISTER_PAGE_URI = "/register.html";
     private static final String UNAUTHORIZED_PAGE_URI = "/401.html";
     private static final String INDEX_PAGE_URI = "/index.html";
     private static final int NO_QUERY_STRING = -1;
@@ -108,6 +109,10 @@ public class Http11Processor implements Runnable, Processor {
             return login(httpRequestStartLine, httpRequestHeader, httpRequestBody);
         }
 
+        if (requestURI.startsWith("/register")) {
+            return register(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+        }
+
         return findStaticResource(requestURI);
     }
 
@@ -179,6 +184,20 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return findAccount.get();
+    }
+
+    private ResponseEntity register(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+        HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
+        String requestURI = httpRequestStartLine.getRequestURI();
+
+        if (httpMethod == HttpMethod.GET) {
+            return ResponseEntity.builder()
+                    .httpStatus(HttpStatus.OK)
+                    .requestURI(requestURI)
+                    .location(REGISTER_PAGE_URI)
+                    .build();
+        }
+        return null;
     }
 
     private Map<String, String> parseQueryString(String requestURI) {

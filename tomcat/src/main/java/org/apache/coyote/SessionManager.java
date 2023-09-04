@@ -2,8 +2,6 @@ package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 public class SessionManager {
 
@@ -22,11 +20,6 @@ public class SessionManager {
     }
 
     public Session findSession(final String id) {
-        Set<Map.Entry<String, Session>> entries = SESSIONS.entrySet();
-        for (Map.Entry<String, Session> entry :entries) {
-            System.out.println(entry.getKey());
-        }
-
         return SESSIONS.getOrDefault(id, null);
     }
 

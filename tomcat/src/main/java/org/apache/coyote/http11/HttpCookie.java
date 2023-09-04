@@ -1,12 +1,7 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.Cookie;
-
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
 

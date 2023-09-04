@@ -25,7 +25,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String RESOURCE_PATH = "static";
     private static final int URL_INDEX = 1;
     private static final String ILLEGAL_REQUEST = "부적절한 요청입니다.";
-    private static SessionManager sessionManager = SessionManager.getInstance();
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+    public static final String PAGE401 = "/401.html";
+    public static final String HTTP_FOUND = "Found";
+    public static final String PAGE_INDEX = "/index.html";
+    private static final SessionManager sessionManager = SessionManager.getInstance();
     private final Socket connection;
 
 
@@ -73,26 +79,26 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestUri.contains("/register")) {
-            return handleMemberRegistRequest(requestLine, header, body);
+            return handleMemberRegistRequest(requestLine, body);
         }
 
         String resourcePath = RESOURCE_PATH + requestUri;
         return new ResponseInfo(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
     }
 
-    private ResponseInfo handleMemberRegistRequest(String requestLine, RequestHeader header, RequestBody body) {
+    private ResponseInfo handleMemberRegistRequest(String requestLine, RequestBody body) {
         ClassLoader classLoader = getClass().getClassLoader();
         String requestMethod = requestLine.split(" ")[0];
 
         if (requestMethod.equals("POST")) {
-            String account = body.getByKey("account");
-            String password = body.getByKey("password");
-            String email = body.getByKey("email");
+            String account = body.getByKey(ACCOUNT);
+            String password = body.getByKey(PASSWORD);
+            String email = body.getByKey(EMAIL);
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            log.info("User create - "+ user);
-            String resourcePath = RESOURCE_PATH + "/index.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+            log.info("User create - {}", user);
+            String resourcePath = RESOURCE_PATH + PAGE_INDEX;
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
         }
 
         String resourcePath = RESOURCE_PATH + "/register.html";
@@ -105,17 +111,17 @@ public class Http11Processor implements Runnable, Processor {
 
         String httpMethod = requestLine.split(" ")[0];
         if (httpMethod.equals("POST")) {
-            String account = body.getByKey("account");
+            String account = body.getByKey(ACCOUNT);
             Optional<User> user = InMemoryUserRepository.findByAccount(account);
             if (user.isEmpty()) {
-                String resourcePath = RESOURCE_PATH + "/401.html";
-                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+                String resourcePath = RESOURCE_PATH + PAGE401;
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
             }
             Session session = new Session(UUID.randomUUID().toString());
             sessionManager.add(session);
             session.setAttribute("user", user.get());
-            String resourcePath = RESOURCE_PATH + "/index.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found",  session.getId());
+            String resourcePath = RESOURCE_PATH + PAGE_INDEX;
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND, session.getId());
         }
 
         if (httpMethod.equals("GET")) {
@@ -128,8 +134,8 @@ public class Http11Processor implements Runnable, Processor {
                         throw new IllegalArgumentException("유효하지 않은 세션입니다.");
                     }
 
-                    String resourcePath = RESOURCE_PATH + "/index.html";
-                    return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found", jsessionid);
+                    String resourcePath = RESOURCE_PATH + PAGE_INDEX;
+                    return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND, jsessionid);
                 }
             }
 
@@ -140,25 +146,25 @@ public class Http11Processor implements Runnable, Processor {
             }
             String queryString = requestUri.substring(index + 1);
             String[] queryParams = queryString.split("&");
-            String account = getParamValueWithKey(queryParams, "account");
+            String account = getParamValueWithKey(queryParams, ACCOUNT);
             Optional<User> user = InMemoryUserRepository.findByAccount(account);
             if (user.isEmpty()) {
-                String resourcePath = RESOURCE_PATH + "/401.html";
-                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+                String resourcePath = RESOURCE_PATH + PAGE401;
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
             }
 
-            if (user.get().checkPassword(getParamValueWithKey(queryParams, "password"))) {
-                log.info("User: " + user);
+            if (user.get().checkPassword(getParamValueWithKey(queryParams, PASSWORD))) {
+                log.info("User: {}", user);
 
-                String resourcePath = RESOURCE_PATH + "/index.html";
-                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+                String resourcePath = RESOURCE_PATH + PAGE_INDEX;
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
             }
 
         }
 
 
-        String resourcePath = RESOURCE_PATH + "/401.html";
-        return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+        String resourcePath = RESOURCE_PATH + PAGE401;
+        return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
     }
 
     private String getParamValueWithKey(String[] queryParams, String key) {
@@ -183,7 +189,7 @@ public class Http11Processor implements Runnable, Processor {
             responseBody = new String(Files.readAllBytes(location.toPath()));
         }
         if (responseInfo.getCookie() != null) {
-            return String.join("\r\n",
+            return String.join(
                     "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
                     "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -192,12 +198,11 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
-                "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName() + " \r\n" +
+                "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n\r\n" + responseBody);
 
     }
 

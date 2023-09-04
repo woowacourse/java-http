@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.request.RequestBody.EMPTY_REQUEST_BODY;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class Request {
         final String contentLength = requestHeader.getHeader().get(CONTENT_LENGTH);
         final Cookie cookie = Cookie.from(requestHeader.getCookie());
         if (Objects.isNull(contentLength)) {
-            return new Request(requestLine, requestHeader, RequestBody.EMPTY_REQUEST_BODY, cookie);
+            return new Request(requestLine, requestHeader, EMPTY_REQUEST_BODY, cookie);
         }
         return new Request(requestLine, requestHeader,
                 RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)),

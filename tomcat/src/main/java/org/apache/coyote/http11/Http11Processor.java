@@ -1,14 +1,10 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -24,9 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpRequestParser httpRequestParser;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        httpRequestParser = new HttpRequestParser();
     }
 
     @Override
@@ -39,12 +37,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            HttpRequest request = httpRequestParser.accept(inputStream);
 
-            final var uri = bufferedReader.readLine().split(" ")[1];
-            log.info("request uri: {}", uri);
-            final var response = handleRequest(uri);
+            log.info("request uri: {}", request.getUri());
+            final var response = handleRequest(request);
 
             outputStream.write(response.buildResponse().getBytes());
             outputStream.flush();
@@ -53,9 +49,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handleLogin(final String uri) throws IOException {
-        final var params = queryParams(uri);
-        final var user = findUser(params);
+    private HttpResponse postLogin(HttpRequest request) throws IOException {
+        final var form = request.getForm();
+        final var account = form.get("account");
+        final var password = form.get("password");
+        final var user = findUser(account, password);
         if (user.isEmpty()) {
             File page = getFile("/401.html");
             String contentType = getContentType(page);
@@ -85,9 +83,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-    private Optional<User> findUser(Map<String, String> params) {
-        return InMemoryUserRepository.findByAccount(params.get("account"))
-                .filter(user -> user.checkPassword(params.get("password")))
+    private Optional<User> findUser(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
                 .stream().findFirst();
     }
 
@@ -110,10 +108,11 @@ public class Http11Processor implements Runnable, Processor {
         return getResource(uri);
     }
 
+    private HttpResponse getResource(String uri) throws IOException {
         try {
-            File file = getFile(uri);
-            String contentType = getContentType(file);
-            String body = buildResponseBody(file);
+            File page = getFile(uri);
+            String contentType = getContentType(page);
+            String body = buildResponseBody(page);
             return new HttpResponse("200 OK", contentType, body);
         } catch (Exception e) {
             File page = getFile("/404.html");
@@ -121,22 +120,6 @@ public class Http11Processor implements Runnable, Processor {
             String body = buildResponseBody(page);
             return new HttpResponse("404 Not Found", contentType, body);
         }
-
-    }
-
-    private Map<String, String> queryParams(String uri) {
-        final var params = new HashMap<String, String>();
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
-        while (queryString.contains("&")) {
-            String[] split = queryString.split("&");
-            for (String s : split) {
-                String[] keyValue = s.split("=");
-                params.put(keyValue[0], keyValue[1]);
-            }
-            queryString = split[split.length - 1];
-        }
-        return params;
     }
 
     @Nullable

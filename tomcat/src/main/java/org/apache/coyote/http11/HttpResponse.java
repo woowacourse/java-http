@@ -1,10 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.lang.String.join;
 
 public class HttpResponse {
 
@@ -27,34 +26,40 @@ public class HttpResponse {
         this.headers = headers;
     }
 
-    private String joinHeaders() {
-        if (headers == null) {
-            return "";
+    private String getHeaders() {
+        String joined = "";
+        if (headers != null) {
+            joined = headers.entrySet().stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                    .collect(Collectors.joining("\r\n"));
         }
-        return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining());
+        if (body == null) {
+            return joined;
+        }
+        if (joined == "") {
+            return contentType + "\r\n" + "Content-Length: " + body.getBytes().length + " ";
+        }
+        return join("\r\n",
+                joined,
+                contentType,
+                "Content-Length: " + body.getBytes().length + " ");
     }
 
-    private String joinBodyMetadata() {
+    private String getBody() {
         if (body == null) {
             return "";
         }
-        return String.join("\r\n",
-                contentType + " ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
+        return "\r\n" + body;
     }
 
     public String buildResponse() {
-        String headers = joinHeaders();
-        String body = joinBodyMetadata();
+        String headers = getHeaders();
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpStatus,
-                headers + " ",
-                body);
+        String startLine = "HTTP/1.1 " + httpStatus + " ";
+        String withHeader = join("\r\n", startLine, headers);
+
+        String body = getBody();
+        return join("\r\n", withHeader, body);
     }
 
 }

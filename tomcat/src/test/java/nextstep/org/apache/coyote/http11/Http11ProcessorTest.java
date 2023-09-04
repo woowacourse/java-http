@@ -10,9 +10,13 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManger;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
+@DisplayNameGeneration(ReplaceUnderscores.class)
+@SuppressWarnings("NonAsciiCharacters")
 class Http11ProcessorTest {
 
     @Test

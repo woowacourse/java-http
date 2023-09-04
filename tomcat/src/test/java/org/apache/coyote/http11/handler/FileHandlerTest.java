@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class FileHandlerTest {
 
@@ -39,6 +40,10 @@ class FileHandlerTest {
 
         // then
         assertThat(responseBody).isEqualTo(fileData);
+        assertAll(
+                () -> assertThat(responseBody).isEqualTo(fileData),
+                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8")
+        );
     }
 
     @Test
@@ -62,7 +67,10 @@ class FileHandlerTest {
         String responseBody = responseElements[responseElements.length - 1];
 
         // then
-        assertThat(responseBody).isEqualTo(fileData);
+        assertAll(
+                () -> assertThat(responseBody).isEqualTo(fileData),
+                () -> assertThat(response).contains("Content-Type: text/css ")
+        );
     }
 
     private String extractFileData(String filePath) throws IOException {
@@ -71,5 +79,4 @@ class FileHandlerTest {
         String fileData = new String(Files.readAllBytes(file.toPath()));
         return fileData;
     }
-
 }

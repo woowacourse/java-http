@@ -91,10 +91,24 @@ public class Http11Processor implements Runnable, Processor {
                 .stream().findFirst();
     }
 
-    private HttpResponse handleRequest(final String uri) throws IOException {
-        if (uri.contains("/login")) {
-            return handleLogin(uri);
+    private HttpResponse handleRequest(final HttpRequest request) throws IOException {
+        final var uri = request.getUri();
+        if (request.isPost()) {
+            if (uri.startsWith("/login")) {
+                return postLogin(request);
+            }
         }
+        if (uri.equals("/")) {
+            return getResource("/");
+        }
+        if (uri.equals("/login")) {
+            return getResource("/login.html");
+        }
+        if (uri.equals("/register")) {
+            return getResource("/register.html");
+        }
+        return getResource(uri);
+    }
 
         try {
             File file = getFile(uri);

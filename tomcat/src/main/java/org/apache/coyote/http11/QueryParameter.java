@@ -7,7 +7,7 @@ public class QueryParameter {
     public static final QueryParameter EMPTY = new QueryParameter(new HashMap<>());
     private Map<String, String> parameters = new HashMap<>();
 
-    public QueryParameter(Map<String, String> parameters) {
+    public QueryParameter(final Map<String, String> parameters) {
         this.parameters = parameters;
     }
 

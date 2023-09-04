@@ -140,6 +140,31 @@ class Http11ProcessorTest {
                     new String(Files.readAllBytes(new File(URI.getFile()).toPath()));
         }
 
+        @Test
+        void setCookie() {
+            //given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "",
+                    "account=gugu&password=password");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            //when
+            processor.process(socket);
+
+            //then
+            final var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Location: /index.html \r\n" +
+                    "Set-Cookie: JSESSIONID=.*\r\n";
+            assertThat(socket.output()).containsPattern(expected);
+        }
+
     }
 
     @Nested

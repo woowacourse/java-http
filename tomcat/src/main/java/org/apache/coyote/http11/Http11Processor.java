@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -21,10 +22,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
+    private final Session session;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
+        session = new Session(new HashMap<>());
     }
 
     @Override
@@ -53,16 +56,19 @@ public class Http11Processor implements Runnable, Processor {
         final var form = request.getForm();
         final var account = form.get("account");
         final var password = form.get("password");
-        final var user = findUser(account, password);
-        if (user.isEmpty()) {
+        final var optionalUser = findUser(account, password);
+
+        if (optionalUser.isEmpty()) {
             File page = getFile("/401.html");
             String contentType = getContentType(page);
             String body = buildResponseBody(page);
             return new HttpResponse("401 Unauthorized", contentType, body);
         }
-        log.info("user: {}", user.get());
+
+        User user = optionalUser.get();
+        log.info("user: {}", user);
         return new HttpResponse("302 Found", "Content-Type: text/plain;charset=utf-8 ", null,
-                Map.of("Location", "/index.html"));
+                Map.of("Location", "/index.html", "Set-Cookie", "JSESSIONID=" + session.addUser(user)));
     }
 
     private HttpResponse postRegister(HttpRequest request) throws IOException {

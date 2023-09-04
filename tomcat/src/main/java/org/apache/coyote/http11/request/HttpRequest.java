@@ -4,18 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequest {
 
     private static final int HTTP_REQUEST_LINE_INDEX = 0;
     private static final int HTTP_REQUEST_HEADER_START_INDEX = 1;
 
-    final RequestLine requestLine;
-    final RequestHeaders headers;
-    final String requestBody;
+    private final RequestLine requestLine;
+    private final HttpHeaders headers;
+    private final String requestBody;
 
     public HttpRequest(final RequestLine requestLine,
-                       final RequestHeaders headers,
+                       final HttpHeaders headers,
                        final String requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -26,7 +27,7 @@ public class HttpRequest {
         final List<String> lines = readAllLines(reader);
 
         final RequestLine requestLine = RequestLine.parse(lines.get(HTTP_REQUEST_LINE_INDEX));
-        final RequestHeaders headers = RequestHeaders.parse(readHeaders(lines));
+        final HttpHeaders headers = HttpHeaders.parse(readHeaders(lines));
         final String requestBody = findRequestBody(reader, headers);
 
         return new HttpRequest(requestLine, headers, requestBody);
@@ -55,7 +56,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String findRequestBody(final BufferedReader reader, final RequestHeaders headers)
+    private static String findRequestBody(final BufferedReader reader, final HttpHeaders headers)
             throws IOException {
         if (headers.hasContentLength()) {
             final int contentLength = headers.getContentLength();
@@ -66,11 +67,15 @@ public class HttpRequest {
         return "";
     }
 
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
-    public RequestHeaders getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 

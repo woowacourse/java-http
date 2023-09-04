@@ -21,11 +21,13 @@ public class HandlerAdaptor {
     );
 
     public Response getMapping(Request request) {
+        /// TODO: 2023/09/04 매핑되는 메서드가 없을 때 예외처리
         return handlerMethods.get(new HandlerMapping(GET, request.getPath()))
                 .apply(request);
     }
 
     public Response postMapping(Request request) {
+        /// TODO: 2023/09/04 매핑되는 메서드가 없을 때 예외처리
         return handlerMethods.get(new HandlerMapping(POST, request.getPath()))
                 .apply(request);
     }

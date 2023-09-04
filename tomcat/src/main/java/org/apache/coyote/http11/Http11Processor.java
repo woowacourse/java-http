@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +39,19 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow(() -> new IllegalStateException("invalid request"));
             log.info("request: {}", request);
             final var response = RequestHandler.handle(request);
+            checkSessionId(request, response);
 
             outputStream.write(response.getBytes());
             log.info("write response: {}", response);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void checkSessionId(Request request, Response response) {
+        if (!request.hasCookieByName("JSESSIONID")) {
+            response.addSetCookie("JSESSIONID=" + UUID.randomUUID());
         }
     }
 

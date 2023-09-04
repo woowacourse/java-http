@@ -29,6 +29,7 @@ public class RequestHandler {
 
     public static Response handle(Request request) throws IOException {
         if (request.getMethod() == GET) {
+            log.info("get request: {}", request);
             return get(request);
         }
         if (request.getMethod() == POST) {
@@ -67,7 +68,7 @@ public class RequestHandler {
             log.warn("static resource url is null");
             return Response.of(NOT_FOUND, "text/plain", "");
         }
-        log.info("static resource url found : {}", url.getPath());
+        log.info("static resource url found: {}", url.getPath());
 
         final var path = Paths.get(url.getPath());
         final var responseBody = new String(Files.readAllBytes(path));
@@ -83,7 +84,7 @@ public class RequestHandler {
     }
 
     private static Response post(Request request) {
-        
+
         return handlerAdaptor.postMapping(request);
     }
 

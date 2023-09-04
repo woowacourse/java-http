@@ -38,6 +38,10 @@ public class Response {
         headers.addLocation(location);
     }
 
+    public void addSetCookie(String cookie) {
+        headers.addSetCookie(cookie);
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -67,5 +71,4 @@ public class Response {
                 + "\r\n"
                 + body;
     }
-
 }

@@ -6,6 +6,7 @@ import static org.apache.coyote.http11.common.Status.FOUND;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Request;
@@ -26,7 +27,9 @@ public class UserController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            return redirect("/index.html");
+            Response redirect = redirect("/index.html");
+            redirect.addSetCookie("JSESSIONID=" + UUID.randomUUID());
+            return redirect;
         }
         return redirect("/401.html");
     }

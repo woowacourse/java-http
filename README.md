@@ -18,5 +18,5 @@
     - [x] 로그인 응답정보 수정하기
 - [x] POST 방식으로 회원가입
     - [x] 로그인도 POST 방식으로 수정
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기

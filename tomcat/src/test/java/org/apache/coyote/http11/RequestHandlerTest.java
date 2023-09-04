@@ -5,7 +5,8 @@ import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
+import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -21,7 +22,7 @@ class RequestHandlerTest {
     @Test
     void handleRoot() throws IOException {
         Response response = RequestHandler.handle(
-                Request.from("get", "/", "localhost:8080", List.of("text/html"), "keep-alive", "")
+                Request.from("get", "/", new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -36,7 +37,7 @@ class RequestHandlerTest {
     })
     void handleHTML(String URI) throws IOException {
         Response response = RequestHandler.handle(
-                Request.from("get", URI, "localhost:8080", List.of("text/html"), "keep-alive", "")
+                Request.from("get", URI, new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -47,7 +48,7 @@ class RequestHandlerTest {
     @Test
     void handleCSS() throws IOException {
         Response response = RequestHandler.handle(
-                Request.from("get", "/css/styles.css", "localhost:8080", List.of("text/html"), "keep-alive", "")
+                Request.from("get", "/css/styles.css", new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -59,7 +60,7 @@ class RequestHandlerTest {
     void handleNotFound() throws IOException {
         Response response = RequestHandler.handle(
                 Request.from(
-                        "get", "/neverexist/not.css", "localhost:8080", List.of("text/css"), "keep-alive", "")
+                        "get", "/neverexist/not.css", new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);

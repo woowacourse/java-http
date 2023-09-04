@@ -6,9 +6,6 @@ import org.apache.coyote.http11.common.RequestMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpRequest {
 
@@ -21,44 +18,56 @@ public class HttpRequest {
     private final RequestMethod requestMethod;
     private final String endPoint;
     private final HttpVersion httpVersion;
-    private final Map<String, String> queryStrings;
+    private final RequestData requestData;
     private final RequestHeader requestHeader;
 
-    private HttpRequest(RequestMethod requestMethod, String endPoint, HttpVersion httpVersion, Map<String, String> queryStrings, RequestHeader requestHeader) {
+    private HttpRequest(RequestMethod requestMethod, String endPoint, HttpVersion httpVersion, RequestData requestData, RequestHeader requestHeader) {
         this.requestMethod = requestMethod;
         this.endPoint = endPoint;
         this.httpVersion = httpVersion;
-        this.queryStrings = queryStrings;
+        this.requestData = requestData;
         this.requestHeader = requestHeader;
     }
 
     public static HttpRequest from(BufferedReader request) throws IOException {
-        String requestFirstLine = request.readLine();
-        String[] requestLine = validateRequestFirstLine(requestFirstLine);
+        String[] requestLine = validateRequestFirstLine(request);
 
         RequestMethod requestMethod = RequestMethod.find(requestLine[METHOD_INDEX]);
         String requestUri = requestLine[URI_INDEX];
         HttpVersion httpVersion = HttpVersion.find(requestLine[HTTP_VERSION_INDEX]);
 
-        int queryStringIndex = requestUri.indexOf(QUERY_STRING_DELIMITER);
-        String endPoint = extractEndPoint(requestUri, queryStringIndex);
-        Map<String, String> queryStrings = extractQueryStrings(requestUri, queryStringIndex);
-
+        String endPoint = parseEndPoint(requestUri);
         RequestHeader requestHeader = RequestHeader.from(request);
-        int contentLength = requestHeader.getContentLength();
-        if (contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            request.read(buffer, 0, contentLength);
-            String requestBody = new String(buffer);
-            queryStrings = parseQueryStrings(requestBody);
-        }
+
+        String requestBody = parseRequestBody(request, requestHeader);
+        RequestData requestData = RequestData.of(requestUri, requestBody);
         return new HttpRequest(
                 requestMethod,
                 endPoint,
                 httpVersion,
-                queryStrings,
+                requestData,
                 requestHeader
         );
+    }
+
+    private static String parseEndPoint(String requestUri) {
+        int queryStringIndex = requestUri.indexOf(QUERY_STRING_DELIMITER);
+        return extractEndPoint(requestUri, queryStringIndex);
+    }
+
+    private static String[] validateRequestFirstLine(BufferedReader request) throws IOException {
+        String requestFirstLine = request.readLine();
+        return validateRequestFirstLine(requestFirstLine);
+    }
+
+    private static String parseRequestBody(BufferedReader request, RequestHeader requestHeader) throws IOException {
+        int contentLength = requestHeader.getContentLength();
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            request.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
     }
 
     public Cookie parseCookie() {
@@ -80,27 +89,6 @@ public class HttpRequest {
         return requestUri.substring(0, queryStringIndex);
     }
 
-    private static Map<String, String> extractQueryStrings(String requestUri, int queryStringIndex) {
-        if (queryStringIndex == -1) {
-            return Map.of();
-        }
-        String queryStringValue = requestUri.substring(queryStringIndex + 1);
-        return parseQueryStrings(queryStringValue);
-    }
-
-    private static Map<String, String> parseQueryStrings(String queryStringValue) {
-        int queryStringBeginIndex = queryStringValue.indexOf(QUERY_STRING_DELIMITER);
-        String queryString = queryStringValue.substring(queryStringBeginIndex + 1);
-        String[] queryParameters = queryString.split("&");
-
-        return Arrays.stream(queryParameters)
-                .map(perQuery -> perQuery.trim().split("="))
-                .collect(Collectors.toMap(
-                        queryParameter -> queryParameter[0],
-                        queryParameter -> queryParameter[1]
-                ));
-    }
-
     public RequestMethod getRequestMethod() {
         return requestMethod;
     }
@@ -113,8 +101,8 @@ public class HttpRequest {
         return httpVersion;
     }
 
-    public Map<String, String> getQueryStrings() {
-        return queryStrings;
+    public RequestData getRequestData() {
+        return requestData;
     }
 
     public RequestHeader getRequestHeader() {

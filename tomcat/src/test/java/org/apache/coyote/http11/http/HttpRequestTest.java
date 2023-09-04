@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -24,12 +23,11 @@ class HttpRequestTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         HttpRequest request = HttpRequest.from(input);
 
-        Map<String, String> queryStrings = request.getQueryStrings();
+        RequestData requestData = request.getRequestData();
 
         assertAll(
-                () -> assertThat(queryStrings).hasSize(2),
-                () -> assertThat(queryStrings).containsEntry("account", "gugu"),
-                () -> assertThat(queryStrings).containsEntry("password", "password")
+                () -> assertThat(requestData.find("account")).isEqualTo("gugu"),
+                () -> assertThat(requestData.find("password")).isEqualTo("password")
         );
     }
 
@@ -48,14 +46,12 @@ class HttpRequestTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
         HttpRequest request = HttpRequest.from(input);
 
-        Map<String, String> queryStrings = request.getQueryStrings();
+        RequestData requestData = request.getRequestData();
 
         assertAll(
-                () -> assertThat(queryStrings).hasSize(3),
-                () -> assertThat(queryStrings).containsEntry("account", "gugu"),
-                () -> assertThat(queryStrings).containsEntry("password", "password"),
-                () -> assertThat(queryStrings).containsEntry("email", "hkkang%40woowahan.com")
+                () -> assertThat(requestData.find("account")).isEqualTo("gugu"),
+                () -> assertThat(requestData.find("password")).isEqualTo("password"),
+                () -> assertThat(requestData.find("email")).isEqualTo("hkkang%40woowahan.com")
         );
     }
-
 }

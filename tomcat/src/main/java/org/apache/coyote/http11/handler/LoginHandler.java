@@ -2,16 +2,12 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.Cookie;
-import org.apache.coyote.http11.common.FileReader;
-import org.apache.coyote.http11.common.RequestMethod;
-import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.common.*;
 import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.RequestData;
 import org.apache.coyote.http11.http.ResponseEntity;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,9 +53,9 @@ public class LoginHandler implements Handler {
     }
 
     private static Optional<User> findUser(HttpRequest request) {
-        Map<String, String> queryStrings = request.getQueryStrings();
-        String account = queryStrings.get("account");
-        String password = queryStrings.get("password");
+        RequestData requestData = request.getRequestData();
+        String account = requestData.find("account");
+        String password = requestData.find("password");
 
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));

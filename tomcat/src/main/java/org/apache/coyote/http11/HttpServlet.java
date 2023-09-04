@@ -25,7 +25,7 @@ public abstract class HttpServlet {
                     res.setHttpResponseStartLine(StatusCode.OK);
                     Path path = FileIOUtils.getPath(PREFIX + req.getPath() + SUFFIX);
                     res.setResponseBody(Files.readAllBytes(path));
-                    res.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
+                    res.addHeader(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path) + "; charset=utf-8");
                 }
             }
         }

@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.response;
 
+import com.sun.net.httpserver.Headers;
 import java.io.IOException;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpResponse {
 
@@ -20,12 +22,12 @@ public class HttpResponse {
 
     public void sendRedirect(final String location) {
         httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, StatusCode.FOUND);
-        headers.add("Location", location);
+        headers.add(HttpHeaders.LOCATION, location);
     }
 
     //FIXME: 쿠키를 여러개 설정할 수 있도록 수정
     public void addCookie(final String key, final String value) {
-        headers.add("Set-Cookie", key + KEY_VALUE_DELIMITER + value);
+        headers.add(HttpHeaders.SET_COOKIE, key + KEY_VALUE_DELIMITER + value);
     }
 
     public void addHeader(final String name, final String value) {
@@ -41,11 +43,11 @@ public class HttpResponse {
     }
 
     public void setResponseBody(final byte[] responseBody) {
-        headers.add("Content-Length", String.valueOf(responseBody.length));
+        headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.length));
         this.responseBody = new String(responseBody);
     }
 
-    public byte[] generateResponse() throws IOException {
+    public byte[] generateResponse() {
         return String.join(NEW_LINE,
                 generateStartLine(),
                 generateHeaders(),

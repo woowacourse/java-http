@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.FileIOUtils;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -24,7 +25,7 @@ public class ResourceController extends HttpServlet {
             resp.sendRedirect("/401.html");
         }
 
-        resp.addHeader("Content-Type", Files.probeContentType(path) + "; charset=utf-8");
+        resp.addHeader(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path) + "; charset=utf-8");
         resp.setResponseBody(Files.readAllBytes(path));
     }
 }

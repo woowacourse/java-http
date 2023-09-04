@@ -22,7 +22,7 @@ public class HttpRequestHeaders {
         final Map<String, String> requestHeaders = new LinkedHashMap<>();
 
         String line;
-        while (!"".equals(line = bufferedReader.readLine())) {
+        while (!(line = bufferedReader.readLine()).isBlank()) {
             if (line == null) {
                 throw new HttpMessageNotReadableException("HTTP 헤더 필드는 'null'일 수 없습니다.");
             }
@@ -36,11 +36,6 @@ public class HttpRequestHeaders {
         }
 
         return new HttpRequestHeaders(requestHeaders);
-    }
-
-    public HttpRequestHeaders add(String key, String value) {
-        handlerMap.put(key.toLowerCase(), value);
-        return new HttpRequestHeaders(handlerMap);
     }
 
     public String getValue(String key) {

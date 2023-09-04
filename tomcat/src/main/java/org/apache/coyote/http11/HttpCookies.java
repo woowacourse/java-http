@@ -10,10 +10,10 @@ public class HttpCookies {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String COOKIE_DELIMITER = ";";
 
-    private final Map<String, String> httpCookies;
+    private final Map<String, String> cookies;
 
-    private HttpCookies(final Map<String, String> httpCookies) {
-        this.httpCookies = httpCookies;
+    private HttpCookies(final Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
     public static HttpCookies empty() {
@@ -25,12 +25,12 @@ public class HttpCookies {
         String[] pairs = cookies.split(COOKIE_DELIMITER);
         for (String pair : pairs) {
             String[] cookie = pair.split(KEY_VALUE_DELIMITER);
-            httpCookies.put(cookie[KEY_INDEX].strip(), cookie[VALUE_INDEX].strip());
+            httpCookies.put(cookie[KEY_INDEX].strip(), cookie[VALUE_INDEX]);
         }
         return new HttpCookies(httpCookies);
     }
 
     public String get(final String key) {
-        return httpCookies.get(key);
+        return cookies.get(key);
     }
 }

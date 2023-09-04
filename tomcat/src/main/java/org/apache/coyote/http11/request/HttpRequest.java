@@ -10,6 +10,7 @@ import org.apache.catalina.session.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookies;
+import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
 
@@ -37,13 +38,13 @@ public class HttpRequest {
         if (httpCookies.get("JSESSIONID") != null) {
             return manager.findSession(httpCookies.get("JSESSIONID"));
         }
-        Session session = new Session(String.valueOf(UUID.randomUUID()));
-        manager.add(session);
-        return session;
+        Session jsessionid = new Session(String.valueOf(UUID.randomUUID()));
+        manager.add(jsessionid);
+        return jsessionid;
     }
 
     private HttpCookies generateHttpCookies(final HttpRequestHeaders httpRequestHeaders) {
-        String cookies = httpRequestHeaders.getValue("Cookie");
+        String cookies = httpRequestHeaders.getValue(HttpHeaders.COOKIE);
         if (cookies != null) {
             return HttpCookies.of(cookies);
         }
@@ -57,7 +58,7 @@ public class HttpRequest {
         HttpRequestStartLine requestLine = HttpRequestStartLine.of(bufferedReader.readLine());
         HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.of(bufferedReader);
 
-        String findContentLength = httpRequestHeaders.getValue("Content-Length");
+        String findContentLength = httpRequestHeaders.getValue(HttpHeaders.CONTENT_LENGTH);
         String requestBody = readRequestBody(findContentLength, bufferedReader);
 
         return new HttpRequest(requestLine, httpRequestHeaders, requestBody);

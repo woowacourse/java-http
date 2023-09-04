@@ -15,27 +15,27 @@ public class HttpResponse {
 
     public HttpResponse(
             final String responseStatus,
-            final String contentType,
-            final String responseBody
-    ) {
+            final String responseBody,
+            final String contentType
+            ) {
         this.responseStatus = responseStatus;
-        this.contentType = contentType;
         this.responseBody = responseBody;
+        this.contentType = contentType;
     }
 
     @Override
     public String toString() {
         return String.join(ENTER,
                 VERSION + responseStatus + SPACE,
-                CONTENT_TYPE_PREFIX + contentType + SPACE,
+                CONTENT_TYPE_PREFIX + convertContentType() + SPACE,
                 CONTENT_LENGTH_PREFIX + responseBody.getBytes().length + SPACE,
                 EMPTY,
                 responseBody
                 );
     }
 
-    private static String getContentType(final String url) {
-        if (url.endsWith(".css")) {
+    private String convertContentType() {
+        if (contentType.endsWith(".css")) {
             return "text/css";
         }
         return "text/html";

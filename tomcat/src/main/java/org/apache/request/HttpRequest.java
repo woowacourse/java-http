@@ -40,17 +40,6 @@ public class HttpRequest {
         return lines;
     }
 
-    private static String extractBody(BufferedReader bufferedReader) throws IOException {
-        StringBuilder actual = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            actual.append(line);
-            actual.append("\r\n");
-        }
-
-        return actual.toString();
-    }
-
     public URI getUri() {
         return httpLine.convertPathToUri();
     }

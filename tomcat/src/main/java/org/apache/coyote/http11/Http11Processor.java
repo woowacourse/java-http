@@ -2,10 +2,15 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
 import org.apache.request.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -35,40 +40,36 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-             ) {
-            log.info("Process starts {}", connection.getLocalPort());
-
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
             String url = httpRequest.getTarget();
-            log.info("Url : {}", url);
-
-            String responseBody = readStaticFile(url);
-
-            HttpResponse httpResponse = new HttpResponse(
-                    "200 OK",
-                    "text/html;charset=utf-8",
-                    responseBody
-            );
-
+            String content = readContent(url);
+            HttpResponse httpResponse = new HttpResponse("200 OK", content, url);
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readStaticFile(final String fileName) throws URISyntaxException {
-        final String filePath = "static/" + fileName;
-        final URL res = getClass().getClassLoader().getResource(filePath);
-
-        try {
-            return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
+    private String readContent(String path) throws IOException {
+        if (Objects.equals(path, "/")) {
             return "Hello world!";
+        }
+        URI uri = convertPathToUri(path);
+
+        return Files.readString(Paths.get(uri));
+    }
+
+    private URI convertPathToUri(String path) {
+        URL url = getClass().getClassLoader().getResource("static" + path);
+        try {
+            return url.toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }

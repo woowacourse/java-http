@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private static final String protocol = "HTTP/1.1";
+    private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
 
     private final HttpHeaders headers;
     private final Map<String, HttpCookie> cookies = new HashMap<>();
@@ -17,7 +17,7 @@ public class HttpResponse {
     }
 
     public String getProtocol() {
-        return protocol;
+        return DEFAULT_PROTOCOL;
     }
 
     public HttpStatus getHttpStatus() {

@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -22,14 +22,14 @@ public class HttpResponse {
         this.statusCode = statusCode;
         this.responseBody = responseBody;
 
-        header = new HashMap<>();
+        header = new LinkedHashMap<>();
         header.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
         header.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
     public String getResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
+                "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getMessage() + " ",
                 printHeader() + "\n",
                 responseBody);
     }
@@ -58,7 +58,7 @@ public class HttpResponse {
 
     public String printHeader() {
         return header.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r")
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 }

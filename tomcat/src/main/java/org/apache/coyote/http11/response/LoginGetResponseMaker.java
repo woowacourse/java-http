@@ -16,9 +16,7 @@ public class LoginGetResponseMaker implements ResponseMaker {
     @Override
     public String createResponse(final HttpRequest request) throws Exception {
         if (request.hasJSessionId()) {
-            System.out.println("아이디가 존재함");
             if (SessionManager.isExist(request.getJSessionId())) {
-                System.out.println("세션에 아이디가 존재함");
                 final HttpResponse httpResponse = new HttpResponse(StatusCode.OK, ContentType.from("/index.html"), new String(getResponseBodyBytes("/index.html"), UTF_8));
                 return httpResponse.getResponse();
             }

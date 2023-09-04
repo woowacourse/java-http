@@ -15,11 +15,11 @@ public class RegisterHandler implements Handler {
         if (requestMethod == RequestMethod.GET) {
             return handleGet(request);
         }
-        return null;
+        return new MethodNotAllowedHandler().handle(request);
     }
 
     private HttpResponse handlePost(final HttpRequest request) {
-
+        return null;
     }
 
     private HttpResponse handleGet(final HttpRequest request) {

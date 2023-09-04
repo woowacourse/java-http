@@ -3,7 +3,8 @@ package org.apache.coyote.httpresponse;
 public enum HttpStatus {
     OK(200, "OK"),
     FOUND(302, "Found"),
-    UNAUTHORIZED(401, "Unauthorized");
+    UNAUTHORIZED(401, "Unauthorized"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed");
 
     private static final String DELIMITER = " ";
     private final int value;

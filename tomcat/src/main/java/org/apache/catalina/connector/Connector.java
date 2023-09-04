@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.apache.coyote.Processor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +48,9 @@ public class Connector implements Runnable {
     @Override
     public void run() {
         // 클라이언트가 연결될때까지 대기한다.
+        int count = 1;
         while (!stopped) {
+            log.info("count {}", count++);
             connect();
         }
     }

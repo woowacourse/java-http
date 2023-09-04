@@ -2,11 +2,7 @@ package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.common.Cookies;
@@ -44,50 +40,6 @@ public class Request {
                 .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
         return new Request(method, requestURI, headers, body);
-    }
-
-    public static Optional<Request> read(BufferedReader bufferedReader) throws IOException {
-        String requestHead = bufferedReader.readLine();
-
-        Headers headers = readHeaders(bufferedReader);
-
-        String[] head = requestHead.split(" ");
-        String method = head[0];
-        String uri = head[1];
-        String body = readBody(bufferedReader, headers);
-
-        return Optional.of(
-                Request.from(
-                        method,
-                        uri,
-                        headers,
-                        body
-                )
-        );
-    }
-
-    private static Headers readHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line;
-        while (!"".equals((line = bufferedReader.readLine()))) {
-            String[] header = line.split(": ");
-            String key = header[0];
-            String value = header[1].trim();
-            headers.put(key, value);
-        }
-
-        return new Headers(headers);
-    }
-
-    private static String readBody(BufferedReader bufferedReader, Headers headers) throws IOException {
-        String body = "";
-        if (headers.hasContentLength()) {
-            int contentLength = Integer.parseInt(headers.find("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            body = new String(buffer);
-        }
-        return body;
     }
 
     public String getPath() {

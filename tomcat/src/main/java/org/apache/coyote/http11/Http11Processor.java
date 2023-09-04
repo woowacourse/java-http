@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.io.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +33,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             log.info("process start");
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var request = Request.read(bufferedReader)
-                    .orElseThrow(() -> new IllegalStateException("invalid request"));
-            log.info("request: {}", request);
+            RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
+            final var request = requestReader.read();
+            log.info("read request: {}", request);
             final var response = RequestHandler.handle(request);
 
             outputStream.write(response.getBytes());

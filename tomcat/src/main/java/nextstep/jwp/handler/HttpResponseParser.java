@@ -7,6 +7,9 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponseParser {
 
+    private HttpResponseParser() {
+    }
+
     public static byte[] parse(HttpResponse response) {
         HttpStatus status = response.getHttpStatus();
         String result = String.join("\r\n",
@@ -14,7 +17,6 @@ public class HttpResponseParser {
             parseHeaders(response) + parseCookie(response.getCookie()),
             "",
             response.getBody());
-        System.out.println("result = " + result);
         return result.getBytes();
     }
 

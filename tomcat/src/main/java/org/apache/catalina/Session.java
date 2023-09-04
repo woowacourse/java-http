@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -16,8 +17,11 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(String name) {
-        return values.get(name);
+    public Optional<Object> getAttribute(String name) {
+        if (values.containsKey(name)) {
+            return Optional.of(values.get(name));
+        }
+        return Optional.empty();
     }
 
     public void setAttribute(String name, Object value) {

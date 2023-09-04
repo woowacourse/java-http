@@ -17,14 +17,14 @@ public class HttpRequest {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
 
-    private final String method;
+    private final HttpMethod httpMethod;
     private final String uri;
     private final Map<String, String> headers;
     private final HttpCookie httpCookie;
     private final Map<String, String> body;
 
-    private HttpRequest(String method, String uri, Map<String, String> headers, Map<String, String> body) {
-        this.method = method;
+    private HttpRequest(HttpMethod httpMethod, String uri, Map<String, String> headers, Map<String, String> body) {
+        this.httpMethod = httpMethod;
         this.uri = uri;
         this.headers = headers;
         httpCookie = HttpCookie.from(headers.get(COOKIE));
@@ -35,6 +35,7 @@ public class HttpRequest {
         String firstLine = bufferedReader.readLine();
         String[] splitByBlank = firstLine.split(BLANK);
         String method = splitByBlank[0];
+        HttpMethod httpMethod = HttpMethod.from(method);
         String uri = splitByBlank[1];
         String requestHeader = getHeader(bufferedReader);
         String[] splitBySeparator = requestHeader.split(SEPARATOR);
@@ -58,7 +59,7 @@ public class HttpRequest {
                 body.put(key, value);
             }
         }
-        return new HttpRequest(method, uri, headers, body);
+        return new HttpRequest(httpMethod, uri, headers, body);
     }
 
     private static String getHeader(BufferedReader bufferedReader) throws IOException {
@@ -96,8 +97,8 @@ public class HttpRequest {
         return Optional.empty();
     }
 
-    public String method() {
-        return method;
+    public HttpMethod method() {
+        return httpMethod;
     }
 
     public String uri() {

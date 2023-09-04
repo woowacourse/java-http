@@ -189,20 +189,6 @@ class RequestHandlerTest {
         );
     }
 
-    @Test
-    void 회원가입시_GET이면_예외() {
-        // given
-        String httpRequest = String.join("\r\n",
-            "GET /register HTTP/1.1 ",
-            "Content-Length: 46",
-            "",
-            "account=hs&password=hs123&email=hs%40naver.com");
-
-        // when & then
-        assertThatThrownBy(() -> HTTP_요청을_보낸다(httpRequest))
-            .isInstanceOf(IllegalArgumentException.class);
-    }
-
     private HttpResponse HTTP_요청을_보낸다(String request) {
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         try {

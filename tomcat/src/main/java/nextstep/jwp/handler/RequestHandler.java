@@ -33,7 +33,7 @@ public class RequestHandler {
             return login(request);
         }
 
-        if (request.getUri().equals("/register") && request.getMethod() == HttpMethod.POST) {
+        if (request.getUri().equals("/register")) {
             return signUp(request);
         }
 
@@ -113,7 +113,10 @@ public class RequestHandler {
         response.addCookie("JSESSIONID", uuid);
     }
 
-    private HttpResponse signUp(HttpRequest request) {
+    private HttpResponse signUp(HttpRequest request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
+            return getFile("/register.html");
+        }
         Map<String, String> body = request.getBody();
         InMemoryUserRepository.save(new User(
             body.get("account"),

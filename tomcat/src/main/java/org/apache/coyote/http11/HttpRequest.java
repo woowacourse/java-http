@@ -12,8 +12,6 @@ public class HttpRequest {
     private static final String BLANK = " ";
     private static final String SEPARATOR = "\r\n";
     private static final String COLON = ": ";
-    private static final String AND = "&";
-    private static final String EQUAL = "=";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
 
@@ -21,9 +19,9 @@ public class HttpRequest {
     private final String uri;
     private final Map<String, String> headers;
     private final HttpCookie httpCookie;
-    private final Map<String, String> body;
+    private final String body;
 
-    private HttpRequest(HttpMethod httpMethod, String uri, Map<String, String> headers, Map<String, String> body) {
+    private HttpRequest(HttpMethod httpMethod, String uri, Map<String, String> headers, String body) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.headers = headers;
@@ -47,19 +45,12 @@ public class HttpRequest {
             headers.put(headerName, headerValue);
         }
 
-        Map<String, String> body = new HashMap<>();
         if (headers.containsKey(CONTENT_LENGTH)) {
             int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
-            String requestBody = getBody(bufferedReader, contentLength);
-            String[] splitByAnd = requestBody.split(AND);
-            for (String pair : splitByAnd) {
-                String[] splitByEqual = pair.split(EQUAL, 2);
-                String key = splitByEqual[0];
-                String value = splitByEqual[1];
-                body.put(key, value);
-            }
+            String body = getBody(bufferedReader, contentLength);
+            return new HttpRequest(httpMethod, uri, headers, body);
         }
-        return new HttpRequest(httpMethod, uri, headers, body);
+        return new HttpRequest(httpMethod, uri, headers, null);
     }
 
     private static String getHeader(BufferedReader bufferedReader) throws IOException {
@@ -90,11 +81,11 @@ public class HttpRequest {
         return httpCookie.getCookie(cookieName);
     }
 
-    public Optional<String> getBody(String key) {
-        if (body.containsKey(key)) {
-            return Optional.of(body.get(key));
+    public String getBody() {
+        if (body == null) {
+            throw new IllegalArgumentException("요청 본문이 존재하지 않습니다");
         }
-        return Optional.empty();
+        return body;
     }
 
     public HttpMethod method() {

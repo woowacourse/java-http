@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
-import static org.apache.coyote.http11.HttpStatus.OK;
 import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
 import java.io.BufferedReader;
@@ -52,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            HttpResponse httpResponse = process2(httpRequest);
+            HttpResponse httpResponse = handleRequest(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -62,58 +61,53 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     // [TODO] 예외 처리 하는 exception handler 만들기
-    private HttpResponse process2(HttpRequest httpRequest) throws IOException {
+    private HttpResponse handleRequest(HttpRequest httpRequest) throws IOException {
+        ResourceLoader resourceLoader = new ResourceLoader();
+
         if (httpRequest.method() == POST) {
             if (httpRequest.uri().equals("/register")) {
-                return register2(httpRequest);
+                return register(httpRequest);
             }
             if (httpRequest.uri().equals("/login")) {
                 Optional<String> jsessionid = httpRequest.getCookie(JSESSIONID);
                 if (jsessionid.isPresent()) {
-                    return loginWithSession2(jsessionid.get());
+                    return loginWithSession(jsessionid.get());
                 }
-                return login2(httpRequest);
+                return login(httpRequest);
             }
             throw new IllegalArgumentException("지원되지 않는 uri 입니다");
         }
         if (httpRequest.method() == GET) {
             if (httpRequest.uri().equals("/")) {
-                String responseBody = "Hello world!";
-                return HttpResponse.from(OK, TEXT_HTML, responseBody);
+                return HttpResponse.ok("Hello world!");
             }
             if (httpRequest.uri().equals("/login")) {
                 Optional<String> jsessionid = httpRequest.getCookie(JSESSIONID);
                 if (jsessionid.isPresent()) {
-                    return loginWithSession2(jsessionid.get());
+                    return loginWithSession(jsessionid.get());
                 }
-                URL resource = getClass().getClassLoader().getResource("static/login.html");
-                String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                return HttpResponse.from(OK, TEXT_HTML, responseBody);
+                return HttpResponse.ok(resourceLoader.loadResourceAsString("static/login.html"));
             }
             if (httpRequest.uri().equals("/register")) {
-                URL resource = getClass().getClassLoader().getResource("static/register.html");
-                String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                return HttpResponse.from(OK, TEXT_HTML, responseBody);
+                return HttpResponse.ok(resourceLoader.loadResourceAsString("static/register.html"));
             }
 
-            URL resource = getClass().getClassLoader().getResource("static" + httpRequest.uri());
-            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            HttpResponse httpResponse =
+                    HttpResponse.ok(resourceLoader.loadResourceAsString("static" + httpRequest.uri()));
             Optional<String> acceptHeader = httpRequest.getHeader("Accept");
             if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
-                return HttpResponse.from(OK, TEXT_CSS, responseBody);
+                httpResponse.setContentType(TEXT_CSS);
             }
-            return HttpResponse.from(OK, TEXT_HTML, responseBody);
+            return httpResponse;
         }
         throw new IllegalArgumentException("지원되지 않는 요청입니다");
     }
 
-    private HttpResponse register2(HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getBody("account")
-                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 아이디가 필요합니다"));
-        String password = httpRequest.getBody("password")
-                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 비밀번호가 필요합니다"));
-        String email = httpRequest.getBody("email")
-                .orElseThrow(() -> new IllegalArgumentException("가입하기 위해선 이메일이 필요합니다"));
+    private HttpResponse register(HttpRequest httpRequest) {
+        FormData formData = FormData.from(httpRequest.getBody());
+        String account = formData.get("account");
+        String password = formData.get("password");
+        String email = formData.get("email");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             throw new IllegalStateException("이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
         }
@@ -125,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpResponse;
     }
 
-    private HttpResponse loginWithSession2(String jsessionid) {
+    private HttpResponse loginWithSession(String jsessionid) {
         SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(jsessionid)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 세션 아이디입니다"));
@@ -136,11 +130,10 @@ public class Http11Processor implements Runnable, Processor {
         return httpResponse;
     }
 
-    private HttpResponse login2(HttpRequest httpRequest) throws IOException {
-        String account = httpRequest.getBody("account")
-                .orElseThrow(() -> new IllegalArgumentException("로그인하기 위해선 아이디가 필요합니다"));
-        String password = httpRequest.getBody("password")
-                .orElseThrow(() -> new IllegalArgumentException("로그인하기 위해선 비밀번호가 필요합니다"));
+    private HttpResponse login(HttpRequest httpRequest) throws IOException {
+        FormData formData = FormData.from(httpRequest.getBody());
+        String account = formData.get("account");
+        String password = formData.get("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             String jsessionid = UUID.randomUUID().toString();

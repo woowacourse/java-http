@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpStatus.OK;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +43,17 @@ public class HttpResponse {
         headers.put(CONTENT_TYPE, contentType.value());
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(httpStatus, headers, body);
+    }
+
+    public static HttpResponse ok(String body) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(CONTENT_TYPE, ContentType.TEXT_HTML.value());
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        return new HttpResponse(OK, headers, body);
+    }
+
+    public void setContentType(ContentType contentType) {
+        headers.put(CONTENT_TYPE, contentType.value());
     }
 
     public void sendRedirect(String redirectUri) {

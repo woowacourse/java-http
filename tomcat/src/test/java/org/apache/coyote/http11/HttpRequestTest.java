@@ -23,7 +23,7 @@ class HttpRequestTest {
                 "body");
 
         HttpRequest httpRequest = HttpRequest.from(toInputStream(message));
-        assertThat(httpRequest.getMethod()).isEqualTo("GET");
+        assertThat(httpRequest.getMethod().isGet()).isTrue();
         assertThat(httpRequest.getTarget()).isEqualTo("/index.html");
         assertThat(httpRequest.getVersion()).isEqualTo("HTTP/1.1");
         assertThat(httpRequest.getHeaders())

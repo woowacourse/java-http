@@ -18,7 +18,7 @@ public class HttpRequest {
 
     private static final String WHITE_SPACE = " ";
 
-    private final String method;
+    private final HttpMethod method;
     private final String target;
     private final String version;
     private final Map<String, HttpHeader> headers;
@@ -29,7 +29,7 @@ public class HttpRequest {
                         final Map<String, HttpHeader> headers,
                         final Map<String, String> queries,
                         final String body) {
-        this.method = method;
+        this.method = new HttpMethod(method);
         this.target = target;
         this.version = version;
         this.headers = headers;
@@ -96,7 +96,7 @@ public class HttpRequest {
         return target.substring(0, queryStringStart);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

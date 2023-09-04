@@ -19,7 +19,7 @@ public class LoginHandler extends FileHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        if (httpRequest.getMethod().equals("POST")) {
+        if (httpRequest.getMethod().isPost()) {
             FormData formData = FormData.of(httpRequest.getBody());
             String account = formData.get("account");
             String password = formData.get("password");

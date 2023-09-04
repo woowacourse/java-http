@@ -50,12 +50,7 @@ public class HttpHeaders {
     }
 
     private static void parseToCookie(final Map<HttpHeaderName, String> headers) {
-        if (headers.containsKey(HttpHeaderName.COOKIE)) {
-            final String rawCookie = headers.get(HttpHeaderName.COOKIE);
-            final HttpCookie cookie = HttpCookie.from(rawCookie);
-
-            headers.put(HttpHeaderName.COOKIE, cookie.toString());
-        }
+        headers.computeIfPresent(HttpHeaderName.COOKIE, (key, value) -> HttpCookie.from(value).toString());
     }
 
     public static HttpHeaders makeHttpResponseHeaders(final String contentType, final String body) {

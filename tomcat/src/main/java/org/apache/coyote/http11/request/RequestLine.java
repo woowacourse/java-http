@@ -62,4 +62,8 @@ public class RequestLine {
     public boolean containsQuery(final String key) {
         return query.containsKey(key);
     }
+
+    public String getMethod() {
+        return requestMethod;
+    }
 }

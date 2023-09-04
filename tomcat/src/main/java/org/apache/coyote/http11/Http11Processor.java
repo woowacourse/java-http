@@ -67,6 +67,13 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.of(HttpStatus.OK, path);
         }
 
+        if (uriPath.equals("/register")) {
+            final String path = "/register.html";
+            if (request.getMethod().equals("GET")) {
+                return HttpResponse.of(HttpStatus.OK, path);
+            }
+        }
+
         return HttpResponse.of(HttpStatus.OK, uriPath);
     }
 

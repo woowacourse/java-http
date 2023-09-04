@@ -5,17 +5,59 @@ import java.io.IOException;
 
 public class HttpRequest {
 
-    private final RequestLine requestLine;
+    private static final String BLANK = "";
+    private static final String HEADER_DELIMITER = ": ";
+    private static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+    public static final String CONTENT_LENGTH = "Content-Length";
 
-    private HttpRequest(final RequestLine requestLine) {
+    private final RequestLine requestLine;
+    private final RequestHeaders headers;
+    private final String body;
+
+    private HttpRequest(
+            final RequestLine requestLine,
+            final RequestHeaders headers,
+            final String body
+    ) {
         this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
     }
 
     public static HttpRequest from(final BufferedReader br) throws IOException {
         final String firstLine = br.readLine();
         final RequestLine requestLine = RequestLine.from(firstLine);
 
-        return new HttpRequest(requestLine);
+        final RequestHeaders headers = getRequestHeaders(br);
+
+        final String requestBody = getRequestBody(br, headers);
+
+        return new HttpRequest(requestLine, headers, requestBody);
+    }
+
+    private static RequestHeaders getRequestHeaders(final BufferedReader br) throws IOException {
+        final RequestHeaders headers = new RequestHeaders();
+        String line = br.readLine();
+        while (!BLANK.equals(line)) {
+            String[] header = line.split(HEADER_DELIMITER);
+            headers.set(header[KEY_INDEX], header[VALUE_INDEX]);
+        }
+        return headers;
+    }
+
+    private static String getRequestBody(final BufferedReader br, final RequestHeaders headers) throws IOException {
+        if (!headers.contains(CONTENT_LENGTH)) {
+            return null;
+        }
+        final int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
+        final char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    public String getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getPath() {

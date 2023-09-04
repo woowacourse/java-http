@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,5 +48,21 @@ public class HttpRequest {
 
     public void setHeader(String header, String value) {
         headers.put(header, value);
+    }
+
+    public String getCookieValue(String key) {
+        if (headers.containsKey("Cookie")) {
+            return Arrays.stream(headers.get("Cookie").split(";"))
+                    .map(String::trim)
+                    .filter(s -> s.startsWith(key))
+                    .map(s -> s.substring(s.indexOf('=') + 1))
+                    .findFirst()
+                    .orElseGet(null);
+        }
+        return null;
+    }
+
+    public String session() {
+        return getCookieValue("JSESSIONID");
     }
 }

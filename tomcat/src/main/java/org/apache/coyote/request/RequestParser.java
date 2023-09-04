@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.coyote.response.Resource;
 import org.apache.coyote.response.ResourceType;
 
-public class UrlParser {
+public class RequestParser {
 
     private static final String HOME_URL = "/";
     private static final String DEFAULT_RESOURCE_PATH = "/static";
@@ -27,7 +27,7 @@ public class UrlParser {
 
     private final BufferedReader bufferedReader;
 
-    public UrlParser(InputStream inputStream) {
+    public RequestParser(InputStream inputStream) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         this.bufferedReader = new BufferedReader(inputStreamReader);
     }

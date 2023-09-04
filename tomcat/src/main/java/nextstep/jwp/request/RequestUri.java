@@ -7,26 +7,26 @@ import java.util.stream.Collectors;
 
 public class RequestUri {
     private final String uri;
-    private final Map<String, String> params;
+    private final Map<String, String> queryParams;
 
-    private RequestUri(String uri, Map<String, String> params) {
+    private RequestUri(String uri, Map<String, String> queryParams) {
         this.uri = uri;
-        this.params = params;
+        this.queryParams = queryParams;
     }
 
     public static RequestUri of(final String requestUri) {
         final int index = requestUri.indexOf("?");
         if (index != -1) {
             String uri = requestUri.substring(0, index);
-            Map<String, String> params = parseParams(requestUri.substring(index));
+            Map<String, String> params = parseParams(requestUri.substring(index+1));
             return new RequestUri(uri, params);
         }
         return new RequestUri(requestUri, Collections.emptyMap());
     }
 
     private static Map<String, String> parseParams(final String params) {
-        if(!params.contains(":")) {
-            throw new IllegalArgumentException("헤더는 key: value 형식이어야 합니다.");
+        if(!params.contains("=")) {
+            throw new IllegalArgumentException("헤더는 key=value 형식이어야 합니다.");
         }
         return Arrays.stream(params.split("&"))
                 .map(query -> query.split("="))
@@ -35,5 +35,9 @@ public class RequestUri {
 
     public String getUri() {
         return uri;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return queryParams;
     }
 }

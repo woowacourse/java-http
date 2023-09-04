@@ -39,6 +39,10 @@ public class HttpCookie {
         return cookie.containsKey("JSESSIONID");
     }
 
+    public String getJSessionId() {
+        return cookie.get("JSESSIONID");
+    }
+
     @Override
     public String toString() {
         return "HttpCookie{" +

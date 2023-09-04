@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -77,11 +79,32 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri;
             }
 
-            System.out.println("path = " + path);
-
             Map<String, String> requestBodyMap = parseQueryParams(requestBody.toString());
 
             String setCookie = "";
+
+            if (path.equals("login") && requestHeader.indexOf("GET") != -1) {
+                statusCode = 302;
+                statusMessage = "Found";
+
+                HttpCookie cookie = getCookie(requestHeader.toString());
+
+                if (cookie == null || !cookie.existJSESSIONID()) {
+                    path = "/login.html";
+                } else {
+                    String jSessionId = cookie.getJSessionId();
+                    Session session = SessionManager.findSession(jSessionId);
+
+                    Optional<User> user = (Optional<User>) session.getAttribute("user");
+
+                    if (user.isPresent()) {
+                        path = "/index.html";
+                    } else {
+                        path = "/login.html";
+                    }
+                }
+            }
+
 
             if (path.equals("login") && requestHeader.indexOf("POST") != -1) {
                 statusCode = 302;
@@ -94,6 +117,10 @@ public class Http11Processor implements Runnable, Processor {
                 if (user.isPresent()) {
                     log.info(user.toString());
                     UUID uuid = UUID.randomUUID();
+                    Session session = new Session(uuid.toString());
+                    session.setAttribute("user", user);
+                    SessionManager.add(session);
+
                     setCookie = "Set-Cookie: JSESSIONID=" + uuid;
 
                     path = "/index.html";

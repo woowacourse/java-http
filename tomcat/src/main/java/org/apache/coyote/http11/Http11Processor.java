@@ -16,13 +16,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String NO_MATCH_USER_MESSAGE = "가입하지 않은 유저입니다.";
 
     private final Socket connection;
 
@@ -57,23 +56,31 @@ public class Http11Processor implements Runnable, Processor {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
-            return getResponseMessage("Hello world!", "text/html;");
+            return getResponseMessage(200, "Hello world!", "text/html;");
         }
         if (path.endsWith(".css")) {
             final String responseBody = findResponseBody(path);
-            return getResponseMessage(responseBody, "text/css;");
+            return getResponseMessage(200, responseBody, "text/css;");
         }
         if (path.equals("/login")) {
             final String responseBody = findResponseBody(path + ".html");
-
-            final Map<String, String> queryStrings = getQueryStrings(uri);
-            final User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                    .orElseThrow(() -> new NoSuchElementException(NO_MATCH_USER_MESSAGE));
-            log.info("User: {}", user);
-            return getResponseMessage(responseBody, "text/html;");
+            return handleLoginRequest(uri, responseBody);
         }
         final String responseBody = findResponseBody(path);
-        return getResponseMessage(responseBody, "text/html;");
+        return getResponseMessage(200, responseBody, "text/html;");
+    }
+
+    private String handleLoginRequest(final String uri, final String responseBody) throws IOException {
+        if (!uri.contains("?")) {
+            return getResponseMessage(200, responseBody, "text/html;");
+        }
+        final Map<String, String> queryStrings = getQueryStrings(uri);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
+        if (user.isEmpty() || !user.get().checkPassword(queryStrings.get("password"))) {
+            return getResponseMessage(401, findResponseBody("/401.html"), "text/html;");
+        }
+        log.info("User: {}", user.get());
+        return getResponseMessage(302, findResponseBody("/index.html"), "text/html;");
     }
 
     private Map<String, String> getQueryStrings(final String uri) {
@@ -91,9 +98,9 @@ public class Http11Processor implements Runnable, Processor {
         return queryStrings;
     }
 
-    private String getResponseMessage(final String responseBody, final String contentType) {
+    private String getResponseMessage(final int statusCode, final String responseBody, final String contentType) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode + " OK ",
                 "Content-Type: " + contentType + "charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

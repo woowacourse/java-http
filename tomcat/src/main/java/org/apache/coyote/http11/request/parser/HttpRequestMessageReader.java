@@ -98,7 +98,7 @@ public class HttpRequestMessageReader {
             return;
         }
 
-        throw new IllegalStateException("헤더는 key: value 형태여야 합니다.");
+        throw new IllegalArgumentException("헤더는 key: value 형태여야 합니다.");
     }
 
     private static HttpRequest httpRequestWithBody(

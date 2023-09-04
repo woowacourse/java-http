@@ -79,10 +79,10 @@ public class Http11Processor implements Runnable, Processor {
     private String controllerResponse(HttpRequest httpRequest) {
         Controller handler = handlerMapper.getHandler(httpRequest);
         HttpResponse<Object> httpResponse = (HttpResponse<Object>) handler.handle(httpRequest);
-        return parse(httpResponse);
+        return makeResponse(httpResponse);
     }
 
-    private String parse(HttpResponse<Object> httpResponse) {
+    private String makeResponse(HttpResponse<Object> httpResponse) {
         StringBuilder response = new StringBuilder();
         response.append(requestLine(httpResponse));
         Optional<String> body = bodyOf(httpResponse);
@@ -94,12 +94,16 @@ public class Http11Processor implements Runnable, Processor {
         return response.append(str).toString();
     }
 
-    private String responseNoBody(HttpResponse<Object> httpResponse) {
-        Map<String, String> headers = httpResponse.getHeaders();
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add(headerResponse(headers));
-        stringJoiner.add("");
-        return stringJoiner.toString();
+    private String requestLine(HttpResponse<Object> httpResponse) {
+        HttpStatusCode httpStatusCode = HttpStatusCode.of(httpResponse.getStatusCode());
+        return "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.name() + " ";
+    }
+
+    private Optional<String> bodyOf(HttpResponse<Object> httpResponse) {
+        if (httpResponse.isViewResponse()) {
+            return Optional.of(resourceProvider.resourceBodyOf(httpResponse.getViewPath()));
+        }
+        return Optional.empty();
     }
 
     private String responseWithBody(HttpResponse<Object> httpResponse, String body) {
@@ -124,15 +128,11 @@ public class Http11Processor implements Runnable, Processor {
         return headerName + ": " + value;
     }
 
-    private Optional<String> bodyOf(HttpResponse<Object> httpResponse) {
-        if (httpResponse.isViewResponse()) {
-            return Optional.of(resourceProvider.resourceBodyOf(httpResponse.getViewPath()));
-        }
-        return Optional.empty();
-    }
-
-    private String requestLine(HttpResponse<Object> httpResponse) {
-        HttpStatusCode httpStatusCode = HttpStatusCode.of(httpResponse.getStatusCode());
-        return "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.name() + " ";
+    private String responseNoBody(HttpResponse<Object> httpResponse) {
+        Map<String, String> headers = httpResponse.getHeaders();
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        stringJoiner.add(headerResponse(headers));
+        stringJoiner.add("");
+        return stringJoiner.toString();
     }
 }

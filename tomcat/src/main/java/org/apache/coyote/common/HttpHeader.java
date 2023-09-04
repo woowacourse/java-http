@@ -7,7 +7,9 @@ public enum HttpHeader {
     CONTENT_LENGTH("Content-Length"),
     HOST("Host"),
     CONNECTION("Connection"),
-    LOCATION("Location");
+    LOCATION("Location"),
+    COOKIE("Cookies"),
+    SET_COOKIE("Set-Cookie");
 
     private final String source;
 

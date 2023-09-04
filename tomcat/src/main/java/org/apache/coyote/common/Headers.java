@@ -1,9 +1,13 @@
 package org.apache.coyote.common;
 
+import org.apache.coyote.exception.CoyoteHttpException;
+import org.apache.coyote.session.Cookies;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Headers {
@@ -22,6 +26,15 @@ public class Headers {
 
     public Headers(final Map<String, String> headers) {
         mapping.putAll(headers);
+    }
+
+    public Cookies cookies() {
+        final String cookiesHeader = mapping.getOrDefault("Cookie", null);
+        if (Objects.isNull(cookiesHeader)) {
+            throw new CoyoteHttpException("Http header에 Cookie가 존재하지 않습니다.");
+        }
+
+        return Cookies.from(cookiesHeader);
     }
 
     public String getHeaderValue(final String name) {

@@ -45,14 +45,25 @@ public class Http11Processor implements Runnable, Processor {
             if (firstLine == null) {
                 return;
             }
-            final StringBuilder request = new StringBuilder(firstLine);
+            final StringBuilder requestHeader = new StringBuilder(firstLine);
 
             String line;
             while (!Objects.equals(line = reader.readLine(), "")) {
-                request.append(line).append("\r\n");
+                requestHeader.append(line).append("\r\n");
             }
 
-            String uri = extractRequestUriFromRequest(request);
+            StringBuilder requestBody = new StringBuilder();
+            int contentLength = getContentLength(requestHeader.toString());
+
+            if (contentLength > 0) {
+                char[] buffer = new char[contentLength];
+                int bytesRead = reader.read(buffer, 0, contentLength);
+                if (bytesRead > 0) {
+                    requestBody.append(buffer, 0, bytesRead);
+                }
+            }
+
+            String uri = extractRequestUriFromRequest(requestHeader);
 
             int index = uri.indexOf("?");
             String path;
@@ -67,6 +78,8 @@ public class Http11Processor implements Runnable, Processor {
             } else {
                 path = uri;
             }
+
+            System.out.println("path = " + path);
 
             if (path.equals("login") && !queryString.equals("")) {
                 statusCode = 302;
@@ -88,6 +101,16 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
+            Map<String, String> requestBodyMap = parseQueryParams(requestBody.toString());
+
+            if (path.equals("register") && requestHeader.indexOf("POST") != -1) {
+                String account = requestBodyMap.get("account");
+                String password = requestBodyMap.get("password");
+                String email = requestBodyMap.get("email");
+
+                InMemoryUserRepository.save(new User(account, password, email));
+                path = "/index.html";
+            }
 
             String contentType = "html";
             if (path.length() != 0) {
@@ -126,7 +149,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String extractRequestUriFromRequest(StringBuilder request) {
-        int startIndex = request.indexOf("GET ") + 4;
+        int startIndex = 0;
+        if (request.indexOf("GET") != -1) {
+            startIndex = request.indexOf("GET ") + 4;
+        }
+        if (request.indexOf("POST") != -1) {
+            startIndex = request.indexOf("POST ") + 5;
+        }
         int endIndex = request.indexOf(" HTTP/1.1");
 
         if (startIndex != -1 && endIndex != -1) {
@@ -150,5 +179,21 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return params;
+    }
+
+    private int getContentLength(String requestHeader) {
+        String[] headerLines = requestHeader.split("\r\n");
+        for (String line : headerLines) {
+            if (line.startsWith("Content-Length:")) {
+                String[] parts = line.split(" ");
+                if (parts.length >= 2) {
+                    try {
+                        return Integer.parseInt(parts[1]);
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+        }
+        return 0;
     }
 }

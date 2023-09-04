@@ -47,20 +47,25 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Map<String, String> headers = parseHeader(bufferedReader);
-
             String response = null;
             final String[] parsedFirstLine = firstLine.split(" ");
-
             response = parseStaticFiles(parsedFirstLine, response);
+
+            final Map<String, String> headers = parseHeader(bufferedReader);
+            String requestBody = "";
+            if ("POST".equals(parsedFirstLine[0])) {
+                final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
             if (parsedFirstLine[1].contains("login")) {
-                response = parseLoginPage(parsedFirstLine, response);
+                response = parseLoginPage(parsedFirstLine, response, requestBody);
             }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException |
-                 UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -148,8 +153,36 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String parseLoginPage(final String[] parsedFirstLine, String response) throws IOException {
+    private String parseLoginPage(final String[] parsedFirstLine, String response, final String requestBody) throws IOException {
         final String requestUri = parsedFirstLine[1];
+
+        if ("POST".equals(parsedFirstLine[0])) {
+            final Map<String, String> bodyParams = Arrays.stream(requestBody.split("&"))
+                    .map(param -> param.split("="))
+                    .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+
+            final String account = bodyParams.get("account");
+            final String password = bodyParams.get("password");
+
+            try {
+                final User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+
+                if (!user.checkPassword(password)) {
+                    throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
+                }
+                log.info("로그인 성공! user = {}", user);
+            } catch (final IllegalArgumentException e) {
+                log.warn("login error = {}", e);
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /401.html ");
+            }
+
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index.html ");
+        }
 
         if (requestUri.contains("login")) {
             final String[] parsedRequestUri = requestUri.split("\\?");

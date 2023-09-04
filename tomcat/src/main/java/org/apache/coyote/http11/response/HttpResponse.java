@@ -56,6 +56,9 @@ public class HttpResponse {
             return "application/javascript";
         }
 
+        if (filePath.equals("/")) {
+            return "text/html;charset=utf-8";
+        }
         return null;
     }
 

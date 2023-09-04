@@ -89,18 +89,16 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse login(final HttpRequest httpRequest) throws URISyntaxException, IOException, NotFoundException {
         Params queryParams = httpRequest.getParams();
 
-        // 로그인 페이지 접속
         if (queryParams.isEmpty() && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             if (httpRequest.getSessionAttribute("user").isPresent()) {
                 return HttpResponse.ok(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
             }
             return HttpResponse.okWithResource("/login.html");
-        } else {
-            // 로그인 진행
+        }
 
+        if (queryParams.isEmpty() && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
             Map<String, String> params = httpRequest.getBody().getParams();
 
-            // 파람이 존재하지 않는 경우
             if (params.isEmpty()) {
                 throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
             }
@@ -118,5 +116,7 @@ public class Http11Processor implements Runnable, Processor {
             response.setCookie(Cookie.fromUserJSession(session.getId()));
             return response;
         }
+
+        throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 }

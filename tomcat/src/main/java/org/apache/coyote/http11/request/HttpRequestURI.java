@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.auth.Session;
+import org.apache.coyote.http11.common.HttpStatus;
 
 public class HttpRequestURI {
 
@@ -45,7 +47,10 @@ public class HttpRequestURI {
         this.httpVersion = httpVersion;
     }
 
-    public static HttpRequestURI get(final List<String> requestURIElements, final Consumer<User> logProcessor) {
+    public static HttpRequestURI get(
+            final List<String> requestURIElements,
+            final Consumer<User> logProcessor
+    ) {
         final var uri = requestURIElements.get(URI_INDEX);
 
         if (uri.startsWith("/login")) {
@@ -68,7 +73,7 @@ public class HttpRequestURI {
 
         if (isExistQueryString(index)) {
             final var queryString = HttpRequestBody.from(uri.substring(index + 1));
-            return parseLoginRequestURI(queryString, requestURIElements, logProcessor);
+            return parseLoginRequestURI(queryString, requestURIElements, null, logProcessor);
         }
 
         return parseRequestURI(LOGIN_PAGE, HttpRequestBody.empty(), requestURIElements);
@@ -77,6 +82,7 @@ public class HttpRequestURI {
     private static HttpRequestURI parseLoginRequestURI(
             final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements,
+            final Consumer<User> sessionProcessor,
             final Consumer<User> logProcessor
     ) {
         final var account = httpRequestBody.getValue("account");
@@ -125,8 +131,9 @@ public class HttpRequestURI {
     public static HttpRequestURI post(
             final List<String> requestURIElements,
             final String requestBody,
+            final Consumer<User> sessionProcessor,
             final Consumer<User> logProcessor
-    ) {
+            ) {
         final var uri = requestURIElements.get(URI_INDEX);
         final HttpRequestBody parsedHttpRequestBody = HttpRequestBody.from(requestBody);
         if (uri.startsWith("/register")) {
@@ -140,7 +147,7 @@ public class HttpRequestURI {
             return parseRequestURI(REGISTER_PAGE, INDEX_PAGE, parsedHttpRequestBody, requestURIElements);
         }
 
-        return parseLoginRequestURI(parsedHttpRequestBody, requestURIElements, logProcessor);
+        return parseLoginRequestURI(parsedHttpRequestBody, requestURIElements, sessionProcessor, logProcessor);
     }
 
     public boolean isLoginSuccess() {
@@ -166,4 +173,5 @@ public class HttpRequestURI {
     public String getHttpVersion() {
         return httpVersion;
     }
+
 }

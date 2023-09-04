@@ -24,6 +24,7 @@ public class HttpResponseEntity {
 
     public String getResponse(final HttpCookie httpCookie) throws IOException {
         final var uri = httpRequestURI.getUri();
+        final var uuid = UUID.randomUUID();
         final var responseHeader = HttpResponseHeader.from(httpRequestURI);
         final var responseBody = HttpResponseBody.from(httpRequestURI);
 
@@ -32,15 +33,15 @@ public class HttpResponseEntity {
                 .append(parseContentLengthLine(responseBody)).append(CRLF);
 
         if (httpRequestURI.isLoginSuccess() && httpCookie.noneJSessionId()) {
-            body.append(parseCookieLine()).append(CRLF);
+            body.append(parseCookieLine(uuid)).append(CRLF);
         }
-        body.append(EMPTY).append(CRLF)
-                .append(responseBody.body());
+        body.append(EMPTY).append(CRLF).append(responseBody.body());
+
         return body.toString();
     }
 
-    private String parseCookieLine() {
-        return String.format("Set-Cookie: JSESSIONID=%s", UUID.randomUUID());
+    private String parseCookieLine(final UUID uuid) {
+        return String.format("Set-Cookie: JSESSIONID=%s", uuid);
     }
 
     private String parseHttpStatusLine(final HttpResponseHeader httpResponseHeader) {

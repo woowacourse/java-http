@@ -41,4 +41,7 @@ public class HttpCookie {
         return !this.httpCookies.containsKey(JSESSIONID_KEY);
     }
 
+    public String getValue(final String key) {
+        return null;
+    }
 }

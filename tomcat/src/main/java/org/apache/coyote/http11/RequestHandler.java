@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.response.StatusCode.OK;
+import static org.apache.coyote.http11.response.StatusCode.UNAUTHORIZED;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.nio.file.Files;
 import java.util.Map;
 
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.exception.LoginException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.Response;
@@ -17,11 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 public class RequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
     private static final String LOGIN_HTML = "/login.html";
+    private static final String INDEX_HTML = "/index.html";
     private static final String LOGIN = "/login";
+    private static final String UNAUTHORIZED_HTML = "/401.html";
     private final Request request;
 
     public RequestHandler(final Request request) {
@@ -35,16 +41,15 @@ public class RequestHandler {
         }
 
         if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(GET)) {
-            return login();
+            return handleLoginPage();
         }
 
-        return getStaticPateResponse(requestPath);
+        return getStaticPateResponse(requestPath, OK);
     }
 
-    private Response getStaticPateResponse(final String requestPath) {
+    private Response getStaticPateResponse(final String requestPath, final StatusCode statusCode) {
         final String responseBody = readFile(requestPath);
         final HttpVersion httpVersion = request.getHttpVersion();
-        final StatusCode statusCode = StatusCode.OK;
         final ContentType contentType = ContentType.findByName(requestPath);
         return Response.of(httpVersion, statusCode, contentType, responseBody);
     }
@@ -63,22 +68,32 @@ public class RequestHandler {
     private Response getMainPage() {
         final String responseBody = "Hello world!";
         final HttpVersion httpVersion = request.getHttpVersion();
-        final StatusCode statusCode = StatusCode.OK;
         final ContentType contentType = ContentType.HTML;
-        return Response.of(httpVersion, statusCode, contentType, responseBody);
+        return Response.of(httpVersion, OK, contentType, responseBody);
     }
 
-    public Response login() {
+    private Response handleLoginPage() {
         if (request.hasQueryString()) {
             final Map<String, String> queryString = request.getQueryString();
             final String account = queryString.get("account");
-            InMemoryUserRepository.findByAccount(account)
-                    .ifPresent(user -> {
-                        if (user.checkPassword(queryString.get("password"))) {
-                            LOGGER.info("user: {}", user);
-                        }
-                    });
+            final String password = queryString.get("password");
+            return login(account, password);
         }
-        return getStaticPateResponse(LOGIN_HTML);
+        return getStaticPateResponse(LOGIN_HTML, OK);
+    }
+
+    private Response login(final String account, final String password) {
+        try {
+            final User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new LoginException("로그인에 실패했습니다."));
+            if (user.checkPassword(password)) {
+                LOGGER.info("user {}", user);
+                return Response.generateRedirectResponse(INDEX_HTML);
+
+            }
+            throw new LoginException("로그인에 실패했습니다.");
+        } catch(LoginException exception) {
+            return getStaticPateResponse(UNAUTHORIZED_HTML, UNAUTHORIZED);
+        }
     }
 }

@@ -11,6 +11,7 @@ import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class Handler {
         final RequestLine requestLine = request.getRequestLine();
 
         if (requestLine.getHttpMethod() == HttpMethod.GET && requestLine.getPath().startsWith("/login")) {
-            if (request.hasSession()) {
+            if (request.hasSession() && SessionManager.has(request.getCookieValue("JSESSIONID"))) {
                 final Session session = request.getSession(false);
                 final User user = (User) session.getAttribute("user");
                 log.info("user = {}", user);

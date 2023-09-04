@@ -17,6 +17,10 @@ public class SessionManager {
         return SESSIONS.get(id);
     }
 
+    public static boolean has(final String id) {
+        return SESSIONS.containsKey(id);
+    }
+
     public static void remove(final String id) {
         SESSIONS.remove(id);
     }

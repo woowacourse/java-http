@@ -1,7 +1,5 @@
 package org.apache.coyote.httpresponse.header;
 
-import org.apache.coyote.httprequest.exception.InvalidHeaderException;
-
 import java.util.Arrays;
 
 public enum ResponseHeaderType {

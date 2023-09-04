@@ -6,11 +6,11 @@ import org.apache.coyote.handler.mapping.LoginPageMapping;
 import org.apache.coyote.handler.mapping.RegisterMapping;
 import org.apache.coyote.handler.mapping.RegisterPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
+import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class FrontHandler {
@@ -25,7 +25,7 @@ public class FrontHandler {
         handlerMapping.add(new RegisterPageMapping());
     }
 
-    public String handle(final String firstLine, final Map<String, String> headers, final String requestBody) throws IOException {
+    public String handle(final String firstLine, final HttpHeaders headers, final String requestBody) throws IOException {
         String response = "";
         final String[] parsedFirstLine = firstLine.split(" ");
         for (final HandlerMapping mapping : handlerMapping) {

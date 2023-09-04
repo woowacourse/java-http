@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.FrontHandler;
+import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Map<String, String> headers = parseHeader(bufferedReader);
+            final HttpHeaders headers = parseHeader(bufferedReader);
 
             final String[] parsedFirstLine = firstLine.split(" ");
             final HttpMethod httpMethod = from(parsedFirstLine[0]);
@@ -61,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String parseRequestBody(final HttpMethod httpMethod, final Map<String, String> headers, final BufferedReader bufferedReader) throws IOException {
+    private static String parseRequestBody(final HttpMethod httpMethod, final HttpHeaders headers, final BufferedReader bufferedReader) throws IOException {
         String requestBody = "";
         if (httpMethod == POST) {
             final int contentLength = Integer.parseInt(headers.get("Content-Length"));
@@ -72,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestBody;
     }
 
-    private Map<String, String> parseHeader(final BufferedReader bufferedReader) throws IOException {
+    private HttpHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         String header = bufferedReader.readLine();
         while (!"".equals(header)) {
@@ -81,6 +82,6 @@ public class Http11Processor implements Runnable, Processor {
             header = bufferedReader.readLine();
         }
 
-        return headers;
+        return new HttpHeaders(headers);
     }
 }

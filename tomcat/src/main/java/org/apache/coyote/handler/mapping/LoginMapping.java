@@ -2,6 +2,7 @@ package org.apache.coyote.handler.mapping;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) {
+    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) {
         final Map<String, String> bodyParams = Arrays.stream(requestBody.split("&"))
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(param -> param[0], param -> param[1]));

@@ -1,5 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
+import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 
 import java.io.File;
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static org.apache.coyote.http.HttpMethod.GET;
 
@@ -25,7 +25,7 @@ public class StaticFileMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
+    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException {
         if ("/".equals(requestUri)) {
             final var responseBody = "Hello world!";
 

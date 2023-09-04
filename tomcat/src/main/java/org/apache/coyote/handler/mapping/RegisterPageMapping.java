@@ -1,5 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
+import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 
 import java.io.File;
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 public class RegisterPageMapping implements HandlerMapping {
 
@@ -18,7 +18,7 @@ public class RegisterPageMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
+    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException {
         final String filePath = "static/register.html";
         final URL fileUrl = getClass().getClassLoader().getResource(filePath);
         final Path path = new File(fileUrl.getPath()).toPath();

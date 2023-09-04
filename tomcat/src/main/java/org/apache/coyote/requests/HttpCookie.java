@@ -16,7 +16,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(String string) {
-        if (string == null) {
+        if (string == null || string.isBlank()) {
             return new HttpCookie(new HashMap<>());
         }
         return Arrays.stream(string.split(" "))
@@ -31,7 +31,10 @@ public class HttpCookie {
         return items.get(key);
     }
 
-    public String generateCookie() {
-        return "JSESSIONID=" + UUID.randomUUID();
+    public String getJSessionId(boolean create) {
+        if (create) {
+            items.put("JSESSIONID", UUID.randomUUID().toString());
+        }
+        return get("JSESSIONID");
     }
 }

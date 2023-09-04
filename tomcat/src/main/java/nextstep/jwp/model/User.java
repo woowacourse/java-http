@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import org.apache.catalina.Session;
+
 public class User {
 
     private final Long id;
@@ -24,6 +26,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
     }
 
     @Override

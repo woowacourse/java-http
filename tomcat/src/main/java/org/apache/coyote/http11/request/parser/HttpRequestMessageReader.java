@@ -29,9 +29,18 @@ public class HttpRequestMessageReader {
     }
 
     public static HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
-        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final HttpRequestLine startLine = readStartLine(br.readLine());
-        final Map<String, String> headers = readHeaders(br);
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            final HttpRequestLine startLine = readStartLine(br.readLine());
+            final Map<String, String> headers = readHeaders(br);
+            return httpRequestByMethod(startLine, headers, br);
+        }
+    }
+
+    private static HttpRequest httpRequestByMethod(
+            final HttpRequestLine startLine,
+            final Map<String, String> headers,
+            final BufferedReader br
+    ) throws IOException {
         if (startLine.getHttpRequestMethod() == HttpMethod.POST) {
             return httpRequestWithBody(headers, br, startLine);
         }
@@ -98,7 +107,7 @@ public class HttpRequestMessageReader {
             return;
         }
 
-        throw new IllegalArgumentException("헤더는 key: value 형태여야 합니다.");
+        throw new IllegalStateException("헤더는 key: value 형태여야 합니다.");
     }
 
     private static HttpRequest httpRequestWithBody(

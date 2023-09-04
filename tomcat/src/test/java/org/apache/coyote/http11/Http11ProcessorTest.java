@@ -61,7 +61,6 @@ class Http11ProcessorTest {
                 "\r\n" +
                 body;
 
-        System.out.println(body.getBytes().length);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -175,6 +174,7 @@ class Http11ProcessorTest {
                 body;
 
         assertThat(socket.output()).isEqualTo(expected);
+        socket.close();
     }
 
     @Test

@@ -50,10 +50,11 @@ class HttpRequestMessageReaderTest {
                     assertThat(httpRequest.getHeader("Cache-Control")).isEqualTo("max-age=0");
                 }
         );
+        stubSocket.close();
     }
 
     @Test
-    void 잘못된_HTTP_요청_메세지_시작라인인_경우_예외_발생() {
+    void 잘못된_HTTP_요청_메세지_시작라인인_경우_예외_발생() throws IOException {
         // given
         final String httpRequestMessage = String.join("\r\n",
                 "GET /index.html wrongSize HTTP/1.1 ",
@@ -68,6 +69,7 @@ class HttpRequestMessageReaderTest {
         assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(inputStream))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("시작 라인의 토큰은 3개여야 합니다.");
+        stubSocket.close();
     }
 
     @Test
@@ -90,6 +92,7 @@ class HttpRequestMessageReaderTest {
             assertThat(httpRequest.getParam("name")).isEqualTo("royce");
             assertThat(httpRequest.getParam("password")).isEqualTo("p1234");
         });
+        stubSocket.close();
     }
 
     @Test
@@ -114,5 +117,6 @@ class HttpRequestMessageReaderTest {
             assertThat(httpRequest.getPayloadValue("name")).isEqualTo("royce");
             assertThat(httpRequest.getPayloadValue("password")).isEqualTo("p1234");
         });
+        stubSocket.close();
     }
 }

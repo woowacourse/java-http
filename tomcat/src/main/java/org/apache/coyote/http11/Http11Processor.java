@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +14,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String NO_MATCH_USER_MESSAGE = "가입하지 않은 유저입니다.";
 
     private final Socket connection;
 
@@ -48,15 +54,41 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleRequest(final String uri) throws IOException {
-        if (uri.equals("/")) {
+        final String path = uri.split("\\?")[0];
+
+        if (path.equals("/")) {
             return getResponseMessage("Hello world!", "text/html;");
         }
-        if (uri.endsWith(".css")) {
-            final String responseBody = findResponseBody(uri);
+        if (path.endsWith(".css")) {
+            final String responseBody = findResponseBody(path);
             return getResponseMessage(responseBody, "text/css;");
         }
-        final String responseBody = findResponseBody(uri);
+        if (path.equals("/login")) {
+            final String responseBody = findResponseBody(path + ".html");
+
+            final Map<String, String> queryStrings = getQueryStrings(uri);
+            final User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                    .orElseThrow(() -> new NoSuchElementException(NO_MATCH_USER_MESSAGE));
+            log.info("User: {}", user);
+            return getResponseMessage(responseBody, "text/html;");
+        }
+        final String responseBody = findResponseBody(path);
         return getResponseMessage(responseBody, "text/html;");
+    }
+
+    private Map<String, String> getQueryStrings(final String uri) {
+        if (!uri.contains("?")) {
+            return Map.of();
+        }
+        final Map<String, String> queryStrings = new HashMap<>();
+        final String queryString = uri.split("\\?")[1];
+
+        final String[] splitQueryStrings = queryString.split("&");
+        for (String value : splitQueryStrings) {
+            final String[] splitValue = value.split("=");
+            queryStrings.put(splitValue[0], splitValue[1]);
+        }
+        return queryStrings;
     }
 
     private String getResponseMessage(final String responseBody, final String contentType) {
@@ -68,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String findResponseBody(String uri) throws IOException {
+    private String findResponseBody(final String uri) throws IOException {
         final URL fileUrl = getClass().getClassLoader().getResource("./static" + uri);
         final String filePath = Objects.requireNonNull(fileUrl).getPath();
         return Files.readString(new File(filePath).toPath());

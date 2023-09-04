@@ -14,6 +14,10 @@ public class HttpBody {
         body.put(key, value);
     }
 
+    public boolean hasBody(final String key) {
+        return body.isContain(key);
+    }
+
     public String getValue(final String key) {
         return body.getRecentValue(key);
     }

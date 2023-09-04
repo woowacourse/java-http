@@ -53,6 +53,14 @@ public class HttpRequest {
         return url.getQueryStringOf(queryString);
     }
 
+    public boolean hasBodyValueOf(final String body) {
+        return this.body.hasBody(body);
+    }
+
+    public String getBodyValueOf(final String body) {
+        return this.body.getValue(body);
+    }
+
     public HttpBody getBody() {
         return body;
     }

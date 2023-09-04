@@ -11,6 +11,7 @@ import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
 import org.apache.coyote.http.SupportFile;
+import org.apache.coyote.http.vo.HttpBody;
 import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
 import org.apache.coyote.http.vo.HttpResponse;
@@ -192,5 +193,93 @@ class HandlerTest {
         assertThat(response)
                 .usingRecursiveComparison()
                 .isEqualTo(new HttpResponse(HttpStatus.OK, headers, expectedBody));
+    }
+
+    @Test
+    void 유저_생성_요청_핸들러는_POST와_적절한_Body를_가진_요청을_지원한다(){
+        // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu2");
+        body.put("email", "gugu@gmail.com");
+        body.put("password", "password");
+
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/register"))
+                .headers(headers)
+                .body(body)
+                .build();
+
+
+        // when
+        final RegisterHandler registerHandler = new RegisterHandler();
+
+        // then
+        assertThat(registerHandler.isSupported(request)).isTrue();
+    }
+
+    @Test
+    void 유저_생성_요청_핸들러는_성공시_index_페이지를_반환한다(){
+        // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu2");
+        body.put("email", "gugu@gmail.com");
+        body.put("password", "password");
+
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/register"))
+                .headers(headers)
+                .body(body)
+                .build();
+
+
+        // when
+        final RegisterHandler registerHandler = new RegisterHandler();
+        HttpResponse response = registerHandler.handle(request);
+
+        // then
+        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
+        expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, expectedHeaders));
+    }
+
+    @Test
+    void 유저_생성_요청_핸들러는_실패시_Bad_Request_를_반환한다(){
+        // given
+        HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        HttpBody body = HttpBody.getEmptyBody();
+
+        headers.put(HttpHeader.CONTENT_LENGTH, "50");
+        body.put("account", "gugu");
+        body.put("email", "gugu@gmail.com");
+        body.put("password", "password");
+
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.POST)
+                .url(Url.from("/register"))
+                .headers(headers)
+                .body(body)
+                .build();
+
+
+        // when
+        final RegisterHandler registerHandler = new RegisterHandler();
+        HttpResponse response = registerHandler.handle(request);
+
+        // then
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(
+                        HttpStatus.BAD_REQUEST,
+                        HttpHeaders.getEmptyHeaders(),
+                        "중복된 계정입니다.")
+                );
     }
 }

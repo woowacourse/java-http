@@ -23,7 +23,7 @@ public class ResourceReader {
             final File file = new File(resource.getFile());
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException | NullPointerException e) {
-            log.error("잘못된 파일을 요청했습니다.");
+            log.trace("잘못된 파일을 요청했습니다.");
             return DEFAULT_VALUE;
         }
     }

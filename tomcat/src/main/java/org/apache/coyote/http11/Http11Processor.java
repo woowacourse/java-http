@@ -7,6 +7,7 @@ import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.handler.Handler;
 import org.apache.coyote.httpresponse.handler.IndexHandler;
 import org.apache.coyote.httpresponse.handler.LoginHandler;
+import org.apache.coyote.httpresponse.handler.RegisterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
         HANDLERS.put("/", new IndexHandler());
         HANDLERS.put("/index.html", new IndexHandler());
         HANDLERS.put("/login", new LoginHandler());
+        HANDLERS.put("/register", new RegisterHandler());
     }
 
     private final Socket connection;

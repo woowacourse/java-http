@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
 
@@ -12,35 +15,21 @@ public class HttpRequest {
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
-    private static final String POST = "POST";
-    private static final String GET = "GET";
-    private static final String PUT = "PUT";
-    private static final String DELETE = "DELETE";
+
     private static final String DOT = ".";
     private static final String QUERY_STRING_SYMBOL = "?";
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String version;
     private final Map<String, String> headers = new HashMap<>();
     private HttpCookie cookie;
     private Map<String, String> requestBody;
 
-    private HttpRequest(final String method, final String uri, final String version) {
-        validateMethod(method);
+    private HttpRequest(final HttpMethod method, final String uri, final String version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
-    }
-
-    private void validateMethod(final String method) {
-        if (method.equalsIgnoreCase(POST) ||
-                method.equalsIgnoreCase(GET) ||
-                method.equalsIgnoreCase(PUT) ||
-                method.equalsIgnoreCase(DELETE)) {
-            return;
-        }
-        throw new IllegalArgumentException("지원하지 않는 HTTP METHOD 입니다.");
     }
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
@@ -51,15 +40,9 @@ public class HttpRequest {
             throw new IllegalArgumentException("잘못된 http 요청 입니다.");
         }
 
-        final String requestMethod = apiInfo[HTTP_METHOD_INDEX];
-        final String requestUri = apiInfo[REQUEST_URI_INDEX];
-        final String requestVersion = apiInfo[HTTP_VERSION_INDEX];
-
-        validateMethod(requestMethod);
-
-        this.method = requestMethod;
-        this.uri = requestUri;
-        this.version = requestVersion;
+        this.method = HttpMethod.valueOf(apiInfo[HTTP_METHOD_INDEX]);
+        this.uri = apiInfo[REQUEST_URI_INDEX];
+        this.version = apiInfo[HTTP_VERSION_INDEX];
         initHeaders(bufferedReader);
         initRequestBody(bufferedReader);
     }
@@ -98,7 +81,7 @@ public class HttpRequest {
     }
 
     public static HttpRequest toIndex() {
-        return new HttpRequest(GET, "/index.html", "HTTP/1.1");
+        return new HttpRequest(HttpMethod.GET, "/index.html", "HTTP/1.1");
     }
 
     public String getUri() {
@@ -142,11 +125,11 @@ public class HttpRequest {
     }
 
     public boolean isGetRequest() {
-        return method.equalsIgnoreCase(GET);
+        return method.isGet();
     }
 
     public boolean hasRequestBody() {
-        return requestBody != null;
+        return Objects.nonNull(requestBody);
     }
 
     public Map<String, String> getRequestBody() {
@@ -154,13 +137,30 @@ public class HttpRequest {
     }
 
     public boolean hasCookie() {
-        return cookie != null;
+        return Objects.nonNull(cookie);
     }
 
     public boolean hasJSessionId() {
-        if(hasCookie()){
+        if (hasCookie()) {
             return cookie.hasJSessionId();
         }
         return false;
+    }
+
+    public Session getSession(boolean create) {
+        if (hasJSessionId()) {
+            final String jsessionid = cookie.getJsessionid();
+            Session session = SessionManager.findSession(jsessionid);
+            if (Objects.nonNull(session)) {
+                return session;
+            }
+        }
+
+        if (!create) {
+            return null;
+        }
+        final Session session = new Session();
+        SessionManager.add(session);
+        return session;
     }
 }

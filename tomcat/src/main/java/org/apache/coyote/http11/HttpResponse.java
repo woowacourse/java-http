@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpResponse {
 
@@ -43,8 +42,11 @@ public class HttpResponse {
         return new HttpResponse(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML.getValue(), ViewLoader.toUnauthorized());
     }
 
-    public void setCookie() {
-        UUID uuid = UUID.randomUUID();
-        headers.put(SET_COOKIE, "JSESSIONID=" + uuid);
+    public void sendRedirect(final String redirectUrl) {
+        headers.put("Location", redirectUrl);
+    }
+
+    public void addCookie(String sessionId) {
+        headers.put(SET_COOKIE, "JSESSIONID=" + sessionId);
     }
 }

@@ -1,12 +1,15 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.HttpMethod.GET;
+import static org.apache.coyote.header.ContentType.CHARSET_UTF_8;
+import static org.apache.coyote.header.ContentType.TEXT_CSS;
+import static org.apache.coyote.header.ContentType.TEXT_HTML;
+import static org.apache.coyote.header.HttpMethod.GET;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.util.RequestExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +57,16 @@ public class GetHttp11MethodHandler implements Http11MethodHandler {
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType(targetPath) + ";" + CHARSET_UTF_8 + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String contentType(final String targetPath) {
+        if (targetPath.contains(".css")) {
+            return TEXT_CSS;
+        }
+        return TEXT_HTML;
     }
 }

@@ -264,12 +264,14 @@ class Http11ProcessorTest {
     @Test
     void 회원가입_성공_시_인덱스_페이지로_이동한다() throws IOException {
         // given
+        final String requestBody = "account=teo&password=123";
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "account=teo&password=1234&email=a@a.com");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

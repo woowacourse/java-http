@@ -13,7 +13,6 @@ public class FileReader {
     }
 
     public static String read(String path) throws IOException {
-
         final URL url = FileReader.class.getClassLoader().getResource(DEFAULT_RESOURCE_LOCATION + path);
         if (url == null) {
             URL notFoundUrl = FileReader.class.getClassLoader().getResource(DEFAULT_RESOURCE_LOCATION + "/404.html");

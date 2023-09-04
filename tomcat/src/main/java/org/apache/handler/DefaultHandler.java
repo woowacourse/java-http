@@ -8,7 +8,7 @@ import org.apache.response.HttpResponse;
 
 public class DefaultHandler implements RequestHandler {
 
-    private static final String DEFAULT_RESPONSE = "Hello world!";
+    private static final String DEFAULT_RESPONSE = "Hello world !";
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {

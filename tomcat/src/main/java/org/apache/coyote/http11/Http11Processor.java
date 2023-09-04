@@ -6,20 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
-import org.apache.common.Content;
-import org.apache.common.HttpMethod;
-import org.apache.common.HttpStatus;
 import org.apache.coyote.Processor;
+import org.apache.handler.HandlerAdapter;
+import org.apache.handler.RequestHandler;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
 import org.slf4j.Logger;
@@ -27,10 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_PATH = "/";
-    private static final String DEFAULT_RESPONSE = "Hello world!";
-    private static final String DEFAULT_RESOURCE_LOCATION = "static";
+    private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
 
@@ -40,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        LOG.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -51,70 +38,14 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
-            Content content = readContent(httpRequest);
-            String response = HttpResponse.create(content.getValue(), httpRequest.getTarget(), content.getHttpStatus());
+            RequestHandler requestHandler = HandlerAdapter.findRequestHandler(httpRequest.getTarget());
 
-            outputStream.write(response.getBytes());
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private Content readContent(HttpRequest httpRequest) throws IOException {
-        String path = httpRequest.getTarget();
-        if (Objects.equals(path, DEFAULT_PATH)) {
-            return new Content(DEFAULT_RESPONSE, HttpStatus.OK);
-        }
-
-        if (Objects.equals(path, "/favicon.ico")) {
-            return new Content(Files.readAllBytes(Paths.get(convertPathToUri("/favicon.ico"))).toString(), HttpStatus.OK);
-        }
-
-        if (path.startsWith("/login")) {
-            if (httpRequest.getMethod().equals(HttpMethod.POST)) {
-                String query = httpRequest.getBody();
-                String[] queries = query.split("&");
-                String account = queries[0].split("=")[1];
-                String password = queries[1].split("=")[1];
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                if (user.isPresent() && user.get().checkPassword(password)) {
-                    log.info("로그인 성공한 회원 : {}", user);
-                    return new Content(Files.readString(Paths.get(convertPathToUri("/index.html"))),  HttpStatus.FOUND);
-                }
-                return new Content(Files.readString(Paths.get(convertPathToUri("/401.html"))), HttpStatus.UNAUTHORIZED);
-            }
-            path = "/login.html";
-        }
-
-        if (Objects.equals(path, "/register")) {
-            if (httpRequest.getMethod().equals(HttpMethod.POST)) {
-                String query = httpRequest.getBody();
-                String[] queries = query.split("&");
-                String account = queries[0].split("=")[1];
-                String email = queries[1].split("=")[1];
-                String password = queries[2].split("=")[1];
-
-                User user = new User(account, email, password);
-                InMemoryUserRepository.save(user);
-                log.info("회원가입 성공한 회원 : {}", user);
-                return new Content(Files.readString(Paths.get(convertPathToUri("/index.html"))), HttpStatus.OK);
-            }
-            path = "/register.html";
-        }
-
-        URI uri = convertPathToUri(path);
-        
-        return new Content(Files.readString(Paths.get(uri)), HttpStatus.OK);
-    }
-
-    private URI convertPathToUri(String path) {
-        URL url = getClass().getClassLoader().getResource(DEFAULT_RESOURCE_LOCATION + path);
-        try {
-            return url.toURI();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 }

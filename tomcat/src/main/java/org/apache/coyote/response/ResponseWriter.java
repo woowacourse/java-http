@@ -12,22 +12,15 @@ import java.nio.file.Path;
 
 public class ResponseWriter {
 
-    private static final String NOT_FOUND_RESOURCE_PATH = "/static/404.html";
-
     private final OutputStream outputStream;
 
     public ResponseWriter(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    public void writeResponse(URL resource) throws URISyntaxException, IOException {
-        boolean isExistFile = true;
-        if (resource == null) {
-            resource = getClass().getResource(NOT_FOUND_RESOURCE_PATH);
-            isExistFile = false;
-        }
-        BufferedReader bufferedReader = getBufferedReader(resource);
-        String response = getResponse(isExistFile, bufferedReader);
+    public void writeResponse(Resource resource) throws URISyntaxException, IOException {
+        BufferedReader bufferedReader = getBufferedReader(resource.getUrl());
+        String response = getResponse(resource, bufferedReader);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -40,9 +33,9 @@ public class ResponseWriter {
         return new BufferedReader(inputStreamReader);
     }
 
-    private String getResponse(boolean isExistFile, BufferedReader bufferedReader) throws IOException {
+    private String getResponse(Resource resource, BufferedReader bufferedReader) throws IOException {
         String responseBody = getResponseBody(bufferedReader);
-        String responseHeader = getResponseHeader(isExistFile, responseBody);
+        String responseHeader = getResponseHeader(resource, responseBody);
 
         return String.join("\r\n",
                 responseHeader,
@@ -59,14 +52,15 @@ public class ResponseWriter {
         return responseBodyBuilder.toString();
     }
 
-    private String getResponseHeader(boolean isExistFile, String responseBody) {
+    private String getResponseHeader(Resource resource, String responseBody) {
         String status = "200 OK ";
-        if (!isExistFile) {
+        if (!resource.isExists()) {
             status = "404 NOT_FOUND ";
         }
+
         return String.join("\r\n",
                 "HTTP/1.1 " + status,
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + resource.getResourceTypes() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "");
     }

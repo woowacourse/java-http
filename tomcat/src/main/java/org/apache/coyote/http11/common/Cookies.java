@@ -33,7 +33,15 @@ public class Cookies {
         return new Cookies(values);
     }
 
+    public static String ofJSessionId(String id) {
+        return "JSESSIONID=" + id;
+    }
+
     public boolean isExistByName(String name) {
         return values.containsKey(name);
+    }
+
+    public String findByName(String name) {
+        return values.get(name);
     }
 }

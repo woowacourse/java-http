@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.Cookies;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -28,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    // TODO Request, Response 객체를 전달하고 set하는 방식으로 수정하기
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
@@ -51,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void checkSessionId(Request request, Response response) {
         if (!request.hasCookieByName("JSESSIONID")) {
-            response.addSetCookie("JSESSIONID=" + UUID.randomUUID());
+            Session session = new Session();
+            response.addSetCookie(Cookies.ofJSessionId(session.getId()));
+            SESSION_MANAGER.add(session);
         }
     }
 

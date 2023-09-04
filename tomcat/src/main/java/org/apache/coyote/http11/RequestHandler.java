@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.apache.coyote.http11.common.Method.GET;
 import static org.apache.coyote.http11.common.Method.POST;
 import static org.apache.coyote.http11.common.Status.BAD_REQUEST;
+import static org.apache.coyote.http11.common.Status.FOUND;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
@@ -13,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -41,13 +44,22 @@ public class RequestHandler {
 
     private static Response get(Request request) throws IOException {
         String uri = request.getUri();
+        Session session = request.getSession();
+
+        /// TODO: 2023/09/04 리팩터링
         if ("/".equals(uri)) {
             return Response.of(OK, "text/html", "Hello world!");
         }
         if ("/login".equals(uri)) {
+            if (isLoginUser(session)) {
+                return redirectLoginUser();
+            }
             return getResponseForStaticResource("/login.html");
         }
         if ("/register".equals(uri)) {
+            if (isLoginUser(session)) {
+                return redirectLoginUser();
+            }
             return getResponseForStaticResource("/register.html");
         }
 
@@ -56,6 +68,16 @@ public class RequestHandler {
         }
 
         return handlerAdaptor.getMapping(request);
+    }
+
+    private static boolean isLoginUser(Session session) {
+        return Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"));
+    }
+
+    private static Response redirectLoginUser() {
+        Response redirect = Response.of(FOUND, HTML.toString(), "");
+        redirect.addLocation("/index.html");
+        return redirect;
     }
 
     private static Response getResponseForStaticResource(String uri) throws IOException {

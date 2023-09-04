@@ -6,11 +6,15 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Method;
+import org.apache.coyote.http11.common.Session;
 
 public class Request {
 
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private final Method method;
     private final String uri;
     private final Headers headers;
@@ -85,6 +89,11 @@ public class Request {
         return body;
     }
 
+    public boolean hasCookieByName(String name) {
+        return headers.getCookie()
+                .isExistByName(name);
+    }
+
     public String getPath() {
         return URI.create(uri).getPath();
     }
@@ -97,13 +106,17 @@ public class Request {
         return uri;
     }
 
-    public String getBody() {
-        return body;
+    public Session getSession() {
+        Cookies cookies = headers.getCookie();
+        try {
+            return (Session) SESSION_MANAGER.findSession(cookies.findByName("JSESSIONID"));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public boolean hasCookieByName(String name) {
-        return headers.getCookie()
-                .isExistByName(name);
+    public String getBody() {
+        return body;
     }
 
     @Override

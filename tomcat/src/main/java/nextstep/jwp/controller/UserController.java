@@ -6,9 +6,10 @@ import static org.apache.coyote.http11.common.Status.FOUND;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.common.Cookies;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.util.QueryStringParser;
@@ -28,7 +29,10 @@ public class UserController {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             Response redirect = redirect("/index.html");
-            redirect.addSetCookie("JSESSIONID=" + UUID.randomUUID());
+
+            Session session = request.getSession();
+            session.setAttribute("user", user.get());
+            redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));
             return redirect;
         }
         return redirect("/401.html");

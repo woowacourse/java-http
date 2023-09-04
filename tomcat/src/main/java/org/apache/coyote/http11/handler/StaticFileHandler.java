@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 import static org.apache.coyote.http11.common.HttpStatus.OK;
@@ -47,13 +48,14 @@ public class StaticFileHandler {
     }
 
     private static String findResponseBody(final String requestURI) throws IOException {
-        String requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestURI).getFile();
-        StringBuilder sb = new StringBuilder();
-        BufferedReader br = new BufferedReader(new FileReader(requestedFile, Charset.forName("UTF-8")));
-        String str;
-        while ((str = br.readLine()) != null) {
-            sb.append(str + "\n");
+        URL requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestURI);
+        try (BufferedReader br = new BufferedReader(new FileReader(requestedFile.getFile(), Charset.forName("UTF-8")))) {
+            StringBuilder sb = new StringBuilder();
+            String str;
+            while ((str = br.readLine()) != null) {
+                sb.append(str + "\n");
+            }
+            return sb.toString();
         }
-        return sb.toString();
     }
 }

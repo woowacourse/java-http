@@ -15,6 +15,9 @@ public class FileFinder {
     private static final String RESOURCE_PATH = ResponseEntityFactory.class.getClassLoader().getResource("static")
         .getPath();
 
+    private FileFinder() {
+    }
+
     public static String readFile(final String fileName) throws IOException {
         final Path absolutePath = findAbsolutePath(fileName);
 

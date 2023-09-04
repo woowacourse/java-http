@@ -10,6 +10,9 @@ public class X_WWW_Form_UrlEncodedDecoder {
     private static final String DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
+    private X_WWW_Form_UrlEncodedDecoder() {
+    }
+
     public static Map<String, String> parse(final String input) {
         final Map<String, String> result = new HashMap<>();
 

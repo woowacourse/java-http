@@ -10,6 +10,9 @@ public class ResponseEntityFactory {
     private static final String HTML_CONTENT_TYPE = "text/html;charset=utf-8";
     private static final String EMPTY_BODY = "";
 
+    private ResponseEntityFactory() {
+    }
+
     public static ResponseEntity createStaticResourceHttpResponse(final HttpRequest httpRequest) throws IOException {
         final String body = FileFinder.readFile(httpRequest.getPath());
 

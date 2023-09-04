@@ -41,28 +41,23 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String requestLine = bufferedReader.readLine();
-            if (requestLine == null) {
-                return;
-            }
-            String[] requests = requestLine.split(" ");
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
-            String httpMethod = requests[0];
-            String httpUrl = requests[1];
-            String fileName = httpUrl.substring(httpUrl.lastIndexOf('/') + 1);
+            String requestMethod = httpRequest.getMethod();
+            String requestPath = httpRequest.getPath();
+            String requestFileName = requestPath.substring(requestPath.lastIndexOf('/') + 1);
+            String requestBody = httpRequest.getBody();
+            Map<String, String> headers = httpRequest.getHeaders();
+
+            log.info("requestMethod: {}", requestMethod);
+            log.info("requestPath: {}", requestPath);
+            log.info("requestFileName: {}", requestFileName);
+            log.info("requestBody: {}", requestBody);
+
             String response = null;
-
-            Map<String, String> header = parseToHeader(bufferedReader);
-
             HttpResponse httpResponse = new HttpResponse();
 
-            if (httpMethod.equals("POST") && httpUrl.equals("/login")) {
-                int contentLength = Integer.parseInt(header.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-                log.info("requestBody: {}", requestBody);
-
+            if (requestMethod.equals("POST") && requestPath.equals("/login")) {
                 Map<String, String> queryParms = parseToQueryParms(requestBody);
 
                 try {
@@ -88,15 +83,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (httpMethod.equals("POST") && httpUrl.equals("/register")) {
-
-                int contentLength = Integer.parseInt(header.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-                log.info("reqeustBody: {}", requestBody);
-
-                Map<String, String> queryParms = parseToQueryParms(requestBody.toString());
+            if (requestMethod.equals("POST") && requestPath.equals("/register")) {
+                Map<String, String> queryParms = parseToQueryParms(requestBody);
 
                 User user = new User(queryParms.get("account"), queryParms.get("password"),
                         queryParms.get("email"));
@@ -106,8 +94,8 @@ public class Http11Processor implements Runnable, Processor {
                 log.info(response);
             }
 
-            if (httpMethod.equals("GET") && httpUrl.equals("/login")) {
-                HttpCookie cookie = new HttpCookie(header.get("Cookie"));
+            if (requestMethod.equals("GET") && requestPath.equals("/login")) {
+                HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
                 String sessionId = cookie.findValue("JSESSIONID");
                 if (sessionManager.isExist(sessionId)) {
@@ -117,28 +105,29 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (httpMethod.equals("GET") && httpUrl.equals("/register")) {
+            if (requestMethod.equals("GET") && requestPath.equals("/register")) {
                 response = createResponse("text/html", readFile("static", "register.html"));
             }
 
-            if (httpMethod.equals("GET") && httpUrl.equals("/")) {
+            if (requestMethod.equals("GET") && requestPath.equals("/")) {
                 response = createResponse("text/plain;", "Hello world!");
             }
 
-            if (httpMethod.equals("GET") && fileName.endsWith(".html")) {
-                response = createResponse("text/html", readFile("static", fileName));
+            if (requestMethod.equals("GET") && requestFileName.endsWith(".html")) {
+                response = createResponse("text/html", readFile("static", requestFileName));
             }
 
-            if (httpMethod.equals("GET") && fileName.equals("styles.css")) {
-                response = createResponse("text/css", readFile("static/css", fileName));
+            if (requestMethod.equals("GET") && requestFileName.equals("styles.css")) {
+                response = createResponse("text/css", readFile("static/css", requestFileName));
             }
 
-            if (httpMethod.equals("GET") && fileName.endsWith(".js") && !fileName.equals("scripts.js")) {
-                response = createResponse("text/javascript", readFile("static/assets", fileName));
+            if (requestMethod.equals("GET") && requestFileName.endsWith(".js") && !requestFileName.equals(
+                    "scripts.js")) {
+                response = createResponse("text/javascript", readFile("static/assets", requestFileName));
             }
 
-            if (httpMethod.equals("GET") && fileName.equals("scripts.js")) {
-                response = createResponse("text/javascript", readFile("static/js", fileName));
+            if (requestMethod.equals("GET") && requestFileName.equals("scripts.js")) {
+                response = createResponse("text/javascript", readFile("static/js", requestFileName));
             }
 
             outputStream.write(response.getBytes());
@@ -160,19 +149,6 @@ public class Http11Processor implements Runnable, Processor {
             queryParms.put(key, value);
         }
         return queryParms;
-    }
-
-    private Map<String, String> parseToHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        String line;
-
-        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] keyValues = line.split(":");
-            String key = keyValues[0].trim();
-            String value = keyValues[1].trim();
-            header.put(key, value);
-        }
-        return header;
     }
 
     private String createResponse(String contentType, String responseBody) {

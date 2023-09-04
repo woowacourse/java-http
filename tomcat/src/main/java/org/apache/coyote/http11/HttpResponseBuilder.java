@@ -95,7 +95,8 @@ public class HttpResponseBuilder {
             Set<Map.Entry<String, String>> entries = cookies.entrySet();
             String collect = entries.stream()
                     .map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .collect(Collectors.joining());
+                    .reduce((cookie1, cookie2) -> cookie1 + "; " + cookie2)
+                    .orElse("");
             cookieHeader.append(collect);
 
             return cookieHeader.toString() + SPACE + LINE_FEED;

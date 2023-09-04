@@ -30,6 +30,20 @@ public class RequestFixture {
             "\n" +
             "message body";
 
+    public static final String POST_SUCCESS_LOGIN_REQUEST = "POST /login HTTP/1.1\n" +
+            "header: header\n" +
+            "Cookie: test=test\n" +
+            "Content-Length: 30\n" +
+            "\n" +
+            "account=gugu&password=password";
+
+    public static final String POST_FAIL_LOGIN_REQUEST = "POST /login HTTP/1.1\n" +
+            "header: header\n" +
+            "Cookie: test=test\n" +
+            "Content-Length: 30\n" +
+            "\n" +
+            "account=test&password=test";
+
     public static final String GET_REGISTER_REQUEST = "GET /register HTTP/1.1\n" +
             "header: header\n" +
             "Cookie: test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n" +

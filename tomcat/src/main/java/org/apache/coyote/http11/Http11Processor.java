@@ -12,9 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,13 +45,11 @@ public class Http11Processor implements Runnable, Processor {
             if (Objects.isNull(requestLine)) {
                 throw new IllegalArgumentException(ILLEGAL_REQUEST);
             }
+            log.info(requestLine);
 
-            URL resource = getResource(requestLine);
-            if (Objects.isNull(resource)) {
-                throw new IllegalArgumentException(ILLEGAL_REQUEST);
-            }
+            ResponseInfo responseInfo = handleRequest(requestLine);
 
-            String response = buildResponse(resource);
+            String response = buildResponse(responseInfo);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -59,32 +57,42 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private URL getResource(String requestLine) {
+    private ResponseInfo handleRequest(String requestLine) {
         String requestUri = requestLine.split(" ")[URL_INDEX];
 
         if (requestUri.contains("/login")) {
-            int index = requestUri.indexOf("?");
-            if (index == -1) {
-                String resourcePath = RESOURCE_PATH + "/login.html";
-                return getClass().getClassLoader().getResource(resourcePath);
-            }
-
-            String path = requestUri.substring(0, index);
-            String queryString = requestUri.substring(index + 1);
-
-            String[] queryParams = queryString.split("&");
-            String account = getParamValueWithKey(queryParams, "account");
-            User user = InMemoryUserRepository.findByAccount(account).get();
-            if (user.checkPassword(getParamValueWithKey(queryParams, "password"))) {
-                log.info("User: " + user.toString());
-            }
-
-            String resourcePath = RESOURCE_PATH + path + ".html";
-            return getClass().getClassLoader().getResource(resourcePath);
+            return handleLoginRequest(requestUri);
         }
 
         String resourcePath = RESOURCE_PATH + requestUri;
-        return getClass().getClassLoader().getResource(resourcePath);
+        return new ResponseInfo(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
+    }
+
+    private ResponseInfo handleLoginRequest(String requestUri) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        int index = requestUri.indexOf("?");
+        if (index == -1) {
+            String resourcePath = RESOURCE_PATH + "/login.html";
+            return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
+        }
+
+        String queryString = requestUri.substring(index + 1);
+
+        String[] queryParams = queryString.split("&");
+        String account = getParamValueWithKey(queryParams, "account");
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            String resourcePath = RESOURCE_PATH + "/401.html";
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+        }
+        if (user.get().checkPassword(getParamValueWithKey(queryParams, "password"))) {
+            log.info("User: " + user);
+            String resourcePath = RESOURCE_PATH + "/index.html";
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+        }
+
+        String resourcePath = RESOURCE_PATH + "/401.html";
+        return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
     }
 
     private String getParamValueWithKey(String[] queryParams, String key) {
@@ -97,8 +105,8 @@ public class Http11Processor implements Runnable, Processor {
         return "";
     }
 
-    private String buildResponse(URL resource) throws IOException {
-        File location = new File(resource.getFile());
+    private String buildResponse(ResponseInfo responseInfo) throws IOException {
+        File location = new File(responseInfo.getResource().getFile());
         String responseBody = "";
 
         if (location.isDirectory()) {
@@ -110,8 +118,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType(resource.getPath()) + ";charset=utf-8 ",
+                "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
+                "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

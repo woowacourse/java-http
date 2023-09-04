@@ -11,6 +11,9 @@ public class MemberRepository {
         memberRepository.put("gugu", new Member("gugu", "password", "a@a.com"));
     }
 
+    private MemberRepository() {
+    }
+
     public static Member findMember(String account) {
         return memberRepository.get(account);
     }

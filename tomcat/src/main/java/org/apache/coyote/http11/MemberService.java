@@ -3,12 +3,17 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MemberService {
 
     private static final Logger log = LoggerFactory.getLogger(MemberService.class);
+
+    private MemberService() {
+    }
 
     public static HttpResponse login(HttpRequest request) {
         String body = request.getBody();
@@ -17,13 +22,19 @@ public class MemberService {
             String account = requestParam.get("account");
             String password = requestParam.get("password");
             Member foundMember = MemberRepository.findMember(account);
+            Session session = new Session();
+            session.setAttribute("member", foundMember);
+            SessionManager.add(session);
             if (isValidMember(password, foundMember)) {
                 log.info("foundMember.getAccount() = " + foundMember.getAccount() + " logged in");
                 return new HttpResponse.Builder()
                         .setHttpStatusCode(HttpStatusCode.FOUND)
-                        .setLocation("/index.html").build();
+                        .setLocation("/index.html")
+                        .setCookie("JSESSIONID=" + session.getId())
+                        .build();
             }
         }
+
         return new HttpResponse.Builder()
                 .setHttpStatusCode(HttpStatusCode.FOUND)
                 .setLocation("/401.html").build();
@@ -37,11 +48,16 @@ public class MemberService {
             Member member = new Member(requestParam.get("account"), requestParam.get("password"),
                     requestParam.get("email"));
             MemberRepository.register(member);
+            Session session = new Session();
+            session.setAttribute("member", member);
+            SessionManager.add(session);
             log.info("member.getAccount() = " + member.getAccount() + " registered");
 
             return new HttpResponse.Builder()
                     .setHttpStatusCode(HttpStatusCode.FOUND)
-                    .setLocation("/index.html").build();
+                    .setLocation("/index.html")
+                    .setCookie("JSESSIONID=" + session.getId())
+                    .build();
         }
         return new HttpResponse.Builder()
                 .setHttpStatusCode(HttpStatusCode.BAD_REQUEST).build();

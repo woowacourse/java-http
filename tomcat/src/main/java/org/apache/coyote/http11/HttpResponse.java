@@ -2,23 +2,26 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private final HttpStatusCode httpStatusCode;
     private final String location;
+    private final String cookie;
     private final String contentType;
     private final String charset;
     private final int contentLength;
     private final byte[] body;
 
     public HttpResponse(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String location,
-            String contentType,
+            String cookie, String contentType,
             String charset, byte[] body) {
         this.httpVersion = httpVersion;
         this.httpStatusCode = httpStatusCode;
         this.location = location;
+        this.cookie = cookie;
         this.contentType = contentType;
         this.charset = charset;
         this.contentLength = body.length;
@@ -43,11 +46,14 @@ public class HttpResponse {
                     "Content-Type: " + contentType + ";charset=" + charset + " ",
                     "Content-Length: " + contentLength + " ",
                     "").getBytes());
-            return;
-        }
-        if (httpStatusCode.isRedirect()) {
+        } else if (httpStatusCode.isRedirect()) {
             outputStream.write(String.join("\r\n",
                     "Location: http://localhost:8080" + location + " ",
+                    "").getBytes());
+        }
+        if (Objects.nonNull(cookie) && !cookie.isEmpty()) {
+            outputStream.write(String.join("\r\n",
+                    "Set-Cookie: " + cookie + "; path =/" +" ",
                     "").getBytes());
         }
     }
@@ -67,6 +73,8 @@ public class HttpResponse {
         private HttpVersion httpVersion = HTTP_VERSION_DEFAULT;
         private HttpStatusCode httpStatusCode = HTTP_STATUS_CODE_DEFAULT;
         private String location = "";
+        private String cookie;
+
         private String contentType = "";
         private String charset = "utf-8";
         private byte[] body = {};
@@ -83,6 +91,11 @@ public class HttpResponse {
 
         public Builder setLocation(String location) {
             this.location = location;
+            return this;
+        }
+
+        public Builder setCookie(String cookie) {
+            this.cookie = cookie;
             return this;
         }
 
@@ -107,7 +120,7 @@ public class HttpResponse {
         }
 
         public HttpResponse build() {
-            return new HttpResponse(httpVersion, httpStatusCode, location, contentType, charset,
+            return new HttpResponse(httpVersion, httpStatusCode, location, cookie, contentType, charset,
                     body);
         }
     }

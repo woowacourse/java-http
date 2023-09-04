@@ -3,10 +3,13 @@ package org.apache.coyote.http11.handler;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MemberService;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginHandler implements Handler {
 
@@ -19,6 +22,22 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
+        if (request.getHeaders().containsKey("Cookie")) {
+            String cookies = request.getHeaders().get("Cookie");
+            for (String cookie : cookies.split(";")) {
+                String[] probableSessionCookie = cookie.split("=");
+                if (probableSessionCookie.length == 2) {
+                    String sessionId = probableSessionCookie[1];
+                    Session session = SessionManager.findSession(sessionId);
+                    if (Objects.nonNull(session)) {
+                        return new HttpResponse.Builder()
+                                .setHttpStatusCode(HttpStatusCode.FOUND)
+                                .setLocation("/index.html")
+                                .setCookie("JSESSIONID=" + session.getId()).build();
+                    }
+                }
+            }
+        }
         if (request.getHeaders().containsKey("Content-Type") && request.getHeaders()
                 .get("Content-Type").contains("application/x-www-form-urlencoded")) {
             return MemberService.login(request);

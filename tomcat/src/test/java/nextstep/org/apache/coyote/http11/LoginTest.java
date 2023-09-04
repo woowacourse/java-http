@@ -65,6 +65,36 @@ public class LoginTest {
         // then
         var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /index.html";
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void 로그인_실패_테스트() throws IOException {
+        // given
+        String requestBody = "account=gugu&password=wrongPassword";
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + requestBody.getBytes().length,
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+
         assertThat(socket.output()).contains(expected);
     }
 }

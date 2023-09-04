@@ -19,6 +19,10 @@ public class HttpRequest {
     }
 
     public String getUriPath() {
-        return requestLine.getRequestUri();
+        return requestLine.getPath();
+    }
+
+    public String getQueryParameter(final String queryKey) {
+        return requestLine.getQueryParameter(queryKey);
     }
 }

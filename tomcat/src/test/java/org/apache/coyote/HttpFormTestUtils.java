@@ -82,6 +82,16 @@ public class HttpFormTestUtils {
         return this;
     }
 
+    public HttpFormTestUtils setCookie(final String cookie) {
+        sb.append(cookie).append(" ");
+        return this;
+    }
+
+    public HttpFormTestUtils responseBody(final String body) {
+        sb.append(body);
+        return this;
+    }
+
     public HttpFormTestUtils responseByResource(final String name) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(name);
         sb.append(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));

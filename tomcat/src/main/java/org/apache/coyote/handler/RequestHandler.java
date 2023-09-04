@@ -5,6 +5,5 @@ import org.apache.coyote.response.HttpResponse;
 
 public interface RequestHandler {
 
-
     HttpResponse handle(final HttpRequest httpRequest);
 }

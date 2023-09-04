@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class RequestBody {
 
-    public final static RequestBody EMPTY = new RequestBody(Collections.emptyMap());
+    public static final RequestBody EMPTY = new RequestBody(Collections.emptyMap());
 
     private static final String REQUEST_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";

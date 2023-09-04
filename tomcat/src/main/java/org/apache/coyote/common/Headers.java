@@ -1,44 +1,25 @@
 package org.apache.coyote.common;
 
-import org.apache.coyote.exception.CoyoteHttpException;
-import org.apache.coyote.session.Cookies;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Headers {
 
-    private static final String HEADER_DELIMITER = ":";
-    private static final int HEADER_NAME_INDEX = 0;
-    private static final int HEADER_VALUE_INDEX = 1;
-
     private final Map<String, String> mapping = new HashMap<>();
-
-    public Headers(final List<String> headersWithValue) {
-        headersWithValue.stream()
-                .map(headerWithValue -> headerWithValue.split(HEADER_DELIMITER))
-                .forEach(header -> mapping.put(header[HEADER_NAME_INDEX].trim(), header[HEADER_VALUE_INDEX].trim()));
-    }
 
     public Headers(final Map<String, String> headers) {
         mapping.putAll(headers);
     }
 
-    public Cookies cookies() {
-        final String cookiesHeader = mapping.getOrDefault("Cookie", null);
-        if (Objects.isNull(cookiesHeader)) {
-            throw new CoyoteHttpException("Http header에 Cookie가 존재하지 않습니다.");
-        }
-
-        return Cookies.from(cookiesHeader);
-    }
-
     public String getHeaderValue(final String name) {
         return mapping.getOrDefault(name, null);
+    }
+
+    public void addHeader(final String headerName, final String value) {
+        mapping.put(headerName, value);
     }
 
     public List<String> headerNames() {

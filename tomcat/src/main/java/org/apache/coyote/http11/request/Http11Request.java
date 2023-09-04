@@ -1,13 +1,15 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.utils.Parser.parseFormData;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Http11Request {
-
     private static final String LINE_SEPARATOR = "\r\n";
+
     final Method method;
     final String path;
     final Map<String, String> queryParams;
@@ -42,7 +44,7 @@ public class Http11Request {
         if (uris.length > 1) {
             queryString = uris[1];
         }
-        final Map<String, String> queryParams = parseQueryString(queryString);
+        final Map<String, String> queryParams = parseFormData(queryString);
         final Map<String, String> headers = parseHeaders(lines);
 
         final String cookieFields = headers.remove("Cookie");
@@ -55,23 +57,6 @@ public class Http11Request {
                 headers,
                 cookies
         );
-    }
-
-    private static Map<String, String> parseQueryString(final String queryString) {
-        final Map<String, String> queryParams = new HashMap<>();
-
-        if (!queryString.contains("&")) {
-            return queryParams;
-        }
-
-        for (final String query : queryString.split("&")) {
-            final String[] param = query.split("=", 2);
-            final String key = param[0];
-            final String value = param[1];
-
-            queryParams.put(key, value);
-        }
-        return queryParams;
     }
 
     private static Map<String, String> parseHeaders(final List<String> lines) {

@@ -1,8 +1,14 @@
 package org.apache.coyote.http11.response;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.exception.PageNotFoundException;
 
 public class Http11Response {
     private static final String LINE_SEPARATOR = "\r\n";
@@ -15,13 +21,41 @@ public class Http11Response {
         this.status = status;
         this.headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/html;charset=utf-8 ");
-        headers.put("Content-Length", body.getBytes().length + " ");
 
         this.body = body;
+        if (body.length() > 0) {
+            headers.put("Content-Length", body.getBytes().length + " ");
+        }
+    }
+
+    public Http11Response(final Status status) {
+        this(status, "");
+    }
+
+    public Http11Response(final Status status, final URL resource) {
+        this(status, readResponseBody(resource));
+    }
+
+    private static String readResponseBody(final URL resource) {
+        try {
+            final Path filePath = new File(resource.getFile()).toPath();
+            return new String(Files.readAllBytes(filePath));
+
+        } catch (final NullPointerException | IOException e) {
+            throw new PageNotFoundException(resource.toString());
+        }
     }
 
     public void addHeader(final String headerName, final String value) {
         headers.put(headerName, value);
+    }
+
+    private String formatStatus(final Status s) {
+        return s.getCode() + " " + s.getName() + " ";
+    }
+
+    private String formatHeader(final String h) {
+        return h + ": " + headers.get(h);
     }
 
     public String getResponse() {
@@ -35,13 +69,5 @@ public class Http11Response {
                 formattedHeaders,
                 "",
                 body);
-    }
-
-    private String formatStatus(final Status s) {
-        return s.getCode() + " " + s.getName() + " ";
-    }
-
-    private String formatHeader(final String h) {
-        return h + ": " + headers.get(h);
     }
 }

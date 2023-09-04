@@ -3,25 +3,24 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.request.Method.GET;
 import static org.apache.coyote.http11.request.Method.POST;
 import static org.apache.coyote.http11.response.Status.FOUND;
+import static org.apache.coyote.http11.response.Status.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.http11.response.Status.NOT_FOUND;
 import static org.apache.coyote.http11.response.Status.OK;
 import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
+import static org.apache.coyote.http11.utils.Parser.parseFormData;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.PageNotFoundException;
+import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.response.Http11Response;
@@ -30,10 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-    public static final String SESSION_COOKIE_NAME = "JSESSIONID";
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String LINE_SEPARATOR = "\r\n";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private final Socket connection;
+    private final UserService userService = new UserService();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -51,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final Http11Request request = readRequest(inputStream);
-            final Http11Response response = makeResponseOf(request);
+            final Http11Response response = handleRequest(request);
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
@@ -100,129 +101,104 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private Http11Response makeResponseOf(final Http11Request request) {
+    private Http11Response handleRequest(final Http11Request request) {
+        try {
+            return handleRequestWithMethod(request);
+        } catch (final PageNotFoundException e) {
+            log.error(e.getMessage());
+            return handleResponseWithException(NOT_FOUND);
+        } catch (final UnauthorizedException e) {
+            log.error(e.getMessage());
+            return handleResponseWithException(UNAUTHORIZED);
+        } catch (final Exception e) {
+            log.error(e.getMessage());
+            return handleResponseWithException(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private Http11Response handleRequestWithMethod(final Http11Request request) {
         final Method method = request.getMethod();
-        final String path = request.getPath();
-        final Status status;
-        final Http11Response response;
-
         if (method == GET) {
-            status = OK;
-            if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
-
-                return makeAuthResponse(FOUND, request, request.getCookie(SESSION_COOKIE_NAME));
-            }
-
-            final String responseBody = getResponseBodyFromResource(OK, path);
-            response = new Http11Response(status, responseBody);
-            final String accept = request.getHeader("Accept");
-            if (accept != null && accept.contains("css")) {
-                response.addHeader("Content-Type", "text/css;charset=utf-8 ");
-            }
-            return response;
+            return handleGetRequest(request);
         }
         if (method == POST) {
-            if (path.equals("/login")) {
-                return logIn(request);
-            }
-            if (path.equals("/register")) {
-                return register(request);
-            }
+            return handlePostRequest(request);
         }
-        throw new IllegalArgumentException("Invalid Request Uri");
+        throw new PageNotFoundException(request.getPath());
     }
 
-    private Http11Response logIn(final Http11Request request) {
-        final Map<String, String> bodyFields = parseFormData(request.getBody());
-        final String account = bodyFields.get("account");
-        final String password = bodyFields.get("password");
-
-        // TODO: 유저가 존재하지 않는 경우 예외 처리
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
-
-        Status status = UNAUTHORIZED;
-        String id = null;
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
-
-            id = UUID.randomUUID().toString();
-            final Session session = new Session(id);
-            session.setAttribute("user", user);
-            SessionManager.add(session);
-            status = FOUND;
+    private Http11Response handleGetRequest(final Http11Request request) {
+        final String path = request.getPath();
+        if (path.equals("/")) {
+            return new Http11Response(OK, "Hello world!");
+        }
+        if (path.equals("/favicon.ico")) {
+            return new Http11Response(OK, "Icon Not Exist!");
+        }
+        if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
+            return handleAuthResponse(request, request.getCookie(SESSION_COOKIE_NAME));
         }
 
-        return makeAuthResponse(status, request, id);
+        try {
+            final URL resource = convertPathToUrl(path);
+            final Http11Response response = new Http11Response(OK, resource);
+            checkContentType(request, response);
+            return response;
+
+        } catch (final Exception e) {
+            throw new PageNotFoundException(path);
+        }
     }
 
-    private Http11Response makeAuthResponse(final Status status, final Http11Request request, final String uuid) {
-        final String responseBody = getResponseBodyFromResource(status, request.getPath());
-        final Http11Response response = new Http11Response(status, responseBody);
+    private Http11Response handleAuthResponse(final Http11Request request, final String uuid) {
+        final Http11Response response = new Http11Response(FOUND);
 
-        if (status == FOUND) {
-            response.addHeader("Location", "/index.html");
-            if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
-                response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
-            }
+        response.addHeader("Location", "/index.html");
+        if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
+            response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
         }
         return response;
     }
 
-    private Http11Response register(final Http11Request request) {
-        final Map<String, String> bodyFields = parseFormData(request.getBody());
-
-        final String account = bodyFields.get("account");
-        final String password = bodyFields.get("password");
-        final String email = bodyFields.get("email");
-
-        final User user = new User(account, password, email);
-
-        InMemoryUserRepository.save(user);
-
-        final String id = UUID.randomUUID().toString();
-        final Session session = new Session(id);
-        session.setAttribute("user", user);
-        SessionManager.add(session);
-
-        return makeAuthResponse(FOUND, request, id);
-    }
-
-    private Map<String, String> parseFormData(final String body) {
-        final Map<String, String> fields = new HashMap<>();
-
-        for (final String field : body.split("&")) {
-            final String[] param = field.split("=", 2);
-            final String name = param[0];
-            final String value = param[1];
-            fields.put(name, value);
-        }
-        return fields;
-    }
-
-    private String getResponseBodyFromResource(final Status status, String path) {
-        if (path.equals("/")) {
-            return "Hello world!";
-        }
-        if (path.equals("/favicon.ico")) {
-            return "Icon Not Exist";
-        }
-        if (status.getCode() >= 400) {
-            path = "/" + status.getCode();
-        }
+    private URL convertPathToUrl(String path) {
         if (!path.contains(".")) {
             path += ".html";
         }
+        return getClass().getClassLoader().getResource("static" + path);
+    }
 
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
-
-        try {
-            final Path filePath = new File(resource.getFile()).toPath();
-            return new String(Files.readAllBytes(filePath));
-
-        } catch (final NullPointerException | IOException e) {
-            log.error(e.getMessage() + path, e);
-            return "Resource Not Exist: " + path;
+    private void checkContentType(final Http11Request request, final Http11Response response) {
+        final String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("css")) {
+            response.addHeader("Content-Type", "text/css;charset=utf-8 ");
         }
+    }
+
+    private Http11Response handlePostRequest(final Http11Request request) throws UnauthorizedException {
+        final String path = request.getPath();
+        if (path.equals("/login")) {
+            return logIn(request);
+        }
+        if (path.equals("/register")) {
+            return register(request);
+        }
+        throw new PageNotFoundException(request.getPath());
+    }
+
+    private Http11Response logIn(final Http11Request request) throws UnauthorizedException {
+        final Map<String, String> bodyFields = parseFormData(request.getBody());
+        final String uuid = userService.logIn(bodyFields);
+        return handleAuthResponse(request, uuid);
+    }
+
+    private Http11Response register(final Http11Request request) {
+        final Map<String, String> bodyFields = parseFormData(request.getBody());
+        final String uuid = userService.register(bodyFields);
+        return handleAuthResponse(request, uuid);
+    }
+
+    private Http11Response handleResponseWithException(final Status status) {
+        final URL resource = convertPathToUrl("/" + status.getCode());
+        return new Http11Response(status, resource);
     }
 }

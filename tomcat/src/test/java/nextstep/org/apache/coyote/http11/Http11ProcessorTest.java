@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -125,9 +126,11 @@ class Http11ProcessorTest {
             // then
             final String result = socket.output();
 
-            assertThat(result).contains("HTTP/1.1 302 Found");
-            assertThat(result).contains("Location: /index.html");
-            assertThat(result).contains("Set-Cookie: JSESSIONID=");
+            assertAll(
+                () -> assertThat(result).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(result).contains("Location: /index.html"),
+                () -> assertThat(result).contains("Set-Cookie: JSESSIONID=")
+            );
         }
 
         @DisplayName("비밀번호가 다른 경우 로그인에 실패한다.")
@@ -152,8 +155,10 @@ class Http11ProcessorTest {
             // then
             final String result = socket.output();
 
-            assertThat(result).contains("HTTP/1.1 302 Found");
-            assertThat(result).contains("Location: /401.html");
+            assertAll(
+                () -> assertThat(result).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(result).contains("Location: /401.html")
+            );
         }
 
         @DisplayName("아이디가 다른 경우 로그인에 실패한다.")
@@ -178,8 +183,10 @@ class Http11ProcessorTest {
             // then
             final String result = socket.output();
 
-            assertThat(result).contains("HTTP/1.1 302 Found");
-            assertThat(result).contains("Location: /401.html");
+            assertAll(
+                () -> assertThat(result).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(result).contains("Location: /401.html")
+            );
         }
     }
 
@@ -236,8 +243,10 @@ class Http11ProcessorTest {
             // then
             final String result = socket.output();
 
-            assertThat(result).contains("HTTP/1.1 302 Found");
-            assertThat(result).contains("Location: /index.html");
+            assertAll(
+                () -> assertThat(result).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(result).contains("Location: /index.html")
+            );
         }
     }
 }

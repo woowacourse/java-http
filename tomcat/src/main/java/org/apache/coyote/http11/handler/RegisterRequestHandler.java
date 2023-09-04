@@ -31,25 +31,28 @@ public class RegisterRequestHandler extends RequestHandler {
 		final var password = request.findBodyField("password");
 		final var email = request.findBodyField("email");
 
-		validateFields(account, password, email);
-
 		return register(account, password, email);
 	}
 
-	private void validateFields(final String account, final String password, final String email) {
-		if (account == null || password == null || email == null) {
-			throw new IllegalArgumentException("필요한 정보가 없습니다.");
-		}
-	}
-
 	private Response register(final String account, final String password, final String email) {
-		InMemoryUserRepository.findByAccount(account)
-			.ifPresent(user -> {
-				throw new IllegalArgumentException("이미 존재하는 계정입니다.");
-			});
+		if (isInvalidInput(account, password, email) || isDuplicatedAccount(account)) {
+			return Response.badRequest();
+		}
 
 		InMemoryUserRepository.save(new User(account, password, email));
 		log.info("[REGISTER SUCCESS] account: {}", account);
 		return Response.redirect("/index.html");
+	}
+
+	private boolean isInvalidInput(final String account, final String password, final String email) {
+		return isBlank(account) || isBlank(password) || isBlank(email);
+	}
+
+	private boolean isBlank(final String value) {
+		return value == null || value.isBlank();
+	}
+
+	private boolean isDuplicatedAccount(final String account) {
+		return InMemoryUserRepository.findByAccount(account).isPresent();
 	}
 }

@@ -68,7 +68,11 @@ public class LoginRequestHandler extends RequestHandler {
 	}
 
 	private boolean isInvalidInput(final String account, final String password) {
-		return account == null || password == null || account.isBlank() || password.isBlank();
+		return isBlank(account) || isBlank(password);
+	}
+	
+	private boolean isBlank(final String value) {
+		return value == null || value.isBlank();
 	}
 
 	private Session createSession(final User user) {

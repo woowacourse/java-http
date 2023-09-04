@@ -35,7 +35,7 @@ public class HttpRequestParser {
     }
 
     private Map<String, String> parseRequestHeader() throws IOException {
-        // TODO: MultiValueMap
+        // TODO: Change to MultiValueMap
         final Map<String, String> header = new HashMap<>();
         String line;
         while (!"".equals(line = reader.readLine())) {
@@ -46,12 +46,13 @@ public class HttpRequestParser {
     }
 
     private Map<String, String> parseRequestBody(final String contentLengthHeader) throws IOException {
-        // TODO: MultiValueMap
+        // TODO: Change to MultiValueMap
         final Map<String, String> body = new HashMap<>();
         int contentLength = Integer.parseInt(contentLengthHeader);
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
 
+        // TODO: Query Parse
         for (String temp : new String(buffer).split("&")) {
             String[] value = temp.split("=");
             body.put(value[0], URLDecoder.decode(value[1], "UTF-8"));

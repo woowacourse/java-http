@@ -2,28 +2,39 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 
+import static org.apache.coyote.http11.HttpStatusCode.NOT_FOUND;
+
 public class HttpResponse {
 
-    private final HttpStatusCode statusCode;
-    private final Map<String, String> header;
-    private final String body;
+    private HttpStatusCode statusCode;
+    private final HttpHeaders headers;
+//    private final Map<String, String> header;
+    private String body;
 
-    private HttpResponse(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
+    private HttpResponse(final HttpStatusCode statusCode, final HttpHeaders headers, final String body) {
         this.statusCode = statusCode;
-        this.header = header;
+        this.headers = headers;
         this.body = body;
     }
 
-    public static HttpResponse from(final HttpStatusCode statusCode, final Map<String, String> header, final String body) {
-        return new HttpResponse(statusCode, header, body);
-    }
-
-    public static HttpResponse from(final HttpStatusCode statusCode, final Map<String, String> header) {
-        return new HttpResponse(statusCode, header, "");
+    public static HttpResponse init() {
+        return new HttpResponse(NOT_FOUND, new HttpHeaders(), "");
     }
 
     public void addHeader(final String key, final String value) {
-        header.put(key, value);
+        headers.setHeaderValue(key, value);
+    }
+
+    public void addHeader(final HttpHeaderType key, final String value) {
+        headers.setHeaderValue(key, value);
+    }
+
+    public void setStatusCode(final HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBody(final String body) {
+        this.body = body;
     }
 
     public String stringify() {
@@ -38,7 +49,7 @@ public class HttpResponse {
 
     private String stringifyHeaders() {
         final StringBuilder stringBuilder = new StringBuilder();
-        for (Map.Entry<String, String> entry : header.entrySet()) {
+        for (Map.Entry<String, String> entry : headers.getHeaders().entrySet()) {
             stringBuilder.append(entry.getKey())
                     .append(": ")
                     .append(entry.getValue())

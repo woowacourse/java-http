@@ -3,6 +3,7 @@ package org.apache.coyote.http11.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Cookies;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -30,6 +31,12 @@ public class SessionManager {
 
     public static void enroll(Session session) {
         SESSIONS.put(session.getId(), session);
+    }
+
+    public static void enrollSession(User user, String sessionId) {
+        Session session = new Session(sessionId);
+        session.setAttribute("user", user);
+        SessionManager.enroll(session);
     }
 
     public void add(Session session) {

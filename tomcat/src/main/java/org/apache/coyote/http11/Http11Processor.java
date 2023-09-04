@@ -6,8 +6,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,6 +20,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Controller indexController = new IndexController();
+    private final Controller loginController = new LoginController();
+    private final Map<String, Controller> handlerMapping = new HashMap<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -26,7 +31,13 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        init();
         process(connection);
+    }
+
+    private void init() {
+        handlerMapping.put("/", indexController);
+        handlerMapping.put("/login", loginController);
     }
 
     @Override
@@ -36,23 +47,23 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequestParser httpRequestParser = new HttpRequestParser();
             final HttpRequest httpRequest = httpRequestParser.parse(inputStream);
 
-            String requestUri = httpRequest.getRequestUri();
-            if (requestUri.equals("/")) {
-                requestUri = "/index.html";
+            final String requestUri = httpRequest.getRequestUri();
+
+            final String view;
+            final HttpResponse httpResponse = new HttpResponse();
+            if (requestUri.contains(".")) {
+                view = requestUri;
+                httpResponse.setStatusCode(HttpStatusCode.OK);
+            } else {
+                final Controller controller = handlerMapping.get(requestUri);
+                view = controller.run(httpRequest, httpResponse);
             }
-            if (requestUri.equals("/login")) {
-                requestUri = "/login.html";
-                login(httpRequest);
-            }
 
-            final FileReader fileReader = new FileReader();
-            final String responseBody = fileReader.read(requestUri);
-
-            final ResponseEntity<String> responseEntity = new ResponseEntity<>(responseBody).ok();
-
-            final HttpResponseMaker httpResponseMaker = new HttpResponseMaker();
-            final HttpResponse httpResponse = httpResponseMaker.make(responseEntity);
+            final ViewResolver viewResolver = new ViewResolver();
+            final String responseBody = viewResolver.read(view);
             httpResponse.setHeader("Content-Type", httpRequest.getContentType());
+            httpResponse.setHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+            httpResponse.setResponseBody(responseBody);
 
             final var responseString = makeResponseString(httpResponse);
             outputStream.write(responseString.getBytes());
@@ -60,14 +71,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void login(final HttpRequest httpRequest) {
-        final String account = httpRequest.getParameter("account");
-        final String password = httpRequest.getParameter("password");
-        InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .ifPresent(user -> log.info(user.toString()));
     }
 
     private String makeResponseString(final HttpResponse httpResponse) {

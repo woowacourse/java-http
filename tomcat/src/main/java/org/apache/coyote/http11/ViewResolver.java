@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.apache.coyote.http11.exception.ServerException;
 
-public class FileReader {
+public class ViewResolver {
 
     private final ClassLoader classLoader = getClass().getClassLoader();
 

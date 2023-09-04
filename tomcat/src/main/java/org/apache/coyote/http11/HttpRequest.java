@@ -19,6 +19,10 @@ public class HttpRequest {
         this.headers = headers;
     }
 
+    public boolean isEmptyQueryString() {
+        return queryStrings.getQueryStrings().size() == 0;
+    }
+
     public String getRequestUri() {
         return requestUri;
     }

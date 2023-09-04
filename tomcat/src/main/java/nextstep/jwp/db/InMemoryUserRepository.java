@@ -24,4 +24,9 @@ public class InMemoryUserRepository {
     }
 
     private InMemoryUserRepository() {}
+
+    public static void deleteAll() {
+        database.clear();
+    }
+
 }

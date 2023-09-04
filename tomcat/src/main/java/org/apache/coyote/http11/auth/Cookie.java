@@ -3,6 +3,7 @@ package org.apache.coyote.http11.auth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Collections.EMPTY_MAP;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -30,6 +31,13 @@ public class Cookie {
                         toMap(header -> header[KEY_INDEX], header -> header[VALUE_INDEX]),
                         Cookie::new
                 ));
+    }
+
+    public static Cookie createSessionCookie() {
+        Map<String, String> cookie = new HashMap<>();
+        final String uuid = UUID.randomUUID().toString();
+        cookie.put("JSESSIONID", uuid);
+        return new Cookie(cookie);
     }
 
     public void put(final String key, final String value) {

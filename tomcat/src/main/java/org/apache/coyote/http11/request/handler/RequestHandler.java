@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-import static org.apache.coyote.http11.common.HttpStatus.OK;
+import static org.apache.coyote.http11.response.HttpStatus.OK;
 
 public class RequestHandler {
 

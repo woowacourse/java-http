@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.auth;
 
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.body.RequestBody;
@@ -8,10 +7,10 @@ import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-import static org.apache.coyote.http11.common.HttpStatus.CONFLICT;
-import static org.apache.coyote.http11.common.HttpStatus.FOUND;
-import static org.apache.coyote.http11.common.HttpStatus.OK;
-import static org.apache.coyote.http11.common.HttpStatus.UNAUTHORIZED;
+import static org.apache.coyote.http11.response.HttpStatus.CONFLICT;
+import static org.apache.coyote.http11.response.HttpStatus.FOUND;
+import static org.apache.coyote.http11.response.HttpStatus.OK;
+import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
 import static org.apache.coyote.http11.request.line.HttpMethod.*;
 
 public class AuthService {
@@ -43,13 +42,12 @@ public class AuthService {
     }
 
     private ResponseEntity getSuccessLoginResponse(final User user) {
-        final String uuid = UUID.randomUUID().toString();
-        final ResponseEntity responseEntity = new ResponseEntity(FOUND, INDEX_PAGE);
-        responseEntity.setCookie("JSESSIONID", uuid);
-        final Session session = new Session(uuid);
+        ResponseEntity response = ResponseEntity.getCookieResponseEntity(FOUND, INDEX_PAGE);
+        String jsessionid = response.getHttpCookie().get("JSESSIONID");
+        final Session session = Session.from(jsessionid);
         session.setAttribute("user", user);
         sessionRepository.create(session);
-        return responseEntity;
+        return response;
     }
 
     public ResponseEntity register(final RequestLine requestLine, final RequestBody requestBody) {

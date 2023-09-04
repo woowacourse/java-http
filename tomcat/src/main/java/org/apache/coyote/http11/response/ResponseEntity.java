@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.auth.Cookie;
-import org.apache.coyote.http11.common.HttpStatus;
+
+import static org.apache.coyote.http11.auth.Cookie.createSessionCookie;
 
 public class ResponseEntity {
 
@@ -11,6 +12,10 @@ public class ResponseEntity {
 
     public ResponseEntity(final HttpStatus httpStatus, final String uri) {
         this(httpStatus, uri, Cookie.from(null));
+    }
+
+    public static ResponseEntity getCookieResponseEntity(final HttpStatus httpStatus, final String uri) {
+        return new ResponseEntity(httpStatus, uri, createSessionCookie());
     }
 
     public ResponseEntity(final HttpStatus httpStatus, final String uri, final Cookie cookie) {

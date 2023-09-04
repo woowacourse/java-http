@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -101,9 +103,12 @@ public class HttpHeaders {
 
     @Override
     public String toString() {
+        final List<Entry<HttpHeaderName, String>> entrySet = headers.entrySet().stream()
+            .sorted(Entry.comparingByKey())
+            .collect(Collectors.toList());
         final StringBuilder stringBuilder = new StringBuilder();
 
-        for (final Entry<HttpHeaderName, String> entry : headers.entrySet()) {
+        for (final Entry<HttpHeaderName, String> entry : entrySet) {
             stringBuilder.append(entry.getKey().getValue())
                 .append(": ")
                 .append(entry.getValue())

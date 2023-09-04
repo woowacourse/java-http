@@ -13,10 +13,10 @@
         - [ ] 확장자를 사용
         - [ ] Accept 헤더를 사용
 
-- [ ] 요청 메시지를 파싱하여 저장한다.
-    - [ ] Start-line
-    - [ ] Headers
-    - [ ] Body
+- [x] 요청 메시지를 파싱하여 저장한다.
+    - [x] Start-line
+    - [x] Headers
+    - [x] Body
 
 - [ ] 응답 메시지를 생성한다.
     - [ ] Status Line

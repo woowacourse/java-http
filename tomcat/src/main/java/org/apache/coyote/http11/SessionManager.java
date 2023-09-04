@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
@@ -25,7 +24,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public HttpSession findSession(String id) throws IOException {
+    public HttpSession findSession(String id) {
         return sessions.get(id);
     }
 

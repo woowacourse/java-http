@@ -197,7 +197,21 @@ public class Http11Processor implements Runnable, Processor {
                     .location(REGISTER_PAGE_URI)
                     .build();
         }
-        return null;
+
+        String account = httpRequestBody.find("account");
+        String password = httpRequestBody.find("password");
+        String email = httpRequestBody.find("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        log.info("{} user 회원가입 성공", account);
+        return ResponseEntity
+                .builder()
+                .httpStatus(HttpStatus.CREATED)
+                .requestURI(requestURI)
+                .location(INDEX_PAGE_URI)
+                .build();
     }
 
     private Map<String, String> parseQueryString(String requestURI) {

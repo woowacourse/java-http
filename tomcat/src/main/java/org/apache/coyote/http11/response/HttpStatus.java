@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 public enum HttpStatus {
 
     OK("200"),
+    CREATED("201"),
     FOUND("302"),
     UNAUTHORIZED("401"),
     ;

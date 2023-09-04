@@ -12,10 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,18 +41,10 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = createRequest(startLine, bufferedReader);
             HandlerMatcher handlerMatcher = new HandlerMatcher(HttpMethod.valueOf(request.method()), request.uri());
-            HandlerMapping.init();
+
             if (!HandlerMapping.canHandle(handlerMatcher)) {
-                Path path = Paths.get(getClass().getClassLoader().getResource("static" + "/" + "404.html").getPath());
-                List<String> contents = Files.readAllLines(path);
-                String responseBody = String.join("\n", contents) + "\n";
-                String response = String.join("\r\n",
-                        "HTTP/1.1 404 Not Found ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-                outputStream.write(response.getBytes());
+                Handler exceptionHandler = HandlerMapping.getExceptionHandler(HttpStatus.NOT_FOUND);
+                outputStream.write(exceptionHandler.handle(request).getResponse().getBytes());
                 outputStream.flush();
                 return;
             }

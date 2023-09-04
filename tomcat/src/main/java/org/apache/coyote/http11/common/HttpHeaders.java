@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
+    public static final String DELIMITER = ": ";
+    public static final String COOKIE = "Cookie";
     private Map<String, String> headers;
 
     public HttpHeaders() {
@@ -19,7 +21,7 @@ public class HttpHeaders {
     public static HttpHeaders create(final List<String> lines) {
         Map<String, String> headers = new LinkedHashMap<>();
         for (String line : lines) {
-            String[] split = line.split(": ");
+            String[] split = line.split(DELIMITER);
             headers.put(split[0], split[1]);
         }
 
@@ -31,7 +33,7 @@ public class HttpHeaders {
     }
 
     public void addHeader(HttpHeaderName header, String value) {
-        headers.put(header.getName(), value); // map의 key로 string? httpheader?
+        headers.put(header.getName(), value);
     }
 
     public String getHeader(String name) {
@@ -39,14 +41,14 @@ public class HttpHeaders {
     }
 
     public Cookies getCookies() {
-        String cookieLine = headers.get("Cookie");
+        String cookieLine = headers.get(COOKIE);
         return Cookies.create(cookieLine);
     }
 
     @Override
     public String toString() {
         return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                .map(entry -> entry.getKey() + DELIMITER + entry.getValue() + " ")
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 }

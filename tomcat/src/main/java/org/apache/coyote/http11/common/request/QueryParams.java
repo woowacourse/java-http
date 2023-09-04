@@ -5,6 +5,9 @@ import org.apache.coyote.http11.util.Parser;
 
 public class QueryParams {
 
+    public static final String START_MARK_OF_QUERY_PARAMS = "?";
+    public static final int HAS_NO_QUERY_PARAMS = -1;
+
     private final Map<String, String> params;
 
     public QueryParams(final Map<String, String> params) {
@@ -12,8 +15,8 @@ public class QueryParams {
     }
 
     public static QueryParams create(String line) {
-        int questionMarkIdx = line.indexOf("?");
-        if (questionMarkIdx == -1) {
+        int questionMarkIdx = line.indexOf(START_MARK_OF_QUERY_PARAMS);
+        if (questionMarkIdx == HAS_NO_QUERY_PARAMS) {
             return QueryParams.empty();
         }
         String paramLine = line.substring(questionMarkIdx + 1);

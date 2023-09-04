@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManger;
 
 public class HttpRequest {
+
+    public static final String SESSIONID = "JSESSIONID";
+
     private final StartLine startLine;
     private final HttpHeaders headers;
     private final MessageBody body;
@@ -46,7 +50,7 @@ public class HttpRequest {
     }
 
     private static MessageBody findBody(HttpHeaders headers, BufferedReader br) throws IOException {
-        final String contentLength = headers.getHeader("Content-Length");
+        final String contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
         if (contentLength == null) {
             return MessageBody.empty();
         }
@@ -71,7 +75,7 @@ public class HttpRequest {
     public Session getSession() {
         Session session = null;
         try {
-            String sessionId = headers.getCookies().getCookie("JSESSIONID");
+            String sessionId = headers.getCookies().getCookie(SESSIONID);
             session = sessionManger.findSession(sessionId);
         } catch (Exception e) {
             return makeNewSession();

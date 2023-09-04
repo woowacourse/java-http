@@ -16,10 +16,16 @@ import org.apache.coyote.http11.util.StaticFileLoader;
 
 public class RegisterHandler implements Handler {
 
+    public static final String REGISTER_PAGE = "/register.html";
+    public static final String ACCOUNT = "account";
+    public static final String PASSWORD = "password";
+    public static final String EMAIL = "email";
+    public static final String INDEX_PAGE = "/index.html";
+
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
-            String content = StaticFileLoader.load("/register.html");
+            String content = StaticFileLoader.load(REGISTER_PAGE);
 
             HttpHeaders headers = new HttpHeaders();
             headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
@@ -29,11 +35,11 @@ public class RegisterHandler implements Handler {
         if (request.getMethod() == HttpMethod.POST) {
             QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
 
-            User user = new User(params.getParam("account"), params.getParam("password"), params.getParam("email"));
+            User user = new User(params.getParam(ACCOUNT), params.getParam(PASSWORD), params.getParam(EMAIL));
             InMemoryUserRepository.save(user);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.LOCATION, "/index.html");
+            headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
             return HttpResponse.create(StatusCode.FOUND, headers);
         }
         return null;

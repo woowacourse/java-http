@@ -20,16 +20,22 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    public static final String ACCOUNT = "account";
+    public static final String PASSWORD = "password";
+    public static final String USER = "user";
+    public static final String INDEX_PAGE = "/index.html";
+    public static final String LOGIN_PAGE = "/login.html";
+    public static final String LOGIN_FAIL_PAGE = "/401.html";
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
             if (isLoggedIn(request)) {
                 HttpHeaders headers = new HttpHeaders();
-                headers.addHeader(HttpHeaderName.LOCATION, "/index.html");
+                headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
                 return HttpResponse.create(StatusCode.FOUND, headers);
             }
-            String content = StaticFileLoader.load("/login.html");
+            String content = StaticFileLoader.load(LOGIN_PAGE);
             HttpHeaders headers = new HttpHeaders();
             headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
             headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
@@ -37,8 +43,8 @@ public class LoginHandler implements Handler {
         }
         if (request.getMethod() == HttpMethod.POST) {
             QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
-            String account = params.getParam("account");
-            String password = params.getParam("password");
+            String account = params.getParam(ACCOUNT);
+            String password = params.getParam(PASSWORD);
 
             return InMemoryUserRepository.findByAccount(account)
                     .filter(user -> user.checkPassword(password))
@@ -49,7 +55,7 @@ public class LoginHandler implements Handler {
     }
 
     private boolean isLoggedIn(HttpRequest request) {
-        Object value = request.getSession().getAttribute("user"); // TODO : 세션 새로만들었을 경우..?
+        Object value = request.getSession().getAttribute(USER); // TODO : 세션 새로만들었을 경우..?
         if (value == null) {
             return false;
         }
@@ -62,17 +68,17 @@ public class LoginHandler implements Handler {
     private HttpResponse loginSuccess(HttpRequest request, User user) {
         log.info("로그인 성공 : {}", user);
         Session session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute(USER, user);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.LOCATION, "/index.html");
+        headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
         headers.addHeader(HttpHeaderName.SET_COOKIE, "JSESSIONID=" + session.getId());
         return HttpResponse.create(StatusCode.FOUND, headers);
     }
 
     private HttpResponse loginFail() {
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.LOCATION, "/401.html");
+        headers.addHeader(HttpHeaderName.LOCATION, LOGIN_FAIL_PAGE);
         return HttpResponse.create(StatusCode.FOUND, headers);
     }
 }

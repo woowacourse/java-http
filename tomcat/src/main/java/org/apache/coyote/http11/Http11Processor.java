@@ -5,8 +5,14 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,7 +35,24 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final StringBuilder request = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    request.append(line).append("\r\n");
+                }
+            }
+
+            String fileName = extractResourcePathFromRequest(request);
+            var responseBody = "";
+
+            if (fileName.length() == 0) {
+                responseBody = "Hello world!";
+            } else {
+                final Path path = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/" + fileName)).getPath());
+
+                responseBody = new String(Files.readAllBytes(path));
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -40,8 +63,20 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractResourcePathFromRequest(StringBuilder request) {
+        int startIndex = request.indexOf("GET ") + 4;
+        int endIndex = request.indexOf(" HTTP/1.1");
+
+        if (startIndex != -1 && endIndex != -1) {
+            return request.substring(startIndex + 1, endIndex);
+        }
+
+        return "";
     }
 }

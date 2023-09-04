@@ -22,6 +22,12 @@ public class HttpResponse {
         return new HttpResponse(formatResponse);
     }
 
+    public static HttpResponse from(ResponseEntity responseEntity) {
+        HttpStatus httpStatus = responseEntity.getHttpStatus();
+        String status = httpStatus.getStatusCode() + " " + httpStatus.name();
+        return of(status, responseEntity.getRequestURI(), responseEntity.getResponseBody());
+    }
+
     private static String contentType(String requestURI) {
         if (requestURI.endsWith(".css")) {
             return "text/css";

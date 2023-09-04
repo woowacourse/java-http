@@ -9,6 +9,8 @@ import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
             HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
 
-            String response = createResponse(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            ResponseEntity responseEntity = createResponse(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            String response = HttpResponse.from(responseEntity).getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -85,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequestHeader.from(stringBuilder.toString());
     }
 
-    private String createResponse(
+    private ResponseEntity createResponse(
             HttpRequestStartLine httpRequestStartLine,
             HttpRequestHeader httpRequestHeader,
             HttpRequestBody httpRequestBody
@@ -95,8 +98,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestURI.equals("/")) {
             final var responseBody = "Hello world!";
-            HttpResponse response = HttpResponse.of("200 OK", requestURI, responseBody);
-            return response.getResponse();
+            return ResponseEntity.of(HttpStatus.OK, requestURI, responseBody);
         }
 
         if (requestURI.equals("/login")) {
@@ -108,13 +110,13 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI);
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponse.of("200 OK", requestURI, responseBody).getResponse();
+        return ResponseEntity.of(HttpStatus.OK, requestURI, responseBody);
     }
 
-    private String login(String requestURI, HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
+    private ResponseEntity login(String requestURI, HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         if (httpMethod == HttpMethod.GET) {
-            return HttpResponse.of("200 OK", "/login.html", null).getResponse();
+            return ResponseEntity.of(HttpStatus.OK, requestURI, null);
         }
         Map<String, String> queryStrings = parseQueryString(requestURI);
         User account = findAccount(queryStrings);
@@ -123,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
         boolean isCorrectPassword = account.checkPassword(password);
         if (!isCorrectPassword) {
             log.info("accout {} 비밀번호 불일치로 로그인 실패", account.getAccount());
-            return HttpResponse.of("401 UNAUTHORIZED", "/401.html", null).getResponse();
+            return ResponseEntity.of(HttpStatus.UNAUTHORIZED, requestURI, null);
         }
 
         URL resource = getClass()
@@ -131,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI + ".html");
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponse.of("302 FOUND", "/index.html", responseBody).getResponse();
+        return ResponseEntity.of(HttpStatus.FOUND, requestURI, responseBody);
     }
 
     private User findAccount(Map<String, String> queryStrings) {

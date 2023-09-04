@@ -5,7 +5,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
-import org.apache.coyote.http11.request.requestLine.requestUri.QueryParameters;
 import org.apache.coyote.http11.request.requestLine.requestUri.RequestUri;
 import org.apache.coyote.http11.request.requestLine.requestUri.ResourcePath;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -20,6 +19,7 @@ public class Controller {
     private static final String ROOT_DIRECTORY = "/";
     private static final String DIRECTORY_SEPARATOR = "/";
     private static final String INDEX_FILE = "index.html";
+    private static final String LOGIN_FILE = "login.html";
     private static final String REGISTER_FILE = "register.html";
 
     private final HttpRequest httpRequest;
@@ -36,7 +36,7 @@ public class Controller {
         }
 
         if (resourcePath.is("/login")) {
-            return login(requestUri);
+            return login(httpRequest);
         }
 
         if (resourcePath.is("/register")) {
@@ -46,15 +46,22 @@ public class Controller {
         return ResponseEntity.of(HttpStatus.OK, resourcePath.getResourcePath());
     }
 
-    private ResponseEntity login(final RequestUri requestUri) {
-        if (requestUri.isQueryParameterEmpty()) {
-            return ResponseEntity.of(HttpStatus.OK, "/login.html");
+    private ResponseEntity login(final HttpRequest httpRequest) {
+        if (httpRequest.isRequestOf(HttpMethod.POST)) {
+            return postLogin(httpRequest.getRequestBody());
         }
 
-        final QueryParameters queryParameters = requestUri.getQueryParameters();
+        if (httpRequest.isRequestOf(HttpMethod.GET)) {
+            final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;
+            return ResponseEntity.of(HttpStatus.OK, loginPath);
+        }
 
-        final String account = queryParameters.search("account");
-        final String password = queryParameters.search("password");
+        return ResponseEntity.of(HttpStatus.BAD_REQUEST, ROOT_DIRECTORY);
+    }
+
+    private ResponseEntity postLogin(final RequestBody requestBody) {
+        final String account = requestBody.search("account");
+        final String password = requestBody.search("password");
 
         return InMemoryUserRepository.findByAccount(account)
                                      .filter(user -> user.checkPassword(password))
@@ -64,6 +71,7 @@ public class Controller {
 
     private ResponseEntity loginSuccess(final User findUser) {
         log.info("user: {}", findUser);
+
         final String indexPath = DIRECTORY_SEPARATOR + INDEX_FILE;
 
         return ResponseEntity.of(HttpStatus.FOUND, indexPath);

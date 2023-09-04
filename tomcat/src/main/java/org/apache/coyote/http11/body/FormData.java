@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 public class FormData {
 
+    private static final int NO_LIMIT = -1;
+
     private final Map<String, String> data;
 
     private FormData(final Map<String, String> data) {
@@ -17,9 +19,10 @@ public class FormData {
     public static FormData of(String body) {
         String[] rawQueries = decode(body).split("&");
         Map<String, String> data = Arrays.stream(rawQueries)
+                .filter(it -> !it.isBlank())
                 .collect(Collectors.toMap(
-                        rawQuery -> rawQuery.split("=")[0],
-                        rawQuery -> rawQuery.split("=")[1]
+                        rawQuery -> rawQuery.split("=", NO_LIMIT)[0],
+                        rawQuery -> rawQuery.split("=", NO_LIMIT)[1]
                 ));
         return new FormData(data);
     }

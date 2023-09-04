@@ -18,6 +18,10 @@ public class User {
         this(null, account, password, email);
     }
 
+    public boolean equalsAccount(String account) {
+        return this.account.equals(account);
+    }
+
     public boolean checkPassword(String password) {
         return this.password.equals(password);
     }

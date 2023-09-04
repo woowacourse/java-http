@@ -1,9 +1,11 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import repository.InMemoryUserRepository;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -17,17 +19,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
 
     private final Socket connection;
+    private final InMemoryUserRepository userRepository;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.userRepository = InMemoryUserRepository.getInstance();
     }
 
     @Override
@@ -53,10 +59,10 @@ public class Http11Processor implements Runnable, Processor {
             String requestMethod = splitFirstLine[0];
             String requestUri = splitFirstLine[1];
 
-            String responseBody = renderResponseBody(requestMethod, requestUri);
-
             String requestAcceptHeader = findAcceptHeader(headers);
             String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
+
+            String responseBody = renderResponseBody(requestMethod, requestUri);
 
             List<String> responseHeaders = new ArrayList<>();
             responseHeaders.add("HTTP/1.1 200 OK ");
@@ -79,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         return headers.stream()
                       .filter(it -> it.startsWith("Accept"))
                       .findFirst()
-                      .orElseThrow(() -> new IllegalArgumentException("해당 헤더가 존재하지 않습니다."));
+                      .orElse("Accept: " + SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE);
     }
 
     private static String getContentTypeHeaderFrom(String requestAcceptHeader) {
@@ -89,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         String[] splitAcceptTypes = acceptTypes[0].split(",");
 
         if (Arrays.asList(splitAcceptTypes).contains("text/css")) {
-            return  "Content-Type: text/css;charset=utf-8 ";
+            return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
     }
@@ -99,12 +105,59 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
         }
 
-        String fileName = "static" + requestUri;
-        String path = getClass().getClassLoader().getResource(fileName).getPath();
-        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+        int index = requestUri.indexOf("?");
+        String requestPath = requestUri;
+
+        if (index != -1) {
+            requestPath = requestUri.substring(0, index);
+            String queryString = requestUri.substring(index + 1);
+
+            String[] splitQueryString = queryString.split("&");
+
+            if (requestMethod.equalsIgnoreCase("GET") && requestPath.equals("/login.html")) {
+                handleLoginRequest(splitQueryString);
+            }
+        }
+
+        String fileName = "static" + requestPath;
+        String filePath = getClass().getClassLoader().getResource(fileName).getPath();
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
             return lines.collect(Collectors.joining("\n", "", "\n"));
         } catch (IOException | UncheckedIOException e) {
             return "Hello world!";
         }
+    }
+
+    private void handleLoginRequest(String[] splitQueryString) {
+        Optional<String> account = getValueOf("account", splitQueryString);
+        Optional<String> password = getValueOf("password", splitQueryString);
+
+        if (account.isEmpty() || password.isEmpty()) {
+            return;
+        }
+
+        Optional<User> user = findUserByAccount(account.get());
+        if (user.isPresent() && user.get().checkPassword(password.get())) {
+            log.info(user.get().toString());
+        }
+    }
+
+    private Optional<String> getValueOf(String key, String[] splitQueryString) {
+        return Arrays.stream(splitQueryString)
+                     .filter(it -> equalsKey(key, it))
+                     .map(it -> it.substring(it.indexOf("=") + 1))
+                     .findFirst();
+    }
+
+    private boolean equalsKey(String expected, String actual) {
+        String[] splitActual = actual.split("=");
+        return splitActual[0].equals(expected);
+    }
+
+    private Optional<User> findUserByAccount(String account) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                    .filter(it -> it.equalsAccount(account))
+                    .findFirst();
     }
 }

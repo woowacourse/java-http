@@ -20,18 +20,22 @@ public class HttpRequest {
 
     private HttpVersion httpVersion;
 
+    private HttpCookie httpCookie;
+
     private Map<String, String> header;
 
     private String body;
 
     private HttpRequest(final HttpMethod httpMethod,
-                        final RequestTarget requestTarget,
-                        final HttpVersion httpVersion,
-                        final Map<String, String> header,
-                        final String body) {
+                       final RequestTarget requestTarget,
+                       final HttpVersion httpVersion,
+                       final HttpCookie httpCookie,
+                       final Map<String, String> header,
+                       final String body) {
         this.httpMethod = httpMethod;
         this.requestTarget = requestTarget;
         this.httpVersion = httpVersion;
+        this.httpCookie = httpCookie;
         this.header = header;
         this.body = body;
     }
@@ -42,8 +46,9 @@ public class HttpRequest {
         final RequestTarget requestTarget = RequestTarget.from(startLine);
         final HttpVersion httpVersion = HttpVersion.from(startLine);
         final Map<String, String> header = getHeader(primitiveRequest);
+        final HttpCookie httpCookie = HttpCookie.of(header);
         final String body = getBody(bufferedReader, header);
-        return new HttpRequest(httpMethod, requestTarget, httpVersion, header, body);
+        return new HttpRequest(httpMethod, requestTarget, httpVersion, httpCookie, header, body);
     }
 
     private static String getStartLine(final List<String> primitiveRequest) {
@@ -96,6 +101,10 @@ public class HttpRequest {
 
     public HttpVersion getHttpVersion() {
         return httpVersion;
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 
     public String header(final String key) {

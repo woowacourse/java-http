@@ -102,6 +102,11 @@ public class HttpResponse {
             return this;
         }
 
+        public HttpResponseMessageBuilder cookie(final String cookieValue) {
+            header.put("Set-Cookie", cookieValue);
+            return this;
+        }
+
         public HttpResponse build() {
             return new HttpResponse(this);
         }

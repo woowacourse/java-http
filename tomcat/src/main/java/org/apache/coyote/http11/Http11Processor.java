@@ -16,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Handler handler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Handler handler) {
         this.connection = connection;
+        this.handler = handler;
     }
 
     @Override
@@ -29,13 +31,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var inputStreamReader = new InputStreamReader(inputStream);
-             final var bufferedReader = new BufferedReader(inputStreamReader)) {
+        try (final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
 
             final Request request = Request.from(bufferedReader);
-            final Handler handler = new Handler();
             final Response response = handler.handle(request);
             final String result = response.toString();
 

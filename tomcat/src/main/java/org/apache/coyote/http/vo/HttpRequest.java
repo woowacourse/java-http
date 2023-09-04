@@ -42,6 +42,14 @@ public class HttpRequest {
         return this.url.isSameUrl(url);
     }
 
+    public boolean hasQueryStringOf(final String queryString) {
+        return url.hasQueryStringOf(queryString);
+    }
+
+    public String getQueryStringValue(final String queryString) {
+        return url.getQueryStringOf(queryString);
+    }
+
     public static class Builder {
         private HttpMethod method;
         private Url url;

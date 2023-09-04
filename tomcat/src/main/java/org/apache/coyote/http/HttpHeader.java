@@ -6,7 +6,8 @@ public enum HttpHeader {
 
     ACCEPT("Accept"),
     CONTENT_LENGTH("Content-Length"),
-    CONTENT_TYPE("Content-Type");
+    CONTENT_TYPE("Content-Type"),
+    LOCATION("Location");
 
     private final String key;
 
@@ -18,7 +19,7 @@ public enum HttpHeader {
         return key;
     }
 
-    public static HttpHeader of(final String value) {
+    public static HttpHeader from(final String value) {
         return Arrays.stream(HttpHeader.values())
                 .filter(it -> it.getKey().equals(value))
                 .findFirst()

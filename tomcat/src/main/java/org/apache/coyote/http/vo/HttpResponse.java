@@ -31,7 +31,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 SUPPORT_HTTP_VERSION + status.getStatus(),
                 headers.getRawHeaders(),
-                "\n" + body
+                "\r\n" + body
         );
     }
 }

@@ -43,4 +43,12 @@ public class Url {
     public boolean isSameUrl(final Url url) {
         return this.urlPath.equals(url.urlPath);
     }
+
+    public boolean hasQueryStringOf(final String queryString) {
+        return this.queryStrings.isContain(queryString);
+    }
+
+    public String getQueryStringOf(final String queryString) {
+        return this.queryStrings.getQueryString(queryString);
+    }
 }

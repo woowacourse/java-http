@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
 import org.apache.coyote.http.SupportFile;
 import org.apache.coyote.http.vo.HttpHeaders;
@@ -93,5 +94,61 @@ class HandlerTest {
         assertThat(response)
                 .usingRecursiveComparison()
                 .isEqualTo(new HttpResponse(HttpStatus.OK, headers, expectedBody));
+    }
+
+    @Test
+    void 로그인_요청_핸들러는_GET_요청과_쿼리_파라미터를_지원한다() {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.GET)
+                .url(Url.from("/login?account=gugu&password=password"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // when
+        final LoginHandler loginHandler = new LoginHandler();
+
+        // then
+        assertThat(loginHandler.isSupported(request)).isTrue();
+    }
+
+    @Test
+    void 로그인_요청_핸들러는_계정과_패스워드가_맞으면_index_리다이렉트를_반환한다() {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.GET)
+                .url(Url.from("/login?account=gugu&password=password"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // when
+        final LoginHandler loginHandler = new LoginHandler();
+        HttpResponse response = loginHandler.handle(request);
+
+        // then
+        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        headers.put(HttpHeader.LOCATION, "/index.html");
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, headers));
+    }
+
+    @Test
+    void 로그인_요청_핸들러는_계정과_패스워드가_틀리면_401_리다이렉트를_반환한다() {
+        // given
+        HttpRequest request = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.GET)
+                .url(Url.from("/login?account=gugu&password=pass2word"))
+                .headers(HttpHeaders.getEmptyHeaders())
+                .build();
+
+        // when
+        final LoginHandler loginHandler = new LoginHandler();
+        HttpResponse response = loginHandler.handle(request);
+
+        // then
+        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+        headers.put(HttpHeader.LOCATION, "/401.html");
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(new HttpResponse(HttpStatus.REDIRECT, headers));
     }
 }

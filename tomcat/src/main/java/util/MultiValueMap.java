@@ -51,6 +51,10 @@ public class MultiValueMap<K, V> {
         return multiValueMap.get(key);
     }
 
+    public boolean isContain(final K key){
+        return this.multiValueMap.containsKey(key);
+    }
+
     private boolean isNotContain(final K key) {
         return !multiValueMap.containsKey(key);
     }

@@ -32,6 +32,10 @@ public class QueryStrings {
         return queryStrings;
     }
 
+    public boolean isContain(final String key){
+        return queryStrings.isContain(key);
+    }
+
     public String getQueryString(final String key) {
         return queryStrings.getRecentValue(key);
     }

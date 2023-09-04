@@ -10,10 +10,10 @@ public class HttpResponse {
         this.response = response;
     }
 
-    public static HttpResponse of(String requestURI, String responseBody) {
+    public static HttpResponse of(String status, String requestURI, String responseBody) {
         String formatResponse = String.join(
                 DELIMITER,
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + status + " ",
                 "Content-Type: " + contentType(requestURI) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 BLANK_LINE,

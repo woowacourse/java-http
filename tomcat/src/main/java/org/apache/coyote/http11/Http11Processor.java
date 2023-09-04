@@ -90,27 +90,12 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestURI.equals("/")) {
             final var responseBody = "Hello world!";
-            HttpResponse response = HttpResponse.of(requestURI, responseBody);
+            HttpResponse response = HttpResponse.of("200 OK", requestURI, responseBody);
             return response.getResponse();
         }
 
         if (requestURI.equals("/login")) {
-            Map<String, String> queryStrings = parseQueryString(requestURI);
-            User account = findAccount(queryStrings);
-
-            String password = queryStrings.get("password");
-            boolean isCorrectPassword = account.checkPassword(password);
-            if (!isCorrectPassword) {
-                log.info("accout {} 비밀번호 불일치로 로그인 실패", account.getAccount());
-                throw new AuthenticationException();
-            }
-
-            URL resource = getClass()
-                    .getClassLoader()
-                    .getResource("static" + requestURI + ".html");
-            File file = new File(resource.getFile());
-            String responseBody = new String(Files.readAllBytes(file.toPath()));
-            return HttpResponse.of(requestURI, responseBody).getResponse();
+            return login(requestURI);
         }
 
         URL resource = getClass()
@@ -118,7 +103,26 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource("static" + requestURI);
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponse.of(requestURI, responseBody).getResponse();
+        return HttpResponse.of("200 OK", requestURI, responseBody).getResponse();
+    }
+
+    private String login(String requestURI) throws IOException {
+        Map<String, String> queryStrings = parseQueryString(requestURI);
+        User account = findAccount(queryStrings);
+
+        String password = queryStrings.get("password");
+        boolean isCorrectPassword = account.checkPassword(password);
+        if (!isCorrectPassword) {
+            log.info("accout {} 비밀번호 불일치로 로그인 실패", account.getAccount());
+            throw new AuthenticationException();
+        }
+
+        URL resource = getClass()
+                .getClassLoader()
+                .getResource("static" + requestURI + ".html");
+        File file = new File(resource.getFile());
+        String responseBody = new String(Files.readAllBytes(file.toPath()));
+        return HttpResponse.of("200 OK", requestURI, responseBody).getResponse();
     }
 
     private User findAccount(Map<String, String> queryStrings) {

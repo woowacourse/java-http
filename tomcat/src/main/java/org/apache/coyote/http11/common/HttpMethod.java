@@ -9,7 +9,7 @@ public enum HttpMethod {
 
     public static HttpMethod from(final String method) {
         return Arrays.stream(HttpMethod.values())
-                .filter(httpMethod -> httpMethod.name().equals(method.toUpperCase()))
+                .filter(httpMethod -> httpMethod.name().equalsIgnoreCase(method))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 메서드입니다."));
     }

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.cookie.Cookie;
 
 import nextstep.jwp.model.User;
@@ -16,6 +18,7 @@ public class Request {
     private final RequestHeader header;
     private final RequestBody body;
     private final Cookie cookie;
+    private final SessionManager sessionManager = new SessionManager();
 
     private Request(final RequestLine line, final RequestHeader header, final RequestBody body, final Cookie cookie) {
         this.line = line;
@@ -32,7 +35,8 @@ public class Request {
         if (Objects.isNull(contentLength)) {
             return new Request(requestLine, requestHeader, RequestBody.EMPTY_REQUEST_BODY, cookie);
         }
-        return new Request(requestLine, requestHeader, RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)),
+        return new Request(requestLine, requestHeader,
+                RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)),
                 cookie);
     }
 
@@ -66,5 +70,15 @@ public class Request {
 
     public RequestBody getBody() {
         return body;
+    }
+
+    public Session getSession(final boolean isNew) {
+        if (isNew) {
+            final Session session = Session.generate();
+            sessionManager.add(session.getId(), session);
+            return session;
+        }
+        final String jsessionid = cookie.findByKey("JSESSIONID");
+        return sessionManager.getById(jsessionid);
     }
 }

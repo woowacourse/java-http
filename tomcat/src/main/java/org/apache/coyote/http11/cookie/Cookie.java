@@ -31,6 +31,10 @@ public class Cookie {
         cookies.putAll(parsedCookie);
     }
 
+    public String findByKey(String key) {
+        return cookies.get(key);
+    }
+
     public Map<String, String> getCookies() {
         return cookies;
     }

@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.exception.LoginException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.ContentType;
@@ -103,15 +103,21 @@ public class RequestHandler {
                     .orElseThrow(() -> new LoginException("로그인에 실패했습니다."));
 
             if (user.checkPassword(password)) {
-                LOGGER.info("user {}", user);
-                final Response response = Response.generateRedirectResponse(INDEX_HTML);
-                response.setCookie(String.join(KEY_VALUE_DELIMITER, JSESSIONID, String.valueOf(UUID.randomUUID())));
-                return response;
+                return successLogin(user);
             }
             throw new LoginException("로그인에 실패했습니다.");
         } catch (LoginException exception) {
             return getStaticPateResponse(UNAUTHORIZED_HTML, UNAUTHORIZED);
         }
+    }
+
+    private Response successLogin(final User user) {
+        LOGGER.info("user {}", user);
+        final Response response = Response.generateRedirectResponse(INDEX_HTML);
+        Session session = request.getSession(true);
+        session.put("user", user);
+        response.setCookie(String.join(KEY_VALUE_DELIMITER, JSESSIONID, session.getId()));
+        return response;
     }
 
     private Response register() {

@@ -33,11 +33,6 @@ public class Response {
 
     public Response createBodyByPlainText(String text) {
         this.body = text;
-        return this;
-    }
-
-    public Response addBaseHeaders() {
-        headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
         headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
         return this;
     }
@@ -54,6 +49,12 @@ public class Response {
             }
             this.body = sb.toString();
         }
+        headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(file.length()));
+        return this;
+    }
+
+    public Response addBaseHeaders() {
+        headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
         return this;
     }
 

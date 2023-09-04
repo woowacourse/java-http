@@ -13,6 +13,7 @@ public class RequestReader {
     private final BufferedReader bufferedReader;
     private final Map<String, String> headers = new HashMap<>();
     private RequestUri requestUri;
+    private final Map<String, String> bodies = new HashMap<>();
 
     public RequestReader(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
@@ -25,6 +26,23 @@ public class RequestReader {
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
+        if (requestUri.getMethod().equals("POST")) {
+            readBody();
+        }
+    }
+
+    private void readBody() throws IOException {
+        String line;
+        StringBuilder sb = new StringBuilder();
+        while (!(line = bufferedReader.readLine()).isBlank()) {
+            sb.append(line).append(System.lineSeparator());
+        }
+        String[] split = sb.toString().split("&");
+        for (String s : split) {
+            String[] keyValue = s.split("=");
+            bodies.put(keyValue[0], keyValue[1]);
+        }
+        bodies.forEach((key, value) -> System.out.println(key + " : " + value));
     }
 
     public void putHeader(String line) {
@@ -44,6 +62,10 @@ public class RequestReader {
             return ContentType.HTML.getType() + CHARSET_UTF_8;
         }
         return split[0] + CHARSET_UTF_8;
+    }
+
+    public String getBodyValue(String key) {
+        return bodies.get(key);
     }
 
     public String getProtocol() {
@@ -66,7 +88,7 @@ public class RequestReader {
         return requestUri;
     }
 
-    public boolean isPost() {
-        return this.requestUri.getMethod().equals("POST");
+    public String getMethod() {
+        return requestUri.getMethod();
     }
 }

@@ -23,7 +23,7 @@ public class FrontController {
         if (requestReader.getRequestUrl().equals("/")) {
             return mainPageController;
         }
-        if (requestReader.getRequestUrl().equals("/login")) {
+        if (requestReader.getRequestUrl().equals("/login") || requestReader.getRequestUrl().equals("/register")) {
             return loginController;
         }
         if (requestReader.getRequestUrl().equals("/index") || requestReader.getRequestUrl().equals("/index.html")) {

@@ -10,7 +10,7 @@ public class MainPageController implements Controller {
     @Override
     public Response service(RequestReader requestReader) throws IOException {
         return new Response(requestReader, StatusCode.OK)
-                .createBodyByPlainText("Hello world!")
-                .addBaseHeaders();
+                .addBaseHeaders()
+                .createBodyByPlainText("Hello world!");
     }
 }

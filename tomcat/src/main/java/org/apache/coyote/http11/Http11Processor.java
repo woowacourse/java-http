@@ -4,6 +4,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -51,6 +53,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(requestStartLine);
+            HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
+            HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
+
             String response = createResponse(httpRequestStartLine.getRequestURI());
 
             outputStream.write(response.getBytes());
@@ -58,6 +63,26 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequestBody parseRequestBody(String contentLength, BufferedReader bufferedReader) throws IOException {
+        if (contentLength == null) {
+            return HttpRequestBody.none();
+        }
+        int length = Integer.parseInt(contentLength);
+        char[] httpRequestBody = new char[length];
+        bufferedReader.read(httpRequestBody, 0, length);
+        return HttpRequestBody.from(new String(httpRequestBody));
+    }
+
+    private HttpRequestHeader parseRequestHeader(BufferedReader bufferedReader) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        String line = bufferedReader.readLine();
+        while (!"".equals(line)) {
+            stringBuilder.append(line).append("\r\n");
+            line = bufferedReader.readLine();
+        }
+        return HttpRequestHeader.from(stringBuilder.toString());
     }
 
     private String createResponse(String requestURI) throws IOException {

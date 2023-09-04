@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final Map<String, String> values = new HashMap<>();
+    private final Map<String, String> values = new ConcurrentHashMap<>();
 
     public HttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -64,7 +64,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getBody() {
-        System.out.println("values = " + values);
         return parseKeyAndValue(values.get("body"));
     }
 

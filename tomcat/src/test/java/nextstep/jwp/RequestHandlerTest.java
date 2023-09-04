@@ -8,15 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
-import support.StubSocket;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 @SuppressWarnings("NonAsciiCharacters")
 class RequestHandlerTest {
+
+    private final RequestHandler requestHandler = new RequestHandler();
 
     @Test
     void html_요청이_오면_content_type은_html() {
@@ -29,10 +30,11 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(request);
+        HttpResponse response = HTTP_요청을_보낸다(request);
 
         // then
-        assertThat(response).contains("text/html");
+        Map<String, String> actual = response.getHeaders();
+        assertThat(actual.get("Content-Type")).contains("text/html");
     }
 
     @Test
@@ -46,10 +48,12 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(request);
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
 
         // then
-        assertThat(response).contains("text/css");
+        Map<String, String> actual = response.getHeaders();
+        assertThat(actual.get("Content-Type")).contains("text/css");
     }
 
     @Test
@@ -63,16 +67,18 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(request);
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
 
         // then
-        assertThat(response).contains("application/javascript");
+        Map<String, String> actual = response.getHeaders();
+        assertThat(actual.get("Content-Type")).contains("application/javascript");
     }
 
     @Test
     void 정상적으로_로그인_성공() {
         // given
-        String httpRequest = String.join("\r\n",
+        String request = String.join("\r\n",
             "GET /login?account=gugu&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
@@ -80,19 +86,21 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(httpRequest);
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
 
         // then
+        Map<String, String> headers = response.getHeaders();
         assertAll(
-            () -> assertThat(response).contains(FOUND.name()),
-            () -> assertThat(response).contains("Location: /index.html")
+            () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
+            () -> assertThat(headers.get("Location")).isEqualTo("/index.html")
         );
     }
 
     @Test
     void 존재하지_않는_아이디로_로그인_요청() {
         // given
-        String httpRequest = String.join("\r\n",
+        String request = String.join("\r\n",
             "GET /login?account=noUser&password=password HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
@@ -100,19 +108,21 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(httpRequest);
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
 
         // then
+        Map<String, String> headers = response.getHeaders();
         assertAll(
-            () -> assertThat(response).contains(FOUND.name()),
-            () -> assertThat(response).contains("Location: /401.html")
+            () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
+            () -> assertThat(headers.get("Location")).isEqualTo("/401.html")
         );
     }
 
     @Test
     void 잘못된_비밀번호로_로그인_요청() {
         // given
-        String httpRequest = String.join("\r\n",
+        String request = String.join("\r\n",
             "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
@@ -120,31 +130,35 @@ class RequestHandlerTest {
             "");
 
         // when
-        String response = HTTP_요청을_보낸다(httpRequest);
+        HttpResponse response = HTTP_요청을_보낸다(request);
+
 
         // then
+        Map<String, String> headers = response.getHeaders();
         assertAll(
-            () -> assertThat(response).contains(FOUND.name()),
-            () -> assertThat(response).contains("Location: /401.html")
+            () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
+            () -> assertThat(headers.get("Location")).isEqualTo("/401.html")
         );
     }
     
     @Test
     void 회원가입_성공() {
         // given
-        String httpRequest = String.join("\r\n",
+        String request = String.join("\r\n",
             "POST /register HTTP/1.1 ",
             "Content-Length: 46",
             "",
             "account=hs&password=hs123&email=hs%40naver.com");
 
         // when
-        String response = HTTP_요청을_보낸다(httpRequest);
+        HttpResponse response = HTTP_요청을_보낸다(request);
 
         // then
+        Map<String, String> headers = response.getHeaders();
+
         assertAll(
-            () -> assertThat(response).contains("Location: /index.html"),
-            () -> assertThat(findByAccount("hs")).isPresent()
+            () -> assertThat(headers.get("Location")).isEqualTo("/index.html"),
+        () -> assertThat(findByAccount("hs")).isPresent()
         );
     }
 
@@ -162,10 +176,10 @@ class RequestHandlerTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-    private String HTTP_요청을_보낸다(String request) {
+    private HttpResponse HTTP_요청을_보낸다(String request) {
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         try {
-            return RequestHandler.handle(new HttpRequest(inputStream));
+            return requestHandler.handle(new HttpRequest(inputStream));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

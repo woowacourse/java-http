@@ -106,11 +106,11 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURI.startsWith("/login")) {
-            return login(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            return login(httpRequestStartLine, httpRequestBody);
         }
 
         if (requestURI.startsWith("/register")) {
-            return register(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            return register(httpRequestStartLine, httpRequestBody);
         }
 
         return findStaticResource(requestURI);
@@ -140,7 +140,7 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
+    private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestBody httpRequestBody) throws IOException {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
         String account = httpRequestBody.find("account");
@@ -200,7 +200,7 @@ public class Http11Processor implements Runnable, Processor {
         return findAccount.get();
     }
 
-    private ResponseEntity register(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+    private ResponseEntity register(HttpRequestStartLine httpRequestStartLine, HttpRequestBody httpRequestBody) {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
 

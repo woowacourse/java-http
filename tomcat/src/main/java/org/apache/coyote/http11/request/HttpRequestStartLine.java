@@ -31,7 +31,7 @@ public class HttpRequestStartLine {
 
     public static HttpRequestStartLine from(String request) {
         List<String> requests = Arrays.stream(request.split(" ")).collect(Collectors.toList());
-        validateRequestStartLineSize(request, requests);
+        validateRequestStartLineSize(requests);
 
         return new HttpRequestStartLine(
                 HttpMethod.of(requests.get(INDEX_HTTP_METHOD)),
@@ -40,7 +40,7 @@ public class HttpRequestStartLine {
         );
     }
 
-    private static void validateRequestStartLineSize(String request, List<String> requests) {
+    private static void validateRequestStartLineSize(List<String> requests) {
         if (requests.size() != REQUEST_START_LINE_SIZE) {
             throw new IllegalStateException();
         }

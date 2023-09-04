@@ -14,10 +14,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,9 +43,10 @@ public class Http11Processor implements Runnable, Processor {
             log.info("Request-Header: {}", requestHeader);
             final String httpMethod = requestHeader.get("Request-Line").split(" ")[0];
             final String uri = requestHeader.get("Request-Line").split(" ")[1];
-
+            final String cookieHeader = requestHeader.getOrDefault("Cookie", null);
+            final HttpCookie cookie = HttpCookie.from(cookieHeader);
             final String requestBody = readRequestBody(bufferedReader, requestHeader, httpMethod);
-            final String response = handleRequest(uri, requestBody);
+            final String response = handleRequest(uri, requestBody, cookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -70,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestBody;
     }
 
-    private String handleRequest(final String uri, final String requestBody) throws IOException {
+    private String handleRequest(final String uri, final String requestBody, final HttpCookie cookie) throws IOException {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
@@ -82,24 +80,24 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals("/login")) {
             final String responseBody = findResponseBody(path + ".html");
-            return handleLoginRequest(requestBody, responseBody);
+            return handleLoginRequest(requestBody, responseBody, cookie);
         }
         if (path.equals("/register")) {
             final String responseBody = findResponseBody(path + ".html");
-            return handleRegisterRequest(requestBody, responseBody);
+            return handleRegisterRequest(requestBody, responseBody, cookie);
         }
         final String responseBody = findResponseBody(path);
         return get200ResponseMessage(responseBody, "text/html;");
     }
 
-    private String handleRegisterRequest(final String requestBody, final String responseBody) {
+    private String handleRegisterRequest(final String requestBody, final String responseBody, final HttpCookie cookie) {
         if (requestBody == null) {
             return get200ResponseMessage(responseBody, "text/html;");
         }
         final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
         final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"), requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
-        return get302ResponseMessage("/index.html");
+        return get302ResponseMessage("/index.html", cookie);
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {
@@ -112,17 +110,17 @@ public class Http11Processor implements Runnable, Processor {
         return requestBodyValues;
     }
 
-    private String handleLoginRequest(final String requestBody, final String responseBody) {
+    private String handleLoginRequest(final String requestBody, final String responseBody, final HttpCookie cookie) {
         if (requestBody == null) {
             return get200ResponseMessage(responseBody, "text/html;");
         }
         final Map<String, String> queryStrings = parseRequestBody(requestBody);
         final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
         if (user.isEmpty() || !user.get().checkPassword(queryStrings.get("password"))) {
-            return get302ResponseMessage("/401.html");
+            return get302ResponseMessage("/401.html", cookie);
         }
         log.info("User: {}", user.get());
-        return get302ResponseMessage("/index.html");
+        return get302ResponseMessage("/index.html", cookie);
     }
 
     private String get200ResponseMessage(final String responseBody, final String contentType) {
@@ -134,10 +132,16 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String get302ResponseMessage(final String location) {
+    private String get302ResponseMessage(final String location, final HttpCookie cookie) {
+        if (cookie.hasCookie("JSESSIONID")) {
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: " + location);
+        }
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: " + location);
+                "Location: " + location + " ",
+                "Set-Cookie: JSESSIONID=" + UUID.randomUUID());
     }
 
     private String findResponseBody(final String uri) throws IOException {

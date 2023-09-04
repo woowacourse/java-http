@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception;
+package org.apache.coyote.http11.common;
 
 public class Http11Exception extends RuntimeException {
 

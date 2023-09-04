@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.common.Http11Exception;
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.exception.InvalidRequestLineException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class RequestLineTest {
 
         // expect
         assertThatThrownBy(() -> RequestLine.from(line))
-                .isInstanceOf(InvalidRequestLineException.class)
+                .isInstanceOf(Http11Exception.class)
                 .hasMessage("올바르지 않은 RequestLine 형식입니다.");
     }
 

@@ -1,10 +1,9 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common;
 
-import static org.apache.coyote.http11.request.HttpVersion.from;
+import static org.apache.coyote.http11.common.HttpVersion.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.exception.Http11Exception;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ class HttpVersionTest {
         // expect
         assertThatThrownBy(() -> HttpVersion.from(version))
                 .isInstanceOf(Http11Exception.class)
-                .hasMessage("입력한 Http Version을 지원할 수 없습니다.");
+                .hasMessage("해당 Http Version을 지원할 수 없습니다.");
     }
 
     @Test

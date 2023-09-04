@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.Http11Exception;
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.exception.InvalidRequestLineException;
 
 public class RequestLine {
 
@@ -35,7 +35,7 @@ public class RequestLine {
 
     private static void validate(final String[] requestLine) {
         if (requestLine.length != VALID_REQUEST_LINE_SIZE) {
-            throw new InvalidRequestLineException();
+            throw new Http11Exception("올바르지 않은 RequestLine 형식입니다.");
         }
     }
 

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request.request.headers;
 
 import java.util.List;
-import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.request.header.RequestHeader;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

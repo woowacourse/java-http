@@ -24,10 +24,6 @@ public class ResponseEntity {
         this.cookie = cookie;
     }
 
-    public void setCookie(final String key, final String value) {
-        cookie.put(key, value);
-    }
-
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request.handler;
 
 import org.apache.coyote.http11.auth.AuthService;
 import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 

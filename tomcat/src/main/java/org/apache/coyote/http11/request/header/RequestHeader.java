@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.headers;
+package org.apache.coyote.http11.request.header;
 
 import java.util.HashMap;
 import java.util.List;

@@ -44,7 +44,7 @@ class QueryStringTest {
             QueryString queryString = QueryString.from(request);
 
             // when, then
-            assertThat(queryString.value()).isNull();
+            assertThat(queryString.value()).isEmpty();
         }
 
     }

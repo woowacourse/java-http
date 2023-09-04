@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,13 @@ public class HttpRequestParser {
 
     private static Cookies getCookies(Map<String, String> headers) throws IOException {
         final Cookies cookies = new Cookies();
-        for (String cookie : headers.get("Cookie").split("; ")) {
+        final String cookiesHeader = headers.get("Cookie");
+
+        if (Objects.isNull(cookiesHeader)) {
+            return cookies;
+        }
+
+        for (String cookie : cookiesHeader.split("; ")) {
             final String[] cookieEntry = cookie.split("=");
             cookies.add(cookieEntry[0], cookieEntry[1]);
         }

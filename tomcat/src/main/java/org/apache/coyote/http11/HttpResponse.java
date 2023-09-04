@@ -33,17 +33,20 @@ public class HttpResponse {
         final StringBuilder response = new StringBuilder();
         response.append("HTTP/1.1 ")
                 .append(this.responseStatus)
+                .append(" ")
                 .append(System.lineSeparator());
         response.append("Content-Type: ")
                 .append(this.contentType)
                 .append(";charset=")
                 .append(this.charSet)
+                .append(" ")
                 .append(System.lineSeparator());
         for (Cookie cookie : cookies) {
             response.append("Set-Cookie: ")
                     .append(cookie.getKey())
                     .append("=")
                     .append(cookie.getValue())
+                    .append(" ")
                     .append(System.lineSeparator());
         }
         response.append("Content-Length: ")

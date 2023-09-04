@@ -14,7 +14,7 @@ import org.apache.coyote.http11.service.LoginService;
 
 public class HandlerMapper {
 
-    private final Map<Mapper, Controller> contollerByMapper = new HashMap<>();
+    private final Map<Mapper, Controller> controllerByMapper = new HashMap<>();
     private final ResourceProvider resourceProvider;
 
     public HandlerMapper(ResourceProvider resourceProvider) {
@@ -23,38 +23,38 @@ public class HandlerMapper {
     }
 
     private void enrollHandler() {
-        contollerByMapper.put(
+        controllerByMapper.put(
             request -> "/login".equals(request.getRequestLine().getPath()) &&
                 HttpMethod.POST.equals(request.getRequestLine().getMethod()),
             new LoginController(new LoginService()));
 
-        contollerByMapper.put(
+        controllerByMapper.put(
             request -> "/register".equals(request.getRequestLine().getPath()) &&
                 HttpMethod.POST.equals(request.getRequestLine().getMethod()),
             new SignUpController(new LoginService()));
 
-        contollerByMapper.put(
+        controllerByMapper.put(
             request -> "/login".equals(request.getRequestLine().getPath()) &&
                 HttpMethod.GET.equals(request.getRequestLine().getMethod()),
             new LoginViewController());
 
-        contollerByMapper.put(
+        controllerByMapper.put(
             request -> "/register".equals(request.getRequestLine().getPath()) &&
                 HttpMethod.GET.equals(request.getRequestLine().getMethod()),
             new SignUpViewController());
     }
 
     public boolean haveAvailableHandler(HttpRequest httpRequest) {
-        return contollerByMapper.keySet().stream()
+        return controllerByMapper.keySet().stream()
             .anyMatch(mapper -> mapper.canHandle(httpRequest));
     }
 
     public Controller getHandler(HttpRequest httpRequest) {
-        Mapper mapper = contollerByMapper.keySet().stream()
+        Mapper mapper = controllerByMapper.keySet().stream()
             .filter(mp -> mp.canHandle(httpRequest))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("해당 요청을 해결할 수 있는 핸들러가 없습니다."));
-        return contollerByMapper.get(mapper);
+        return controllerByMapper.get(mapper);
     }
 
     public String controllerResponse(HttpRequest httpRequest) {

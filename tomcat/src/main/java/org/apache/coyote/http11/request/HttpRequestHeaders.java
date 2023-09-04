@@ -1,28 +1,22 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-public class HttpHeaders {
+public class HttpRequestHeaders {
 
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int REQUEST_HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
-    private HttpHeaders(final Map<String, String> headers) {
+    private HttpRequestHeaders(final Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static HttpHeaders empty() {
-        return new HttpHeaders(new HashMap<>());
-    }
-
-    public static HttpHeaders of(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequestHeaders of(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestHeaders = new HashMap<>();
 
         String line;
@@ -39,16 +33,12 @@ public class HttpHeaders {
             );
         }
 
-        return new HttpHeaders(requestHeaders);
+        return new HttpRequestHeaders(requestHeaders);
     }
 
-    public HttpHeaders add(String key, String value) {
+    public HttpRequestHeaders add(String key, String value) {
         headers.put(key.toLowerCase(), value);
-        return new HttpHeaders(headers);
-    }
-
-    public Set<Entry<String, String>> getEntrySet() {
-        return headers.entrySet();
+        return new HttpRequestHeaders(headers);
     }
 
     public String getValue(String key) {

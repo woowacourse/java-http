@@ -10,22 +10,21 @@ import org.apache.catalina.session.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookies;
-import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
 
     private static final String EMPTY_BODY = "";
     private final HttpRequestStartLine httpRequestStartLine;
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
     private final HttpCookies httpCookies;
     private final String requestBody;
     private Manager manager = new SessionManager();
     private Session session = null;
 
-    private HttpRequest(final HttpRequestStartLine requestLine, final HttpHeaders httpHeaders,
+    private HttpRequest(final HttpRequestStartLine requestLine, final HttpRequestHeaders httpRequestHeaders,
                         final HttpCookies httpCookies, final String requestBody) throws IOException {
         this.httpRequestStartLine = requestLine;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
         this.httpCookies = httpCookies;
         this.requestBody = requestBody;
 
@@ -39,34 +38,24 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         HttpRequestStartLine requestLine = HttpRequestStartLine.of(bufferedReader.readLine());
-        HttpHeaders httpHeaders = HttpHeaders.of(bufferedReader);
+        HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.of(bufferedReader);
         HttpCookies httpCookies = HttpCookies.empty();
 
-        String findContentLength = httpHeaders.getValue("content-length");
+        String findContentLength = httpRequestHeaders.getValue("content-length");
         if (findContentLength != null) {
             int contentLength = Integer.parseInt(findContentLength);
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String requestBody = new String(buffer);
-            return new HttpRequest(requestLine, httpHeaders, httpCookies, requestBody);
+            return new HttpRequest(requestLine, httpRequestHeaders, httpCookies, requestBody);
         }
 
-        String cookies = httpHeaders.getValue("cookie");
+        String cookies = httpRequestHeaders.getValue("cookie");
         if (cookies != null) {
-            return new HttpRequest(requestLine, httpHeaders, HttpCookies.of(cookies), EMPTY_BODY);
+            return new HttpRequest(requestLine, httpRequestHeaders, HttpCookies.of(cookies), EMPTY_BODY);
         }
 
-
-
-        return new HttpRequest(requestLine, httpHeaders, httpCookies, EMPTY_BODY);
-    }
-
-    public String getHttpVersion() {
-        return httpRequestStartLine.getHttpVersion();
-    }
-
-    public boolean containsCookie(String key) {
-        return httpCookies.get(key) != null;
+        return new HttpRequest(requestLine, httpRequestHeaders, httpCookies, EMPTY_BODY);
     }
 
     public String getRequestBody() {
@@ -79,10 +68,6 @@ public class HttpRequest {
 
     public String getQuery() {
         return httpRequestStartLine.getUri().getQuery();
-    }
-
-    public String getCookie(String key) {
-        return httpCookies.get(key);
     }
 
     public Session getSession(boolean create) {

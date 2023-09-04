@@ -2,18 +2,17 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpResponse {
 
     public static final String EMPTY_LINE = "";
     public static final String NEW_LINE = "\r\n";
     private HttpResponseStartLine httpResponseStartLine;
-    private HttpHeaders headers;
+    private HttpResponseHeaders headers;
     private String responseBody;
 
     public HttpResponse() {
-        this.headers = HttpHeaders.empty();
+        this.headers = HttpResponseHeaders.empty();
     }
 
     public void setHttpResponseStartLine(StatusCode statusCode) {

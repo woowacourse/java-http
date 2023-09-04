@@ -15,6 +15,7 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class LoginController extends HttpServlet {
 
+    public static final String JSESSIONID = "JSESSIONID";
     private static final String PREFIX = "static";
     private static final String SUFFIX = ".html";
 
@@ -40,6 +41,7 @@ public class LoginController extends HttpServlet {
         if (findAccount.isPresent() && findAccount.get().checkPassword(requestParam.get("password"))) {
             final var session = req.getSession(true);
             session.setAttribute("user", findAccount.get());
+            resp.addCookie(JSESSIONID, req.getSession().getId());
             resp.sendRedirect("/index.html");
         } else {
             resp.sendRedirect("/401.html");

@@ -32,6 +32,10 @@ public class HttpResponse {
         headers.add(name, value);
     }
 
+    public boolean isNotRedirect(){
+        return httpResponseStartLine.getStatusCode()!=StatusCode.FOUND;
+    }
+
     public void setHttpResponseStartLine(final StatusCode statusCode) {
         httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, statusCode);
     }

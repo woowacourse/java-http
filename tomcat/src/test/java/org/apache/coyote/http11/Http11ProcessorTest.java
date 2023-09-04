@@ -307,10 +307,6 @@ class Http11ProcessorTest {
 
         assertThat(lines).contains(
                 "HTTP/1.1 302 FOUND ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body
-        );
+                "Location: index.html ");
     }
 }

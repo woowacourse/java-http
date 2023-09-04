@@ -41,19 +41,16 @@ public class RegisterHandler extends Handler {
                 headers, responseBody);
     }
 
-    private Response responseWhenHttpMethodIsPost(Request request) throws IOException {
+    private Response responseWhenHttpMethodIsPost(Request request) {
         saveUser(request);
         String absolutePath = "index.html";
 
-        String resource = findResourceWithPath(absolutePath);
         Headers headers = new Headers(Map.of(
-                "Content-Type", ContentTypeParser.parse(absolutePath),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                "Location", absolutePath
         ));
-        ResponseBody responseBody = new ResponseBody(resource);
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
-                headers, responseBody);
+                headers, ResponseBody.ofEmpty());
     }
 
     private void saveUser(Request request) {

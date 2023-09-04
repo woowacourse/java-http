@@ -110,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestMethod.equals("GET") && requestPath.equals("/")) {
-                response = createResponse("text/plain;", "Hello world!");
+                response = createResponse("text/html", "Hello world!");
             }
 
             if (requestMethod.equals("GET") && requestFileName.endsWith(".html")) {

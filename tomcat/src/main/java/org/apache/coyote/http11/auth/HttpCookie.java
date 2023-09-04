@@ -6,9 +6,11 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import org.apache.coyote.http11.request.HttpRequestHeader;
 
 public class HttpCookie {
 
+    private static final String COOKIE_HEADER_KEY = "Cookie";
     private static final String JSESSIONID_KEY = "JSESSIONID";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -21,7 +23,8 @@ public class HttpCookie {
         this.httpCookies = httpCookies;
     }
 
-    public static HttpCookie from(final String cookie) {
+    public static HttpCookie from(final HttpRequestHeader httpRequestHeader) {
+        final String cookie = httpRequestHeader.get(COOKIE_HEADER_KEY);
         if ("none".equals(cookie)) {
             return new HttpCookie(Collections.emptyMap());
         }
@@ -38,7 +41,4 @@ public class HttpCookie {
         return !this.httpCookies.containsKey(JSESSIONID_KEY);
     }
 
-    public String getId() {
-        return httpCookies.get(JSESSIONID_KEY);
-    }
 }

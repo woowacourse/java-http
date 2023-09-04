@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-public class RequestBody {
+public class HttpRequestBody {
 
     private static final String SEPARATOR = "&";
     private static final String DELIMITER = "=";
@@ -16,21 +16,21 @@ public class RequestBody {
 
     private final Map<String, String> queryStrings;
 
-    private RequestBody(final Map<String, String> queryStrings) {
+    private HttpRequestBody(final Map<String, String> queryStrings) {
         this.queryStrings = queryStrings;
     }
 
-    public static RequestBody from(final String queryString) {
+    public static HttpRequestBody from(final String queryString) {
         return Arrays.stream(queryString.split(SEPARATOR))
                 .map(query -> query.split(DELIMITER))
                 .collect(collectingAndThen(
                         toUnmodifiableMap(query -> query[KEY_INDEX], query -> query[VALUE_INDEX]),
-                        RequestBody::new
+                        HttpRequestBody::new
                 ));
     }
 
-    public static RequestBody empty() {
-        return new RequestBody(Collections.emptyMap());
+    public static HttpRequestBody empty() {
+        return new HttpRequestBody(Collections.emptyMap());
     }
 
     public boolean isEmpty() {

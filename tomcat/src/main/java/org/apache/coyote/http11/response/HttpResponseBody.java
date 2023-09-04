@@ -4,25 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
-import org.apache.coyote.http11.request.RequestURI;
+import org.apache.coyote.http11.request.HttpRequestURI;
 
-public class ResponseBody {
+public class HttpResponseBody {
 
     private static final String STATIC_DIRECTORY = "static";
 
     private final String body;
 
-    private ResponseBody(final String body) {
+    private HttpResponseBody(final String body) {
         this.body = body;
     }
 
-    public static ResponseBody from(final RequestURI requestURI) throws IOException {
-        final var uri = requestURI.getUri();
+    public static HttpResponseBody from(final HttpRequestURI httpRequestURI) throws IOException {
+        final var uri = httpRequestURI.getUri();
         if("/".equals(uri)) {
-            return new ResponseBody("Hello world!");
+            return new HttpResponseBody("Hello world!");
         }
 
-        return new ResponseBody(readFile(uri));
+        return new HttpResponseBody(readFile(uri));
     }
 
     private static String readFile(final String uri) throws IOException {

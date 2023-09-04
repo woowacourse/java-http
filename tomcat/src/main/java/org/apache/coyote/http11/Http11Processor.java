@@ -14,9 +14,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.auth.HttpCookie;
 import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.request.RequestURI;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestURI;
+import org.apache.coyote.http11.response.HttpResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +48,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestHeader = readHeader(bufferedReader);
             final var requestURI = readRequestURI(firstLine, requestHeader, bufferedReader);
-            final var httpCookie = HttpCookie.from(requestHeader.get("Cookie"));
+            final var httpCookie = HttpCookie.from(requestHeader);
 
-            final var responseEntity = ResponseEntity.from(requestURI);
+            final var responseEntity = HttpResponseEntity.from(requestURI);
             final var response = responseEntity.getResponse(httpCookie);
 
             outputStream.write(response.getBytes());
@@ -60,18 +60,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
+    private HttpRequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
         for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
             stringBuilder.append(line).append(CRLF);
         }
 
-        return RequestHeader.from(stringBuilder.toString());
+        return HttpRequestHeader.from(stringBuilder.toString());
     }
 
-    private static RequestURI readRequestURI(
+    private static HttpRequestURI readRequestURI(
             final String firstLine,
-            final RequestHeader requestHeader,
+            final HttpRequestHeader httpRequestHeader,
             final BufferedReader bufferedReader
     ) throws IOException {
         final var requestURIElements = parseRequestURIElements(firstLine);
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
             return getRequestURI(requestURIElements);
         }
 
-        return postRequestURI(requestURIElements, parseRequestBody(requestHeader, bufferedReader));
+        return postRequestURI(requestURIElements, parseRequestBody(httpRequestHeader, bufferedReader));
     }
 
     private static List<String> parseRequestURIElements(final String requestURILine) {
@@ -89,25 +89,25 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private static RequestURI getRequestURI(final List<String> requestURIElements) {
-        return RequestURI.get(
+    private static HttpRequestURI getRequestURI(final List<String> requestURIElements) {
+        return HttpRequestURI.get(
                 requestURIElements,
                 user -> log.info("user : {}", user)
         );
     }
 
     private static String parseRequestBody(
-            final RequestHeader requestHeader,
+            final HttpRequestHeader httpRequestHeader,
             final BufferedReader bufferedReader
     ) throws IOException {
-        int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+        int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    private static RequestURI postRequestURI(final List<String> requestURIElements, final String requestBody) {
-        return RequestURI.post(
+    private static HttpRequestURI postRequestURI(final List<String> requestURIElements, final String requestBody) {
+        return HttpRequestURI.post(
                 requestURIElements,
                 requestBody,
                 user -> log.info("user : {}", user)

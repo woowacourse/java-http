@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class RequestURI {
+public class HttpRequestURI {
 
     private static final String REGISTER_PAGE = "/register.html";
     private static final String LOGIN_PAGE = "/login.html";
@@ -18,34 +18,34 @@ public class RequestURI {
 
     private final String oldUri;
     private final String uri;
-    private final RequestBody requestBody;
+    private final HttpRequestBody httpRequestBody;
     private final String httpMethod;
     private final String httpVersion;
 
-    private RequestURI(
+    private HttpRequestURI(
             final String uri,
-            final RequestBody requestBody,
+            final HttpRequestBody httpRequestBody,
             final String httpMethod,
             final String httpVersion
     ) {
-        this(uri, uri, requestBody, httpMethod, httpVersion);
+        this(uri, uri, httpRequestBody, httpMethod, httpVersion);
     }
 
-    private RequestURI(
+    private HttpRequestURI(
             final String oldUri,
             final String uri,
-            final RequestBody requestBody,
+            final HttpRequestBody httpRequestBody,
             final String httpMethod,
             final String httpVersion
     ) {
         this.oldUri = oldUri;
         this.uri = uri;
-        this.requestBody = requestBody;
+        this.httpRequestBody = httpRequestBody;
         this.httpMethod = httpMethod;
         this.httpVersion = httpVersion;
     }
 
-    public static RequestURI get(final List<String> requestURIElements, final Consumer<User> logProcessor) {
+    public static HttpRequestURI get(final List<String> requestURIElements, final Consumer<User> logProcessor) {
         final var uri = requestURIElements.get(URI_INDEX);
 
         if (uri.startsWith("/login")) {
@@ -53,13 +53,13 @@ public class RequestURI {
         }
 
         if (uri.startsWith("/register")) {
-            return parseRequestURI(REGISTER_PAGE, RequestBody.empty(), requestURIElements);
+            return parseRequestURI(REGISTER_PAGE, HttpRequestBody.empty(), requestURIElements);
         }
 
-        return parseRequestURI(uri, RequestBody.empty(), requestURIElements);
+        return parseRequestURI(uri, HttpRequestBody.empty(), requestURIElements);
     }
 
-    private static RequestURI parseLoginRequestURI(
+    private static HttpRequestURI parseLoginRequestURI(
             final String uri,
             final List<String> requestURIElements,
             final Consumer<User> logProcessor
@@ -67,80 +67,80 @@ public class RequestURI {
         final var index = uri.indexOf(QUERY_STRING_BEGIN_CHAR);
 
         if (isExistQueryString(index)) {
-            final var queryString = RequestBody.from(uri.substring(index + 1));
+            final var queryString = HttpRequestBody.from(uri.substring(index + 1));
             return parseLoginRequestURI(queryString, requestURIElements, logProcessor);
         }
 
-        return parseRequestURI(LOGIN_PAGE, RequestBody.empty(), requestURIElements);
+        return parseRequestURI(LOGIN_PAGE, HttpRequestBody.empty(), requestURIElements);
     }
 
-    private static RequestURI parseLoginRequestURI(
-            final RequestBody requestBody,
+    private static HttpRequestURI parseLoginRequestURI(
+            final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements,
             final Consumer<User> logProcessor
     ) {
-        final var account = requestBody.getValue("account");
-        final var password = requestBody.getValue("password");
+        final var account = httpRequestBody.getValue("account");
+        final var password = httpRequestBody.getValue("password");
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
                     logProcessor.accept(user);
-                    return parseRequestURI(LOGIN_PAGE, INDEX_PAGE, requestBody, requestURIElements);
+                    return parseRequestURI(LOGIN_PAGE, INDEX_PAGE, httpRequestBody, requestURIElements);
                 })
-                .orElseGet(() -> parseRequestURI(LOGIN_PAGE, LOGIN_FAIL_PAGE, RequestBody.empty(), requestURIElements));
+                .orElseGet(() -> parseRequestURI(LOGIN_PAGE, LOGIN_FAIL_PAGE, HttpRequestBody.empty(), requestURIElements));
     }
 
     private static boolean isExistQueryString(final int index) {
         return index != -1;
     }
 
-    private static RequestURI parseRequestURI(
+    private static HttpRequestURI parseRequestURI(
             final String oldPage,
             final String page,
-            final RequestBody requestBody,
+            final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements
     ) {
-        return new RequestURI(
+        return new HttpRequestURI(
                 oldPage,
                 page,
-                requestBody,
+                httpRequestBody,
                 requestURIElements.get(HTTP_METHOD_INDEX),
                 requestURIElements.get(HTTP_VERSION_INDEX)
         );
     }
 
-    private static RequestURI parseRequestURI(
+    private static HttpRequestURI parseRequestURI(
             final String page,
-            final RequestBody requestBody,
+            final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements
     ) {
-        return new RequestURI(
+        return new HttpRequestURI(
                 page,
-                requestBody,
+                httpRequestBody,
                 requestURIElements.get(HTTP_METHOD_INDEX),
                 requestURIElements.get(HTTP_VERSION_INDEX)
         );
     }
 
-    public static RequestURI post(
+    public static HttpRequestURI post(
             final List<String> requestURIElements,
             final String requestBody,
             final Consumer<User> logProcessor
     ) {
         final var uri = requestURIElements.get(URI_INDEX);
-        final RequestBody parsedRequestBody = RequestBody.from(requestBody);
+        final HttpRequestBody parsedHttpRequestBody = HttpRequestBody.from(requestBody);
         if (uri.startsWith("/register")) {
-            final var account = parsedRequestBody.getValue("account");
-            final var password = parsedRequestBody.getValue("password");
-            final var email = parsedRequestBody.getValue("email");
+            final var account = parsedHttpRequestBody.getValue("account");
+            final var password = parsedHttpRequestBody.getValue("password");
+            final var email = parsedHttpRequestBody.getValue("email");
 
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            return parseRequestURI(REGISTER_PAGE, INDEX_PAGE, parsedRequestBody, requestURIElements);
+            return parseRequestURI(REGISTER_PAGE, INDEX_PAGE, parsedHttpRequestBody, requestURIElements);
         }
 
-        return parseLoginRequestURI(parsedRequestBody, requestURIElements, logProcessor);
+        return parseLoginRequestURI(parsedHttpRequestBody, requestURIElements, logProcessor);
     }
 
     public boolean isLoginSuccess() {
@@ -155,8 +155,8 @@ public class RequestURI {
         return uri;
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
+    public HttpRequestBody getRequestBody() {
+        return httpRequestBody;
     }
 
     public String getHttpMethod() {

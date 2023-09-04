@@ -8,30 +8,30 @@ import java.io.IOException;
 import java.util.UUID;
 import org.apache.coyote.http11.auth.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.request.RequestURI;
+import org.apache.coyote.http11.request.HttpRequestURI;
 
-public class ResponseEntity {
+public class HttpResponseEntity {
 
-    private final RequestURI requestURI;
+    private final HttpRequestURI httpRequestURI;
 
-    private ResponseEntity(final RequestURI requestURI) {
-        this.requestURI = requestURI;
+    private HttpResponseEntity(final HttpRequestURI httpRequestURI) {
+        this.httpRequestURI = httpRequestURI;
     }
 
-    public static ResponseEntity from(final RequestURI requestURI) {
-        return new ResponseEntity(requestURI);
+    public static HttpResponseEntity from(final HttpRequestURI httpRequestURI) {
+        return new HttpResponseEntity(httpRequestURI);
     }
 
     public String getResponse(final HttpCookie httpCookie) throws IOException {
-        final var uri = requestURI.getUri();
-        final var responseHeader = ResponseHeader.from(requestURI);
-        final var responseBody = ResponseBody.from(requestURI);
+        final var uri = httpRequestURI.getUri();
+        final var responseHeader = HttpResponseHeader.from(httpRequestURI);
+        final var responseBody = HttpResponseBody.from(httpRequestURI);
 
         final StringBuilder body = new StringBuilder().append(parseHttpStatusLine(responseHeader)).append(CRLF)
                 .append(parseContentTypeLine(uri)).append(CRLF)
                 .append(parseContentLengthLine(responseBody)).append(CRLF);
 
-        if (requestURI.isLoginSuccess() && httpCookie.noneJSessionId()) {
+        if (httpRequestURI.isLoginSuccess() && httpCookie.noneJSessionId()) {
             body.append(parseCookieLine()).append(CRLF);
         }
         body.append(EMPTY).append(CRLF)
@@ -43,11 +43,11 @@ public class ResponseEntity {
         return String.format("Set-Cookie: JSESSIONID=%s", UUID.randomUUID());
     }
 
-    private String parseHttpStatusLine(final ResponseHeader responseHeader) {
-        final HttpStatus httpStatus = responseHeader.getHttpStatus();
+    private String parseHttpStatusLine(final HttpResponseHeader httpResponseHeader) {
+        final HttpStatus httpStatus = httpResponseHeader.getHttpStatus();
         return String.join(
                 SPACE,
-                requestURI.getHttpVersion(),
+                httpRequestURI.getHttpVersion(),
                 String.valueOf(httpStatus.getCode()),
                 httpStatus.name(),
                 ""
@@ -62,8 +62,8 @@ public class ResponseEntity {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private String parseContentLengthLine(final ResponseBody responseBody) {
-        return String.join(SPACE, "Content-Length:", String.valueOf(responseBody.contentLength()), "");
+    private String parseContentLengthLine(final HttpResponseBody httpResponseBody) {
+        return String.join(SPACE, "Content-Length:", String.valueOf(httpResponseBody.contentLength()), "");
     }
 
 }

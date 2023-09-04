@@ -1,22 +1,24 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.request.HttpRequestDecoder;
-import org.apache.coyote.http.response.HttpResponse;
-import org.apache.coyote.http.controller.HttpController;
-import org.apache.coyote.http.controller.ViewRenderer;
-import org.reflections.Reflections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.Optional;
+import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.apache.coyote.http.controller.HttpController;
+import org.apache.coyote.http.controller.ViewRenderer;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequestDecoder;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionManager;
+import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -44,17 +46,21 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequestDecoder requestParser = new HttpRequestDecoder();
             HttpRequest httpRequest = requestParser.decode(inputStream);
+            Optional<String> sessionId = httpRequest.getSessionId();
+
+            Session session = SessionManager.findSession(sessionId.orElse(null));
 
             HttpResponse httpResponse = new HttpResponse();
             HttpController controller = controllers.get(httpRequest.getPath());
             if (controller != null) {
-                controller.service(httpRequest, httpResponse);
+                controller.service(httpRequest, httpResponse, session);
             }
 
             if (!httpResponse.isCompleted()) {
                 VIEW_RENDERER.render(httpRequest, httpResponse);
             }
 
+            SessionManager.manageSession(httpResponse, session);
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

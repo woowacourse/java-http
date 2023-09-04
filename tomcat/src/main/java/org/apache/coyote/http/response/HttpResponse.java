@@ -4,9 +4,11 @@ import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaderConverter;
 import org.apache.coyote.http.MediaType;
+import org.apache.coyote.http.cookie.Cookie;
 
 public class HttpResponse {
 
@@ -42,6 +44,14 @@ public class HttpResponse {
         header.setValue(key, value);
     }
 
+    public boolean contains(String key) {
+        return !header.getValue(key).isEmpty();
+    }
+
+    public List<String> getHeader(String key) {
+        return header.getValue(key);
+    }
+
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;
         this.isCompleted = true;
@@ -65,7 +75,22 @@ public class HttpResponse {
         return forwardPath;
     }
 
+    public void addCookie(Cookie cookie) {
+        header.addCookie(cookie);
+    }
+
     public void setCharset(Charset charset) {
         header.setCharset(charset);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+            "statusCode=" + statusCode +
+            ", header=" + header +
+            ", body='" + body + '\'' +
+            ", forwardPath='" + forwardPath + '\'' +
+            ", isCompleted=" + isCompleted +
+            '}';
     }
 }

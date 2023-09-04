@@ -1,15 +1,20 @@
 package org.apache.coyote.http;
 
+import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
+import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
+import java.util.Optional;
+import org.apache.coyote.http.cookie.Cookie;
+import org.apache.coyote.http.cookie.Cookies;
+import org.apache.coyote.http.session.Session;
 
 public class HttpHeader {
 
@@ -17,36 +22,40 @@ public class HttpHeader {
     private MediaType mediaType;
     private Charset charset;
     private int contentLength;
+    private Cookies cookies;
 
-    private HttpHeader(Map<String, List<String>> header, MediaType mediaType, Charset charset, int contentLength) {
+    private HttpHeader(Map<String, List<String>> header, MediaType mediaType, Charset charset, int contentLength,
+        Cookies cookies) {
         this.header = header;
         this.mediaType = mediaType;
         this.charset = charset;
         this.contentLength = contentLength;
+        this.cookies = cookies;
     }
 
     public HttpHeader() {
-        this(new HashMap<>(), null, null, 0);
+        this(new HashMap<>(), null, null, 0, Cookies.from());
     }
 
     public static HttpHeader from(Map<String, List<String>> header) {
         String[] mediaTypeAndCharset = readContentType(header);
         MediaType mediaType = null;
         Charset charset = null;
-        if (mediaTypeAndCharset != null) {
+        if (mediaTypeAndCharset.length > 0) {
             mediaType = MediaType.fromValue(mediaTypeAndCharset[0]);
             charset = readCharset(mediaTypeAndCharset);
         }
 
+        Cookies cookies = Cookies.from(header);
         int contentLength = readContentLength(header);
 
-        return new HttpHeader(header, mediaType, charset, contentLength);
+        return new HttpHeader(header, mediaType, charset, contentLength, cookies);
     }
 
     private static String[] readContentType(Map<String, List<String>> header) {
         List<String> contentType = header.get(CONTENT_TYPE.value);
         if (contentType == null) {
-            return null;
+            return new String[0];
         }
 
         String contentTypeValue = contentType.get(0);
@@ -70,6 +79,10 @@ public class HttpHeader {
             return 0;
         }
         return Integer.parseInt(contentLength.get(0));
+    }
+
+    public Optional<Cookie> findSessionIdCookie() {
+        return cookies.findCookie(Session.REQUEST_COOKIE_KEY);
     }
 
     public String getContentType() {
@@ -100,6 +113,10 @@ public class HttpHeader {
         return contentLength;
     }
 
+    public List<String> getValue(String key) {
+        return new ArrayList<>(header.getOrDefault(key, Collections.emptyList()));
+    }
+
     public void setValue(String key, String value) {
         List<String> values = header.computeIfAbsent(key, ignored -> new ArrayList<>());
         values.add(value);
@@ -111,6 +128,14 @@ public class HttpHeader {
 
     public void setCharset(Charset charset) {
         this.charset = charset;
+    }
+
+    public void addCookie(Cookie cookie) {
+        cookies.addCookie(cookie);
+    }
+
+    public Cookies getCookies() {
+        return cookies;
     }
 
     @Override
@@ -145,7 +170,8 @@ public class HttpHeader {
 
         CONTENT_LENGTH("Content-Length"),
         CONTENT_TYPE("Content-Type"),
-        LOCATION("Location");
+        LOCATION("Location"),
+        SET_COOKIE("Set-Cookie");
 
         public final String value;
 

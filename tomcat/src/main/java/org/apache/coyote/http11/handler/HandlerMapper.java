@@ -1,9 +1,17 @@
 package org.apache.coyote.http11.handler;
 
+import static org.reflections.Reflections.log;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.RequestLine;
 import org.apache.coyote.http11.Response;
@@ -17,6 +25,8 @@ public class HandlerMapper {
 
     public void init() {
         HANDLERS.put(new HandlerStatus("GET", "/"), this::rootHandler);
+        HANDLERS.put(new HandlerStatus("GET", "/login", Set.of("account", "password")),
+                this::loginWithQueryParameterHandler);
     }
 
     public Response rootHandler(final Request request) {
@@ -66,6 +76,39 @@ public class HandlerMapper {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+        return new Response(response);
+    }
+
+    public Response loginWithQueryParameterHandler(final Request request) {
+        final RequestLine requestLine = request.getRequestLine();
+        final var queryParameter = requestLine.getRequestURI().getQueryParameter();
+
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("login.html이 존재하지 않습니다.");
+        }
+
+        final User user = InMemoryUserRepository.findByAccount(queryParameter.get("account"))
+                .orElseGet(null);
+
+        if (user != null) {
+            if (!user.checkPassword(queryParameter.get("password"))) {
+                log.error("유저의 아이디와 비밀번호가 일치하지않습니다.");
+            } else {
+                log.info("user : " + user);
+            }
+        }
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
         return new Response(response);
     }
 

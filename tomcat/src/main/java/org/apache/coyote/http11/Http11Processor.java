@@ -143,21 +143,23 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
-        Map<String, String> queryStrings = parseQueryString(requestURI);
+        String account = httpRequestBody.find("account");
 
-        if (httpMethod == HttpMethod.GET && queryStrings.isEmpty()) {
+        if (httpMethod == HttpMethod.GET && account == null) {
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
                     .requestURI(requestURI)
                     .location(LOGIN_PAGE_URI)
                     .build();
         }
-        User account = findAccount(queryStrings);
 
-        String password = queryStrings.get("password");
-        boolean isCorrectPassword = account.checkPassword(password);
+        String password = httpRequestBody.find("password");
+
+        User findAccount = findAccount(account);
+        boolean isCorrectPassword = findAccount.checkPassword(password);
+
         if (!isCorrectPassword) {
-            log.info("account {} 비밀번호 불일치로 로그인 실패", account.getAccount());
+            log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
             return ResponseEntity
                     .builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
@@ -166,7 +168,7 @@ public class Http11Processor implements Runnable, Processor {
                     .build();
         }
 
-        log.info("account {} 로그인 성공", account.getAccount());
+        log.info("account {} 로그인 성공", findAccount.getAccount());
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
@@ -175,8 +177,7 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private User findAccount(Map<String, String> queryStrings) {
-        String account = queryStrings.get("account");
+    private User findAccount(String account) {
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(account);
         if (findAccount.isEmpty()) {
             log.info("해당하는 Account를 찾을 수 없음! account={}", account);

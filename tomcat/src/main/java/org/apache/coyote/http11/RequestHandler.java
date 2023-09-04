@@ -68,6 +68,6 @@ public class RequestHandler {
         if (LoginValidator.check(httpRequest, sessionId)) {
             return ResponseBody.redirectResponse(HOME_PAGE, httpRequest, sessionId);
         }
-        return ResponseBody.from(UNAUTHORIZED_PAGE, HttpStatus.UNAUTHORIZED).getResponseMessage();
+        return ResponseBody.redirectResponse(UNAUTHORIZED_PAGE);
     }
 }

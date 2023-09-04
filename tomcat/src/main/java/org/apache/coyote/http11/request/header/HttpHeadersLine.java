@@ -11,9 +11,25 @@ public class HttpHeadersLine {
         this.headers = headers;
     }
 
-    public static HttpHeadersLine from(final String httpHeadersLine) {
-        return new HttpHeadersLine(Arrays.stream(httpHeadersLine.split("\r\n"))
+    public static HttpHeadersLine from(final String[] httpHeadersLine) {
+        return new HttpHeadersLine(Arrays.stream(httpHeadersLine)
                 .map(header -> header.split(":"))
                 .collect(Collectors.toMap(key -> key[0], value -> value[1])));
+    }
+
+    public static HttpHeadersLine from(final Map<String, String> httpHeaders) {
+        return new HttpHeadersLine(httpHeaders);
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.get("Content-Length").trim());
+    }
+
+    public String getCookie() {
+        return headers.get("Cookie").trim();
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

@@ -11,10 +11,8 @@ public enum HttpMethod {
 
     public static HttpMethod from(final String httpMethod) {
         return Arrays.stream(HttpMethod.values())
-                .filter(method -> method.name().equals(httpMethod))
+                .filter(method -> method.name().equalsIgnoreCase(httpMethod))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 http요청입니다."));
     }
-
-
 }

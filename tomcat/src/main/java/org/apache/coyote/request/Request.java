@@ -25,6 +25,10 @@ public class Request {
                 .collect(Collectors.joining(","));
     }
 
+    public String getQueryStringValue(String key) {
+        return url.getQueryValue(key);
+    }
+
     public URL getPath() {
         return url.getPath();
     }

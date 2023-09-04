@@ -33,6 +33,13 @@ public class RequestUrl {
         return path.equals(RequestUrl.class.getResource(NOT_FOUND_RESOURCE_PATH));
     }
 
+    public String getQueryValue(String key) {
+        if (!queryString.containsKey(key)) {
+            throw new IllegalArgumentException("키가 존재하지 않습니다.");
+        }
+        return queryString.get(key);
+    }
+
     public URL getPath() {
         return path;
     }

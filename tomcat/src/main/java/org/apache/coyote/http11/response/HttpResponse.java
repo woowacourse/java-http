@@ -7,20 +7,30 @@ public class HttpResponse {
 
     public static final String EMPTY_LINE = "";
     public static final String NEW_LINE = "\r\n";
+    private final HttpResponseHeaders headers;
     private HttpResponseStartLine httpResponseStartLine;
-    private HttpResponseHeaders headers;
     private String responseBody;
 
     public HttpResponse() {
         this.headers = HttpResponseHeaders.empty();
     }
 
-    public void setHttpResponseStartLine(StatusCode statusCode) {
-        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", statusCode);
+    public void sendRedirect(String location) {
+        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", StatusCode.FOUND);
+        headers.add("Location", location);
+    }
+
+    //FIXME: 쿠키를 여러개 설정할 수 있도록 수정
+    public void addCookie(String key, String value) {
+        headers.add("Set-Cookie", key + "=" + value);
     }
 
     public void addHeader(String name, String value) {
         headers.add(name, value);
+    }
+
+    public void setHttpResponseStartLine(StatusCode statusCode) {
+        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", statusCode);
     }
 
     public void setResponseBody(final byte[] responseBody) {
@@ -49,14 +59,5 @@ public class HttpResponse {
                 .stream()
                 .map(header -> String.format("%s: %s ", header.getKey(), header.getValue()))
                 .collect(Collectors.joining(NEW_LINE));
-    }
-
-    public void sendRedirect(String location) {
-        httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", StatusCode.FOUND);
-        headers.add("Location", location);
-    }
-
-    public void addCookie(String key, String value) {
-        headers.add("Set-Cookie", key + "=" + value);
     }
 }

@@ -14,7 +14,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Status;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

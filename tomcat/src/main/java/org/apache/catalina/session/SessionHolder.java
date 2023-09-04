@@ -1,7 +1,6 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.Manager;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

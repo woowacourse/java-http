@@ -2,8 +2,8 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.Header;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionHolder;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionHolder;
 
 import java.io.BufferedReader;
 import java.io.IOException;

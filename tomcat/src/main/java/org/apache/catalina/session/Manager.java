@@ -1,7 +1,7 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 
 import java.io.IOException;
 

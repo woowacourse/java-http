@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.message.request;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,12 @@ public class RequestBody {
         return new RequestBody(body);
     }
 
+    public static RequestBody ofEmpty() {
+        return new RequestBody(Collections.emptyMap());
+    }
+
     public String get(String key) {
         return body.get(key);
     }
+
 }

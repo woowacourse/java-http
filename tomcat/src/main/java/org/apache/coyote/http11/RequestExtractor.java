@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.request.RequestBody;
@@ -20,29 +21,38 @@ public class RequestExtractor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         String startLine = reader.readLine();
-        List<String> headers = extractHeaders(reader);
-        List<String> body = extractBody(reader);
+        Headers headers = extractHeaders(reader);
+        RequestBody requestBody = extractBodyIfExists(reader, headers);
 
-        return Request.from(startLine, Headers.from(headers), RequestBody.from(body));
+        return Request.from(startLine, headers, requestBody);
     }
 
-    private static List<String> extractHeaders(BufferedReader reader) throws IOException {
+    private static Headers extractHeaders(BufferedReader reader) throws IOException {
         List<String> headers = new ArrayList<>();
         String line;
         while (!(line = reader.readLine()).isBlank()) {
             headers.add(line);
         }
-        return headers;
+        return Headers.from(headers);
     }
 
-    private static List<String> extractBody(BufferedReader reader) throws IOException {
+    private static RequestBody extractBodyIfExists(BufferedReader reader,
+                                                   Headers headers) throws IOException {
+        String contentLength = headers.get("Content-Length");
+        if (Objects.nonNull(contentLength)) {
+            return extractBody(reader, Integer.parseInt(contentLength));
+        }
+        return RequestBody.ofEmpty();
+    }
+
+    private static RequestBody extractBody(BufferedReader reader, int contentLength) throws IOException {
         List<String> body = new ArrayList<>();
         if (reader.ready()) {
-            char[] buffer = new char[1024];
+            char[] buffer = new char[contentLength];
             reader.read(buffer);
             body.addAll(Arrays.asList(new String(buffer).trim()
                     .split("&")));
         }
-        return body;
+        return RequestBody.from(body);
     }
 }

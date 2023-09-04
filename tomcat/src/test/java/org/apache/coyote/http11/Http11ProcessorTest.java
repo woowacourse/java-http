@@ -140,12 +140,14 @@ class Http11ProcessorTest {
     @Test
     void 로그인_성공_시_인덱스_페이지로_이동한다() {
         // given
+        final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "account=gugu&password=password");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -168,12 +170,14 @@ class Http11ProcessorTest {
     @Test
     void 로그인_실패_시_401_페이지로_이동한다() {
         // given
+        final String requestBody = "account=gugu&password=wrongpassword";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "account=gugu&password=qweqwewqeqwe");
+                requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

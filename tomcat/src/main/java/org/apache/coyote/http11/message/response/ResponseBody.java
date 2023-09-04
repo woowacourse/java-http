@@ -11,18 +11,11 @@ public class ResponseBody {
     }
 
     public static ResponseBody ofEmpty() {
-        return new EmptyBody();
+        return new ResponseBody(StringUtils.EMPTY);
     }
 
     @Override
     public String toString() {
         return body;
-    }
-
-    private static class EmptyBody extends ResponseBody {
-
-        public EmptyBody() {
-            super(StringUtils.EMPTY);
-        }
     }
 }

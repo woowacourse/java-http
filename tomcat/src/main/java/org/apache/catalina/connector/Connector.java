@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.List;
+import org.apache.coyote.handler.Handler;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +20,16 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final List<Handler> handlers;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final List<Handler> handlers) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, handlers);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final List<Handler> handlers) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.handlers = handlers;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -66,7 +70,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, handlers);
         new Thread(processor).start();
     }
 

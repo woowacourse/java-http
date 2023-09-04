@@ -8,6 +8,7 @@ public enum ContentType {
     CSS("css", "text/css"),
     JS("js", "text/javascript"),
     ICON("ico", "image/x-icon"),
+    SVG("svg", "image/svg+xml"),
     ;
 
     private String fileExtension;

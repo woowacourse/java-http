@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.common.FileContent;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -45,21 +46,32 @@ public class HttpResponse {
             URL url;
             if (splitUri.length == 1) {
                 url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + uri + ".html");
+                        .getResource(STATIC + FileContent.findPage(uri) + ".html");
+
+                path = new File(url.getPath()).toPath();
+
+                final byte[] content = Files.readAllBytes(path);
+
+                final HttpHeaders headers = HttpHeaders.createResponse(path);
+                final String responseBody = new String(content);
+
+                if (FileContent.findPage(uri).equals("/404")) {
+                    return new HttpResponse(ResponseLine.create(HttpStatus.NOT_FOUND), headers, responseBody);
+                }
+                return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
             } else {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + uri);
+
+                path = new File(url.getPath()).toPath();
+
+                final byte[] content = Files.readAllBytes(path);
+
+                final HttpHeaders headers = HttpHeaders.createResponse(path);
+                final String responseBody = new String(content);
+
+                return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
             }
-
-            System.out.println(url);
-            path = new File(url.getPath()).toPath();
-
-            final byte[] content = Files.readAllBytes(path);
-
-            final HttpHeaders headers = HttpHeaders.createResponse(path);
-            final String responseBody = new String(content);
-
-            return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
         }
         else {
             uri = queryUri[0];

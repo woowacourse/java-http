@@ -19,8 +19,8 @@ public class ResponseLine {
     }
 
     public static ResponseLine create(final HttpStatus httpStatus) {
-        final String statusCode = String.valueOf(HttpStatus.OK.getValue());
-        final String statusText = HttpStatus.OK.getReasonPhrase();
+        final String statusCode = String.valueOf(httpStatus.getValue());
+        final String statusText = httpStatus.getReasonPhrase();
 
         return new ResponseLine(HTTP_VERSION, statusCode, statusText);
     }

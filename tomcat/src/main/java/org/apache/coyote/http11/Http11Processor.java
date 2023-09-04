@@ -209,7 +209,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("{} user 회원가입 성공", account);
         return ResponseEntity
                 .builder()
-                .httpStatus(HttpStatus.CREATED)
+                .httpStatus(HttpStatus.FOUND)
                 .requestURI(requestURI)
                 .location(INDEX_PAGE_URI)
                 .build();

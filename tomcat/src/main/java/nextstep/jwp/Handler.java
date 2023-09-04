@@ -30,19 +30,30 @@ public class Handler {
             return doLogin(httpRequest);
         }
         if (requestURI.isHome()) {
-            return new HttpResponse(HttpStatus.OK, "Hello world!", httpRequest.contentType());
+            return new HttpResponse.Builder()
+                    .httpStatus(HttpStatus.OK)
+                    .responseBody("Hello world!")
+                    .contentType(httpRequest.contentType())
+                    .build();
         }
         if (requestURI.isRegister()) {
             return doRegister(httpRequest);
         }
-        String responseBody = readResponseBody(requestURI.getResourcePath());
-        return new HttpResponse(HttpStatus.OK, responseBody, httpRequest.contentType());
+        return new HttpResponse.Builder()
+                .httpStatus(HttpStatus.OK)
+                .responseBody(parseResponseBody(requestURI.getResourcePath()))
+                .contentType(httpRequest.contentType())
+                .build();
     }
 
     private static HttpResponse doRegister(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRequestBodyEmpty()) {
-            String responseBody = readResponseBody("static/register.html");
-            return new HttpResponse(HttpStatus.OK, responseBody, httpRequest.contentType(), "register.html");
+            return new HttpResponse.Builder()
+                    .httpStatus(HttpStatus.OK)
+                    .responseBody(parseResponseBody("static/register.html"))
+                    .contentType(httpRequest.contentType())
+                    .redirectPage("register.html")
+                    .build();
         }
 
         RequestBody requestBody = httpRequest.getRequestBody();
@@ -50,11 +61,19 @@ public class Handler {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            String responseBody = readResponseBody("static/register.html");
-            return new HttpResponse(HttpStatus.FOUND, responseBody, httpRequest.contentType(), "register.html");
+            return new HttpResponse.Builder()
+                    .httpStatus(HttpStatus.FOUND)
+                    .responseBody(parseResponseBody("static/register.html"))
+                    .contentType(httpRequest.contentType())
+                    .redirectPage("register.html")
+                    .build();
         }
-        String responseBody = readResponseBody("static/index.html");
-        return new HttpResponse(HttpStatus.CREATED, responseBody, httpRequest.contentType(), "index.html");
+        return new HttpResponse.Builder()
+                .httpStatus(HttpStatus.CREATED)
+                .responseBody(parseResponseBody("static/index.html"))
+                .contentType(httpRequest.contentType())
+                .redirectPage("index.html")
+                .build();
     }
 
     private static HttpResponse doLogin(HttpRequest httpRequest) throws IOException {
@@ -66,14 +85,24 @@ public class Handler {
         log.info(user.toString());
         String password = queryString.getValueOf("password");
         if (!user.checkPassword(password)) {
-            String responseBody = readResponseBody("static/401.html");
-            return new HttpResponse(HttpStatus.UNAUTHORIZED, responseBody, httpRequest.contentType(), "401.html");
+            String responseBody = parseResponseBody("static/401.html");
+            return new HttpResponse.Builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .responseBody(responseBody)
+                    .contentType(httpRequest.contentType())
+                    .redirectPage("401.html")
+                    .build();
         }
-        String responseBody = readResponseBody("static/index.html");
-        return new HttpResponse(HttpStatus.FOUND, responseBody, httpRequest.contentType(), "index.html");
+        String responseBody = parseResponseBody("static/index.html");
+        return new HttpResponse.Builder()
+                .httpStatus(HttpStatus.FOUND)
+                .responseBody(responseBody)
+                .contentType(httpRequest.contentType())
+                .redirectPage("index.html")
+                .build();
     }
 
-    private static String readResponseBody(String resourcePath) throws IOException {
+    private static String parseResponseBody(String resourcePath) throws IOException {
         Path path = new File(Objects.requireNonNull(
                 Handler.class.getClassLoader().getResource(resourcePath)).getFile()
         ).toPath();

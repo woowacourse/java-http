@@ -43,11 +43,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(requestHeader, requestBody);
             HttpResponse httpResponse = Handler.run(httpRequest);
 
-            if (httpResponse.hasRedirect()) {
-                outputStream.write(httpResponse.getResponseWithRedirect().getBytes());
-                outputStream.flush();
-                return;
-            }
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

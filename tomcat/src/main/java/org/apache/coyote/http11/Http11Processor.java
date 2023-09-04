@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,59 +63,61 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpRequestHeader.getMethod() == HttpMethod.GET) {
                 if (path.equals("/index.html")) {
-                    if (httpRequestHeader.hasCookie()) {
-                        final String content = getResourceContent(path);
-                        final String response = new HttpResponse(HttpStatus.OK)
-                                .addContentType(ContentType.HTML)
-                                .addContentLength(content.length())
-                                .build(content);
-                        writeResponse(outputStream, response);
-                        return;
-                    }
-                    final String response = redirectResponse("/login.html");
-                    writeResponse(outputStream, response);
+                    writeResourceResponse(httpRequestHeader, outputStream);
                     return;
                 }
                 if (path.equals("/login")) {
                     if (httpRequestHeader.hasCookie()) {
-                        final String response = redirectResponse("/index.html");
-                        writeResponse(outputStream, response);
+                        writeRedirectResponse(outputStream, "/index.html");
                         return;
                     }
-                    final String response = redirectResponse("/login.html");
-                    writeResponse(outputStream, response);
+                    writeRedirectResponse(outputStream, "/login.html");
                     return;
                 }
                 if (path.equals("/register")) {
-                    final String response = redirectResponse("/register.html");
-                    writeResponse(outputStream, response);
+                    writeRedirectResponse(outputStream, "/register.html");
                     return;
                 }
                 if (httpRequestHeader.getRequestUri().contains(".")) {
-                    generateResourceResponse(httpRequestHeader, outputStream);
+                    writeResourceResponse(httpRequestHeader, outputStream);
                     return;
                 }
-                final String response = redirectResponse("/404.html");
-                writeResponse(outputStream, response);
+                if (path.equals("/")) {
+                    writeDefaultResponse(outputStream);
+                    return;
+                }
+                writeRedirectResponse(outputStream, "/404.html");
             }
 
-            if (httpRequestHeader.getMethod() == HttpMethod.POST && path.equals("/login")) {
-                final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
-                generateLoginResponse(httpRequestBody, outputStream);
-                return;
+            if (httpRequestHeader.getMethod() == HttpMethod.POST) {
+                if (path.equals("/login")) {
+                    final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
+                    writeLoginResponse(httpRequestBody, outputStream);
+                    return;
+                }
+                if (path.equals("/register")) {
+                    final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
+                    writeRegisterResponse(httpRequestBody, outputStream);
+                }
             }
-
-            if (httpRequestHeader.getMethod() == HttpMethod.POST && path.equals("/register")) {
-                final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
-                generateRegisterResponse(httpRequestBody, outputStream);
-                return;
-            }
-            generateDefaultResponse(outputStream);
+        } catch (AuthenticationException e) {
+            writeRedirectResponse(outputStream, "/login.html");
         } catch (IllegalArgumentException e) {
             final String response = new HttpResponse(HttpStatus.BAD_REQUEST).build();
             log.error(e.getMessage(), e);
             writeResponse(outputStream, response);
         }
+    }
+
+    private void writeRedirectResponse(final OutputStream outputStream, final String location) throws IOException {
+        final String response = redirectResponse(location);
+        writeResponse(outputStream, response);
+    }
+
+    private String redirectResponse(final String location) {
+        return new HttpResponse(HttpStatus.FOUND)
+                .addLocation(location)
+                .build();
     }
 
     private static HttpRequestBody parseBody(final HttpRequestHeader httpRequestHeader, final BufferedReader bufferedReader) throws IOException {
@@ -126,64 +130,66 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequestBody.empty();
     }
 
-    private void generateRegisterResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
+    private void writeRegisterResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
         final String account = body.get("account");
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {
-                    throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+                    throw new AuthenticationException("이미 존재하는 계정입니다.");
                 });
         final String password = body.get("password");
         final String email = body.get("email");
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        final String response = redirectResponse("/login.html");
-        writeResponse(outputStream, response);
+        writeRedirectResponse(outputStream, "/login.html");
     }
 
-    private void generateLoginResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
+    private void writeLoginResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
         final String account = body.get("account");
         final String password = body.get("password");
-        final String response = InMemoryUserRepository.findByAccount(account)
+        final User loginUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .map(user -> loginResponse())
-                .orElseGet(() -> redirectResponse("/401.html"));
+                .orElseThrow(() -> new AuthenticationException("아이디 또는 비밀번호가 틀립니다."));
+        final String response = getLoginResponse(loginUser);
         writeResponse(outputStream, response);
     }
 
-    private String loginResponse() {
+    private String getLoginResponse(User user) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final String sessionId = sessionManager.createSession(user);
         return new HttpResponse(HttpStatus.FOUND)
                 .addLocation("/index.html")
-                .addSetCookie(Cookie.ofJSessionId("1234567890"))
+                .addSetCookie(Cookie.ofJSessionId(sessionId))
                 .build();
     }
 
-    private String redirectResponse(final String location) {
-        return new HttpResponse(HttpStatus.FOUND)
-                .addLocation(location)
-                .build();
-    }
-
-    private void generateDefaultResponse(final OutputStream outputStream) throws IOException {
+    private void writeDefaultResponse(final OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
         final var response = new HttpResponse(HttpStatus.OK)
                 .addContentType(ContentType.HTML)
+                .addCharset("utf-8")
                 .addContentLength(responseBody.length())
                 .build(responseBody);
 
         writeResponse(outputStream, response);
     }
 
-    private void generateResourceResponse(final HttpRequestHeader request, final OutputStream outputStream) throws IOException {
+    private void writeResourceResponse(final HttpRequestHeader request, final OutputStream outputStream) throws IOException {
         final String requestUri = request.getRequestUri();
         final String extension = requestUri.substring(requestUri.lastIndexOf(".") + 1);
         final ContentType contentType = ContentType.from(extension);
         final String content = getResourceContent(requestUri);
         final String response = new HttpResponse(HttpStatus.OK)
                 .addContentType(contentType)
-                .addContentLength(content.length())
+                .addCharset("utf-8")
+                .addContentLength(content.getBytes().length)
                 .build(content);
         writeResponse(outputStream, response);
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private String getResourceContent(final String resourcePath) throws IOException {
@@ -192,11 +198,6 @@ public class Http11Processor implements Runnable, Processor {
         if (Objects.isNull(resource)) {
             throw new IllegalArgumentException("존재하지 않는 파일입니다.");
         }
-        return Files.readString(Path.of(resource.getPath()));
-    }
-
-    private void writeResponse(final OutputStream outputStream, final String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return new String(Files.readAllBytes(Path.of(resource.getFile())));
     }
 }

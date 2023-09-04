@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class HttpResponse {
     private final HttpStatus status;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(final HttpStatus status) {
         this.status = status;
@@ -28,6 +28,12 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse addCharset(final String charset) {
+        final String type = headers.get("Content-Type") + ";charset=" + charset;
+        headers.put("Content-Type", type);
+        return this;
+    }
+
     public HttpResponse addLocation(final String location) {
         headers.put("Location", location);
         return this;
@@ -39,8 +45,8 @@ public class HttpResponse {
 
     public String build(final String body) {
         List<String> response = new ArrayList<>();
-        response.add("HTTP/1.1 " + status.getStatusResponse());
-        headers.forEach((key, value) -> response.add(key + ": " + value));
+        response.add("HTTP/1.1 " + status.getStatusResponse() + " ");
+        headers.forEach((key, value) -> response.add(key + ": " + value + " "));
         response.add("");
         response.add(body);
         return String.join("\r\n", response);

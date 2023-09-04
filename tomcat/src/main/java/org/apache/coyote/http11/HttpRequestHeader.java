@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequestHeader {
     private final HttpMethod method;
@@ -61,6 +62,12 @@ public class HttpRequestHeader {
 
     public ContentType getContentType() {
         return ContentType.of(headers.getOrDefault("Content-Type", ""));
+    }
+
+    public Optional<Cookie> getJsessionCookie() {
+        return getCookies().stream()
+                .filter(cookie -> cookie.getName().equals("JSESSIONID"))
+                .findFirst();
     }
 
     public List<Cookie> getCookies() {

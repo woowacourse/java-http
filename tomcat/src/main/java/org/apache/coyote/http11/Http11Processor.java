@@ -41,13 +41,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final HttpRequest request = HttpRequest.from(bufferedReader);
 
-            final String uriPath = request.getUriPath();
-            log.info("request to {}", uriPath);
-
-            final String httpStatusOk = "200 OK";
-            final String contentType = getContentType(uriPath);
-            final String responseBody = readStaticFile(uriPath);
-            final HttpResponse response = new HttpResponse(httpStatusOk, contentType, responseBody);
+            final HttpResponse response = handleRequest(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -56,32 +50,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public String readStaticFile(final String fileName) throws URISyntaxException {
-        final String filePath = "static/" + fileName;
-        final URL res = getClass().getClassLoader().getResource(filePath);
+    public HttpResponse handleRequest(final HttpRequest request) throws URISyntaxException {
 
-        try {
-            return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
-            return "Hello world!";
-        }
-    }
+        final String httpStatusOk = "200 OK";
 
-    public String getContentType(final String fileName) {
-        final String[] fileNameSplit = fileName.split("\\.");
-        final String fileType = fileNameSplit[fileNameSplit.length - 1];
+        final String uriPath = request.getPath();
+        log.info("request to {}", uriPath);
 
-        if (fileType.equals("html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (fileType.equals("css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (fileType.equals("js")) {
-            return "application/javascript";
+        if(uriPath.equals("/login")) {
+            final String path = "/login.html";
+            return HttpResponse.of(httpStatusOk, path);
         }
 
-        return null;
+        return HttpResponse.of(httpStatusOk, uriPath);
     }
 
 }

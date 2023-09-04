@@ -18,7 +18,7 @@ public class HttpRequest {
         return new HttpRequest(requestLine);
     }
 
-    public String getUriPath() {
+    public String getPath() {
         return requestLine.getPath();
     }
 

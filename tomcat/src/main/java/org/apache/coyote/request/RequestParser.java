@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.response.Resource;
-import org.apache.coyote.response.ResourceType;
 
 public class RequestParser {
 
@@ -33,11 +31,11 @@ public class RequestParser {
         this.bufferedReader = new BufferedReader(inputStreamReader);
     }
 
-    public Resource getResource() throws IOException {
+    public Request getResource() throws IOException {
         RequestUrl requestUrl = readUrl(bufferedReader.readLine());
-        List<ResourceType> resourceType = getResourceType();
+        List<RequestContentType> requestContentType = getResourceType();
 
-        return Resource.of(requestUrl, resourceType);
+        return Request.of(requestUrl, requestContentType);
     }
 
     private RequestUrl readUrl(String message) {
@@ -72,16 +70,16 @@ public class RequestParser {
         return requestQueryString;
     }
 
-    private List<ResourceType> getResourceType() throws IOException {
+    private List<RequestContentType> getResourceType() throws IOException {
         String header;
         while ((header = bufferedReader.readLine()) != null) {
             if (header.startsWith(ACCEPT_HEADER) || header.startsWith(CONTENT_TYPE)) {
                 String resourceType = readLine(header);
                 return Arrays.stream(resourceType.split(SPLIT_VALUE_DELIMITER))
-                        .map(ResourceType::findResourceType)
+                        .map(RequestContentType::findResourceType)
                         .collect(Collectors.toList());
             }
         }
-        return List.of(ResourceType.HTML);
+        return List.of(RequestContentType.HTML);
     }
 }

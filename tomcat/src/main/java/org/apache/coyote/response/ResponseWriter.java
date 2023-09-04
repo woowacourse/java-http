@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import org.apache.coyote.request.Request;
 
 public class ResponseWriter {
 
@@ -18,9 +19,9 @@ public class ResponseWriter {
         this.outputStream = outputStream;
     }
 
-    public void writeResponse(Resource resource) throws URISyntaxException, IOException {
-        BufferedReader bufferedReader = getBufferedReader(resource.getPath());
-        String response = getResponse(resource, bufferedReader);
+    public void writeResponse(Request request) throws URISyntaxException, IOException {
+        BufferedReader bufferedReader = getBufferedReader(request.getPath());
+        String response = getResponse(request, bufferedReader);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -33,9 +34,9 @@ public class ResponseWriter {
         return new BufferedReader(inputStreamReader);
     }
 
-    private String getResponse(Resource resource, BufferedReader bufferedReader) throws IOException {
+    private String getResponse(Request request, BufferedReader bufferedReader) throws IOException {
         String responseBody = getResponseBody(bufferedReader);
-        String responseHeader = getResponseHeader(resource, responseBody);
+        String responseHeader = getResponseHeader(request, responseBody);
 
         return String.join("\r\n",
                 responseHeader,
@@ -52,15 +53,15 @@ public class ResponseWriter {
         return responseBodyBuilder.toString();
     }
 
-    private String getResponseHeader(Resource resource, String responseBody) {
+    private String getResponseHeader(Request request, String responseBody) {
         String status = "200 OK ";
-        if (!resource.isExists()) {
+        if (!request.isExists()) {
             status = "404 NOT_FOUND ";
         }
 
         return String.join("\r\n",
                 "HTTP/1.1 " + status,
-                "Content-Type: " + resource.getResourceTypes() + ";charset=utf-8 ",
+                "Content-Type: " + request.getResourceTypes() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "");
     }

@@ -1,14 +1,11 @@
 package org.apache.coyote.request;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.coyote.response.Resource;
-import org.apache.coyote.response.ResourceType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,12 +17,12 @@ class RequestParserTest {
         InputStream inputStream = new ByteArrayInputStream("GET /index.html HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Resource resource = requestParser.getResource();
+        Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
-                () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
-                () -> assertThat(resource.isExists()).isTrue()
+                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
+                () -> assertThat(request.isExists()).isTrue()
         );
     }
 
@@ -35,12 +32,12 @@ class RequestParserTest {
         InputStream inputStream = new ByteArrayInputStream("GET / HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Resource resource = requestParser.getResource();
+        Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
-                () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
-                () -> assertThat(resource.isExists()).isTrue()
+                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
+                () -> assertThat(request.isExists()).isTrue()
         );
     }
 
@@ -51,12 +48,12 @@ class RequestParserTest {
                 "GET /trestset/qweqsdae/asdawdqd/qwdqweqw HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Resource resource = requestParser.getResource();
+        Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getPath().getFile()).contains("/404.html"),
-                () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
-                () -> assertThat(resource.isExists()).isFalse()
+                () -> assertThat(request.getPath().getFile()).contains("/404.html"),
+                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
+                () -> assertThat(request.isExists()).isFalse()
         );
     }
 
@@ -67,14 +64,14 @@ class RequestParserTest {
                 "GET /index.html?account=123&password=password1234! HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Resource resource = requestParser.getResource();
+        Request request = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
-                () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
-                () -> assertThat(resource.getQueryString().get("account")).isEqualTo("123"),
-                () -> assertThat(resource.getQueryString().get("password")).isEqualTo("password1234!"),
-                () -> assertThat(resource.isExists()).isTrue()
+                () -> assertThat(request.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
+                () -> assertThat(request.getQueryString().get("account")).isEqualTo("123"),
+                () -> assertThat(request.getQueryString().get("password")).isEqualTo("password1234!"),
+                () -> assertThat(request.isExists()).isTrue()
         );
     }
 }

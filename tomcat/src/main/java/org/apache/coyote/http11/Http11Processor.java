@@ -4,7 +4,7 @@ import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.RequestParser;
-import org.apache.coyote.response.Resource;
+import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             RequestParser requestParser = new RequestParser(inputStream);
-            Resource resource = requestParser.getResource();
+            Request request = requestParser.getResource();
 
             ResponseWriter responseWriter = new ResponseWriter(outputStream);
-            responseWriter.writeResponse(resource);
+            responseWriter.writeResponse(request);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }

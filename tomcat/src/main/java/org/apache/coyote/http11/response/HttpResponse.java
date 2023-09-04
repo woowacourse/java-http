@@ -56,4 +56,8 @@ public class HttpResponse {
         httpResponseStartLine = new HttpResponseStartLine("HTTP/1.1", StatusCode.FOUND);
         headers.add("Location", location);
     }
+
+    public void addCookie(String key, String value) {
+        headers.add("Set-Cookie", key + "=" + value);
+    }
 }

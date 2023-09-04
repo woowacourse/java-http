@@ -4,7 +4,10 @@ public enum StatusCode {
 
     OK("200", "OK"),
     FOUND("302", "FOUND"),
-    UNAUTHORIZED("401", "UNAUTHORIZED");
+    BAD_REQUEST("400", "BAD_REQUEST"),
+    UNAUTHORIZED("401", "UNAUTHORIZED"),
+    NOT_FOUND("404", "NOT_FOUND"),
+    INTERNAL_SERVER_ERROR("500", "INTERNAL_SERVER_ERROR");
 
     private final String code;
     private final String text;
@@ -21,4 +24,4 @@ public enum StatusCode {
     public String getText() {
         return text;
     }
-    }
+}

@@ -1,5 +1,7 @@
 package nextstep.jwp.presentation;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.RequestReader;
 import org.apache.coyote.http11.Response;
 
@@ -7,6 +9,7 @@ import java.io.IOException;
 
 import static org.apache.coyote.http11.Header.LOCATION;
 import static org.apache.coyote.http11.StatusCode.FOUND;
+import static org.apache.coyote.http11.StatusCode.OK;
 import static org.apache.coyote.http11.StatusCode.UNAUTHORIZED;
 
 public class LoginController implements Controller {
@@ -22,6 +25,12 @@ public class LoginController implements Controller {
         }
         if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/login")) {
             return tryLogin(requestReader);
+        }
+        if (requestReader.getMethod().equalsIgnoreCase("GET") && requestReader.getRequestUrl().equals("/register")) {
+            return registerPage(requestReader);
+        }
+        if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/register")) {
+            return register(requestReader);
         }
         return null;
     }
@@ -44,5 +53,23 @@ public class LoginController implements Controller {
                     .addBaseHeaders()
                     .createResponseBodyByFile(UNAUTHORIZED_HTML);
         }
+    }
+
+    private Response registerPage(RequestReader requestReader) throws IOException {
+        return new Response(requestReader, OK)
+                .addBaseHeaders()
+                .createResponseBodyByFile(requestReader.getRequestUrl());
+    }
+
+    private Response register(RequestReader requestReader) throws IOException {
+        InMemoryUserRepository.save(new User(
+                requestReader.getBodyValue("account"),
+                requestReader.getBodyValue("password"),
+                requestReader.getBodyValue("email")
+        ));
+        return new Response(requestReader, FOUND)
+                .createResponseBodyByFile(INDEX)
+                .addHeader(LOCATION.getName(), INDEX)
+                .addBaseHeaders();
     }
 }

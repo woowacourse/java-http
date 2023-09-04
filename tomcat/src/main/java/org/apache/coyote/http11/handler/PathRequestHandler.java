@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,12 @@ public class PathRequestHandler {
                 getContentLengthHeader("Hello World!")
             )
         ));
+
+        try {
+            mappedRequest.put("/login", new StaticResourceHandler().getResponse("/login.html"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String getContentLengthHeader(final String body) {

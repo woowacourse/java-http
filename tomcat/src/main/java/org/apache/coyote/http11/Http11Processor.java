@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.PathRequestHandler;
@@ -44,8 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final List<String> messageLines = bufferedReader.lines()
-                .collect(Collectors.toList());
+            final List<String> messageLines = List.of(bufferedReader.readLine());
 
             final HttpRequestMessage httpRequestMessage = HttpRequestMessage.with(messageLines);
             final String response = getResponse(httpRequestMessage.getTargetUrl());

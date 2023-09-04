@@ -68,7 +68,7 @@ public class Request {
     private Optional<Session> findSession() {
         Cookies cookies = headers.getCookie();
         String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
-        return Optional.ofNullable((Session) SESSION_MANAGER.findSession(sessionId));
+        return Optional.ofNullable(SESSION_MANAGER.findSession(sessionId));
     }
 
     public String getBody() {

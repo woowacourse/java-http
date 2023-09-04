@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
@@ -13,6 +14,9 @@ import org.apache.coyote.http11.response.statusLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.UUID;
+
 public class Controller {
 
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
@@ -21,6 +25,7 @@ public class Controller {
     private static final String INDEX_FILE = "index.html";
     private static final String LOGIN_FILE = "login.html";
     private static final String REGISTER_FILE = "register.html";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final HttpRequest httpRequest;
 
@@ -72,9 +77,10 @@ public class Controller {
     private ResponseEntity loginSuccess(final User findUser) {
         log.info("user: {}", findUser);
 
+        final HttpCookie httpCookie = new HttpCookie(Map.of(JSESSIONID, UUID.randomUUID().toString()));
         final String indexPath = DIRECTORY_SEPARATOR + INDEX_FILE;
 
-        return ResponseEntity.of(HttpStatus.FOUND, indexPath);
+        return ResponseEntity.of(HttpStatus.FOUND, httpCookie, indexPath);
     }
 
     private ResponseEntity loginFail() {

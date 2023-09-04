@@ -1,43 +1,67 @@
 package org.apache.coyote.http11.response.headers;
 
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 import java.util.Objects;
 
 public class ResponseHeaders {
 
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String KEY_VALUE_DELIMITER = ": ";
     private static final String SPACE = " ";
     private static final String NEW_LINE = "\r\n";
 
+    private final HttpCookie httpCookie;
     private final ContentType contentType;
     private final int contentLength;
 
-    private ResponseHeaders(final ContentType contentType, final int contentLength) {
+    private ResponseHeaders(final HttpCookie httpCookie, final ContentType contentType, final int contentLength) {
+        this.httpCookie = httpCookie;
         this.contentType = contentType;
         this.contentLength = contentLength;
     }
 
     public static ResponseHeaders from(final ResponseEntity responseEntity) {
-        return new ResponseHeaders(responseEntity.getContentType(), responseEntity.calculateContentLength());
+        return new ResponseHeaders(
+                responseEntity.getHttpCookie(),
+                responseEntity.getContentType(),
+                responseEntity.calculateContentLength()
+        );
     }
 
     public String convertToString() {
+        if (httpCookie.isEmpty()) {
+            return String.join(NEW_LINE,
+                    convertContentType(),
+                    convertContentLength()
+            );
+        }
+
         return String.join(NEW_LINE,
+                convertSetCookie(),
                 convertContentType(),
                 convertContentLength()
         );
     }
 
+    private String convertSetCookie() {
+        return new StringBuilder().append(SET_COOKIE).append(KEY_VALUE_DELIMITER)
+                                  .append(httpCookie.convertToString()).append(SPACE)
+                                  .toString();
+    }
+
     private String convertContentType() {
-        return new StringBuilder().append(CONTENT_TYPE).append(KEY_VALUE_DELIMITER).append(contentType.convertToString()).append(SPACE)
+        return new StringBuilder().append(CONTENT_TYPE).append(KEY_VALUE_DELIMITER)
+                                  .append(contentType.convertToString()).append(SPACE)
                                   .toString();
     }
 
     private String convertContentLength() {
-        return new StringBuilder().append(CONTENT_LENGTH).append(KEY_VALUE_DELIMITER).append(contentLength).append(SPACE)
+        return new StringBuilder().append(CONTENT_LENGTH).append(KEY_VALUE_DELIMITER).append(contentLength)
+                                  .append(SPACE)
                                   .toString();
     }
 

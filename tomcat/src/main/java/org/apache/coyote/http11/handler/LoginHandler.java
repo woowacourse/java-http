@@ -81,18 +81,20 @@ public class LoginHandler implements HttpHandler {
 	private static HttpResponse checkPasswordProcess(final String password, final User user) {
 		if (user.checkPassword(password)) {
 			log.info(user.toString());
-			return loginSuccessResponse();
+			return loginSuccessResponse(user);
 		}
 		throw new UnauthorizedException();
 	}
 
-	private static HttpResponse loginSuccessResponse() {
+	private static HttpResponse loginSuccessResponse(final User user) {
 		final String body = "";
 		final HttpHeaders headers = resolveHeader(body);
-		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
 		final String jSessionId = UUID.randomUUID().toString();
-		SessionManager.add(new Session(jSessionId));
+		final Session session = new Session(jSessionId);
+		session.setAttributes("user", user);
+		SessionManager.add(session);
 		headers.put(SET_COOKIE.getValue(), jSessionId);
+		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
 		return new HttpResponse(
 			HttpStatusCode.TEMPORARILY_MOVED_302,
 			body,

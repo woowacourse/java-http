@@ -14,6 +14,7 @@ import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,11 +48,38 @@ class LoginHandlerTest {
 
 		@Test
 		@DisplayName("쿼리파람이 없는 경우 login.html을 반환한다")
-		void resolveHtml() throws IOException {
+		void resolveLoginHtml() throws IOException {
 			final String plainRequest = String.join("\r\n",
 				"GET /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
+				"",
+				"");
+			final String file = "/login.html";
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
+
+			final HttpResponse actual = HANDLER.handleTo(request);
+
+			final URL resource = getClass().getClassLoader().getResource("static" + file);
+			final String expected = "HTTP/1.1 200 OK \r\n" +
+				"Content-Type: text/html;charset=utf-8 \r\n" +
+				"Content-Length: 3797 \r\n" +
+				"\r\n" +
+				new String(readAllBytes(new File(resource.getFile()).toPath()));
+
+			assertThat(actual.buildResponse())
+				.isEqualTo(expected);
+		}
+
+		@Test
+		@DisplayName("쿼리파람이 없는 경우 login.html을 반환한다")
+		void resolveIndexHtml() throws IOException {
+			SessionManager.add(new Session("id"));
+			final String plainRequest = String.join("\r\n",
+				"GET /login HTTP/1.1 ",
+				"Host: localhost:8080 ",
+				"Connection: keep-alive ",
+				"Cookies: JSESSIONID=id ",
 				"",
 				"");
 			final String file = "/login.html";

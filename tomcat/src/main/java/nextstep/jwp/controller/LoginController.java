@@ -30,7 +30,7 @@ public class LoginController implements Controller{
         Map<String, String> requestBody = request.getRequestBody();
 
         if(!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY)){
-            throw new IllegalArgumentException();
+            return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
         }
 
         final String account = requestBody.get(QUERY_ACCOUNT_KEY);

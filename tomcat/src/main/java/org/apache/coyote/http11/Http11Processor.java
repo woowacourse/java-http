@@ -72,10 +72,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String writeView(Response response) throws FileNotFoundException {
+    private String writeView(Response response) {
         URL resource = getClass().getClassLoader().getResource("static" + response.getPath());
 
-        if(Objects.isNull(resource)){
+        if (Objects.isNull(resource)) {
             response = new PathResponse("/404", HttpURLConnection.HTTP_NOT_FOUND, "Not Found");
             resource = getClass().getClassLoader().getResource("static" + response.getPath());
         }
@@ -84,21 +84,28 @@ public class Http11Processor implements Runnable, Processor {
         return makeResponse(response, responseBody);
     }
 
-    private String getResponseBody(URL resource) throws FileNotFoundException {
+    private String getResponseBody(URL resource) {
+
         final Path path = Paths.get(resource.getPath());
-        final BufferedReader fileReader =  new BufferedReader(new FileReader(path.toFile()));
+        try (final BufferedReader fileReader = new BufferedReader(new FileReader(path.toFile()))) {
 
-        final StringBuilder actual = new StringBuilder();
-        fileReader.lines()
-                .forEach(br -> actual.append(br)
-                        .append(System.lineSeparator()));
+            final StringBuilder actual = new StringBuilder();
+            fileReader.lines()
+                    .forEach(br -> actual.append(br)
+                            .append(System.lineSeparator()));
 
-        return actual.toString();
+            return actual.toString();
+
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return "";
     }
 
     private static String makeResponse(Response response, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusValue() +" ",
+                "HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusValue() + " ",
                 "Content-Type: text/" + response.getFileType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

@@ -11,6 +11,7 @@ import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.session.JSessionIdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,12 +170,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("account {} 로그인 성공", findAccount.getAccount());
-        return ResponseEntity
+        ResponseEntity responseEntity = ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
                 .requestURI(requestURI)
                 .location(INDEX_PAGE_URI)
                 .build();
+        responseEntity.setCookie("JSESSIONID", JSessionIdGenerator.generateRandomSessionId());
+        return responseEntity;
     }
 
     private User findAccount(String account) {

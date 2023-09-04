@@ -19,6 +19,9 @@ import nextstep.jwp.http.HttpUri;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.QueryString;
 import nextstep.jwp.model.User;
+import nextstep.jwp.security.Session;
+import nextstep.jwp.security.SessionManager;
+import org.apache.catalina.Manager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,7 @@ public class LoginHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     private static final RequestHandler handler = new LoginHandler();
+    private static final Manager sessionManager = SessionManager.getInstance();
 
     private LoginHandler() {
     }
@@ -38,6 +42,18 @@ public class LoginHandler implements RequestHandler {
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         if (request.getHttpMethod().equals(HttpMethod.GET)) {
+            HttpHeaders requestHeaders = request.getHttpHeaders();
+
+            if (requestHeaders.containsKey("Cookie")) {
+                HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+                String jSessionId = cookie.getJSessionId();
+                Session session = sessionManager.findSession(jSessionId);
+                User user = (User) session.getAttribute("user");
+                InMemoryUserRepository.save(user);
+
+                return redirectToIndexPage(request);
+            }
+
             HttpUri httpUri = request.getHttpUri();
             if (httpUri.hasQueryString()) {
                 QueryString queryString = httpUri.getQueryString();
@@ -112,6 +128,10 @@ public class LoginHandler implements RequestHandler {
 
             if (user.checkPassword(queryString.get("password"))) {
                 log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+                Session session = new Session(UUID.randomUUID().toString());
+                session.setAttribute("user", user);
+                sessionManager.add(session);
+
                 return true;
             }
         }

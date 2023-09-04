@@ -36,7 +36,7 @@ Connection: keep-alive
 - [X] Cookie에 JSESSIONID 값 저장하기
   - [X] 요청 헤더에 JSESSIONID가 없을 경우, 응답 헤더에 Set-Cookie를 추가한다.
 
-- [ ] Session 구현하기
-  - [ ] 쿠키에서 전달받은 JSESSIONID 값으로 로그인 여부를 체크한다.
-  - [ ] 로그인에 성공하면, SESSION 객체의 값으로 USER를 저장한다.
-  - [ ] 로그인 된 상태에서 /login 페이지에 GET 요청을 보낼 경우, /index.html로 리다이렉트 한다.
+- [X] Session 구현하기
+  - [X] 쿠키에서 전달받은 JSESSIONID 값으로 로그인 여부를 체크한다.
+  - [X] 로그인에 성공하면, SESSION 객체의 값으로 USER를 저장한다.
+  - [X] 로그인 된 상태에서 /login 페이지에 GET 요청을 보낼 경우, /index.html로 리다이렉트 한다.

@@ -40,7 +40,7 @@ public class RequestLine {
     }
 
     public String parseUriWithOutQueryString() {
-        int queryStringIndex = uri.indexOf(QUERY_STRING_BEGIN);
+        final int queryStringIndex = uri.indexOf(QUERY_STRING_BEGIN);
         if (queryStringIndex == EMPTY_QUERY_STRING) {
             return uri;
         }

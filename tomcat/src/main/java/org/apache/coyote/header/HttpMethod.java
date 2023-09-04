@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.header;
 
 import java.util.Arrays;
 

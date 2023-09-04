@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.http11.handler.Http11MethodHandler;
 
 public class Http11MethodHandlerAdaptor {

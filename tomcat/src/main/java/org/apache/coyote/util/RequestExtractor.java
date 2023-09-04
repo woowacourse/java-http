@@ -1,6 +1,6 @@
 package org.apache.coyote.util;
 
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.header.HttpMethod;
 
 public class RequestExtractor {
 

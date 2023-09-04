@@ -1,11 +1,14 @@
 package org.apache.coyote.util;
 
-import static org.apache.coyote.HttpMethod.GET;
+import static org.apache.coyote.header.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.header.HttpMethod;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class RequestExtractorTest {
 
     @Test

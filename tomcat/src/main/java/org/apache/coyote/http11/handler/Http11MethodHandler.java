@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.HttpMethod;
+import org.apache.coyote.header.HttpMethod;
 
 public interface Http11MethodHandler {
 

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handle.Handlers;
+import org.apache.coyote.http11.handle.DispatcherServlet;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.support.HttpRequestExtractor;
@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = HttpRequestExtractor.extract(inputStream);
-            final HttpResponse httpResponses = Handlers.from(request);
+            final HttpResponse httpResponses = DispatcherServlet.from(request);
 
             outputStream.write(httpResponses.getResponse().getBytes());
             outputStream.flush();

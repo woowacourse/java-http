@@ -27,7 +27,6 @@ public class Http11Processor implements Runnable, Processor {
   private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
   private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
   private static final String PREFIX_STATIC_PATH = "static";
-  private static final String NEW_LINE = "\r\n";
   private static final String INDERX_PAGE = "/index.html";
   private static final String LOGIN_PAGE = "/login.html";
   private static final String JSESSIONID = "JSESSIONID";
@@ -137,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
   }
 
   private String response200(final String contentType, final String responseBody) {
-    return String.join(NEW_LINE,
+    return String.join(System.lineSeparator(),
         "HTTP/1.1 200 OK ",
         "Content-Type: " + contentType + ";charset=utf-8 ",
         "Content-Length: " + responseBody.getBytes().length + " ",
@@ -146,14 +145,14 @@ public class Http11Processor implements Runnable, Processor {
   }
 
   private String response302(final String location) {
-    return String.join(NEW_LINE,
+    return String.join(System.lineSeparator(),
         "HTTP/1.1 302 FOUND ",
         "Location: " + location,
         "");
   }
 
   private String response302(final String location, final String cookie) {
-    return String.join(NEW_LINE,
+    return String.join(System.lineSeparator(),
         "HTTP/1.1 302 FOUND ",
         "Location: " + location,
         "Set-Cookie: " + cookie,

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class RequestLine {
     private static final String REQUEST_HEADER_DELIMITER = " ";

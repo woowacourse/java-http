@@ -1,7 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 
 public class Request {
     private final RequestLine requestLine;

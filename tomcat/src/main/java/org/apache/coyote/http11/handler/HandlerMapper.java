@@ -10,11 +10,11 @@ import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.Request;
-import org.apache.coyote.http11.RequestLine;
-import org.apache.coyote.http11.Response;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.Response;
 
 public class HandlerMapper {
     private static final Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();

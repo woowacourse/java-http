@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
     private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     private static final String JSESSION_ID = "JSESSIONID";
 
@@ -42,8 +39,6 @@ public class HttpRequest {
             final String protocol = requestLineTokens[2];
             final HttpHeaders headers = HttpHeaders.from(bufferedReader);
             final Map<String, String> body = parseBody(headers, bufferedReader);
-
-            LOGGER.info("method: {}, uri: {}, protocol: {}", method, uri, protocol);
 
             return new HttpRequest(headers, HttpMethod.of(method), HttpRequestURI.from(uri), protocol, body);
         } catch (IOException e) {

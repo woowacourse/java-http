@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.cookie;
+package org.apache.coyote.http11.session;
 
 import lombok.Getter;
 

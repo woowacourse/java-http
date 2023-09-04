@@ -7,7 +7,6 @@ import org.apache.coyote.http11.response.header.Header;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,10 +62,7 @@ public class HttpRequest {
     private static String getBody(final BufferedReader requestReader, final int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         requestReader.read(buffer, 0, contentLength);
-
-        String body = new String(buffer);
-        body = URLDecoder.decode(body, "UTF-8");
-        return body;
+        return new String(buffer);
     }
 
     private static HttpRequest getHttpRequest(final Uri uri, final Headers headers, final Params body) {

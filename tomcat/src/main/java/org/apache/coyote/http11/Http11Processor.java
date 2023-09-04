@@ -19,12 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -48,13 +50,13 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))
         ) {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = getResponse(httpRequest);
-            outputStream.write(httpResponse.toString().getBytes());
-            outputStream.flush();
+            bufferedWriter.write(httpResponse.toString());
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException | NotFoundException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }

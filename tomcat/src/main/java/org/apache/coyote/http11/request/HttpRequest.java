@@ -4,19 +4,23 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.common.Cookie;
+import java.util.UUID;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
+import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.SessionManger;
 
 public class HttpRequest {
     private final StartLine startLine;
     private final HttpHeaders headers;
     private final MessageBody body;
+    private final SessionManger sessionManger;
 
     private HttpRequest(final StartLine startLine, final HttpHeaders headers, final MessageBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+        this.sessionManger = new SessionManger();
     }
 
     public static HttpRequest create(BufferedReader br) throws IOException {
@@ -64,7 +68,20 @@ public class HttpRequest {
         return body;
     }
 
-    public Cookie getCookie() {
-        return headers.getCookie();
+    public Session getSession() {
+        Session session = null;
+        try {
+            String sessionId = headers.getCookies().getCookie("JSESSIONID");
+            session = sessionManger.findSession(sessionId);
+        } catch (Exception e) {
+            return makeNewSession();
+        }
+        return session;
+    }
+
+    private Session makeNewSession() {
+        Session session = new Session(UUID.randomUUID().toString());
+        sessionManger.add(session);
+        return session;
     }
 }

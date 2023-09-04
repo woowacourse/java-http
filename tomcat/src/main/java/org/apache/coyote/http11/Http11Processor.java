@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,7 +41,14 @@ public class Http11Processor implements Runnable, Processor {
             final var uri = request.split(" ")[1];
             System.out.println(uri);
 
-            final var response = getResponse(uri);
+            final var responseBody = getResponseBody(uri);
+
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    getContentType(uri),
+                    getContentLength(responseBody),
+                    "",
+                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,26 +57,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String getResponse(final String uri) throws IOException {
+    private String getResponseBody(final String uri) throws IOException {
         if ("/".equals(uri)) {
-            final var responseBody = "Hello world!";
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return "Hello world!";
         }
 
         final URL resource = ClassLoader.getSystemClassLoader().getResource("static" + uri);
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String file = Objects.requireNonNull(resource).getFile();
+        return new String(Files.readAllBytes(new File(file).toPath()));
+    }
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private String getContentType(final String uri) {
+        if (uri.endsWith(".css")) {
+            return "Content-Type: text/css;charset=utf-8 ";
+        }
+
+        return "Content-Type: text/html;charset=utf-8 ";
+    }
+
+    private String getContentLength(final String responseBody) {
+        return "Content-Length: " + responseBody.getBytes().length + " ";
     }
 }

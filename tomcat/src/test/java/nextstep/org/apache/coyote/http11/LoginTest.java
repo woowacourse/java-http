@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class LoginTest {
+class LoginTest {
 
     @Test
     void 로그인_페이지에_접속_테스트() throws IOException {

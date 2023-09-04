@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.HttpExtensionType;
 import org.apache.coyote.http11.common.HttpStatus;
 
 public class ResponseEntity {
@@ -27,6 +28,10 @@ public class ResponseEntity {
 
     public void setJSessionId(final String id) {
         httpCookie.put(JSESSION_ID, id);
+    }
+
+    public HttpExtensionType getHttpExtensionType() {
+        return HttpExtensionType.from(uri);
     }
 
     public HttpStatus getHttpStatus() {

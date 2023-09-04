@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.common.HttpExtensionType;
 import org.apache.coyote.http11.common.HttpStatus;
 
 public class HttpResponseGenerator {
@@ -29,7 +30,7 @@ public class HttpResponseGenerator {
         return String.join(
                 CRLF,
                 generateHttpStatusLine(responseEntity.getHttpStatus()),
-                generateContentTypeLine(responseEntity.getUri()),
+                generateContentTypeLine(responseEntity.getHttpExtensionType()),
                 generateContentLengthLine(responseBody),
                 "",
                 responseBody
@@ -40,11 +41,8 @@ public class HttpResponseGenerator {
         return String.join(BLANK, "HTTP/1.1", httpStatus.getCode(), httpStatus.name(), "");
     }
 
-    private String generateContentTypeLine(final String url) {
-        if (url.endsWith(".css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
-        }
-        return "Content-Type: text/html;charset=utf-8 ";
+    private String generateContentTypeLine(final HttpExtensionType httpExtensionType) {
+        return "Content-Type: " + httpExtensionType.getContentType() + ";charset=utf-8 ";
     }
 
     private CharSequence generateContentLengthLine(final String responseBody) {

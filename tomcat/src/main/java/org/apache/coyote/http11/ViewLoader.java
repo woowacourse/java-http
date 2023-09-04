@@ -19,7 +19,6 @@ public class ViewLoader {
         try{
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e){
-            e.printStackTrace();
             return null;
         }
     }

@@ -43,7 +43,7 @@ class CookiesTest {
         final Cookies cookies = Cookies.from(cookieValues);
 
         // then
-        assertThat(cookies.names()).containsExactlyInAnyOrder("name", "title", "content");
+        assertThat(cookies.cookieNames()).containsExactlyInAnyOrder("name", "title", "content");
     }
 
     @Test

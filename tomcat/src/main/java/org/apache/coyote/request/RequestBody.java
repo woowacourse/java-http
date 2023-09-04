@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 public class RequestBody {
 
-    public static final RequestBody EMPTY = new RequestBody(Collections.emptyMap());
-
     private static final String REQUEST_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int NAME_INDEX = 0;
@@ -24,7 +22,7 @@ public class RequestBody {
 
     public static RequestBody from(final String requestBodyValue) {
         if (requestBodyValue.isBlank()) {
-            return EMPTY;
+            return RequestBody.empty();
         }
 
         final Map<String, String> mapping = Arrays.asList(requestBodyValue.split(REQUEST_DELIMITER))
@@ -33,6 +31,10 @@ public class RequestBody {
                 .collect(Collectors.toMap(keyValue -> keyValue[NAME_INDEX], keyValue -> keyValue[VALUE_INDEX]));
 
         return new RequestBody(mapping);
+    }
+
+    public static RequestBody empty() {
+        return new RequestBody(Collections.emptyMap());
     }
 
     public List<String> names() {

@@ -4,12 +4,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class ResponseBody {
 
-    public static final ResponseBody EMPTY = new ResponseBody("");
+    private static final String EMPTY_BODY = "";
 
     private final String source;
 
     public ResponseBody(final String source) {
         this.source = source;
+    }
+
+    public static ResponseBody empty() {
+        return new ResponseBody(EMPTY_BODY);
     }
 
     public byte[] bytes() {

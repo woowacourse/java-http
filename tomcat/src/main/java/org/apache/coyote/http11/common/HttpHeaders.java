@@ -72,6 +72,10 @@ public class HttpHeaders {
         return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 
+    public void setHeader(final String key, final String value) {
+        headers.put(key, value);
+    }
+
     @Override
     public String toString() {
         return String.join(" \r\n",

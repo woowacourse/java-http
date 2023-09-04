@@ -18,6 +18,7 @@ public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NEW_LINE = "\r\n";
     private static final String STATIC = "static";
+
     private final ResponseLine responseLine;
     private final HttpHeaders headers;
     private final String responseBody;
@@ -76,8 +77,6 @@ public class HttpResponse {
                         .getResource(STATIC + uri);
             }
 
-            path = new File(url.getPath()).toPath();
-
             if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
                 url = HttpResponse.class.getClassLoader()
                         .getResource(STATIC + "/401" + ".html");
@@ -90,15 +89,20 @@ public class HttpResponse {
 
                 return new HttpResponse(ResponseLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
             } else {
+                url = HttpResponse.class.getClassLoader()
+                        .getResource(STATIC + "/index" + ".html");
+                path = new File(url.getPath()).toPath();
+
                 final User user = InMemoryUserRepository.findByAccountAndPassword(username, password).get();
                 log.info(user.toString());
 
                 final byte[] content = Files.readAllBytes(path);
 
                 final HttpHeaders headers = HttpHeaders.createResponse(path);
+                headers.setHeader("Location", "/index.html");
                 final String responseBody = new String(content);
 
-                return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
+                return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, responseBody);
             }
         }
     }

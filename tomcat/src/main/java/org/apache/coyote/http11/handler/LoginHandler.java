@@ -53,7 +53,7 @@ public class LoginHandler implements Handler {
     private ResponseEntity loginSuccessResponse(User user) {
         ResponseEntity responseEntity = ResponseEntity.redirect("index.html");
         UUID uuid = createSession(user);
-        responseEntity.setCookie("JSESSIONID", uuid.toString());
+        responseEntity.addCookie("JSESSIONID", uuid.toString());
         return responseEntity;
     }
 

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,8 +62,8 @@ class LoginHandlerTest {
 
         // when
         ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        Map<String, String> cookies = responseEntity.getCookies();
-        String jsessionid = cookies.get("JSESSIONID");
+        Cookie cookie = responseEntity.getCookie();
+        String jsessionid = cookie.findByKey("JSESSIONID");
         Session session = SessionManager.findSession(UUID.fromString(jsessionid));
 
         // then

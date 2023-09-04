@@ -37,17 +37,17 @@ public class HttpResponse {
     public String getBody() {
         return body;
     }
-    
+
     public void setBody(final String body) {
-        httpHeaders.setHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpHeaders.addHeader("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }
 
     public void setHeader(final String header, final String value) {
-        httpHeaders.setHeader(header, value);
+        httpHeaders.addHeader(header, value);
     }
 
     public void setCookie(final String cookieKey, final String cookieValue) {
-        httpHeaders.setHeader("Set-Cookie", cookieKey + "=" + cookieValue);
+        httpHeaders.addHeader("Set-Cookie", cookieKey + "=" + cookieValue);
     }
 }

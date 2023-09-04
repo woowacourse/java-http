@@ -19,7 +19,7 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    public void setHeader(final String header, final String value) {
+    public void addHeader(final String header, final String value) {
         headers.put(header, value);
     }
 

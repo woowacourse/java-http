@@ -1,8 +1,11 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.response.HttpStatusCode.OK;
+import static org.apache.coyote.http11.response.HttpStatusCode.UNAUTHORIZED;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,17 +28,44 @@ public class LoginHandler implements RequestHandler {
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         String uri = httpRequest.getStartLine().getHttpRequestUri().getUri();
 
-        if (uri.contains("?")) {
-            Map<String, String> queryParms = parseQueryParms(uri);
-            Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryParms.get("account"));
-            if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
-                if (user.checkPassword(queryParms.get("password"))) {
-                    System.out.println(user);
-                }
+        if (uri.equals("/login")) {
+            return getLoginPage(httpRequest);
+        }
+
+        Map<String, String> queryParms = parseQueryParms(uri);
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryParms.get("account"));
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.checkPassword(queryParms.get("password"))) {
+                HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
+                        httpRequest.getStartLine().getHttpVersion(), FOUND);
+
+                HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+                httpResponseHeader.add(CONTENT_TYPE, "text/html;charset=utf-8");
+                httpResponseHeader.add(CONTENT_LENGTH, String.valueOf("".getBytes().length));
+                httpResponseHeader.add(LOCATION, "/index.html");
+
+                HttpResponseBody body = HttpResponseBody.from("");
+
+                return new HttpResponse(statusLine, httpResponseHeader, body);
             }
         }
-        return getLoginPage(httpRequest);
+
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
+                httpRequest.getStartLine().getHttpVersion(), UNAUTHORIZED);
+
+        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+        httpResponseHeader.add(CONTENT_TYPE, "text/html;charset=utf-8");
+        httpResponseHeader.add(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+
+        HttpResponseBody body = HttpResponseBody.from(responseBody);
+
+        return new HttpResponse(statusLine, httpResponseHeader, body);
     }
 
     private HttpResponse getLoginPage(final HttpRequest httpRequest) throws IOException {

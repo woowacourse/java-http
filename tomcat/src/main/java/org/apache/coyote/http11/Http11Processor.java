@@ -53,7 +53,11 @@ public class Http11Processor implements Runnable, Processor {
 
       if (request.getUrl().equals("/login")) {
         final String account = params.get("account");
-        response = loginResponse(account);
+        response = login(account);
+      } else if (request.getUrl().equals("/register")) {
+        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        final Map<String, String> body = readBody(inputStream, contentLength);
+        response = register(body);
       } else {
         final String responseBody = readContentsFromFile(request.getUrl());
         final String contentType = getContentType(headers);
@@ -67,7 +71,22 @@ public class Http11Processor implements Runnable, Processor {
     }
   }
 
-  private String loginResponse(final String account) {
+  private Map<String, String> readBody(
+      final BufferedReader inputStream,
+      final int contentLength
+  ) throws IOException {
+    final char[] buffer = new char[contentLength];
+    inputStream.read(buffer);
+    return extractParams(new String(buffer));
+  }
+
+  private String register(final Map<String, String> body) {
+    final User user = new User(body.get("account"), body.get("password"), body.get("email"));
+    InMemoryUserRepository.save(user);
+    return response302("/index.html");
+  }
+
+  private String login(final String account) {
     final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
     if (user.isPresent()) {

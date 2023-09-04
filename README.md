@@ -9,6 +9,6 @@
 ## 2단계 기능 요구 사항
 
 - [x] HTTP Status Code 302
-- [ ] POST 방식으로 회원가입
+- [x] POST 방식으로 회원가입
 - [ ] Cookie에 JSESSIONID 값 저장하기
 - [ ] Session 구현하기

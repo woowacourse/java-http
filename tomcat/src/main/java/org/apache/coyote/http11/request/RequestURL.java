@@ -35,10 +35,10 @@ public class RequestURL {
     public static RequestURL from(String line) {
         validate(line);
 
-        final String[] splitedLine = line.split(SPACE_DELIMITER);
+        final String[] splitLine = line.split(SPACE_DELIMITER);
 
-        return new RequestURL(getMethod(splitedLine[METHOD_INDEX]), splitedLine[URL_INDEX],
-                splitedLine[VERSION_INDEX], parseQueryParam(splitedLine[URL_INDEX]));
+        return new RequestURL(getMethod(splitLine[METHOD_INDEX]), splitLine[URL_INDEX],
+                splitLine[VERSION_INDEX], parseQueryParam(splitLine[URL_INDEX]));
     }
 
     private static void validate(final String line) {
@@ -54,8 +54,8 @@ public class RequestURL {
         final String[] splitedQueryString = url.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[1].split(QUERY_PARAM_DELIMITER);
         Map<String, String> queryStrings = new HashMap<>();
         for (String queryString : splitedQueryString) {
-            final String[] splitedQuery = queryString.split(KEY_VALUE_DELIMITER);
-            queryStrings.put(splitedQuery[0], splitedQuery[1]);
+            final String[] splitQuery = queryString.split(KEY_VALUE_DELIMITER);
+            queryStrings.put(splitQuery[0], splitQuery[1]);
         }
 
         return queryStrings;
@@ -73,9 +73,9 @@ public class RequestURL {
     }
 
     public String getExtension() {
-        final String[] splitedUrl = url.split(NON_RESERVED_EXTENSION_DELIMITER);
-        if (splitedUrl.length > 1) {
-            return splitedUrl[splitedUrl.length - 1];
+        final String[] splitUrl = url.split(NON_RESERVED_EXTENSION_DELIMITER);
+        if (splitUrl.length > 1) {
+            return splitUrl[splitUrl.length - 1];
         }
         return "html";
     }
@@ -90,5 +90,9 @@ public class RequestURL {
 
     public String getUrl() {
         return url;
+    }
+
+    public HttpMethod getMethod() {
+        return method;
     }
 }

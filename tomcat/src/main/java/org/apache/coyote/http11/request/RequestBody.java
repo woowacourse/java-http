@@ -16,8 +16,8 @@ public class RequestBody {
             return null;
         }
 
-        char[] tmp = new char[Integer.parseInt(contentLength)];
-        bufferedReader.read(tmp, 0, Integer.parseInt(contentLength));
+        char[] tmp = new char[Integer.parseInt(contentLength.trim())];
+        bufferedReader.read(tmp, 0, Integer.parseInt(contentLength.trim()));
 
         return new RequestBody(String.copyValueOf(tmp));
     }

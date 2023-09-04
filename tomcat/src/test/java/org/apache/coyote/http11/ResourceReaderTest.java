@@ -10,7 +10,7 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ResourceTest {
+class ResourceReaderTest {
 
     @Test
     @DisplayName("해당하는 자원을 불러오는 테스트")
@@ -19,7 +19,7 @@ class ResourceTest {
         String fileName = "nextstep.txt";
 
         // when
-        String actual = Resource.readResource(fileName);
+        String actual = ResourceReader.readResource(fileName);
 
         // then
         URL resource = getClass().getClassLoader().getResource(fileName);

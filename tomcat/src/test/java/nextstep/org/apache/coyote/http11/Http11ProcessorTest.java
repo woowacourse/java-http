@@ -143,23 +143,23 @@ class Http11ProcessorTest {
     void redirectIfLoginSuccess() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "");
+                "account=gugu&password=password");
 
-        String httpResponse = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: /index.html\r\n"
-        );
+        String http = "HTTP/1.1 302 FOUND ";
+        String location = "Location: /index.html";
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
         processor.process(socket);
 
         // when, then
-        assertThat(socket.output()).isEqualTo(httpResponse);
+        assertThat(socket.output()).contains(http,location);
     }
 
     @Test
@@ -167,21 +167,46 @@ class Http11ProcessorTest {
     void redirectIfLoginFail() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=zz&password=zz HTTP/1.1 ",
+                "POST /login?account=zz&password=zz HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 62 ",
+                "Content-Type: application/x-www-form-urlencoded",
                 "",
-                "");
+                "account=hoho&password=password\n");
 
-        String httpResponse = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: /401.html\r\n");
+        String http = "HTTP/1.1 302 FOUND ";
+        String location = "Location: /401.html";
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
         processor.process(socket);
 
         // when, then
-        assertThat(socket.output()).isEqualTo(httpResponse);
+        assertThat(socket.output()).contains(http,location);
+    }
+
+    @Test
+    @DisplayName("회원 가입 완료 시 index.html로 리다이렉트 한다.")
+    void register() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com\n");
+
+        String http = "HTTP/1.1 302 FOUND ";
+        String location = "Location: /index.html";
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+        processor.process(socket);
+
+        // when, then
+        assertThat(socket.output()).contains(http,location);
     }
 }

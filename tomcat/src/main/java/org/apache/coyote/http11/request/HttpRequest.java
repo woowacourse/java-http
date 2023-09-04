@@ -9,7 +9,7 @@ public class HttpRequest {
     private final RequestURL requestURL;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
-    private static final String CONTENT_LENGTH = "content-length";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private HttpRequest(final RequestURL requestURL, final RequestHeaders requestHeaders, final RequestBody requestBody) {
         this.requestURL = requestURL;

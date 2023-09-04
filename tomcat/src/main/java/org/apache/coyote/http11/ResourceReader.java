@@ -8,9 +8,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
-public class Resource {
+public class ResourceReader {
 
-    private Resource() {
+    private ResourceReader() {
     }
 
     public static String readResource(final String resourcePath) throws IOException {

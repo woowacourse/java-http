@@ -16,4 +16,11 @@ public class RequestFixture {
             "\n" +
             "message body";
 
+    public static final String GET_LOGIN_REQUEST = "GET /login HTTP/1.1\n" +
+            "header: header\n" +
+            "Cookie: test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n" +
+            "Content-Length: 12\n" +
+            "\n" +
+            "message body";
+
 }

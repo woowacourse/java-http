@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.model.User;
 import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.util.RequestExtractor;
 import org.slf4j.Logger;
@@ -33,18 +35,29 @@ public class GetHttp11MethodHandler implements Http11MethodHandler {
         }
 
         if (targetPath.contains("?")) {
-            Map<String, String> queryParams = RequestExtractor.extractQueryParam(request);
-            log.info("user : {}", findByAccount(queryParams.get("account")).orElseThrow(
-                    () -> new RuntimeException("존재하지 않는 유저입니다.")
-            ));
-
-            targetPath = targetPath.substring(0, targetPath.indexOf("?"));
+            return login(request);
         }
 
         if (!targetPath.contains(".")) {
             targetPath += ".html";
         }
         return resourceContent(targetPath);
+    }
+
+    private String login(String request) {
+        Map<String, String> queryParams = RequestExtractor.extractQueryParam(request);
+        Optional<User> foundUser = findByAccount(queryParams.get("account"));
+        User user = foundUser.orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+
+        if (user.checkPassword(queryParams.get("password"))) {
+            log.info("user : {}", user);
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Location: " + "index.html");
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + "401.html");
     }
 
     private String defaultContent() {

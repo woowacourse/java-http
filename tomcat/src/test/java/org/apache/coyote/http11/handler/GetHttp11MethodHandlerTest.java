@@ -95,7 +95,7 @@ class GetHttp11MethodHandlerTest {
     }
 
     @Test
-    void 로그인에_실패하면_예외가_발생한다() {
+    void 존재하지_않는_유저로_로그인하면_예외가_발생한다() {
         // given
         String request = String.join("\r\n",
                 "GET /login?account=doggy&password=1234 HTTP/1.1 ",
@@ -107,5 +107,37 @@ class GetHttp11MethodHandlerTest {
         assertThrows(RuntimeException.class, () -> handler.handle(request));
     }
 
-    // TODO TEST: 로그인에 성공하면 유저 정보를 로깅한다
+    @Test
+    void 비밀번호가_틀리면_401_페이지로_리다이렉션한다() {
+        // given
+        String request = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        // when
+        String result = handler.handle(request);
+
+        // then
+        assertThat(result).contains("HTTP/1.1 302 Found");
+        assertThat(result).contains("Location: 401.html");
+    }
+
+    @Test
+    void 로그인이_정상적으로_처리되면_index_페이지로_리다이렉션한다() {
+        // given
+        String request = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "",
+                "");
+
+        // when
+        String result = handler.handle(request);
+
+        // then
+        assertThat(result).contains("HTTP/1.1 302 Found");
+        assertThat(result).contains("Location: index.html");
+    }
 }

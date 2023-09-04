@@ -30,35 +30,40 @@ public class Response {
                 .location(httpStatus.getValue()+".html")
                 .build();
     }
+
     public String getResponse(){
+
         return String.join("\r\n",
-                "HTTP/1.1 " + status ,
-                "Content-Type: text/" + contentType + ";",
-                "charset=utf-8 ",
+                "HTTP/1.1 " + status + " ",
+                "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
-                "Set-Cookie :" + makeCookie(),
-                "",
+                makeLocation(),
+                makeCookie(),
                 responseBody);
     }
 
-    public String redirect(String file){
-        return String.join("\r\n",
-                "HTTP/1.1 " + status ,
-                "Content-Type: text/html;",
-                "charset=utf-8 ",
-                "Content-Length: " + file.getBytes().length + " ",
-                "Set-Cookie :" + makeCookie(),
-                "location : " + location,
-                "",
-                file);
+    public Response redirect(String file, String location){
+        return new Builder()
+                .status(this.status)
+                .contentType("html")
+                .location(location)
+                .cookie(cookie)
+                .responseBody(file)
+                .build();
     }
 
 
+    private String makeLocation(){
+        if(location==null){
+            return "";
+        }
+        return "location : " + location;
+    }
     private String makeCookie(){
         if(cookie == null){
             return "";
         }
-        return cookie.entrySet().stream()
+        return "Set-Cookie :" + cookie.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
     }

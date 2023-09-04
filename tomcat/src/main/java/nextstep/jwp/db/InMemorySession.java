@@ -1,11 +1,9 @@
 package nextstep.jwp.db;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.model.AuthUser;
 import nextstep.jwp.model.User;
 
 public class InMemorySession {

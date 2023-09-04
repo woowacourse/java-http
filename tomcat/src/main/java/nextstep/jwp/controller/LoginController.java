@@ -12,9 +12,10 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 
 public class LoginController {
-    public static Response getLogin(Request request){
-        Map<String, String> query = request.getQueries().orElseThrow();
-        AuthUser authUser = AuthUser.from(query);
+
+    public static Response login(Request request){
+        Map<String, String> body = request.getBody();
+        AuthUser authUser = AuthUser.from(body);
         User user = InMemoryUserRepository.findByAccount(authUser.getAccount()).orElseThrow(()->new UnauthorizedException("해당 유저가 없습니다."));
         if(!user.checkPassword(authUser.getPassword())){
             throw new UnauthorizedException("아이디 및 패스워드가 틀렸습니다.");
@@ -26,10 +27,7 @@ public class LoginController {
         }
         return Response.builder()
                 .status(HttpStatus.FOUND)
-                .contentType(request.getContentType())
-                .responseBody(request.getResponseBody())
                 .cookie(cookie)
-                .location("index.html")
                 .build();
     }
 
@@ -42,9 +40,6 @@ public class LoginController {
         InMemoryUserRepository.save(user);
         return Response.builder()
                 .status(HttpStatus.FOUND)
-                .contentType(request.getContentType())
-                .responseBody(request.getResponseBody())
-                .location("index.html")
                 .build();
     }
 }

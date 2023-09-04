@@ -1,9 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 public enum HttpStatus {
     OK(200,"OK"),
     FOUND(302,"Found"),

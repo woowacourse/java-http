@@ -14,13 +14,12 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
-    private final SessionManager sessionManager;
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
-        this.sessionManager = new SessionManager();
     }
 
     @Override

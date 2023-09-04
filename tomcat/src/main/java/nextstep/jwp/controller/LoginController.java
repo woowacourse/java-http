@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -39,7 +39,7 @@ public class LoginController implements Controller {
             }
 
             log.info("login success!");
-            Map<String, String> headers = new HashMap<>();
+            Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Location", "/index.html");
             return new HttpResponse(
                     "HTTP/1.1",
@@ -48,7 +48,7 @@ public class LoginController implements Controller {
             );
         } catch (IllegalArgumentException exception) {
             log.info("login fail!");
-            Map<String, String> headers = new HashMap<>();
+            Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Location", "/401.html");
             return new HttpResponse(
                     "HTTP/1.1",

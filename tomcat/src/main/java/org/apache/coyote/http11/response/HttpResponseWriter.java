@@ -26,7 +26,7 @@ public class HttpResponseWriter {
         final String httpVersion = httpResponse.getHttpVersion();
         final int statusCode = httpResponse.getStatusCode().getCode();
         final String statusText = httpResponse.getStatusCode().getText();
-        return String.join(" ", httpVersion, String.valueOf(statusCode), statusText);
+        return String.join(" ", httpVersion, String.valueOf(statusCode), statusText) + " ";
     }
 
     private static String extractHeaders(final HttpResponse httpResponse) {

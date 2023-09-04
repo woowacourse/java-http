@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
@@ -31,7 +31,7 @@ public class StaticResourceHandler implements ResourceHandler {
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
 

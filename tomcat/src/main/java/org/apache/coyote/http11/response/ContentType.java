@@ -5,8 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
 
     ICO("image/x-icon"),
-    HTML("text/html; charset=utf-8"),
-    CSS("text/css; charset=utf-8"),
+    HTML("text/html;charset=utf-8"),
+    CSS("text/css;charset=utf-8"),
     JS("text/javascript"),
     SVG("image/svg+xml");
 

@@ -36,7 +36,10 @@ public class Location {
 
         final ClassLoader classLoader = Response.class.getClassLoader();
         final String locationWithoutExtension = location.replaceAll(REGEX_FOR_EXTENSION, "");
-        final URL resource = classLoader.getResource(BASE_PATH + locationWithoutExtension + contentType.getExtension());
+        final URL resource = classLoader.getResource(BASE_PATH +
+                locationWithoutExtension +
+                "." +
+                contentType.getExtension());
 
         if (isNull(resource)) {
             return Paths.get("/");

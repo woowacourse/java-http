@@ -2,8 +2,10 @@ package org.apache.coyote.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Cookies {
@@ -20,18 +22,32 @@ public class Cookies {
     }
 
     public static Cookies from(final String cookieValues) {
-        final Map<String, String> mapping = Arrays.stream(cookieValues.split(COOKIE_HEADER_DELIMITER))
+        if (Objects.isNull(cookieValues) || cookieValues.isBlank()) {
+            return empty();
+        }
+
+        return new Cookies(collectCookieMapping(cookieValues));
+    }
+
+    private static Map<String, String> collectCookieMapping(final String cookieValues) {
+        return Arrays.stream(cookieValues.split(COOKIE_HEADER_DELIMITER))
                 .map(cookieEntry -> cookieEntry.split(COOKIE_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         cookieEntry -> cookieEntry[COOKIE_KEY_INDEX].trim(),
                         cookieEntry -> cookieEntry[COOKIE_VALUE_INDEX].trim()
                 ));
-
-        return new Cookies(mapping);
     }
 
     public static Cookies ofJSessionId(final String sessionId) {
         return new Cookies(Map.of("JSESSIONID", sessionId));
+    }
+
+    public static Cookies empty() {
+        return new Cookies(new HashMap<>());
+    }
+
+    public void addCookie(final Cookies other) {
+        cookie.putAll(other.cookie);
     }
 
     public List<String> names() {
@@ -40,6 +56,19 @@ public class Cookies {
 
     public String getCookieValue(final String name) {
         return cookie.getOrDefault(name, null);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Cookies cookies = (Cookies) o;
+        return Objects.equals(cookie, cookies.cookie);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cookie);
     }
 
     @Override

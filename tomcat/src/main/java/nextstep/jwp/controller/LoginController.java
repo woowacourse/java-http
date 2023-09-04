@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.StatusCode;
 
 public class LoginController extends HttpServlet {
 
@@ -20,9 +21,11 @@ public class LoginController extends HttpServlet {
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
         if (req.getSession().containskey("user")) {
+            resp.setHttpResponseStartLine(StatusCode.FOUND);
             resp.sendRedirect("/index.html");
             return;
         }
+        resp.setHttpResponseStartLine(StatusCode.OK);
         byte[] file = FileIOUtils.getFileInBytes(PREFIX+req.getPath()+SUFFIX);
         resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
         resp.setResponseBody(file);

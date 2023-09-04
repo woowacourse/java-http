@@ -10,7 +10,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-//FIXME: 스프링 에러 처리는 Redirect를 사용하는 것이 아니라 RequestDispatcher를 통해 처리된다
+// 스프링 에러 처리는 Redirect를 사용하는 것이 아니라 RequestDispatcher를 통해 처리된다
 public class ResourceController extends HttpServlet {
 
     private static final String PREFIX = "static";
@@ -23,6 +23,7 @@ public class ResourceController extends HttpServlet {
 
         if (path == null || !path.toFile().isFile()) {
             resp.sendRedirect("/401.html");
+            return;
         }
 
         resp.addHeader(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path) + "; charset=utf-8");

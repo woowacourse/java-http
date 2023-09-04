@@ -10,12 +10,17 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpServlet;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.StatusCode;
 
 public class RegisterController extends HttpServlet {
 
+    private static final String PREFIX = "static";
+    private static final String SUFFIX = ".html";
+
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        byte[] file = FileIOUtils.getFileInBytes(req.getPath());
+        byte[] file = FileIOUtils.getFileInBytes(PREFIX + req.getPath() + SUFFIX);
+        resp.setHttpResponseStartLine(StatusCode.OK);
         resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
         resp.setResponseBody(file);
     }

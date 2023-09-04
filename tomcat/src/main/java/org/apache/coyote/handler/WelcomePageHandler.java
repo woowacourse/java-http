@@ -6,7 +6,8 @@ public class WelcomePageHandler implements StaticHandler {
 
   @Override
   public boolean canHandle(final HttpRequest httpRequest) {
-    return httpRequest.getHttpMethod().equals("GET") && httpRequest.getPath().equals("/");
+    return httpRequest.getHttpMethod().equals("GET")
+        && httpRequest.getPath().equals("/");
   }
 
   @Override

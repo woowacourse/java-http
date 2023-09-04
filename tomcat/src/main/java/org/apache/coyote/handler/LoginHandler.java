@@ -16,9 +16,8 @@ public class LoginHandler implements DynamicHandler {
 
   @Override
   public boolean canHandle(final HttpRequest httpRequest) {
-    final String httpMethod = httpRequest.getHttpMethod();
-    final String path = httpRequest.getPath();
-    return httpMethod.equals("GET") && path.startsWith("/login");
+    return httpRequest.getHttpMethod().equals("GET")
+        && httpRequest.getPath().startsWith("/login");
   }
 
   @Override

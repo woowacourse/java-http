@@ -1,19 +1,16 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.ContentType.TEXT_CSS;
-import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -50,17 +47,23 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            HttpResponse httpResponse = handleRequest(httpRequest);
-
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(process(bufferedReader).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    // [TODO] 예외 처리 하는 exception handler 만들기
+    private HttpResponse process(BufferedReader bufferedReader) throws IOException {
+        ExceptionHandler exceptionHandler = new ExceptionHandler();
+        try {
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            return handleRequest(httpRequest);
+        } catch (HttpException e) {
+            return exceptionHandler.handleException(e);
+        }
+    }
+
     private HttpResponse handleRequest(HttpRequest httpRequest) throws IOException {
         ResourceLoader resourceLoader = new ResourceLoader();
 
@@ -75,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 return login(httpRequest);
             }
-            throw new IllegalArgumentException("지원되지 않는 uri 입니다");
+            throw new HttpException(BAD_REQUEST, "지원되지 않는 uri 입니다");
         }
         if (httpRequest.method() == GET) {
             if (httpRequest.uri().equals("/")) {
@@ -100,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return httpResponse;
         }
-        throw new IllegalArgumentException("지원되지 않는 요청입니다");
+        throw new HttpException(BAD_REQUEST, "지원되지 않는 요청입니다");
     }
 
     private HttpResponse register(HttpRequest httpRequest) {
@@ -109,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = formData.get("password");
         String email = formData.get("email");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalStateException("이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
+            throw new HttpException(BAD_REQUEST, "이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -122,9 +125,9 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse loginWithSession(String jsessionid) {
         SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(jsessionid)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 세션 아이디입니다"));
+                .orElseThrow(() -> new HttpException(UNAUTHORIZED, "잘못된 세션 아이디입니다"));
         session.getAttribute("user")
-                .orElseThrow(() -> new IllegalArgumentException("세션에 회원정보가 존재하지 않습니다"));
+                .orElseThrow(() -> new HttpException(UNAUTHORIZED, "세션에 회원정보가 존재하지 않습니다"));
         HttpResponse httpResponse = HttpResponse.from(FOUND);
         httpResponse.sendRedirect(INDEX_HTML);
         return httpResponse;
@@ -144,7 +147,7 @@ public class Http11Processor implements Runnable, Processor {
             sessionManager.add(session);
             return getRedirectResponseWithCookie(jsessionid);
         }
-        return getUnauthorizedResponse();
+        throw new HttpException(UNAUTHORIZED, "아이디나 비밀번호를 확인해주세요");
     }
 
     private HttpResponse getRedirectResponseWithCookie(String jsessionid) {
@@ -152,11 +155,5 @@ public class Http11Processor implements Runnable, Processor {
         httpResponse.sendRedirect(INDEX_HTML);
         httpResponse.addCookie(JSESSIONID, jsessionid);
         return httpResponse;
-    }
-
-    private HttpResponse getUnauthorizedResponse() throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return HttpResponse.from(UNAUTHORIZED, TEXT_HTML, responseBody);
     }
 }

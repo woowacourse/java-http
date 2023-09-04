@@ -37,10 +37,6 @@ public class HttpCookie {
         cookies.put(cookieName, cookieValue);
     }
 
-    public boolean isEmpty() {
-        return cookies.isEmpty();
-    }
-
     public Optional<String> getCookie(String cookieName) {
         if (cookies.containsKey(cookieName)) {
             return Optional.of(cookies.get(cookieName));

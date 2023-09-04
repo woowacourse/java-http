@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -83,7 +85,7 @@ public class HttpRequest {
 
     public String getBody() {
         if (body == null) {
-            throw new IllegalArgumentException("요청 본문이 존재하지 않습니다");
+            throw new HttpException(BAD_REQUEST, "요청 본문이 존재하지 않습니다");
         }
         return body;
     }

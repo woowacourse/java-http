@@ -5,6 +5,7 @@ public enum HttpStatus {
     OK(200),
     FOUND(302),
     UNAUTHORIZED(401),
+    BAD_REQUEST(404),
     ;
 
     private final int statusCode;

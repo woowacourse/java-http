@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +32,6 @@ public class FormData {
         if (formTable.containsKey(key)) {
             return formTable.get(key);
         }
-        throw new IllegalArgumentException("데이터가 존재하지 않습니다");
+        throw new HttpException(BAD_REQUEST, "데이터가 존재하지 않습니다");
     }
 }

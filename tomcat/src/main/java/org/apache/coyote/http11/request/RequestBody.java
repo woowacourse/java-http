@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import nextstep.jwp.model.User;
+
 public class RequestBody {
     public static final RequestBody EMPTY_REQUEST_BODY = new RequestBody(new HashMap<>());
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -19,8 +21,10 @@ public class RequestBody {
         this.bodies = bodies;
     }
 
-    public static RequestBody convert(final BufferedReader bufferedReader) throws IOException {
-        final String requestBody = bufferedReader.readLine();
+    public static RequestBody convert(final BufferedReader bufferedReader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
         final Map<String, String> bodies = Arrays.stream(requestBody.split(DELIMITER))
                 .map(keyValue -> keyValue.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
@@ -28,6 +32,13 @@ public class RequestBody {
                         splitKeyValue -> splitKeyValue[VALUE_INDEX]
                 ));
         return new RequestBody(bodies);
+    }
+
+    public User parseToUser() {
+        final String account = bodies.get("account");
+        final String password = bodies.get("password");
+        final String mail = bodies.get("email");
+        return new User(account, password, mail);
     }
 
     public Map<String, String> getBodies() {

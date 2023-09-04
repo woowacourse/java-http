@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.request.HttpMethod.POST;
 import static org.apache.coyote.http11.response.StatusCode.OK;
 import static org.apache.coyote.http11.response.StatusCode.UNAUTHORIZED;
 
@@ -48,6 +49,10 @@ public class RequestHandler {
 
         if (requestPath.equals(REGISTER) && request.getHttpMethod().equals(GET)) {
             return getStaticPateResponse(REGISTER_HTML, OK);
+        }
+
+        if (requestPath.equals(REGISTER) && request.getHttpMethod().equals(POST)) {
+            return register();
         }
 
         return getStaticPateResponse(requestPath, OK);
@@ -101,5 +106,11 @@ public class RequestHandler {
         } catch(LoginException exception) {
             return getStaticPateResponse(UNAUTHORIZED_HTML, UNAUTHORIZED);
         }
+    }
+
+    private Response register() {
+        final User user = request.parseToUser();
+        InMemoryUserRepository.save(user);
+        return Response.generateRedirectResponse(INDEX_HTML);
     }
 }

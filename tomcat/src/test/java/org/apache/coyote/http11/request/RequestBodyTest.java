@@ -24,7 +24,7 @@ class RequestBodyTest {
         final BufferedReader bufferedReader = new BufferedReader(new StringReader(request));
 
         //when
-        final RequestBody requestBody = RequestBody.convert(bufferedReader);
+        final RequestBody requestBody = RequestBody.convert(bufferedReader, request.getBytes().length);
 
         //then
         final Map<String, String> expected = new HashMap<>();

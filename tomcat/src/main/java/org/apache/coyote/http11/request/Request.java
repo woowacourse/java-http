@@ -7,6 +7,8 @@ import java.util.Objects;
 
 import org.apache.coyote.http11.common.HttpVersion;
 
+import nextstep.jwp.model.User;
+
 public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
     private final RequestLine line;
@@ -26,7 +28,7 @@ public class Request {
         if (Objects.isNull(contentLength)) {
             return new Request(requestLine, requestHeader, RequestBody.EMPTY_REQUEST_BODY);
         }
-        return new Request(requestLine, requestHeader, RequestBody.convert(bufferedReader));
+        return new Request(requestLine, requestHeader, RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)));
     }
 
     public boolean hasQueryString() {
@@ -35,6 +37,10 @@ public class Request {
 
     public Map<String, String> getQueryString() {
         return line.getQueryString();
+    }
+
+    public User parseToUser() {
+        return body.parseToUser();
     }
 
     public RequestLine getLine() {

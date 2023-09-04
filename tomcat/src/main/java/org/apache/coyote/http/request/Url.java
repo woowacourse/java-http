@@ -74,4 +74,8 @@ public class Url {
 
         return resourceName.contains(STATIC_RESOURCE_EXTENSION_SEPARATOR);
     }
+
+    public boolean startsWithRootContextPath(final String rootContextPath) {
+        return path.startsWith(rootContextPath);
+    }
 }

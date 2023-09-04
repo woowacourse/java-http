@@ -132,6 +132,48 @@ class RequestTest {
     }
 
     @Test
+    void matchesByRootContextPath_메서드는_path가_rootContextPath로_시작하면_true를_반환한다() {
+        final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
+        final HttpMethod method = HttpMethod.findMethod("get");
+        final Url url = Url.from("/login");
+        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
+        final Request request = new Request(
+                headers,
+                method,
+                version,
+                url,
+                HttpRequestBody.EMPTY,
+                QueryParameters.EMPTY
+        );
+        final String rootContextPath = "/";
+
+        final boolean actual = request.matchesByRootContextPath(rootContextPath);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void matchesByRootContextPath_메서드는_path가_rootContextPath로_시작하지_않으면_false를_반환한다() {
+        final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
+        final HttpMethod method = HttpMethod.findMethod("get");
+        final Url url = Url.from("/login");
+        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
+        final Request request = new Request(
+                headers,
+                method,
+                version,
+                url,
+                HttpRequestBody.EMPTY,
+                QueryParameters.EMPTY
+        );
+        final String rootContextPath = "/hello";
+
+        final boolean actual = request.matchesByRootContextPath(rootContextPath);
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
     void isWelcomePageRequest_메서드는_welcome_page_요청인_경우_true를_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");

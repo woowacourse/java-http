@@ -6,5 +6,7 @@ import org.apache.coyote.http.response.Response;
 
 public interface Container {
 
+    boolean supports(Request request);
+
     Response service(final Request request) throws IOException;
 }

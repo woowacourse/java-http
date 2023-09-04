@@ -40,8 +40,12 @@ public class Request {
         return this.method.matches(method);
     }
 
-    public boolean matchesByPath(final String targetPath, final String contextRoot) {
-        return url.matchesByPath(targetPath, contextRoot);
+    public boolean matchesByPath(final String targetPath, final String rootContextPath) {
+        return url.matchesByPath(targetPath, rootContextPath);
+    }
+
+    public boolean matchesByRootContextPath(final String rootContextPath) {
+        return url.startsWithRootContextPath(rootContextPath);
     }
 
     public boolean isWelcomePageRequest(final String rootContextPath) {

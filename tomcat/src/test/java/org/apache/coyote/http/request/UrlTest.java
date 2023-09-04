@@ -82,4 +82,26 @@ class UrlTest {
 
         assertThat(actual).isFalse();
     }
+
+    @Test
+    void startsWithRootContextPath_메서드는_path가_rootContextPath로_시작하면_true를_반환한다() {
+        final String path = "/login";
+        final Url url = Url.from(path);
+        final String rootContextPath = "/";
+
+        final boolean actual = url.startsWithRootContextPath(rootContextPath);
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void startsWithRootContextPath_메서드는_path가_rootContextPath로_시작하지_않으면_false를_반환한다() {
+        final String path = "/login";
+        final Url url = Url.from(path);
+        final String rootContextPath = "/hello";
+
+        final boolean actual = url.startsWithRootContextPath(rootContextPath);
+
+        assertThat(actual).isFalse();
+    }
 }

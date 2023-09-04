@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.exception.ServerException;
 
 public class HttpRequestParser {
@@ -15,14 +17,26 @@ public class HttpRequestParser {
     private static final String QUERY_STRING_VALUE_DELIMITER = "&";
     private static final String KEY_AND_VALUE_DELIMITER = "=";
 
+    private final Map<String, BodyParser> bodyParsers = new HashMap<>();
+
+    public HttpRequestParser() {
+        init();
+    }
+
+    private void init() {
+        bodyParsers.put("application/x-www-form-urlencoded", new FormBodyParser());
+    }
+
     public HttpRequest parse(final BufferedReader reader) {
         final String firstLine = readLine(reader);
         final HttpMethod httpMethod = parseHttpMethod(firstLine);
         final String requestUri = parseRequestUri(firstLine);
         final QueryStrings queryStrings = parseQueryStrings(firstLine);
         final HttpHeaders httpHeaders = parseHttpHeaders(reader);
+        final Map<String, String> requestBody = parseRequestBody(reader, httpHeaders.get("Content-Length"),
+                bodyParsers.get(httpHeaders.getContentType()));
 
-        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders);
+        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders, requestBody);
     }
 
     private String readLine(final BufferedReader reader) {
@@ -77,5 +91,20 @@ public class HttpRequestParser {
             line = readLine(reader);
         }
         return httpHeaders;
+    }
+
+    private Map<String, String> parseRequestBody(final BufferedReader reader, final String contentLength,
+                                                 final BodyParser bodyParser) {
+        if (contentLength.isEmpty()) {
+            return new HashMap<>();
+        }
+        final int length = Integer.parseInt(contentLength);
+        final char[] buffer = new char[length];
+        try {
+            reader.read(buffer, 0, length);
+        } catch (final IOException e) {
+            throw new ServerException("요청을 읽어오는데 실패했습니다.");
+        }
+        return bodyParser.parse(new String(buffer));
     }
 }

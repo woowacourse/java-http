@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,24 +21,23 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Controller indexController = new IndexController();
-    private final Controller loginController = new LoginController();
     private final Map<String, Controller> handlerMapping = new HashMap<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        init();
+    }
+
+    private void init() {
+        handlerMapping.put("/", new IndexController());
+        handlerMapping.put("/login", new LoginController());
+        handlerMapping.put("/register", new RegisterController());
     }
 
     @Override
     public void run() {
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        init();
         process(connection);
-    }
-
-    private void init() {
-        handlerMapping.put("/", indexController);
-        handlerMapping.put("/login", loginController);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> headers = httpResponse.getHeaders();
         return headers.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(joining("\r\n"));
     }
 }

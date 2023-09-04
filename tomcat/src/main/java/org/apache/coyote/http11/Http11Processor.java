@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +17,17 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String RESOURCE_PATH = "static";
     private static final int URL_INDEX = 1;
-    public static final String ILLEGAL_REQUEST = "부적절한 요청입니다.";
+    private static final String ILLEGAL_REQUEST = "부적절한 요청입니다.";
+    private static SessionManager sessionManager = SessionManager.getInstance();
     private final Socket connection;
+
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -42,7 +46,6 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader br = new BufferedReader(inputStreamReader)) {
 
-            //읽기
             String requestLine = br.readLine();
             if (Objects.isNull(requestLine)) {
                 throw new IllegalArgumentException(ILLEGAL_REQUEST);
@@ -52,7 +55,6 @@ public class Http11Processor implements Runnable, Processor {
             RequestHeader requestHeader = readHeader(br);
             RequestBody requestBody = readBody(br, requestHeader);
 
-            //요청 처리
             ResponseInfo responseInfo = handleRequest(requestLine, requestHeader, requestBody);
 
             String response = buildResponse(responseInfo);
@@ -109,31 +111,50 @@ public class Http11Processor implements Runnable, Processor {
                 String resourcePath = RESOURCE_PATH + "/401.html";
                 return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
             }
-            Session session = new Session(user.get());
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            session.setAttribute("user", user.get());
             String resourcePath = RESOURCE_PATH + "/index.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found",  session.getSessionId());
+            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found",  session.getId());
         }
 
-        int index = requestUri.indexOf("?");
-        if (index == -1) {
-            String resourcePath = RESOURCE_PATH + "/login.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
-        }
-        String queryString = requestUri.substring(index + 1);
-        String[] queryParams = queryString.split("&");
-        String account = getParamValueWithKey(queryParams, "account");
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isEmpty()) {
-            String resourcePath = RESOURCE_PATH + "/401.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
-        }
-        if (user.get().checkPassword(getParamValueWithKey(queryParams, "password"))) {
-            log.info("User: " + user);
+        if (httpMethod.equals("GET")) {
+            if (header.getByKey("Cookie") != null) {
+                HttpCookie cookie = HttpCookie.from(header.getByKey("Cookie"));
+                String jsessionid = cookie.getByKey("JSESSIONID");
 
-            String resourcePath = RESOURCE_PATH + "/index.html";
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
-        }
+                if (jsessionid != null) {
+                    if (sessionManager.findSession(jsessionid) == null) {
+                        throw new IllegalArgumentException("유효하지 않은 세션입니다.");
+                    }
 
+                    String resourcePath = RESOURCE_PATH + "/index.html";
+                    return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found", jsessionid);
+                }
+            }
+
+            int index = requestUri.indexOf("?");
+            if (index == -1) {
+                String resourcePath = RESOURCE_PATH + "/login.html";
+                return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
+            }
+            String queryString = requestUri.substring(index + 1);
+            String[] queryParams = queryString.split("&");
+            String account = getParamValueWithKey(queryParams, "account");
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            if (user.isEmpty()) {
+                String resourcePath = RESOURCE_PATH + "/401.html";
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+            }
+
+            if (user.get().checkPassword(getParamValueWithKey(queryParams, "password"))) {
+                log.info("User: " + user);
+
+                String resourcePath = RESOURCE_PATH + "/index.html";
+                return new ResponseInfo(classLoader.getResource(resourcePath), 302, "Found");
+            }
+
+        }
 
 
         String resourcePath = RESOURCE_PATH + "/401.html";

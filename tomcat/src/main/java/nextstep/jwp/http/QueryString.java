@@ -44,4 +44,5 @@ public class QueryString {
     public boolean hasValues() {
         return params.size() != 0;
     }
+
 }

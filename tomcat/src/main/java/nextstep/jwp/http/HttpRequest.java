@@ -1,7 +1,5 @@
 package nextstep.jwp.http;
 
-import java.util.Map;
-
 public class HttpRequest {
 
     private final HttpHeaders httpHeaders;
@@ -48,7 +46,4 @@ public class HttpRequest {
         return httpUri.getNativePath();
     }
 
-    public QueryString getQueryString(){
-        return httpUri.getQueryString();
-    }
 }

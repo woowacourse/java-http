@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpBody;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
@@ -17,13 +19,12 @@ import nextstep.jwp.http.HttpUri;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.QueryString;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     private static final RequestHandler handler = new LoginHandler();
 
@@ -86,7 +87,22 @@ public class LoginHandler implements RequestHandler {
         HttpBody httpBody = HttpBody.from("");
         HttpHeaders httpHeaders = createHeadersWithLocation(httpBody, "/index.html");
 
+        setCookie(request, httpHeaders);
+
         return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+    }
+
+    private void setCookie(HttpRequest request, HttpHeaders httpHeaders) {
+        HttpHeaders requestHeaders = request.getHttpHeaders();
+
+        if (requestHeaders.containsKey("Cookie")) {
+            HttpCookie cookie = HttpCookie.from(requestHeaders.get("Cookie"));
+            if (cookie.containsKey("JSESSIONID")) {
+                return;
+            }
+        }
+
+        httpHeaders.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
     }
 
     private boolean login(QueryString queryString) {
@@ -121,4 +137,5 @@ public class LoginHandler implements RequestHandler {
 
         return HttpHeaders.from(headers);
     }
+
 }

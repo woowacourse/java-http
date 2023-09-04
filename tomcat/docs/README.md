@@ -33,8 +33,8 @@ Connection: keep-alive
   - [X] 회원가입 버튼을 누르면 POST 요청을 보낸다.
   - [X] 회원가입이 완료되면, index.html로 리다이렉트 한다.
 
-- [ ] Cookie에 JSESSIONID 값 저장하기
-  - [ ] 요청 헤더에 JSESSIONID가 없을 경우, 응답 헤더에 Set-Cookie를 추가한다.
+- [X] Cookie에 JSESSIONID 값 저장하기
+  - [X] 요청 헤더에 JSESSIONID가 없을 경우, 응답 헤더에 Set-Cookie를 추가한다.
 
 - [ ] Session 구현하기
   - [ ] 쿠키에서 전달받은 JSESSIONID 값으로 로그인 여부를 체크한다.

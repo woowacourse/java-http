@@ -33,10 +33,15 @@ public class HttpHeaders {
         return httpHeaders.containsKey(key);
     }
 
-    public String getHeaders(){
+    public String getHeaders() {
         return httpHeaders.keySet()
                 .stream()
                 .map(key -> key + ": " + httpHeaders.get(key))
                 .collect(Collectors.joining("\r\n"));
     }
+
+    public void addHeader(String key, String value) {
+        httpHeaders.put(key, value);
+    }
+
 }

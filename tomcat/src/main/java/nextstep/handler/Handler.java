@@ -2,13 +2,17 @@ package nextstep.handler;
 
 import common.FileReader;
 import java.io.IOException;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +41,12 @@ public class Handler {
             return;
         }
         if (method == HttpMethod.GET && (path.equals("/login") || path.equals("/login.html"))) {
+            Session session = httpRequest.getSession();
+            if (session != null) {
+                httpResponse.setHttpStatus(HttpStatus.FOUND);
+                httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
+                return;
+            }
             final var responseBody = FileReader.readFile(httpRequest.getUri());
             httpResponse.setHttpStatus(HttpStatus.OK);
             httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
@@ -123,14 +133,18 @@ public class Handler {
     private static void checkUser(HttpResponse httpResponse, String account, String password) {
         InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(user -> loginSuccess(httpResponse),
+                .ifPresentOrElse(user -> loginSuccess(httpResponse, user),
                         () -> loginFailed(httpResponse));
     }
 
-    private static void loginSuccess(HttpResponse httpResponse) {
+    private static void loginSuccess(HttpResponse httpResponse, User user) {
         httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
         httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
+        final var session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        httpResponse.addCookie(new HttpCookie(HttpCookie.JSESSIONID, session.getId()));
     }
 
     private static void loginFailed(HttpResponse httpResponse) {

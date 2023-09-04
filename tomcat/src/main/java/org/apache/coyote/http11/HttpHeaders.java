@@ -9,15 +9,12 @@ public class HttpHeaders {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String LOCATION = "Location";
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String COOKIE = "Cookie";
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
 
     public HttpHeaders() {
-        this.headers = new HashMap<>();
-    }
-
-    public HttpHeaders(Map<String, String> headers) {
-        this.headers = headers;
     }
 
     public boolean containsHeader(String headerName) {

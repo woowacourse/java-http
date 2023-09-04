@@ -2,6 +2,8 @@ package org.apache.coyote.http11.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -10,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 public class HttpResponseWriter {
 
-    private HttpResponseWriter() {
-    }
-
     private static final Logger log = LoggerFactory.getLogger(HttpResponseWriter.class);
     private static final String HEADER_DELIMITER = ": ";
+
+    private HttpResponseWriter() {
+    }
 
     public static void write(OutputStream outputStream, HttpResponse httpResponse)
             throws IOException {
@@ -39,9 +41,10 @@ public class HttpResponseWriter {
 
     private static String createOkResponse(HttpResponse httpResponse, String contentType) {
         return String.join("\r\n",
-                createStatusLine(httpResponse) + " ",
+                createStatusLine(httpResponse),
                 String.join(HEADER_DELIMITER, HttpHeaders.CONTENT_TYPE, contentType) + " ",
-                String.join(HEADER_DELIMITER, HttpHeaders.CONTENT_LENGTH, String.valueOf(httpResponse.getBody().getBytes().length)) + " ",
+                String.join(HEADER_DELIMITER, HttpHeaders.CONTENT_LENGTH,
+                        String.valueOf(httpResponse.getBody().getBytes().length)) + " ",
                 "",
                 httpResponse.getBody());
     }
@@ -49,6 +52,7 @@ public class HttpResponseWriter {
     private static String createFoundResponse(HttpResponse httpResponse) {
         return String.join("\r\n",
                 createStatusLine(httpResponse) + " ",
+                setCookie(httpResponse) + " ",
                 String.join(HEADER_DELIMITER, HttpHeaders.LOCATION, httpResponse.getHeader("Location")) + " ",
                 "",
                 httpResponse.getBody());
@@ -58,5 +62,15 @@ public class HttpResponseWriter {
         return String.join(" ", httpResponse.getProtocol(),
                 String.valueOf(httpResponse.getHttpStatus().getValue()),
                 httpResponse.getHttpStatus().getReasonPhrase());
+    }
+
+    private static String setCookie(HttpResponse httpResponse) {
+        if (httpResponse.getCookie(HttpCookie.JSESSIONID) == null) {
+            return "";
+        }
+        String cookieValues = httpResponse.getCookies().values().stream()
+                .map(cookie -> cookie.getName() + "=" + cookie.getValue())
+                .collect(Collectors.joining("; "));
+        return String.join(HEADER_DELIMITER, HttpHeaders.SET_COOKIE, cookieValues);
     }
 }

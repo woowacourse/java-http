@@ -1,18 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HttpResponse {
 
     private static final String protocol = "HTTP/1.1";
+
+    private final HttpHeaders headers;
+    private final Map<String, HttpCookie> cookies = new HashMap<>();
     private HttpStatus httpStatus;
-    private HttpHeaders headers;
     private String body;
 
     public HttpResponse() {
         this.headers = new HttpHeaders();
-    }
-
-    public void addHeader(String headerName, String value) {
-        this.headers.put(headerName, value);
     }
 
     public String getProtocol() {
@@ -42,5 +43,21 @@ public class HttpResponse {
     public void setBody(String body) {
         this.body = body;
         addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    }
+
+    public void addHeader(String headerName, String value) {
+        this.headers.put(headerName, value);
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        this.cookies.put(cookie.getName(), cookie);
+    }
+
+    public HttpCookie getCookie(String name) {
+        return this.cookies.get(name);
+    }
+
+    public Map<String, HttpCookie> getCookies() {
+        return this.cookies;
     }
 }

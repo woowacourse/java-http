@@ -6,10 +6,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.exception.InvalidHttpFormException;
+import org.apache.coyote.http11.exception.SessionNotFoundException;
 
 public class HttpRequestReader {
 
@@ -49,9 +53,26 @@ public class HttpRequestReader {
             final var keyValuePair = header.split(": ");
             httpRequest.addHeader(keyValuePair[0], keyValuePair[1]);
         }
+        if (httpRequest.containsHeader(HttpHeaders.COOKIE)) {
+
+            String[] cookies = httpRequest.getHeader(HttpHeaders.COOKIE).split("; ");
+            for (String cookie : cookies) {
+                String[] keyValuePair = cookie.split("=");
+                httpRequest.addCookie(new HttpCookie(keyValuePair[0], keyValuePair[1]));
+            }
+        }
+        if (httpRequest.hasCookie(HttpCookie.JSESSIONID)) {
+            HttpCookie sessionCookie = httpRequest.getCookie(HttpCookie.JSESSIONID);
+            Session session = SessionManager.findSession(sessionCookie.getValue());
+            if (session == null) {
+                throw new SessionNotFoundException();
+            }
+            httpRequest.setSession(session);
+        }
     }
 
-    private static void readRequestBody(HttpRequest httpRequest, BufferedReader bufferedReader) throws IOException {
+    private static void readRequestBody(HttpRequest httpRequest, BufferedReader bufferedReader)
+            throws IOException {
         if (!httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
             return;
         }
@@ -61,6 +82,7 @@ public class HttpRequestReader {
         String requestBody = new String(buffer);
         httpRequest.setBody(requestBody);
     }
+
     private static void parseUri(HttpRequest httpRequest, String uri) {
         if (uri.contains("?")) {
             final var queryStartIndex = uri.indexOf("?");

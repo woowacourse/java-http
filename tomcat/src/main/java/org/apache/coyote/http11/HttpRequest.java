@@ -5,16 +5,22 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private final HttpHeaders headers;
+    private final Map<String, HttpCookie> cookies = new HashMap<>();
     private HttpMethod httpMethod;
     private String uri;
     private String path;
     private Map<String, String> parameters = new HashMap<>();
     private String protocol;
-    private HttpHeaders headers;
+    private Session session;
     private String body;
 
     public HttpRequest() {
         this.headers = new HttpHeaders();
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        this.cookies.put(cookie.getName(), cookie);
     }
 
     public String getPath() {
@@ -25,12 +31,16 @@ public class HttpRequest {
         this.path = path;
     }
 
-    public String getParameter(String parameterName) {
-        return this.parameters.get(parameterName);
+    public HttpCookie getCookie(String name) {
+        return cookies.get(name);
     }
 
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+    public Session getSession() {
+        return this.session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public HttpMethod getHttpMethod() {
@@ -53,8 +63,8 @@ public class HttpRequest {
         return this.headers.containsHeader(headerName);
     }
 
-    public void addParameter(String parameterName, String value) {
-        this.parameters.put(parameterName, value);
+    public boolean hasCookie(String name) {
+        return this.cookies.containsKey(name);
     }
 
     public void addParameters(Map<String, String> parameters) {
@@ -69,16 +79,8 @@ public class HttpRequest {
         this.uri = uri;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
     public void setProtocol(String protocol) {
         this.protocol = protocol;
-    }
-
-    public void setHeaders(HttpHeaders headers) {
-        this.headers = headers;
     }
 
     public String getBody() {
@@ -87,9 +89,5 @@ public class HttpRequest {
 
     public void setBody(String body) {
         this.body = body;
-    }
-
-    public Map<String, String> getParameters() {
-        return parameters;
     }
 }

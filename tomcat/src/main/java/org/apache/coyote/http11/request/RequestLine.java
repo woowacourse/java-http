@@ -54,4 +54,12 @@ public class RequestLine {
     public String getQueryParameter(final String queryKey) {
         return query.get(queryKey);
     }
+
+    public boolean containsQuery() {
+        return !query.isEmpty();
+    }
+
+    public boolean containsQuery(final String key) {
+        return query.containsKey(key);
+    }
 }

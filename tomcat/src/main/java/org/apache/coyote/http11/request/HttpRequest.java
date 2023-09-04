@@ -22,6 +22,14 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
+    public boolean containsQuery() {
+        return requestLine.containsQuery();
+    }
+
+    public boolean containsQuery(final String key) {
+        return requestLine.containsQuery(key);
+    }
+
     public String getQueryParameter(final String queryKey) {
         return requestLine.getQueryParameter(queryKey);
     }

@@ -53,6 +53,10 @@ public class RequestHeaders {
         return parsedRequestHeader;
     }
 
+    public boolean isJSessionIdExist() {
+        return headers.containsKey(RequestHeaderType.COOKIE);
+    }
+
     public int getContentLength() {
         if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
             return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH).getValue());

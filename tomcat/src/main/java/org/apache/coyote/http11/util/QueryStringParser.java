@@ -1,45 +1,60 @@
 package org.apache.coyote.http11.util;
 
-import java.util.ArrayList;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class QueryStringParser {
 
-    private static final Pattern QUERY_STRING_PATTERN = Pattern.compile("([^&=]++)=([^&]*+)");
+    private static final String QUERY_PARAMETER_DELIMITER = "&";
+    private static final String KEY_PAIR_BRIDGE = "=";
+    private static final String KEY_PAIR_PATTERN = "%s" + KEY_PAIR_BRIDGE + "%s";
 
     private QueryStringParser() {
     }
 
     public static Map<String, List<String>> parse(String query) {
-        HashMap<String, List<String>> result = new HashMap<>();
-        Matcher matcher = QUERY_STRING_PATTERN.matcher(query);
-        while (matcher.find()) {
-            String key = matcher.group(1);
-            String value = matcher.group(2);
-            List<String> values = result.getOrDefault(key, new ArrayList<>());
-            values.add(value);
+        HashMap<String, List<String>> queryParams = new HashMap<>();
+        String[] pairs = query.split(QUERY_PARAMETER_DELIMITER);
 
-            result.put(key, values);
+        for (String pair : pairs) {
+            int equalsIndex = pair.indexOf(KEY_PAIR_BRIDGE);
+            String key = extractKey(pair, equalsIndex);
+            queryParams.computeIfAbsent(key, k -> new LinkedList<>())
+                    .add(extractValue(pair, equalsIndex));
         }
+        return queryParams;
+    }
 
-        return result;
+    private static String extractKey(String pair, int index) {
+        if (index > 0) {
+            return URLDecoder.decode(pair.substring(0, index), StandardCharsets.UTF_8);
+        }
+        return pair;
+    }
+
+    private static String extractValue(String pair, int idx) {
+        if (idx > 0 && pair.length() > idx + 1) {
+            return URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8);
+        }
+        return null;
     }
 
     public static String parse(Map<String, List<String>> queryParams) {
         return queryParams.entrySet()
                 .stream()
                 .map(entry -> QueryStringParser.create(entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining("&"));
+                .collect(Collectors.joining(QUERY_PARAMETER_DELIMITER));
     }
 
     private static String create(String key, List<String> values) {
         return values.stream()
-                .map(value -> String.format("%s=%s", key, value))
-                .collect(Collectors.joining("&"));
+                .map(value -> String.format(KEY_PAIR_PATTERN, key, value))
+                .collect(Collectors.joining(QUERY_PARAMETER_DELIMITER));
     }
+
 }

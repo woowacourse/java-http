@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.util;
+package nextstep.org.apache.coyote.http11.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.util.UriComponentsBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

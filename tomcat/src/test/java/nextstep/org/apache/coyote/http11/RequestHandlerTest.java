@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.common.ContentType.CSS;
 import static org.apache.coyote.http11.common.ContentType.HTML;
@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;

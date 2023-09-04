@@ -16,7 +16,7 @@ public class Response {
     private final RequestReader requestReader;
     private final StatusCode statusCode;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    
+
     private String body;
 
     public Response(RequestReader requestReader, StatusCode statusCode) {
@@ -62,6 +62,13 @@ public class Response {
 
     public Response addHeader(String key, String value) {
         headers.put(key, value);
+        return this;
+    }
+
+    public Response addCookieWithSession(String session) {
+        if (requestReader.sessionNotExists()) {
+            headers.put(Header.SET_COOKIE.getName(), "JSESSIONID=" + session);
+        }
         return this;
     }
 

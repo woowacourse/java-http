@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Header;
 
 public class RequestReader {
@@ -78,6 +79,19 @@ public class RequestReader {
 
     public String getBodyValue(String key) {
         return bodies.get(key);
+    }
+
+    public boolean sessionNotExists() {
+        if (!headers.containsKey(Header.COOKIE.getName())) {
+            return true;
+        }
+        Cookie cookie = new Cookie(headers.get(Header.COOKIE.getName()));
+        try {
+            cookie.getSession();
+        } catch (NullPointerException e) {
+            return true;
+        }
+        return false;
     }
 
     public String getProtocol() {

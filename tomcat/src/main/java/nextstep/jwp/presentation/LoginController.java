@@ -2,8 +2,11 @@ package nextstep.jwp.presentation;
 
 
 import java.io.IOException;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.RequestReader;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.StatusCode;
@@ -37,7 +40,7 @@ public class LoginController implements Controller {
         ));
         return new Response(requestReader, StatusCode.FOUND)
                 .createResponseBodyByFile(INDEX)
-                .addHeader("Location", INDEX)
+                .addHeader(Header.LOCATION.getName(), INDEX)
                 .addBaseHeaders();
     }
 
@@ -48,6 +51,12 @@ public class LoginController implements Controller {
     }
 
     private Response loginPage(RequestReader requestReader) throws IOException {
+        if (!requestReader.sessionNotExists()) {
+            return new Response(requestReader, StatusCode.FOUND)
+                    .createResponseBodyByFile(INDEX)
+                    .addHeader(Header.LOCATION.getName(), INDEX)
+                    .addBaseHeaders();
+        }
         return new Response(requestReader, StatusCode.OK)
                 .addBaseHeaders()
                 .createResponseBodyByFile(requestReader.getRequestUrl());
@@ -55,10 +64,11 @@ public class LoginController implements Controller {
 
     private Response tryLogin(RequestReader requestReader) throws IOException {
         try {
-            login(requestReader);
+            String sessionId = login(requestReader);
             return new Response(requestReader, StatusCode.FOUND)
                     .createResponseBodyByFile(INDEX)
-                    .addHeader("Location", INDEX)
+                    .addHeader(Header.LOCATION.getName(), INDEX)
+                    .addCookieWithSession(sessionId)
                     .addBaseHeaders();
         } catch (IllegalArgumentException e) {
             return new Response(requestReader, StatusCode.UNAUTHORIZED)
@@ -67,9 +77,14 @@ public class LoginController implements Controller {
         }
     }
 
-    private void login(RequestReader requestReader) {
-        InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
-                              .filter(user -> user.checkPassword(requestReader.getBodyValue("password")))
-                              .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 틀립니다."));
+    private String login(RequestReader requestReader) {
+        User find = InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
+                                          .filter(user -> user.checkPassword(requestReader.getBodyValue("password")))
+                                          .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 틀립니다."));
+
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.addSession(sessionId, find);
+
+        return sessionId;
     }
 }

@@ -27,8 +27,14 @@ public class RequestLine {
     public static RequestLine from(final String line) {
         final String[] lineSplit = line.split(DELIMITER);
 
+        final String method = lineSplit[METHOD_INDEX];
         final String uri = lineSplit[URI_INDEX];
+
         final int index = uri.indexOf("?");
+        if (index == -1) {
+            return new RequestLine(method, uri, Map.of());
+        }
+
         final String path = uri.substring(0, index);
         final String queryString = uri.substring(index + 1);
         final Map<String, String> query = Arrays.stream(queryString.split("&"))
@@ -38,7 +44,7 @@ public class RequestLine {
                         e -> e[1]
                 ));
 
-        return new RequestLine(lineSplit[METHOD_INDEX], path, query);
+        return new RequestLine(method, path, query);
     }
 
     public String getPath() {

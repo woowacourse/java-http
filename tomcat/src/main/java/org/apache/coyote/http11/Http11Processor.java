@@ -39,10 +39,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
-            log.info("start process");
             final HttpRequest request = HttpRequest.from(bufferedReader);
 
             final String uriPath = request.getUriPath();
+            log.info("request to {}", uriPath);
 
             final String httpStatusOk = "200 OK";
             final String contentType = getContentType(uriPath);

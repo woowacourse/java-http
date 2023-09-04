@@ -46,7 +46,7 @@ public class RegisterController extends HttpServlet {
                 requestParam.get("email")
         );
         InMemoryUserRepository.save(user);
-        Session session = req.getSession(true);
+        Session session = req.getSession();
         session.setAttribute("user", user);
 
         resp.sendRedirect("/index.html");

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.apache.coyote.http11.exception.HttpMessageNotReadableException;
 
 public class HttpRequestStartLine {
 
@@ -30,7 +31,7 @@ public class HttpRequestStartLine {
                     requestLineParts[HTTP_VERSION_INDEX]
             );
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new HttpMessageNotReadableException("HTTP StartLine URI 형식이 잘못되었습니다.");
         }
     }
 

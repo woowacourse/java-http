@@ -18,19 +18,36 @@ public class HttpRequest {
     private final HttpRequestHeaders httpRequestHeaders;
     private final HttpCookies httpCookies;
     private final String requestBody;
-    private Manager manager = new SessionManager();
-    private Session session = null;
+    private final Session session;
 
-    private HttpRequest(final HttpRequestStartLine requestLine, final HttpRequestHeaders httpRequestHeaders,
-                        final HttpCookies httpCookies, final String requestBody) throws IOException {
+    private HttpRequest(
+            final HttpRequestStartLine requestLine,
+            final HttpRequestHeaders httpRequestHeaders,
+            final String requestBody
+    ) throws IOException {
         this.httpRequestStartLine = requestLine;
         this.httpRequestHeaders = httpRequestHeaders;
-        this.httpCookies = httpCookies;
+        this.httpCookies = generateHttpCookies(httpRequestHeaders);
         this.requestBody = requestBody;
+        this.session = generateSession();
+    }
 
-        if(httpCookies.get("JSESSIONID")!=null){
-            this.session = manager.findSession(httpCookies.get("JSESSIONID"));
+    private Session generateSession() throws IOException {
+        Manager manager = new SessionManager();
+        if (httpCookies.get("JSESSIONID") != null) {
+            return manager.findSession(httpCookies.get("JSESSIONID"));
         }
+        Session session = new Session(String.valueOf(UUID.randomUUID()));
+        manager.add(session);
+        return session;
+    }
+
+    private HttpCookies generateHttpCookies(final HttpRequestHeaders httpRequestHeaders) {
+        String cookies = httpRequestHeaders.getValue("Cookie");
+        if (cookies != null) {
+            return HttpCookies.of(cookies);
+        }
+        return HttpCookies.empty();
     }
 
     public static HttpRequest of(InputStream inputStream) throws IOException {
@@ -39,23 +56,22 @@ public class HttpRequest {
 
         HttpRequestStartLine requestLine = HttpRequestStartLine.of(bufferedReader.readLine());
         HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.of(bufferedReader);
-        HttpCookies httpCookies = HttpCookies.empty();
 
-        String findContentLength = httpRequestHeaders.getValue("content-length");
+        String findContentLength = httpRequestHeaders.getValue("Content-Length");
+        String requestBody = readRequestBody(findContentLength, bufferedReader);
+
+        return new HttpRequest(requestLine, httpRequestHeaders, requestBody);
+    }
+
+    private static String readRequestBody(final String findContentLength, final BufferedReader bufferedReader)
+            throws IOException {
         if (findContentLength != null) {
             int contentLength = Integer.parseInt(findContentLength);
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            String requestBody = new String(buffer);
-            return new HttpRequest(requestLine, httpRequestHeaders, httpCookies, requestBody);
+            return new String(buffer);
         }
-
-        String cookies = httpRequestHeaders.getValue("cookie");
-        if (cookies != null) {
-            return new HttpRequest(requestLine, httpRequestHeaders, HttpCookies.of(cookies), EMPTY_BODY);
-        }
-
-        return new HttpRequest(requestLine, httpRequestHeaders, httpCookies, EMPTY_BODY);
+        return EMPTY_BODY;
     }
 
     public String getRequestBody() {
@@ -66,20 +82,8 @@ public class HttpRequest {
         return httpRequestStartLine.getUri().getPath();
     }
 
-    public String getQuery() {
-        return httpRequestStartLine.getUri().getQuery();
-    }
-
-    public Session getSession(boolean create) {
-        if(session == null && create){
-            session =  new Session(String.valueOf(UUID.randomUUID()));
-            manager.add(session);
-        }
-        return session;
-    }
-
     public Session getSession() {
-        return getSession(true);
+        return session;
     }
 
     public boolean isSameMethod(String method) {

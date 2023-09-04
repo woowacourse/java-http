@@ -41,7 +41,7 @@ public class LoginController extends HttpServlet {
         if (findAccount.isPresent()) {
             User user = findAccount.get();
             if (user.checkPassword(requestParam.get("password"))) {
-                Session session = req.getSession(true);
+                Session session = req.getSession();
                 session.setAttribute("user", user);
                 resp.addCookie(JSESSIONID, req.getSession().getId());
                 resp.sendRedirect("/index.html");

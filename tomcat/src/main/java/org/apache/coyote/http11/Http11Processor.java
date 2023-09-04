@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             final Request request = Request.from(bufferedReader);
-            final var response = getResponse(request);
+            final String response = getResponse(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -44,6 +44,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(final Request request) {
-        return handlerMapper.handle(request).getValue();
+        return handlerMapper.handle(request).getResponse();
     }
 }

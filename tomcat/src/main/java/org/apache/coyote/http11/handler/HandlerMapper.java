@@ -2,10 +2,6 @@ package org.apache.coyote.http11.handler;
 
 import static org.reflections.Reflections.log;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -13,12 +9,13 @@ import java.util.Set;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Request;
 import org.apache.coyote.http11.RequestLine;
 import org.apache.coyote.http11.Response;
 
 public class HandlerMapper {
-    private static Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();
+    private static final Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();
 
     public HandlerMapper() {
         init();
@@ -35,91 +32,21 @@ public class HandlerMapper {
     }
 
     public Response rootHandler(final Request request) {
-        final var responseBody = "Hello world!";
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
-    }
-
-    public Response htmlHandler(final Request request) {
-        final var responseBody = request.getRequestLine().readFile();
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
-    }
-
-
-    public Response cssHandler(final Request request) {
-        final var responseBody = request.getRequestLine().readFile();
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
-    }
-
-    public Response jsHandler(final Request request) {
-        final var responseBody = request.getRequestLine().readFile();
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/javascript;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByResponseBody(HttpStatus.OK, "Hello world!");
     }
 
     public Response loginHandler(final Request request) {
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("login.html이 존재하지 않습니다.");
-        }
-
-        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByTemplate(HttpStatus.OK, "login.html");
     }
 
     public Response loginWithQueryParameterHandler(final Request request) {
         final RequestLine requestLine = request.getRequestLine();
         final var queryParameter = requestLine.getRequestURI().getQueryParameter();
         final User user = InMemoryUserRepository.findByAccountAndPassword(
-                queryParameter.get("account"), queryParameter.get("password"))
+                        queryParameter.get("account"), queryParameter.get("password"))
                 .orElseThrow(() -> new IllegalArgumentException("아이디와 비밀번호가 일치하는 사용자가 존재하지 않습니다."));
         log.info("user : " + user);
-
-
-        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        final URL resource = classLoader.getResource("static/" + "index.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (final IOException e) {
-            throw new IllegalArgumentException("index.html" + "이 존재하지 않습니다.");
-        }
-        return new Response(responseBody);
+        return Response.createByTemplate(request.getRequestLine().getRequestURI());
     }
 
     public Response loginFormHandler(final Request request) {
@@ -132,40 +59,11 @@ public class HandlerMapper {
     }
 
     private Response loginSuccess() {
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
-        }
-
-        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByTemplate(HttpStatus.FOUND, "index.html");
     }
 
     private Response loginFail() {
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
-        }
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByTemplate(HttpStatus.UNAUTHORIZED, "401.html");
     }
 
     private Optional<User> login(final String account, final String password) {
@@ -173,21 +71,7 @@ public class HandlerMapper {
     }
 
     public Response registerHandler(final Request request) {
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("register.html이 존재하지 않습니다.");
-        }
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByTemplate(HttpStatus.OK, "register.html");
     }
 
     public Response registerFormHandler(final Request request) {
@@ -197,22 +81,7 @@ public class HandlerMapper {
         final String password = requestForms.get("password");
         InMemoryUserRepository.save(new User(account, password, email));
 
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
-        }
-
-        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
-        final var response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        return new Response(response);
+        return Response.createByTemplate(HttpStatus.FOUND, "index.html");
     }
 
     public Response handle(final Request request) {
@@ -228,12 +97,8 @@ public class HandlerMapper {
             return handler.apply(request);
         }
 
-        if (requestLine.getPath().endsWith(".html")) {
-            return htmlHandler(request);
-        } else if (requestLine.getPath().endsWith(".css")) {
-            return cssHandler(request);
-        } else if (requestLine.getPath().endsWith(".js")) {
-            return jsHandler(request);
+        if (requestLine.getRequestURI().isExistFile()) {
+            return Response.createByTemplate(request.getRequestLine().getRequestURI());
         }
         throw new IllegalArgumentException("매핑되는 핸들러가 존재하지 않습니다.");
     }

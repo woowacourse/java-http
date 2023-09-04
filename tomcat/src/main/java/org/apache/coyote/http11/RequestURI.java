@@ -61,16 +61,16 @@ public class RequestURI {
         }
     }
 
-    public int getFileLength() throws IOException {
-        return new String(Files.readAllBytes(file.toPath())).getBytes().length;
-    }
-
     public boolean isExistFile() {
-        return this.file == null;
+        return this.file.isFile();
     }
 
     public String getPath() {
         return this.path;
+    }
+
+    public String getFileName() {
+        return this.file.getName();
     }
 
     public Map<String, String> getQueryParameter() {

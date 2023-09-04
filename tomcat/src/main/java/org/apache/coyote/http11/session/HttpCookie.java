@@ -48,4 +48,8 @@ public class HttpCookie {
     public String find(String key) {
         return cookies.get(key);
     }
+
+    public String findJSessionId() {
+        return cookies.get("JSESSIONID");
+    }
 }

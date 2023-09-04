@@ -21,9 +21,20 @@ public class HttpResponse {
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
         String location = responseEntity.getLocation();
         String responseBody = responseEntity.getResponseBody();
+        HttpStatus httpStatus = responseEntity.getHttpStatus();
 
         if (responseBody == null) {
             responseBody = findResourceFromLocation(location);
+        }
+
+        if (httpStatus == HttpStatus.FOUND) {
+            String formatResponse = String.join(
+                    DELIMITER,
+                    generateHttpStatus(httpStatus),
+                    generateLocation(responseEntity),
+                    generateCookie(responseEntity)
+            );
+            return new HttpResponse(formatResponse);
         }
 
         String formatResponse = String.join(

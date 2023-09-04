@@ -7,18 +7,17 @@ public class Response {
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
-    public Response(final StatusLine statusLine, final ResponseHeader responseHeader, final ResponseBody responseBody) {
+    private Response(final StatusLine statusLine, final ResponseHeader responseHeader, final ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
-
     public static Response of(final HttpStatus httpStatus,
                               final ResponseBody responseBody) {
         return new Response(
                 StatusLine.of(httpStatus),
-                ResponseHeader.basic(responseBody),
+                ResponseHeader.of(responseBody),
                 responseBody
         );
     }
@@ -45,5 +44,3 @@ public class Response {
                 responseBody.getContent();
     }
 }
-
-

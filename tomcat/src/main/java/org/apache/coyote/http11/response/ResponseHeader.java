@@ -12,7 +12,7 @@ public class ResponseHeader {
         this.header = header;
     }
 
-    public static ResponseHeader basic(final ResponseBody responseBody) {
+    public static ResponseHeader of(final ResponseBody responseBody) {
         final Map<String, String> result = new LinkedHashMap<>();
         result.put("Content-Type", responseBody.getContentType().getType());
         result.put("Content-Length", String.valueOf(responseBody.getContent().getBytes().length));

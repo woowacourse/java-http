@@ -34,10 +34,6 @@ public class Request {
         return requestLine;
     }
 
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
-    }
-
     public RequestBody getRequestBody() {
         return requestBody;
     }
@@ -48,7 +44,6 @@ public class Request {
             if (cookieOptional.isPresent()) {
                 return SessionManager.findSession(cookieOptional.get().getValue());
             }
-            return null;
         }
         final Session session = Session.create();
         SessionManager.add(session);

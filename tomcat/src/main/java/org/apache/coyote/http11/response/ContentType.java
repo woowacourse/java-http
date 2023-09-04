@@ -24,10 +24,6 @@ public enum ContentType {
                 .orElseThrow();
     }
 
-    public String getFileExtension() {
-        return fileExtension;
-    }
-
     public String getType() {
         return type;
     }

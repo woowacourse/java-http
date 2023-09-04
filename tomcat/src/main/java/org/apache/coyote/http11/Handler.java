@@ -31,13 +31,9 @@ public class Handler {
                 final Session session = request.getSession(false);
                 final User user = (User) session.getAttribute("user");
                 log.info("user = {}", user);
-                final StaticResource staticResource = StaticResource.from(INDEX_HTML);
-                final ResponseBody responseBody = ResponseBody.from(staticResource);
-                return Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
+                return redirect(INDEX_HTML);
             }
-            final StaticResource staticResource = StaticResource.from(LOGIN_HTML);
-            final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.of(HttpStatus.OK, responseBody);
+            return render(LOGIN_HTML);
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/login")) {
@@ -51,15 +47,9 @@ public class Handler {
                 log.info("user = {}", user);
                 final Session session = request.getSession(true);
                 session.setAttribute("user", user);
-                final StaticResource staticResource = StaticResource.from(INDEX_HTML);
-                final ResponseBody responseBody = ResponseBody.from(staticResource);
-                final Response response = Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
-                response.addSession(session.getId());
-                return response;
+                return redirectWithSession(INDEX_HTML, session.getId());
             }
-            final StaticResource staticResource = StaticResource.from(UNAUTHORIZED_HTML);
-            final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.redirect(HttpStatus.FOUND, UNAUTHORIZED_HTML, responseBody);
+            return redirect(UNAUTHORIZED_HTML);
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/register")) {
@@ -71,18 +61,33 @@ public class Handler {
                             requestBody.getParamValue("email")
                     )
             );
-
-            final StaticResource staticResource = StaticResource.from(INDEX_HTML);
-            final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.redirect(HttpStatus.FOUND, INDEX_HTML, responseBody);
+            return redirect(INDEX_HTML);
         }
 
         if (requestLine.getHttpMethod() == HttpMethod.GET && !requestLine.getPath().equals("/")) {
-            final StaticResource staticResource = StaticResource.from(requestLine.getPath());
-            final ResponseBody responseBody = ResponseBody.from(staticResource);
-            return Response.of(HttpStatus.OK, responseBody);
+            return render(requestLine.getPath());
         }
 
         return Response.of(HttpStatus.OK, ResponseBody.noContent(ContentType.HTML));
+    }
+
+    private static Response render(final String path) throws IOException {
+        final StaticResource staticResource = StaticResource.from(path);
+        final ResponseBody responseBody = ResponseBody.from(staticResource);
+        return Response.of(HttpStatus.OK, responseBody);
+    }
+
+    private static Response redirect(final String path) throws IOException {
+        final StaticResource staticResource = StaticResource.from(path);
+        final ResponseBody responseBody = ResponseBody.from(staticResource);
+        return Response.redirect(HttpStatus.FOUND, path, responseBody);
+    }
+
+    private static Response redirectWithSession(final String path, final String sessionId) throws IOException {
+        final StaticResource staticResource = StaticResource.from(path);
+        final ResponseBody responseBody = ResponseBody.from(staticResource);
+        final Response response = Response.redirect(HttpStatus.FOUND, path, responseBody);
+        response.addSession(sessionId);
+        return response;
     }
 }

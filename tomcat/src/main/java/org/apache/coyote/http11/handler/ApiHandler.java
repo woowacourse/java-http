@@ -13,7 +13,8 @@ public class ApiHandler extends Handler{
     private static final List<API> apiList =new ArrayList<>();
 
     static{
-        addApi("/login", ViewController::getIndex,"login.html",false,false);
+        addApi("/", ViewController::getVoid,"Hello world!",false,false);
+        addApi("/login", ViewController::getLogin,"login.html",false,false);
         addApi("/register", ViewController::getRegister,"register.html",false,false);
         addApi("/login", LoginController::login,"index.html",false,true);
         addApi("/register", LoginController::signUp,"index.html",false, true);
@@ -30,7 +31,7 @@ public class ApiHandler extends Handler{
             boolean isHandle = api.isHandle(request);
             if(isHandle){
                 Response response = api.controller.apply(request);
-                return response.redirect(getFile(api.file),api.file).getResponse();
+                return response.getResponse();
             }
         }
         return next.getResponse(request);

@@ -32,13 +32,11 @@ public class Response {
     }
 
     public String getResponse(){
-
         return String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
-                makeLocation(),
-                makeCookie(),
+                makeLocation() + makeCookie(),
                 responseBody);
     }
 
@@ -57,7 +55,7 @@ public class Response {
         if(location==null){
             return "";
         }
-        return "location : " + location;
+        return "location : " + location + "\r\n";
     }
     private String makeCookie(){
         if(cookie == null){

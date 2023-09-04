@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemorySession;
@@ -10,6 +13,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.servlet.Servlet;
 
 public class LoginController {
 
@@ -27,7 +31,10 @@ public class LoginController {
         }
         return Response.builder()
                 .status(HttpStatus.FOUND)
+                .contentType("html")
                 .cookie(cookie)
+                .location("index.html")
+                .responseBody(getFile("index.html"))
                 .build();
     }
 
@@ -40,6 +47,22 @@ public class LoginController {
         InMemoryUserRepository.save(user);
         return Response.builder()
                 .status(HttpStatus.FOUND)
+                .contentType("html")
+                .location("index.html")
+                .responseBody(getFile("index.html"))
                 .build();
+    }
+
+
+    private static String getFile(String fileName){
+        try {
+            final var fileUrl = Servlet.class.getClassLoader().getResource("static/" + fileName);
+            final var fileBytes = Files.readAllBytes(new File(fileUrl.getFile()).toPath());
+            return new String(fileBytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (NullPointerException e){
+            return "";
+        }
     }
 }

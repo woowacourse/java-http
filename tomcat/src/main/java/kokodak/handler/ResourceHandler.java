@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
 
@@ -39,5 +41,15 @@ public class ResourceHandler implements Handler {
     private String getLastPathSnippet(final String path) {
         final String[] pathSnippets = path.split("/");
         return pathSnippets[pathSnippets.length - 1];
+    }
+
+    @Override
+    public List<Class<? extends Argument>> requiredArguments() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void setArguments(final List<Argument> arguments) {
+        throw new UnsupportedOperationException();
     }
 }

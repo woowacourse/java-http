@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
 
@@ -21,5 +23,15 @@ public class NotFoundHandler implements Handler {
                            .header("Content-Length", String.valueOf(responseBody.getBytes().length))
                            .body(responseBody)
                            .build();
+    }
+
+    @Override
+    public List<Class<? extends Argument>> requiredArguments() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void setArguments(final List<Argument> arguments) {
+        throw new UnsupportedOperationException();
     }
 }

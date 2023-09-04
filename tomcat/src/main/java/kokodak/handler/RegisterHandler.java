@@ -5,15 +5,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import kokodak.http.FormDataParser;
 import kokodak.http.HttpMethod;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
+import kokodak.http.Session;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 public class RegisterHandler implements Handler {
+
+    private List<Argument> arguments;
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
@@ -25,6 +29,16 @@ public class RegisterHandler implements Handler {
                                .redirect("http://localhost:8080/index.html")
                                .build();
         } else {
+            final Session argument = arguments.stream()
+                                              .filter(ag -> ag.getImlClass() == Session.class)
+                                              .map(ag -> (Session) ag)
+                                              .findFirst()
+                                              .orElseThrow(IllegalArgumentException::new);
+            if (argument.getId() != null) {
+                return HttpResponse.builder()
+                                   .redirect("http://localhost:8080/index.html")
+                                   .build();
+            }
             final String fileName = "static/register.html";
             final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
             final Path path = new File(resourceUrl.getPath()).toPath();
@@ -35,5 +49,15 @@ public class RegisterHandler implements Handler {
                                .body(responseBody)
                                .build();
         }
+    }
+
+    @Override
+    public List<Class<? extends Argument>> requiredArguments() {
+        return List.of(Session.class);
+    }
+
+    @Override
+    public void setArguments(final List<Argument> arguments) {
+        this.arguments = arguments;
     }
 }

@@ -2,17 +2,24 @@ package kokodak.handler;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
 import kokodak.http.RequestTarget;
+import kokodak.http.Session;
 
 public class MappingHandler {
 
+    private static Map<Class<? extends Argument>, ArgumentResolver> argumentResolvers;
     private static Map<String, Handler> handlers;
 
     static {
+        argumentResolvers = new HashMap<>();
+        argumentResolvers.put(Session.class, new SessionArgumentResolver());
+
         handlers = new HashMap<>();
         handlers.put("/", new BasicHandler());
         handlers.put("/login", new LoginHandler());
@@ -32,6 +39,17 @@ public class MappingHandler {
             return handler.handle(httpRequest);
         }
         final Handler handler = handlers.getOrDefault(path, new NotFoundHandler());
+        final List<Class<? extends Argument>> requiredArguments = handler.requiredArguments();
+        if (requiredArguments.isEmpty()) {
+            return handler.handle(httpRequest);
+        }
+        final List<Argument> arguments = new ArrayList<>();
+        requiredArguments.forEach(aClass -> {
+            final ArgumentResolver argumentResolver = argumentResolvers.get(aClass);
+            final Argument argument = (Argument) argumentResolver.resolve(httpRequest);
+            arguments.add(argument);
+        });
+        handler.setArguments(arguments);
         return handler.handle(httpRequest);
     }
 

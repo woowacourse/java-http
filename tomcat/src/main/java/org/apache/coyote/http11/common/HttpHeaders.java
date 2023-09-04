@@ -6,6 +6,9 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
 
 public class HttpHeaders {
 
@@ -18,7 +21,7 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
-    private HttpHeaders(final Map<String, String> headers) {
+    public HttpHeaders(final Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -59,9 +62,9 @@ public class HttpHeaders {
     private static String findContentType(final Path path) {
         final String fileName = path.getFileName()
                 .toString();
-        final String[] splieFileName = fileName.split("\\.");
+        final String[] splitFileName = fileName.split("\\.");
 
-        return ContentType.findMimeType(splieFileName[1]);
+        return ContentType.findMimeType(splitFileName[1]);
     }
 
     public boolean hasContentLength() {
@@ -76,12 +79,37 @@ public class HttpHeaders {
         headers.put(key, value);
     }
 
+    public String getCookie(final String key) {
+        final String cookies = headers.get("Cookie");
+        if (Objects.isNull(cookies)) {
+            return "";
+        }
+
+        final String[] splitCookies = cookies.split("; ");
+        for (String cookie : splitCookies) {
+            final String cookieName = cookie.split("=")[0];
+            final String cookieValue = cookie.split("=")[1];
+
+            if (cookieName.equals(key)) {
+                return cookieValue;
+            }
+        }
+
+        return "";
+    }
+
+    public void setCookie(final String key, final String value) {
+        headers.put("Set-Cookie", key + "=" + value);
+    }
+
     @Override
     public String toString() {
-        return String.join(" \r\n",
-                CONTENT_TYPE + DELIMITER + headers.get(CONTENT_TYPE),
-                CONTENT_LENGTH + DELIMITER + headers.get(CONTENT_LENGTH),
-                EMPTY_LINE
-                );
+        final StringJoiner joiner = new StringJoiner("\r\n");
+        final Set<String> keys = headers.keySet();
+        for (String key : keys) {
+            joiner.add(key + DELIMITER + headers.get(key));
+        }
+        joiner.add(EMPTY_LINE);
+        return joiner.toString();
     }
 }

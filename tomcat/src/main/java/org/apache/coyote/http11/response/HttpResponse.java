@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.common.FileContent;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
@@ -82,6 +86,20 @@ public class HttpResponse {
                 final HttpHeaders headers = HttpHeaders.createResponse(path);
                 final String responseBody = new String(content);
 
+
+                final Session session = SessionManager.findSession(request.getHeaders().getCookie("JSESSIONID"));
+                if (uri.equals("/login") && Objects.nonNull(session)) {
+                    url = HttpResponse.class.getClassLoader()
+                            .getResource(STATIC + "/index" + ".html");
+                    final Path loginPath = new File(url.getPath()).toPath();
+
+                    final byte[] loginContent = Files.readAllBytes(loginPath);
+                    final String loginResponseBody = new String(loginContent);
+
+                    headers.setHeader("Location", "/index.html");
+
+                    return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, loginResponseBody);
+                }
                 if (FileContent.findPage(uri).equals("/404")) {
                     return new HttpResponse(ResponseLine.create(HttpStatus.NOT_FOUND), headers, responseBody);
                 }
@@ -99,8 +117,7 @@ public class HttpResponse {
 
                 return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
             }
-        }
-        else if (requestLine.getMethod().equals("POST")) {
+        } else if (requestLine.getMethod().equals("POST")) {
             final String body = request.getRequestBody();
             final String[] parseQuery = body.split("&");
             final String username = parseQuery[0].split("=")[1];
@@ -131,6 +148,12 @@ public class HttpResponse {
                 final byte[] content = Files.readAllBytes(path);
 
                 final HttpHeaders headers = HttpHeaders.createResponse(path);
+                final String uuid = UUID.randomUUID().toString();
+                headers.setCookie("JSESSIONID", uuid);
+                final Session session = new Session(uuid);
+                session.setAttribute("user", user);
+                SessionManager.add(session);
+
                 headers.setHeader("Location", "/index.html");
                 final String responseBody = new String(content);
 

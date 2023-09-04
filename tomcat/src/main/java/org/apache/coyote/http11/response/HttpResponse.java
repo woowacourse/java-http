@@ -25,9 +25,7 @@ public class HttpResponse {
         String responseBody = responseEntity.getResponseBody();
 
         if (responseBody == null) {
-            URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
-            File file = new File(resource.getFile());
-            responseBody = new String(Files.readAllBytes(file.toPath()));
+            responseBody = findResourceFromLocation(location);
         }
 
         String formatResponse = String.join(
@@ -39,6 +37,14 @@ public class HttpResponse {
                 responseBody
         );
         return new HttpResponse(formatResponse);
+    }
+
+    private static String findResourceFromLocation(String location) throws IOException {
+        String responseBody;
+        URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
+        File file = new File(resource.getFile());
+        responseBody = new String(Files.readAllBytes(file.toPath()));
+        return responseBody;
     }
 
     private static String generateHttpStatus(String status) {

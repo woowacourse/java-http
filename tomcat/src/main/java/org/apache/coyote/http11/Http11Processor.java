@@ -100,19 +100,27 @@ public class Http11Processor implements Runnable, Processor {
         log.info("REQUEST URI: {}", requestURI);
 
         if (requestURI.equals("/")) {
-            final var responseBody = "Hello world!";
-            return ResponseEntity
-                    .builder()
-                    .httpStatus(HttpStatus.OK)
-                    .requestURI(requestURI)
-                    .responseBody(responseBody)
-                    .build();
+            return findMainPageResource(requestURI);
         }
 
         if (requestURI.equals("/login")) {
             return login(httpRequestStartLine, httpRequestHeader, httpRequestBody);
         }
 
+        return findStaticResource(requestURI);
+    }
+
+    private ResponseEntity findMainPageResource(String requestURI) {
+        final var responseBody = "Hello world!";
+        return ResponseEntity
+                .builder()
+                .httpStatus(HttpStatus.OK)
+                .requestURI(requestURI)
+                .responseBody(responseBody)
+                .build();
+    }
+
+    private ResponseEntity findStaticResource(String requestURI) throws IOException {
         URL resource = getClass()
                 .getClassLoader()
                 .getResource("static" + requestURI);

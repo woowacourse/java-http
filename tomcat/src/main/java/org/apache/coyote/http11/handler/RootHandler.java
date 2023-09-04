@@ -14,7 +14,7 @@ public class RootHandler implements Handler {
     public ResponseEntity handle(HttpRequest request) {
         String responseData = "Hello world!";
         List<String> headers = List.of(
-                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getContentType()),
+                String.join(" ", "Content-Type:", ContentType.findMatchingType(request.getEndPoint()).getHttpContentType()),
                 String.join(" ", "Content-Length:", String.valueOf(responseData.getBytes().length))
         );
 

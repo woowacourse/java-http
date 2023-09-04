@@ -12,17 +12,16 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.PathRequestHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.RequestHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeaders;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final PathRequestHandler pathRequestHandler = new PathRequestHandler();
-    private static final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
+    private static final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int DEFAULT_BUFFER_SIZE = 1024;
 
@@ -48,9 +47,9 @@ public class Http11Processor implements Runnable, Processor {
             final OutputStream outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = createHttpRequest(bufferedReader);
-            final String response = getResponse(request.getRequestPath());
+            final HttpResponse response = requestHandlerMapper.getHandler(request).handle(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.convertToMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -94,13 +93,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new HttpRequest(start, headers, body);
-    }
-
-    private String getResponse(final String targetUrl) throws IOException {
-        if (pathRequestHandler.containsPath(targetUrl)) {
-            return pathRequestHandler.getResponse(targetUrl).getResponse();
-        }
-
-        return staticResourceHandler.getResponse(targetUrl).getResponse();
     }
 }

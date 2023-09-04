@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,10 @@ public class HttpRequestHeaders {
         this.headers = parseHeader(header);
     }
 
+    public static HttpRequestHeaders empty() {
+        return new HttpRequestHeaders(Collections.emptyList());
+    }
+
     private Map<String, String> parseHeader(final List<String> headerLines) {
         return headerLines.stream()
             .map(line -> line.split(HEADER_DELIMITER, HEADER_PARTS_COUNT))
@@ -25,7 +30,7 @@ public class HttpRequestHeaders {
             .collect(Collectors.toMap(
                 headerParts -> headerParts[HEADER_NAME_INDEX].toLowerCase(),
                 headerParts -> headerParts[HEADER_VALUE_INDEX],
-                (a, b) -> b)
+                (prev, update) -> update)
             );
     }
 

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
 
-    @DisplayName("start-line 만 존재할 때 ( 쿼리 스트링 존재 )")
+    @DisplayName("start-line 만 존재할 때")
     @Test
     void parseHttpRequest_exist_start() {
         //given
@@ -25,14 +25,12 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello?name=split"),
-            () -> assertThat(request.getRequestPath()).isEqualTo("/hello"),
-            () -> assertThat(request.getQueryString()).isEqualTo("name=split"),
-            () -> assertThat(request.getHeaders()).isEmpty(),
+            () -> assertThat(request.getHeaders().getHeaders()).isEmpty(),
             () -> assertThat(request.getBody()).isEmpty()
         );
     }
 
-    @DisplayName("start-line, header만 존재할 때 ( 쿼리 스트링 존재 X )")
+    @DisplayName("start-line, header만 존재할 때")
     @Test
     void parseHttpRequest_exist_start_header() {
         //given
@@ -47,8 +45,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getRequestPath()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders()).hasSize(1),
+            () -> assertThat(request.getHeaders().getHeaders()).hasSize(1),
             () -> assertThat(request.getHeaderValueIgnoringCase("host"))
                 .isEqualTo("www.example.com"),
             () -> assertThat(request.getBody()).isEmpty()
@@ -73,8 +70,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getRequestPath()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders()).hasSize(2),
+            () -> assertThat(request.getHeaders().getHeaders()).hasSize(2),
             () -> assertThat(request.getHeaderValueIgnoringCase("host"))
                 .isEqualTo("www.example.com"),
             () -> assertThat(request.getHeaderValueIgnoringCase("accept"))

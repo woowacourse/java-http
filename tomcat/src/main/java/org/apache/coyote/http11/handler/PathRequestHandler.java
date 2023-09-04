@@ -1,51 +1,60 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import org.apache.coyote.http11.handler.component.HttpResponse;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestTarget;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class PathRequestHandler {
+public class PathRequestHandler implements RequestHandler {
 
-    private static Map<String, HttpResponse> mappedRequest = new HashMap<>();
+    private static final List<String> HANDLEABLE_PATH = List.of("/", "/login");
+    private static final Logger log = LoggerFactory.getLogger(PathRequestHandler.class);
+    private final StaticResourceHandler staticResourceHandler;
 
-    static {
-        mappedRequest.put("/", new HttpResponse(
-            "HTTP/1.1 200 OK ",
-            "Hello world!",
-            List.of(
-                "Content-Type: text/html;charset=utf-8 ",
-                getContentLengthHeader("Hello World!")
-            )
-        ));
+    public PathRequestHandler(final StaticResourceHandler staticResourceHandler) {
+        this.staticResourceHandler = staticResourceHandler;
+    }
 
-        try {
-            mappedRequest.put("/login", new StaticResourceHandler().getResponse("/login.html"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    @Override
+    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
+        final HttpRequestTarget target = new HttpRequestTarget(httpRequest.getRequestTarget());
+
+        if (target.getPath().equals("/")) {
+            return HttpResponse.withBody(
+                "HTTP/1.1 200 OK ",
+                "text/html;charset=utf-8",
+                "Hello world!"
+            );
         }
-    }
 
-    private static String getContentLengthHeader(final String body) {
-        return "Content-Length: " + body.getBytes().length + " ";
-    }
-
-    public void add(final String path, final HttpResponse message) {
-        if (mappedRequest.containsKey(path)) {
-            throw new IllegalArgumentException("이미 맵핑이 된 경로입니다. path : " + path);
+        if (target.getPath().equals("/login")) {
+            if (target.containsParameterKey("account") && target.containsParameterKey("password")) {
+                final String account = target.getParameterValue("account");
+                final Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
+                byAccount.ifPresent(user -> log.info("user = {}", user));
+            }
+            final HttpRequest convertedRequest = new HttpRequest(
+                "GET /login.html HTTP.1,1",
+                httpRequest.getHeaders(),
+                httpRequest.getBody()
+            );
+            return staticResourceHandler.handle(convertedRequest);
         }
-        mappedRequest.put(path, message);
+
+        return new HttpResponse("HTTP/1.1 404 Not Found", "", Collections.emptyList());
     }
 
-    public boolean containsPath(final String path) {
-        return mappedRequest.containsKey(path);
-    }
+    @Override
+    public boolean handleable(final HttpRequest httpRequest) {
+        final HttpRequestTarget target = new HttpRequestTarget(httpRequest.getRequestTarget());
 
-    public HttpResponse getResponse(final String path) {
-        if (!mappedRequest.containsKey(path)) {
-            throw new IllegalArgumentException("맵핑된 경로가 존재하지 않습니다. path : " + path);
-        }
-        return mappedRequest.get(path);
+        return HANDLEABLE_PATH.contains(target.getPath());
     }
 }

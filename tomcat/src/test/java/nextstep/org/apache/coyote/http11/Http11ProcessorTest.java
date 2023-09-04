@@ -1,14 +1,18 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import nextstep.jwp.model.User;
+import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -35,7 +39,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -55,7 +59,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
 //                "Content-Length: 5564 \r\n" +
                 String.format("Content-Length: %d \r\n", file.length()) +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -224,5 +228,45 @@ class Http11ProcessorTest {
                 "";
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void sessionTest() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                String.format("Content-Length: %d ", requestBody.getBytes().length),
+                "",
+                requestBody);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        SessionManager sessionManager = new SessionManager();
+        String output = socket.output();
+
+        // Todo : httpHeaderParser 구현해서 분리하기
+        Map<String, String> requestHeaders = new HashMap<>();
+        List<String> splited = Arrays.asList(output.split("\r\n"));
+        List<String> headers = splited.subList(1, splited.size());
+        for (String line : headers) {
+            System.out.println("line: " + line);
+            String[] splitedLine = line.split(": ");
+            requestHeaders.put(splitedLine[0], splitedLine[1].strip());
+        }
+
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        String jSessionId = httpCookie.get("JSESSIONID");
+        User user = (User) sessionManager.findSession(jSessionId).getAttribute("gugu");
+
+        assertThat(user).isNotNull();
     }
 }

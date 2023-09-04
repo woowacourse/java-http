@@ -8,11 +8,12 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     public static final String SET_COOKIE_HEADER = "Set-Cookie: %s \r\n";
-    private final Map<String, String> cookie = new HashMap<>();
     public static final String COOKIE_DELIMITER = "; ";
     public static final String KEY_VALUE_DELIMITER = "=";
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
+
+    private final Map<String, String> cookie = new HashMap<>();
 
     public void parseCookieHeaders(String cookieHeaders) {
         Arrays.asList(cookieHeaders.split(COOKIE_DELIMITER)).forEach(header -> {
@@ -23,6 +24,10 @@ public class HttpCookie {
 
     public void set(String key, String value) {
         cookie.put(key, value);
+    }
+
+    public String get(String key) {
+        return cookie.get(key);
     }
 
     public boolean isEmpty() {

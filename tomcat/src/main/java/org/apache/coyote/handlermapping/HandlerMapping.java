@@ -29,7 +29,6 @@ public class HandlerMapping {
     };
 
     public static boolean canHandle(HandlerMatcher handlerMatcher) {
-        System.out.println(handlerMatcher.getHttpMethod() + " " + handlerMatcher.getRequestTarget() + "  " + handlerMap.containsKey(handlerMatcher));
         if (handlerMap.containsKey(handlerMatcher)) {
             return true;
         }

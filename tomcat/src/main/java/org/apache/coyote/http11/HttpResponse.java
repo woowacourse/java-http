@@ -27,7 +27,7 @@ public class HttpResponse {
         for (HttpHeader header : headers) {
             putHeader(header);
         }
-        putHeader(new HttpHeader("Content-Length", String.valueOf(body.length())));
+        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
     }
 
     public static HttpResponse redirectTo(final String location) {

@@ -11,6 +11,7 @@ import java.util.Optional;
 public class HttpHeaders {
 
 	private static final String HEADER_DELIMITER = ":";
+	private static final String LINE_SEPARATOR = "\r\n";
 
 	private final Map<String, String> headers;
 	private final HttpCookie cookie;
@@ -26,7 +27,7 @@ public class HttpHeaders {
 	}
 
 	public static HttpHeaders from(final String httpRequest) {
-		final Map<String, String> headerMaps = stream(httpRequest.split(System.lineSeparator()))
+		final Map<String, String> headerMaps = stream(httpRequest.split(LINE_SEPARATOR))
 			.skip(1)
 			.map(headerLine -> headerLine.split(HEADER_DELIMITER, 2))
 			.collect(toMap(
@@ -45,8 +46,8 @@ public class HttpHeaders {
 	public String build() {
 		return headers.entrySet().stream()
 			.map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
-			.collect(joining(System.lineSeparator()))
-			+ System.lineSeparator();
+			.collect(joining(LINE_SEPARATOR))
+			+ LINE_SEPARATOR;
 	}
 
 	public void put(final String key, final String value) {

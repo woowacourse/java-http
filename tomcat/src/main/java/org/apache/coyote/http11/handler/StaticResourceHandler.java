@@ -39,7 +39,8 @@ public class StaticResourceHandler implements HttpHandler {
 	}
 
 	private HttpHeaders resolveHeader(final HttpRequest request, final String body) {
-		final MimeType mimeType = MimeType.parseEndpoint(request.getEndPoint()); final HttpHeaders headers = new HttpHeaders();
+		final MimeType mimeType = MimeType.parseEndpoint(request.getEndPoint());
+		final HttpHeaders headers = new HttpHeaders();
 		headers.put(CONTENT_TYPE.getValue(), mimeType.getValue());
 		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
 		return headers;

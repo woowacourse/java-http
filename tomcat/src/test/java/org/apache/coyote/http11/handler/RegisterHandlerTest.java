@@ -28,7 +28,7 @@ class RegisterHandlerTest {
 		@Test
 		@DisplayName("http method가 get이면 true를 반환한다.")
 		void getMethod() {
-			final String plainRequest = String.join(System.lineSeparator(),
+			final String plainRequest = String.join("\r\n",
 				"GET /register HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
@@ -46,7 +46,7 @@ class RegisterHandlerTest {
 		@Test
 		@DisplayName("http method가 get이면 true를 반환한다.")
 		void postMethod() {
-			final String plainRequest = String.join(System.lineSeparator(),
+			final String plainRequest = String.join("\r\n",
 				"POST /register HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
@@ -64,7 +64,7 @@ class RegisterHandlerTest {
 		@Test
 		@DisplayName("httpMethod가 유효해도, endPoint가 다르면, false를 반환한다.")
 		void invalidEndPoint() {
-			final String plainRequest = String.join(System.lineSeparator(),
+			final String plainRequest = String.join("\r\n",
 				"POST /register1 HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",
@@ -82,7 +82,7 @@ class RegisterHandlerTest {
 		@Test
 		@DisplayName("endPoint가 유효해도 httpMethod가 다르면, false를 반환한다.")
 		void invalidHttpMethod() {
-			final String plainRequest = String.join(System.lineSeparator(),
+			final String plainRequest = String.join("\r\n",
 				"PUT /register1 HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",

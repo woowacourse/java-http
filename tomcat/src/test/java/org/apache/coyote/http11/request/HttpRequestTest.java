@@ -18,7 +18,7 @@ class HttpRequestTest {
 	void createHttpRequest() {
 		//given
 		final String reqeustBody = "body";
-		final String httpRequest = String.join(System.lineSeparator(),
+		final String httpRequest = String.join("\r\n",
 			"GET /index.html?user=hong HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",

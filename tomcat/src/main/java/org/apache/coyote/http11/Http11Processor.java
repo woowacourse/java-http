@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
 			 readLine != null && !readLine.isEmpty();
 			 readLine = reader.readLine()) {
 			builder.append(readLine);
-			builder.append(System.lineSeparator());
+			builder.append("\r\n");
 		}
 		return builder.toString();
 	}

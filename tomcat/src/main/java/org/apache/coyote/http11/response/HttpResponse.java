@@ -15,7 +15,7 @@ public class HttpResponse {
 	}
 
 	public String buildResponse() {
-		return String.join(System.lineSeparator(),
+		return String.join("\r\n",
 			"HTTP/1.1 " + statusCode.buildResponse(),
 			headers.build(),
 			body

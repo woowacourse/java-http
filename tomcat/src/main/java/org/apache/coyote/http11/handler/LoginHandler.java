@@ -40,6 +40,7 @@ public class LoginHandler implements HttpHandler {
 	private static final String LOGIN_SUCCESS_LOCATION = "http://localhost:8080/index.html";
 	private static final String LOGIN_STATIC_RESOURCE_FILE_PATH = "static/login.html";
 	private static final String SESSION_USER_KEY = "user";
+	private static final String JSESSIONID_KEY = "JSESSIONID=";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
@@ -128,7 +129,7 @@ public class LoginHandler implements HttpHandler {
 		final Session session = new Session(jSessionId);
 		session.setAttributes(SESSION_USER_KEY, user);
 		SessionManager.add(session);
-		headers.put(SET_COOKIE.getValue(), "JSESSIONID=" + jSessionId);
+		headers.put(SET_COOKIE.getValue(), JSESSIONID_KEY + jSessionId);
 	}
 
 	private static HttpHeaders resolveHeader(final String body) {

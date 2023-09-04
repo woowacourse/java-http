@@ -139,7 +139,7 @@ class LoginHandlerTest {
 		@DisplayName("Post 메서드고, 로그인에 실패하는 경우 UnauthorizedException을 반환한다.")
 		void loginFail() {
 			final String requestBody = "account=gugu&password=invalid";
-			final String plainRequest = String.join(System.lineSeparator(),
+			final String plainRequest = String.join("\r\n",
 				"POST /login HTTP/1.1 ",
 				"Host: localhost:8080 ",
 				"Connection: keep-alive ",

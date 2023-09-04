@@ -1,5 +1,7 @@
 package org.apache.coyote.handler.mapping;
 
+import org.apache.coyote.http.HttpMethod;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -7,11 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import static org.apache.coyote.http.HttpMethod.GET;
+
 public class StaticFileMapping implements HandlerMapping {
 
     @Override
-    public boolean supports(final String httpMethod, final String requestUri) {
-        return "GET".equals(httpMethod) &&
+    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
+        return GET == httpMethod &&
                 ("/".equals(requestUri) ||
                         "/index.html".equals(requestUri) ||
                         requestUri.endsWith(".js") ||

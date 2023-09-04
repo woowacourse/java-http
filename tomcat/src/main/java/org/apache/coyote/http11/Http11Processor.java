@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.FrontHandler;
+import org.apache.coyote.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.coyote.http.HttpMethod.POST;
+import static org.apache.coyote.http.HttpMethod.from;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,7 +49,8 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> headers = parseHeader(bufferedReader);
 
             final String[] parsedFirstLine = firstLine.split(" ");
-            final String requestBody = parseRequestBody(parsedFirstLine[0], headers, bufferedReader);
+            final HttpMethod httpMethod = from(parsedFirstLine[0]);
+            final String requestBody = parseRequestBody(httpMethod, headers, bufferedReader);
 
             final String response = frontHandler.handle(firstLine, headers, requestBody);
 
@@ -56,9 +61,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String parseRequestBody(final String httpMethod, final Map<String, String> headers, final BufferedReader bufferedReader) throws IOException {
+    private static String parseRequestBody(final HttpMethod httpMethod, final Map<String, String> headers, final BufferedReader bufferedReader) throws IOException {
         String requestBody = "";
-        if ("POST".equals(httpMethod)) {
+        if (httpMethod == POST) {
             final int contentLength = Integer.parseInt(headers.get("Content-Length"));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);

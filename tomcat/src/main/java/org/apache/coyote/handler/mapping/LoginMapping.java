@@ -2,6 +2,7 @@ package org.apache.coyote.handler.mapping;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,13 +11,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http.HttpMethod.POST;
+
 public class LoginMapping extends LoginFilter implements HandlerMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LoginMapping.class);
 
     @Override
-    public boolean supports(final String httpMethod, final String requestUri) {
-        return "POST".equals(httpMethod) &&
+    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
+        return POST == httpMethod &&
                 requestUri.contains("login");
     }
 

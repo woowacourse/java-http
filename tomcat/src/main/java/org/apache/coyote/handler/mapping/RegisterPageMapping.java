@@ -1,5 +1,7 @@
 package org.apache.coyote.handler.mapping;
 
+import org.apache.coyote.http.HttpMethod;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -10,8 +12,8 @@ import java.util.Map;
 public class RegisterPageMapping implements HandlerMapping {
 
     @Override
-    public boolean supports(final String httpMethod, final String requestUri) {
-        return "GET".equals(httpMethod) &&
+    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
+        return HttpMethod.GET == httpMethod &&
                 requestUri.contains("register");
     }
 

@@ -14,7 +14,7 @@ public class RequestLine {
     private static final String QUERY_PARAM_SPLITER = "\\?";
     private static final String QUERY_PARAM = "?";
 
-    private final Method method;
+    private final HttpMethod httpMethod;
     private final String path;
     private final Map<String, String> queryParam;
     private final String httpVersion;
@@ -22,7 +22,7 @@ public class RequestLine {
     public RequestLine(String requestLine) {
         String[] split = requestLine.split(" ");
         validate(split);
-        this.method = methodOf(split[0]);
+        this.httpMethod = methodOf(split[0]);
         this.path = pathOf(split[1]);
         this.queryParam = queryParamsOf(split[1]);
         this.httpVersion = split[2];
@@ -34,8 +34,8 @@ public class RequestLine {
         }
     }
 
-    private Method methodOf(String methodName) {
-        return Method.of(methodName);
+    private HttpMethod methodOf(String methodName) {
+        return HttpMethod.of(methodName);
     }
 
     private String pathOf(String requestTarget) {
@@ -68,8 +68,8 @@ public class RequestLine {
         return split[1];
     }
 
-    public Method getMethod() {
-        return method;
+    public HttpMethod getMethod() {
+        return httpMethod;
     }
 
     public String getPath() {

@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    Response<? extends Object> handle(Request request);
+    HttpResponse<? extends Object> handle(HttpRequest httpRequest);
 }

@@ -12,12 +12,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.request.ResponseBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +45,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             final var outputStream = connection.getOutputStream()) {
-            Request request = readRequest(inputReader);
-            String response = getResponse(request);
+            HttpRequest httpRequest = readRequest(inputReader);
+            String response = getResponse(httpRequest);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -54,11 +54,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Request readRequest(BufferedReader inputReader) {
+    private HttpRequest readRequest(BufferedReader inputReader) {
         RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
         RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
         ResponseBody responseBody = new ResponseBody(readBody(inputReader, requestHeaders));
-        return new Request(requestLine,
+        return new HttpRequest(requestLine,
             requestHeaders,
             responseBody);
     }
@@ -101,12 +101,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(Request request) {
-        if (resourceProvider.haveResource(request.getRequestLine().getPath())) {
-            return staticResourceResponse(request.getRequestLine().getPath());
+    private String getResponse(HttpRequest httpRequest) {
+        if (resourceProvider.haveResource(httpRequest.getRequestLine().getPath())) {
+            return staticResourceResponse(httpRequest.getRequestLine().getPath());
         }
-        if (handlerMapper.haveAvailableHandler(request)) {
-            return controllerResponse(request);
+        if (handlerMapper.haveAvailableHandler(httpRequest)) {
+            return controllerResponse(httpRequest);
         }
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
@@ -126,33 +126,33 @@ public class Http11Processor implements Runnable, Processor {
             responseBody);
     }
 
-    private String controllerResponse(Request request) {
-        Controller handler = handlerMapper.getHandler(request);
-        Response<Object> response = (Response<Object>) handler.handle(request);
+    private String controllerResponse(HttpRequest httpRequest) {
+        Controller handler = handlerMapper.getHandler(httpRequest);
+        HttpResponse<Object> httpResponse = (HttpResponse<Object>) handler.handle(httpRequest);
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(requestLine(response));
-        Optional<String> body = bodyOf(response);
+        stringBuilder.append(requestLine(httpResponse));
+        Optional<String> body = bodyOf(httpResponse);
         if (body.isPresent()) {
-            return stringBuilder.append(responseWithBody(response, body.get())).toString();
+            return stringBuilder.append(responseWithBody(httpResponse, body.get())).toString();
         }
-        String str = responseNoBody(response);
+        String str = responseNoBody(httpResponse);
         stringBuilder.append("\r\n");
         return stringBuilder.append(str).toString();
     }
 
-    private String responseNoBody(Response<Object> response) {
-        Map<String, String> headers = response.getHeaders();
+    private String responseNoBody(HttpResponse<Object> httpResponse) {
+        Map<String, String> headers = httpResponse.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
         stringJoiner.add("");
         return stringJoiner.toString();
     }
 
-    private String responseWithBody(Response<Object> response, String body) {
-        Map<String, String> headers = response.getHeaders();
+    private String responseWithBody(HttpResponse<Object> httpResponse, String body) {
+        Map<String, String> headers = httpResponse.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
-        stringJoiner.add(resourceProvider.contentTypeOf(response.getViewPath()));
+        stringJoiner.add(resourceProvider.contentTypeOf(httpResponse.getViewPath()));
         stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
         stringJoiner.add("");
         stringJoiner.add(body);
@@ -172,15 +172,15 @@ public class Http11Processor implements Runnable, Processor {
         return headerKey + ": " + headerValue;
     }
 
-    private Optional<String> bodyOf(Response<Object> response) {
-        if (response.isViewResponse()) {
-            return Optional.of(resourceProvider.resourceBodyOf(response.getViewPath()));
+    private Optional<String> bodyOf(HttpResponse<Object> httpResponse) {
+        if (httpResponse.isViewResponse()) {
+            return Optional.of(resourceProvider.resourceBodyOf(httpResponse.getViewPath()));
         }
         return Optional.empty();
     }
 
-    private String requestLine(Response<Object> response) {
-        HttpResponse httpResponse = HttpResponse.of(response.getStatusCode());
-        return "HTTP/1.1 " + httpResponse.getStatusCode() + " " + httpResponse.name() + " ";
+    private String requestLine(HttpResponse<Object> httpResponse) {
+        HttpStatusCode httpStatusCode = HttpStatusCode.of(httpResponse.getStatusCode());
+        return "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.name() + " ";
     }
 }

@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.Cookies;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public static boolean loggedIn(Request request) {
-        Optional<Cookies> cookie = request.getRequestHeaders().getCookie();
+    public static boolean loggedIn(HttpRequest httpRequest) {
+        Optional<Cookies> cookie = httpRequest.getRequestHeaders().getCookie();
         if (cookie.isPresent()) {
             return checkSession(cookie.get());
         }

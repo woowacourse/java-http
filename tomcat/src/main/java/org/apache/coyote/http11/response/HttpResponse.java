@@ -1,25 +1,84 @@
 package org.apache.coyote.http11.response;
 
-import java.util.stream.Stream;
+import java.util.HashMap;
+import java.util.Map;
 
-public enum HttpResponse {
-    OK(200),
-    FOUND(302);
+public class HttpResponse<T> {
 
-    private final int statusCode;
+    private int statusCode = 200;
+    private Map<String, String> headers;
+    private T body;
+    private boolean viewResponse = false;
+    private String viewPath = null;
 
-    HttpResponse(int statusCode) {
+    private HttpResponse(int statusCode, Map<String, String> headers, T body) {
         this.statusCode = statusCode;
+        this.headers = headers;
+        this.body = body;
     }
 
-    public static HttpResponse of(int statusCode) {
-        return Stream.of(HttpResponse.values())
-            .filter(httpResponse -> httpResponse.statusCode == statusCode)
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 상태 코드 입니다."));
+    public static ResponseBuilder status(int statusCode) {
+        return new ResponseBuilderImpl(statusCode);
+    }
+
+    public void responseView(String viewPath) {
+        this.viewResponse = true;
+        this.viewPath = viewPath;
     }
 
     public int getStatusCode() {
         return statusCode;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public T getBody() {
+        return body;
+    }
+
+    public boolean isViewResponse() {
+        return viewResponse;
+    }
+
+    public String getViewPath() {
+        return viewPath;
+    }
+
+    public interface ResponseBuilder {
+
+        ResponseBuilder addHeader(String key, String value);
+
+        <T> HttpResponse<T> build();
+
+        <T> HttpResponse<T> body(T body);
+    }
+
+    private static final class ResponseBuilderImpl implements ResponseBuilder {
+
+        private int statusCode;
+        private Map<String, String> headers;
+
+        public ResponseBuilderImpl(int statusCode) {
+            this.statusCode = statusCode;
+            this.headers = new HashMap<>();
+        }
+
+        @Override
+        public ResponseBuilder addHeader(String key, String value) {
+            headers.put(key, value);
+            return this;
+        }
+
+        @Override
+        public <T> HttpResponse<T> build() {
+            return body(null);
+        }
+
+        @Override
+        public <T> HttpResponse<T> body(T body) {
+            return new HttpResponse<>(this.statusCode, headers, body);
+        }
     }
 }

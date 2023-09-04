@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
-import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 @SuppressWarnings("NonAsciiCharacters")
-class RequestLineTest {
+class HttpRequestLineTest {
 
     @Test
     void 유효하지_않은_requestLine_형식이면_에외() {
@@ -34,7 +34,7 @@ class RequestLineTest {
         RequestLine actual = new RequestLine(requestLine);
 
         // then
-        assertThat(actual.getMethod()).isEqualTo(Method.GET);
+        assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
     }
 
     @Test

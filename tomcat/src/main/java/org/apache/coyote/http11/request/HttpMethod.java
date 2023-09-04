@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 
-public enum Method {
+public enum HttpMethod {
     GET("GET"),
     POST("POST"),
     PUT("PUT"),
@@ -10,16 +10,16 @@ public enum Method {
 
     private final String methodName;
 
-    Method(String methodName) {
+    HttpMethod(String methodName) {
         this.methodName = methodName;
     }
 
-    public static Method of(String targetMethod) {
+    public static HttpMethod of(String targetMethod) {
         if (targetMethod == null) {
             throw new IllegalArgumentException("null 에 대한 메서드는 존재하지 않습니다.");
         }
-        return Arrays.stream(Method.values())
-            .filter(method -> targetMethod.toUpperCase().equals(method.methodName))
+        return Arrays.stream(HttpMethod.values())
+            .filter(httpMethod -> targetMethod.toUpperCase().equals(httpMethod.methodName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 메서드 입니다."));
     }

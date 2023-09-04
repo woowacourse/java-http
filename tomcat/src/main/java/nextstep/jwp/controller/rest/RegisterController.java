@@ -1,12 +1,12 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.controller.rest;
+
+import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
+import static nextstep.jwp.controller.StaticResourceController.REGISTER_PAGE;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
 
 public class RegisterController implements RestController {
 
@@ -16,13 +16,12 @@ public class RegisterController implements RestController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public ResponseEntity handle(HttpRequest request) {
         final var user = new User(
                 request.getJsonProperty("account"),
                 request.getJsonProperty("password"),
                 request.getJsonProperty("email")
         );
-        final var headers = HttpHeaders.RestHeaders();
         try {
             InMemoryUserRepository.findByAccount(user.getAccount())
                                   .ifPresentOrElse(
@@ -31,12 +30,9 @@ public class RegisterController implements RestController {
                                           },
                                           () -> InMemoryUserRepository.save(user)
                                   );
-            headers.put(HttpHeaders.LOCATION, "/index.html");
-            return new HttpResponse(HttpStatusCode.FOUND, headers, "");
-        }
-        catch (IllegalArgumentException e) {
-            headers.put(HttpHeaders.LOCATION, "/register.html");
-            return new HttpResponse(HttpStatusCode.FOUND, headers, e.getLocalizedMessage());
+            return ResponseEntity.found(HOME_PAGE);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.found(REGISTER_PAGE);
         }
     }
 }

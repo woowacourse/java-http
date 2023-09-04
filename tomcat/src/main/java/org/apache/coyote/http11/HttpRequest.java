@@ -3,11 +3,14 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import org.apache.catalina.manager.Session;
+import org.apache.catalina.manager.SessionManager;
 
 public class HttpRequest {
 
     private static final String HEADER_BODY_DELIMITER = "";
     private static final String PATH_QUERY_STRING_DELIMITER = "\\?";
+    private static final String INDEX_HTML = "/index.html";
 
     private final HttpMethod method;
     private final String path;
@@ -39,7 +42,7 @@ public class HttpRequest {
             request.add(line);
         }
         request.add(HEADER_BODY_DELIMITER);
-        final HttpHeaders header = HttpHeaders.from(request);
+        final HttpHeaders header = HttpHeaders.createBasicRequestHeadersFrom(request);
 
         if (header.getContentLength() > 0) {
             var bodyChars = new char[contentLength];
@@ -66,6 +69,10 @@ public class HttpRequest {
         return queryStrings != null;
     }
 
+    public Session getSession() {
+        return SessionManager.getInstance().findSession(headers.getCookie("JSESSIONID"));
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
     }
@@ -84,8 +91,13 @@ public class HttpRequest {
 
     public String getPath() {
         if (path.equals("/")) {
-            return "/index.html";
+            return INDEX_HTML;
         }
         return path;
     }
+
+    public boolean hasCookie(String key) {
+        return headers.hasCookie(key);
+    }
+
 }

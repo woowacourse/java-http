@@ -1,8 +1,7 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.controller.rest;
 
-import nextstep.servlet.controller.Controller;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 
 public interface RestController extends Controller {
 
@@ -10,5 +9,5 @@ public interface RestController extends Controller {
     boolean canHandle(HttpRequest request);
 
     @Override
-    HttpResponse handle(HttpRequest request);
+    ResponseEntity handle(HttpRequest request);
 }

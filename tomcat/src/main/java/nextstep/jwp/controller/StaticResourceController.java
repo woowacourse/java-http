@@ -1,29 +1,25 @@
-package nextstep.servlet.controller;
-
-import static org.apache.coyote.http11.HttpHeaders.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeaders.CONTENT_TYPE;
-import static org.apache.coyote.http11.HttpHeaders.CONTENT_TYPE_CSS;
-import static org.apache.coyote.http11.HttpHeaders.CONTENT_TYPE_UTF_8;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
+import nextstep.jwp.controller.rest.ResponseEntity;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
 
 public class StaticResourceController implements Controller {
 
     private static final int MAX_DEPTH = 3;
     private static final String PATH_DELIMITER = "/";
     private static final String RESOURCE_ROOT_PATH = "static";
+
+    public static final String HOME_PAGE = "/index.html";
+    public static final String UNAUTHORIZED_PAGE = "/401.html";
+    public static final String REGISTER_PAGE = "register.html";
 
     private final List<String> staticRequestPaths = List.of(
             "/login",
@@ -37,31 +33,17 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
+    public ResponseEntity handle(HttpRequest request) throws IOException {
         return createStaticResponse(request);
     }
 
-    private HttpResponse createStaticResponse(HttpRequest request) throws IOException {
-        var requestHeaders = request.getHeaders();
+    private ResponseEntity createStaticResponse(HttpRequest request) throws IOException {
         var responseBody = "";
-
         if (request.getMethod() == HttpMethod.GET) {
             responseBody = findFileContentByPath(request.getPath());
         }
-        final var responseHeaders = buildResponseHeaders(responseBody, requestHeaders);
 
-        return new HttpResponse(HttpStatusCode.OK, responseHeaders, responseBody);
-    }
-
-    private HttpHeaders buildResponseHeaders(String responseBody, HttpHeaders requestHeaders) {
-        var responseHeaders = new HttpHeaders(new HashMap<>());
-        responseHeaders.put(CONTENT_TYPE, CONTENT_TYPE_UTF_8);
-        responseHeaders.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-
-        if (requestHeaders.isAcceptCss()) {
-            responseHeaders.put(CONTENT_TYPE, CONTENT_TYPE_CSS);
-        }
-        return responseHeaders;
+        return ResponseEntity.ok(responseBody);
     }
 
     private String findFileContentByPath(String requestPath) throws IOException {

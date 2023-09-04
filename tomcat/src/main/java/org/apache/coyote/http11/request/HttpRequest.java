@@ -16,19 +16,17 @@ public class HttpRequest {
     }
 
     public static HttpRequest makeRequest(BufferedReader inputReader) {
-        RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
-        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
-        ResponseBody responseBody = new ResponseBody(readBody(inputReader, requestHeaders));
-        return new HttpRequest(requestLine,
-            requestHeaders,
-            responseBody);
+        return new HttpRequest(
+            new RequestLine(readRequestLine(inputReader)),
+            new RequestHeaders(readHeaders(inputReader)),
+            new ResponseBody(readBody(inputReader, new RequestHeaders(readHeaders(inputReader)))));
     }
 
     private static String readRequestLine(BufferedReader inputReader) {
         try {
             return inputReader.readLine();
         } catch (IOException e) {
-            return null;
+            throw new IllegalArgumentException("RequestLine 을 읽을 수 없습니다.");
         }
     }
 
@@ -43,7 +41,7 @@ public class HttpRequest {
             }
             return stringBuilder.toString();
         } catch (IOException e) {
-            throw new IllegalArgumentException("RequestLine 을 읽을 수 없습니다.");
+            throw new IllegalArgumentException("RequestHeader 를 읽을 수 없습니다.");
         }
     }
 
@@ -61,7 +59,6 @@ public class HttpRequest {
             throw new IllegalArgumentException("RequestBody 를 읽을 수 없습니다.");
         }
     }
-
 
     public RequestLine getRequestLine() {
         return requestLine;

@@ -41,16 +41,12 @@ public class LoginHandler implements Handler {
                 session.setAttribute("user", user);
                 SessionManager.addSession(session);
                 return HttpResponse.builder()
-                                   .httpStatusCode(FOUND)
-                                   .header("Location", "http://localhost:8080/index.html")
-                                   .header("Content-Type", "text/html;charset=utf-8")
+                                   .redirect("http://localhost:8080/index.html")
                                    .cookie("JSESSIONID=" + sessionId)
                                    .build();
             } else {
                 return HttpResponse.builder()
-                                   .httpStatusCode(FOUND)
-                                   .header("Location", "http://localhost:8080/401.html")
-                                   .header("Content-Type", "text/html;charset=utf-8")
+                                   .redirect("http://localhost:8080/401.html")
                                    .build();
             }
         } else {

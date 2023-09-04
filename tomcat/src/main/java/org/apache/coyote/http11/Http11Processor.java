@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestParser.extract(reader);
 
             HandlerMapping handlerMapping = new HandlerMapping();
-            ResponseEntity responseEntity = handlerMapping.extractResponseEntity(httpRequest.getRequestLine());
+            ResponseEntity responseEntity = handlerMapping.extractResponseEntity(httpRequest);
 
             ViewResolver viewResolver = new ViewResolver(responseEntity);
 

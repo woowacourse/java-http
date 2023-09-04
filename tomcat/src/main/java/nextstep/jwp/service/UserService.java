@@ -20,4 +20,11 @@ public class UserService {
 
         throw new IllegalArgumentException("잘못된 패스워드입니다.");
     }
+
+    public void save(String account, String password, String email) {
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        log.info("User: {}", InMemoryUserRepository.findByAccount(account));
+    }
 }

@@ -2,21 +2,26 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class HandlerMapping {
 
-    public ResponseEntity extractResponseEntity(RequestLine requestLine) {
+    public ResponseEntity extractResponseEntity(HttpRequest request) {
+        RequestLine requestLine = request.getRequestLine();
+        HttpMethod httpMethod = requestLine.getHttpMethod();
         String path = requestLine.getPath();
 
-        if (path.equals("/login")) {
+        if (httpMethod.isEqualTo(HttpMethod.POST)) {
             UserController userController = new UserController(new UserService());
-            if (requestLine.isQueryStringExisted()) {
-                String account = requestLine.findQueryStringValue("account");
-                String password = requestLine.findQueryStringValue("password");
-
-                return userController.login(account, password);
+            RequestBody requestBody = request.getRequestBody();
+            if (path.equals("/login")) {
+                return userController.login(requestBody);
+            }
+            if (path.equals("/register")) {
+                return userController.signUp(requestBody);
             }
         }
 

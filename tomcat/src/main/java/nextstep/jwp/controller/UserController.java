@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class UserController {
@@ -12,12 +13,25 @@ public class UserController {
         this.userService = userService;
     }
 
-    public ResponseEntity login(String account, String password) {
+    public ResponseEntity login(RequestBody requestBody) {
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+
         try {
             userService.login(account, password);
             return ResponseEntity.of(HttpStatus.FOUND, "/index");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.of(HttpStatus.UNAUTHORIZED, "/401");
         }
+    }
+
+    public ResponseEntity signUp(RequestBody requestBody) {
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        String email = requestBody.get("email");
+
+        userService.save(account, password, email);
+
+        return ResponseEntity.of(HttpStatus.FOUND, "/index");
     }
 }

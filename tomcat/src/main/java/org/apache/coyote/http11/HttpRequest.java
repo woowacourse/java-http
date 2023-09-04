@@ -14,17 +14,17 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private static final String CRLF = "\r\n";
     private static final String WHITE_SPACE = " ";
 
     private final String method;
     private final String target;
     private final String version;
-    private final List<HttpHeader> headers;
+    private final Map<String, HttpHeader> headers;
     private final Map<String, String> queries;
     private final String body;
 
-    private HttpRequest(final String method, final String target, final String version, final List<HttpHeader> headers,
+    private HttpRequest(final String method, final String target, final String version,
+                        final Map<String, HttpHeader> headers,
                         final Map<String, String> queries,
                         final String body) {
         this.method = method;
@@ -40,26 +40,30 @@ public class HttpRequest {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String[] requestLineElements = reader.readLine().split(WHITE_SPACE);
 
-            List<String> headerLines = new ArrayList<>();
+            Map<String, HttpHeader> headers = new HashMap<>();
             String next;
             while (reader.ready() && !(next = reader.readLine()).isEmpty()) {
-                headerLines.add(next);
+                HttpHeader header = HttpHeader.of(next);
+                headers.put(header.getName(), header);
             }
 
-            List<String> bodyLines = new ArrayList<>();
-            while (reader.ready()) {
-                next = reader.readLine();
-                bodyLines.add(next);
+            HttpHeader contentLengthHeader = headers.getOrDefault("Content-Length", HttpHeader.EMPTY);
+            int contentLength = 0;
+            if (contentLengthHeader != HttpHeader.EMPTY) {
+                contentLength = Integer.parseInt(contentLengthHeader.getValue());
             }
-            String body = String.join(CRLF, bodyLines);
+            char[] buffer = new char[contentLength];
+            while (contentLength > 0) {
+                int readCount = reader.read(buffer, 0, contentLength);
+                contentLength -= readCount;
+            }
+            String body = new String(buffer);
 
             return new HttpRequest(
                     requestLineElements[0],
                     removeQueriesFrom(requestLineElements[1]),
                     requestLineElements[2],
-                    headerLines.stream()
-                            .map(HttpHeader::of)
-                            .collect(Collectors.toList()),
+                    headers,
                     getQueriesFrom(requestLineElements[1]),
                     body
             );
@@ -103,14 +107,11 @@ public class HttpRequest {
     }
 
     public List<HttpHeader> getHeaders() {
-        return headers;
+        return new ArrayList<>(headers.values());
     }
 
     public HttpHeader getHeader(String name) {
-        return headers.stream()
-                .filter(httpHeader -> httpHeader.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+        return headers.getOrDefault(name, HttpHeader.EMPTY);
     }
 
     public String getQuery(String name) {

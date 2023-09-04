@@ -85,4 +85,8 @@ public class Url {
     public String url() {
         return url;
     }
+
+    public String resourceName() {
+        return resourceName;
+    }
 }

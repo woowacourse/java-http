@@ -7,6 +7,10 @@ import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.handler.ResourceProvider;
 
+/***
+ * TODO: 빌더 패턴을 사용한 리팩토링
+ * HttpServletResponse 참고하여 리팩토링 진행
+ */
 public class Response {
 
 	private static final String CRLF = "\r\n";

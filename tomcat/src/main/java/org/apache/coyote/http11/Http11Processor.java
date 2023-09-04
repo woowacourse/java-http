@@ -7,17 +7,21 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.PathRequestHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.component.HttpRequestMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final PathRequestHandler pathRequestHandler = new PathRequestHandler();
+    private static final StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String REQUEST_START_LINE_DELIMITER = " ";
-    private static final int REQUEST_START_LINE_ELEMENT_SIZE = 3;
-    private static final int REQUEST_TARGET_INDEX = 1;
 
     private final Socket connection;
 
@@ -40,7 +44,11 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final String response = getResponse(getTargetUrl(bufferedReader.readLine()));
+            final List<String> messageLines = bufferedReader.lines()
+                .collect(Collectors.toList());
+
+            final HttpRequestMessage httpRequestMessage = HttpRequestMessage.with(messageLines);
+            final String response = getResponse(httpRequestMessage.getTargetUrl());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -50,27 +58,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(final String targetUrl) throws IOException {
-        final ResponseBodyFinder responseBodyFinder = new ResponseBodyFinder();
-
-        if (responseBodyFinder.isBodyExist(targetUrl)) {
-            final byte[] responseBody = responseBodyFinder.getBody(targetUrl);
-            final String contentType = responseBodyFinder.getContentType(targetUrl);
-            
-            return String.join(System.lineSeparator(),
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                new String(responseBody));
+        if (pathRequestHandler.containsPath(targetUrl)) {
+            return pathRequestHandler.getResponse(targetUrl).getResponse();
         }
-        return String.join(System.lineSeparator(), "HTTP/1.1 200 OK ");
-    }
 
-    private String getTargetUrl(final String startLine) {
-        final String[] startLineElements = startLine.split(REQUEST_START_LINE_DELIMITER);
-        if (startLineElements.length != REQUEST_START_LINE_ELEMENT_SIZE) {
-            throw new IllegalArgumentException("Invalid HTTP request start line: " + startLine);
-        }
-        return startLineElements[REQUEST_TARGET_INDEX];
+        return staticResourceHandler.getResponse(targetUrl).getResponse();
     }
 }

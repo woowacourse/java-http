@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler.component;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-enum StaticResourceContentType {
+public enum StaticResourceContentType {
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
     JAVASCRIPT(".js", "text/javascript");

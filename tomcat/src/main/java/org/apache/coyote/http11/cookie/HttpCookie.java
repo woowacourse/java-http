@@ -28,12 +28,12 @@ public class HttpCookie {
     }
 
     public static HttpCookie create() {
-        return new HttpCookie(Map.of("JSESSTIONID", String.valueOf(UUID.randomUUID())));
+        return new HttpCookie(Map.of("JSESSIONID", String.valueOf(UUID.randomUUID())));
     }
 
 
     public boolean hasJSESSIONID() {
-        return this.cookie.containsKey("JSESSTIONID");
+        return this.cookie.containsKey("JSESSIONID");
     }
 
     public Map<String, String> getCookie() {
@@ -41,6 +41,6 @@ public class HttpCookie {
     }
 
     public String getJSESSIONID() {
-        return this.cookie.get("JSESSTIONID");
+        return this.cookie.get("JSESSIONID");
     }
 }

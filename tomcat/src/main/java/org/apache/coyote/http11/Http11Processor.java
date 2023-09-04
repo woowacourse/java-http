@@ -10,6 +10,8 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponseEntity;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.session.HttpSession;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,13 +21,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
     private static final String STATIC = "static";
     private static final String INDEX_HTML = "/index.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
+    private static final String LOGIN_HTML = "/login.html";
 
     private final Socket connection;
 
@@ -45,7 +52,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequest.from(inputStream);
-            final HttpRequestStartLine startLine = httpRequest.getStartLine();
             HttpCookie cookie = HttpCookie.empty();
             if (httpRequest.hasCookie()) {
                 cookie = HttpCookie.from(httpRequest.getCookie());
@@ -61,17 +67,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) {
+    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) throws IOException {
         final HttpRequestStartLine startLine = httpRequest.getStartLine();
+
         if (startLine.getHttpMethod().equals(HttpMethod.POST)) {
             if (startLine.getPath().startsWith("/login")) {
-                return login(httpRequest, cookie);
+                return login(httpRequest);
             }
             if (startLine.getPath().startsWith("/register")) {
                 return register(httpRequest, cookie);
             }
         }
-        return new HttpResponseEntity(startLine.getPath(), cookie, HttpStatusCode.OK);
+        if (startLine.getHttpMethod().equals(HttpMethod.GET)) {
+            if (startLine.getPath().startsWith("/login") && cookie.hasJSESSIONID()) {
+                final String jsessionid = cookie.getJSESSIONID();
+                HttpSession httpSession = sessionManager.findSession(jsessionid);
+                if (Objects.isNull(httpSession)) {
+                    return HttpResponseEntity.ok(LOGIN_HTML);
+                }
+                return HttpResponseEntity.found(INDEX_HTML);
+            }
+        }
+        return HttpResponseEntity.ok(startLine.getPath());
     }
 
     private HttpResponseEntity register(final HttpRequest httpRequest, final HttpCookie cookie) {
@@ -83,13 +100,10 @@ public class Http11Processor implements Runnable, Processor {
                         data -> data[1])
                 );
         InMemoryUserRepository.save(new User(registerData.get("account"), registerData.get("password"), registerData.get("email")));
-        return new HttpResponseEntity(INDEX_HTML, cookie, HttpStatusCode.OK);
+        return HttpResponseEntity.ok(INDEX_HTML);
     }
 
-    private HttpResponseEntity login(final HttpRequest httpRequest, final HttpCookie cookie) {
-        if (cookie.hasJSESSIONID()) {
-            return new HttpResponseEntity(INDEX_HTML, cookie, HttpStatusCode.OK);
-        }
+    private HttpResponseEntity login(final HttpRequest httpRequest) throws IOException {
         final String body = httpRequest.getBody();
         final Map<String, String> loginData = Arrays.stream(body.split("&"))
                 .map(data -> data.split("="))
@@ -99,34 +113,40 @@ public class Http11Processor implements Runnable, Processor {
                 );
         final User user = InMemoryUserRepository.findByAccount(loginData.get("account"))
                 .orElseThrow();
+
         if (user.checkPassword(loginData.get("password"))) {
-            return new HttpResponseEntity(INDEX_HTML, HttpCookie.create(), HttpStatusCode.FOUND);
+            final HttpCookie newCookie = HttpCookie.create();
+            final HttpSession httpSession = new HttpSession(newCookie.getJSESSIONID());
+            httpSession.setAttribute("user", user);
+            sessionManager.add(httpSession);
+            final HttpResponseEntity httpResponseEntity = HttpResponseEntity.found(INDEX_HTML);
+            httpResponseEntity.addHeader("Set-Cookie: JSESSIONID=", newCookie.getJSESSIONID());
+            return httpResponseEntity;
         }
-        return new HttpResponseEntity(UNAUTHORIZED_HTML, HttpCookie.empty(), HttpStatusCode.OK);
+        return HttpResponseEntity.ok(UNAUTHORIZED_HTML);
     }
 
     private String makeResponse(final HttpResponseEntity httpResponseEntity) throws IOException {
         final String path = httpResponseEntity.getPath();
         final String responseBody = makeResponseBody(path);
         final String contentType = makeContentType(path);
-        final HttpCookie cookie = httpResponseEntity.getCookie();
         final HttpStatusCode httpStatusCode = httpResponseEntity.getHttpStatusCode();
 
-        if (cookie.hasJSESSIONID()) {
-            return String.join("\r\n",
-                    "HTTP/1.1 " + HttpStatusCode.message(httpStatusCode),
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "Set-Cookie: JSESSIONID=" + cookie.getJSESSIONID() + " ",
-                    "",
-                    responseBody);
+        StringJoiner stringJoiner = new StringJoiner("\r\n");
+        stringJoiner.add("HTTP/1.1 " + HttpStatusCode.message(httpStatusCode));
+
+        for (final Entry<String, String> entry : httpResponseEntity.getAdditionalHeader().entrySet()) {
+            stringJoiner.add(entry.getKey() + entry.getValue());
         }
-        return String.join("\r\n",
-                "HTTP/1.1 " + HttpStatusCode.message(httpStatusCode),
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+
+        if (httpStatusCode != HttpStatusCode.FOUND) {
+            stringJoiner.add("Content-Type: " + contentType + ";charset=utf-8 ");
+            stringJoiner.add("Content-Length: " + responseBody.getBytes().length + " ");
+            stringJoiner.add("");
+            stringJoiner.add(responseBody);
+        }
+
+        return stringJoiner.toString();
     }
 
     private String makeResponseBody(final String path) throws IOException {

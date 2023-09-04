@@ -62,7 +62,7 @@ public class HttpRequest {
     private static RequestBody parseToResponseBody(final BufferedReader br, final HttpHeaders httpHeaders) throws IOException {
         final String contentLengthHeader = httpHeaders.getHeaderValue(CONTENT_LENGTH.source());
         if (Objects.isNull(contentLengthHeader)) {
-            return RequestBody.EMPTY;
+            return RequestBody.empty();
         }
 
         final int contentLength = Integer.parseInt(contentLengthHeader);
@@ -73,6 +73,10 @@ public class HttpRequest {
 
     public RequestLine requestLine() {
         return requestLine;
+    }
+
+    public String getCookieValue(final String cookieName) {
+        return httpHeaders.getCookieValue(cookieName);
     }
 
     public Headers headers() {

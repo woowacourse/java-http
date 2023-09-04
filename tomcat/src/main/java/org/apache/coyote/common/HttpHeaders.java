@@ -85,9 +85,9 @@ public class HttpHeaders {
     @Override
     public String toString() {
         return "HttpHeaders{" +
-               "headers=" + headers +
-               ", cookies=" + cookies +
-               ", session=" + session +
+               "headers=" + headers + System.lineSeparator() +
+               "        " + cookies + System.lineSeparator() +
+               "        " + session + System.lineSeparator() +
                '}';
     }
 }

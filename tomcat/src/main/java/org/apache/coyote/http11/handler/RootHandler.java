@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
+
 import java.util.Map;
 import org.apache.coyote.http11.ContentTypeParser;
 import org.apache.coyote.http11.message.Headers;
@@ -15,8 +18,8 @@ public class RootHandler extends Handler {
         String resource = "Hello world!";
 
         Headers headers = Headers.fromMap(Map.of(
-                "Content-Type", ContentTypeParser.parse(resource),
-                "Content-Length", String.valueOf(resource.getBytes().length)
+                CONTENT_TYPE, ContentTypeParser.parse(resource),
+                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 

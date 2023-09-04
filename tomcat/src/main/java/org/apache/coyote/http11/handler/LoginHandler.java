@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.message.HttpHeaders.*;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -16,10 +18,6 @@ import org.apache.coyote.http11.message.response.Response;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class LoginHandler extends Handler {
-
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
 
     public Response handle(Request request) throws IOException {
         HttpMethod httpMethod = request.getMethod();
@@ -46,7 +44,7 @@ public class LoginHandler extends Handler {
     private Response responseForLoggedIn(Request request) {
         String absolutePath = "index.html";
         Headers headers = Headers.fromMap(Map.of(
-                "Location", absolutePath
+                LOCATION, absolutePath
         ));
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
@@ -83,7 +81,7 @@ public class LoginHandler extends Handler {
         String absolutePath = "index.html";
         Headers headers = Headers.fromMap(Map.of(
                 SET_COOKIE, "JSESSIONID=" + sessionId,
-                "Location", absolutePath
+                LOCATION, absolutePath
         ));
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
@@ -94,7 +92,7 @@ public class LoginHandler extends Handler {
         String absolutePath = "401.html";
 
         Headers headers = Headers.fromMap(Map.of(
-                "Location", absolutePath
+                LOCATION, absolutePath
         ));
 
         return Response.from(request.getHttpVersion(), HttpStatus.FOUND,

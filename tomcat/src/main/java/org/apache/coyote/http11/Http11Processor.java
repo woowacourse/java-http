@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
             HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
 
-            ResponseEntity responseEntity = createResponse(httpRequestStartLine, httpRequestHeader, httpRequestBody);
+            ResponseEntity responseEntity = createResponse(httpRequestStartLine, httpRequestBody);
             String response = HttpResponse.from(responseEntity).getResponse();
 
             outputStream.write(response.getBytes());
@@ -95,7 +95,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseEntity createResponse(
             HttpRequestStartLine httpRequestStartLine,
-            HttpRequestHeader httpRequestHeader,
             HttpRequestBody httpRequestBody
     ) throws IOException {
         String requestURI = httpRequestStartLine.getRequestURI();
@@ -140,7 +139,10 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestBody httpRequestBody) throws IOException {
+    private ResponseEntity login(
+            HttpRequestStartLine httpRequestStartLine,
+            HttpRequestBody httpRequestBody
+    ) {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
         String account = httpRequestBody.find("account");
@@ -200,7 +202,10 @@ public class Http11Processor implements Runnable, Processor {
         return findAccount.get();
     }
 
-    private ResponseEntity register(HttpRequestStartLine httpRequestStartLine, HttpRequestBody httpRequestBody) {
+    private ResponseEntity register(
+            HttpRequestStartLine httpRequestStartLine,
+            HttpRequestBody httpRequestBody
+    ) {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
 

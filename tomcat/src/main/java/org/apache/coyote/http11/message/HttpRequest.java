@@ -10,11 +10,11 @@ import java.util.Optional;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeaders headers;
+    private final HttpHeaders headers;
     private final QueryParams queryParams;
     private final RequestBody body;
 
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers,
+    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers,
         final QueryParams queryParams, final RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -26,24 +26,24 @@ public class HttpRequest {
         final String startLine = messageReader.readLine();
         final RequestLine requestLine = RequestLine.from(startLine);
         final QueryParams queryParams = QueryParams.from(requestLine);
-        final RequestHeaders requestHeaders = parseHeaders(messageReader);
-        final RequestBody requestBody = readBody(messageReader, requestHeaders);
+        final HttpHeaders httpHeaders = parseHeaders(messageReader);
+        final RequestBody requestBody = readBody(messageReader, httpHeaders);
 
-        return new HttpRequest(requestLine, requestHeaders, queryParams, requestBody);
+        return new HttpRequest(requestLine, httpHeaders, queryParams, requestBody);
     }
 
-    private static RequestHeaders parseHeaders(final BufferedReader messageReader) throws IOException {
+    private static HttpHeaders parseHeaders(final BufferedReader messageReader) throws IOException {
         String readLine;
         final List<String> readHeaderLines = new ArrayList<>();
         while ((readLine = messageReader.readLine()) != null && !readLine.isEmpty()) {
             readHeaderLines.add(readLine);
         }
 
-        return RequestHeaders.from(readHeaderLines);
+        return HttpHeaders.from(readHeaderLines);
     }
 
-    private static RequestBody readBody(final BufferedReader reader, final RequestHeaders requestHeaders) throws IOException {
-        final Optional<String> contentLengthValue = requestHeaders.findFirstValueOfField("Content-Length");
+    private static RequestBody readBody(final BufferedReader reader, final HttpHeaders httpHeaders) throws IOException {
+        final Optional<String> contentLengthValue = httpHeaders.findFirstValueOfField("Content-Length");
         if (contentLengthValue.isEmpty()) {
             return RequestBody.empty();
         }
@@ -67,7 +67,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestHeaders getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 

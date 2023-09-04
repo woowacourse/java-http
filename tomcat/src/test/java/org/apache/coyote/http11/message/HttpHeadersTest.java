@@ -8,16 +8,16 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestHeadersTest {
+class HttpHeadersTest {
 
     @Test
-    @DisplayName("메세지의 header 줄들로부터 RequestHeaders 를 생성한다.")
+    @DisplayName("메세지의 header 줄들로부터 HttpHeaders 를 생성한다.")
     void from() {
         // given
         final List<String> headerLines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
 
         // when
-        final RequestHeaders headers = RequestHeaders.from(headerLines);
+        final HttpHeaders headers = HttpHeaders.from(headerLines);
 
         // then
         assertThat(headers.getHeadersWithValue())
@@ -32,7 +32,7 @@ class RequestHeadersTest {
     void findFirstValueOfField_exist() {
         // given
         final List<String> headerLines = List.of("Accept: text/html,*/* ");
-        final RequestHeaders headers = RequestHeaders.from(headerLines);
+        final HttpHeaders headers = HttpHeaders.from(headerLines);
 
         // when
         final Optional<String> firstValueOfField = headers.findFirstValueOfField("Accept");
@@ -48,7 +48,7 @@ class RequestHeadersTest {
     void findFirstValueOfField_notExist() {
         // given
         final List<String> headerLines = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
-        final RequestHeaders headers = RequestHeaders.from(headerLines);
+        final HttpHeaders headers = HttpHeaders.from(headerLines);
 
         // when
         final Optional<String> firstValueOfField = headers.findFirstValueOfField("Accept");

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class RequestHeaders {
+public class HttpHeaders {
 
     private static final String FIELD_VALUE_DELIMITER = ": ";
     private static final String VALUES_DELIMITER = ",";
@@ -15,11 +15,11 @@ public class RequestHeaders {
 
     private final Map<String, String> headersWithValue;
 
-    public RequestHeaders(final Map<String, String> headersWithValue) {
+    public HttpHeaders(final Map<String, String> headersWithValue) {
         this.headersWithValue = headersWithValue;
     }
 
-    public static RequestHeaders from(final List<String> headerLines) {
+    public static HttpHeaders from(final List<String> headerLines) {
         final Map<String, String> headersWithValue = new LinkedHashMap<>();
         String[] parsedHeaderLine;
 
@@ -28,7 +28,7 @@ public class RequestHeaders {
             headersWithValue.put(parsedHeaderLine[FIELD_INDEX].trim(), parsedHeaderLine[VALUE_INDEX].trim());
         }
 
-        return new RequestHeaders(headersWithValue);
+        return new HttpHeaders(headersWithValue);
     }
 
     public Optional<String> findFirstValueOfField(final String field) {

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class HttpTarget {
 
     private static final String EMPTY_VALUE = "";
+
     private final String path;
     private final Map<String, String> queries;
 

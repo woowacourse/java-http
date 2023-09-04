@@ -1,19 +1,22 @@
 package study;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Test;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
  * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
  */
 @DisplayName("File 클래스 학습 테스트")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class FileTest {
 
     /**
@@ -28,7 +31,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final var resource = ClassLoader.getSystemClassLoader().getResource(fileName);
+        final String actual = new File(resource.getPath()).getAbsolutePath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +44,13 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final var resource = ClassLoader.getSystemClassLoader().getResource(fileName);
+        final var path = new File(resource.getPath()).toPath();
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

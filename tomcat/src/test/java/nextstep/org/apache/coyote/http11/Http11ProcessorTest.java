@@ -132,11 +132,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3797 \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /login \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "/login";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

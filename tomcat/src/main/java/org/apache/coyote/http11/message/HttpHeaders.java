@@ -37,6 +37,10 @@ public class HttpHeaders {
             .orElse(Optional.empty());
     }
 
+    public Optional<String> getValuesOfField(final String field) {
+        return Optional.ofNullable(headersWithValue.get(field));
+    }
+
     public Map<String, String> getHeadersWithValue() {
         return new LinkedHashMap<>(headersWithValue);
     }

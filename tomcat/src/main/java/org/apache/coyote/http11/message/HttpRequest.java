@@ -63,6 +63,10 @@ public class HttpRequest {
         return headers.findFirstValueOfField(field);
     }
 
+    public boolean hasHeader(final String field) {
+        return headers.getValuesOfField(field).isPresent();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

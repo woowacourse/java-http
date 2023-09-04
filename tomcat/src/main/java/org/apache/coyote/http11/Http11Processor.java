@@ -3,10 +3,13 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Session;
+import org.apache.coyote.request.HttpRequestBody;
+import org.apache.coyote.request.HttpRequestHeader;
+import org.apache.coyote.request.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +20,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,22 +44,28 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String firstLine = reader.readLine();
-            if (firstLine == null) {
+            String requestLine = reader.readLine();
+            if (requestLine == null) {
                 return;
             }
-            final StringBuilder requestHeader = new StringBuilder(firstLine);
+
+            HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
+
+            final StringBuilder requestHeader = new StringBuilder();
 
             String line;
             while (!Objects.equals(line = reader.readLine(), "")) {
                 requestHeader.append(line).append("\r\n");
             }
 
-            StringBuilder requestBody = new StringBuilder();
-            int contentLength = getContentLength(requestHeader.toString());
+            HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(requestHeader.toString());
 
+
+            int contentLength = httpRequestHeader.getContentLength();
+
+            StringBuilder requestBody = new StringBuilder();
             if (contentLength > 0) {
                 char[] buffer = new char[contentLength];
                 int bytesRead = reader.read(buffer, 0, contentLength);
@@ -63,7 +74,9 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            String uri = extractRequestUriFromRequest(requestHeader);
+            HttpRequestBody httpRequestBody = HttpRequestBody.from(requestBody.toString());
+
+            String uri = extractRequestUriFromRequest(requestLine);
 
             int index = uri.indexOf("?");
             String path;
@@ -79,11 +92,9 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri;
             }
 
-            Map<String, String> requestBodyMap = parseQueryParams(requestBody.toString());
-
             String setCookie = "";
 
-            if (path.equals("login") && requestHeader.indexOf("GET") != -1) {
+            if (path.equals("login") && httpRequestLine.isGetMethod()) {
                 statusCode = 302;
                 statusMessage = "Found";
 
@@ -106,12 +117,12 @@ public class Http11Processor implements Runnable, Processor {
             }
 
 
-            if (path.equals("login") && requestHeader.indexOf("POST") != -1) {
+            if (path.equals("login") && httpRequestLine.isPostMethod()) {
                 statusCode = 302;
                 statusMessage = "Found";
 
-                String account = requestBodyMap.get("account");
-                String password = requestBodyMap.get("password");
+                String account = httpRequestBody.getValue("account");
+                String password = httpRequestBody.getValue("password");
 
                 Optional<User> user = InMemoryUserRepository.findByAccount(account);
                 if (user.isPresent()) {
@@ -132,9 +143,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (path.equals("register") && requestHeader.indexOf("POST") != -1) {
-                String account = requestBodyMap.get("account");
-                String password = requestBodyMap.get("password");
-                String email = requestBodyMap.get("email");
+                String account = httpRequestBody.getValue("account");
+                String password = httpRequestBody.getValue("password");
+                String email = httpRequestBody.getValue("email");
 
                 InMemoryUserRepository.save(new User(account, password, email));
                 path = "/index.html";
@@ -189,7 +200,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestUriFromRequest(StringBuilder request) {
+    private String extractRequestUriFromRequest(String request) {
         int startIndex = 0;
         if (request.indexOf("GET") != -1) {
             startIndex = request.indexOf("GET ") + 4;
@@ -204,38 +215,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "";
-    }
-
-    private Map<String, String> parseQueryParams(String input) {
-        Map<String, String> params = new HashMap<>();
-
-        String[] keyValuePairs = input.split("&");
-        for (String pair : keyValuePairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                String key = keyValue[0];
-                String value = keyValue[1];
-                params.put(key, value);
-            }
-        }
-
-        return params;
-    }
-
-    private int getContentLength(String requestHeader) {
-        String[] headerLines = requestHeader.split("\r\n");
-        for (String line : headerLines) {
-            if (line.startsWith("Content-Length:")) {
-                String[] parts = line.split(" ");
-                if (parts.length >= 2) {
-                    try {
-                        return Integer.parseInt(parts[1]);
-                    } catch (NumberFormatException e) {
-                    }
-                }
-            }
-        }
-        return 0;
     }
 
     private HttpCookie getCookie(String requestHeader) {

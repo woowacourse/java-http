@@ -6,6 +6,7 @@ import static org.apache.coyote.header.HttpMethod.POST;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.model.User;
 import org.apache.coyote.header.HttpMethod;
 import org.apache.coyote.util.RequestExtractor;
@@ -61,9 +62,11 @@ public class PostHttp11MethodHandler implements Http11MethodHandler {
 
         if (user.checkPassword(requestBody.get("password"))) {
             log.info("로그인 성공! -> {}", user);
+
             return String.join("\r\n",
                     "HTTP/1.1 302 Found",
-                    "Location: " + "index.html");
+                    "Location: " + "index.html",
+                    "Set-Cookie: " + "JSESSIONID=" + UUID.randomUUID());
         }
         return String.join("\r\n",
                 "HTTP/1.1 302 Found",

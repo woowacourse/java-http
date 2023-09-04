@@ -17,4 +17,8 @@ public enum HttpProtocol {
             .findAny()
             .orElseThrow(() -> new IllegalArgumentException("지원되지 않는 프로토콜입니다."));
     }
+
+    public String getVersion() {
+        return httpVersion;
+    }
 }

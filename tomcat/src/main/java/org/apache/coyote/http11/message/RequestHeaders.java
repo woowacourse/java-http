@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,12 +15,12 @@ public class RequestHeaders {
 
     private final Map<String, String> headersWithValue;
 
-    private RequestHeaders(final Map<String, String> headersWithValue) {
+    public RequestHeaders(final Map<String, String> headersWithValue) {
         this.headersWithValue = headersWithValue;
     }
 
     public static RequestHeaders from(final List<String> headerLines) {
-        final Map<String, String> headersWithValue = new HashMap<>();
+        final Map<String, String> headersWithValue = new LinkedHashMap<>();
         String[] parsedHeaderLine;
 
         for (final String line : headerLines) {
@@ -38,6 +38,10 @@ public class RequestHeaders {
     }
 
     public Map<String, String> getHeadersWithValue() {
-        return new HashMap<>(headersWithValue);
+        return new LinkedHashMap<>(headersWithValue);
+    }
+
+    public void setHeaderWithValue(final String field, final String value) {
+        headersWithValue.put(field, value);
     }
 }

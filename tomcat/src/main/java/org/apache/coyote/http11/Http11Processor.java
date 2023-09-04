@@ -1,25 +1,25 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
+import org.apache.coyote.http11.message.HttpResponse;
+import org.apache.coyote.http11.message.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private final ClassLoader classLoader = getClass().getClassLoader();
 
     private final Socket connection;
 
@@ -42,46 +42,51 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequest.from(reader);
 
-            final String responseBody = createResponseBody(httpRequest);
-            final ContentType responseContentType = ContentType.findResponseContentTypeFromRequest(httpRequest);
+            final HttpResponse httpResponse = createResponse(httpRequest);
+            final String message = httpResponse.convertToMessage();
 
-            final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + responseContentType.getType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(message.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponseBody(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse createResponse(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRequestOf(HttpMethod.GET, "/")) {
-            return "Hello world!";
+            return HttpResponse.ofText(HttpStatus.OK, "Hello world!", httpRequest);
         }
         if (httpRequest.isRequestOf(HttpMethod.GET, "/login")) {
-            final User user = InMemoryUserRepository.findByAccount(httpRequest.getParamOf("account"))
-                .filter(foundUser -> foundUser.checkPassword(httpRequest.getParamOf("password")))
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
-
-            log.info(user.toString());
-            return createStaticFileResponse("/login.html");
+            return HttpResponse.ofFile(HttpStatus.OK, getFilePath("/login.html"), httpRequest);
         }
 
-        return createStaticFileResponse(httpRequest.getPath());
+        if (httpRequest.isRequestOf(HttpMethod.POST, "/login")) {
+            try {
+                login(httpRequest);
+            } catch (IllegalArgumentException e) {
+                return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
+            }
+            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, httpRequest);
+            httpResponse.setHeader("Location", "/index.html");
+            return httpResponse;
+        }
+
+        return HttpResponse.ofFile(HttpStatus.OK, getFilePath(httpRequest.getPath()), httpRequest);
     }
 
-    private String createStaticFileResponse(final String path) throws IOException {
-        URL url = getClass().getClassLoader().getResource("static" + path);
+    private void login(final HttpRequest httpRequest) throws IllegalArgumentException {
+        final User user = InMemoryUserRepository.findByAccount(httpRequest.getBodyOf("account"))
+            .filter(foundUser -> foundUser.checkPassword(httpRequest.getBodyOf("password")))
+            .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
 
+        log.info(user.toString());
+    }
+
+    private URL getFilePath(final String path){
+        URL url = classLoader.getResource("static" + path);
         if (url == null) {
-            url = getClass().getClassLoader().getResource("static/404.html");
+            url = classLoader.getResource("static/404.html");
         }
-
-        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+        return url;
     }
 }

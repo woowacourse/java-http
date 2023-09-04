@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 public enum HttpMethod {
 
-    GET;
+    GET,
+    POST;
 
     public static HttpMethod from(final String requestMethod) {
         return Arrays.stream(values())

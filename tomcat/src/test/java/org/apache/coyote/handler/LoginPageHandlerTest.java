@@ -4,6 +4,7 @@ package org.apache.coyote.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.QueryParameters;
@@ -83,6 +84,7 @@ class LoginPageHandlerTest {
                 HttpRequestBody.EMPTY,
                 QueryParameters.EMPTY
         );
+        request.initSessionManager(new SessionManager());
 
         final Response actual = handler.service(request);
 

@@ -50,7 +50,7 @@ class QueryParametersTest {
     void fromBodyContent_메서드는_유효하지_않은_바디을_전달하면_빈_QueryParmaeter를_반환한다() {
         final String InvalidUrlContent = "{\"user\" : \"gugu\"}";
 
-        final QueryParameters actual = QueryParameters.fromUrlContent(InvalidUrlContent);
+        final QueryParameters actual = QueryParameters.fromBodyContent(InvalidUrlContent);
 
         assertThat(actual.size()).isZero();
     }

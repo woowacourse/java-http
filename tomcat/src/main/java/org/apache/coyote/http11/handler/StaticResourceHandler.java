@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
@@ -36,16 +37,9 @@ public class StaticResourceHandler implements ResourceHandler {
             throws IOException {
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));
-
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
-
-        return new HttpResponse(
-                "HTTP/1.1",
-                statusCode,
-                headers,
-                body
-        );
+        final HttpResponse httpResponse = new HttpResponse(statusCode, body);
+        httpResponse.addHeader(CONTENT_TYPE, contentType);
+        httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        return httpResponse;
     }
 }

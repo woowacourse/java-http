@@ -1,8 +1,9 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
+
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -23,30 +24,28 @@ public class LoginPageController implements Controller {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        final String cookieHeader = httpRequest.getHeaders().get("Cookie");
-        final Cookie cookie = Cookie.from(cookieHeader);
-        final String sessionId = cookie.getAttribute("JSESSIONID");
+        final String sessionId = extractSessionId(httpRequest);
         if (sessionId == null) {
             return redirectPage("login");
         }
         final Session session = SessionManager.findSession(sessionId);
-        if(session == null) {
+        if (session == null) {
             return redirectPage("login");
         }
         return redirectPage("index");
     }
 
+    private String extractSessionId(final HttpRequest httpRequest) {
+        final String cookieHeader = httpRequest.getHeaders().get(Cookie.getNAME());
+        final Cookie cookie = Cookie.from(cookieHeader);
+        return cookie.getAttribute(Session.getName());
+    }
+
     private HttpResponse redirectPage(final String viewName) throws IOException {
         final String body = ViewResolver.findView(viewName);
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getContentType());
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
-
-        return new HttpResponse(
-                "HTTP/1.1",
-                StatusCode.OK,
-                headers,
-                body
-        );
+        final HttpResponse httpResponse = new HttpResponse(StatusCode.OK, body);
+        httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
+        httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        return httpResponse;
     }
 }

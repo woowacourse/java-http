@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public class Session {
 
+    private static String NAME = "JSESSIONID";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -15,6 +17,10 @@ public class Session {
 
     public static Session create() {
         return new Session(UUID.randomUUID().toString());
+    }
+
+    public static String getName() {
+        return NAME;
     }
 
     public String getId() {

@@ -44,21 +44,21 @@ public class Http11Processor implements Runnable, Processor {
             if(request == null){
                 return;
             }
-            final Controller controller = ControllerMapper.findController(request);
-            if (controller != null) {
-                final HttpResponse response = controller.handle(request);
-                HttpResponseWriter.write(outputStream, response);
-                outputStream.flush();
-                return;
-            }
-
-            final ResourceHandler resourceHandler = ResourceHandlerMapper.findHandler(request);
-            final HttpResponse response = resourceHandler.handle(request);
+            final HttpResponse response = handleRequest(request);
 
             HttpResponseWriter.write(outputStream, response);
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse handleRequest(final HttpRequest request) throws IOException {
+        final Controller controller = ControllerMapper.findController(request);
+        if (controller != null) {
+            return controller.handle(request);
+        }
+        final ResourceHandler resourceHandler = ResourceHandlerMapper.findHandler(request);
+        return resourceHandler.handle(request);
     }
 }

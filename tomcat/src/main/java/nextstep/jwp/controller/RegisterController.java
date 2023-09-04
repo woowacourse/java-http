@@ -1,10 +1,11 @@
 package nextstep.jwp.controller;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
+
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.QueryStringUtil;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,26 +25,17 @@ public class RegisterController implements Controller {
         User user = extractUser(httpRequest.getBody());
         InMemoryUserRepository.save(user);
 
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", "/index.html");
-        return new HttpResponse(
-                "HTTP/1.1",
-                StatusCode.FOUND,
-                headers
-        );
+        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+        httpResponse.addHeader(LOCATION, "/index.html");
+        return httpResponse;
     }
 
     private User extractUser(final String body) {
-        Map<String, String> userData = new HashMap<>();
-        final String[] split = body.split("&");
-        for (String each : split) {
-            final String[] keyAndValue = each.split("=");
-            userData.put(keyAndValue[0], keyAndValue[1]);
-        }
+        Map<String, String> userData = QueryStringUtil.parse(body);
         return new User(
                 userData.get("account"),
                 userData.get("password"),
                 userData.get("email")
-                );
+        );
     }
 }

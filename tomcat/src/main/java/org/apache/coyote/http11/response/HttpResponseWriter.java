@@ -30,10 +30,10 @@ public class HttpResponseWriter {
     }
 
     private static String extractHeaders(final HttpResponse httpResponse) {
-        final Map<String, String> headers = httpResponse.getHeaders();
+        final Map<HttpResponseHeader, String> headers = httpResponse.getHeaders();
         final List<String> headerLines = new ArrayList<>();
-        for (Entry<String, String> entry : headers.entrySet()) {
-            final String headerLine = entry.getKey()
+        for (Entry<HttpResponseHeader, String> entry : headers.entrySet()) {
+            final String headerLine = entry.getKey().getHeader()
                     + ": "
                     + entry.getValue()
                     + " ";

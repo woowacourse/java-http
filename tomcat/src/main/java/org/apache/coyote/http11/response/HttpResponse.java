@@ -1,27 +1,33 @@
 package org.apache.coyote.http11.response;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
+    private static final String HTTP_VERSION = "HTTP/1.1";
+
     private final String httpVersion;
     private final StatusCode statusCode;
-    private final Map<String, String> headers;
+    private final Map<HttpResponseHeader, String> headers;
     private final String body;
 
-    public HttpResponse(final String httpVersion, final StatusCode statusCode, final Map<String, String> headers,
-                        final String body) {
-        this.httpVersion = httpVersion;
+    public HttpResponse(final StatusCode statusCode) {
+        this.httpVersion = HTTP_VERSION;
         this.statusCode = statusCode;
-        this.headers = headers;
+        this.headers = new LinkedHashMap<>();
+        this.body = "";
+    }
+
+    public HttpResponse(final StatusCode statusCode, final String body) {
+        this.httpVersion = HTTP_VERSION;
+        this.statusCode = statusCode;
+        this.headers = new LinkedHashMap<>();
         this.body = body;
     }
 
-    public HttpResponse(final String httpVersion, final StatusCode statusCode, final Map<String, String> headers) {
-        this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
-        this.headers = headers;
-        this.body = "";
+    public void addHeader(final HttpResponseHeader header, final String value) {
+        headers.put(header, value);
     }
 
     public String getHttpVersion() {
@@ -32,7 +38,7 @@ public class HttpResponse {
         return statusCode;
     }
 
-    public Map<String, String> getHeaders() {
+    public Map<HttpResponseHeader, String> getHeaders() {
         return headers;
     }
 

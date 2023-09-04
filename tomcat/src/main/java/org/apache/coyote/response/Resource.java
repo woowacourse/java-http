@@ -2,27 +2,22 @@ package org.apache.coyote.response;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.request.RequestUrl;
 
 public class Resource {
 
-    private static final String NOT_FOUND_RESOURCE_PATH = "/static/404.html";
-
-    private final URL url;
+    private final RequestUrl url;
     private final List<ResourceType> resourceTypes;
-    private final boolean isExists;
 
-    public static Resource of(URL url, List<ResourceType> resourceType) {
-        if (url == null) {
-            return new Resource(Resource.class.getResource(NOT_FOUND_RESOURCE_PATH), resourceType, false);
-        }
-        return new Resource(url, resourceType, true);
+    public static Resource of(RequestUrl url, List<ResourceType> resourceType) {
+        return new Resource(url, resourceType);
     }
 
-    private Resource(URL url, List<ResourceType> resourceTypes, boolean isExists) {
+    private Resource(RequestUrl url, List<ResourceType> resourceTypes) {
         this.url = url;
         this.resourceTypes = resourceTypes;
-        this.isExists = isExists;
     }
 
     public String getResourceTypes() {
@@ -31,11 +26,15 @@ public class Resource {
                 .collect(Collectors.joining(","));
     }
 
-    public URL getUrl() {
-        return url;
+    public URL getPath() {
+        return url.getPath();
+    }
+
+    public Map<String, String> getQueryString() {
+        return url.getQueryString();
     }
 
     public boolean isExists() {
-        return isExists;
+        return !url.isNullPath();
     }
 }

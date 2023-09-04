@@ -1,5 +1,6 @@
 package org.apache.coyote.request;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -22,7 +23,7 @@ class RequestParserTest {
         Resource resource = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getUrl().getFile()).contains("/index.html"),
+                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
                 () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
                 () -> assertThat(resource.isExists()).isTrue()
         );
@@ -37,16 +38,15 @@ class RequestParserTest {
         Resource resource = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getUrl().getFile()).contains("/index.html"),
+                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
                 () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
                 () -> assertThat(resource.isExists()).isTrue()
         );
     }
 
-
     @Test
     @DisplayName("주어진 url의 파일이 없다면 url이 null이고 isExists가 false인 resource 객체가 반환한다.")
-    void getResourceUrl_noFile() throws IOException {
+    void getResource_noFile() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(
                 "GET /trestset/qweqsdae/asdawdqd/qwdqweqw HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
@@ -54,9 +54,27 @@ class RequestParserTest {
         Resource resource = requestParser.getResource();
 
         assertAll(
-                () -> assertThat(resource.getUrl().getFile()).contains("/404.html"),
+                () -> assertThat(resource.getPath().getFile()).contains("/404.html"),
                 () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
                 () -> assertThat(resource.isExists()).isFalse()
+        );
+    }
+
+    @Test
+    @DisplayName("주어진 url의 쿼리스트링을 파싱해 쿼리스트링을 key와 value로 가지고 있는 resource 객체를 생성할 수 있다.")
+    void getResource_queryString() throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(
+                "GET /index.html?account=123&password=password1234! HTTP/1.1".getBytes());
+        RequestParser requestParser = new RequestParser(inputStream);
+
+        Resource resource = requestParser.getResource();
+
+        assertAll(
+                () -> assertThat(resource.getPath().getFile()).contains("/index.html"),
+                () -> assertThat(resource.getResourceTypes()).contains(ResourceType.HTML.getResourceType()),
+                () -> assertThat(resource.getQueryString().get("account")).isEqualTo("123"),
+                () -> assertThat(resource.getQueryString().get("password")).isEqualTo("password1234!"),
+                () -> assertThat(resource.isExists()).isTrue()
         );
     }
 }

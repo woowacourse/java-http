@@ -33,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PAGE_URI = "/login.html";
     private static final String UNAUTHORIZED_PAGE_URI = "/401.html";
     private static final String INDEX_PAGE_URI = "/index.html";
+    private static final int NO_QUERY_STRING = -1;
 
     private final Socket connection;
 
@@ -103,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
             return findMainPageResource(requestURI);
         }
 
-        if (requestURI.equals("/login")) {
+        if (requestURI.startsWith("/login")) {
             return login(httpRequestStartLine, httpRequestHeader, httpRequestBody);
         }
 
@@ -137,14 +138,15 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseEntity login(HttpRequestStartLine httpRequestStartLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) throws IOException {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
         String requestURI = httpRequestStartLine.getRequestURI();
-        if (httpMethod == HttpMethod.GET) {
+        Map<String, String> queryStrings = parseQueryString(requestURI);
+
+        if (httpMethod == HttpMethod.GET && queryStrings.isEmpty()) {
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
                     .requestURI(requestURI)
                     .location(LOGIN_PAGE_URI)
                     .build();
         }
-        Map<String, String> queryStrings = parseQueryString(requestURI);
         User account = findAccount(queryStrings);
 
         String password = queryStrings.get("password");
@@ -159,6 +161,7 @@ public class Http11Processor implements Runnable, Processor {
                     .build();
         }
 
+        log.info("account {} 로그인 성공", account.getAccount());
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
@@ -180,7 +183,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseQueryString(String requestURI) {
         int questionIndex = requestURI.indexOf("?");
-        if (questionIndex == -1) {
+        if (questionIndex == NO_QUERY_STRING) {
             return Map.of();
         }
 

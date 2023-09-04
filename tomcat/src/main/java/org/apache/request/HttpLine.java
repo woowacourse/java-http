@@ -1,8 +1,9 @@
-package org.apache.common;
+package org.apache.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import org.apache.common.HttpMethod;
 
 public class HttpLine {
 
@@ -47,7 +48,7 @@ public class HttpLine {
         try {
             return url.toURI();
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

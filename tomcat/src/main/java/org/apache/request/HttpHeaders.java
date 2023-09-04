@@ -1,5 +1,6 @@
-package org.apache.common;
+package org.apache.request;
 
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
@@ -18,11 +19,12 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders of(List<String> lines) {
-        Map<String, String> headers = lines.stream()
+        return lines.stream()
                 .map(line -> line.split(HEADER_SPLIT_DELIMITER))
-                .collect(toMap(line -> line[HEADER_KEY_INDEX], line -> line[HEADER_VALUE_INDEX]));
-
-        return new HttpHeaders(headers);
+                .collect(collectingAndThen(
+                        toMap(line -> line[HEADER_KEY_INDEX], line -> line[HEADER_VALUE_INDEX]),
+                        HttpHeaders::new)
+                );
     }
 
     public boolean containsHeader(String header) {

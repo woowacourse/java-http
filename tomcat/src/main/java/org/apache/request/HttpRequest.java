@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.common.HttpBody;
-import org.apache.common.HttpHeaders;
-import org.apache.common.HttpLine;
+import org.apache.common.Cookie;
 import org.apache.common.HttpMethod;
 
 public class HttpRequest {
@@ -48,7 +46,7 @@ public class HttpRequest {
 
     private static String extractBody(BufferedReader bufferedReader, HttpHeaders httpHeaders) throws IOException {
         if (!httpHeaders.containsHeader("Content-Length")) {
-            return new String("");
+            return "";
         }
         int contentLength = Integer.parseInt(httpHeaders.getHeaderValue("Content-Length"));
         char[] buffer = new char[contentLength];
@@ -70,5 +68,20 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return httpLine.getHttpMethod();
+    }
+
+    public Cookie getCookie() {
+        if (!httpHeaders.containsHeader("Cookie")) {
+            return Cookie.from("");
+        }
+        return Cookie.from(httpHeaders.getHeaderValue("Cookie"));
+    }
+
+    public boolean isPost() {
+        return httpLine.getHttpMethod().equals(HttpMethod.POST);
+    }
+
+    public boolean isGet() {
+        return httpLine.getHttpMethod().equals(HttpMethod.GET);
     }
 }

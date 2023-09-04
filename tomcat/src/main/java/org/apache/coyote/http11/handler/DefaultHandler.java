@@ -15,8 +15,7 @@ public class DefaultHandler implements RequestHandler {
     public HttpResponse handle(final HttpRequest httpRequest) {
         var responseBody = "Hello world!";
 
-        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
-                httpRequest.getStartLine().getHttpVersion(), OK);
+        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getStartLine().getHttpVersion(), OK);
 
         HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
         httpResponseHeader.add(CONTENT_TYPE, "text/html;charset=utf-8");

@@ -13,6 +13,11 @@ public class HandlerAdapter {
         if (requestUri.equals("/")) {
             return new DefaultHandler();
         }
+
+        if (requestUri.contains("/register")) {
+            return new RegisterHandler();
+        }
+
         return new ResourceHandler();
     }
 }

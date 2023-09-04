@@ -20,10 +20,6 @@ public class ResourceHandler implements RequestHandler {
         String uri = httpRequest.getStartLine().getHttpRequestUri().getUri();
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
 
-        if (resource == null) {
-            var responseBody = "";
-        }
-
         File file = new File(resource.getFile());
         String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
 

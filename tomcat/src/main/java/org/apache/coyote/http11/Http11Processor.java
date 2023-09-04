@@ -12,6 +12,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HandlerAdapter;
 import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private RequestHandler findHandler(final HttpRequest httpRequest) {
         HandlerAdapter handlerAdapter = new HandlerAdapter();
-        RequestHandler requestHandler = handlerAdapter.find(httpRequest);
-        return requestHandler;
+        return handlerAdapter.find(httpRequest);
     }
 
     private HttpRequest createHttpRequest(final InputStream inputStream) throws IOException {
@@ -64,7 +66,21 @@ public class Http11Processor implements Runnable, Processor {
         while (!(line = bufferedReader.readLine()).equals("")) {
             headers.add(line);
         }
-        HttpRequest httpRequest = HttpRequest.of(startLine, headers);
-        return httpRequest;
+
+        HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
+        HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(headers);
+
+        if (!httpRequestHeader.contains("Content-Length")) {
+            return HttpRequest.of(requestStartLine, httpRequestHeader);
+        }
+
+        int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        HttpRequestBody httpRequestBody = new HttpRequestBody(requestBody);
+
+        return HttpRequest.of(requestStartLine, httpRequestHeader, httpRequestBody);
     }
 }

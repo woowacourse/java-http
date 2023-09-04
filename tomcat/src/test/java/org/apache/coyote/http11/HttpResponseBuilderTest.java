@@ -49,6 +49,19 @@ class HttpResponseBuilderTest {
     }
 
     @Test
+    void buildStaticFileNotFoundResponse() throws IOException {
+        //when
+        String response = httpResponseBuilder.buildStaticFileNotFoundResponse(httpRequestParser);
+
+        //then
+        assertAll(
+                () -> assertTrue(response.contains("HTTP/1.1 404 Not Found")),
+                () -> assertTrue(response.contains("Content-Type: text/html;charset=utf-8")),
+                () -> assertTrue(response.contains("Content-Length: 2426"))
+        );
+    }
+
+    @Test
     void buildCustomResponse() {
         //when
         String response = httpResponseBuilder.buildCustomResponse(httpRequestParser, "test");

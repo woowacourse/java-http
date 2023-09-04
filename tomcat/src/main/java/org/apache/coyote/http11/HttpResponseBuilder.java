@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +51,21 @@ public class HttpResponseBuilder {
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 "Location: " + redirectPath + SPACE + LINE_FEED +
+                content;
+    }
+
+    public String buildStaticFileNotFoundResponse(HttpRequestParser httpRequestParser) throws IOException {
+        String status = HttpStatus.NOT_FOUND.getHttpStatusCode() + SPACE + HttpStatus.NOT_FOUND.getHttpStatusMessage();
+        String protocol = httpRequestParser.findProtocol();
+        String contentType = joinContentType(ContentType.HTML.getType());
+        String content = getContent("/404.html");
+        String contentLength = joinContentLength(content);
+
+        return protocol + SPACE + status + SPACE + LINE_FEED +
+                findCookie(httpRequestParser) +
+                contentType + SPACE + LINE_FEED +
+                contentLength + SPACE + LINE_FEED +
+                LINE_FEED +
                 content;
     }
 

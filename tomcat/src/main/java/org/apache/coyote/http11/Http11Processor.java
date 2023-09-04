@@ -83,7 +83,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private void sendResponse(final BufferedWriter bufferedWriter, final HttpResponse response) {
         try {
-            System.out.println(response.getRawResponse());
             bufferedWriter.write(response.getRawResponse());
             bufferedWriter.flush();
         } catch (IOException ioError) {

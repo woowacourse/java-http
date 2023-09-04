@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 
 import java.io.BufferedReader;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.coyote.http11.HttpHeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeaderType.COOKIE;
 
 public class HttpRequestParser {
 
@@ -40,12 +42,15 @@ public class HttpRequestParser {
 
     private HttpHeaders parseRequestHeader() throws IOException {
         // TODO: Change to MultiValueMap
-        final HttpHeaders httpHeaders = new HttpHeaders();
+        final Map<String, String> headers = new HashMap<>();
         String line;
         while (!"".equals(line = reader.readLine())) {
             String[] value = line.split(": ");
-            httpHeaders.setHeaderValue(value[0], value[1]);
+            headers.put(value[0], value[1]);
         }
+        final HttpHeaders httpHeaders = HttpHeaders.of(headers);
+        final HttpCookie httpCookie = HttpCookie.of(headers.get(COOKIE.getName()));
+        httpHeaders.setCookie(httpCookie);
         return httpHeaders;
     }
 

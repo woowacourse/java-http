@@ -32,9 +32,8 @@ public class HttpRequest {
         return requestLine.getVersion();
     }
 
-    public Map<String, String> getHeaders() {
-        // TODO: refactoring
-        return headers.getHeaders();
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     public Map<String, String> getBody() {

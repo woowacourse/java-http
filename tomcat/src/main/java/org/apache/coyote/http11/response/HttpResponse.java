@@ -20,7 +20,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse init() {
-        return new HttpResponse(NOT_FOUND, new HttpHeaders(), "");
+        return new HttpResponse(NOT_FOUND, HttpHeaders.empty(), "");
     }
 
     public void addHeader(final String key, final String value) {

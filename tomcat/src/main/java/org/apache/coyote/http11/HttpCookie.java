@@ -15,6 +15,10 @@ public class HttpCookie {
         return new HttpCookie(parse(cookies));
     }
 
+    public static HttpCookie empty() {
+        return new HttpCookie(new HashMap<>());
+    }
+
     private static Map<String, String> parse(final String cookies) {
         if (cookies == null) {
             return new HashMap<>();

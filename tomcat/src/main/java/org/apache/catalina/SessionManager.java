@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.Session;
 
 public class SessionManager implements Manager {
 

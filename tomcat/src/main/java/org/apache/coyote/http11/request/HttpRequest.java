@@ -1,20 +1,22 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
+
+import org.apache.coyote.http11.HttpHeaders;
 
 import java.util.Map;
 
 public class HttpRequest {
 
-    private final RequestLine requestLine;
+    private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
     private final Map<String, String> body;
 
-    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final Map<String, String> body) {
+    private HttpRequest(final HttpRequestLine requestLine, final HttpHeaders headers, final Map<String, String> body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest from(final RequestLine requestLine, final HttpHeaders header, final Map<String, String> body) {
+    public static HttpRequest from(final HttpRequestLine requestLine, final HttpHeaders header, final Map<String, String> body) {
         return new HttpRequest(requestLine, header, body);
     }
 

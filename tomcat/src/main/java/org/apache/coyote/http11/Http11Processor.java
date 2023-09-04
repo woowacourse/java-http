@@ -2,10 +2,13 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.Session;
+import org.apache.catalina.Session;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.coyote.http11.HttpHeaderType.*;
-import static org.apache.coyote.http11.HttpStatusCode.*;
+import static org.apache.coyote.http11.response.HttpStatusCode.*;
 
 public class Http11Processor implements Runnable, Processor {
 

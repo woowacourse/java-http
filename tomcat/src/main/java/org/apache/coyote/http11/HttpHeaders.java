@@ -65,12 +65,38 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
+    public boolean containsHeader(final HttpHeaderName headerName) {
+        return headers.containsKey(headerName);
+    }
+
     public boolean containsHeaderNameAndValue(final HttpHeaderName headerName, final String headerValue) {
-        return headers.containsKey(headerName) && headers.get(headerName).contains(headerValue);
+        return containsHeader(headerName) && getHeaderValue(headerName).contains(headerValue);
     }
 
     public void addHeader(final HttpHeaderName headerName, final String value) {
         headers.put(headerName, value);
+    }
+
+    public void addHeader(final HttpHeaders httpHeaders) {
+        headers.putAll(httpHeaders.headers);
+    }
+
+    public int getContentLength() {
+        if (headers.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
+            return Integer.parseInt(headers.get(HttpHeaderName.CONTENT_LENGTH));
+        }
+        return 0;
+    }
+
+    public HttpCookie getCookie() {
+        if (headers.containsKey(HttpHeaderName.COOKIE)) {
+            return HttpCookie.from(headers.get(HttpHeaderName.COOKIE));
+        }
+        throw new IllegalStateException("쿠키가 존재하지 않습니다.");
+    }
+
+    public String getHeaderValue(final HttpHeaderName headerName) {
+        return headers.get(headerName);
     }
 
     @Override
@@ -85,12 +111,5 @@ public class HttpHeaders {
         }
 
         return stringBuilder.toString();
-    }
-
-    public int getContentLength() {
-        if (headers.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
-            return Integer.parseInt(headers.get(HttpHeaderName.CONTENT_LENGTH));
-        }
-        return 0;
     }
 }

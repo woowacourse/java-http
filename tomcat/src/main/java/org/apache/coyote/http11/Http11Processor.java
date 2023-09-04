@@ -36,7 +36,8 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest httpRequest = parseRequest(bufferedReader);
-            final HttpResponse httpResponse = new DispatcherServlet().service(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.createBasicResponse();
+            new DispatcherServlet().service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();

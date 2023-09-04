@@ -1,10 +1,11 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.StaticPages.INDEX_PAGE;
+
 public class HttpRequestURI {
 
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String INDEX_PATH = "/";
-    private static final String INDEX_HTML_FILE_PATH = "index.html";
 
     private final String path;
     private final QueryStrings queryStrings;
@@ -37,7 +38,7 @@ public class HttpRequestURI {
 
     public String getPath() {
         if (INDEX_PATH.equals(path)) {
-            return INDEX_HTML_FILE_PATH;
+            return INDEX_PAGE.getFileName();
         }
         return path;
     }

@@ -6,8 +6,7 @@ import java.util.NoSuchElementException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestURI;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponseFactory;
+import org.apache.coyote.http11.ResponseEntityFactory;
 import org.apache.coyote.util.FileFinder;
 
 public class ResourceController implements Controller {
@@ -18,8 +17,8 @@ public class ResourceController implements Controller {
     );
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) throws IOException {
-        return HttpResponseFactory.createStaticResourceHttpResponse(httpRequest);
+    public ResponseEntity service(final HttpRequest httpRequest) throws IOException {
+        return ResponseEntityFactory.createStaticResourceHttpResponse(httpRequest);
     }
 
     @Override

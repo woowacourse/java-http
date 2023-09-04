@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpCookie {
 
@@ -27,12 +26,18 @@ public class HttpCookie {
         return new HttpCookie(cookieValues);
     }
 
-    public static HttpCookie createJSessionID() {
-        final UUID uuid = UUID.randomUUID();
+    public static HttpCookie fromJSessionId(final String sessionId) {
         final Map<String, String> values = new HashMap<>();
-        values.put(JSESSIONID, uuid.toString());
+        values.put(JSESSIONID, sessionId);
 
         return new HttpCookie(values);
+    }
+
+    public String getJSessionID() {
+        if (values.containsKey(JSESSIONID)) {
+            return values.get(JSESSIONID);
+        }
+        throw new IllegalStateException("JSESSIONID가 존재하지 않습니다.");
     }
 
     public Map<String, String> getValues() {

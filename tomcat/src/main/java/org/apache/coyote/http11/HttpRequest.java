@@ -84,6 +84,11 @@ public class HttpRequest {
         return headers.containsHeaderNameAndValue(HttpHeaderName.COOKIE, JSESSION_ID);
     }
 
+    public HttpCookie getCookie() {
+        final String rawCookie = headers.getHeaderValue(HttpHeaderName.COOKIE);
+        return HttpCookie.from(rawCookie);
+    }
+
     public String getPath() {
         return requestURI.getPath();
     }

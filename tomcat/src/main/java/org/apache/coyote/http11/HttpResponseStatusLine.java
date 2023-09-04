@@ -4,52 +4,45 @@ public class HttpResponseStatusLine {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
 
-    final String httpVersion;
-    final int statusCode;
-    final String statusText;
+    private final String httpVersion;
+    private final HttpStatusCode httpStatus;
 
-    public HttpResponseStatusLine(final String httpVersion, final int statusCode, final String statusText) {
+    public HttpResponseStatusLine(final String httpVersion, final HttpStatusCode httpStatus) {
         this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
-        this.statusText = statusText;
+        this.httpStatus = httpStatus;
     }
 
-    public HttpResponseStatusLine(final int statusCode, final String statusText) {
+    public HttpResponseStatusLine(final HttpStatusCode httpStatus) {
         this.httpVersion = HTTP_VERSION;
-        this.statusCode = statusCode;
-        this.statusText = statusText;
+        this.httpStatus = httpStatus;
     }
 
     public static HttpResponseStatusLine OK() {
-        return new HttpResponseStatusLine(200, "OK");
+        return new HttpResponseStatusLine(HttpStatusCode.OK);
     }
 
     public static HttpResponseStatusLine UNAUTHORIZED() {
-        return new HttpResponseStatusLine(401, "Unauthorized");
+        return new HttpResponseStatusLine(HttpStatusCode.UNAUTHORIZED);
     }
 
     public static HttpResponseStatusLine FOUND() {
-        return new HttpResponseStatusLine(302, "Found");
+        return new HttpResponseStatusLine(HttpStatusCode.FOUND);
     }
 
     public static HttpResponseStatusLine BAD_REQUEST() {
-        return new HttpResponseStatusLine(400, "Bad Request");
+        return new HttpResponseStatusLine(HttpStatusCode.BAD_REQUEST);
     }
 
     public String getHttpVersion() {
         return httpVersion;
     }
 
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public String getStatusText() {
-        return statusText;
+    public HttpStatusCode getHttpStatus() {
+        return httpStatus;
     }
 
     @Override
     public String toString() {
-        return httpVersion + " " + statusCode + " " + statusText;
+        return httpVersion + " " + httpStatus.getStatusCode() + " " + httpStatus.getStatusText();
     }
 }

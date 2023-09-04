@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.controller.ResponseEntity;
+
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
-
-    private final HttpResponseStatusLine responseLine;
+    private static final String EMPTY_STRING = "";
     private final HttpHeaders headers;
-    private final String body;
+    private HttpResponseStatusLine responseLine;
+    private String body;
 
     public HttpResponse(final HttpResponseStatusLine responseLine, final HttpHeaders headers, final String body) {
         this.responseLine = responseLine;
@@ -14,8 +16,25 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse(final String contentType, final String body) {
-        this(HttpResponseStatusLine.OK(), HttpHeaders.makeHttpResponseHeaders(contentType, body), body);
+    public HttpResponse(final HttpResponseStatusLine responseLine, final String body) {
+        this(responseLine, new HttpHeaders(), body);
+    }
+
+    public static HttpResponse createBasicResponse() {
+        return new HttpResponse(HttpResponseStatusLine.OK(), EMPTY_STRING);
+    }
+
+    public void addAttributes(final ResponseEntity responseBody) {
+        headers.addHeader(responseBody.getHeaders());
+        final int bodyLength = responseBody.getBody().getBytes().length;
+        headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(bodyLength));
+        responseLine = responseBody.getResponseLine();
+        body = responseBody.getBody();
+    }
+
+    public void sendRedirect(final StaticPages staticPages) {
+        headers.addHeader(HttpHeaderName.LOCATION, staticPages.getFileName());
+        responseLine = HttpResponseStatusLine.FOUND();
     }
 
     public HttpResponseStatusLine getResponseLine() {

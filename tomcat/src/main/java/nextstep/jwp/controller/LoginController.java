@@ -1,31 +1,40 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.StaticPages.INDEX_PAGE;
+import static org.apache.coyote.http11.StaticPages.UNAUTHORIZED_PAGE;
+
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpResponseFactory;
 import org.apache.coyote.http11.HttpResponseStatusLine;
+import org.apache.coyote.http11.ResponseEntityFactory;
+import org.apache.coyote.http11.Session;
 
 public class LoginController extends RestController {
 
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String SUPPORTED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     public LoginController() {
         super("/login");
     }
 
+    private static Session createSession(final User user) {
+        final Session session = new Session();
+        SessionManager.getInstance().add(session);
+        session.setAttribute("user", user);
+        return session;
+    }
+
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public ResponseEntity service(final HttpRequest httpRequest) {
         return login(httpRequest);
     }
 
-    private HttpResponse login(final HttpRequest httpRequest) {
+    private ResponseEntity login(final HttpRequest httpRequest) {
         try {
             final Map<String, String> body = httpRequest.getBody();
             final String account = body.get("account");
@@ -34,9 +43,9 @@ public class LoginController extends RestController {
             final User user = findUser(account);
             validatePassword(user, password);
 
-            return makeSuccessResponse(httpRequest);
+            return makeSuccessResponse(user);
         } catch (IllegalArgumentException e) {
-            return HttpResponseFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), UNAUTHORIZED_PAGE);
+            return ResponseEntityFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), UNAUTHORIZED_PAGE);
         }
     }
 
@@ -51,13 +60,11 @@ public class LoginController extends RestController {
         }
     }
 
-    private HttpResponse makeSuccessResponse(final HttpRequest httpRequest) {
-        if (!httpRequest.containsCookieAndJSessionID()) {
-            final HttpCookie httpCookie = HttpCookie.createJSessionID();
-            return HttpResponseFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), INDEX_PAGE,
-                httpCookie);
-        }
-        return HttpResponseFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), INDEX_PAGE);
+    private ResponseEntity makeSuccessResponse(final User user) {
+        final Session session = createSession(user);
+        final HttpCookie httpCookie = HttpCookie.fromJSessionId(session.getId());
+        return ResponseEntityFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), INDEX_PAGE,
+            httpCookie);
     }
 
     @Override

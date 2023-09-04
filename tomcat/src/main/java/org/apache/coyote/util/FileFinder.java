@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.HttpResponseFactory;
+import org.apache.coyote.http11.ResponseEntityFactory;
 
 public class FileFinder {
 
     private static final int MAX_DEPTH = 3;
     private static final String PATH_DELIMITER = "/";
-    private static final String RESOURCE_PATH = HttpResponseFactory.class.getClassLoader().getResource("static")
+    private static final String RESOURCE_PATH = ResponseEntityFactory.class.getClassLoader().getResource("static")
         .getPath();
 
     public static String readFile(final String fileName) throws IOException {

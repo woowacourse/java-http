@@ -2,6 +2,7 @@ package org.apache.coyote.handler.mapping;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class LoginPageMapping implements HandlerMapping {
+public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LoginPageMapping.class);
 
@@ -26,6 +27,15 @@ public class LoginPageMapping implements HandlerMapping {
 
     @Override
     public String handle(final String requestUri, final Map<String, String> headers, final String requestBody) throws IOException {
+        if (headers.containsKey("Cookie")) {
+            final HttpCookie cookies = HttpCookie.from(headers.get("Cookie"));
+            if (isAlreadyLogined(cookies.get("JSESSIONID"))) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /index.html ");
+            }
+        }
+
         final String[] parsedRequestUri = requestUri.split("\\?");
         if (requestUri.contains("?")) {
             final String uri = parsedRequestUri[0];

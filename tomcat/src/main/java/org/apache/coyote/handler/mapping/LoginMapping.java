@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class LoginMapping implements HandlerMapping {
+public class LoginMapping extends LoginFilter implements HandlerMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LoginMapping.class);
 
@@ -30,8 +30,9 @@ public class LoginMapping implements HandlerMapping {
         final String account = bodyParams.get("account");
         final String password = bodyParams.get("password");
 
+        User user = null;
         try {
-            final User user = InMemoryUserRepository.findByAccount(account)
+            user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
 
             if (!user.checkPassword(password)) {
@@ -45,9 +46,12 @@ public class LoginMapping implements HandlerMapping {
                     "Location: /401.html ");
         }
 
+        final UUID uuid = UUID.randomUUID();
+        setSession(uuid.toString(), Map.of("account", user.getAccount()));
+
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
-                "Set-Cookie: JSESSIONID=" + UUID.randomUUID() + " ");
+                "Set-Cookie: JSESSIONID=" + uuid + " ");
     }
 }

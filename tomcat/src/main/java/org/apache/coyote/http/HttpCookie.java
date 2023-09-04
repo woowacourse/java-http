@@ -19,4 +19,8 @@ public class HttpCookie {
 
         return new HttpCookie(parseHttpCookies);
     }
+
+    public String get(final String key) {
+        return parsedHttpCookies.get(key);
+    }
 }

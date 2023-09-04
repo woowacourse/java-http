@@ -11,6 +11,12 @@ public class HttpRequest {
     private static final String HEADER_BODY_DELIMITER = "";
     private static final String PATH_QUERY_STRING_DELIMITER = "\\?";
     private static final String INDEX_HTML = "/index.html";
+    private static final int URI_INDEX = 0;
+    private static final int METHOD_INDEX = 0;
+    private static final int PATH_AND_PARAMETER_INDEX = 1;
+    private static final int PATH_INDEX = 0;
+    private static final int QUERY_PARAM_INDEX = 1;
+
 
     private final HttpMethod method;
     private final String path;
@@ -37,9 +43,9 @@ public class HttpRequest {
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             request.add(line);
         }
-        request.add(HEADER_BODY_DELIMITER);
-        final HttpHeaders header = HttpHeaders.createBasicRequestHeadersFrom(request);
+        final var header = HttpHeaders.createBasicRequestHeadersFrom(request);
 
+        request.add(HEADER_BODY_DELIMITER);
         if (header.getContentLength() > 0) {
             var bodyChars = new char[header.getContentLength()];
             reader.read(bodyChars, 0, bodyChars.length);
@@ -47,14 +53,14 @@ public class HttpRequest {
             properties = JsonProperties.from(body.trim(), header);
         }
 
-        final String[] uri = request.get(0).split(" ");
-        final var method = HttpMethod.of(uri[0]);
-        final var fullPath = uri[1];
+        final String[] uri = request.get(URI_INDEX).split(" ");
+        final var method = HttpMethod.of(uri[METHOD_INDEX]);
+        final var fullPath = uri[PATH_AND_PARAMETER_INDEX];
 
         if (fullPath.contains("?")) {
             final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
-            final var path = pathAndQueryParams[0].trim();
-            final var queryStrings = new QueryStrings(pathAndQueryParams[1].trim());
+            final var path = pathAndQueryParams[PATH_INDEX].trim();
+            final var queryStrings = new QueryStrings(pathAndQueryParams[QUERY_PARAM_INDEX].trim());
             return new HttpRequest(method, path, header, queryStrings, body, properties);
         }
 

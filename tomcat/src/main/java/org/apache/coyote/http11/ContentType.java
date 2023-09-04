@@ -5,6 +5,7 @@ public enum ContentType {
     CSS("text/css"),
     HTML("text/html"),
     ALL("*/*"),
+    URL_ENCODED("application/x-www-form-urlencoded"),
     ;
 
     private final String type;

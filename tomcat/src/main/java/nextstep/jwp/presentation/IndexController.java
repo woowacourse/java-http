@@ -12,7 +12,7 @@ public class IndexController implements Controller {
     @Override
     public Response service(RequestReader requestReader) throws IOException {
         return new Response(requestReader, OK)
-                .addBaseHeaders()
-                .createResponseBodyByFile(requestReader.getRequestUrl());
+                .addBaseHeader()
+                .createBodyByFile(requestReader.getRequestUrl());
     }
 }

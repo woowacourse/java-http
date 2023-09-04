@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class RequestUri {
 
     private final String method;
@@ -27,5 +29,9 @@ public class RequestUri {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public Map<String, String> getParams() {
+        return requestUrl.getParams();
     }
 }

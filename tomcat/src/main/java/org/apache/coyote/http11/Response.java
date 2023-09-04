@@ -6,16 +6,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Response {
 
     private static final String STATIC = "static";
-    public static final String SPACE_CRLF = " \r\n";
-    public static final String HTML_EXTENSION = ".html";
-    public static final String PERIOD = ".";
-    public static final String SPACE = " ";
-    public static final String CRLF = "\r\n";
-    public static final String COLON = ": ";
+    private static final String SPACE_CRLF = " \r\n";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String PERIOD = ".";
+    private static final String SPACE = " ";
+    private static final String CRLF = "\r\n";
+    private static final String COLON = ": ";
 
     private final RequestReader requestReader;
     private final StatusCode statusCode;
@@ -37,15 +38,15 @@ public class Response {
         return sb.toString();
     }
 
-    public Response createBodyByPlainText(String text) {
+    public Response createBodyByText(String text) {
         this.body = text;
         headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
         return this;
     }
 
-    public Response createResponseBodyByFile(String url) throws IOException {
+    public Response createBodyByFile(String url) throws IOException {
         url = resolveExtension(url);
-        String path = getClass().getClassLoader().getResource(STATIC + url).getPath();
+        String path = Objects.requireNonNull(getClass().getClassLoader().getResource(STATIC + url)).getPath();
         File file = new File(path);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             StringBuilder sb = new StringBuilder();
@@ -66,13 +67,20 @@ public class Response {
         return url + HTML_EXTENSION;
     }
 
-    public Response addBaseHeaders() {
+    public Response addBaseHeader() {
         headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
         return this;
     }
 
     public Response addHeader(String key, String value) {
         headers.put(key, value);
+        return this;
+    }
+
+    public Response addCookieBySession(String session) {
+        if (!requestReader.isSessionExits()) {
+            headers.put(Header.SET_COOKIE.getName(), "JSESSIONID=" + session);
+        }
         return this;
     }
 }

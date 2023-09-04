@@ -9,7 +9,7 @@ public class MainController implements Controller{
     @Override
     public Response service(RequestReader requestReader) {
         return new Response(requestReader, StatusCode.OK)
-                .addBaseHeaders()
-                .createBodyByPlainText("Hello world!");
+                .addBaseHeader()
+                .createBodyByText("Hello world!");
     }
 }

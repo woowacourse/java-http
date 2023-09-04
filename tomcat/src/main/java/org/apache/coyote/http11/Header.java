@@ -6,6 +6,8 @@ public enum Header {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
     ACCEPT("Accept"),
+    SET_COOKIE("Set-Cookie"),
+    COOKIE("Cookie"),
     ;
 
     private final String name;

@@ -4,8 +4,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.RequestReader;
 import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.SessionManager;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static org.apache.coyote.http11.Header.LOCATION;
 import static org.apache.coyote.http11.StatusCode.FOUND;
@@ -36,29 +38,47 @@ public class LoginController implements Controller {
     }
 
     private Response loginPage(RequestReader requestReader) throws IOException {
+        if (requestReader.isSessionExits()) {
+            return new Response(requestReader, OK)
+                    .addBaseHeader()
+                    .createBodyByFile(requestReader.getRequestUrl());
+        }
         return new Response(requestReader, FOUND)
-                .createResponseBodyByFile(LOGIN)
-                .addHeader(LOCATION.getName(), LOGIN)
-                .addBaseHeaders();
+                .createBodyByFile(INDEX)
+                .addHeader(LOCATION.getName(), INDEX)
+                .addBaseHeader();
     }
 
     private Response tryLogin(RequestReader requestReader) throws IOException {
         try {
+            String sessionId = login(requestReader);
             return new Response(requestReader, FOUND)
-                    .createResponseBodyByFile(INDEX)
+                    .createBodyByFile(INDEX)
                     .addHeader(LOCATION.getName(), INDEX)
-                    .addBaseHeaders();
+                    .addCookieBySession(sessionId)
+                    .addBaseHeader();
         } catch (IllegalArgumentException e) {
             return new Response(requestReader, UNAUTHORIZED)
-                    .addBaseHeaders()
-                    .createResponseBodyByFile(UNAUTHORIZED_HTML);
+                    .addBaseHeader()
+                    .createBodyByFile(UNAUTHORIZED_HTML);
         }
+    }
+
+    private String login(RequestReader requestReader) {
+        User find = InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
+                .filter(user -> user.checkPassword(requestReader.getBodyValue("password")))
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다"));
+
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.addSession(sessionId, find);
+
+        return sessionId;
     }
 
     private Response registerPage(RequestReader requestReader) throws IOException {
         return new Response(requestReader, OK)
-                .addBaseHeaders()
-                .createResponseBodyByFile(requestReader.getRequestUrl());
+                .addBaseHeader()
+                .createBodyByFile(requestReader.getRequestUrl());
     }
 
     private Response register(RequestReader requestReader) throws IOException {
@@ -68,8 +88,8 @@ public class LoginController implements Controller {
                 requestReader.getBodyValue("email")
         ));
         return new Response(requestReader, FOUND)
-                .createResponseBodyByFile(INDEX)
+                .createBodyByFile(INDEX)
                 .addHeader(LOCATION.getName(), INDEX)
-                .addBaseHeaders();
+                .addBaseHeader();
     }
 }

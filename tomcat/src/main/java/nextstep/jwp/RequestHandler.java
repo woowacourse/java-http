@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
@@ -61,7 +62,9 @@ public class RequestHandler {
             User user = optionalUser.get();
             if (user.checkPassword(queryString.get("password"))) {
                 log.info(user.toString());
-                return HttpResponse.found("/index.html");
+                HttpResponse response = HttpResponse.found("/index.html");
+                response.addCookie("JSESSIONID", UUID.randomUUID().toString());
+                return response;
             }
         }
 

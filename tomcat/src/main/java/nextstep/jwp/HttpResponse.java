@@ -8,6 +8,7 @@ public class HttpResponse {
     private Map<String, String> headers = new LinkedHashMap<>();
     private final HttpStatus httpStatus;
     private final String body;
+    private final HttpCookie httpCookie = new HttpCookie();
 
     public HttpResponse(Map<String, String> headers,
                         HttpStatus httpStatus, String body) {
@@ -30,6 +31,10 @@ public class HttpResponse {
         return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
 
+    public void addCookie(String key, String value) {
+        httpCookie.add(key, value);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -40,5 +45,9 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public String getCookieValue(String key) {
+        return httpCookie.get(key);
     }
 }

@@ -158,7 +158,8 @@ class RequestHandlerTest {
 
         assertAll(
             () -> assertThat(headers.get("Location")).isEqualTo("/index.html"),
-        () -> assertThat(findByAccount("hs")).isPresent()
+        () -> assertThat(findByAccount("hs")).isPresent(),
+            () -> assertThat(response.getCookieValue("JSESSIONID"))
         );
     }
 

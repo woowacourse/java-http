@@ -1,16 +1,26 @@
 package nextstep.jwp.presentation;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.request.RequestReader;
 
 public class FrontController {
+
+    private static final Map<String, Controller> controllers = new HashMap<>();
+    private static final FrontController frontController = new FrontController();
+
+    static {
+        controllers.put("/", frontController.mainPageController);
+        controllers.put("/login", frontController.loginController);
+        controllers.put("/register", frontController.loginController);
+        controllers.put("/index", frontController.indexController);
+        controllers.put("/index.html", frontController.indexController);
+    }
 
     private final LoginController loginController = new LoginController();
     private final MainPageController mainPageController = new MainPageController();
     private final IndexController indexController = new IndexController();
     private final OtherController otherController = new OtherController();
-
-
-    private static final FrontController frontController = new FrontController();
 
     private FrontController() {
     }
@@ -20,15 +30,6 @@ public class FrontController {
     }
 
     public Controller findController(RequestReader requestReader) {
-        if (requestReader.getRequestUrl().equals("/")) {
-            return mainPageController;
-        }
-        if (requestReader.getRequestUrl().equals("/login") || requestReader.getRequestUrl().equals("/register")) {
-            return loginController;
-        }
-        if (requestReader.getRequestUrl().equals("/index") || requestReader.getRequestUrl().equals("/index.html")) {
-            return indexController;
-        }
-        return otherController;
+        return controllers.getOrDefault(requestReader.getRequestUrl(), otherController);
     }
 }

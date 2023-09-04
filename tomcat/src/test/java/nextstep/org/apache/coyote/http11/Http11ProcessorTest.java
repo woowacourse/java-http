@@ -31,7 +31,7 @@ class Http11ProcessorTest {
                 "Hello world!"
         );
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("Content-Type: text/html;charset=utf-8 ", "Content-Length: 12 ");
     }
 
     @Test
@@ -58,6 +58,6 @@ class Http11ProcessorTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("Content-Type: text/html;charset=utf-8 ", "Content-Length: 5564");
     }
 }

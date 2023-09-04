@@ -7,7 +7,8 @@ import org.apache.coyote.http.request.HttpRequestDecoder;
 
 public enum RequestFixture {
 
-    GET("GET ");
+    GET("GET "),
+    ;
 
     private static final HttpRequestDecoder REQUEST_DECODER = new HttpRequestDecoder();
 

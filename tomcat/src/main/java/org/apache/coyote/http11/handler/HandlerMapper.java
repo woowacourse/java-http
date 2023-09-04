@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -27,6 +28,7 @@ public class HandlerMapper {
         HANDLERS.put(new HandlerStatus("GET", "/"), this::rootHandler);
         HANDLERS.put(new HandlerStatus("GET", "/login", Set.of("account", "password")),
                 this::loginWithQueryParameterHandler);
+        HANDLERS.put(new HandlerStatus("POST", "/login"), this::loginFormHandler);
     }
 
     public Response rootHandler(final Request request) {
@@ -40,7 +42,6 @@ public class HandlerMapper {
                 responseBody);
         return new Response(response);
     }
-
 
     public Response htmlHandler(final Request request) {
         final var responseBody = request.getRequestLine().readFile();
@@ -110,6 +111,59 @@ public class HandlerMapper {
                 responseBody);
 
         return new Response(response);
+    }
+
+    public Response loginFormHandler(final Request request) {
+        // request form에서 loginRequest생성
+        final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
+        Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
+        if (user.isPresent()) { // 성공 301 & index.html
+            return loginSuccess();
+        }
+
+        // 실패 401html
+        return loginFail();
+    }
+
+    private Response loginSuccess() {
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
+        }
+
+        // request header의 cookie에 세션아이디가 없으면 response에 set-cookie추가
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
+    private Response loginFail() {
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final String responseBody;
+        try {
+            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("index.html이 존재하지 않습니다.");
+        }
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return new Response(response);
+    }
+
+    private Optional<User> login(final String account, final String password) {
+        return InMemoryUserRepository.findByAccountAndPassword(account, password);
     }
 
     public Response handle(final Request request) {

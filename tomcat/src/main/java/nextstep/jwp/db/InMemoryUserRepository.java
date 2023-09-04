@@ -1,10 +1,9 @@
 package nextstep.jwp.db;
 
-import nextstep.jwp.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
@@ -23,5 +22,14 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static Optional<User> findByAccountAndPassword(final String account, final String password) {
+        final Optional<User> user = Optional.ofNullable(database.get(account));
+        if (user.isPresent() && !user.get().checkPassword(password)) {
+            return Optional.empty();
+        }
+        return user;
+    }
+
+    private InMemoryUserRepository() {
+    }
 }

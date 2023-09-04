@@ -8,7 +8,8 @@ public class Request {
     private final RequestHeaders requestHeaders;
     private final RequestForms requestForms;
 
-    public Request(final RequestLine requestLine, final RequestHeaders requestHeaders, final RequestForms requestForms) {
+    public Request(final RequestLine requestLine, final RequestHeaders requestHeaders,
+                   final RequestForms requestForms) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestForms = requestForms;
@@ -20,6 +21,7 @@ public class Request {
         final RequestForms requestForms = createRequestBody(br, requestHeaders);
         return new Request(requestLine, requestHeaders, requestForms);
     }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -34,5 +36,13 @@ public class Request {
         br.read(buffer, 0, contentLength);
         final String requestBody = new String(buffer);
         return RequestForms.from(requestBody);
+    }
+
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public RequestForms getRequestForms() {
+        return requestForms;
     }
 }

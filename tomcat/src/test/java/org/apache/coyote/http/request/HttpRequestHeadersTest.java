@@ -23,6 +23,26 @@ class HttpRequestHeadersTest {
     }
 
     @Test
+    void isRequestBodyEmpty_메서드는_바디가_없을_경우_true를_반환한다() {
+        final String headerContents = "Content-Type: application/json";
+        final HttpRequestHeaders headers = HttpRequestHeaders.from(headerContents);
+
+        final boolean actual = headers.isRequestBodyEmpty();
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void isRequestBodyEmpty_메서드는_바디가_있을_경우_false를_반환한다() {
+        final String headerContents = "Content-Length: 12";
+        final HttpRequestHeaders headers = HttpRequestHeaders.from(headerContents);
+
+        final boolean actual = headers.isRequestBodyEmpty();
+
+        assertThat(actual).isFalse();
+    }
+
+    @Test
     void findValue_메서드는_key를_전달하면_value를_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
 

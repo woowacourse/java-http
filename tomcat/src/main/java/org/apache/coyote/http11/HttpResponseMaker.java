@@ -138,7 +138,7 @@ public class HttpResponseMaker {
     }
 
     private static String buildFirstLine(HttpRequestFirstLineInfo firstLineInfo, RequestMapper mapper) {
-        return firstLineInfo.getVersionOfTheProtocol() + SPACE + mapper.getHttpStatus().getStatusCode() + SPACE + mapper.getHttpStatus().getStatus() + SPACE;
+        return String.join(firstLineInfo.getVersionOfTheProtocol() + SPACE + mapper.getHttpStatus().getStatusCode() + SPACE + mapper.getHttpStatus().getStatus() + SPACE);
     }
 
     private enum RedirectLocation {

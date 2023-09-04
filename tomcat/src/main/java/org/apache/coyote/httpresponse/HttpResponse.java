@@ -28,15 +28,6 @@ public class HttpResponse {
         return new HttpResponse(httpVersion, null, null, null);
     }
 
-    public static HttpResponse from(final HttpRequest request) throws URISyntaxException {
-        final String httpVersion = request.getHttpVersion();
-        final String path = request.getPath();
-        final QueryString queryString = request.getQueryString();
-        final String contentBody = ResourceReader.read(path);
-        final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
-        return new HttpResponse(httpVersion, HttpStatus.OK, responseHeaders, contentBody);
-    }
-
     public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
         return new HttpResponse(this.httpVersion, httpStatus, this.responseHeaders, this.contentBody);
     }
@@ -51,6 +42,11 @@ public class HttpResponse {
         final String contentBody = ResourceReader.read(path);
         final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
         return new HttpResponse(this.httpVersion, this.httpStatus, responseHeaders, contentBody);
+    }
+
+    public HttpResponse setLocationHeader(final String path) {
+        responseHeaders.setLocationHeader(path);
+        return new HttpResponse(this.httpVersion, HttpStatus.FOUND, responseHeaders, this.contentBody);
     }
 
     public byte[] getBytes() {

@@ -1,6 +1,5 @@
 package org.apache.coyote.httpresponse.header;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,6 +16,10 @@ public class ResponseHeaders {
         headers.put(ResponseHeaderType.CONTENT_TYPE, ContentTypeHeader.from(path));
         headers.put(ResponseHeaderType.CONTENT_LENGTH, new ContentLengthHeader(content));
         return new ResponseHeaders(headers);
+    }
+
+    public void setLocationHeader(final String path) {
+        headers.put(ResponseHeaderType.LOCATION, new LocationHeader(path));
     }
 
     public String getFormattedHeaders() {

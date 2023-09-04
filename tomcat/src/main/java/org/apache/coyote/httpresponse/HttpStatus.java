@@ -2,6 +2,7 @@ package org.apache.coyote.httpresponse;
 
 public enum HttpStatus {
     OK(200, "OK"),
+    FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized");
 
     private static final String DELIMITER = " ";

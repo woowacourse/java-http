@@ -22,7 +22,7 @@ public class HttpRequestFirstLineInfo {
 
     public static HttpRequestFirstLineInfo from(String firstLine) {
         String[] infos = firstLine.split(SPACE);
-        if (infos.length < NUMBER_OF_FIRST_LINE_INFOS) {
+        if (infos.length != NUMBER_OF_FIRST_LINE_INFOS) {
             throw new IllegalArgumentException("유효하지 않은 요청 헤더 첫 줄 입니다.");
         }
 

@@ -29,11 +29,7 @@ public class RequestHandler {
             return HttpResponse.ok("Hello world!", ContentType.HTML);
         }
 
-        if (isStaticFile(request.getUri()) && request.getMethod() == HttpMethod.GET) {
-            return getFile(request);
-        }
-
-        if (request.getUri().equals("/login") && request.getMethod() == HttpMethod.POST) {
+        if (request.getUri().equals("/login")) {
             return login(request);
         }
 
@@ -41,11 +37,15 @@ public class RequestHandler {
             return signUp(request);
         }
 
+        if (isStaticFile(request.getUri()) && request.getMethod() == HttpMethod.GET) {
+            return getFile(request.getUri());
+        }
+
         throw new IllegalArgumentException();
     }
 
-    private HttpResponse getFile(HttpRequest request) throws IOException {
-        String fileUrl = "static" + request.getUri();
+    private HttpResponse getFile(String uri) throws IOException {
+        String fileUrl = "static" + uri;
         File file = new File(
             RequestHandler.class
                 .getClassLoader()
@@ -62,9 +62,9 @@ public class RequestHandler {
             .anyMatch(it -> it.name().equalsIgnoreCase(value));
     }
 
-    private HttpResponse login(HttpRequest request) {
-        if (isLogin(request)) {
-            return HttpResponse.found("/index.html");
+    private HttpResponse login(HttpRequest request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
+            return doLoginGetRequest(request);
         }
 
         Map<String, String> queryString = request.getQueryString();
@@ -80,6 +80,14 @@ public class RequestHandler {
         }
 
         return HttpResponse.found("/401.html");
+    }
+
+    private HttpResponse doLoginGetRequest(HttpRequest request) throws IOException {
+        if (isLogin(request)) {
+            return HttpResponse.found("/index.html");
+        }
+
+        return getFile("/login.html");
     }
 
     private boolean isLogin(HttpRequest request) {

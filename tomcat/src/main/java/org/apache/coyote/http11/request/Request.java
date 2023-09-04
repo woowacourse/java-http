@@ -52,6 +52,16 @@ public class Request {
         return body.parseToUser();
     }
 
+    public Session getSession(final boolean isNew) {
+        if (isNew) {
+            final Session session = Session.generate();
+            sessionManager.add(session.getId(), session);
+            return session;
+        }
+        final String jsessionid = cookie.findByKey("JSESSIONID");
+        return sessionManager.getById(jsessionid);
+    }
+
     public RequestLine getLine() {
         return line;
     }
@@ -70,15 +80,5 @@ public class Request {
 
     public RequestBody getBody() {
         return body;
-    }
-
-    public Session getSession(final boolean isNew) {
-        if (isNew) {
-            final Session session = Session.generate();
-            sessionManager.add(session.getId(), session);
-            return session;
-        }
-        final String jsessionid = cookie.findByKey("JSESSIONID");
-        return sessionManager.getById(jsessionid);
     }
 }

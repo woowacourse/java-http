@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.Session;
@@ -29,10 +30,10 @@ public class RequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
     private static final String LOGIN_HTML = "/login.html";
     private static final String INDEX_HTML = "/index.html";
-    private static final String LOGIN = "/login";
     private static final String UNAUTHORIZED_HTML = "/401.html";
-    private static final String REGISTER = "/register";
     private static final String REGISTER_HTML = "/register.html";
+    private static final String LOGIN = "/login";
+    private static final String REGISTER = "/register";
     private static final String JSESSIONID = "JSESSIONID";
     private final Request request;
 
@@ -47,7 +48,7 @@ public class RequestHandler {
         }
 
         if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(GET)) {
-            return getStaticPateResponse(LOGIN_HTML, OK);
+            return handleLoginPage();
         }
 
         if (requestPath.equals(LOGIN) && request.getHttpMethod().equals(POST)) {
@@ -63,6 +64,16 @@ public class RequestHandler {
         }
 
         return getStaticPateResponse(requestPath, OK);
+    }
+
+    private Response handleLoginPage() {
+        final Session session = request.getSession(false);
+        if (Objects.isNull(session)) {
+            return getStaticPateResponse(LOGIN_HTML, OK);
+        }
+        final User user = (User) session.get("user");
+        LOGGER.info("user {}", user);
+        return Response.generateRedirectResponse(INDEX_HTML);
     }
 
     private Response getStaticPateResponse(final String requestPath, final StatusCode statusCode) {

@@ -20,11 +20,15 @@ public class Session {
         return new Session(id);
     }
 
-    public String getId() {
-        return id;
-    }
-
     public void put(final String key, final User value) {
         values.put(key, value);
+    }
+
+    public Object get(final String key) {
+        return values.get(key);
+    }
+
+    public String getId() {
+        return id;
     }
 }

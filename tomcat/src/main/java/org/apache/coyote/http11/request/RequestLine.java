@@ -28,6 +28,14 @@ public class RequestLine {
         return new RequestLine(httpMethod, requestPath, httpVersion);
     }
 
+    public boolean hasQueryString() {
+        return requestPath.hasQueryString();
+    }
+
+    public Map<String, String> getQueryString() {
+        return requestPath.getQueryString();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
@@ -38,13 +46,5 @@ public class RequestLine {
 
     public HttpVersion getHttpVersion() {
         return httpVersion;
-    }
-
-    public boolean hasQueryString() {
-        return requestPath.hasQueryString();
-    }
-
-    public Map<String, String> getQueryString() {
-        return requestPath.getQueryString();
     }
 }

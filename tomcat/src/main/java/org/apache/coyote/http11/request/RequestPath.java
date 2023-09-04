@@ -30,15 +30,15 @@ public class RequestPath {
                 QueryString.from(path.substring(queryStringDelimiterIndex + NEXT)));
     }
 
+    public boolean hasQueryString() {
+        return !queryString.equals(QueryString.EMPTY);
+    }
+
     public String getPath() {
         return path;
     }
 
     public Map<String, String> getQueryString() {
         return queryString.getQueryStrings();
-    }
-
-    public boolean hasQueryString() {
-        return !queryString.equals(QueryString.EMPTY);
     }
 }

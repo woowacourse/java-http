@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class Cookie {
     public static final String KEY_VALUE_DELIMITER = "=";
-    private static final String DELIMITER = ";";
+    private static final String DELIMITER = "; ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private final Map<String, String> cookies = new HashMap<>();

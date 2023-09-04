@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class HttpResponse<T> {
 
-    private int statusCode = 200;
-    private Map<String, String> headers;
-    private T body;
+    private final int statusCode;
+    private final Map<String, String> headers;
+    private final T body;
     private boolean viewResponse = false;
     private String viewPath = null;
 

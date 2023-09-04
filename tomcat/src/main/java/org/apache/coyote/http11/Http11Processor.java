@@ -22,11 +22,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -216,17 +213,5 @@ public class Http11Processor implements Runnable, Processor {
                 .requestURI(requestURI)
                 .location(INDEX_PAGE_URI)
                 .build();
-    }
-
-    private Map<String, String> parseQueryString(String requestURI) {
-        int questionIndex = requestURI.indexOf("?");
-        if (questionIndex == NO_QUERY_STRING) {
-            return Map.of();
-        }
-
-        String nonParsedQueryString = requestURI.substring(questionIndex + 1);
-        return Arrays.stream(nonParsedQueryString.split("&"))
-                .map(it -> Arrays.stream(it.split("=")).collect(Collectors.toList()))
-                .collect(Collectors.toMap(it -> it.get(0), it -> it.get(1)));
     }
 }

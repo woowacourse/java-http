@@ -51,6 +51,13 @@ public class RequestFixture {
             "\n" +
             "message body";
 
+    public static final String POST_REGISTER_LOGIN_REQUEST = "POST /register HTTP/1.1\n" +
+            "header: header\n" +
+            "Cookie: test=test\n" +
+            "Content-Length: 59\n" +
+            "\n" +
+            "account=test&password=test&email=test@test.com";
+
     public static final String CSS_REQUEST = "GET /css/styles.css HTTP/1.1\n" +
             "header: header\n" +
             "Cookie: test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46\n" +

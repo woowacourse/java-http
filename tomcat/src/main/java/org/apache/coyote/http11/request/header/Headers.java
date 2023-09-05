@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.header;
 
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.Header;

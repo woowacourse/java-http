@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.handler.controller.base;
+package nextstep.jwp.controller.base;
 
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.uri.HttpMethod;
 
 import java.util.Arrays;
 
@@ -26,7 +26,6 @@ public enum Dict {
     }
 
     public static Dict find(final String path, final HttpMethod httpMethod) {
-        System.out.println(path + " " + httpMethod.name());
         return Arrays.stream(values())
                 .filter(it -> it.getPath().startsWith(path) && it.getHttpMethod().equals(httpMethod))
                 .findAny()

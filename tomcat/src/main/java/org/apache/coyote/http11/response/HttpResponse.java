@@ -18,13 +18,9 @@ public class HttpResponse {
     private final Headers headers;
     private final String body;
 
-    private HttpResponse(final Status status, final Headers headers, final String body) {
-        this.status = status;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    private HttpResponse(final ContentType contentType, final Status status, final Map<Header, String> headers,
+    private HttpResponse(final ContentType contentType,
+                         final Status status,
+                         final Map<Header, String> headers,
                          final String body) {
         this.status = status;
         this.headers = Headers.of(contentType, body);

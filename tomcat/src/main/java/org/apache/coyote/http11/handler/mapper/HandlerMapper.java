@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.handler.mapper;
 
+import nextstep.jwp.controller.base.Controller;
+import nextstep.jwp.controller.base.Dict;
+import nextstep.jwp.controller.index.IndexController;
+import nextstep.jwp.controller.index.WelcomeController;
+import nextstep.jwp.controller.login.LoginController;
+import nextstep.jwp.controller.register.RegisterController;
+import nextstep.jwp.controller.resource.ResourceController;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.http11.handler.controller.base.Controller;
-import org.apache.coyote.http11.handler.controller.base.Dict;
-import org.apache.coyote.http11.handler.controller.index.IndexController;
-import org.apache.coyote.http11.handler.controller.index.WelcomeController;
-import org.apache.coyote.http11.handler.controller.login.LoginController;
-import org.apache.coyote.http11.handler.controller.register.RegisterController;
-import org.apache.coyote.http11.handler.controller.resource.ResourceController;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.uri.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.util.Map;
@@ -18,12 +18,9 @@ public class HandlerMapper {
     private static final Map<Dict, Controller> CONTROLLER_MAP = Map.of(
             Dict.WELCOME_GET, new WelcomeController(),
             Dict.INDEX_GET, new IndexController(),
-
             Dict.RESOURCE_GET, new ResourceController(),
-
             Dict.LOGIN_POST, new LoginController(new UserService()),
             Dict.LOGIN_GET, new LoginController(new UserService()),
-
             Dict.REGISTER_GET, new RegisterController(new UserService()),
             Dict.REGISTER_POST, new RegisterController(new UserService())
     );

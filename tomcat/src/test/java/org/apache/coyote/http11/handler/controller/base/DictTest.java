@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler.controller.base;
 
-import org.apache.coyote.http11.request.HttpMethod;
+import nextstep.jwp.controller.base.Dict;
+import org.apache.coyote.http11.request.uri.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

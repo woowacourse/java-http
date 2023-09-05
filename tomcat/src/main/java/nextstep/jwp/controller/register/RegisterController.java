@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.handler.controller.register;
+package nextstep.jwp.controller.register;
 
+import nextstep.jwp.controller.base.AbstractController;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.http11.handler.controller.base.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.ContentType;
@@ -19,9 +19,8 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) throws Exception {
-        System.out.println("register");
-        return super.service(httpRequest);
+    public HttpResponse handle(final HttpRequest httpRequest) throws Exception {
+        return super.handle(httpRequest);
     }
 
     @Override
@@ -30,9 +29,10 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         Map<String, String> params = httpRequest.getBody().getParams();
         userService.register(params.get("account"), params.get("password"), params.get("email"));
+
         return HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
     }
 }

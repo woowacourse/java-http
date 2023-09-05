@@ -3,6 +3,10 @@ package org.apache.coyote.http11.request;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionHolder;
 import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.request.header.Headers;
+import org.apache.coyote.http11.request.header.Params;
+import org.apache.coyote.http11.request.uri.HttpMethod;
+import org.apache.coyote.http11.request.uri.Uri;
 import org.apache.coyote.http11.response.header.Header;
 
 import java.io.BufferedReader;

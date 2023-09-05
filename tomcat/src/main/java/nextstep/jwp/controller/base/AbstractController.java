@@ -1,12 +1,13 @@
-package org.apache.coyote.http11.handler.controller.base;
+package nextstep.jwp.controller.base;
 
+import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) throws Exception {
+    public HttpResponse handle(final HttpRequest httpRequest) throws Exception {
         if (httpRequest.isGetMethod()) {
             return doGet(httpRequest);
         }
@@ -15,14 +16,14 @@ public abstract class AbstractController implements Controller {
             return doPost(httpRequest);
         }
 
-        throw new IllegalArgumentException("Abstract 예외 발생");
+        throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
     }
 
     protected HttpResponse doGet(HttpRequest httpRequest) throws Exception {
-        return null;
+        throw new UnsupportedMethodException();
     }
 
     protected HttpResponse doPost(HttpRequest httpRequest) throws Exception {
-        return null;
+        throw new UnsupportedMethodException();
     }
 }

@@ -33,7 +33,6 @@ public class UserService {
         validateRegister(account, email);
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        log.info("가입 성공! " + account + " " + password + " " + email);
     }
 
     private void validateRegister(final String account, final String email) {

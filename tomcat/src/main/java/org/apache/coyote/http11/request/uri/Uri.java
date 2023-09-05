@@ -1,12 +1,12 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.uri;
 
 public class Uri {
 
     private final HttpMethod httpMethod;
     private final String path;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    private Uri(final HttpMethod httpMethod, final String path, final String httpVersion) {
+    private Uri(final HttpMethod httpMethod, final String path, final HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.httpVersion = httpVersion;
@@ -16,7 +16,7 @@ public class Uri {
         return new Uri(
                 HttpMethod.from(requestLines.split(" ")[0]),
                 requestLines.split(" ")[1],
-                requestLines.split(" ")[2]
+                HttpVersion.from(requestLines.split(" ")[2])
         );
     }
 
@@ -58,6 +58,6 @@ public class Uri {
     }
 
     public String getHttpVersion() {
-        return httpVersion;
+        return httpVersion.getVersion();
     }
 }

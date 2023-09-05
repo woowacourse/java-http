@@ -12,7 +12,7 @@ import java.io.StringReader;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class HandlerControllerTest {
+class HandlerMapperTest {
 
     @DisplayName("GET /Login 요청시 LoginController를 반환한다.")
     @Test

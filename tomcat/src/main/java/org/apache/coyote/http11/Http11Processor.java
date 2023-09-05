@@ -8,6 +8,7 @@ import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.handler.controller.base.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Params;
@@ -28,6 +29,9 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static org.apache.coyote.http11.handler.adapter.HandlerAdapter.handlerController;
+import static org.apache.coyote.http11.handler.mapper.HandlerMapper.getController;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -54,11 +58,17 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))
         ) {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            HttpResponse httpResponse = getResponse(httpRequest);
+
+            Controller controller = getController(httpRequest);
+            HttpResponse httpResponse = handlerController(controller, httpRequest);
+
             bufferedWriter.write(httpResponse.toString());
             bufferedWriter.flush();
-        } catch (IOException | UncheckedServletException | NotFoundException | URISyntaxException e) {
+
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

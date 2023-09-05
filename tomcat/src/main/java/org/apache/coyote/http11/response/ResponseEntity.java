@@ -23,7 +23,7 @@ public class ResponseEntity {
         return path;
     }
 
-    public boolean isEqualTo(HttpMethod httpMethod) {
+    public boolean hasSameHttpMethod(HttpMethod httpMethod) {
         return httpMethod.isEqualTo(this.httpMethod);
     }
 

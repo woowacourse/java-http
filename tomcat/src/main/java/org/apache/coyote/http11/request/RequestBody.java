@@ -2,14 +2,12 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RequestBody {
 
-    public static final RequestBody EMPTY = new RequestBody(Collections.unmodifiableMap(new HashMap<>()));
+    public static final RequestBody EMPTY = new RequestBody(Collections.emptyMap());
 
     private final Map<String, String> body;
 
@@ -18,7 +16,7 @@ public class RequestBody {
     }
 
     public static RequestBody from(final String requestBody) {
-        if (Objects.isNull(requestBody) || requestBody.isEmpty()) {
+        if (requestBody == null || requestBody.isEmpty()) {
             return EMPTY;
         }
 

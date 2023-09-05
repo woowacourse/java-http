@@ -4,12 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class HttpRequestParser {
 
-    private static final String HEADER_DELIMITER = ":";
+    private static final String HEADER_DELIMITER = ": ";
 
     private HttpRequestParser() {
     }
@@ -24,8 +23,8 @@ public class HttpRequestParser {
 
     private static RequestLine extractRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
-        if (Objects.isNull(requestLine)) {
-            throw new IOException("잘못된 요청입니다.");
+        if (requestLine == null) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
         }
         return RequestLine.from(requestLine);
     }
@@ -43,14 +42,14 @@ public class HttpRequestParser {
     }
 
     private static boolean canRead(String line) {
-        return !(Objects.isNull(line) || line.isEmpty());
+        return !(line == null || line.isEmpty());
     }
 
     private static void mapRequestHeaders(Map<String, String> requestHeaders, String line) {
         String[] split = line.split(HEADER_DELIMITER, 2);
 
         if (split.length == 2) {
-            requestHeaders.put(split[0].trim(), split[1].trim());
+            requestHeaders.put(split[0], split[1]);
         }
     }
 
@@ -70,6 +69,6 @@ public class HttpRequestParser {
     }
 
     private static boolean isEmptyOrBufferNotReady(BufferedReader reader, int length) throws IOException {
-        return !reader.ready() || length == 0;
+        return length == 0 || !reader.ready();
     }
 }

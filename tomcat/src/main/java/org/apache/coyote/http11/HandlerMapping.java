@@ -17,10 +17,10 @@ public class HandlerMapping {
         if (httpMethod.isEqualTo(HttpMethod.POST)) {
             UserController userController = new UserController(new UserService());
             RequestBody requestBody = request.getRequestBody();
-            if (path.equals("/login")) {
+            if ("/login".equals(path)) {
                 return userController.login(requestBody);
             }
-            if (path.equals("/register")) {
+            if ("/register".equals(path)) {
                 return userController.signUp(requestBody);
             }
         }

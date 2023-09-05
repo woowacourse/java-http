@@ -47,13 +47,13 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private String extractResponse(ResponseEntity responseEntity) {
-        if (responseEntity.isEqualTo(HttpMethod.GET)) {
+        if (responseEntity.hasSameHttpMethod(HttpMethod.GET)) {
             ViewResolver viewResolver = new ViewResolver(responseEntity);
             HttpResponse httpResponse = viewResolver.extractHttpResponse();
 

@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String controller(final Map<String, String> httpRequestHeader, final String method, final String path, final Map<String, String> queryString, Map<String, String> requestBody) throws IOException {
+    private String controller(final Map<String, String> httpRequestHeader, final String method, final String path, final Map<String, String> queryString, final Map<String, String> requestBody) throws IOException {
         if ("GET".equals(method) && "/".equals(path)) {
             return generateResponseBody(200, "html", "Hello world!");
         }

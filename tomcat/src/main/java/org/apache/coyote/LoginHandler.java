@@ -3,6 +3,7 @@ package org.apache.coyote;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.RequestBody;
 import org.apache.coyote.http11.RequestHeader;
 import org.apache.coyote.http11.ResponseInfo;
@@ -10,22 +11,34 @@ import org.apache.coyote.http11.ResponseInfo;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.coyote.http11.Http11Processor.ACCOUNT;
-import static org.apache.coyote.http11.Http11Processor.HTTP_FOUND;
-import static org.apache.coyote.http11.Http11Processor.INDEX_PAGE;
-import static org.apache.coyote.http11.Http11Processor.PAGE401;
-import static org.apache.coyote.http11.Http11Processor.RESOURCE_PATH;
-
-public class LoginHandler {
-    private final ClassLoader classLoader = getClass().getClassLoader();
+public class LoginHandler extends RequestHandler {
     private static final SessionManager sessionManager = SessionManager.getInstance();
-    private String mappingUri;
+    public static final String ACCOUNT = "account";
 
     public LoginHandler(String mappingUri) {
         this.mappingUri = mappingUri;
     }
 
-    public ResponseInfo doPost(final RequestBody body) {
+    @Override
+    public ResponseInfo doService(final HttpRequest httpRequest) {
+        final String httpMethod = httpRequest.getRequestLine().getHttpMethod();
+
+        if (httpMethod.equals("GET")) {
+            return doGet(httpRequest);
+        }
+
+        if (httpMethod.equals("POST")) {
+            return doPost(httpRequest);
+        }
+
+        final String resourcePath = RESOURCE_PATH + PAGE401;
+        return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
+    }
+
+    @Override
+    public ResponseInfo doPost(final HttpRequest httpRequest) {
+        final RequestBody body = httpRequest.getRequestBody();
+
         final String account = body.getByKey(ACCOUNT);
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
@@ -39,7 +52,10 @@ public class LoginHandler {
         return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND, session.getId());
     }
 
-    public ResponseInfo doGet(final RequestHeader header) {
+    @Override
+    public ResponseInfo doGet(final HttpRequest httpRequest) {
+        final RequestHeader header = httpRequest.getRequestHeader();
+
         if (header.getByKey("Cookie") != null) {
             HttpCookie cookie = HttpCookie.from(header.getByKey("Cookie"));
             String jsessionid = cookie.getByKey("JSESSIONID");

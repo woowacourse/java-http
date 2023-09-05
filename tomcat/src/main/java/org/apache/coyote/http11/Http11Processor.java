@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.LoginHandler;
+import org.apache.coyote.MemberRegisterHandler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,24 +14,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     public static final String RESOURCE_PATH = "static";
-    private static final String ILLEGAL_REQUEST = "부적절한 요청입니다.";
-    public static final String ACCOUNT = "account";
-    public static final String PASSWORD = "password";
-    public static final String EMAIL = "email";
-    public static final String PAGE401 = "/401.html";
-    public static final String HTTP_FOUND = "Found";
-    public static final String INDEX_PAGE = "/index.html";
     private final Socket connection;
-    private final LoginHandler loginHandler = new LoginHandler("/login");
+    private final List<RequestHandler> handlers = new ArrayList<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+
+        final RequestHandler loginHandler = new LoginHandler("/login");
+        final RequestHandler memberRegisterHandler = new MemberRegisterHandler("/register");
+        handlers.add(loginHandler);
+        handlers.add(memberRegisterHandler);
     }
 
     @Override
@@ -45,18 +44,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader br = new BufferedReader(inputStreamReader)) {
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            RequestLine requestLine = RequestLine.from(br.readLine());
-            if (Objects.isNull(requestLine)) {
-                throw new IllegalArgumentException(ILLEGAL_REQUEST);
-            }
-            RequestHeader requestHeader = readHeader(br);
-            RequestBody requestBody = readBody(br, requestHeader);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final ResponseInfo responseInfo = handleRequest(httpRequest);
+            final String response = buildResponse(responseInfo);
 
-            ResponseInfo responseInfo = handleRequest(requestLine, requestHeader, requestBody);
-
-            String response = buildResponse(responseInfo);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -64,58 +57,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseInfo handleRequest(RequestLine requestLine, RequestHeader header, RequestBody body) {
-        String requestUri = requestLine.getRequestURI();
-
-        if (requestUri.contains("/login")) {
-            return handleLoginRequest(requestLine, header, body);
+    private ResponseInfo handleRequest(final HttpRequest httpRequest) {
+        for (RequestHandler handler : handlers) {
+            if (handler.isMatch(httpRequest)) {
+                return handler.doService(httpRequest);
+            }
         }
 
-        if (requestUri.contains("/register")) {
-            return handleMemberRegistRequest(requestLine, body);
-        }
-
-        String resourcePath = RESOURCE_PATH + requestUri;
+        final String requestUri = httpRequest.getRequestLine().getRequestURI();
+        final String resourcePath = RESOURCE_PATH + requestUri;
         return new ResponseInfo(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
     }
 
-    private ResponseInfo handleMemberRegistRequest(RequestLine requestLine, RequestBody body) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        final String httpMethod = requestLine.getHttpMethod();
-
-        if (httpMethod.equals("POST")) {
-            String account = body.getByKey(ACCOUNT);
-            String password = body.getByKey(PASSWORD);
-            String email = body.getByKey(EMAIL);
-            User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-            log.info("User create - {}", user);
-            String resourcePath = RESOURCE_PATH + INDEX_PAGE;
-            return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
-        }
-
-        String resourcePath = RESOURCE_PATH + "/register.html";
-        return new ResponseInfo(classLoader.getResource(resourcePath), 200, "OK");
-    }
-
-    private ResponseInfo handleLoginRequest(RequestLine requestLine, RequestHeader header, RequestBody body) {
-        ClassLoader classLoader = getClass().getClassLoader();
-
-        final String httpMethod = requestLine.getHttpMethod();
-        if (httpMethod.equals("POST")) {
-            return loginHandler.doPost(body);
-        }
-
-        if (httpMethod.equals("GET")) {
-            return loginHandler.doGet(header);
-        }
-
-        String resourcePath = RESOURCE_PATH + PAGE401;
-        return new ResponseInfo(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
-    }
-
     private String buildResponse(ResponseInfo responseInfo) throws IOException {
-        File location = new File(responseInfo.getResource().getFile());
+        final File location = new File(responseInfo.getResource().getFile());
         String responseBody = "";
 
         if (location.isDirectory()) {
@@ -149,25 +104,5 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
-    }
-
-    private RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
-            stringBuilder.append(line).append("\r\n");
-        }
-        return RequestHeader.from(stringBuilder.toString());
-    }
-
-    private RequestBody readBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
-            throws IOException {
-        final String contentLength = requestHeader.getByKey("Content-Length");
-        if (contentLength == null) {
-            return null;
-        }
-        final int length = Integer.parseInt(contentLength.trim());
-        char[] buffer = new char[length];
-        bufferedReader.read(buffer, 0, length);
-        return RequestBody.from(new String(buffer));
     }
 }

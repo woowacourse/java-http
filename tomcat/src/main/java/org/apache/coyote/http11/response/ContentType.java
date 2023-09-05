@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 public enum ContentType {
     HTML("text/html;charset=utf-8"),
-    CSS("text/css;charset=utf-8");
+    CSS("text/css;charset=utf-8"),
+    SVG("image/svg+xml");
 
     private static final int EXTENSION_INDEX = 1;
     private static final String EXTENSION_DELIMITER = "\\.";
@@ -25,5 +26,4 @@ public enum ContentType {
     public String getType() {
         return type;
     }
-
 }

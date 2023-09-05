@@ -28,13 +28,15 @@ import nextstep.jwp.model.User;
 
 public class RequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String BASE_DIRECTORY = "static";
     private static final String LOGIN_HTML = "/login.html";
     private static final String INDEX_HTML = "/index.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
+    private static final String NOT_FOUND_HTML = "/404.html";
     private static final String REGISTER_HTML = "/register.html";
     private static final String LOGIN = "/login";
     private static final String REGISTER = "/register";
-    private static final String JSESSIONID = "JSESSIONID";
     private final Request request;
 
     public RequestHandler(final Request request) {
@@ -77,20 +79,24 @@ public class RequestHandler {
     }
 
     private Response getStaticPateResponse(final String requestPath, final StatusCode statusCode) {
-        final String responseBody = readFile(requestPath);
-        final HttpVersion httpVersion = request.getHttpVersion();
-        final ContentType contentType = ContentType.findByName(requestPath);
-        return Response.of(httpVersion, statusCode, contentType, responseBody);
+        try {
+            final String responseBody = readFile(requestPath);
+            final HttpVersion httpVersion = request.getHttpVersion();
+            final ContentType contentType = ContentType.findByName(requestPath);
+            return Response.of(httpVersion, statusCode, contentType, responseBody);
+        } catch (IOException exception) {
+            return getStaticPateResponse(NOT_FOUND_HTML, OK);
+        }
     }
 
-    private String readFile(final String fileName) {
+    private String readFile(final String fileName) throws IOException {
         try {
             final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-            URL url = classLoader.getResource("static" + fileName);
+            URL url = classLoader.getResource(BASE_DIRECTORY + fileName);
             final File file = new File(url.getFile());
             return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException | NullPointerException exception) {
-            throw new IllegalStateException("파일이 없습니다.");
+        } catch (NullPointerException exception) {
+            throw new IOException();
         }
     }
 

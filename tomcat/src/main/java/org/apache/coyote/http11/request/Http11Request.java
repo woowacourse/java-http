@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpMethod;
+
 public class Http11Request {
 
     private final HttpMethod httpMethod;

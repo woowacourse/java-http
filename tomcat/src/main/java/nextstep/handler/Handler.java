@@ -1,8 +1,11 @@
 package nextstep.handler;
 
-import common.FileReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
+import nextstep.ModelAndView;
+import nextstep.View;
+import nextstep.ViewResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;
@@ -13,140 +16,144 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.util.HttpParser;
 
 public class Handler {
 
-    public static final String INDEX_HTML = "/index.html";
-    private static final String TEXT_HTML = "text/html;charset=utf-8";
+    private static final String INDEX_HTML = "/index.html";
+    private static final String BAD_REQUEST_HTML = "/400.html";
+    private static final String UNAUTHORIZED_HTML = "/401.html";
 
     private Handler() {
     }
 
     public static void handle(HttpRequest httpRequest, HttpResponse httpResponse)
             throws IOException {
+        ModelAndView modelAndView = handler(httpRequest, httpResponse);
+        View view = new View();
+        if (modelAndView.getViewName() != null) {
+            view = ViewResolver.resolve(modelAndView.getViewName());
+        }
+        view.render(modelAndView.getModel(), httpResponse);
+    }
+
+    private static ModelAndView handler(final HttpRequest httpRequest,
+            final HttpResponse httpResponse) {
         final var path = httpRequest.getPath();
         HttpMethod method = httpRequest.getHttpMethod();
         if (method == HttpMethod.GET && path.equals("/")) {
             httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.setBody("Hello world!");
-            return;
+            ModelAndView modelAndView = new ModelAndView();
+            modelAndView.setAttribute("message", "Hello world!");
+            return modelAndView;
         }
         if (method == HttpMethod.GET && path.isEmpty()) {
             httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
-            httpResponse.setBody(FileReader.readFile(INDEX_HTML));
-            return;
+            return new ModelAndView(INDEX_HTML);
         }
         if (method == HttpMethod.GET && (path.equals("/login") || path.equals("/login.html"))) {
-            Session session = httpRequest.getSession();
-            if (session != null) {
+            if (isAlreadyLogin(httpRequest)) {
                 httpResponse.setHttpStatus(HttpStatus.FOUND);
                 httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
-                return;
+                return new ModelAndView(INDEX_HTML);
             }
-            final var responseBody = FileReader.readFile(httpRequest.getUri());
             httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
-            httpResponse.setBody(responseBody);
-            return;
+            return new ModelAndView(httpRequest.getPath());
         }
         if (method == HttpMethod.GET && path.endsWith(".html")) {
-            final var responseBody = FileReader.readFile(httpRequest.getUri());
             httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
-            httpResponse.setBody(responseBody);
-            return;
+            return new ModelAndView(httpRequest.getPath());
         }
         if (method == HttpMethod.GET) {
-            final var responseBody = FileReader.readFile(httpRequest.getUri());
             httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.CONTENT_TYPE,
-                    httpRequest.getHeader(HttpHeaders.ACCEPT));
-            httpResponse.setBody(responseBody);
-            return;
+            return new ModelAndView(httpRequest.getPath());
         }
         if (method == HttpMethod.POST && (path.equals("/login") || path.equals("/login.html"))) {
-            login(httpRequest, httpResponse);
-            return;
+            final var viewName = login(httpRequest, httpResponse);
+            return new ModelAndView(viewName);
         }
-        if (method == HttpMethod.POST && path.equals("/register.html")) {
-            register(httpRequest, httpResponse);
+        if (method == HttpMethod.POST && (path.equals("/register") || path.equals(
+                "/register.html"))) {
+            final var viewName = register(httpRequest, httpResponse);
+            return new ModelAndView(viewName);
         }
+        httpResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+        return new ModelAndView(BAD_REQUEST_HTML);
     }
 
-    private static void login(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private static boolean isAlreadyLogin(final HttpRequest httpRequest) {
+        Session session = httpRequest.getSession();
+        if (session == null) {
+            return false;
+        }
+        return SessionManager.findSession(session.getId()).isPresent();
+    }
+
+    private static String login(HttpRequest httpRequest, HttpResponse httpResponse) {
         final var body = httpRequest.getBody();
-        String[] parameters = body.split("&");
-
-        String account = "";
-        String password = "";
-        for (String parameter : parameters) {
-            String[] keyValuePair = parameter.split("=");
-            if (keyValuePair[0].equals("account")) {
-                account = keyValuePair[1];
-            }
-            if (keyValuePair[0].equals("password")) {
-                password = keyValuePair[1];
-            }
+        Map<String, String> parameters = HttpParser.parseFormData(body);
+        if (parameters.containsKey("account") && parameters.containsKey("password")) {
+            return checkUser(httpResponse, parameters.get("account"), parameters.get("password"));
         }
-
-        if (account.isEmpty() || password.isEmpty()) {
-            httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.LOCATION, "/500.html");
-            return;
-        }
-        checkUser(httpResponse, account, password);
+        httpResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+        httpResponse.addHeader(HttpHeaders.LOCATION, BAD_REQUEST_HTML);
+        return BAD_REQUEST_HTML;
     }
 
-    private static void register(HttpRequest httpRequest, HttpResponse httpResponse) {
-        final var body = httpRequest.getBody();
-        String[] parameters = body.split("&");
-
-        String account = "";
-        String password = "";
-        String email = "";
-        for (String parameter : parameters) {
-            String[] keyValuePair = parameter.split("=");
-            if (keyValuePair[0].equals("account")) {
-                account = keyValuePair[1];
-            }
-            if (keyValuePair[0].equals("password")) {
-                password = keyValuePair[1];
-            }
-            if (keyValuePair[0].equals("email")) {
-                email = keyValuePair[1];
-            }
-        }
-        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            httpResponse.setHttpStatus(HttpStatus.OK);
-            httpResponse.addHeader(HttpHeaders.LOCATION, "/500.html");
-            return;
-        }
-        InMemoryUserRepository.save(new User(account, password, email));
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
-    }
-
-    private static void checkUser(HttpResponse httpResponse, String account, String password) {
-        InMemoryUserRepository.findByAccount(account)
+    private static String checkUser(HttpResponse httpResponse, String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(user -> loginSuccess(httpResponse, user),
-                        () -> loginFailed(httpResponse));
+                .map(user -> loginSuccess(httpResponse, user))
+                .orElseGet(() -> loginFailed(httpResponse));
     }
 
-    private static void loginSuccess(HttpResponse httpResponse, User user) {
+    private static String loginSuccess(HttpResponse httpResponse, User user) {
         httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
         httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
         final var session = new Session(UUID.randomUUID().toString());
         session.setAttribute("user", user);
         SessionManager.add(session);
         httpResponse.addCookie(new HttpCookie(HttpCookie.JSESSIONID, session.getId()));
+        return INDEX_HTML;
     }
 
-    private static void loginFailed(HttpResponse httpResponse) {
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, TEXT_HTML);
-        httpResponse.addHeader(HttpHeaders.LOCATION, "/401.html");
+    private static String loginFailed(HttpResponse httpResponse) {
+        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+        httpResponse.addHeader(HttpHeaders.LOCATION, UNAUTHORIZED_HTML);
+        return UNAUTHORIZED_HTML;
+    }
+
+    private static String register(HttpRequest httpRequest, HttpResponse httpResponse) {
+        final String account = "account";
+        final String password = "password";
+        final String email = "email";
+
+        final var body = httpRequest.getBody();
+        Map<String, String> parameters = HttpParser.parseFormData(body);
+        if (parameters.containsKey(account) &&
+                parameters.containsKey(password) &&
+                parameters.containsKey(email)
+        ) {
+            if (InMemoryUserRepository.findByAccount(parameters.get(account)).isPresent()) {
+                httpResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+                httpResponse.addHeader(HttpHeaders.LOCATION, BAD_REQUEST_HTML);
+                return BAD_REQUEST_HTML;
+            }
+            InMemoryUserRepository.save(
+                    new User(
+                            parameters.get(account),
+                            parameters.get(password),
+                            parameters.get(email)
+                    )
+            );
+
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
+            httpResponse.addHeader(HttpHeaders.LOCATION, INDEX_HTML);
+            return INDEX_HTML;
+        }
+
+        httpResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+        httpResponse.addHeader(HttpHeaders.LOCATION, BAD_REQUEST_HTML);
+        return BAD_REQUEST_HTML;
     }
 }

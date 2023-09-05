@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 public class FileReader {
 
     private static final String STATIC_RESOURCE_PATH = "static";
+    private static final String EXTENSION_HTML = ".html";
 
     private FileReader() {
     }
@@ -23,7 +24,7 @@ public class FileReader {
         URL resource = FileReader.class.getClassLoader()
                 .getResource(STATIC_RESOURCE_PATH + fileName);
         if (resource == null) {
-            fileName = fileName + ".html";
+            fileName = fileName + EXTENSION_HTML;
             resource = FileReader.class.getClassLoader()
                     .getResource(STATIC_RESOURCE_PATH + fileName);
         }

@@ -2,6 +2,7 @@ package org.apache.catalina.manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.Session;
 
 public class SessionManager {
@@ -19,7 +20,11 @@ public class SessionManager {
         SESSIONS.remove(session.getId());
     }
 
-    public static Session findSession(String id) {
-        return SESSIONS.get(id);
+    public static Optional<Session> findSession(String id) {
+        try {
+            return Optional.of(SESSIONS.get(id));
+        } catch (NullPointerException e) {
+            return Optional.empty();
+        }
     }
 }

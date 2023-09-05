@@ -1,7 +1,11 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.util.HttpParser;
 
 public class HttpRequest {
 
@@ -39,8 +43,29 @@ public class HttpRequest {
         return this.session;
     }
 
-    public void setSession(Session session) {
-        this.session = session;
+    public void addHeaders(final Map<String, String> headers) {
+        this.headers.putAll(headers);
+        addCookies();
+        addSession();
+    }
+
+    private void addCookies() {
+        if (!this.headers.containsHeader(HttpHeaders.COOKIE)) {
+            return;
+        }
+        List<HttpCookie> parsedCookies = HttpParser.parseCookies(
+                this.headers.get(HttpHeaders.COOKIE));
+        final Map<String, HttpCookie> cookieMap = parsedCookies.stream()
+                .collect(Collectors.toMap(HttpCookie::getName, Function.identity()));
+        this.cookies.putAll(cookieMap);
+    }
+
+    private void addSession() {
+        if (!this.cookies.containsKey(HttpCookie.JSESSIONID)) {
+            return;
+        }
+        final var sessionCookie = this.cookies.get(HttpCookie.JSESSIONID);
+        this.session = new Session(sessionCookie.getValue());
     }
 
     public HttpMethod getHttpMethod() {
@@ -51,20 +76,12 @@ public class HttpRequest {
         this.httpMethod = httpMethod;
     }
 
-    public void addHeader(String headerName, String value) {
-        this.headers.put(headerName, value);
-    }
-
     public String getHeader(String headerName) {
         return this.headers.get(headerName);
     }
 
     public boolean containsHeader(String headerName) {
         return this.headers.containsHeader(headerName);
-    }
-
-    public boolean hasCookie(String name) {
-        return this.cookies.containsKey(name);
     }
 
     public void addParameters(Map<String, String> parameters) {

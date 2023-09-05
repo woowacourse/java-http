@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long id = 1L;
 
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
@@ -16,12 +17,15 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        id += 1;
+        User saveUser = new User(id, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(user.getAccount(), saveUser);
     }
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

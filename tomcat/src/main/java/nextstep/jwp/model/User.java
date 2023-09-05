@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import lombok.Getter;
+
+@Getter
 public class User {
 
     private final Long id;

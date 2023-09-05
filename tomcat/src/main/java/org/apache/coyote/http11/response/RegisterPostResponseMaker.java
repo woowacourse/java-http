@@ -7,16 +7,13 @@ import org.apache.coyote.http11.QueryParams;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class RegisterPostResponseMaker implements ResponseMaker {
+public class RegisterPostResponseMaker extends ResponseMaker {
 
     @Override
-    public String createResponse(final HttpRequest request) throws Exception {
+    public String createResponse(final HttpRequest request) throws IOException {
         saveMemberFromQuery(request);
 
         final HttpResponse httpResponse = new HttpResponse(StatusCode.CREATED, ContentType.HTML, new String(getResponseBodyBytes("/index.html"), UTF_8));
@@ -29,11 +26,6 @@ public class RegisterPostResponseMaker implements ResponseMaker {
                 queryParams.getValueFromKey("account"),
                 queryParams.getValueFromKey("password"),
                 queryParams.getValueFromKey("email")));
-    }
-
-    private byte[] getResponseBodyBytes(String resourcePath) throws IOException {
-        final URL fileUrl = this.getClass().getClassLoader().getResource("static" + resourcePath);
-        return Files.readAllBytes(Paths.get(fileUrl.getPath()));
     }
 
 }

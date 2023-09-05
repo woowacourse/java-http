@@ -5,16 +5,13 @@ import org.apache.coyote.http11.LoginHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class LoginPostResponseMaker implements ResponseMaker {
+public class LoginPostResponseMaker extends ResponseMaker {
 
     @Override
-    public String createResponse(final HttpRequest request) throws Exception {
+    public String createResponse(final HttpRequest request) throws IOException {
         final LoginHandler loginHandler = new LoginHandler();
         if (loginHandler.login(request.getRequestBody())) {
             return successLoginResponse(request);
@@ -32,11 +29,6 @@ public class LoginPostResponseMaker implements ResponseMaker {
     private String failLoginResponse() throws IOException {
         final HttpResponse httpResponse = new HttpResponse(StatusCode.UNAUTHORIZED, ContentType.HTML, new String(getResponseBodyBytes("/401.html"), UTF_8));
         return httpResponse.getResponse();
-    }
-
-    private byte[] getResponseBodyBytes(String resourcePath) throws IOException {
-        final URL fileUrl = this.getClass().getClassLoader().getResource("static" + resourcePath);
-        return Files.readAllBytes(Paths.get(fileUrl.getPath()));
     }
 
 }

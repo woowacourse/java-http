@@ -7,19 +7,19 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final ResponseBody responseBody;
+    private final RequestBody requestBody;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, ResponseBody responseBody) {
+    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
-        this.responseBody = responseBody;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest makeRequest(BufferedReader inputReader) {
         RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
         RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
-        ResponseBody responseBody = new ResponseBody(readBody(inputReader, requestHeaders));
-        return new HttpRequest(requestLine, requestHeaders, responseBody);
+        RequestBody requestBody = new RequestBody(readBody(inputReader, requestHeaders));
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     private static String readRequestLine(BufferedReader inputReader) {
@@ -68,7 +68,7 @@ public class HttpRequest {
         return requestHeaders;
     }
 
-    public ResponseBody getResponseBody() {
-        return responseBody;
+    public RequestBody getResponseBody() {
+        return requestBody;
     }
 }

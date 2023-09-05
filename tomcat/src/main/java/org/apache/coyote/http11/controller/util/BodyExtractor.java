@@ -3,7 +3,7 @@ package org.apache.coyote.http11.controller.util;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.coyote.http11.request.ResponseBody;
+import org.apache.coyote.http11.request.RequestBody;
 
 public class BodyExtractor {
 
@@ -14,8 +14,11 @@ public class BodyExtractor {
     private BodyExtractor() {
     }
 
-    public static Map<String, String> convertBody(ResponseBody responseBody) {
-        return Stream.of(responseBody.getBody().split(INVIDUAL_QUERY_PARAM_DIVIDER))
+    public static Map<String, String> convertBody(RequestBody requestBody) {
+        if (requestBody.getBody().isEmpty()) {
+            throw new IllegalArgumentException("Body 에 데이터가 없습니다.");
+        }
+        return Stream.of(requestBody.getBody().get().split(INVIDUAL_QUERY_PARAM_DIVIDER))
             .collect(Collectors.toMap(BodyExtractor::keyOf, BodyExtractor::valueOf));
     }
 

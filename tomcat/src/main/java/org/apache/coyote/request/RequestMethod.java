@@ -18,4 +18,9 @@ public enum RequestMethod {
     public boolean isGet(){
         return this == GET;
     }
+
+    @Override
+    public String toString() {
+        return this.name();
+    }
 }

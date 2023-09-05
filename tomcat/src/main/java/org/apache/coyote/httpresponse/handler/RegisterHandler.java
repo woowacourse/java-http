@@ -24,13 +24,12 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpResponse handlePost(final HttpRequest request) {
-        final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
-        final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.CREATED);
         saveUser(request.getRequestBody());
-        final HttpResponse afterSetContent = afterSetHttpStatus.setBlankContent();
-        final HttpResponse afterSetLocationHeader = afterSetContent.setLocationHeader("/index.html");
-        final HttpResponse afterSetCookie = afterSetLocationHeader.setCookieHeader(request.getCookieHeader());
-        return afterSetCookie;
+        return HttpResponse
+                .init(request.getHttpVersion())
+                .setHttpStatus(HttpStatus.CREATED)
+                .setBlankContent()
+                .setLocationHeader("/index.html");
     }
 
     private void saveUser(final RequestBody requestBody) {
@@ -39,11 +38,10 @@ public class RegisterHandler implements Handler {
     }
 
     private HttpResponse handleGet(final HttpRequest request) {
-        final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
-        final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.OK);
         final String resourcePath = request.getPath() + ".html";
-        final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath);
-        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
-        return afterSetCookie;
+        return HttpResponse
+                .init(request.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .setContent(resourcePath);
     }
 }

@@ -34,10 +34,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final char COLON = ':';
-    private static final String EMPTY_JSESSIONID = "";
+    private static final String EMPTY = "";
     private static final String CSS = ".css";
     private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
     private static final HttpCookie httpCookie = new HttpCookie();
+    private static final String POST_HTTP_METHOD = "POST";
+    private static Map<String, String> headers;
     private final Socket connection;
 
 
@@ -59,10 +61,10 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);  // HTTP method를 읽음 (예: GET)
-            final Map<String, String> headers = parseRequestHeaders(br); // header를 읽음
+            headers = parseRequestHeaders(br); // header를 읽음
             storeJsessionId(headers);
 
-            if ("POST".equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
+            if (POST_HTTP_METHOD.equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
                 final String requestBody = readRequestBody(br, headers);
                 registerUser(requestBody);
             }
@@ -135,7 +137,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        return "";
+        return EMPTY;
     }
 
     private String readRequestBody(final BufferedReader br, final Map<String, String> headers) throws IOException {
@@ -166,14 +168,14 @@ public class Http11Processor implements Runnable, Processor {
     private List<String> readAllLines(final BufferedReader br) throws IOException {
         final List<String> lines = new ArrayList<>();
         String line;
-        while (!(line = br.readLine()).equals(EMPTY_JSESSIONID)) {
+        while (!(line = br.readLine()).equals(EMPTY)) {
             lines.add(line);
         }
         return lines;
     }
 
     private int getEmptyLineIndex(final List<String> lines) {
-        int emptyLineIndex = lines.indexOf(EMPTY_JSESSIONID);
+        int emptyLineIndex = lines.indexOf(EMPTY);
         if (emptyLineIndex == -1) {
             emptyLineIndex = lines.size();
         }
@@ -244,7 +246,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isValidUser(final String path) {
-        String noUrlPath = path.replace(LOGIN_WITH_PARAM.getUrl(), "");
+        String noUrlPath = path.replace(LOGIN_WITH_PARAM.getUrl(), EMPTY);
         Map<String, String> loginData = parseLoginData(noUrlPath);
         String parsedAccount = loginData.get("account");
         String parsedPassword = loginData.get("password");
@@ -289,7 +291,6 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = new User(parsedAccount, parsedPassword, parsedEmail);
         InMemoryUserRepository.save(user);
-        SessionManager.add(user, httpCookie);
         log.info("유저 저장 성공!");
     }
 

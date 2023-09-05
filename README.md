@@ -5,11 +5,13 @@
 - [x] 요청의 queryParam 파싱하기
     - [x] 복수개의 value가 올 수 있게 하기
     - [x] 요청에 쿼리가 없는 경우 빈 map 반환하도록 처리
-- [x] http 요청 구현하기
-    - [x] queryParam
+- [ ] http 요청 구현하기(리팩터링)
+    - [ ] RequestLine 추상화하기
+        - [x] queryParam
+        - [x] uri
+        - [x] httpMethod
     - [x] body
     - [x] endPoint
-    - [x] httpMethod
     - [x] headers
 - [x] /login API 요청 처리
     - [x] 요청한 회원을 조회 후 로깅
@@ -26,6 +28,6 @@
 - [x] Http cookie 구현하기
     - [x] request를 cookie 클래스 형태로 파싱하기
     - [x] 로그인 후 response를 반환할 때, SET-COOKIES : JSESSIONID값 추가하기
-- [ ] http session
-    - [ ] 로그인된 상태에서 GET /login 접근 시 index.html로 리다이렉트 처리
+- [x] http session
+    - [x] 로그인된 상태에서 GET /login 접근 시 index.html로 리다이렉트 처리
     - [x] 로그인 성공하면 session을 저장하기

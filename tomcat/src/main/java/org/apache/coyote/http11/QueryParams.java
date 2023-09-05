@@ -7,7 +7,7 @@ public class QueryParams {
 
     private Map<String, String> queryMap;
 
-    public QueryParams(final Map<String, String> queryMap) {
+    private QueryParams(final Map<String, String> queryMap) {
         this.queryMap = queryMap;
     }
 

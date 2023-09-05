@@ -3,8 +3,9 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.cookie.Cookie;
+import org.apache.http.Cookie;
 import org.apache.coyote.Processor;
+import org.apache.http.HttpHeaders;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 import org.slf4j.Logger;
@@ -132,14 +133,14 @@ public class Http11Processor implements Runnable, Processor {
     private String generateRedirect(final String location, final String statusCode) {
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
-                "Location: " + location + " ");
+                HttpHeaders.LOCATION + ": " + location + " ");
     }
 
     private String generateRedirect(final String location, final String statusCode, final Cookie cookie) {
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
-                "Set-Cookie: " + cookie.generateCookieHeaderValue() + " ",
-                "Location: " + location + " ");
+                HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
+                HttpHeaders.LOCATION + ": " + location + " ");
     }
 
     private String generateResult(final String path, final String statusCode) throws IOException {
@@ -166,8 +167,8 @@ public class Http11Processor implements Runnable, Processor {
     private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
-                "Content-Type: " + CONTENT_TYPE.get(fileExtension) + " ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
+                HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }
@@ -175,9 +176,9 @@ public class Http11Processor implements Runnable, Processor {
     private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody, final Cookie cookie) {
         return String.join("\r\n",
                 "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
-                "Set-Cookie: " + cookie.generateCookieHeaderValue() + " ",
-                "Content-Type: " + CONTENT_TYPE.get(fileExtension) + " ",
-                "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
+                HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
+                HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }

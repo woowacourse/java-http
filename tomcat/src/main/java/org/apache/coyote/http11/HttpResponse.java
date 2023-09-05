@@ -8,24 +8,25 @@ import static java.lang.String.join;
 
 public class HttpResponse {
 
+    public static final String CRLF = "\r\n";
     private HttpStatus httpStatus;
-    private String contentType;
+    private ContentType contentType;
     private String body;
     private Map<String, String> headers;
 
     public HttpResponse(final HttpStatus httpStatus) {
-        this(httpStatus, "Content-Type: text/plain;charset=utf-8 ");
+        this(httpStatus, new ContentType("text/plain", "utf-8"));
     }
 
-    public HttpResponse(final HttpStatus httpStatus, final String contentType) {
+    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType) {
         this(httpStatus, contentType, null);
     }
 
-    public HttpResponse(final HttpStatus httpStatus, final String contentType, final String body) {
+    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body) {
         this(httpStatus, contentType, body, new HashMap<>());
     }
 
-    public HttpResponse(final HttpStatus httpStatus, final String contentType, final String body,
+    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body,
                         final Map<String, String> headers) {
         this.httpStatus = httpStatus;
         this.contentType = contentType;
@@ -53,11 +54,11 @@ public class HttpResponse {
             return joined;
         }
         if (joined.isBlank()) {
-            return contentType + "\r\n" + "Content-Length: " + body.getBytes().length + " ";
+            return contentType + CRLF + "Content-Length: " + body.getBytes().length + " ";
         }
-        return join("\r\n",
+        return join(CRLF,
                 joined,
-                contentType,
+                contentType.toString(),
                 "Content-Length: " + body.getBytes().length + " ");
     }
 
@@ -66,7 +67,7 @@ public class HttpResponse {
         if (headers != null) {
             joined = headers.entrySet().stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                    .collect(Collectors.joining("\r\n"));
+                    .collect(Collectors.joining(CRLF));
         }
         return joined;
     }
@@ -75,16 +76,16 @@ public class HttpResponse {
         if (body == null) {
             return "";
         }
-        return "\r\n" + body;
+        return CRLF + body;
     }
 
     public String buildResponse() {
         String joinedHeader = getHeaders();
 
         String startLine = "HTTP/1.1 " + httpStatus + " ";
-        String withHeader = join("\r\n", startLine, joinedHeader);
+        String withHeader = join(CRLF, startLine, joinedHeader);
 
-        return join("\r\n", withHeader, getBody());
+        return join(CRLF, withHeader, getBody());
     }
 
 }

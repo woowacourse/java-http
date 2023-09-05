@@ -83,9 +83,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse buildStaticResponse(HttpStatus status, String uri) throws IOException {
         File page = getFile(uri);
-        String contentType = getContentType(page);
+        String contentType = getMimeType(page);
         String body = buildResponseBody(page);
-        return new HttpResponse(status, contentType, body);
+        return new HttpResponse(status, new ContentType(contentType), body);
     }
 
     @Nullable
@@ -97,14 +97,12 @@ public class Http11Processor implements Runnable, Processor {
         return Optional.ofNullable(resource.getFile()).map(File::new).orElse(null);
     }
 
-    private String getContentType(final File file) throws IOException {
+    private String getMimeType(final File file) throws IOException {
         if (file == null) {
-            return "Content-Type: text/plain;charset=utf-8 ";
+            return "text/plain";
         }
         final var urlConnection = file.toURI().toURL().openConnection();
-        final var mimeType = urlConnection.getContentType();
-        return "Content-Type: " + mimeType + ";charset=utf-8 ";
-
+        return urlConnection.getContentType();
     }
 
     private String buildResponseBody(final File file) throws IOException {

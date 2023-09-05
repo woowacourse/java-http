@@ -14,13 +14,6 @@ public class FileHandler implements RequestHandler {
         String target = httpRequest.getTarget();
 
         String content = FileReader.read(target);
-        return new HttpResponse(HttpStatus.OK, ContentType.of(getContentType(target)), content);
-    }
-
-    private static String getContentType(final String url) {
-        if (url.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html";
+        return new HttpResponse(HttpStatus.OK, ContentType.from(target), content);
     }
 }

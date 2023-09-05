@@ -11,7 +11,7 @@ public class QueryStrings {
     private static final int VALUE_INDEX = 1;
     private final MultiValueMap<String, String> queryStrings;
 
-    private QueryStrings(MultiValueMap<String, String> queryStrings) {
+    private QueryStrings(final MultiValueMap<String, String> queryStrings) {
         this.queryStrings = queryStrings;
     }
 

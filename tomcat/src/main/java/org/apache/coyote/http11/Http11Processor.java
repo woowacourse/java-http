@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleRequest(BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+    private void handleRequest(final BufferedReader bufferedReader, final BufferedWriter bufferedWriter) {
         try {
             final HttpRequest request = HttpRequestParser.parse(bufferedReader);
             final HttpServlet servlet = ServletMapping.getSupportedServlet(request);

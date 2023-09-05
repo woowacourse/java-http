@@ -28,8 +28,8 @@ public class DispatcherServlet {
             return;
         }
         final Controller controller = findController(httpRequest);
-        final ResponseEntity responseBody = controller.service(httpRequest);
-        httpResponse.addAttributes(responseBody);
+        final ResponseEntity responseEntity = controller.service(httpRequest);
+        httpResponse.addAttributes(responseEntity);
     }
 
     private boolean isPassedThroughInterceptors(final HttpRequest httpRequest, final HttpResponse httpResponse) {

@@ -9,6 +9,9 @@ public class HttpResponse {
 
     private static final String BLANK = " ";
 
+    private HttpResponse() {
+    }
+
     public static String getResponse(final HttpResponseEntity responseEntity) throws IOException {
         String contentType = "text/html;charset=utf-8";
         if (responseEntity.getPath().equals("/")) {
@@ -48,4 +51,19 @@ public class HttpResponse {
         );
     }
 
+    public static String makeRedirectResponse(
+            final String contentType,
+            final HttpResponseEntity responseEntity,
+            final String body
+    ) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        return String.join("\r\n",
+                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                "Location: " + responseEntity.getPath(),
+                "Content-Type: " + contentType + BLANK,
+                "Content-Length: " + body.getBytes().length + BLANK,
+                "",
+                body
+        );
+    }
 }

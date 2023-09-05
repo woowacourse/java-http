@@ -37,5 +37,4 @@ public class HttpRequestBody {
     public String getBody() {
         return body;
     }
-
 }

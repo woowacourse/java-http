@@ -25,10 +25,10 @@ public class Session {
     }
 
     public void invalidate() {
+        values.clear();
     }
 
     public String getId() {
         return id;
     }
-
 }

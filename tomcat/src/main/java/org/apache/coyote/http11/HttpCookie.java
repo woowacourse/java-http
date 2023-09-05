@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpCookie {
 
@@ -19,14 +20,9 @@ public class HttpCookie {
     }
 
     public String getValues() {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (final String key : values.keySet()) {
-            stringBuilder.append(key)
-                    .append("=")
-                    .append(values.get(key))
-                    .append(" ");
-        }
-        return stringBuilder.toString();
+        return values.keySet()
+                .stream()
+                .map(key -> key + "=" + values.get(key) + " ")
+                .collect(Collectors.joining());
     }
-
 }

@@ -30,5 +30,4 @@ public class QueryString {
     public String get(final String key) {
         return params.get(key);
     }
-
 }

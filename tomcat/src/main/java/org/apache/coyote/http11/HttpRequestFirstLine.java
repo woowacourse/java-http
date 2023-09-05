@@ -5,28 +5,27 @@ import java.util.List;
 
 public class HttpRequestFirstLine {
 
-    private final String method;
+    private final HttpMethod httpMethod;
     private final HttpPath httpPath;
     private final String protocolVersion;
 
     public static HttpRequestFirstLine from(final String firstLine) {
-        System.out.println("firstLine = " + firstLine);
         final List<String> firstLines = Arrays.asList(firstLine.split(" "));
         return new HttpRequestFirstLine(firstLines.get(0), firstLines.get(1), firstLines.get(2));
     }
 
     public HttpRequestFirstLine(
-            final String method,
+            final String httpMethod,
             final String uri,
             final String protocolVersion
     ) {
-        this.method = method;
+        this.httpMethod = HttpMethod.valueOf(httpMethod);
         this.httpPath = HttpPath.from(uri);
         this.protocolVersion = protocolVersion;
     }
 
-    public String getMethod() {
-        return method;
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
     }
 
     public HttpPath getHttpPath() {
@@ -36,5 +35,4 @@ public class HttpRequestFirstLine {
     public String getProtocolVersion() {
         return protocolVersion;
     }
-
 }

@@ -25,5 +25,4 @@ public class SessionManager implements Manager {
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
-
 }

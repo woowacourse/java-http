@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,8 +28,30 @@ public class HttpRequestHeader {
         this.headers = headers;
     }
 
+    public boolean hasJSessionId() {
+        final String cookie = headers.get("Cookie");
+        if (cookie != null) {
+            return Arrays.stream(cookie.split("; "))
+                    .map(it -> it.split("="))
+                    .anyMatch(it -> it[0].equals("JSESSIONID"));
+        }
+        return false;
+    }
+
+    public String getJSessionId() {
+        final String cookie = headers.get("Cookie");
+        if (cookie != null) {
+            return Arrays.stream(cookie.split("; "))
+                    .map(s -> s.split("="))
+                    .filter(word -> word[0].equals("JSESSIONID"))
+                    .findAny()
+                    .map(word -> word[1])
+                    .orElse(null);
+        }
+        return null;
+    }
+
     public String get(final String key) {
         return headers.get(key);
     }
-
 }

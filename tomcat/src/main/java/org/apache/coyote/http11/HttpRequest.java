@@ -38,24 +38,15 @@ public class HttpRequest {
         return httpPath.isRegister();
     }
 
+    public boolean isCorrectMethod(final HttpMethod method) {
+        return firstLine.getHttpMethod() == method;
+    }
+
     public HttpPath getPath() {
         return firstLine.getHttpPath();
-    }
-
-    public String getProtocolVersion() {
-        return firstLine.getProtocolVersion();
-    }
-
-    public String getMethod() {
-        return firstLine.getMethod();
-    }
-
-    public HttpRequestHeader getHeaders() {
-        return headers;
     }
 
     public HttpRequestBody getBody() {
         return body;
     }
-
 }

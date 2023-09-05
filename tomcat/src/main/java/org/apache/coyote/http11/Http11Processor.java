@@ -16,9 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,20 +76,78 @@ public class Http11Processor implements Runnable, Processor {
 
   private String handleRequest(final String startLine, final Map<String, String> headers)
       throws URISyntaxException, IOException {
+    int statusCode = 200;
+    String statusMessage = "OK";
     String responseBody = "";
     String contentType = "text/html";
+    String location = null;
+
+    URL filePathUrl;
     final List<String> startLineTokens = List.of(startLine.split(" "));
-    if (startLineTokens.get(0).equals("GET")) {
-      responseBody = handleGetRequest(startLineTokens);
+    String method = startLineTokens.get(0);
+    // ===== uri => path, queryString
+    String uri = startLineTokens.get(1);
+    int uriSeparatorIndex = uri.indexOf("?");
+    String path;
+    Map<String, String> queryProperties = new HashMap<>();
+    if (uriSeparatorIndex == -1) {
+      path = uri;
+    } else {
+      path = uri.substring(0, uriSeparatorIndex);
+      final String queryString = uri.substring(uriSeparatorIndex + 1);
+      // 쿼리스트링 파싱
+      String[] queryTokens = queryString.split("&");
+      for (int i = 0; i < queryTokens.length; i++) {
+        int equalSeperatorIndex = queryTokens[i].indexOf("=");
+        if (equalSeperatorIndex != -1) {
+          queryProperties.put(queryTokens[i].substring(0, equalSeperatorIndex),
+              queryTokens[i].substring(equalSeperatorIndex + 1));
+
+        }
+      }
+    }
+
+    if (method.equals("GET")) {
+      if (path.equals("/login")) {
+        if (!queryProperties.isEmpty() && queryProperties.get("account").equals("gugu")
+            && queryProperties.get("password").equals("password")) {
+          statusCode = 302;
+          statusMessage = "Found";
+          location = "/index.html";
+          filePathUrl = getClass().getResource("/static/login.html");
+        } else {
+          statusCode = 401;
+          statusMessage = "Unauthorization";
+          filePathUrl = getClass().getResource("/static/401.html");
+        }
+
+      } else {
+        filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
+            .orElse(getClass().getResource("/static/404.html"));
+      }
+
+      final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
+      Charset charset = StandardCharsets.UTF_8;
+      responseBody = String.join(System.lineSeparator(), Files.readAllLines(filePath, charset));
       if (isRequestCssFile(headers, startLineTokens.get(1).split("."))) {
         contentType = "text/css";
       }
     }
+    Map<String, String> responseHeaders = new HashMap<>();
+    responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
+    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+    if (location != null) {
+      responseHeaders.put("Location", location);
+    }
+    final String responseHeader = String.join(" \r\n",
+        responseHeaders.entrySet()
+            .stream()
+            .map(entry -> entry.getKey() + ": " + entry.getValue()
+            ).collect(Collectors.toList()));
 
     return String.join("\r\n",
-        "HTTP/1.1 200 OK ",
-        "Content-Type: " + contentType + ";charset=utf-8 ",
-        "Content-Length: " + responseBody.getBytes().length + " ",
+        "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
+        responseHeader,
         "",
         responseBody);
   }
@@ -98,44 +155,5 @@ public class Http11Processor implements Runnable, Processor {
   private boolean isRequestCssFile(final Map<String, String> headers, final String[] tokens) {
     return (tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || headers.get("Accept")
         .contains("text/css");
-  }
-
-  private String handleGetRequest(final List<String> tokens)
-      throws URISyntaxException, IOException {
-    String uri = tokens.get(1);
-    int uriSeperatorIndex = uri.indexOf("?");
-    String path;
-    String queryString;
-    if (uriSeperatorIndex == -1) {
-      path = uri;
-      queryString = "";
-    } else {
-      path = uri.substring(0, uriSeperatorIndex);
-      queryString = uri.substring(uriSeperatorIndex + 1);
-    }
-    URL filePathUrl;
-    if (path.equals("/login")) {
-      filePathUrl = getClass().getResource("/static/login.html");
-      if (!queryString.equals("")) {
-        Map<String, String> queryProperties = new HashMap<>();
-        String[] queryTokens = queryString.split("&");
-        for (int i = 0; i < queryTokens.length; i++) {
-          String[] queryPair = queryTokens[i].split("=");
-          queryProperties.put(queryPair[0], queryPair[1]);
-        }
-        final Optional<User> user = InMemoryUserRepository.findByAccount(
-            queryProperties.get("account"));
-        if (user.isPresent()) {
-          log.info("회원 정보 : {}", user);
-        }
-      }
-    } else {
-      filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
-          .orElse(getClass().getResource("/static/404.html"));
-    }
-
-    final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
-    Charset charset = StandardCharsets.UTF_8;
-    return String.join(System.lineSeparator(), Files.readAllLines(filePath, charset));
   }
 }

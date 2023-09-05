@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class RequestBody {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestBody.class);
 
     private final String contents;
 
@@ -20,7 +20,7 @@ public class RequestBody {
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         final String content = new String(buffer);
-        log.debug("Request body: " + content);
+        log.debug("Request body: {}", content);
         return new RequestBody(content);
     }
 

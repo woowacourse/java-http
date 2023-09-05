@@ -20,7 +20,9 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.domain.HttpHeader;
 import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.domain.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,20 +55,23 @@ public class Http11Processor implements Runnable, Processor {
         final var outputStream = connection.getOutputStream()
     ) {
       final HttpRequest request = HttpRequest.from(inputStream);
+      final RequestLine requestLine = request.getRequestLine();
+      final HttpHeader header = request.getHeader();
+      final String body = request.getBody();
 
       final SessionManager sessionManager = new SessionManager();
       final String response;
 
-      if (request.getUrl().equals("/login")) {
-        final String sessionId = request.getCookie(JSESSIONID);
-        response = login(sessionManager, sessionId, request);
-      } else if (request.getUrl().equals("/register")) {
-        final int contentLength = Integer.parseInt(request.getHeader("Content-Length"));
-        final Map<String, String> body = readBody(inputStream, contentLength);
-        response = register(body);
+      final String url = requestLine.getUrl();
+      if (url.equals("/login")) {
+        final String sessionId = header.getCookie(JSESSIONID);
+        response = login(sessionManager, sessionId, requestLine.getParams());
+      } else if (url.equals("/register")) {
+        final Map<String, String> bodyParams = extractParams(body);
+        response = register(bodyParams);
       } else {
-        final String responseBody = readContentsFromFile(request.getUrl());
-        final String contentType = getContentType(request);
+        final String responseBody = readContentsFromFile(url);
+        final String contentType = getContentType(header.get("Accept"));
         response = response200(contentType, responseBody);
       }
 
@@ -80,10 +85,10 @@ public class Http11Processor implements Runnable, Processor {
   private String login(
       final SessionManager sessionManager,
       final String sessionId,
-      final HttpRequest request
+      final Map<String, String> params
   ) {
-    final String account = request.getParam("account");
-    final String password = request.getParam("password");
+    final String account = params.get("account");
+    final String password = params.get("password");
     if (isAuthorized(sessionId, sessionManager)) {
       return response302(INDEX_PAGE);
     } else if (account == null) {
@@ -95,16 +100,7 @@ public class Http11Processor implements Runnable, Processor {
   private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
     return sessionId != null && sessionManager.findSession(sessionId) != null;
   }
-
-  private Map<String, String> readBody(
-      final BufferedReader inputStream,
-      final int contentLength
-  ) throws IOException {
-    final char[] buffer = new char[contentLength];
-    inputStream.read(buffer);
-    return extractParams(new String(buffer));
-  }
-
+  
   private String register(final Map<String, String> body) {
     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
     InMemoryUserRepository.save(user);
@@ -179,15 +175,14 @@ public class Http11Processor implements Runnable, Processor {
     return new String(Files.readAllBytes(file.toPath()));
   }
 
-  private String getContentType(final HttpRequest request) {
-    final String accept = request.getHeader("Accept");
+  private boolean isInvalidFile(final URL resource) {
+    return resource == null || new File(resource.getFile()).isDirectory();
+  }
+
+  private String getContentType(final String accept) {
     if (accept == null) {
       return "text/html";
     }
     return accept.split(",")[0];
-  }
-
-  private boolean isInvalidFile(final URL resource) {
-    return resource == null || new File(resource.getFile()).isDirectory();
   }
 }

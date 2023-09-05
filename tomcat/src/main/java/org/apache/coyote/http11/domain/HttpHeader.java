@@ -1,23 +1,23 @@
 package org.apache.coyote.http11.domain;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpHeader {
 
   private final Map<String, String> headers;
+  private final Cookie cookie;
 
   public HttpHeader(final Map<String, String> headers) {
     this.headers = headers;
+    this.cookie = Cookie.from(headers.get("Cookie"));
   }
 
-  public static HttpHeader from(final BufferedReader br) throws IOException {
+  public static HttpHeader from(final List<String> lines) {
     final Map<String, String> headers = new HashMap<>();
-    String line;
-    while (!(line = br.readLine()).isEmpty()) {
-      final String[] tokens = line.split(": ");
+    for (final String line : lines) {
+      final String[] tokens = line.split(":", 2);
       headers.put(tokens[0].trim(), tokens[1].trim());
     }
     return new HttpHeader(headers);
@@ -25,5 +25,9 @@ public class HttpHeader {
 
   public String get(final String key) {
     return this.headers.get(key);
+  }
+
+  public String getCookie(final String key) {
+    return this.cookie.get(key);
   }
 }

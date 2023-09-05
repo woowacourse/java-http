@@ -5,6 +5,7 @@ public class Url {
     private static final String QUERY_STRING_DELIMITER = "\\?";
     private static final int URL_PATH_INDEX = 0;
     private static final int QUERY_STRING_INDEX = 1;
+
     private final String urlPath;
     private final QueryStrings queryStrings;
 

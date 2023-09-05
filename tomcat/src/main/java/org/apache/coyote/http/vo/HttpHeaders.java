@@ -11,6 +11,7 @@ public class HttpHeaders {
 
     private static final String KEY_VALUE_DELIMITER = ":";
     private static final String VALUE_DELIMITER = ",";
+
     private final MultiValueMap<HttpHeader, String> headers;
 
     private HttpHeaders(final MultiValueMap<HttpHeader, String> headers) {

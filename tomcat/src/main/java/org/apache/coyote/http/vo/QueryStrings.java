@@ -7,6 +7,7 @@ public class QueryStrings {
 
     private static final String QUERY_STRING_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
+
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private final MultiValueMap<String, String> queryStrings;

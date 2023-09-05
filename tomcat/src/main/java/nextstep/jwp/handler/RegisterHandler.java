@@ -15,6 +15,7 @@ public class RegisterHandler implements Handler {
     private static final String ACCOUNT_BODY = "account";
     private static final String EMAIL_BODY = "email";
     private static final String PASSWORD_BODY = "password";
+
     private final AuthService authService = new AuthService();
 
     @Override

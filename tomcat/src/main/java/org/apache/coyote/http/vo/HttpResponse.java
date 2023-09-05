@@ -6,6 +6,7 @@ import org.apache.coyote.http.HttpStatus;
 public class HttpResponse {
 
     private static final String SUPPORT_HTTP_VERSION = "HTTP/1.1 ";
+
     private final HttpStatus status;
     private final HttpHeaders headers;
     private final String body;
@@ -44,6 +45,7 @@ public class HttpResponse {
     }
 
     public static class Builder {
+
         private HttpStatus status;
         private HttpHeaders headers;
         private String body = "";

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import org.apache.coyote.http.vo.HttpRequest;
 
 public enum SupportFile {
+
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css;"),
     JS(".js", "application/javascript;"),

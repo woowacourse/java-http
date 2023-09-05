@@ -42,6 +42,7 @@ public class LoginPageHandler implements Handler {
 
     @Override
     public boolean isSupported(final HttpRequest request) {
-        return request.isRequestMethodOf(HttpMethod.GET) && request.isUrl(Url.from("/login"));
+        return request.isRequestMethodOf(HttpMethod.GET) &&
+                request.isUrl(Url.from("/login"));
     }
 }

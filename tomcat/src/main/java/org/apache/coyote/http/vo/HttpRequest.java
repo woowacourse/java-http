@@ -86,6 +86,7 @@ public class HttpRequest {
     }
 
     public static class Builder {
+
         private HttpMethod method;
         private Url url;
         private HttpHeaders headers;

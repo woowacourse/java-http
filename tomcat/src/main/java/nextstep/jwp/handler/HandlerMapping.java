@@ -15,7 +15,8 @@ public class HandlerMapping {
     );
 
     public static boolean hasSupportedHandler(final HttpRequest request) {
-        return handlers.stream().anyMatch(it -> it.isSupported(request));
+        return handlers.stream()
+                .anyMatch(it -> it.isSupported(request));
     }
 
     public static Handler getSupportedHandler(final HttpRequest request) {

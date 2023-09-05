@@ -3,40 +3,24 @@ package org.apache.coyote;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-import java.util.Set;
-
 public abstract class Controller {
 
-    public HttpResponse handleRequest(final HttpRequest httpRequest) {
-        final String method = httpRequest.getMethod();
-        if (checkMethod(method)) {
-            return handle(httpRequest);
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        if (!canHandle(httpRequest)) {
+            // TODO: exception - there is any controller to handle
         }
-        return HttpResponse.init();
-    }
-
-    private boolean checkMethod(final String method) {
-        final Set<String> methods = Set.of("GET", "POST");
-        return methods.contains(method);
-    }
-
-    private HttpResponse handle(final HttpRequest httpRequest) {
         final String method = httpRequest.getMethod();
         if ("GET".equals(method)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
         }
         if ("POST".equals(method)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
         }
-        if ("PATCH".equals(method)) {
-
-        }
-        if ("DELETE".equals(method)) {
-
-        }
-        return HttpResponse.init();
+        // TODO: exception - invalid http method
     }
 
-    public abstract HttpResponse doGet(final HttpRequest httpRequest);
-    public abstract HttpResponse doPost(final HttpRequest httpRequest);
+    public abstract boolean canHandle(final HttpRequest target);
+
+    public abstract HttpResponse doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
+    public abstract HttpResponse doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
 }

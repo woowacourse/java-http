@@ -1,16 +1,16 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestHandler;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.RootController;
+import org.apache.coyote.RequestMapping;
+import org.apache.coyote.ResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,14 +56,18 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequestParser httpRequestParser = new HttpRequestParser(reader);
             final HttpRequest httpRequest = httpRequestParser.parse();
 
-            final RequestHandler requestHandler = new RequestHandler(Map.of(
-                    "/", new RootController(),
-                    "/login", new LoginController(),
-                    "/register", new RegisterController()
+            final RequestMapping requestMapping = new RequestMapping(List.of(
+                    new RootController(),
+                    new LoginController(),
+                    new RegisterController(),
+                    new ResourceController()
             ));
 
-            final Controller handler = requestHandler.getHandler(httpRequest);
-//            final HttpResponse httpResponse = handler.handleRequest(httpRequest);
+            /* handler */
+//            final Controller controller = requestMapping.getController(httpRequest);
+//            final HttpResponse httpResponse = HttpResponse.init();
+//            controller.service(httpRequest, httpResponse);
+
             final HttpResponse httpResponse = handleRequest(httpRequest);
             outputStream.write(httpResponse.stringify().getBytes());
             outputStream.flush();

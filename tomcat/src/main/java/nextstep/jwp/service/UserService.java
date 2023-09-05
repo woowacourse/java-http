@@ -1,7 +1,6 @@
 package nextstep.jwp.service;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -18,17 +17,15 @@ public class UserService {
         final String account = requestBody.get("account");
         final String password = requestBody.get("password");
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UnauthorizedException(account));
 
-        if (user.isEmpty()) {
-            throw new UnauthorizedException(account);
-        }
-        if (!user.get().checkPassword(password)) {
+        if (!user.checkPassword(password)) {
             throw new UnauthorizedException(account);
         }
         log.info(user.toString());
 
-        return setSessionWithUUID(user.get());
+        return setSessionWithUUID(user);
     }
 
     private String setSessionWithUUID(final User user) {
@@ -44,9 +41,10 @@ public class UserService {
         final String password = requestBody.get("password");
         final String email = requestBody.get("email");
 
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new UnauthorizedException(account);
-        }
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(ignored -> {
+                    throw new UnauthorizedException(account);
+                });
 
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

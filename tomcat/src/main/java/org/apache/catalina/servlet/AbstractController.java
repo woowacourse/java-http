@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isMatchMethod(HttpMethod.GET)) {
             doGet(request, response);
         }
@@ -17,7 +17,7 @@ public abstract class AbstractController implements Controller {
 
     }
 
-    protected abstract void doPost(HttpRequest request, HttpResponse response);
+    protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
 
-    protected abstract void doGet(HttpRequest request, HttpResponse response);
+    protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
 }

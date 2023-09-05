@@ -19,6 +19,7 @@ public class RequestBody {
     public static RequestBody parse(String requestBody) {
         return Arrays.stream(requestBody.split("&"))
                 .map(query -> query.split("="))
+                .filter(it -> it.length == 2)
                 .collect(collectingAndThen(toMap(query -> query[0], query -> query[1]), RequestBody::new));
     }
 

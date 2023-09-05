@@ -74,6 +74,9 @@ public class Handler {
                     .redirectPage("register.html")
                     .build();
         }
+        String password = requestBody.getValueOf("password");
+        String email = requestBody.getValueOf("email");
+        InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponse.builder()
                 .httpStatus(HttpStatus.CREATED)
                 .responseBody(parseResponseBody("static/index.html"))

@@ -14,7 +14,7 @@ class UserSessionTest {
     @DisplayName("유저의 세션이 존재하는 지 조회할 수 있다 - false")
     void exist_fail() {
         //when
-        final boolean exist = UserSession.exist("test");
+        final boolean exist = UserSession.exist("nothing");
 
         //then
         assertThat(exist).isFalse();

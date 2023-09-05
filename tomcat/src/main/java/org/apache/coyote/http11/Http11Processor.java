@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -31,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
+             final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
             RequestParser requestParser = new RequestParser(inputStream);
             Request request = requestParser.parse();
             doHandler(request);

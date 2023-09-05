@@ -31,10 +31,11 @@ public class HttpRequestHandler {
         }
 
         if (httpRequest.isRegister()) {
-            final Map<String, String> userInfos = requestBody.parseUserInfos();
             if (httpRequest.isCorrectMethod(HttpMethod.GET)) {
                 return new HttpResponseEntity(HttpStatus.OK, REGISTER_PAGE);
             }
+            
+            final Map<String, String> userInfos = requestBody.parseUserInfos();
             if (httpRequest.isCorrectMethod(HttpMethod.POST) &&
                     InMemoryUserRepository.isNonExistentByAccount(userInfos.get("account"))) {
                 return register(userInfos);

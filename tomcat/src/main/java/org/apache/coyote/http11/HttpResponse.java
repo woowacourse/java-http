@@ -7,18 +7,16 @@ import java.nio.file.Files;
 
 public class HttpResponse {
 
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String BLANK = " ";
 
     private HttpResponse() {
     }
 
     public static String getResponse(final HttpResponseEntity responseEntity) throws IOException {
-        String contentType = "text/html;charset=utf-8";
+        final String contentType = ContentType.getByPath(responseEntity.getPath()) + CHARSET_UTF_8;
         if (responseEntity.getPath().equals("/")) {
             return makeResponse(contentType, responseEntity, "Hello world!");
-        }
-        if (responseEntity.getPath().endsWith(".css")) {
-            contentType = "text/css;charset=utf-8";
         }
 
         final URL resource = HttpResponse.class.getClassLoader().getResource("static" + responseEntity.getPath());
@@ -44,22 +42,6 @@ public class HttpResponse {
         }
         return String.join("\r\n",
                 "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Content-Type: " + contentType + BLANK,
-                "Content-Length: " + body.getBytes().length + BLANK,
-                "",
-                body
-        );
-    }
-
-    public static String makeRedirectResponse(
-            final String contentType,
-            final HttpResponseEntity responseEntity,
-            final String body
-    ) {
-        final HttpStatus status = responseEntity.getHttpStatus();
-        return String.join("\r\n",
-                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Location: " + responseEntity.getPath(),
                 "Content-Type: " + contentType + BLANK,
                 "Content-Length: " + body.getBytes().length + BLANK,
                 "",

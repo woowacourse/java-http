@@ -42,6 +42,10 @@ public class HttpRequest {
         return firstLine.getHttpMethod() == method;
     }
 
+    public HttpRequestFirstLine getFirstLine() {
+        return firstLine;
+    }
+
     public HttpPath getPath() {
         return firstLine.getHttpPath();
     }

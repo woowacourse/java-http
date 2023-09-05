@@ -1,25 +1,15 @@
 package study;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다. File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
@@ -57,19 +47,18 @@ class FileTest {
         // todo
         final Path path = Path.of(resource.toURI());
 
-
         // todo
-        final List<String> actual = new ArrayList<>();
+        final List<String> actual = Files.readAllLines(path);
 
-        FileInputStream fileInputStream = new FileInputStream(path.toFile());
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+//        FileInputStream fileInputStream = new FileInputStream(path.toFile());
+//        BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+//        InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
+//        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String data;
-        while ((data = bufferedReader.readLine()) != null) {
-            actual.add(data);
-        }
+//        String data;
+//        while ((data = bufferedReader.readLine()) != null) {
+//            actual.add(data);
+//        }
 
         assertThat(actual).containsOnly("nextstep");
     }

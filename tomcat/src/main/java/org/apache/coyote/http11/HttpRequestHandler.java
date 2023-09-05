@@ -12,7 +12,9 @@ public class HttpRequestHandler {
     private static final String MAIN_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String REGISTER_PAGE = "/register.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final HttpRequest httpRequest;
 
@@ -25,6 +27,11 @@ public class HttpRequestHandler {
 
         if (httpRequest.isLogin()) {
             if (httpRequest.isCorrectMethod(HttpMethod.GET)) {
+                if (httpRequest.hasJSessionId()) {
+                    final Session session = SESSION_MANAGER.findSession(httpRequest.getJSessionId());
+                    final User user = (User) session.getAttribute("user");
+                    return new HttpResponseEntity(HttpStatus.FOUND, MAIN_PAGE, true);
+                }
                 return new HttpResponseEntity(HttpStatus.OK, LOGIN_PAGE);
             }
             return login(requestBody);
@@ -62,7 +69,7 @@ public class HttpRequestHandler {
             responseEntity.addCookie(HttpCookie.ofJSessionId(session.getId()));
             return responseEntity;
         }
-        return new HttpResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html", true);
+        return new HttpResponseEntity(HttpStatus.FOUND, UNAUTHORIZED_PAGE, true);
     }
 
     private HttpResponseEntity register(final Map<String, String> userInfos) {

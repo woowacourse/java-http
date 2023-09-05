@@ -19,6 +19,9 @@ public class HttpResponse {
             return makeResponse(contentType, responseEntity, "Hello world!");
         }
         if (responseEntity.isRedirect()) {
+            if (responseEntity.hasCookie()) {
+                return makeRedirectResponseWithCookie(responseEntity, responseEntity.getHttpCookie());
+            }
             return makeRedirectResponse(responseEntity);
         }
 
@@ -32,24 +35,10 @@ public class HttpResponse {
             final HttpResponseEntity responseEntity,
             final String body
     ) {
-        final HttpStatus status = responseEntity.getHttpStatus();
         if (responseEntity.hasCookie()) {
-            return String.join("\r\n",
-                    "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                    "Set-Cookie: " + responseEntity.getHttpCookie().getValues(),
-                    "Content-Type: " + contentType + BLANK,
-                    "Content-Length: " + body.getBytes().length + BLANK,
-                    "",
-                    body
-            );
+            return makeGeneralResponseWithCookie(contentType, responseEntity, body, responseEntity.getHttpCookie());
         }
-        return String.join("\r\n",
-                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Content-Type: " + contentType + BLANK,
-                "Content-Length: " + body.getBytes().length + BLANK,
-                "",
-                body
-        );
+        return makeGeneralResponse(contentType, responseEntity, body);
     }
 
     private static String makeRedirectResponse(final HttpResponseEntity responseEntity) {
@@ -58,6 +47,51 @@ public class HttpResponse {
                 "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
                 "Location: " + responseEntity.getPath() + BLANK,
                 ""
+        );
+    }
+
+    private static String makeRedirectResponseWithCookie(
+            final HttpResponseEntity responseEntity,
+            final HttpCookie cookie
+    ) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        return String.join("\r\n",
+                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                "Set-Cookie: " + cookie.getValues() + BLANK,
+                "Location: " + responseEntity.getPath() + BLANK,
+                ""
+        );
+    }
+
+    private static String makeGeneralResponseWithCookie(
+            final String contentType,
+            final HttpResponseEntity responseEntity,
+            final String body,
+            final HttpCookie cookie
+    ) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        return String.join("\r\n",
+                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                "Set-Cookie: " + cookie.getValues() + BLANK,
+                "Content-Type: " + contentType + BLANK,
+                "Content-Length: " + body.getBytes().length + BLANK,
+                "",
+                body
+        );
+    }
+
+    private static String makeGeneralResponse(
+            final String contentType,
+            final HttpResponseEntity responseEntity,
+            final String body
+    ) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        return String.join("\r\n",
+                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                "Content-Type: " + contentType + BLANK,
+                "Content-Length: " + body.getBytes().length + BLANK,
+                "",
+                body
         );
     }
 }

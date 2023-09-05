@@ -23,16 +23,12 @@ public class HttpResponseEntity {
         this.isRedirect = isRedirect;
     }
 
-    public void changeRedirect() {
-        isRedirect = true;
-    }
-
     public boolean isRedirect() {
         return isRedirect;
     }
 
     public boolean hasCookie() {
-        return httpCookie != null;
+        return httpCookie.isNotEmpty();
     }
 
     public void addCookie(final HttpCookie httpCookie) {

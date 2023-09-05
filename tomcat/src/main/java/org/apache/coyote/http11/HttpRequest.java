@@ -42,6 +42,14 @@ public class HttpRequest {
         return firstLine.getHttpMethod() == method;
     }
 
+    public boolean hasJSessionId() {
+        return headers.hasJSessionId();
+    }
+
+    public String getJSessionId() {
+        return headers.getJSessionId();
+    }
+
     public HttpRequestFirstLine getFirstLine() {
         return firstLine;
     }

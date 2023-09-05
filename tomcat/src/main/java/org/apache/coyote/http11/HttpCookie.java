@@ -22,7 +22,11 @@ public class HttpCookie {
     public String getValues() {
         return values.keySet()
                 .stream()
-                .map(key -> key + "=" + values.get(key) + " ")
+                .map(key -> key + "=" + values.get(key) + "; ")
                 .collect(Collectors.joining());
+    }
+
+    public boolean isNotEmpty() {
+        return !values.isEmpty();
     }
 }

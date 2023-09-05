@@ -91,12 +91,12 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpRequestHeader.getMethod() == HttpMethod.POST) {
                 if (path.equals("/login")) {
-                    final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
+                    final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
                     writeLoginResponse(httpRequestBody, outputStream);
                     return;
                 }
                 if (path.equals("/register")) {
-                    final HttpRequestBody httpRequestBody = parseBody(httpRequestHeader, bufferedReader);
+                    final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
                     writeRegisterResponse(httpRequestBody, outputStream);
                 }
             }
@@ -118,16 +118,6 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpResponse(HttpStatus.FOUND)
                 .addLocation(location)
                 .build();
-    }
-
-    private static HttpRequestBody parseBody(final HttpRequestHeader httpRequestHeader, final BufferedReader bufferedReader) throws IOException {
-        if (httpRequestHeader.getContentLength() != 0) {
-            final int contentLength = httpRequestHeader.getContentLength();
-            final char[] buffers = new char[contentLength];
-            bufferedReader.read(buffers, 0, contentLength);
-            return HttpRequestBody.of(httpRequestHeader.getContentType(), new String(buffers));
-        }
-        return HttpRequestBody.empty();
     }
 
     private void writeRegisterResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {

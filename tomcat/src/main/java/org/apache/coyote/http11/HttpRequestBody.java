@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,16 @@ public class HttpRequestBody {
 
     private HttpRequestBody(Map<String, String> parameters) {
         this.parameters = parameters;
+    }
+
+    public static HttpRequestBody parseBody(final HttpRequestHeader httpRequestHeader, final BufferedReader bufferedReader) throws IOException {
+        if (httpRequestHeader.getContentLength() != 0) {
+            final int contentLength = httpRequestHeader.getContentLength();
+            final char[] body = new char[contentLength];
+            bufferedReader.read(body, 0, contentLength);
+            return HttpRequestBody.of(httpRequestHeader.getContentType(), new String(body));
+        }
+        return HttpRequestBody.empty();
     }
 
     public static HttpRequestBody empty() {

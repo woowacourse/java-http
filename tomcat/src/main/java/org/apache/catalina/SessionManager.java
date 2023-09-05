@@ -3,6 +3,8 @@ package org.apache.catalina;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.exception.InvalidSessionException;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Session;
 
 public class SessionManager implements Manager {
@@ -26,6 +28,13 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public void validateSession(final HttpCookie httpCookie) {
+        final String sessionID = httpCookie.getJSessionID();
+        if (!SESSIONS.containsKey(sessionID)) {
+            throw new InvalidSessionException();
+        }
     }
 
     private static final class SessionManagerHolder {

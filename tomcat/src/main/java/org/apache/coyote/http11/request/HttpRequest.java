@@ -64,7 +64,7 @@ public class HttpRequest {
     private int getContentLength(List<String> lines) {
         for (String line : lines) {
             if (line.startsWith("Content-Length:")) {
-                return Integer.parseInt(line.split(":")[1].trim());
+                return Integer.parseInt(line.split(":")[1].strip());
             }
         }
         return 0;

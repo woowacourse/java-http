@@ -19,8 +19,8 @@ public class RequestHeader {
         for (String str : headerList) {
             final String[] parts = str.split(":");
             if (parts.length == 2) {
-                final String key = parts[0].trim();
-                final String value = parts[1].trim();
+                final String key = parts[0].strip();
+                final String value = parts[1].strip();
                 map.put(key, value);
             }
         }

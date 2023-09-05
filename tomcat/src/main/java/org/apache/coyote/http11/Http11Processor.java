@@ -27,6 +27,7 @@ import static org.apache.coyote.http11.Url.LOGIN_HTML;
 import static org.apache.coyote.http11.Url.LOGIN_WITH_PARAM;
 import static org.apache.coyote.http11.Url.REGISTER;
 import static org.apache.coyote.http11.Url.REGISTER_HTML;
+import static org.apache.coyote.http11.Url.STATIC;
 import static org.apache.coyote.http11.Url.UNAUTHORIZED;
 import static org.apache.coyote.http11.Url.isContainParam;
 
@@ -39,6 +40,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
     private static final HttpCookie httpCookie = new HttpCookie();
     private static final String POST_HTTP_METHOD = "POST";
+    private static final String USER_SAVE_SUCCESS_MESSAGE = "유저 저장 성공!";
+    private static final String LOGIN_SUCCESS_MESSAGE = "로그인 성공! 아이디 : ";
+    private static final String INVALID_HTTP_REQUEST_MESSAGE = "Invalid HTTP request";
+    private static final String PARAMETER_DELIM = "&";
+    private static final char EQUALS = '=';
     private static Map<String, String> headers;
     private final Socket connection;
 
@@ -199,8 +205,7 @@ public class Http11Processor implements Runnable, Processor {
         if (requestParts.length >= 2) {
             return requestParts[1]; // 두 번째 요소가 경로 (예: "/index.html")
         }
-        throw new IOException("Invalid HTTP request"); // 유효하지 않은 요청 처리
-
+        throw new IOException(INVALID_HTTP_REQUEST_MESSAGE); // 유효하지 않은 요청 처리
     }
 
     private String parseHttpMethod(final String requestLine) throws IOException {
@@ -211,7 +216,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readStaticFile(final String parsedPath) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream resourceInputStream = classLoader.getResourceAsStream("static" + parsedPath);
+        InputStream resourceInputStream = classLoader.getResourceAsStream(parsedPath);
 
         StringBuilder content = new StringBuilder();
         if (resourceInputStream != null) {
@@ -227,22 +232,40 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parsePath(final String path, final String httpMethod) {
+        String url = INDEX.getUrl();
+
         if (path.contains(LOGIN.getUrl())) {
-            if (isContainParam(path) && !isValidUser(path)) {
-                return UNAUTHORIZED.getUrl();
-            } else if (!SessionManager.isValidHttpCookie(httpCookie)) {
-                return LOGIN_HTML.getUrl();
-            }
-        } else if (path.equals(REGISTER.getUrl())) {
-            if (httpMethod.equals("POST")) {
-                return INDEX.getUrl();
-            }
-            return REGISTER_HTML.getUrl();
-        } else if (path.matches(JS_ICO_CSS_REGEX)) {
-            return path;
+            url = getPathForLogin(path);
+        }
+
+        if (path.equals(REGISTER.getUrl())) {
+            url = getPathForRegister(httpMethod);
+        }
+
+        if (path.matches(JS_ICO_CSS_REGEX)) {
+            url = STATIC.getUrl() + path;
+        }
+
+        return url;
+    }
+
+    private String getPathForLogin(final String path) {
+        if (isContainParam(path) && !isValidUser(path)) {
+            return UNAUTHORIZED.getUrl();
+        }
+
+        if (!SessionManager.isValidHttpCookie(httpCookie)) {
+            return LOGIN_HTML.getUrl();
         }
 
         return INDEX.getUrl();
+    }
+
+    private String getPathForRegister(final String httpMethod) {
+        if (httpMethod.equals(POST_HTTP_METHOD)) {
+            return INDEX.getUrl();
+        }
+        return REGISTER_HTML.getUrl();
     }
 
     private boolean isValidUser(final String path) {
@@ -256,7 +279,7 @@ public class Http11Processor implements Runnable, Processor {
             final User foundUser = maybeUser.get();
             if (foundUser.checkPassword(parsedPassword) && !SessionManager.isValidUser(foundUser)) {
                 SessionManager.add(foundUser, httpCookie);
-                log.info("로그인 성공! 아이디 : " + parsedAccount);
+                log.info(LOGIN_SUCCESS_MESSAGE + parsedAccount);
 
                 return true;
             }
@@ -267,11 +290,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private Map<String, String> parseLoginData(final String path) {
         Map<String, String> loginData = new HashMap<>();
-        final StringTokenizer st = new StringTokenizer(path, "&");
+        final StringTokenizer st = new StringTokenizer(path, PARAMETER_DELIM);
 
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-            int equalsIndex = token.indexOf('=');
+            int equalsIndex = token.indexOf(EQUALS);
 
             if (equalsIndex != -1) {
                 String key = token.substring(0, equalsIndex);
@@ -291,16 +314,16 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = new User(parsedAccount, parsedPassword, parsedEmail);
         InMemoryUserRepository.save(user);
-        log.info("유저 저장 성공!");
+        log.info(USER_SAVE_SUCCESS_MESSAGE);
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {
         Map<String, String> userData = new HashMap<>();
-        StringTokenizer st = new StringTokenizer(requestBody, "&");
+        StringTokenizer st = new StringTokenizer(requestBody, PARAMETER_DELIM);
 
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-            int equalsIndex = token.indexOf('=');
+            int equalsIndex = token.indexOf(EQUALS);
 
             if (equalsIndex != -1) {
                 String key = token.substring(0, equalsIndex);

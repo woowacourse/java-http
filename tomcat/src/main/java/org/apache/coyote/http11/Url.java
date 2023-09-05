@@ -2,14 +2,16 @@ package org.apache.coyote.http11;
 
 public enum Url {
 
-    INDEX("/index.html"),
+    INDEX("static/index.html"),
     LOGIN("/login"),
     LOGIN_WITH_PARAM("/login?"),
     REGISTER("/register"),
 
-    LOGIN_HTML("/login.html"),
-    UNAUTHORIZED("/401.html"),
-    REGISTER_HTML("/register.html");
+    LOGIN_HTML("static/login.html"),
+    UNAUTHORIZED("static/401.html"),
+    REGISTER_HTML("static/register.html"),
+
+    STATIC("static");
 
     private final String url;
 

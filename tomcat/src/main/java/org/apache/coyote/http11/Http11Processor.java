@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
@@ -83,7 +85,11 @@ public class Http11Processor implements Runnable, Processor {
         File page = getFile(uri);
         String contentType = getMimeType(page);
         String body = buildResponseBody(page);
-        return new HttpResponse(status, new ContentType(contentType), body);
+        return HttpResponse.builder()
+                .setHttpStatus(status)
+                .setContentType(new ContentType(contentType))
+                .setBody(body)
+                .build();
     }
 
     @Nullable
@@ -92,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return Optional.ofNullable(resource.getFile()).map(File::new).orElse(null);
+        return ofNullable(resource.getFile()).map(File::new).orElse(null);
     }
 
     private String getMimeType(final File file) throws IOException {
@@ -116,8 +122,10 @@ public class Http11Processor implements Runnable, Processor {
             return postLogin(request);
         }
         if (isAlreadyLoggedIn(request)) {
-            return new HttpResponse(FOUND)
-                    .sendRedirect("/index.html");
+            return HttpResponse.builder()
+                    .setHttpStatus(FOUND)
+                    .sendRedirect("/index.html")
+                    .build();
         }
         return handleStaticResponse("/login.html");
     }
@@ -137,9 +145,11 @@ public class Http11Processor implements Runnable, Processor {
         Session session = new Session(UUID.randomUUID().toString());
         SessionManager.add(session);
         session.addUser(user);
-        return new HttpResponse(FOUND)
+        return HttpResponse.builder()
+                .setHttpStatus(FOUND)
                 .sendRedirect("/index.html")
-                .setCookie("JSESSIONID", session.getId());
+                .setCookie("JSESSIONID", session.getId())
+                .build();
     }
 
     private Optional<User> findUser(String account, String password) {
@@ -160,8 +170,10 @@ public class Http11Processor implements Runnable, Processor {
         final var email = form.get("email");
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return new HttpResponse(FOUND)
-                .sendRedirect("/index.html");
+        return HttpResponse.builder()
+                .setHttpStatus(FOUND)
+                .sendRedirect("/index.html")
+                .build();
     }
 
 }

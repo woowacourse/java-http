@@ -1,9 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import static java.lang.String.join;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 
 public class HttpResponse {
+
     public static final String CRLF = "\r\n";
     public static final String EMPTY_STRING = "";
 
@@ -12,34 +18,16 @@ public class HttpResponse {
     private final String body;
     private final Headers headers;
 
-    public HttpResponse(final HttpStatus httpStatus) {
-        this(httpStatus, PLAINTEXT_UTF8);
-    }
-
-    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType) {
-        this(httpStatus, contentType, EMPTY_STRING);
-    }
-
-    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body) {
-        this(httpStatus, contentType, body, new Headers());
+    public static HttpResponseBuilder builder() {
+        return new HttpResponseBuilder();
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body,
                         final Headers headers) {
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.body = body;
-        this.headers = headers;
-    }
-
-    public HttpResponse setCookie(String key, String value) {
-        headers.setCookie(key, value);
-        return this;
-    }
-
-    public HttpResponse sendRedirect(String location) {
-        headers.put("Location", location);
-        return this;
+        this.httpStatus = requireNonNull(httpStatus);
+        this.contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
+        this.body = ofNullable(body).orElse(EMPTY_STRING);
+        this.headers = ofNullable(headers).orElse(new Headers());
     }
 
     private String getHeaders() {
@@ -74,6 +62,45 @@ public class HttpResponse {
         String withHeader = join(CRLF, startLine, joinedHeader);
 
         return join(CRLF, withHeader, getBody());
+    }
+
+
+}
+
+class HttpResponseBuilder {
+
+    private HttpStatus httpStatus;
+    private ContentType contentType;
+    private String body;
+    private Headers headers = new Headers();
+
+    public HttpResponseBuilder setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+        return this;
+    }
+
+    public HttpResponseBuilder setContentType(ContentType contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public HttpResponseBuilder setBody(String body) {
+        this.body = body;
+        return this;
+    }
+
+    public HttpResponseBuilder setCookie(String key, String value) {
+        headers.setCookie(key, value);
+        return this;
+    }
+
+    public HttpResponseBuilder sendRedirect(String location) {
+        headers.put("Location", location);
+        return this;
+    }
+
+    public HttpResponse build() {
+        return new HttpResponse(httpStatus, contentType, body, headers);
     }
 
 }

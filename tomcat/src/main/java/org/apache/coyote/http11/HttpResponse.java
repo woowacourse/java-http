@@ -9,6 +9,7 @@ import static java.lang.String.join;
 public class HttpResponse {
 
     public static final String CRLF = "\r\n";
+    public static final String EMPTY_STRING = "";
     private HttpStatus httpStatus;
     private ContentType contentType;
     private String body;
@@ -19,7 +20,7 @@ public class HttpResponse {
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType) {
-        this(httpStatus, contentType, null);
+        this(httpStatus, contentType, EMPTY_STRING);
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body) {
@@ -50,7 +51,7 @@ public class HttpResponse {
 
     private String getHeaders() {
         String joined = joinHeaders();
-        if (body == null) {
+        if (body.isEmpty()) {
             return joined;
         }
         if (joined.isBlank()) {
@@ -63,7 +64,7 @@ public class HttpResponse {
     }
 
     private String joinHeaders() {
-        String joined = "";
+        String joined = EMPTY_STRING;
         if (headers != null) {
             joined = headers.entrySet().stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
@@ -73,8 +74,8 @@ public class HttpResponse {
     }
 
     private String getBody() {
-        if (body == null) {
-            return "";
+        if (body.isEmpty()) {
+            return EMPTY_STRING;
         }
         return CRLF + body;
     }

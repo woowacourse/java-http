@@ -39,7 +39,7 @@ public class HttpResponse {
                 .append(contentLengthHeader).append(ENTER);
 
         if (redirectPage != null) {
-            response.append("Location: http://localhost:8080/").append(redirectPage + " ").append(ENTER) ;
+            response.append("Location: http://localhost:8080/").append(redirectPage + " ").append(ENTER);
         }
         if (httpCookie != null) {
             response.append("Set-Cookie: ").append(
@@ -79,16 +79,6 @@ public class HttpResponse {
             return this;
         }
 
-        public String getRedirectWithCookie() {
-            return String.join(ENTER,
-                    "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.name() + " ",
-                    "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "Set-Cookie: " + httpCookie.getValue("JSESSIONID") + " ",
-                    "",
-                    responseBody);
-        }
-
         public Builder httpCookie(HttpCookie httpCookie) {
             this.httpCookie = httpCookie;
             return this;
@@ -98,6 +88,10 @@ public class HttpResponse {
             return new HttpResponse(httpStatus, responseBody, contentType, redirectPage, httpCookie);
         }
 
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
 }

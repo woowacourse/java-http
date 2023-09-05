@@ -36,7 +36,7 @@ public class Handler {
             return doLogin(httpRequest);
         }
         if (requestURI.isHome()) {
-            return new HttpResponse.Builder()
+            return HttpResponse.builder()
                     .httpStatus(HttpStatus.OK)
                     .responseBody("Hello world!")
                     .contentType(httpRequest.contentType())
@@ -45,7 +45,7 @@ public class Handler {
         if (requestURI.isRegister()) {
             return doRegister(httpRequest);
         }
-        return new HttpResponse.Builder()
+        return HttpResponse.builder()
                 .httpStatus(HttpStatus.OK)
                 .responseBody(parseResponseBody(requestURI.getResourcePath()))
                 .contentType(httpRequest.contentType())
@@ -54,7 +54,7 @@ public class Handler {
 
     private static HttpResponse doRegister(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRequestBodyEmpty()) {
-            return new HttpResponse.Builder()
+            return HttpResponse.builder()
                     .httpStatus(HttpStatus.OK)
                     .responseBody(parseResponseBody("static/register.html"))
                     .contentType(httpRequest.contentType())
@@ -67,14 +67,14 @@ public class Handler {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            return new HttpResponse.Builder()
+            return HttpResponse.builder()
                     .httpStatus(HttpStatus.FOUND)
                     .responseBody(parseResponseBody("static/register.html"))
                     .contentType(httpRequest.contentType())
                     .redirectPage("register.html")
                     .build();
         }
-        return new HttpResponse.Builder()
+        return HttpResponse.builder()
                 .httpStatus(HttpStatus.CREATED)
                 .responseBody(parseResponseBody("static/index.html"))
                 .contentType(httpRequest.contentType())
@@ -91,7 +91,7 @@ public class Handler {
         log.info(user.toString());
         String password = queryString.getValueOf("password");
         if (!user.checkPassword(password)) {
-            return new HttpResponse.Builder()
+            return HttpResponse.builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
                     .responseBody(parseResponseBody("static/401.html"))
                     .contentType(httpRequest.contentType())
@@ -101,7 +101,7 @@ public class Handler {
         HttpCookie cookie = HttpCookie.from(httpRequest.getHeaderValue("Cookie"));
         Session foundSession = sessionManager.findSession(cookie.getValue("JSESSIONID"));
         if (foundSession == null) {
-            return new HttpResponse.Builder()
+            return HttpResponse.builder()
                     .httpStatus(HttpStatus.FOUND)
                     .responseBody(parseResponseBody("static/index.html"))
                     .contentType(httpRequest.contentType())
@@ -113,7 +113,7 @@ public class Handler {
         Session session = new Session(uuid);
         session.setAttribute("user", user);
         sessionManager.add(session);
-        return new HttpResponse.Builder()
+        return HttpResponse.builder()
                 .httpStatus(HttpStatus.FOUND)
                 .responseBody(parseResponseBody("static/index.html"))
                 .contentType(httpRequest.contentType())

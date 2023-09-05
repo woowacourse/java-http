@@ -1,8 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +34,33 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /anyThing.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        var expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2426 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
@@ -54,6 +81,86 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Length: 211991 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /login \r\n" +
+                "\r\n"+
+                "/login";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginWithParam() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3797 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

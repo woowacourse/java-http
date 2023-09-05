@@ -50,23 +50,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handleRequest(final HttpRequest httpRequest) {
+    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
         final RequestPath requestPath = httpRequest.getRequestPath();
 
-        if (!requestPath.isParamEmpty() && requestPath.getResource().contains("login")) {
-            executeLogin(requestPath.getQueryParameter());
-
-            final URL url = getClass().getClassLoader()
-                    .getResource("static" + requestPath.getResource() + HttpExtensionType.HTML.getExtension());
-            final Path path = new File(url.getPath()).toPath();
-
-            try {
+        if (requestPath.getResource().equals("/login")) {
+            if (requestPath.isParamEmpty()) {
+                final URL url = getClass().getClassLoader()
+                        .getResource("static" + requestPath.getResource() + HttpExtensionType.HTML.getExtension());
+                final Path path = new File(url.getPath()).toPath();
                 final String content = new String(Files.readAllBytes(path));
                 return HttpResponse.of(HttpStatusCode.OK, ResponseBody.of(HttpExtensionType.HTML.getExtension(), content));
-            } catch (IOException exception) {
-                log.error(exception.getMessage());
-                throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
             }
+
+            if (executeLogin(requestPath.getQueryParameter())) {
+                // 로그인 성공
+                final URL url = getClass().getClassLoader()
+                        .getResource("static" + "/index" + HttpExtensionType.HTML.getExtension());
+                final Path path = new File(url.getPath()).toPath();
+                final String content = new String(Files.readAllBytes(path));
+                final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
+                return HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+            }
+            // 로그인 실패
+            final URL url = getClass().getClassLoader()
+                    .getResource("static" + "/401" + HttpExtensionType.HTML.getExtension());
+            final Path path = new File(url.getPath()).toPath();
+            final String content = new String(Files.readAllBytes(path));
+            final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
+            return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, responseBody);
         }
 
         if (requestPath.getResource().equals("/")) {
@@ -87,62 +98,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean executeLogin(Map<String, String> params) {
+        try {
+            final String userName = params.get("account");
+            final String password = params.get("password");
 
-//    private HttpResponse generateResponse(final HttpRequest httpRequest) {
-//        // RequestLine에서 HttpMethod랑 RequestPath 보고 분기처리 -> StatusLine 생성(version + code + message)
-//        if (httpRequest.getRequestUri().equals("/")) {
-//
-//        }
-//
-//        if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && HttpExtensionType.hasExtensionType(httpRequest.getRequestUri())) {
-////            new ResponseBody()
-//        }
-//        // ResponseBody 만든다.
-//        // ResponseHeader 만든다.
-//
-//        // 조합해서 HttpResponse 만든다.
-////        HttpExtensionType.from(httpRequest.getRequestLine());
-//    }
+            final User user = InMemoryUserRepository.findByAccount(userName)
+                    .orElseThrow(() -> new UncheckedServletException("존재하지 않는 userName입니다."));
 
-
-//    private String getResponse(final RequestLine requestLine) {
-//        final RequestPath requestPath = requestLine.getRequestPath();
-//
-//        if (requestPath.isDefaultResource()) {
-//            final HttpResponse httpResponse = new HttpResponse(requestPath.getContentType(), "Hello world!");
-//            return httpResponse.extractResponse();
-//        }
-//        final HttpResponse httpResponse = new HttpResponse(requestPath.getContentType(), getResponseBody(requestPath));
-//        return httpResponse.extractResponse();
-//    }
-
-//    private String getResponseBody(final RequestPath requestPath) {
-//        if (!requestPath.isParamEmpty() && requestPath.getResource().contains("login")) {
-//            executeLogin(requestPath.getQueryParameter());
-//        }
-//
-//        URL url = getClass().getClassLoader()
-//                .getResource("static" + requestPath.getResource() + requestPath.getExtension());
-//        final Path path = new File(url.getPath()).toPath();
-//
-//        try {
-//            return new String(Files.readAllBytes(path));
-//        } catch (IOException exception) {
-//            log.error(exception.getMessage());
-//            throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
-//        }
-//    }
-
-    private void executeLogin(Map<String, String> params) {
-        final String userName = params.get("account");
-        final String password = params.get("password");
-
-        final User user = InMemoryUserRepository.findByAccount(userName)
-                .orElseThrow(() -> new UncheckedServletException("존재하지 않는 userName입니다."));
-
-        if (!user.checkPassword(password)) {
-            throw new UncheckedServletException("비밀번호가 일치하지 않습니다.");
+            if (!user.checkPassword(password)) {
+                throw new UncheckedServletException("비밀번호가 일치하지 않습니다.");
+            }
+            log.info(user.toString());
+            return true;
+        } catch (UncheckedServletException exception) {
+            return false;
         }
-        log.info(user.toString());
     }
 }

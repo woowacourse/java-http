@@ -53,15 +53,15 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
+    public Map<String, String> getRequestHeaders() {
+        return requestHeaders.getHeaders();
     }
 
     public Map<String, String> getQueryParameter() {
         return requestLine.getRequestPath().getQueryParameter();
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
+    public Map<String, String> getRequestBody() {
+        return requestBody.getBody();
     }
 }

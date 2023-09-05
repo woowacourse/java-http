@@ -13,4 +13,8 @@ public class RequestHeaders {
     public boolean hasNotContent() {
         return !headers.containsKey("Content-Type");
     }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 }

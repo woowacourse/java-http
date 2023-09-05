@@ -12,6 +12,7 @@ public class Http11Response {
     private final ContentType contentType;
     private final String responseBody;
     private final Map<String, String> otherHeader = new HashMap<>();
+    
     private Cookie cookie;
 
     public Http11Response(final StatusCode statusCode, final ContentType contentType, final String responseBody) {
@@ -24,7 +25,7 @@ public class Http11Response {
         this.cookie = new Cookie(cookie);
     }
 
-    public boolean containJessionId() {
+    public boolean containJsessionId() {
         return cookie != null && cookie.containsJsessionId();
     }
 

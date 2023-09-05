@@ -1,15 +1,7 @@
 package org.apache.catalina.connector;
 
-import nextstep.jwp.HandlerResolver;
-import nextstep.jwp.JwpHttpDispatcher;
-import nextstep.jwp.handler.get.LoginGetHandler;
-import nextstep.jwp.handler.get.RegisterGetHandler;
-import nextstep.jwp.handler.get.RootGetHandler;
-import nextstep.jwp.handler.post.LoginPostHandler;
-import nextstep.jwp.handler.post.RegisterPostHandler;
-import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.HttpDispatcher;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +9,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 public class Connector implements Runnable {
 
@@ -26,22 +17,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
-    private final Map<String, Handler> httpGetHandlers =
-            Map.of("/", new RootGetHandler(),
-                    "/login", new LoginGetHandler(new SessionManager()),
-                    "/register", new RegisterGetHandler());
-    private final Map<String, Handler> httpPostHandlers =
-            Map.of("/login", new LoginPostHandler(new SessionManager()),
-                    "/register", new RegisterPostHandler());
-
+    private final HttpDispatcher httpDispatcher;
     private final ServerSocket serverSocket;
+    
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final HttpDispatcher httpDispatcher) {
+        this(httpDispatcher, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final HttpDispatcher httpDispatcher, final int port, final int acceptCount) {
+        this.httpDispatcher = httpDispatcher;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -84,7 +70,6 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
         final var processor = new Http11Processor(connection, new HttpRequestParser(), httpDispatcher);
         new Thread(processor).start();
     }

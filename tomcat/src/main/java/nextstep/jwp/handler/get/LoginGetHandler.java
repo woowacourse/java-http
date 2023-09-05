@@ -1,9 +1,9 @@
 package nextstep.jwp.handler.get;
 
+import nextstep.jwp.SessionManager;
 import nextstep.jwp.exception.BusinessException;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.Http11Request;

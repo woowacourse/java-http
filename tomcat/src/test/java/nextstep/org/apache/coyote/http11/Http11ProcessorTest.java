@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.HandlerResolver;
 import nextstep.jwp.JwpHttpDispatcher;
+import nextstep.jwp.SessionManager;
 import nextstep.jwp.handler.get.LoginGetHandler;
 import nextstep.jwp.handler.get.RegisterGetHandler;
 import nextstep.jwp.handler.get.RootGetHandler;
 import nextstep.jwp.handler.post.LoginPostHandler;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

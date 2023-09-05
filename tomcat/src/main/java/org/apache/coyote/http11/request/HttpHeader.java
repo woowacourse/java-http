@@ -9,12 +9,8 @@ import java.util.regex.Pattern;
 
 public class HttpHeader {
 
-    private static final String HOST = "Host";
-    private static final String CONNECTION = "Connection";
     private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String CONTENT_TYPE = "Content-Type";
     private static final String COOKIE = "Cookie";
-    private static final String ACCEPT = "Accept";
 
     private final Map<String, String> values = new HashMap<>();
 

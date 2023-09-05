@@ -17,6 +17,11 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.coyote.http11.HttpStatus.FOUND;
+import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.http11.HttpStatus.OK;
+import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -70,13 +75,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleStaticResponse(String uri) throws IOException {
         try {
-            return buildStaticResponse("200 OK", uri);
+            return buildStaticResponse(OK, uri);
         } catch (Exception e) {
-            return buildStaticResponse("404 Not Found", "/404.html");
+            return buildStaticResponse(NOT_FOUND, "/404.html");
         }
     }
 
-    private HttpResponse buildStaticResponse(String status, String uri) throws IOException {
+    private HttpResponse buildStaticResponse(HttpStatus status, String uri) throws IOException {
         File page = getFile(uri);
         String contentType = getContentType(page);
         String body = buildResponseBody(page);
@@ -115,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
             return postLogin(request);
         }
         if (isAlreadyLoggedIn(request)) {
-            return new HttpResponse("302 Found")
+            return new HttpResponse(FOUND)
                     .addHeader("Location", "/index.html");
         }
         return handleStaticResponse("/login.html");
@@ -128,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
         final var optionalUser = findUser(account, password);
 
         if (optionalUser.isEmpty()) {
-            return buildStaticResponse("401 Unauthorized", "/401.html");
+            return buildStaticResponse(UNAUTHORIZED, "/401.html");
         }
 
         User user = optionalUser.get();
@@ -136,7 +141,7 @@ public class Http11Processor implements Runnable, Processor {
         Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
         session.addUser(user);
-        return new HttpResponse("302 Found")
+        return new HttpResponse(FOUND)
                 .addHeader("Location", "/index.html")
                 .setCookie("JSESSIONID", session.getId());
     }
@@ -159,7 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         final var email = form.get("email");
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return new HttpResponse("302 Found")
+        return new HttpResponse(FOUND)
                 .addHeader("Location", "/index.html");
     }
 

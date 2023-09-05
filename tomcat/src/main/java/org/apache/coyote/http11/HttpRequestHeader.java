@@ -67,6 +67,14 @@ public class HttpRequestHeader {
         return method;
     }
 
+    public boolean isGet() {
+        return method == HttpMethod.GET;
+    }
+
+    public boolean isPost() {
+        return method == HttpMethod.POST;
+    }
+
     public String getRequestUri() {
         return requestUri;
     }

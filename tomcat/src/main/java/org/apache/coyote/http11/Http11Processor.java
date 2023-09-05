@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final String path = httpRequestHeader.getPath();
 
-            if (httpRequestHeader.getMethod() == HttpMethod.GET) {
+            if (httpRequestHeader.isGet()) {
                 if (path.equals("/index.html")) {
                     writeResourceResponse(httpRequestHeader, outputStream);
                     return;
@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
                 writeRedirectResponse(outputStream, "/404.html");
             }
 
-            if (httpRequestHeader.getMethod() == HttpMethod.POST) {
+            if (httpRequestHeader.isPost()) {
                 if (path.equals("/login")) {
                     final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
                     writeLoginResponse(httpRequestBody, outputStream);

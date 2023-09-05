@@ -29,7 +29,12 @@ public class RequestBody {
                 .map(keyValue -> keyValue.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         splitKeyValue -> splitKeyValue[KEY_INDEX],
-                        splitKeyValue -> splitKeyValue[VALUE_INDEX]
+                        splitKeyValue -> {
+                            if (splitKeyValue.length < 2) {
+                                return "";
+                            }
+                            return splitKeyValue[VALUE_INDEX];
+                        }
                 ));
         return new RequestBody(bodies);
     }

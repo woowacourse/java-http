@@ -8,8 +8,6 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequest {
 
-    private static final int HTTP_REQUEST_HEADER_START_INDEX = 0;
-
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final String requestBody;

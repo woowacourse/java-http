@@ -19,7 +19,6 @@ import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestHeaders;
 import nextstep.jwp.response.ResponseEntity;
 import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
@@ -54,6 +53,12 @@ public class RequestProcessor {
             }
 
             if (requestUri.equals("login")) {
+                final String sessionId = cookies.ofJSessionId("JSESSIONID");
+                final Session session = SessionManager.findSession(sessionId);
+                if (session != null) {
+                    return ResponseEntity.of(version, HttpStatus.FOUND, null,
+                            Map.of(LOCATION_HEADER, INDEX_PAGE));
+                }
                 content = makeResponseBody(requestUri);
                 return ResponseEntity.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
@@ -119,14 +124,15 @@ public class RequestProcessor {
                         session.setAttribute("user", user);
                         SessionManager.add(session);
                         cookies.save("JSESSIONID", session.getId());
-                        final String cookie = cookies.cookieInfo("JSESSIONID");
+                        final String cookieInfo = cookies.cookieInfo("JSESSIONID");
                         return ResponseEntity.of(version, HttpStatus.FOUND, content,
                                 Map.of(LOCATION_HEADER, INDEX_PAGE,
-                                        "Set-Cookie", cookie));
+                                        "Set-Cookie", cookieInfo));
                     }
                 }
 
-                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
+                return ResponseEntity.of(version, HttpStatus.FOUND, content,
+                        Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
             }
         }
 
@@ -158,9 +164,5 @@ public class RequestProcessor {
         }
         final var path = Paths.get(url.toURI());
         return Files.readString(path);
-    }
-
-    private User getUSer(final Session session) {
-        return (User) session.getAttribute("user");
     }
 }

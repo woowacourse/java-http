@@ -2,20 +2,23 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.model.Session;
 
 public class SessionManager {
 
     private static final Map<String, Session> sessions = new HashMap<>();
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 
     public static void add(final Session session) {
-        sessions.put(UUID.randomUUID().toString(), session);
+        sessions.put(session.getId(), session);
     }
 
     public static Session findSession(final String id) {
+        if (id == null) {
+            return null;
+        }
         return sessions.get(id);
     }
 

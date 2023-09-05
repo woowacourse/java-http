@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (user.get().checkPassword(requestBody.get("password"))) {
                 log.info("user : {}", user);
-                Cookie cookie = Cookie.newInstance();
+                final Cookie cookie = Cookie.empty();
                 final String sessionId = UUID.randomUUID().toString();
                 final Session session = new Session(sessionId);
                 session.setAttribute("user", user);
@@ -93,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
             return generateResult("/401.html", 401);
         }
         if ("GET".equals(method) && "/login".equals(path)) {
-            Cookie cookie = Cookie.newInstance();
+            Cookie cookie = Cookie.empty();
             if (httpRequestHeader.containsKey("Cookie")) {
                 cookie = Cookie.parse(httpRequestHeader.get("Cookie"));
             }
@@ -129,7 +129,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResult(final String path, final int statusCode) throws IOException {
-        return generateResult(path, statusCode, Cookie.newInstance());
+        return generateResult(path, statusCode, Cookie.empty());
     }
 
     private String generateResult(final String path, final int statusCode, final Cookie cookie) throws IOException {

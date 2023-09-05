@@ -20,7 +20,7 @@ public final class Cookie {
         return new Cookie(cookies);
     }
 
-    public static Cookie newInstance() {
+    public static Cookie empty() {
         return new Cookie(new HashMap<>());
     }
 

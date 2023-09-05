@@ -53,8 +53,8 @@ public class HttpResponse {
         return String.join("\r\n", response);
     }
 
-    public HttpResponse addSetCookie(final String cookie) {
-        headers.put("Set-Cookie", cookie);
+    public HttpResponse addSetCookie(final Cookie cookie) {
+        headers.put("Set-Cookie", cookie.getName() + "=" + cookie.getValue());
         return this;
     }
 }

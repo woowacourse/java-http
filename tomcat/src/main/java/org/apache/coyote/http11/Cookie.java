@@ -18,10 +18,6 @@ public class Cookie {
         throw new IllegalArgumentException("올바른 쿠키 형식이 아닙니다.");
     }
 
-    public static String ofJSessionId(final String sessionId) {
-        return "JSESSIONID=" + sessionId;
-    }
-
     public String getName() {
         return name;
     }

@@ -148,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
         final String sessionId = sessionManager.createSession(user);
         return new HttpResponse(HttpStatus.FOUND)
                 .addLocation("/index.html")
-                .addSetCookie(Cookie.ofJSessionId(sessionId))
+                .addSetCookie(new Cookie("JSESSIONID", sessionId))
                 .build();
     }
 

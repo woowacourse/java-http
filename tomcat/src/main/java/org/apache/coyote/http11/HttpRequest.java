@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringTokenizer;
 
 public class HttpRequest {
 
@@ -58,7 +59,7 @@ public class HttpRequest {
         }
 
         final String parameters = this.uri.substring(this.uri.lastIndexOf("?") + 1, this.uri.length());
-        return parseParameterAsMap(parameters);
+        return parseParametersIntoMap(parameters);
     }
 
     public boolean hasQueryParameter() {
@@ -70,24 +71,25 @@ public class HttpRequest {
     }
 
     public Map<String, String> getRequestBodyAsMap() {
-        return parseParameterAsMap(this.requestBody);
+        return parseParametersIntoMap(this.requestBody);
     }
 
-    private HashMap<String, String> parseParameterAsMap(String parameters) {
+    private HashMap<String, String> parseParametersIntoMap(String parameters) {
         final HashMap<String, String> queryParameters = new HashMap<>();
-        for (String parameter : parameters.split("&")) {
-            if (isInValidParameter(parameter)) {
-                continue;
-            }
-            final String key = parameter.split("=")[0];
-            final String value = parameter.split("=")[1];
-            queryParameters.put(key, value);
+        final StringTokenizer stringTokenizer = new StringTokenizer(parameters, "&");
+        while (stringTokenizer.hasMoreTokens()) {
+            final String parameter = stringTokenizer.nextToken();
+            parseParameterIntoMap(queryParameters, parameter);
         }
         return queryParameters;
     }
 
-    private boolean isInValidParameter(String parameter) {
-        return Objects.isNull(parameter) || !Objects.equals(parameter.split("=").length, 2);
+    private static void parseParameterIntoMap(final HashMap<String, String> queryParameters, final String parameter) {
+        final StringTokenizer stringTokenizer = new StringTokenizer(parameter, "=");
+        if (!stringTokenizer.hasMoreTokens()) {
+            return;
+        }
+        queryParameters.put(stringTokenizer.nextToken(), stringTokenizer.nextToken());
     }
 
     public Optional<String> getSessionId() {

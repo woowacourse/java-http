@@ -45,19 +45,32 @@ public class HttpRequestParser {
             return cookies;
         }
 
-        for (String cookie : cookiesHeader.split("; ")) {
-            final String[] cookieEntry = cookie.split("=");
-            cookies.add(cookieEntry[0], cookieEntry[1]);
+        final StringTokenizer stringTokenizer = new StringTokenizer(cookiesHeader, "; ");
+        while (stringTokenizer.hasMoreTokens()) {
+            final String cookie = stringTokenizer.nextToken();
+            addCookie(cookies, cookie);
         }
+
         return cookies;
+    }
+
+    private static void addCookie(final Cookies cookies, final String cookieEntry) {
+        final StringTokenizer stringTokenizer = new StringTokenizer(cookieEntry, "=");
+        cookies.add(
+                stringTokenizer.nextToken(),
+                stringTokenizer.nextToken()
+        );
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestHeaders = new HashMap<>();
         String header;
         while ((header = bufferedReader.readLine()).length() != 0) {
-            final String[] headerEntry = header.split(": ");
-            requestHeaders.put(headerEntry[0], headerEntry[1]);
+            final StringTokenizer stringTokenizer = new StringTokenizer(header, ": ");
+            requestHeaders.put(
+                    stringTokenizer.nextToken(),
+                    stringTokenizer.nextToken()
+            );
         }
         return requestHeaders;
     }

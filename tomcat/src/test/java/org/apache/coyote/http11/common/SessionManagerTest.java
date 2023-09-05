@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SessionManagerTest {
 
@@ -16,5 +17,11 @@ class SessionManagerTest {
         SessionManager.add(session);
 
         assertThat(SessionManager.findSession(uuid)).isEqualTo(session);
+    }
+
+    @Test
+    void 존재하지_않는_세션_조회_시_예외() {
+        assertThatThrownBy(() -> SessionManager.findSession(UUID.randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

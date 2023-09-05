@@ -96,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             bufferedReader.read(buffer, 0, contentLength);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
         }
         return new String(buffer);
     }

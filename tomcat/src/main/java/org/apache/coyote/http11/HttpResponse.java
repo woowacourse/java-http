@@ -18,6 +18,9 @@ public class HttpResponse {
         if (responseEntity.getPath().equals("/")) {
             return makeResponse(contentType, responseEntity, "Hello world!");
         }
+        if (responseEntity.isRedirect()) {
+            return makeRedirectResponse(responseEntity);
+        }
 
         final URL resource = HttpResponse.class.getClassLoader().getResource("static" + responseEntity.getPath());
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -46,6 +49,15 @@ public class HttpResponse {
                 "Content-Length: " + body.getBytes().length + BLANK,
                 "",
                 body
+        );
+    }
+
+    private static String makeRedirectResponse(final HttpResponseEntity responseEntity) {
+        final HttpStatus status = responseEntity.getHttpStatus();
+        return String.join("\r\n",
+                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                "Location: " + responseEntity.getPath() + BLANK,
+                ""
         );
     }
 }

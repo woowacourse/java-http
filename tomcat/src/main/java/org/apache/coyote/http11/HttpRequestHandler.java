@@ -34,7 +34,7 @@ public class HttpRequestHandler {
             if (httpRequest.isCorrectMethod(HttpMethod.GET)) {
                 return new HttpResponseEntity(HttpStatus.OK, REGISTER_PAGE);
             }
-            
+
             final Map<String, String> userInfos = requestBody.parseUserInfos();
             if (httpRequest.isCorrectMethod(HttpMethod.POST) &&
                     InMemoryUserRepository.isNonExistentByAccount(userInfos.get("account"))) {
@@ -58,16 +58,16 @@ public class HttpRequestHandler {
             sessionManager.add(session);
 
             log.info("로그인 성공! 아이디: {}", account);
-            final HttpResponseEntity responseEntity = new HttpResponseEntity(HttpStatus.FOUND, MAIN_PAGE);
+            final HttpResponseEntity responseEntity = new HttpResponseEntity(HttpStatus.FOUND, MAIN_PAGE, true);
             responseEntity.addCookie(HttpCookie.ofJSessionId(session.getId()));
             return responseEntity;
         }
-        return new HttpResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html");
+        return new HttpResponseEntity(HttpStatus.UNAUTHORIZED, "/401.html", true);
     }
 
     private HttpResponseEntity register(final Map<String, String> userInfos) {
         final User user = new User(userInfos.get("account"), userInfos.get("password"), userInfos.get("email"));
         InMemoryUserRepository.save(user);
-        return new HttpResponseEntity(HttpStatus.FOUND, MAIN_PAGE);
+        return new HttpResponseEntity(HttpStatus.FOUND, MAIN_PAGE, true);
     }
 }

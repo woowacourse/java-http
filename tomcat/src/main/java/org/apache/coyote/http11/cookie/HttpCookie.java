@@ -3,7 +3,7 @@ package org.apache.coyote.http11.cookie;
 import java.util.UUID;
 
 public class HttpCookie {
-    private static String JSESSIONID;
+    private static String JSESSIONID = "";
 
     public HttpCookie() {
     }

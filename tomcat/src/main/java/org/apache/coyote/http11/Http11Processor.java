@@ -21,11 +21,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
+import static org.apache.coyote.http11.Url.INDEX;
+import static org.apache.coyote.http11.Url.LOGIN;
+import static org.apache.coyote.http11.Url.LOGIN_HTML;
+import static org.apache.coyote.http11.Url.LOGIN_WITH_PARAM;
+import static org.apache.coyote.http11.Url.REGISTER;
+import static org.apache.coyote.http11.Url.REGISTER_HTML;
+import static org.apache.coyote.http11.Url.UNAUTHORIZED;
+import static org.apache.coyote.http11.Url.isContainParam;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final char COLON = ':';
-    private static final String EMPTY_JSESSION = "";
+    private static final String EMPTY_JSESSIONID = "";
     private static final String CSS = ".css";
     private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
     private static final HttpCookie httpCookie = new HttpCookie();
@@ -73,13 +82,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private void storeJsessionId(final Map<String, String> headers) {
         if (isContainJsessionId(headers)) {
-           httpCookie.changeJSessionId(parseJsessionId(headers));
+            httpCookie.changeJSessionId(parseJsessionId(headers));
         }
         httpCookie.createJSession();
     }
 
+    //TODO: header 지워보기
     private String getResponse(final String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath) {
-        if (path.contains("/login?") && parsedPath.equals("/index.html") && !isContainJsessionId(headers)) {
+        if (path.contains(LOGIN_WITH_PARAM.getUrl()) && parsedPath.equals(INDEX.getUrl()) && !isContainJsessionId(headers)) {
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Set-Cookie: " + "JSESSIONID=" + httpCookie.getJSessionId() + " ",
@@ -156,14 +166,14 @@ public class Http11Processor implements Runnable, Processor {
     private List<String> readAllLines(final BufferedReader br) throws IOException {
         final List<String> lines = new ArrayList<>();
         String line;
-        while (!(line = br.readLine()).equals(EMPTY_JSESSION)) {
+        while (!(line = br.readLine()).equals(EMPTY_JSESSIONID)) {
             lines.add(line);
         }
         return lines;
     }
 
     private int getEmptyLineIndex(final List<String> lines) {
-        int emptyLineIndex = lines.indexOf(EMPTY_JSESSION);
+        int emptyLineIndex = lines.indexOf(EMPTY_JSESSIONID);
         if (emptyLineIndex == -1) {
             emptyLineIndex = lines.size();
         }
@@ -186,9 +196,9 @@ public class Http11Processor implements Runnable, Processor {
 
         if (requestParts.length >= 2) {
             return requestParts[1]; // 두 번째 요소가 경로 (예: "/index.html")
-        } else {
-            throw new IOException("Invalid HTTP request"); // 유효하지 않은 요청 처리
         }
+        throw new IOException("Invalid HTTP request"); // 유효하지 않은 요청 처리
+
     }
 
     private String parseHttpMethod(final String requestLine) throws IOException {
@@ -215,26 +225,26 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parsePath(final String path, final String httpMethod) {
-        if (path.contains("/login")) {
-            if (path.contains("?") && !isValidUser(path)) {
-                return "/401.html";
+        if (path.contains(LOGIN.getUrl())) {
+            if (isContainParam(path) && !isValidUser(path)) {
+                return UNAUTHORIZED.getUrl();
             } else if (!SessionManager.isValidHttpCookie(httpCookie)) {
-                return "/login.html";
+                return LOGIN_HTML.getUrl();
             }
-        } else if (path.equals("/register")) {
+        } else if (path.equals(REGISTER.getUrl())) {
             if (httpMethod.equals("POST")) {
-                return "/index.html";
+                return INDEX.getUrl();
             }
-            return "/register.html";
+            return REGISTER_HTML.getUrl();
         } else if (path.matches(JS_ICO_CSS_REGEX)) {
             return path;
         }
 
-        return "/index.html";
+        return INDEX.getUrl();
     }
 
     private boolean isValidUser(final String path) {
-        String noUrlPath = path.replace("/login?", "");
+        String noUrlPath = path.replace(LOGIN_WITH_PARAM.getUrl(), "");
         Map<String, String> loginData = parseLoginData(noUrlPath);
         String parsedAccount = loginData.get("account");
         String parsedPassword = loginData.get("password");

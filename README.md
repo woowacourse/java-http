@@ -30,10 +30,10 @@
     - [x] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하여 값을 전달한다.
     - [x] Cookie 클래스 구현
     - [x] 요청 헤더의 Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환하게 한다.
-- [ ] Session 구현
-    - [ ] 쿠키에서 전달받은 JSESIONID의 값으로 로그인 여부를 체크한다.
-    - [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
-    - [ ] 로그인된 상태에서 /login 페이지에 GET method로 접근하면 index.html 페이지로 리다이렉트한다.
+- [x] Session 구현
+    - [x] 쿠키에서 전달받은 JSESIONID의 값으로 로그인 여부를 체크한다.
+    - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
+    - [x] 로그인된 상태에서 /login 페이지에 GET method로 접근하면 index.html 페이지로 리다이렉트한다.
 
 ## 3단계
 

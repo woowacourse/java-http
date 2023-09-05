@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,8 +165,12 @@ public class Http11Processor implements Runnable, Processor {
               parsedRequestBody.get("account"));
           if (userOptional.isPresent()
               && userOptional.get().checkPassword(parsedRequestBody.get("password"))) { // 로그인 성공
-            if (cookie.isExist("JSESSIOINID")) {
-              setCookie = "JSESSIONID=" + UUID.randomUUID();
+            if (!cookie.isExist("JSESSIOINID")) {  //쿠키에 JSESSIONID가 존재하지 않으면
+              String jSessionId = String.valueOf(UUID.randomUUID());
+              setCookie = "JSESSIONID=" + jSessionId; // set Cookie 속성을 추가하고
+              Session session = new Session(jSessionId);
+              session.setAttribute("user", userOptional.get());
+              SessionManager.InstanceOf().add(session); //세션 매니저에 세션을 추가한다.
             }
             statusCode = 302;
             statusMessage = "Found";
@@ -178,7 +184,13 @@ public class Http11Processor implements Runnable, Processor {
       }
     } else if (method.equals("GET")) {
       if (path.equals("/login")) {
-        filePathUrl = getClass().getResource("/static/login.html");
+        if (cookie.isExist("JSESSIONID")
+            && SessionManager.InstanceOf().findSession(cookie.findCookie("JSESSIONID")) != null) {
+          filePathUrl = getClass().getResource("/static/index.html");
+        } else {
+          filePathUrl = getClass().getResource("/static/login.html");
+        }
+
       } else if (path.equals("/register")) {
         filePathUrl = getClass().getResource("/static/register.html");
       } else {  // 핸들러(컨트롤러)가 없을 때

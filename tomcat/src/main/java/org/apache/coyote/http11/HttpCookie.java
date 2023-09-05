@@ -23,4 +23,7 @@ public class HttpCookie {
     return requestCookies.get(key) != null;
   }
 
+  public String findCookie(String key) {
+    return requestCookies.get(key);
+  }
 }

@@ -10,7 +10,7 @@ public class RequestUri {
     private final HttpPath httpPath;
     private final HttpProtocol httpProtocol;
 
-    public RequestUri(HttpMethod httpMethod, HttpPath httpPath, HttpProtocol httpProtocol) {
+    private RequestUri(HttpMethod httpMethod, HttpPath httpPath, HttpProtocol httpProtocol) {
         validate(httpMethod, httpPath, httpProtocol);
         this.httpMethod = httpMethod;
         this.httpPath = httpPath;

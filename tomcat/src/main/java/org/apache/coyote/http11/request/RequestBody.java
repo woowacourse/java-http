@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import nextstep.jwp.model.User;
@@ -29,14 +30,18 @@ public class RequestBody {
                 .map(keyValue -> keyValue.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         splitKeyValue -> splitKeyValue[KEY_INDEX],
-                        splitKeyValue -> {
-                            if (splitKeyValue.length < 2) {
-                                return "";
-                            }
-                            return splitKeyValue[VALUE_INDEX];
-                        }
+                        getValue()
                 ));
         return new RequestBody(bodies);
+    }
+
+    private static Function<String[], String> getValue() {
+        return splitKeyValue -> {
+            if (splitKeyValue.length < 2) {
+                return "";
+            }
+            return splitKeyValue[VALUE_INDEX];
+        };
     }
 
     public User parseToUser() {

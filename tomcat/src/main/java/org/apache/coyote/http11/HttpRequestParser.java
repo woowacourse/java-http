@@ -28,9 +28,9 @@ public class HttpRequestParser {
 
             final Map<String, String> headers = getHeaders(bufferedReader);
             final Cookies cookies = getCookies(headers);
-            final StringBuilder requestBody = getRequestBody(bufferedReader);
+            final String requestBody = getRequestBody(bufferedReader);
 
-            return new HttpRequest(httpRequestUri, httpRequestMethod, requestBody.toString(), cookies);
+            return new HttpRequest(httpRequestUri, httpRequestMethod, requestBody, cookies);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -62,11 +62,11 @@ public class HttpRequestParser {
         return requestHeaders;
     }
 
-    private static StringBuilder getRequestBody(BufferedReader bufferedReader) throws IOException {
+    private static String getRequestBody(BufferedReader bufferedReader) throws IOException {
         final StringBuilder requestBody = new StringBuilder();
         while (bufferedReader.ready()) {
             requestBody.append((char) bufferedReader.read());
         }
-        return requestBody;
+        return requestBody.toString();
     }
 }

@@ -22,7 +22,7 @@ public class ResisterHandler implements RequestHandler {
         }
 
         if (httpRequest.isGet()) {
-            return doGet(httpRequest);
+            return doGet();
         }
 
         throw new IllegalArgumentException("일치하는 Method 타입이 없습니다.");
@@ -39,11 +39,15 @@ public class ResisterHandler implements RequestHandler {
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
         String content = FileReader.read("/index.html");
-        return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+        return httpResponse;
     }
 
-    public HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    public HttpResponse doGet() throws IOException {
         String content = FileReader.read("/register.html");
-        return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+        return httpResponse;
     }
 }

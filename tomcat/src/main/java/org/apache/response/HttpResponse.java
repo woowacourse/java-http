@@ -12,38 +12,48 @@ public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CHARACTER_SET = ";charset=utf-8 ";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+    private static final String SPACE = " ";
+    private static final String LINE_SEPARATOR = "";
+    private static final String HEADER_JOINER = ": ";
 
     private final HttpStatus httpStatus;
-    private final ContentType contentType;
     private final String body;
     private final HashMap<String, String> headers;
 
-    public HttpResponse(HttpStatus httpStatus, ContentType contentType, String body) {
-        this.headers = new LinkedHashMap<>();
+    public HttpResponse(HttpStatus httpStatus, String body) {
         this.httpStatus = httpStatus;
-        this.contentType = contentType;
         this.body = body;
-        headers.put(CONTENT_TYPE, contentType.getValue() + ";charset=utf-8 ");
-        headers.put(CONTENT_LENGTH, body.getBytes().length + " ");
+        this.headers = new LinkedHashMap<>();
+        headers.put(CONTENT_LENGTH, body.getBytes().length + SPACE);
     }
 
     public String getResponse() {
         return String.join("\r\n",
-                HTTP_VERSION + httpStatus.getCode() + " " + httpStatus.name() + " ",
+                HTTP_VERSION + httpStatus.getCode() + SPACE + httpStatus.name() + SPACE,
                 parseHeaders(),
-                "",
+                LINE_SEPARATOR,
                 body);
     }
 
     public String parseHeaders() {
         List<String> headerLines = headers.entrySet().stream()
-                .map(entrySet -> entrySet.getKey() + ": " + entrySet.getValue())
+                .map(entrySet -> entrySet.getKey() + HEADER_JOINER + entrySet.getValue())
                 .collect(Collectors.toList());
         return String.join("\r\n", headerLines);
     }
 
-    public void setCookie(String value) {
-        headers.put(SET_COOKIE, value);
+    public void setCookie(String cookie) {
+        headers.put(SET_COOKIE, cookie);
+    }
+
+    public void setLocation(String location) {
+        headers.put(LOCATION, location);
+    }
+
+    public void setContentType(ContentType contentType) {
+        headers.put(CONTENT_TYPE, contentType.getValue() + CHARACTER_SET);
     }
 }

@@ -45,7 +45,9 @@ public class LoginHandler implements RequestHandler {
 
         if (isInvalidParameter(accountQuery[0], passwordQuery[0])) {
             String content = FileReader.read(LOGIN_PAGE);
-            return new HttpResponse(HttpStatus.FOUND, ContentType.TEXT_HTML, content);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
+            httpResponse.setContentType(ContentType.TEXT_HTML);
+            return httpResponse;
         }
 
         String account = accountQuery[1];
@@ -57,14 +59,16 @@ public class LoginHandler implements RequestHandler {
             LOG.info("user : {}", user);
             String content = FileReader.read(INDEX_PAGE);
 
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, ContentType.TEXT_HTML, content);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
             Session session = createSession(httpResponse, user.get());
             httpResponse.setCookie(JSESSIONID + session.getId());
             return httpResponse;
         }
 
         String content = FileReader.read(UNAUTHORIZED_PAGE);
-        return new HttpResponse(HttpStatus.UNAUTHORIZED, ContentType.TEXT_HTML, content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, content);
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+        return httpResponse;
     }
 
     private boolean isInvalidParameter(String account, String password) {
@@ -78,11 +82,15 @@ public class LoginHandler implements RequestHandler {
 
         if (isAuthenticatedUser(session)) {
             String content = FileReader.read(INDEX_PAGE);
-            return new HttpResponse(HttpStatus.FOUND, ContentType.TEXT_HTML, content);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
+            httpResponse.setContentType(ContentType.TEXT_HTML);
+            return httpResponse;
         }
 
         String content = FileReader.read(LOGIN_PAGE);
-        return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+        return httpResponse;
     }
 
     private boolean isAuthenticatedUser(Session session) {

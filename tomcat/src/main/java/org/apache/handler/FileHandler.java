@@ -15,11 +15,15 @@ public class FileHandler implements RequestHandler {
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
         if (!httpRequest.isGet() && !httpRequest.isPost()) {
             String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);
-            return new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, ContentType.TEXT_HTML, content);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, content);
+            httpResponse.setContentType(ContentType.TEXT_HTML);
+            return httpResponse;
         }
 
         String target = httpRequest.getTarget();
         String content = FileReader.read(target);
-        return new HttpResponse(HttpStatus.OK, ContentType.from(target), content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setContentType(ContentType.from(target));
+        return httpResponse;
     }
 }

@@ -34,7 +34,7 @@ class LoginHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             LoginHandler loginHandler = new LoginHandler();
 
             HttpResponse httpResponse = loginHandler.handle(httpRequest);
@@ -55,7 +55,7 @@ class LoginHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             LoginHandler loginHandler = new LoginHandler();
             Session session = new Session("f47ac10b-58cc-4372-a567-0e02b2c3d479");
             session.setAttribute("user", "user");
@@ -82,7 +82,7 @@ class LoginHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             LoginHandler loginHandler = new LoginHandler();
 
             HttpResponse httpResponse = loginHandler.handle(httpRequest);
@@ -100,7 +100,7 @@ class LoginHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             LoginHandler loginHandler = new LoginHandler();
 
             assertThatThrownBy(() -> loginHandler.handle(httpRequest))

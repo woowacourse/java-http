@@ -31,7 +31,7 @@ class FileHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             FileHandler fileHandler = new FileHandler();
 
             HttpResponse httpResponse = fileHandler.handle(httpRequest);
@@ -53,7 +53,7 @@ class FileHandlerTest {
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             FileHandler fileHandler = new FileHandler();
 
             HttpResponse httpResponse = fileHandler.handle(httpRequest);

@@ -9,15 +9,15 @@ public class SessionManager {
     public static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public void add(Session session) {
+    public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String id) {
+    public Session findSession(final String id) {
         return SESSIONS.get(id);
     }
 
-    public boolean contains(String sessionId) {
+    public boolean contains(final String sessionId) {
         return SESSIONS.containsKey(sessionId);
     }
 }

@@ -20,11 +20,11 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         return values.get(name);
     }
 
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         values.put(name, value);
     }
 

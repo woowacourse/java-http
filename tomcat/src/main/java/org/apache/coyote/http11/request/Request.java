@@ -19,10 +19,10 @@ public class Request {
     private final String body;
 
     private Request(
-            Method method,
-            String uri,
-            Headers headers,
-            String body
+            final Method method,
+            final String uri,
+            final Headers headers,
+            final String body
     ) {
         this.method = method;
         this.uri = uri;
@@ -31,12 +31,12 @@ public class Request {
     }
 
     public static Request from(
-            String methodName,
-            String requestURI,
-            Headers headers,
-            String body
+            final String methodName,
+            final String requestURI,
+            final Headers headers,
+            final String body
     ) {
-        Method method = Method.find(methodName)
+        final Method method = Method.find(methodName)
                 .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
         return new Request(method, requestURI, headers, body);
@@ -60,14 +60,14 @@ public class Request {
     }
 
     private Session createSession() {
-        Session session = new Session();
+        final Session session = new Session();
         SESSION_MANAGER.add(session);
         return session;
     }
 
     private Optional<Session> findSession() {
-        Cookies cookies = headers.getCookie();
-        String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
+        final Cookies cookies = headers.getCookie();
+        final String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
         return Optional.ofNullable(SESSION_MANAGER.findSession(sessionId));
     }
 

@@ -26,7 +26,7 @@ public class StubSocket extends Socket {
     public InetAddress getInetAddress() {
         try {
             return InetAddress.getLocalHost();
-        } catch (UnknownHostException ignored) {
+        } catch (final UnknownHostException ignored) {
             return null;
         }
     }
@@ -42,7 +42,7 @@ public class StubSocket extends Socket {
     public OutputStream getOutputStream() {
         return new OutputStream() {
             @Override
-            public void write(int b) {
+            public void write(final int b) {
                 outputStream.write(b);
             }
         };

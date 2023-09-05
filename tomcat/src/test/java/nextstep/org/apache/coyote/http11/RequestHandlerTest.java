@@ -22,7 +22,7 @@ class RequestHandlerTest {
     @DisplayName("/로 GET 요청을 보내면 Hello world!를 반환한다.")
     @Test
     void handleRoot() throws IOException {
-        Response response = RequestHandler.handle(
+        final Response response = RequestHandler.handle(
                 Request.from("get", "/", new Headers(Map.of("Accept", "text/html")), "")
         );
 
@@ -36,8 +36,8 @@ class RequestHandlerTest {
     @ValueSource(strings = {
             "/index.html", "/login.html", "/register.html", "/401.html"
     })
-    void handleHTML(String URI) throws IOException {
-        Response response = RequestHandler.handle(
+    void handleHTML(final String URI) throws IOException {
+        final Response response = RequestHandler.handle(
                 Request.from("get", URI, new Headers(Map.of("Accept", "text/html")), "")
         );
 
@@ -48,7 +48,7 @@ class RequestHandlerTest {
     @DisplayName("css 파일명을 자원으로 GET 요청을 보내면 resources/static 디렉토리 내의 동일한 파일을 찾아 반환한다.")
     @Test
     void handleCSS() throws IOException {
-        Response response = RequestHandler.handle(
+        final Response response = RequestHandler.handle(
                 Request.from("get", "/css/styles.css", new Headers(Map.of("Accept", "text/html")), "")
         );
 
@@ -59,7 +59,7 @@ class RequestHandlerTest {
     @DisplayName("resources/static 디렉토리 내에 존재하지 않는 파일명을 자원으로 GET 요청을 보내면 404 응답코드로 반환한다.")
     @Test
     void handleNotFound() throws IOException {
-        Response response = RequestHandler.handle(
+        final Response response = RequestHandler.handle(
                 Request.from(
                         "get", "/neverexist/not.css", new Headers(Map.of("Accept", "text/html")), "")
         );

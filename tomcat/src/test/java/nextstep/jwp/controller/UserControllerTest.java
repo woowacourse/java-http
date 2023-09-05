@@ -20,10 +20,10 @@ class UserControllerTest {
     @DisplayName("로그인에 성공하면 index.html로 리다이렉트한다.")
     @Test
     void loginSuccess() {
-        Session session = new Session();
+        final Session session = new Session();
         sessionManager.add(session);
 
-        Response response = UserController.login(
+        final Response response = UserController.login(
                 Request.from("post", "/login",
                         new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
                         "account=gugu&password=password"));
@@ -35,10 +35,10 @@ class UserControllerTest {
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다.")
     @Test
     void loginFail() {
-        Session session = new Session();
+        final Session session = new Session();
         sessionManager.add(session);
 
-        Response response = UserController.login(
+        final Response response = UserController.login(
                 Request.from("post", "/login",
                         new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
                         "account=dodo&password=password"));

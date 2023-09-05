@@ -28,7 +28,7 @@ public class RequestHandler {
     private RequestHandler() {
     }
 
-    public static Response handle(Request request) throws IOException {
+    public static Response handle(final Request request) throws IOException {
         if (request.getMethod() == GET) {
             return get(request);
         }
@@ -38,9 +38,9 @@ public class RequestHandler {
         return Response.of(BAD_REQUEST, "text/plain", "");
     }
 
-    private static Response get(Request request) throws IOException {
-        String uri = request.getUri();
-        Session session = request.getOrCreateSession();
+    private static Response get(final Request request) throws IOException {
+        final String uri = request.getUri();
+        final Session session = request.getOrCreateSession();
 
         if ("/".equals(uri)) {
             return Response.of(OK, "text/html", "Hello world!");
@@ -59,32 +59,32 @@ public class RequestHandler {
         return handlerAdaptor.getMapping(request);
     }
 
-    private static Response responseByLogin(Session session, String redirectUri) throws IOException {
+    private static Response responseByLogin(final Session session, final String redirectUri) throws IOException {
         if (isLoginUser(session)) {
             return Response.redirect("index.html");
         }
         return getResponseForStaticResource(redirectUri);
     }
 
-    private static boolean isLoginUser(Session session) {
+    private static boolean isLoginUser(final Session session) {
         return session.isSaved() && Objects.nonNull(session.getAttribute("user"));
     }
 
-    private static boolean isStaticResourceURI(String uri) {
-        Path path = Paths.get(uri);
-        String fileName = path.getFileName().toString();
+    private static boolean isStaticResourceURI(final String uri) {
+        final Path path = Paths.get(uri);
+        final String fileName = path.getFileName().toString();
         return RESOURCE_PATTERN_FILE_EXTENSION
                 .matcher(fileName)
                 .matches();
     }
 
-    private static Response getResponseForStaticResource(String uri) throws IOException {
+    private static Response getResponseForStaticResource(final String uri) throws IOException {
         final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
 
         return createStaticResourceResponse(url);
     }
 
-    private static Response createStaticResourceResponse(URL url) throws IOException {
+    private static Response createStaticResourceResponse(final URL url) throws IOException {
         if (Objects.isNull(url)) {
             log.warn("static resource url is null");
             return Response.of(NOT_FOUND, "text/plain", "");
@@ -96,7 +96,7 @@ public class RequestHandler {
         return Response.of(OK, Files.probeContentType(path), responseBody);
     }
 
-    private static Response post(Request request) {
+    private static Response post(final Request request) {
 
         return handlerAdaptor.postMapping(request);
     }

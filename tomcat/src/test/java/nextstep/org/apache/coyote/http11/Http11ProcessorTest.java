@@ -52,7 +52,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
+        final var expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
                 "Content-Type: text/html;charset=utf-8" + System.lineSeparator() +
                 "Content-Length: 5564" + System.lineSeparator() +
                 System.lineSeparator() +

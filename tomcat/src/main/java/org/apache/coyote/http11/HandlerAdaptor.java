@@ -20,12 +20,12 @@ public class HandlerAdaptor {
             )
     );
 
-    public Response getMapping(Request request) {
+    public Response getMapping(final Request request) {
         return handlerMethods.get(new HandlerMapping(GET, request.getPath()))
                 .handle(request);
     }
 
-    public Response postMapping(Request request) {
+    public Response postMapping(final Request request) {
         return handlerMethods.get(new HandlerMapping(POST, request.getPath()))
                 .handle(request);
     }

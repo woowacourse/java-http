@@ -18,9 +18,9 @@ public class Response {
     private final String body;
 
     private Response(
-            Status status,
-            ContentType contentType,
-            String body
+            final Status status,
+            final ContentType contentType,
+            final String body
     ) {
         this.status = status;
         this.contentType = contentType;
@@ -29,28 +29,28 @@ public class Response {
     }
 
     public static Response of(
-            Status status,
-            String contentTypeString,
-            String body
+            final Status status,
+            final String contentTypeString,
+            final String body
     ) {
-        ContentType contentType = ContentType.from(contentTypeString)
+        final ContentType contentType = ContentType.from(contentTypeString)
                 .orElse(TEXT);
 
         return new Response(status, contentType, body);
     }
 
-    public static Response redirect(String location) {
-        Response response = Response.of(FOUND, HTML.toString(), "");
+    public static Response redirect(final String location) {
+        final Response response = Response.of(FOUND, HTML.toString(), "");
         response.addLocation(location);
 
         return response;
     }
 
-    public void addLocation(String location) {
+    public void addLocation(final String location) {
         headers.addLocation(location);
     }
 
-    public void addSetCookie(String cookie) {
+    public void addSetCookie(final String cookie) {
         headers.addSetCookie(cookie);
     }
 

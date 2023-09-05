@@ -14,19 +14,19 @@ public class Headers {
         values = new HashMap<>();
     }
 
-    public Headers(Map<String, String> headers) {
+    public Headers(final Map<String, String> headers) {
         values = headers;
     }
 
-    public void add(String name, String value) {
+    public void add(final String name, final String value) {
         values.put(name, value);
     }
 
-    public void addLocation(String location) {
+    public void addLocation(final String location) {
         values.put("Location", location);
     }
 
-    public void addSetCookie(String cookie) {
+    public void addSetCookie(final String cookie) {
         values.put("Set-Cookie", cookie);
     }
 
@@ -34,7 +34,7 @@ public class Headers {
         return values.containsKey("Content-Length");
     }
 
-    public String find(String headerName) {
+    public String find(final String headerName) {
         return values.get(headerName);
     }
 

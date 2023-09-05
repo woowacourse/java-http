@@ -14,7 +14,7 @@ public enum Method {
     OPTIONS,
     PATCH;
 
-    public static Optional<Method> find(String name) {
+    public static Optional<Method> find(final String name) {
         return Arrays.stream(values())
                 .filter(method -> method.name().equalsIgnoreCase(name))
                 .findFirst();

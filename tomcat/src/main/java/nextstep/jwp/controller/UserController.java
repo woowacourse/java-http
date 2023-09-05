@@ -16,17 +16,17 @@ public class UserController {
     private UserController() {
     }
 
-    public static Response login(Request request) {
-        String form = request.getBody();
-        Map<String, List<String>> formContents = QueryStringParser.parse(form);
-        String account = formContents.get("account").get(0);
-        String password = formContents.get("password").get(0);
+    public static Response login(final Request request) {
+        final String form = request.getBody();
+        final Map<String, List<String>> formContents = QueryStringParser.parse(form);
+        final String account = formContents.get("account").get(0);
+        final String password = formContents.get("password").get(0);
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            Response redirect = Response.redirect("/index.html");
-            Session session = request.getOrCreateSession();
+            final Response redirect = Response.redirect("/index.html");
+            final Session session = request.getOrCreateSession();
             session.setAttribute("user", user.get());
             redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));
             return redirect;
@@ -34,12 +34,12 @@ public class UserController {
         return Response.redirect("/401.html");
     }
 
-    public static Response register(Request request) {
-        String form = request.getBody();
-        Map<String, List<String>> formContents = QueryStringParser.parse(form);
-        String account = formContents.get("account").get(0);
-        String email = formContents.get("email").get(0);
-        String password = formContents.get("password").get(0);
+    public static Response register(final Request request) {
+        final String form = request.getBody();
+        final Map<String, List<String>> formContents = QueryStringParser.parse(form);
+        final String account = formContents.get("account").get(0);
+        final String email = formContents.get("email").get(0);
+        final String password = formContents.get("password").get(0);
 
         if (InMemoryUserRepository.isExistByAccount(account)) {
             return Response.redirect("/401.html");

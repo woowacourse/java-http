@@ -17,41 +17,41 @@ public class QueryStringParser {
     private QueryStringParser() {
     }
 
-    public static Map<String, List<String>> parse(String query) {
-        HashMap<String, List<String>> queryParams = new HashMap<>();
-        String[] pairs = query.split(QUERY_PARAMETER_DELIMITER);
+    public static Map<String, List<String>> parse(final String query) {
+        final HashMap<String, List<String>> queryParams = new HashMap<>();
+        final String[] pairs = query.split(QUERY_PARAMETER_DELIMITER);
 
-        for (String pair : pairs) {
-            int equalsIndex = pair.indexOf(KEY_PAIR_BRIDGE);
-            String key = extractKey(pair, equalsIndex);
+        for (final String pair : pairs) {
+            final int equalsIndex = pair.indexOf(KEY_PAIR_BRIDGE);
+            final String key = extractKey(pair, equalsIndex);
             queryParams.computeIfAbsent(key, k -> new LinkedList<>())
                     .add(extractValue(pair, equalsIndex));
         }
         return queryParams;
     }
 
-    private static String extractKey(String pair, int index) {
+    private static String extractKey(final String pair, final int index) {
         if (index > 0) {
             return URLDecoder.decode(pair.substring(0, index), StandardCharsets.UTF_8);
         }
         return pair;
     }
 
-    private static String extractValue(String pair, int idx) {
+    private static String extractValue(final String pair, final int idx) {
         if (idx > 0 && pair.length() > idx + 1) {
             return URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8);
         }
         return null;
     }
 
-    public static String parse(Map<String, List<String>> queryParams) {
+    public static String parse(final Map<String, List<String>> queryParams) {
         return queryParams.entrySet()
                 .stream()
                 .map(entry -> QueryStringParser.create(entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(QUERY_PARAMETER_DELIMITER));
     }
 
-    private static String create(String key, List<String> values) {
+    private static String create(final String key, final List<String> values) {
         return values.stream()
                 .map(value -> String.format(KEY_PAIR_PATTERN, key, value))
                 .collect(Collectors.joining(QUERY_PARAMETER_DELIMITER));

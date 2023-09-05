@@ -10,7 +10,7 @@ public enum Status {
 
     private final int code;
 
-    Status(int code) {
+    Status(final int code) {
         this.code = code;
     }
 

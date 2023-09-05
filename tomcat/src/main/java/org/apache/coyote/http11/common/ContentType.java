@@ -24,11 +24,11 @@ public enum ContentType {
 
     private final String[] contentTypeStrings;
 
-    ContentType(String... contentTypeStrings) {
+    ContentType(final String... contentTypeStrings) {
         this.contentTypeStrings = contentTypeStrings;
     }
 
-    public static Optional<ContentType> from(String contentTypeString) {
+    public static Optional<ContentType> from(final String contentTypeString) {
         if (Objects.isNull(contentTypeString)) {
             return Optional.empty();
         }
@@ -37,7 +37,7 @@ public enum ContentType {
                 .findFirst();
     }
 
-    private boolean matches(String contentTypeString) {
+    private boolean matches(final String contentTypeString) {
         return Arrays.stream(this.contentTypeStrings)
                 .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
     }
@@ -46,7 +46,7 @@ public enum ContentType {
         return contentTypeStrings;
     }
 
-    public String withCharset(String charset) {
+    public String withCharset(final String charset) {
         if (StringUtils.isBlank(charset)) {
             throw new IllegalArgumentException("charset cannot be empty");
         }

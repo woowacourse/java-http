@@ -30,7 +30,7 @@ public class UriComponentsBuilder {
     }
 
     public UriComponentsBuilder build() {
-        final String query = uri.getQuery();
+        final var query = uri.getQuery();
 
         return new UriComponentsBuilder(uri, QueryStringParser.parse(query));
     }
@@ -40,6 +40,6 @@ public class UriComponentsBuilder {
     }
 
     public Map<String, List<String>> getQueryParams() {
-        return queryParams;
+        return new HashMap<>(queryParams);
     }
 }

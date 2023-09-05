@@ -19,13 +19,13 @@ public class RequestReader {
 
 
     public Request read() throws IOException {
-        final String requestHead = reader.readLine();
-        final String[] head = requestHead.split(" ");
-        final String method = head[0];
-        final String uri = head[1];
+        final var requestHead = reader.readLine();
+        final var head = requestHead.split(" ");
+        final var method = head[0];
+        final var uri = head[1];
 
-        final Headers headers = readHeaders();
-        final String body = readBody(headers);
+        final var headers = readHeaders();
+        final var body = readBody(headers);
 
         return Request.from(
                 method,

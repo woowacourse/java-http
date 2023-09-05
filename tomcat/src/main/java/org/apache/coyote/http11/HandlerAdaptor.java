@@ -21,11 +21,13 @@ public class HandlerAdaptor {
     );
 
     public Response getMapping(final Request request) {
+
         return handlerMethods.get(new HandlerMapping(GET, request.getPath()))
                 .handle(request);
     }
 
     public Response postMapping(final Request request) {
+        
         return handlerMethods.get(new HandlerMapping(POST, request.getPath()))
                 .handle(request);
     }

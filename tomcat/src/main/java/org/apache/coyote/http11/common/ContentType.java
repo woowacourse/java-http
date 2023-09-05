@@ -32,24 +32,23 @@ public enum ContentType {
         if (Objects.isNull(contentTypeString)) {
             return Optional.empty();
         }
+
         return Arrays.stream(values())
                 .filter(contentType -> contentType.matches(contentTypeString))
                 .findFirst();
     }
 
     private boolean matches(final String contentTypeString) {
+
         return Arrays.stream(this.contentTypeStrings)
                 .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
-    }
-
-    public String[] getContentTypeStrings() {
-        return contentTypeStrings;
     }
 
     public String withCharset(final String charset) {
         if (StringUtils.isBlank(charset)) {
             throw new IllegalArgumentException("charset cannot be empty");
         }
+
         return format("%s;charset=%s", this.toString(), trim(charset));
     }
 

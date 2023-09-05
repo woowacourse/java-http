@@ -33,14 +33,14 @@ public class Response {
             final String contentTypeString,
             final String body
     ) {
-        final ContentType contentType = ContentType.from(contentTypeString)
+        final var contentType = ContentType.from(contentTypeString)
                 .orElse(TEXT);
 
         return new Response(status, contentType, body);
     }
 
     public static Response redirect(final String location) {
-        final Response response = Response.of(FOUND, HTML.toString(), "");
+        final var response = Response.of(FOUND, HTML.toString(), "");
         response.addLocation(location);
 
         return response;

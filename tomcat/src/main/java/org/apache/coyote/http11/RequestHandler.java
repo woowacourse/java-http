@@ -9,7 +9,6 @@ import static org.apache.coyote.http11.common.Status.OK;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -39,8 +38,8 @@ public class RequestHandler {
     }
 
     private static Response get(final Request request) throws IOException {
-        final String uri = request.getUri();
-        final Session session = request.getOrCreateSession();
+        final var uri = request.getUri();
+        final var session = request.getOrCreateSession();
 
         if ("/".equals(uri)) {
             return Response.of(OK, "text/html", "Hello world!");
@@ -71,8 +70,8 @@ public class RequestHandler {
     }
 
     private static boolean isStaticResourceURI(final String uri) {
-        final Path path = Paths.get(uri);
-        final String fileName = path.getFileName().toString();
+        final var path = Paths.get(uri);
+        final var fileName = path.getFileName().toString();
         return RESOURCE_PATTERN_FILE_EXTENSION
                 .matcher(fileName)
                 .matches();

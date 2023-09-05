@@ -37,11 +37,8 @@ public class Cookies {
         return "JSESSIONID=" + id;
     }
 
-    public boolean isExistByName(final String name) {
-        return values.containsKey(name);
-    }
-
     public String findByName(final String name) {
         return values.get(name);
     }
+
 }

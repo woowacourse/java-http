@@ -51,6 +51,7 @@ public class Headers {
         if (values.isEmpty()) {
             return "";
         }
+        
         return values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())

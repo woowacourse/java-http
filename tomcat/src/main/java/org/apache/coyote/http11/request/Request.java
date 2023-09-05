@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
 import java.net.URI;
 import java.util.Optional;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Method;
 import org.apache.coyote.http11.common.Session;
@@ -36,7 +35,7 @@ public class Request {
             final Headers headers,
             final String body
     ) {
-        final Method method = Method.find(methodName)
+        final var method = Method.find(methodName)
                 .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
         return new Request(method, requestURI, headers, body);
@@ -60,14 +59,16 @@ public class Request {
     }
 
     private Session createSession() {
-        final Session session = new Session();
+        final var session = new Session();
         SESSION_MANAGER.add(session);
+
         return session;
     }
 
     private Optional<Session> findSession() {
-        final Cookies cookies = headers.getCookie();
-        final String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
+        final var cookies = headers.getCookie();
+        final var sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
+
         return Optional.ofNullable(SESSION_MANAGER.findSession(sessionId));
     }
 

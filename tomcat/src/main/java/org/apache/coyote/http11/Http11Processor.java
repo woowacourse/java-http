@@ -50,13 +50,12 @@ public class Http11Processor implements Runnable, Processor {
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);  // HTTP method를 읽음 (예: GET)
             final Map<String, String> headers = parseRequestHeaders(br); // header를 읽음
+            final String jsessionId = getJsessionId(headers);
 
             if ("POST".equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
                 final String requestBody = readRequestBody(br, headers);
-                registerUser(requestBody);
+                registerUser(requestBody, jsessionId);
             }
-
-            String jsessionId = getJsessionId(headers);
 
             final String path = parseHttpRequest(requestLine); // 파싱된 HTTP 요청에서 경로 추출
             final String parsedPath = parsePath(path, jsessionId); // 경로를 기반으로 정적 파일을 읽고 응답 생성
@@ -222,6 +221,9 @@ public class Http11Processor implements Runnable, Processor {
                 return "/login.html";
             }
         } else if (path.equals("/register")) {
+            if(SessionManager.validJsession(jsessionId)){
+                return "/index.html";
+            }
             return "/register.html";
         } else if (path.matches(JS_ICO_CSS_REGEX)) {
             return path;
@@ -231,7 +233,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isValidUser(final String path, final String jsessionId) {
-        String noUrlPath = path.replace("/login?","");
+        String noUrlPath = path.replace("/login?", "");
         Map<String, String> loginData = parseLoginData(noUrlPath);
         String parsedAccount = loginData.get("account");
         String parsedPassword = loginData.get("password");
@@ -240,8 +242,8 @@ public class Http11Processor implements Runnable, Processor {
         if (maybeUser.isPresent()) {
             final User foundUser = maybeUser.get();
             if (foundUser.checkPassword(parsedPassword) && !SessionManager.validUser(foundUser)) {
-                log.info("로그인 성공! 아이디 : " + parsedAccount);
                 SessionManager.add(foundUser, jsessionId);
+                log.info("로그인 성공! 아이디 : " + parsedAccount);
                 return true;
             }
         }
@@ -267,7 +269,7 @@ public class Http11Processor implements Runnable, Processor {
         return loginData;
     }
 
-    private void registerUser(final String requestBody) throws IOException {
+    private void registerUser(final String requestBody, final String jsessionId) throws IOException {
         Map<String, String> userData = parseRequestBody(requestBody);
         String parsedAccount = userData.get("account");
         String parsedEmail = userData.get("email");
@@ -275,6 +277,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = new User(parsedAccount, parsedPassword, parsedEmail);
         InMemoryUserRepository.save(user);
+        SessionManager.add(user, jsessionId);
         log.info("유저 저장 성공!");
     }
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.response.util;
 
 import javassist.NotFoundException;
 

@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Headers;
 import org.apache.coyote.http11.response.header.Status;
-import org.apache.coyote.http11.util.ResourceFinder;
+import org.apache.coyote.http11.response.util.ResourceFinder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

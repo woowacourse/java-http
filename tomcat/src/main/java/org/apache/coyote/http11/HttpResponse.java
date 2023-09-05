@@ -10,10 +10,12 @@ public class HttpResponse {
 
     public static final String CRLF = "\r\n";
     public static final String EMPTY_STRING = "";
-    private HttpStatus httpStatus;
-    private ContentType contentType;
-    private String body;
-    private Map<String, String> headers;
+
+
+    private final HttpStatus httpStatus;
+    private final ContentType contentType;
+    private final String body;
+    private final Map<String, String> headers;
 
     public HttpResponse(final HttpStatus httpStatus) {
         this(httpStatus, new ContentType("text/plain", "utf-8"));
@@ -64,13 +66,12 @@ public class HttpResponse {
     }
 
     private String joinHeaders() {
-        String joined = EMPTY_STRING;
-        if (headers != null) {
-            joined = headers.entrySet().stream()
-                    .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                    .collect(Collectors.joining(CRLF));
+        if (headers.isEmpty()) {
+            return EMPTY_STRING;
         }
-        return joined;
+        return headers.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                .collect(Collectors.joining(CRLF));
     }
 
     private String getBody() {

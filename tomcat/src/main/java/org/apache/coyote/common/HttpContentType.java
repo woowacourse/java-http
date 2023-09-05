@@ -17,6 +17,9 @@ public enum HttpContentType {
     }
 
     public static HttpContentType from(String extension) {
+        if (extension == null) {
+            return TEXT_PLAIN;
+        }
         for (HttpContentType contentType : values()) {
             if (extension.endsWith(contentType.getExtension())) {
                 return contentType;

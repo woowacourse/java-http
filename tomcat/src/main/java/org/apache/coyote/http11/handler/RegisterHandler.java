@@ -11,26 +11,26 @@ import org.apache.coyote.http11.ContentTypeParser;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class RegisterHandler extends Handler {
 
     @Override
-    public Response handle(Request request) throws IOException {
-        if (request.getMethod().isEqualTo(HttpMethod.GET)) {
-            return responseWhenHttpMethodIsGet(request);
+    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getMethod().isEqualTo(HttpMethod.GET)) {
+            return responseWhenHttpMethodIsGet(httpRequest);
         }
-        if (request.getMethod().isEqualTo(HttpMethod.POST)) {
-            return responseWhenHttpMethodIsPost(request);
+        if (httpRequest.getMethod().isEqualTo(HttpMethod.POST)) {
+            return responseWhenHttpMethodIsPost(httpRequest);
         }
 
         throw new IllegalArgumentException();
     }
 
-    private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
+    private HttpResponse responseWhenHttpMethodIsGet(HttpRequest httpRequest) throws IOException {
         String absolutePath = REGISTER_PAGE.path();
 
         String resource = findResourceWithPath(absolutePath);
@@ -40,24 +40,24 @@ public class RegisterHandler extends Handler {
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
-        return Response.from(request.getHttpVersion(), HttpStatus.OK,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.OK,
                 headers, responseBody);
     }
 
-    private Response responseWhenHttpMethodIsPost(Request request) {
-        saveUser(request);
+    private HttpResponse responseWhenHttpMethodIsPost(HttpRequest httpRequest) {
+        saveUser(httpRequest);
         String absolutePath = INDEX_PAGE.path();
 
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath
         ));
 
-        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.FOUND,
                 headers, ResponseBody.ofEmpty());
     }
 
-    private void saveUser(Request request) {
-        RequestBody requestBody = request.getBody();
+    private void saveUser(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");

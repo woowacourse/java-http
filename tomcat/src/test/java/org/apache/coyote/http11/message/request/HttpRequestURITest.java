@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RequestURITest {
+class HttpRequestURITest {
 
     @Test
     void 절대경로를_반환할_수_있다() {

@@ -5,7 +5,7 @@ import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpVersion;
 
-public class Request {
+public class HttpRequest {
 
     private final HttpMethod method;
     private final HttpVersion httpVersion;
@@ -13,8 +13,8 @@ public class Request {
     private final Headers headers;
     private final RequestBody requestBody;
 
-    private Request(HttpMethod method, HttpVersion httpVersion,
-                    RequestURI requestURI, Headers headers, RequestBody requestBody) {
+    private HttpRequest(HttpMethod method, HttpVersion httpVersion,
+                        RequestURI requestURI, Headers headers, RequestBody requestBody) {
         this.method = method;
         this.httpVersion = httpVersion;
         this.requestURI = requestURI;
@@ -22,13 +22,13 @@ public class Request {
         this.requestBody = requestBody;
     }
 
-    public static Request from(String startLine, Headers headers, RequestBody body) {
+    public static HttpRequest from(String startLine, Headers headers, RequestBody body) {
         String[] splitStartLine = startLine.split(" ");
         String httpMethod = splitStartLine[0];
         String requestURI = splitStartLine[1];
         String httpVersion = splitStartLine[2];
 
-        return new Request(HttpMethod.from(httpMethod), HttpVersion.from(httpVersion),
+        return new HttpRequest(HttpMethod.from(httpMethod), HttpVersion.from(httpVersion),
                 RequestURI.from(requestURI), headers, body);
     }
 

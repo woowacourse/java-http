@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO: 다른 점이 없으므로 RequestBody + ResponseBody 묶기
 public class RequestBody {
 
     private final Map<String, String> body;

@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.apache.coyote.http11.message.Headers;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 
 public class RequestExtractor {
@@ -17,14 +17,14 @@ public class RequestExtractor {
     private RequestExtractor() {
     }
 
-    public static Request extract(InputStream inputStream) throws IOException {
+    public static HttpRequest extract(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         String startLine = reader.readLine();
         Headers headers = extractHeaders(reader);
         RequestBody requestBody = extractBodyIfExists(reader, headers);
 
-        return Request.from(startLine, headers, requestBody);
+        return HttpRequest.from(startLine, headers, requestBody);
     }
 
     private static Headers extractHeaders(BufferedReader reader) throws IOException {

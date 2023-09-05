@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RequestBodyTest {
+class HttpRequestBodyTest {
 
     @Test
     void HTTP_MESSAGE_BODY를_파싱할_수_있다() {

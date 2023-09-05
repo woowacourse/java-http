@@ -13,46 +13,46 @@ import org.apache.coyote.http11.message.Cookie;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class LoginHandler extends Handler {
 
-    public Response handle(Request request) throws IOException {
-        HttpMethod httpMethod = request.getMethod();
+    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+        HttpMethod httpMethod = httpRequest.getMethod();
         if (httpMethod.isEqualTo(HttpMethod.GET)) {
-            return responseWhenHttpMethodIsGet(request);
+            return responseWhenHttpMethodIsGet(httpRequest);
         }
         if (httpMethod.isEqualTo(HttpMethod.POST)) {
-            return responseWhenHttpMethodIsPost(request);
+            return responseWhenHttpMethodIsPost(httpRequest);
         }
 
         throw new IllegalArgumentException();
     }
 
-    private Response responseWhenHttpMethodIsGet(Request request) throws IOException {
-        Headers requestHeaders = request.getHeaders();
+    private HttpResponse responseWhenHttpMethodIsGet(HttpRequest httpRequest) throws IOException {
+        Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
         if (cookie.hasKey("JSESSIONID")) {
-            return responseForLoggedIn(request);
+            return responseForLoggedIn(httpRequest);
         }
-        return responseForNotLoggedIn(request);
+        return responseForNotLoggedIn(httpRequest);
     }
 
-    private Response responseForLoggedIn(Request request) {
+    private HttpResponse responseForLoggedIn(HttpRequest httpRequest) {
         String absolutePath = INDEX_PAGE.path();
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath
         ));
 
-        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.FOUND,
                 headers, ResponseBody.ofEmpty());
     }
 
-    private Response responseForNotLoggedIn(Request request) throws IOException {
+    private HttpResponse responseForNotLoggedIn(HttpRequest httpRequest) throws IOException {
         String absolutePath = LOGIN_PAGE.path();
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(
@@ -61,23 +61,23 @@ public class LoginHandler extends Handler {
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
-        return Response.from(request.getHttpVersion(), HttpStatus.OK,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.OK,
                 headers, responseBody);
     }
 
-    private Response responseWhenHttpMethodIsPost(Request request) {
-        RequestBody requestBody = request.getBody();
+    private HttpResponse responseWhenHttpMethodIsPost(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 
         if (InMemoryUserRepository.hasSameCredential(account, password)) {
-            return responseWhenLoginSuccess(request);
+            return responseWhenLoginSuccess(httpRequest);
         }
-        return responseWhenLoginFail(request);
+        return responseWhenLoginFail(httpRequest);
     }
 
-    private Response responseWhenLoginSuccess(Request request) {
-        UUID sessionId = saveSession(request);
+    private HttpResponse responseWhenLoginSuccess(HttpRequest httpRequest) {
+        UUID sessionId = saveSession(httpRequest);
 
         String absolutePath = INDEX_PAGE.path();
         Headers headers = Headers.fromMap(Map.of(
@@ -85,23 +85,23 @@ public class LoginHandler extends Handler {
                 LOCATION, absolutePath
         ));
 
-        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.FOUND,
                 headers, ResponseBody.ofEmpty());
     }
 
-    private Response responseWhenLoginFail(Request request) {
+    private HttpResponse responseWhenLoginFail(HttpRequest httpRequest) {
         String absolutePath = UNAUTHORIZED_PAGE.path();
 
         Headers headers = Headers.fromMap(Map.of(
                 LOCATION, absolutePath
         ));
 
-        return Response.from(request.getHttpVersion(), HttpStatus.FOUND,
+        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.FOUND,
                 headers, ResponseBody.ofEmpty());
     }
 
-    private UUID saveSession(Request request) {
-        RequestBody body = request.getBody();
+    private UUID saveSession(HttpRequest httpRequest) {
+        RequestBody body = httpRequest.getBody();
         String account = body.get("account");
         String password = body.get("password");
 

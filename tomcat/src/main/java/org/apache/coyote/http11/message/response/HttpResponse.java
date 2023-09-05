@@ -4,22 +4,22 @@ import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.HttpVersion;
 
-public class Response {
+public class HttpResponse {
 
     private final String statusLine;
     private final Headers headers;
     private final ResponseBody body;
 
-    private Response(String statusLine, Headers headers, ResponseBody body) {
+    private HttpResponse(String statusLine, Headers headers, ResponseBody body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public static Response from(HttpVersion httpVersion, HttpStatus httpStatus,
-                                Headers headers, ResponseBody responseBody) {
+    public static HttpResponse from(HttpVersion httpVersion, HttpStatus httpStatus,
+                                    Headers headers, ResponseBody responseBody) {
         String statusLine = httpVersion + " " + httpStatus + " ";
-        return new Response(statusLine, headers, responseBody);
+        return new HttpResponse(statusLine, headers, responseBody);
     }
 
     public byte[] getBytes() {

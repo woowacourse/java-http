@@ -3,9 +3,9 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestURI;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class Handlers {
 
@@ -22,8 +22,8 @@ public class Handlers {
     private Handlers() {
     }
 
-    public static Response handle(Request request) throws IOException {
-        RequestURI requestURI = request.getRequestURI();
+    public static HttpResponse handle(HttpRequest httpRequest) throws IOException {
+        RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
 
         Handler handler = mappings.entrySet().stream()
@@ -32,6 +32,6 @@ public class Handlers {
                 .map(Map.Entry::getValue)
                 .orElseGet(StaticResourceHandler::new);
 
-        return handler.handle(request);
+        return handler.handle(httpRequest);
     }
 }

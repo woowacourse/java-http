@@ -11,7 +11,7 @@ public class EtagFilterConfiguration {
     @Bean
     public FilterRegistrationBean<ShallowEtagHeaderFilter> shallowEtagHeaderFilter() {
         var filterRegistrationBean = new FilterRegistrationBean<>(new ShallowEtagHeaderFilter());
-        filterRegistrationBean.addUrlPatterns("/etag");
+        filterRegistrationBean.addUrlPatterns("/etag", "/resources/*");
         return filterRegistrationBean;
     }
 }

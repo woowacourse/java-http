@@ -5,6 +5,7 @@ public enum HttpStatus {
     OK("200"),
     FOUND("302"),
     UNAUTHORIZED("401"),
+    METHOD_NOT_ALLOWED("405"),
     CONFLICT("409");
 
     private final String code;

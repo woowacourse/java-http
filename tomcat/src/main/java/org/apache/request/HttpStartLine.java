@@ -21,9 +21,6 @@ public class HttpStartLine {
     }
 
     public static HttpStartLine of(String line) {
-        if (line == null || line.isBlank()) {
-            throw new IllegalArgumentException("잘못된 HTTP 요청입니다.");
-        }
         String[] splits = splitLine(line);
         validate(splits);
         String httpMethod = splits[HTTP_METHOD_INDEX];
@@ -38,7 +35,7 @@ public class HttpStartLine {
 
     private static void validate(String[] splits) {
         if (splits.length < MIN_LINE_SIZE) {
-            throw new IllegalArgumentException("올바르지 않은 HTTP 요청입니다.");
+            throw new IllegalArgumentException("잘못된 HTTP 요청입니다.");
         }
     }
 

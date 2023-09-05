@@ -3,6 +3,7 @@ package nextstep.jwp.servlet;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.servlet.exception.NotFoundFileException;
 import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.Servlet;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 public class DispatcherServlet implements Servlet {
 
-    private static Map<String, Controller> container = new HashMap<>();
+    private static final Map<String, Controller> container = new HashMap<>();
 
     static {
         container.put("/", new HomeController());
@@ -24,29 +25,38 @@ public class DispatcherServlet implements Servlet {
         container.put("/register", new RegisterController());
     }
 
+    private final ControllerAdvice controllerAdvice;
+
+    public DispatcherServlet(ControllerAdvice controllerAdvice) {
+        this.controllerAdvice = controllerAdvice;
+    }
+
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String requestUri = httpRequest.getRequestUri();
-        if (isStaticResource(httpResponse, requestUri)) {
+        if (isStaticResource(httpResponse, requestUri) && requestUri.contains(".")) {
             return;
         }
-        Controller controller = container.get(requestUri);
         try {
+            Controller controller = container.get(requestUri);
             controller.service(httpRequest, httpResponse);
-        } catch (IllegalAccessException e) {
-
         } catch (Exception e) {
-
+            controllerAdvice.handleException(e, httpResponse);
         }
     }
 
-    private boolean isStaticResource(HttpResponse httpResponse, String requestUri) throws IOException {
+    private boolean isStaticResource(HttpResponse httpResponse, String requestUri) {
         if (container.containsKey(requestUri)) {
             return false;
         }
-        StaticResource staticResource = StaticResource.of(requestUri);
-        ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-        httpResponse.setResponseBody(responseBody);
-        return true;
+        try {
+
+            StaticResource staticResource = StaticResource.of(requestUri);
+            ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
+            httpResponse.setResponseBody(responseBody);
+            return true;
+        } catch (IOException e) {
+            throw new NotFoundFileException();
+        }
     }
 }

@@ -7,6 +7,9 @@ import java.util.Optional;
 
 public class MemberService {
 
+    private MemberService() {
+    }
+
     public static void register(String name, String email, String password) {
         User user = new User(name, email, password);
         InMemoryUserRepository.save(user);

@@ -1,12 +1,13 @@
 package nextstep;
 
+import nextstep.jwp.servlet.ControllerAdvice;
 import nextstep.jwp.servlet.DispatcherServlet;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(String[] args) {
-        var servlet = new DispatcherServlet();
+        var servlet = new DispatcherServlet(new ControllerAdvice());
         final var tomcat = new Tomcat(servlet);
         tomcat.start();
     }

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.application.MemberService;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.http11.cookie.HttpCookie;
@@ -11,16 +12,20 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
 
-import java.io.IOException;
-import java.util.Optional;
-
 public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         String account = request.getBody("account");
         String password = request.getBody("password");
-        redirectLogin(request, response, account, password);
+        User findUser = MemberService.login(account, password)
+                .orElseThrow(UserNotFoundException::new);
+
+        Session session = request.getSession(true);
+        session.setAttribute("user", findUser);
+        response.location("index.html");
+        response.setStatusCode(HttpStatusCode.FOUND);
+        response.addCookie(HttpCookie.jSessionId(session.getId()));
     }
 
     @Override
@@ -33,21 +38,5 @@ public class LoginController extends AbstractController {
         StaticResource staticResource = StaticResource.of("/login.html");
         ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
         response.setResponseBody(responseBody);
-    }
-
-    private void redirectLogin(HttpRequest httpRequest, HttpResponse httpResponse, String account, String password) throws IOException {
-        Optional<User> findUser = MemberService.login(account, password);
-        if (findUser.isEmpty()) {
-            StaticResource staticResource = StaticResource.of("/401.html");
-            ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-            httpResponse.setStatusCode(HttpStatusCode.UNAUTHORIZED);
-            httpResponse.setResponseBody(responseBody);
-            return;
-        }
-        Session session = httpRequest.getSession(true);
-        session.setAttribute("user", findUser.get());
-        httpResponse.location("index.html");
-        httpResponse.setStatusCode(HttpStatusCode.FOUND);
-        httpResponse.addCookie(HttpCookie.jSessionId(session.getId()));
     }
 }

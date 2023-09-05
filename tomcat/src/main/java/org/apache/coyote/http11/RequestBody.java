@@ -18,10 +18,15 @@ public class RequestBody {
     }
 
     public static RequestBody from(final String requestBody) {
-        final Map<String, String> body = new HashMap<>();
         if (Objects.isNull(requestBody) || requestBody.isEmpty()) {
-            return new RequestBody(body);
+            return emptyBody();
         }
+        final Map<String, String> body = makeBody(requestBody);
+        return new RequestBody(body);
+    }
+
+    private static Map<String, String> makeBody(final String requestBody) {
+        final Map<String, String> body = new HashMap<>();
         final String[] keyValues = requestBody.split("&");
         for (String keyValue : keyValues) {
             final String[] splitKeyValue = keyValue.split("=");
@@ -30,7 +35,8 @@ public class RequestBody {
             }
             body.put(splitKeyValue[0], splitKeyValue[1]);
         }
-        return new RequestBody(body);
+
+        return body;
     }
 
     public String get(final String key) {

@@ -12,14 +12,13 @@ public class HttpResponseParser {
     private HttpResponseParser() {
     }
 
-    public static byte[] parse(HttpResponse response) {
+    public static String parse(HttpResponse response) {
         HttpStatus status = response.getHttpStatus();
-        String result = String.join(CRLF,
+        return String.join(CRLF,
             parseStartLine(status),
             parseHeaders(response) + parseCookie(response.getCookie()),
             "",
             response.getBody());
-        return result.getBytes();
     }
 
     private static String parseStartLine(HttpStatus status) {

@@ -24,7 +24,7 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpResponse handle(HttpRequest request) throws IOException {
-        if (request.getUri().equals("/") && request.getMethod() == HttpMethod.GET) {
+        if (isIndexPage(request)) {
             return HttpResponse.ok("Hello world!", ContentType.HTML);
         }
 
@@ -42,6 +42,10 @@ public class RequestHandler {
         }
 
         return getFile("/404.html");
+    }
+
+    private boolean isIndexPage(HttpRequest request) {
+        return request.getUri().equals("/") && request.getMethod() == HttpMethod.GET;
     }
 
     private HttpResponse getFile(String uri) throws IOException {

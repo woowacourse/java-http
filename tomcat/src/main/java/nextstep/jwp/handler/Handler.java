@@ -8,7 +8,7 @@ public class Handler {
 
     private static final RequestHandler requestHandler = new RequestHandler();
 
-    public static byte[] handle(HttpRequest request) {
+    public static String handle(HttpRequest request) {
         try {
             HttpResponse response = requestHandler.handle(request);
             return HttpResponseParser.parse(response);

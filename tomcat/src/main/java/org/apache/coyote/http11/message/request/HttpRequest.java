@@ -8,28 +8,18 @@ import org.apache.coyote.http11.message.HttpVersion;
 public class HttpRequest {
 
     private final HttpMethod method;
-    private final HttpVersion httpVersion;
     private final RequestURI requestURI;
+    private final HttpVersion httpVersion;
     private final Headers headers;
     private final RequestBody requestBody;
 
-    private HttpRequest(HttpMethod method, HttpVersion httpVersion,
-                        RequestURI requestURI, Headers headers, RequestBody requestBody) {
+    public HttpRequest(HttpMethod method, RequestURI requestURI, HttpVersion httpVersion,
+                        Headers headers, RequestBody requestBody) {
         this.method = method;
-        this.httpVersion = httpVersion;
         this.requestURI = requestURI;
+        this.httpVersion = httpVersion;
         this.headers = headers;
         this.requestBody = requestBody;
-    }
-
-    public static HttpRequest from(String startLine, Headers headers, RequestBody body) {
-        String[] splitStartLine = startLine.split(" ");
-        String httpMethod = splitStartLine[0];
-        String requestURI = splitStartLine[1];
-        String httpVersion = splitStartLine[2];
-
-        return new HttpRequest(HttpMethod.from(httpMethod), HttpVersion.from(httpVersion),
-                RequestURI.from(requestURI), headers, body);
     }
 
     public HttpMethod getMethod() {

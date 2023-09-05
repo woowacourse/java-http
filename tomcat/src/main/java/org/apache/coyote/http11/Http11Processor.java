@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.base.Controller;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.adapter.HandlerAdapter;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.Status;
@@ -19,6 +19,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+import static org.apache.coyote.http11.handler.adapter.HandlerAdapter.adaptController;
 import static org.apache.coyote.http11.handler.mapper.HandlerMapper.getController;
 
 public class Http11Processor implements Runnable, Processor {
@@ -52,19 +53,13 @@ public class Http11Processor implements Runnable, Processor {
     private void handleRequest(final BufferedReader bufferedReader, final BufferedWriter bufferedWriter) throws Exception {
         try {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            Controller controller = getController(httpRequest);
-            HttpResponse httpResponse = handleController(controller, httpRequest);
-            response(bufferedWriter, httpResponse);
-        } catch (NotFoundException e) {
-            response(bufferedWriter, HttpResponse.withResource(Status.NOT_FOUND, "/404.html"));
-        }
-    }
 
-    private HttpResponse handleController(final Controller controller, final HttpRequest httpRequest) {
-        try {
-            return HandlerAdapter.adaptController(controller, httpRequest);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Controller controller = getController(httpRequest);
+            HttpResponse httpResponse = adaptController(controller, httpRequest);
+
+            response(bufferedWriter, httpResponse);
+        } catch (NotFoundException | UnsupportedMethodException e) {
+            response(bufferedWriter, HttpResponse.withResource(Status.NOT_FOUND, "/404.html"));
         }
     }
 

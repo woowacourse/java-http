@@ -35,7 +35,7 @@ class RequestHeaderTest {
     }
 
     @Test
-    void header_field_이름을_입력하면_value_를_반환한다() {
+    void header_field_이름을_입력하면_value를_반환한다() {
         // given
         String requestHeader = String.join(
                 System.lineSeparator(),

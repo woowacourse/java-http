@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -155,7 +157,7 @@ public class Http11Processor implements Runnable, Processor {
       return params;
     }
 
-    for (final String query : queryString.split("&")) {
+    for (final String query : URLDecoder.decode(queryString, StandardCharsets.UTF_8).split("&")) {
       final String[] tokens = query.split("=");
       params.put(tokens[0], tokens[1]);
     }

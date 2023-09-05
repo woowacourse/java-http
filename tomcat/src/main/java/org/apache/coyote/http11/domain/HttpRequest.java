@@ -2,6 +2,8 @@ package org.apache.coyote.http11.domain;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class HttpRequest {
 
@@ -23,7 +25,8 @@ public class HttpRequest {
   }
 
   public static HttpRequest from(final BufferedReader br) throws IOException {
-    final String[] tokens = br.readLine().split(" ");
+    final String requestLine = URLDecoder.decode(br.readLine(), StandardCharsets.UTF_8);
+    final String[] tokens = requestLine.split(" ");
     final int index = tokens[1].indexOf("?");
     final String method = tokens[0];
     final String url = index != -1 ? tokens[1].substring(0, index) : tokens[1];

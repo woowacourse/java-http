@@ -25,7 +25,7 @@ public class Session {
         values.put(name, value);
     }
 
-    public void remoteAttribute(final String name) {
+    public void removeAttribute(final String name) {
         values.remove(name);
     }
 

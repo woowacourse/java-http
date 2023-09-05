@@ -27,7 +27,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + new File(resource.getPath()).length() + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -81,7 +81,7 @@ class Http11ProcessorTest {
         //then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + new File(resource.getPath()).length() + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -141,7 +141,7 @@ class Http11ProcessorTest {
         //then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         var expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + new File(resource.getPath()).length();
 
         assertThat(socket.output()).contains(expected);
@@ -194,7 +194,7 @@ class Http11ProcessorTest {
         //then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + new File(resource.getPath()).length() + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

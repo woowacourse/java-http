@@ -13,13 +13,13 @@ public class ResourceRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        final String requestPath = httpRequest.requestLine().requestPath().source();
+        final String requestPath = httpRequest.requestLine().requestPath().value();
         final String resourceBody = ResourceReader.read(requestPath);
         final ResponseBody responseBody = new ResponseBody(resourceBody);
 
         return HttpResponse.builder()
                 .setHttpVersion(HTTP_1_1)
-                .setContentType(MediaType.from(requestPath).source())
+                .setContentType(MediaType.from(requestPath).value())
                 .setHttpStatus(OK)
                 .setResponseBody(responseBody)
                 .setContentLength(resourceBody.length())

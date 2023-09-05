@@ -68,7 +68,7 @@ public class HttpResponse {
         }
 
         public HttpResponseBuilder setContentType(final String contentType) {
-            this.headers.setContentType(contentType + ";" + UTF_8.source());
+            this.headers.setContentType(contentType + ";" + UTF_8.value());
             return this;
         }
 

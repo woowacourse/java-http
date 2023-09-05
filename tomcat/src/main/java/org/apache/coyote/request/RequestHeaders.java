@@ -1,5 +1,6 @@
-package org.apache.coyote.common;
+package org.apache.coyote.request;
 
+import org.apache.coyote.common.Headers;
 import org.apache.coyote.session.Cookies;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.coyote.common.HeaderType.*;
 
-public class HttpHeaders {
+public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ":";
     private static final int HEADER_NAME_INDEX = 0;
@@ -21,18 +22,18 @@ public class HttpHeaders {
     private final Cookies cookies;
     private final Session session;
 
-    private HttpHeaders(final Headers headers, final Cookies cookies, final Session session) {
+    private RequestHeaders(final Headers headers, final Cookies cookies, final Session session) {
         this.headers = headers;
         this.cookies = cookies;
         this.session = session;
     }
 
-    public static HttpHeaders from(final List<String> headersWithValue) {
+    public static RequestHeaders from(final List<String> headersWithValue) {
         final Map<String, String> headerMapping = collectHeaderMapping(headersWithValue);
         final Cookies newCookies = getCookiesBy(headerMapping);
         final Session foundSession = getSessionBy(newCookies);
 
-        return new HttpHeaders(new Headers(headerMapping), newCookies, foundSession);
+        return new RequestHeaders(new Headers(headerMapping), newCookies, foundSession);
     }
 
     private static Map<String, String> collectHeaderMapping(final List<String> headersWithValue) {
@@ -45,8 +46,8 @@ public class HttpHeaders {
     }
 
     private static Cookies getCookiesBy(final Map<String, String> headers) {
-        final String cookiesWithValue = headers.getOrDefault(COOKIE.source(), null);
-        if (Objects.isNull(COOKIE.source())) {
+        final String cookiesWithValue = headers.getOrDefault(COOKIE.value(), null);
+        if (Objects.isNull(COOKIE.value())) {
             return Cookies.empty();
         }
 
@@ -84,7 +85,7 @@ public class HttpHeaders {
 
     @Override
     public String toString() {
-        return "HttpHeaders{" +
+        return "RequestHeaders{" +
                "headers=" + headers + System.lineSeparator() +
                "        " + cookies + System.lineSeparator() +
                "        " + session + System.lineSeparator() +

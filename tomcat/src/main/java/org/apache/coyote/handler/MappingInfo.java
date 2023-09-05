@@ -17,7 +17,7 @@ public class MappingInfo {
     public static MappingInfo from(final HttpRequest request) {
         return new MappingInfo(
                 request.requestLine().httpMethod().name(),
-                request.requestLine().requestPath().source()
+                request.requestLine().requestPath().value()
         );
     }
 

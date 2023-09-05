@@ -1,7 +1,6 @@
 package org.apache.coyote.request;
 
 import org.apache.coyote.common.Headers;
-import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.exception.CoyoteIOException;
 import org.apache.coyote.session.Cookies;
@@ -20,17 +19,17 @@ public class HttpRequest {
     private static final String HEADER_END_CONDITION = "";
 
     private final RequestLine requestLine;
-    private final HttpHeaders httpHeaders;
+    private final RequestHeaders requestHeaders;
     private final MediaType mediaType;
     private final RequestBody requestBody;
 
     private HttpRequest(final RequestLine requestLine,
-                        final HttpHeaders headersV2,
+                        final RequestHeaders requestHeaders,
                         final MediaType mediaType,
                         final RequestBody requestBody
     ) {
         this.requestLine = requestLine;
-        this.httpHeaders = headersV2;
+        this.requestHeaders = requestHeaders;
         this.mediaType = mediaType;
         this.requestBody = requestBody;
     }
@@ -38,17 +37,17 @@ public class HttpRequest {
     public static HttpRequest from(final BufferedReader br) {
         try {
             final RequestLine requestLine = RequestLine.from(br.readLine());
-            final HttpHeaders httpHeaders = parseToHttpHeaders(br);
-            final MediaType mediaType = MediaType.from(requestLine.requestPath().source());
-            final RequestBody requestBody = parseToResponseBody(br, httpHeaders);
+            final RequestHeaders requestHeaders = parseToHttpHeaders(br);
+            final MediaType mediaType = MediaType.from(requestLine.requestPath().value());
+            final RequestBody requestBody = parseToResponseBody(br, requestHeaders);
 
-            return new HttpRequest(requestLine, httpHeaders, mediaType, requestBody);
+            return new HttpRequest(requestLine, requestHeaders, mediaType, requestBody);
         } catch (IOException e) {
             throw new CoyoteIOException("HTTP 요청 정보를 읽던 도중에 예외가 발생하였습니다.");
         }
     }
 
-    private static HttpHeaders parseToHttpHeaders(final BufferedReader br) throws IOException {
+    private static RequestHeaders parseToHttpHeaders(final BufferedReader br) throws IOException {
         final List<String> headersWithValue = new ArrayList<>();
         String header = br.readLine();
         while (!header.equals(HEADER_END_CONDITION)) {
@@ -56,11 +55,11 @@ public class HttpRequest {
             header = br.readLine();
         }
 
-        return HttpHeaders.from(headersWithValue);
+        return RequestHeaders.from(headersWithValue);
     }
 
-    private static RequestBody parseToResponseBody(final BufferedReader br, final HttpHeaders httpHeaders) throws IOException {
-        final String contentLengthHeader = httpHeaders.getHeaderValue(CONTENT_LENGTH.source());
+    private static RequestBody parseToResponseBody(final BufferedReader br, final RequestHeaders requestHeaders) throws IOException {
+        final String contentLengthHeader = requestHeaders.getHeaderValue(CONTENT_LENGTH.value());
         if (Objects.isNull(contentLengthHeader)) {
             return RequestBody.empty();
         }
@@ -76,19 +75,19 @@ public class HttpRequest {
     }
 
     public String getCookieValue(final String cookieName) {
-        return httpHeaders.getCookieValue(cookieName);
+        return requestHeaders.getCookieValue(cookieName);
     }
 
     public Headers headers() {
-        return httpHeaders.headers();
+        return requestHeaders.headers();
     }
 
     public Cookies cookies() {
-        return httpHeaders.cookies();
+        return requestHeaders.cookies();
     }
 
     public Session session() {
-        return httpHeaders.session();
+        return requestHeaders.session();
     }
 
     public MediaType mediaType() {
@@ -103,7 +102,7 @@ public class HttpRequest {
     public String toString() {
         return "HttpRequest{" + System.lineSeparator() +
                "    requestLine = " + requestLine + ", " + System.lineSeparator() +
-               "    httpHeaders = " + httpHeaders + System.lineSeparator() +
+               "    requestHeaders = " + requestHeaders + System.lineSeparator() +
                "    mediaType = " + mediaType + System.lineSeparator() +
                "    requestBody = " + requestBody + System.lineSeparator() +
                '}';

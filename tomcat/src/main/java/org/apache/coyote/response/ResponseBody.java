@@ -6,10 +6,10 @@ public class ResponseBody {
 
     private static final String EMPTY_BODY = "";
 
-    private final String source;
+    private final String value;
 
-    public ResponseBody(final String source) {
-        this.source = source;
+    public ResponseBody(final String value) {
+        this.value = value;
     }
 
     public static ResponseBody empty() {
@@ -17,21 +17,21 @@ public class ResponseBody {
     }
 
     public byte[] bytes() {
-        return source.getBytes(UTF_8);
+        return value.getBytes(UTF_8);
     }
 
     public int length() {
         return bytes().length;
     }
 
-    public String source() {
-        return source;
+    public String value() {
+        return value;
     }
 
     @Override
     public String toString() {
         return "ResponseBody.Length{" +
-               "source='" + source.length() + '\'' +
+               "source='" + value.length() + '\'' +
                '}';
     }
 }

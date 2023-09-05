@@ -6,13 +6,13 @@ public enum CharacterSet {
 
     private static final String CHARACTER_SET = "charset";
 
-    private final String source;
+    private final String value;
 
-    CharacterSet(final String source) {
-        this.source = source;
+    CharacterSet(final String value) {
+        this.value = value;
     }
 
-    public String source() {
-        return CHARACTER_SET + "=" + source;
+    public String value() {
+        return CHARACTER_SET + "=" + value;
     }
 }

@@ -22,7 +22,7 @@ public class UserRegisterRequestGetHandler implements RequestHandler {
         return HttpResponse.builder()
                 .setHttpVersion(HTTP_1_1)
                 .setHttpStatus(OK)
-                .setContentType(TEXT_HTML.source())
+                .setContentType(TEXT_HTML.value())
                 .setContentLength(registerPageBody.length())
                 .setResponseBody(registerPageBody)
                 .build();

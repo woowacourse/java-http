@@ -74,7 +74,7 @@ public class UserLoginRequestGetHandler implements RequestHandler {
         return HttpResponse.builder()
                 .setHttpVersion(HTTP_1_1)
                 .setHttpStatus(OK)
-                .setContentType(TEXT_HTML.source())
+                .setContentType(TEXT_HTML.value())
                 .setContentLength(loginPageBody.length())
                 .setResponseBody(loginPageBody)
                 .build();

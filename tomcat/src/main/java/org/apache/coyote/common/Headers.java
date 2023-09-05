@@ -34,15 +34,15 @@ public class Headers {
     }
 
     public void setContentType(final String contentType) {
-        mapping.put(CONTENT_TYPE.source(), contentType);
+        mapping.put(CONTENT_TYPE.value(), contentType);
     }
 
     public void setContentLength(final int contentLength) {
-        mapping.put(CONTENT_LENGTH.source(), String.valueOf(contentLength));
+        mapping.put(CONTENT_LENGTH.value(), String.valueOf(contentLength));
     }
 
     public void setLocation(final String location) {
-        mapping.put(LOCATION.source(), location);
+        mapping.put(LOCATION.value(), location);
     }
 
     public void setCookies(final Cookies cookies) {
@@ -51,16 +51,16 @@ public class Headers {
                 .map(cookieName -> cookieName + "=" + cookies.getCookieValue(cookieName))
                 .collect(Collectors.joining(";"));
 
-        mapping.put(SET_COOKIE.source(), cookieValues);
+        mapping.put(SET_COOKIE.value(), cookieValues);
     }
 
     public void addCookie(final String cookieName, final String cookieValue) {
-        final String oldSetCookies = mapping.getOrDefault(SET_COOKIE.source(), null);
+        final String oldSetCookies = mapping.getOrDefault(SET_COOKIE.value(), null);
         if (Objects.isNull(oldSetCookies)) {
-            mapping.put(SET_COOKIE.source(), cookieName + "=" + cookieValue);
+            mapping.put(SET_COOKIE.value(), cookieName + "=" + cookieValue);
         }
 
-        mapping.put(SET_COOKIE.source(), oldSetCookies + ";" + cookieName + "=" + cookieValue);
+        mapping.put(SET_COOKIE.value(), oldSetCookies + ";" + cookieName + "=" + cookieValue);
     }
 
     public List<String> headerNames() {

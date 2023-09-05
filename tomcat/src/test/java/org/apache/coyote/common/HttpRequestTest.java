@@ -31,7 +31,7 @@ class HttpRequestTest {
         // then
         assertAll(
                 () -> assertThat(httpRequest.requestLine().httpMethod().name()).isEqualTo("GET"),
-                () -> assertThat(httpRequest.requestLine().requestPath().source()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.requestLine().requestPath().value()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.requestLine().httpVersion().version()).isEqualTo("HTTP/1.1")
         );
     }

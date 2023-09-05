@@ -1,5 +1,6 @@
 package org.apache.coyote.common;
 
+import org.apache.coyote.request.RequestHeaders;
 import org.apache.coyote.session.Cookies;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HttpHeadersTest {
+class RequestHeadersTest {
 
     @Test
     void 헤더와_값이_하나의_문자열로_놓여진_상태의_목록을_이용하여_생성에_성공한다() {
@@ -27,7 +28,7 @@ class HttpHeadersTest {
         );
 
         // expect
-        assertThatCode(() -> HttpHeaders.from(headersWithValue))
+        assertThatCode(() -> RequestHeaders.from(headersWithValue))
                 .doesNotThrowAnyException();
     }
 
@@ -46,11 +47,11 @@ class HttpHeadersTest {
         );
 
         // when
-        final HttpHeaders httpHeaders = HttpHeaders.from(headersWithValue);
+        final RequestHeaders requestHeaders = RequestHeaders.from(headersWithValue);
 
         // then
-        final Cookies actualCookies = httpHeaders.cookies();
-        final Session actualSessions = httpHeaders.session();
+        final Cookies actualCookies = requestHeaders.cookies();
+        final Session actualSessions = requestHeaders.session();
 
         assertAll(
                 () -> assertThat(actualCookies.getCookieValue("JSESSIONID")).isEqualTo(sessionId),
@@ -61,24 +62,24 @@ class HttpHeadersTest {
     @Test
     void 헤더에_쿠키가_없을_경우에_빈_쿠키를_반환한다() {
         // given
-        final HttpHeaders httpHeaders = HttpHeaders.from(List.of(
+        final RequestHeaders requestHeaders = RequestHeaders.from(List.of(
                 "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive"
         ));
 
         // expect
-        assertThat(httpHeaders.cookies()).isEqualTo(Cookies.empty());
+        assertThat(requestHeaders.cookies()).isEqualTo(Cookies.empty());
     }
 
     @Test
     void 헤더에_세션이_없을_경우에_세션을_반환한다() {
         // given
-        final HttpHeaders httpHeaders = HttpHeaders.from(List.of(
+        final RequestHeaders requestHeaders = RequestHeaders.from(List.of(
                 "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive"
         ));
 
         // expect
-        assertThat(httpHeaders.session()).isEqualTo(Session.empty());
+        assertThat(requestHeaders.session()).isEqualTo(Session.empty());
     }
 }

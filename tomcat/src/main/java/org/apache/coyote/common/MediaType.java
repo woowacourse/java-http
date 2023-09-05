@@ -8,11 +8,11 @@ public enum MediaType {
     TEXT_CSS("text/css", ".css"),
     APPLICATION_JAVASCRIPT("application/javascript", ".js");
 
-    private final String source;
+    private final String value;
     private final String type;
 
-    MediaType(final String source, final String type) {
-        this.source = source;
+    MediaType(final String value, final String type) {
+        this.value = value;
         this.type = type;
     }
 
@@ -23,12 +23,12 @@ public enum MediaType {
                 .orElse(TEXT_HTML);
     }
 
-    public String source() {
-        return source;
+    public String value() {
+        return value;
     }
 
     @Override
     public String toString() {
-        return source;
+        return value;
     }
 }

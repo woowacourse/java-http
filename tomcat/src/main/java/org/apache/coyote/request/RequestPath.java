@@ -13,7 +13,7 @@ public class RequestPath {
         this.source = source;
     }
 
-    public String source() {
+    public String value() {
         return source;
     }
 

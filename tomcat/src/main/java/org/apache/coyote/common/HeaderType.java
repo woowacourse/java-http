@@ -11,13 +11,13 @@ public enum HeaderType {
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie");
 
-    private final String source;
+    private final String value;
 
-    HeaderType(final String source) {
-        this.source = source;
+    HeaderType(final String value) {
+        this.value = value;
     }
 
-    public String source() {
-        return source;
+    public String value() {
+        return value;
     }
 }

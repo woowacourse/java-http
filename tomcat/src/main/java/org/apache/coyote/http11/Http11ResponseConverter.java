@@ -43,6 +43,6 @@ public class Http11ResponseConverter {
     private static void appendResponseBody(final HttpResponse response, final StringBuilder responseByteBuilder) {
         responseByteBuilder
                 .append(ENTER)
-                .append(response.responseBody().source());
+                .append(response.responseBody().value());
     }
 }

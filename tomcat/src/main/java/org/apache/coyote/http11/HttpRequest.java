@@ -1,48 +1,40 @@
 package org.apache.coyote.http11;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.swing.text.html.Option;
+
+import static java.util.Optional.ofNullable;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
 public class HttpRequest {
 
-    private String method;
-    private String uri;
+    private HttpMethod method;
+    private HttpUri uri;
+    private Map<String, String> queryParameters;
     private String messageBody;
-    private Map<String, String> headers;
+    private Headers headers;
     private Cookies cookies;
 
-    public HttpRequest(final String method, final String uri, final Map<String, String> headers,
-                       final String messageBody, final Map<String, String> cookie) {
+    public HttpRequest(final HttpMethod method, final HttpUri uri, final Map<String, String> queryParameters,
+                       final Map<String, String> headers, final String messageBody, final Map<String, String> cookie) {
         this.method = method;
         this.uri = uri;
-        this.headers = headers;
-        this.messageBody = messageBody;
+        this.queryParameters = ofNullable(queryParameters).orElse(Map.of());
+        this.headers = ofNullable(headers).map(Headers::new).orElse(new Headers());
+        this.messageBody = Optional.ofNullable(messageBody).orElse("");
         this.cookies = new Cookies(cookie);
     }
 
-    public boolean isGet() {
-        return "GET".equals(method);
-    }
-
     public boolean isPost() {
-        return "POST".equals(method);
+        return method == POST;
     }
 
-    public String getUri() {
+    public HttpUri getUri() {
         return uri;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public String getMessageBody() {
-        return messageBody;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
     }
 
     public Map<String, String> getForm() {

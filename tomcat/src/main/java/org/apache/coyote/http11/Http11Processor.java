@@ -1,29 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.UUID;
-import javax.annotation.Nullable;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.Optional.ofNullable;
-import static org.apache.coyote.http11.HttpStatus.FOUND;
-import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
-import static org.apache.coyote.http11.HttpStatus.OK;
-import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -31,10 +13,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
+    private final RequestHandler requestHandler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
+        requestHandler = new RequestHandler();
     }
 
     @Override
@@ -48,150 +32,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final var request = httpRequestParser.accept(inputStream);
-            final var response = handleRequest(request);
+            final var response = requestHandler.handle(request);
 
             outputStream.write(response.buildResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpResponse handleRequest(final HttpRequest request) throws IOException {
-        final var uri = request.getUri();
-        if (uri.equals("/")) {
-            return handleStaticResponse("/");
-        }
-        if (uri.equals("/login")) {
-            return handleLogin(request);
-        }
-        if (uri.equals("/register")) {
-            if (request.isPost()) {
-                return postRegister(request);
-            }
-            return handleStaticResponse("/register.html");
-        }
-        return handleStaticResponse(uri);
-    }
-
-    private HttpResponse handleStaticResponse(String uri) throws IOException {
-        try {
-            return buildStaticResponse(OK, uri);
-        } catch (Exception e) {
-            return buildStaticResponse(NOT_FOUND, "/404.html");
-        }
-    }
-
-    private HttpResponse buildStaticResponse(HttpStatus status, String uri) throws IOException {
-        File page = getFile(uri);
-        String contentType = getMimeType(page);
-        String body = buildResponseBody(page);
-        return HttpResponse.builder()
-                .setHttpStatus(status)
-                .setContentType(new ContentType(contentType))
-                .setBody(body)
-                .build();
-    }
-
-    @Nullable
-    private File getFile(final String uri) {
-        if (uri.equals("/")) {
-            return null;
-        }
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return ofNullable(resource.getFile()).map(File::new).orElse(null);
-    }
-
-    private String getMimeType(final File file) {
-        ofNullable(file)
-                .map(this::getContentType)
-                .orElse("text/plain");
-        return getContentType(file);
-    }
-
-    private String getContentType(final File file) {
-        try {
-            final URLConnection urlConnection = file.toURI().toURL().openConnection();
-            return urlConnection.getContentType();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String buildResponseBody(final File file) {
-        return ofNullable(file)
-                .map(this::readString)
-                .orElse("Hello world!");
-    }
-
-    private String readString(final File file) {
-        try {
-            final Path path = file.toPath();
-            final byte[] bytes = Files.readAllBytes(path);
-            return new String(bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private HttpResponse handleLogin(final HttpRequest request) throws IOException {
-        if (request.isPost()) {
-            return postLogin(request);
-        }
-        if (isAlreadyLoggedIn(request)) {
-            return HttpResponse.builder()
-                    .setHttpStatus(FOUND)
-                    .sendRedirect("/index.html")
-                    .build();
-        }
-        return handleStaticResponse("/login.html");
-    }
-
-    private HttpResponse postLogin(HttpRequest request) throws IOException {
-        final var form = request.getForm();
-        final var account = form.get("account");
-        final var password = form.get("password");
-        final var optionalUser = findUser(account, password);
-
-        if (optionalUser.isEmpty()) {
-            return buildStaticResponse(UNAUTHORIZED, "/401.html");
-        }
-
-        User user = optionalUser.get();
-        log.info("user: {}", user);
-        Session session = new Session(UUID.randomUUID().toString());
-        SessionManager.add(session);
-        session.addUser(user);
-        return HttpResponse.builder()
-                .setHttpStatus(FOUND)
-                .sendRedirect("/index.html")
-                .setCookie("JSESSIONID", session.getId())
-                .build();
-    }
-
-    private Optional<User> findUser(String account, String password) {
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .stream().findFirst();
-    }
-
-    private boolean isAlreadyLoggedIn(final HttpRequest request) {
-        String sessionId = request.getCookie("JSESSIONID");
-        return SessionManager.findSession(sessionId) != null;
-    }
-
-    private HttpResponse postRegister(HttpRequest request) {
-        final var form = request.getForm();
-        final var account = form.get("account");
-        final var password = form.get("password");
-        final var email = form.get("email");
-        final var user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return HttpResponse.builder()
-                .setHttpStatus(FOUND)
-                .sendRedirect("/index.html")
-                .build();
     }
 
 }

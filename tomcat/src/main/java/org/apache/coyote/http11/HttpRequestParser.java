@@ -23,13 +23,14 @@ public class HttpRequestParser {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final var startLine = bufferedReader.readLine();
-        final var method = startLine.split(START_LINE_DELIMITER)[0];
+        final var method = HttpMethod.valueOf(startLine.split(START_LINE_DELIMITER)[0]);
         final var path = getPath(startLine);
+        final var queryParameters = findQueryStrings(startLine);
         final var headers = readHeader(bufferedReader);
         final var body = readMessageBody(bufferedReader, headers);
         final var cookies = findCookies(headers);
 
-        return new HttpRequest(method, path, headers, body, cookies);
+        return new HttpRequest(method, new HttpUri(path), queryParameters, headers, body, cookies);
     }
 
     private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {
@@ -63,11 +64,11 @@ public class HttpRequestParser {
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
     }
 
-    public Map<String, String> findQueryStrings(String path) {
-        if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
+    public Map<String, String> findQueryStrings(String startLine) {
+        if (!startLine.contains(QUERY_PARAMETER_DELIMITER)) {
             return new HashMap<>();
         }
-        String queryString = path.split(QUERY_PARAMETER_DELIMITER_REGEX)[1];
+        String queryString = startLine.split(QUERY_PARAMETER_DELIMITER_REGEX)[1].split(" ")[0];
         return Arrays.stream(queryString.split("&"))
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));

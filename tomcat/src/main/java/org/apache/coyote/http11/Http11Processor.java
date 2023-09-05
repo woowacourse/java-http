@@ -18,7 +18,7 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.Request;
+import org.apache.coyote.http11.domain.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,24 +50,21 @@ public class Http11Processor implements Runnable, Processor {
         final var inputStream = bufferingInputStream(connection.getInputStream());
         final var outputStream = connection.getOutputStream()
     ) {
-      final Request request = Request.from(inputStream.readLine());
-      final Map<String, String> headers = extractHeaders(inputStream);
-      final Map<String, String> params = extractParams(request.getQueryString());
-      final Map<String, String> cookies = extractCookies(headers.get("Cookie"));
+      final HttpRequest request = HttpRequest.from(inputStream);
 
       final SessionManager sessionManager = new SessionManager();
       final String response;
 
       if (request.getUrl().equals("/login")) {
-        final String sessionId = cookies.get(JSESSIONID);
-        response = login(sessionManager, sessionId, params);
+        final String sessionId = request.getCookie(JSESSIONID);
+        response = login(sessionManager, sessionId, request);
       } else if (request.getUrl().equals("/register")) {
-        final int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        final int contentLength = Integer.parseInt(request.getHeader("Content-Length"));
         final Map<String, String> body = readBody(inputStream, contentLength);
         response = register(body);
       } else {
         final String responseBody = readContentsFromFile(request.getUrl());
-        final String contentType = getContentType(headers);
+        final String contentType = getContentType(request);
         response = response200(contentType, responseBody);
       }
 
@@ -81,10 +78,10 @@ public class Http11Processor implements Runnable, Processor {
   private String login(
       final SessionManager sessionManager,
       final String sessionId,
-      final Map<String, String> params
+      final HttpRequest request
   ) {
-    final String account = params.get("account");
-    final String password = params.get("password");
+    final String account = request.getParam("account");
+    final String password = request.getParam("password");
     if (isAuthorized(sessionId, sessionManager)) {
       return response302(INDEX_PAGE);
     } else if (account == null) {
@@ -95,17 +92,6 @@ public class Http11Processor implements Runnable, Processor {
 
   private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
     return sessionId != null && sessionManager.findSession(sessionId) != null;
-  }
-
-  private Map<String, String> extractCookies(final String requestCookie) {
-    final Map<String, String> cookies = new HashMap<>();
-    if (requestCookie != null) {
-      for (final String cookie : requestCookie.split(";")) {
-        final String[] tokens = cookie.split("=");
-        cookies.put(tokens[0], tokens[1]);
-      }
-    }
-    return cookies;
   }
 
   private Map<String, String> readBody(
@@ -176,16 +162,6 @@ public class Http11Processor implements Runnable, Processor {
     return params;
   }
 
-  private Map<String, String> extractHeaders(final BufferedReader inputStream) throws IOException {
-    final Map<String, String> headers = new HashMap<>();
-    String line;
-    while (!(line = inputStream.readLine()).isEmpty()) {
-      final String[] tokens = line.split(": ");
-      headers.put(tokens[0].trim(), tokens[1].trim());
-    }
-    return headers;
-  }
-
   private BufferedReader bufferingInputStream(final InputStream inputStream) {
     final InputStreamReader reader = new InputStreamReader(inputStream);
     return new BufferedReader(reader);
@@ -201,8 +177,8 @@ public class Http11Processor implements Runnable, Processor {
     return new String(Files.readAllBytes(file.toPath()));
   }
 
-  private String getContentType(final Map<String, String> headers) {
-    final String accept = headers.get("Accept");
+  private String getContentType(final HttpRequest request) {
+    final String accept = request.getHeader("Accept");
     if (accept == null) {
       return "text/html";
     }

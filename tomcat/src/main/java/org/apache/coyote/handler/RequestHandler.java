@@ -1,7 +1,7 @@
-package org.apache.coyote;
+package org.apache.coyote.handler;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.ResponseInfo;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ResponseInfo;
 
 public abstract class RequestHandler {
 

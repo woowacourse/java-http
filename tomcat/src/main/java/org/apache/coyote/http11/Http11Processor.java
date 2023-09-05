@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.LoginHandler;
-import org.apache.coyote.MemberRegisterHandler;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestHandler;
+import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.MemberRegisterHandler;
+import org.apache.coyote.handler.RequestHandler;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ResponseInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,10 @@
-package org.apache.coyote;
+package org.apache.coyote.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.RequestBody;
-import org.apache.coyote.http11.ResponseInfo;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.response.ResponseInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,12 +1,14 @@
-package org.apache.coyote;
+package org.apache.coyote.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.RequestBody;
-import org.apache.coyote.http11.RequestHeader;
-import org.apache.coyote.http11.ResponseInfo;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
+import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.response.ResponseInfo;
 
 import java.util.Optional;
 import java.util.UUID;

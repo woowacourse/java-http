@@ -93,8 +93,8 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
             String[] header = line.split(":");
-            String key = header[0].trim();
-            List<String> values = Arrays.asList(header[1].trim().split(","));
+            String key = header[0].strip();
+            List<String> values = Arrays.asList(header[1].strip().split(","));
             httpHeaders.addHeader(key, values);
         }
         return httpHeaders;

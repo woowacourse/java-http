@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public enum HttpHeader {
 
@@ -21,10 +22,9 @@ public enum HttpHeader {
         return key;
     }
 
-    public static HttpHeader from(final String value) {
+    public static Optional<HttpHeader> from(final String value) {
         return Arrays.stream(HttpHeader.values())
                 .filter(it -> it.getKey().equals(value))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 }

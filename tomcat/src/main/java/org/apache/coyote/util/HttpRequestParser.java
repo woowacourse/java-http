@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http.HttpHeader;
@@ -45,15 +46,13 @@ public class HttpRequestParser {
         String rawHeader;
         while ((rawHeader = readLine(bufferedReader)) != null && !rawHeader.isBlank()) {
             final String[] keyWithValue = rawHeader.split(":");
-            final HttpHeader key = HttpHeader.from(keyWithValue[0]);
+            final Optional<HttpHeader> key = HttpHeader.from(keyWithValue[0]);
 
-            if (key != null) {
-                httpHeaders.putAll(key,
-                        Arrays.stream(keyWithValue[1].split(","))
-                                .map(String::trim)
-                                .collect(Collectors.toUnmodifiableList())
-                );
-            }
+            key.ifPresent(header -> httpHeaders.putAll(header,
+                    Arrays.stream(keyWithValue[1].split(","))
+                            .map(String::trim)
+                            .collect(Collectors.toUnmodifiableList()))
+            );
         }
         return httpHeaders;
     }

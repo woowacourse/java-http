@@ -67,7 +67,7 @@ public class LoginHandler implements Handler {
             final User user = searchedAccount.get();
             if (user.checkPassword(password)) {
                 log.info(user.toString());
-                return response.setLocationHeader("/index.html");
+                return response.setCookieHeader(request.getCookieHeader()).setLocationHeader("/index.html");
             }
         }
         return new UnAuthorizedHandler().handle(request);

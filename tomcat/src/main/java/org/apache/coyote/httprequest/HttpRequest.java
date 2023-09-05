@@ -1,6 +1,7 @@
 package org.apache.coyote.httprequest;
 
 import org.apache.coyote.http11.common.CookieHeader;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.httprequest.header.RequestHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,4 +62,9 @@ public class HttpRequest {
     public CookieHeader getCookieHeader() {
         return requestHeaders.getCookieHeader();
     }
+
+//    public Session getSession(final boolean create) {
+//        final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
+//
+//    }
 }

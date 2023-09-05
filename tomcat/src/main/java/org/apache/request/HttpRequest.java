@@ -2,7 +2,6 @@ package org.apache.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.common.Cookie;
@@ -52,10 +51,6 @@ public class HttpRequest {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    public URI getUri() {
-        return httpStartLine.convertPathToUri();
     }
 
     public String getTarget() {

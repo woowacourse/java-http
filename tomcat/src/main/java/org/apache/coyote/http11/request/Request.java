@@ -38,13 +38,9 @@ public class Request {
         return requestBody;
     }
 
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
-    }
-
     public Session getSession(final boolean create) {
         if (!create) {
-            final Optional<Cookie> cookieOptional = requestHeader.getCookieValue(JSESSIONID);
+            final Optional<Cookie> cookieOptional = requestHeader.findCookie(JSESSIONID);
             if (cookieOptional.isPresent()) {
                 return SessionManager.findSession(cookieOptional.get().getValue());
             }
@@ -54,12 +50,7 @@ public class Request {
         return session;
     }
 
-    public boolean hasSession() {
-        return requestHeader.getCookieValue(JSESSIONID).isPresent();
-    }
-
-    public String getCookieValue(final String cookieKey) {
-        final Cookie cookie = requestHeader.getCookieValue(cookieKey).orElseThrow();
-        return cookie.getValue();
+    public Optional<Cookie> getCookieValue(final String cookieKey) {
+        return requestHeader.findCookie(cookieKey);
     }
 }

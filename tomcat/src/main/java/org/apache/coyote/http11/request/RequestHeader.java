@@ -19,7 +19,7 @@ public class RequestHeader {
     }
 
     public static RequestHeader from(final BufferedReader bufferedReader) throws IOException {
-        Map<String, String> result = new HashMap<>();
+        final Map<String, String> result = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             final String[] split = line.split(": ", 2);
@@ -37,7 +37,7 @@ public class RequestHeader {
         return header.containsKey(key);
     }
 
-    public Optional<Cookie> getCookieValue(final String cookieKey) {
+    public Optional<Cookie> findCookie(final String cookieKey) {
         return cookies.getCookieOf(cookieKey);
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.exception.MemberAlreadyExistException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestBody;
@@ -60,16 +61,18 @@ public class Handler {
         if (requestLine.getHttpMethod() == HttpMethod.POST && requestLine.getPath().startsWith("/register")) {
             final RequestBody requestBody = request.getRequestBody();
             final String accountValue = requestBody.getParamValue("account");
-            InMemoryUserRepository.findByAccount(accountValue)
-                    .ifPresentOrElse(
-                            (member) -> new MemberAlreadyExistException(accountValue),
-                            () -> InMemoryUserRepository.save(
-                                    new User(
-                                            requestBody.getParamValue("account"),
-                                            requestBody.getParamValue("password"),
-                                            requestBody.getParamValue("email")
-                                    )
-                            ));
+            final Optional<User> userOptional = InMemoryUserRepository.findByAccount(accountValue);
+            if (userOptional.isPresent()) {
+                log.error("중복 사용자 등록 : ", new MemberAlreadyExistException(accountValue));
+                return redirect(INDEX_HTML);
+            }
+            InMemoryUserRepository.save(
+                    new User(
+                            requestBody.getParamValue("account"),
+                            requestBody.getParamValue("password"),
+                            requestBody.getParamValue("email")
+                    )
+            );
 
             return redirect(INDEX_HTML);
         }
@@ -82,7 +85,13 @@ public class Handler {
     }
 
     private boolean isLoggedIn(final Request request) {
-        return request.hasSession() && SessionManager.has(request.getCookieValue("JSESSIONID"));
+        final Optional<Cookie> cookieOptional = request.getCookieValue("JSESSIONID");
+        if (cookieOptional.isPresent() && SessionManager.has(cookieOptional.get().getValue())) {
+            final String cookieJsessionId = cookieOptional.get().getValue();
+            final Session session = SessionManager.findSession(cookieJsessionId);
+            return session.getId().equals(cookieJsessionId);
+        }
+        return false;
     }
 
     private Response render(final String path) throws IOException {

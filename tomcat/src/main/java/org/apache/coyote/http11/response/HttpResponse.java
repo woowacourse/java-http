@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Objects;
+import org.apache.coyote.http11.resource.Cookies;
 
 public class HttpResponse {
 
@@ -30,34 +30,7 @@ public class HttpResponse {
     }
 
     public void flush() throws IOException {
-
-        final StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ")
-                .append(this.responseStatus)
-                .append(" ")
-                .append(System.lineSeparator());
-        response.append("Content-Type: ")
-                .append(this.contentType)
-                .append(";charset=")
-                .append(this.charSet)
-                .append(" ")
-                .append(System.lineSeparator());
-        for (Cookie cookie : cookies) {
-            response.append("Set-Cookie: ")
-                    .append(cookie.getKey())
-                    .append("=")
-                    .append(cookie.getValue())
-                    .append(" ")
-                    .append(System.lineSeparator());
-        }
-        response.append("Content-Length: ")
-                .append(this.contentLength)
-                .append(" ")
-                .append(System.lineSeparator());
-        response.append(System.lineSeparator());
-        response.append(this.responseBody);
-
-        outputStream.write(response.toString().getBytes());
+        outputStream.write(HttpResponseParser.parseToBytes(this));
         outputStream.flush();
     }
 

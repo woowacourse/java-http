@@ -2,10 +2,9 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.FileHandler;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestHandler;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.resource.FileHandler;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;

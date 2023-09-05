@@ -2,9 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestHandler;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class BasicURIHandler implements HttpRequestHandler {
     @Override

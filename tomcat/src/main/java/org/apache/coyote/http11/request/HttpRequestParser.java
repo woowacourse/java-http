@@ -1,8 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.InputStream;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.resource.Cookies;
+import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

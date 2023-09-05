@@ -1,7 +1,14 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.LoginController;
+import org.apache.coyote.request.RequestParser;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.response.ResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,22 +33,22 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        try (final var inputStream = new BufferedInputStream(connection.getInputStream());
+             final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
+            RequestParser requestParser = new RequestParser(inputStream);
+            Request request = requestParser.parse();
+            doHandler(request);
+            ResponseWriter responseWriter = new ResponseWriter(outputStream);
+            responseWriter.writeResponse(request);
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void doHandler(Request request) {
+        if (request.isSamePath("/login")) {
+            LoginController loginController = new LoginController();
+            loginController.login(request);
         }
     }
 }

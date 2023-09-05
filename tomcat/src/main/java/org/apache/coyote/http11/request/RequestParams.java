@@ -15,6 +15,9 @@ public class RequestParams {
     }
 
     public static RequestParams parse(String queryParam) {
+        if (!queryParam.contains("=")) {
+            return EMPTY;
+        }
         Map<String, String> collect = Arrays.stream(queryParam.split("&"))
                 .map(query -> query.split("="))
                 .collect(Collectors.toMap(query -> query[0], query -> query[1]));

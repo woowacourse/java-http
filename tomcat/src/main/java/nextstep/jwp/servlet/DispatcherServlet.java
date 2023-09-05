@@ -34,10 +34,10 @@ public class DispatcherServlet implements Servlet {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String requestUri = httpRequest.getRequestUri();
-        if (isStaticResource(httpResponse, requestUri) && requestUri.contains(".")) {
-            return;
-        }
         try {
+            if (isStaticResource(httpResponse, requestUri) && requestUri.contains(".")) {
+                return;
+            }
             Controller controller = container.get(requestUri);
             controller.service(httpRequest, httpResponse);
         } catch (Exception e) {
@@ -50,7 +50,6 @@ public class DispatcherServlet implements Servlet {
             return false;
         }
         try {
-
             StaticResource staticResource = StaticResource.of(requestUri);
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
             httpResponse.setResponseBody(responseBody);

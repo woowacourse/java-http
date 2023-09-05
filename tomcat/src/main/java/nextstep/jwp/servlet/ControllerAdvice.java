@@ -12,13 +12,20 @@ import java.io.IOException;
 public class ControllerAdvice {
 
     public void handleException(Exception exception, HttpResponse httpResponse) throws IOException {
-        if (exception instanceof UserNotFoundException || exception instanceof NotFoundFileException) {
-            StaticResource staticResource = StaticResource.of("/404.html");
+        if (exception instanceof UserNotFoundException) {
+            StaticResource staticResource = StaticResource.of("/401.html");
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
             httpResponse.setStatusCode(HttpStatusCode.UNAUTHORIZED);
             httpResponse.setResponseBody(responseBody);
+            return;
         }
-
+        if (exception instanceof NotFoundFileException) {
+            StaticResource staticResource = StaticResource.of("/404.html");
+            ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
+            httpResponse.setStatusCode(HttpStatusCode.NOT_FOUND);
+            httpResponse.setResponseBody(responseBody);
+            return;
+        }
         if (exception instanceof RuntimeException) {
             StaticResource staticResource = StaticResource.of("/500.html");
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());

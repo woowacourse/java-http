@@ -8,8 +8,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.FrontController;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +33,16 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()) {
+                final var outputStream = connection.getOutputStream();
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
-            requestReader.read();
+            HttpRequest request = new HttpRequest(bufferedReader);
+            HttpResponse response = new HttpResponse();
 
-            Controller controller = frontController.findController(requestReader);
-            Response response = controller.service(requestReader);
+            Controller controller = frontController.findController(request);
+            HttpResponse httpResponse = controller.service(request, response);
 
-            outputStream.write(response.format().getBytes());
+            outputStream.write(httpResponse.format().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

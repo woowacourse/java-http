@@ -1,10 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.ContentType.ALL;
 import static org.apache.coyote.http11.ContentType.HTML;
-import static org.apache.coyote.http11.ContentType.URL_ENCODED;
 import static org.apache.coyote.http11.Header.ACCEPT;
-import static org.apache.coyote.http11.Header.CONTENT_TYPE;
+import static org.apache.coyote.http11.Header.CONTENT_LENGTH;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,26 +11,26 @@ import java.util.Map;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Header;
 
-public class RequestReader {
+public class HttpRequest {
 
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private final BufferedReader bufferedReader;
     private final Map<String, String> headers = new HashMap<>();
-    private RequestUri requestUri;
+    private RequestLine requestLine;
     private final Map<String, String> bodies = new HashMap<>();
 
-    public RequestReader(BufferedReader bufferedReader) {
+    public HttpRequest(BufferedReader bufferedReader) throws IOException {
         this.bufferedReader = bufferedReader;
+        read();
     }
 
-    public void read() throws IOException {
+    private void read() throws IOException {
         String line;
-        requestUri = RequestUri.of(bufferedReader.readLine());
+        requestLine = RequestLine.of(bufferedReader.readLine());
 
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
-        if (URL_ENCODED.getType().equals(headers.get(CONTENT_TYPE.getName()))) {
+        if (headers.containsKey(CONTENT_LENGTH.getName())) {
             readBody();
         }
     }
@@ -55,22 +53,14 @@ public class RequestReader {
         if (line.isEmpty()) {
             return;
         }
-        String[] split = line.split(" ");
-        String name = split[0].substring(0, split[0].length() - 1);
+        String[] split = line.split(": ");
+        String name = split[0];
         String content = split[1];
         headers.put(name, content);
     }
 
-    public String getContentType() {
-        String accept = headers.getOrDefault(ACCEPT.getName(), HTML.getType());
-        if (!accept.contains(",")) {
-            return accept + CHARSET_UTF_8;
-        }
-        String[] split = accept.split(",");
-        if (split[0].equals(ALL.getType())) {
-            return HTML.getType() + CHARSET_UTF_8;
-        }
-        return split[0] + CHARSET_UTF_8;
+    public String getAccept() {
+        return headers.getOrDefault(ACCEPT.getName(), HTML.getType());
     }
 
     public int getContentLength() {
@@ -81,25 +71,25 @@ public class RequestReader {
         return bodies.get(key);
     }
 
-    public boolean sessionNotExists() {
+    public boolean cookieKeyExists(String key) {
         if (!headers.containsKey(Header.COOKIE.getName())) {
-            return true;
+            return false;
         }
         Cookie cookie = new Cookie(headers.get(Header.COOKIE.getName()));
         try {
-            cookie.getSession();
+            cookie.getValue(key);
         } catch (NullPointerException e) {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
-    public String getProtocol() {
-        return requestUri.getProtocol();
+    public String getProtocolVersion() {
+        return requestLine.getProtocolVersion();
     }
 
     public String getRequestUrl() {
-        return requestUri.getUrl();
+        return requestLine.getUrl();
     }
 
     public Map<String, String> getHeaders() {
@@ -107,14 +97,14 @@ public class RequestReader {
     }
 
     public Map<String, String> getParams() {
-        return requestUri.getParams();
+        return requestLine.getParams();
     }
 
-    public RequestUri getUriRequest() {
-        return requestUri;
+    public RequestLine getUriRequest() {
+        return requestLine;
     }
 
     public String getMethod() {
-        return requestUri.getMethod();
+        return requestLine.getMethod();
     }
 }

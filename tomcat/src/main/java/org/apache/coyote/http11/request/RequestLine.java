@@ -2,21 +2,21 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
-public class RequestUri {
+public class RequestLine {
 
     private final String method;
     private final RequestUrl requestUrl;
-    private final String protocol;
+    private final String protocolVersion;
 
-    public RequestUri(String method, RequestUrl requestUrl, String protocol) {
+    public RequestLine(String method, RequestUrl requestUrl, String protocolVersion) {
         this.method = method;
         this.requestUrl = requestUrl;
-        this.protocol = protocol;
+        this.protocolVersion = protocolVersion;
     }
 
-    public static RequestUri of(String line) {
+    public static RequestLine of(String line) {
         String[] split = line.split(" ");
-        return new RequestUri(split[0], new RequestUrl(split[1]), split[2]);
+        return new RequestLine(split[0], new RequestUrl(split[1]), split[2]);
     }
 
     public String getMethod() {
@@ -27,8 +27,8 @@ public class RequestUri {
         return requestUrl.getUrl();
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
     public Map<String, String> getParams() {

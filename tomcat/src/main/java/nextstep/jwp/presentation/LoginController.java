@@ -1,94 +1,120 @@
 package nextstep.jwp.presentation;
 
 
-import java.io.IOException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.FileIOReader;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
 public class LoginController implements Controller {
 
     private static final String INDEX = "/index.html";
+    private static final String JSESSIONID = "JSESSIONID";
+
     private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final LoginController instance = new LoginController();
+    private static final String NOT_FOUND = "/401.html";
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        return instance;
+    }
 
     @Override
-    public Response service(RequestReader requestReader) throws IOException {
-        if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/login")) {
-            return tryLogin(requestReader);
+    public HttpResponse service(HttpRequest request, HttpResponse response) {
+        if (request.getMethod().equalsIgnoreCase("POST") && request.getRequestUrl().equals("/login")) {
+            return tryLogin(request, response);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("GET") && requestReader.getRequestUrl().equals("/login")) {
-            return loginPage(requestReader);
+        if (request.getMethod().equalsIgnoreCase("GET") && request.getRequestUrl().equals("/login")) {
+            return loginPage(request, response);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("GET") && requestReader.getRequestUrl().equals("/register")) {
-            return registerPage(requestReader);
+        if (request.getMethod().equalsIgnoreCase("GET") && request.getRequestUrl().equals("/register")) {
+            return registerPage(request, response);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/register")) {
-            return register(requestReader);
+        if (request.getMethod().equalsIgnoreCase("POST") && request.getRequestUrl().equals("/register")) {
+            return register(request, response);
         }
         return null;
     }
 
-    private Response register(RequestReader requestReader) throws IOException {
+    private HttpResponse register(HttpRequest request, HttpResponse response) {
         InMemoryUserRepository.save(new User(
-                requestReader.getBodyValue("account"),
-                requestReader.getBodyValue("password"),
-                requestReader.getBodyValue("email")
+                request.getBodyValue("account"),
+                request.getBodyValue("password"),
+                request.getBodyValue("email")
         ));
-        return new Response(requestReader, StatusCode.FOUND)
-                .createResponseBodyByFile(INDEX)
-                .addHeader(Header.LOCATION.getName(), INDEX)
-                .addBaseHeaders();
+        String responseBody = FileIOReader.readFile(INDEX);
+        return response.contentType(request.getAccept())
+                       .statusCode(StatusCode.FOUND)
+                       .body(responseBody)
+                       .protocol(request.getProtocolVersion())
+                       .addHeader(Header.LOCATION.getName(), INDEX);
     }
 
-    private Response registerPage(RequestReader requestReader) throws IOException {
-        return new Response(requestReader, StatusCode.OK)
-                .addBaseHeaders()
-                .createResponseBodyByFile(requestReader.getRequestUrl());
+    private HttpResponse registerPage(HttpRequest request, HttpResponse response) {
+        String responseBody = FileIOReader.readFile(request.getRequestUrl());
+        return response.contentType(request.getAccept())
+                       .statusCode(StatusCode.OK)
+                       .protocol(request.getProtocolVersion())
+                       .body(responseBody);
     }
 
-    private Response loginPage(RequestReader requestReader) throws IOException {
-        if (!requestReader.sessionNotExists()) {
-            return new Response(requestReader, StatusCode.FOUND)
-                    .createResponseBodyByFile(INDEX)
-                    .addHeader(Header.LOCATION.getName(), INDEX)
-                    .addBaseHeaders();
+    private HttpResponse loginPage(HttpRequest request, HttpResponse response) {
+        if (request.cookieKeyExists(JSESSIONID)) {
+            String responseBody = FileIOReader.readFile(INDEX);
+            return response.contentType(request.getAccept())
+                           .statusCode(StatusCode.FOUND)
+                           .body(responseBody)
+                           .protocol(request.getProtocolVersion())
+                           .addHeader(Header.LOCATION.getName(), INDEX);
         }
-        return new Response(requestReader, StatusCode.OK)
-                .addBaseHeaders()
-                .createResponseBodyByFile(requestReader.getRequestUrl());
+        String responseBody = FileIOReader.readFile(request.getRequestUrl());
+        return response.contentType(request.getAccept())
+                       .statusCode(StatusCode.OK)
+                       .protocol(request.getProtocolVersion())
+                       .body(responseBody);
     }
 
-    private Response tryLogin(RequestReader requestReader) throws IOException {
+    private HttpResponse tryLogin(HttpRequest request, HttpResponse response) {
         try {
-            String sessionId = login(requestReader);
-            return new Response(requestReader, StatusCode.FOUND)
-                    .createResponseBodyByFile(INDEX)
-                    .addHeader(Header.LOCATION.getName(), INDEX)
-                    .addCookieWithSession(sessionId)
-                    .addBaseHeaders();
+            login(request, response);
+            String responseBody = FileIOReader.readFile(INDEX);
+            return response.contentType(request.getAccept())
+                           .statusCode(StatusCode.FOUND)
+                           .body(responseBody)
+                           .protocol(request.getProtocolVersion())
+                           .addHeader(Header.LOCATION.getName(), INDEX);
+
         } catch (IllegalArgumentException e) {
-            return new Response(requestReader, StatusCode.UNAUTHORIZED)
-                    .addBaseHeaders()
-                    .createResponseBodyByFile("/401.html");
+            String responseBody = FileIOReader.readFile(NOT_FOUND);
+            return response.contentType(request.getAccept())
+                           .statusCode(StatusCode.UNAUTHORIZED)
+                           .protocol(request.getProtocolVersion())
+                           .body(responseBody);
         }
     }
 
-    private String login(RequestReader requestReader) {
-        User find = InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
-                                          .filter(user -> user.checkPassword(requestReader.getBodyValue("password")))
+    private void login(HttpRequest request, HttpResponse response) {
+        User find = InMemoryUserRepository.findByAccount(request.getBodyValue("account"))
+                                          .filter(user -> user.checkPassword(request.getBodyValue("password")))
                                           .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 틀립니다."));
 
         String sessionId = UUID.randomUUID().toString();
         Session session = new Session(sessionId);
         session.setAttribute("user", find);
         sessionManager.add(session);
+        response.addHeader(Header.SET_COOKIE.getName(), makeCookie(sessionId));
+    }
 
-        return sessionId;
+    private String makeCookie(String sessionId) {
+        return JSESSIONID + "=" + sessionId;
     }
 }

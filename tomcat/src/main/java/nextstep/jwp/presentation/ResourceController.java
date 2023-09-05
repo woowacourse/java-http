@@ -5,14 +5,14 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class IndexController implements Controller {
+public class ResourceController implements Controller {
 
-    private static final IndexController instance = new IndexController();
+    private static final ResourceController instance = new ResourceController();
 
-    private IndexController() {
+    private ResourceController() {
     }
 
-    public static IndexController getInstance() {
+    public static ResourceController getInstance() {
         return instance;
     }
 

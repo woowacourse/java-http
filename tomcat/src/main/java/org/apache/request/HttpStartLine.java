@@ -1,14 +1,10 @@
 package org.apache.request;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import org.apache.common.HttpMethod;
 
 public class HttpStartLine {
 
     private static final String REQUEST_SPLIT_DELIMITER = " ";
-    private static final String DEFAULT_RESOURCE_LOCATION = "static";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int RESOURCE_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
@@ -25,6 +21,9 @@ public class HttpStartLine {
     }
 
     public static HttpStartLine of(String line) {
+        if (line == null || line.isBlank()) {
+            throw new IllegalArgumentException("잘못된 HTTP 요청입니다.");
+        }
         String[] splits = splitLine(line);
         validate(splits);
         String httpMethod = splits[HTTP_METHOD_INDEX];
@@ -40,15 +39,6 @@ public class HttpStartLine {
     private static void validate(String[] splits) {
         if (splits.length < MIN_LINE_SIZE) {
             throw new IllegalArgumentException("올바르지 않은 HTTP 요청입니다.");
-        }
-    }
-
-    public URI convertPathToUri() {
-        URL url = getClass().getClassLoader().getResource(DEFAULT_RESOURCE_LOCATION + requestTarget);
-        try {
-            return url.toURI();
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
         }
     }
 

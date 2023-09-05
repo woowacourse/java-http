@@ -1,7 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.HttpExtensionType;
-import org.apache.coyote.http11.HttpPath;
+import org.apache.coyote.http11.RequestPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class HttpPathTest {
+class RequestPathTest {
 
     @DisplayName("queryParameter가 없는 경우")
     @Test
@@ -22,13 +22,12 @@ class HttpPathTest {
         final HttpExtensionType expectedExtensionType = HttpExtensionType.HTML;
 
         // when
-        final HttpPath httpPath = HttpPath.from(uri);
+        final RequestPath requestPath = RequestPath.from(uri);
 
         // then
         assertAll(
-                () -> assertThat(httpPath.getResource()).isEqualTo(expectedResource),
-                () -> assertThat(httpPath.getContentType()).isEqualTo(expectedExtensionType),
-                () -> assertThat(httpPath.getQueryParameter()).isEmpty()
+                () -> assertThat(requestPath.getResource()).isEqualTo(expectedResource),
+                () -> assertThat(requestPath.getQueryParameter()).isEmpty()
         );
     }
 
@@ -44,13 +43,12 @@ class HttpPathTest {
         expectedParams.put("password", "password");
 
         // when
-        final HttpPath httpPath = HttpPath.from(uri);
+        final RequestPath requestPath = RequestPath.from(uri);
 
         // then
         assertAll(
-                () -> assertThat(httpPath.getResource()).isEqualTo(expectedResource),
-                () -> assertThat(httpPath.getContentType()).isEqualTo(expectedExtensionType),
-                () -> assertThat(httpPath.getQueryParameter()).isEqualTo(expectedParams)
+                () -> assertThat(requestPath.getResource()).isEqualTo(expectedResource),
+                () -> assertThat(requestPath.getQueryParameter()).isEqualTo(expectedParams)
         );
     }
 }

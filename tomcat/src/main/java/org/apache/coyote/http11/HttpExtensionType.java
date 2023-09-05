@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum HttpExtensionType {
 
-    HTML(".html", "text/html"),
+    HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
     ICO(".ico", "image/svg+xml");
@@ -22,6 +22,25 @@ public enum HttpExtensionType {
                 .filter(it -> extension.contains(it.extension))
                 .findAny()
                 .orElse(HTML);
+    }
+
+    public static HttpExtensionType from(final RequestLine requestLine) {
+        return Arrays.stream(values())
+                .filter(it -> requestLine.hasFileExtension(it.getExtension()))
+                .findAny()
+                .orElse(HTML);
+    }
+
+    //    private static String removeExtension(final String uri) {
+    //        if (uri.contains(".")) {
+    //            return uri.split("\\" + ".")[0];
+    //        }
+    //        return uri;
+    //    }
+
+    public static boolean hasExtensionType(final String requestUri) {
+        return Arrays.stream(values())
+                .anyMatch(it -> requestUri.endsWith(it.getExtension()));
     }
 
     public String getExtension() {

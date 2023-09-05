@@ -2,20 +2,41 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
-    private final HttpExtensionType httpExtensionType;
-    private final String responseBody;
+    private final StatusLine statusLine;
+    private final ResponseHeaders responseHeaders;
+    private final ResponseBody responseBody;
 
-    public HttpResponse(final HttpExtensionType httpExtensionType, final String responseBody) {
-        this.httpExtensionType = httpExtensionType;
+    private HttpResponse(
+            final StatusLine statusLine,
+            final ResponseHeaders responseHeaders,
+            final ResponseBody responseBody
+    ) {
+        this.statusLine = statusLine;
+        this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
     }
 
-    public String extractResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpExtensionType.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    public static HttpResponse of(final HttpStatusCode httpStatusCode, final ResponseBody responseBody) {
+        final ResponseHeaders responseHeaders = ResponseHeaders.from(responseBody);
+        final StatusLine statusLine = new StatusLine(httpStatusCode);
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
+    }
+
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public ResponseHeaders getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    public ResponseBody getResponseBody() {
+        return responseBody;
+    }
+
+    public String toString() {
+        return statusLine + "\r\n" +
+                responseHeaders + "\r\n" +
+                responseBody.getContent();
     }
 }

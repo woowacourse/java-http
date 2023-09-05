@@ -1,31 +1,67 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
 
-    private final HttpMethodType httpMethodType;
-    private final HttpPath httpPath;
+    private final RequestLine requestLine;
+    private final RequestHeaders requestHeaders;
+    private final RequestBody requestBody;
 
-    private HttpRequest(final HttpMethodType httpMethodType, final HttpPath httpPath) {
-        this.httpMethodType = httpMethodType;
-        this.httpPath = httpPath;
+    public HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders, final RequestBody requestBody) {
+        this.requestLine = requestLine;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final String request) {
-        if (request == null) {
-            throw new UncheckedServletException("request가 존재하지 않습니다.");
+    public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
+        final String firstLine = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.from(firstLine);
+
+        Map<String, String> headers = new HashMap<>();
+        String line = bufferedReader.readLine();
+        while (!"".equals(line)) {
+            final String[] split = line.split(": ");
+            headers.put(split[0], split[1]);
+            line = bufferedReader.readLine();
+        }
+        final RequestHeaders requestHeaders = new RequestHeaders(headers);
+        if (!bufferedReader.ready()) {
+            return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
         }
 
-        final String[] split = request.split(" ");
-        return new HttpRequest(HttpMethodType.from(split[0]), HttpPath.from(split[1]));
+        final RequestBody requestBody = RequestBody.parse(bufferedReader.readLine());
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    public HttpMethodType getHttpMethodType() {
-        return httpMethodType;
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
-    public HttpPath getHttpPath() {
-        return httpPath;
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public RequestPath getRequestPath() {
+        return requestLine.getRequestPath();
+    }
+
+    public String getRequestUri() {
+        return requestLine.getRequestUri();
+    }
+
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public Map<String, String> getQueryParameter() {
+        return requestLine.getRequestPath().getQueryParameter();
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

@@ -39,13 +39,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final String line = bufferedReader.readLine();
-            if (line == null) {
-                return;
-            }
-
-            final HttpRequest httpRequest = HttpRequest.from(line);
-            final var response = getResponse(httpRequest);
+            final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
+            final HttpResponse httpResponse = handleRequest(httpRequest);
+            final var response = httpResponse.toString();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -54,32 +50,88 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(final HttpRequest httpRequest) {
-        final HttpPath httpPath = httpRequest.getHttpPath();
+    private HttpResponse handleRequest(final HttpRequest httpRequest) {
+        final RequestPath requestPath = httpRequest.getRequestPath();
 
-        if (httpPath.isDefaultResource()) {
-            final HttpResponse httpResponse = new HttpResponse(httpPath.getContentType(), "Hello world!");
-            return httpResponse.extractResponse();
+        if (!requestPath.isParamEmpty() && requestPath.getResource().contains("login")) {
+            executeLogin(requestPath.getQueryParameter());
+
+            final URL url = getClass().getClassLoader()
+                    .getResource("static" + requestPath.getResource() + HttpExtensionType.HTML.getExtension());
+            final Path path = new File(url.getPath()).toPath();
+
+            try {
+                final String content = new String(Files.readAllBytes(path));
+                return HttpResponse.of(HttpStatusCode.OK, ResponseBody.of(HttpExtensionType.HTML.getExtension(), content));
+            } catch (IOException exception) {
+                log.error(exception.getMessage());
+                throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
+            }
         }
-        final HttpResponse httpResponse = new HttpResponse(httpPath.getContentType(), getResponseBody(httpPath));
-        return httpResponse.extractResponse();
-    }
 
-    private String getResponseBody(final HttpPath httpPath) {
-        if (!httpPath.isParamEmpty() && httpPath.getResource().contains("login")) {
-            executeLogin(httpPath.getQueryParameter());
+        if (requestPath.getResource().equals("/")) {
+            final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), "Hello world!");
+            return HttpResponse.of(HttpStatusCode.OK, responseBody);
         }
 
-        URL url = getClass().getClassLoader().getResource("static" + httpPath.getResource() + httpPath.getExtension());
+        final URL url = getClass().getClassLoader()
+                .getResource("static" + requestPath.getResource());
         final Path path = new File(url.getPath()).toPath();
-
         try {
-            return new String(Files.readAllBytes(path));
+            final String content = new String(Files.readAllBytes(path));
+            return HttpResponse.of(HttpStatusCode.OK, ResponseBody.of(HttpExtensionType.from(requestPath.getResource()).getExtension(), content));
+
         } catch (IOException exception) {
             log.error(exception.getMessage());
             throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
         }
     }
+
+
+//    private HttpResponse generateResponse(final HttpRequest httpRequest) {
+//        // RequestLine에서 HttpMethod랑 RequestPath 보고 분기처리 -> StatusLine 생성(version + code + message)
+//        if (httpRequest.getRequestUri().equals("/")) {
+//
+//        }
+//
+//        if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && HttpExtensionType.hasExtensionType(httpRequest.getRequestUri())) {
+////            new ResponseBody()
+//        }
+//        // ResponseBody 만든다.
+//        // ResponseHeader 만든다.
+//
+//        // 조합해서 HttpResponse 만든다.
+////        HttpExtensionType.from(httpRequest.getRequestLine());
+//    }
+
+
+//    private String getResponse(final RequestLine requestLine) {
+//        final RequestPath requestPath = requestLine.getRequestPath();
+//
+//        if (requestPath.isDefaultResource()) {
+//            final HttpResponse httpResponse = new HttpResponse(requestPath.getContentType(), "Hello world!");
+//            return httpResponse.extractResponse();
+//        }
+//        final HttpResponse httpResponse = new HttpResponse(requestPath.getContentType(), getResponseBody(requestPath));
+//        return httpResponse.extractResponse();
+//    }
+
+//    private String getResponseBody(final RequestPath requestPath) {
+//        if (!requestPath.isParamEmpty() && requestPath.getResource().contains("login")) {
+//            executeLogin(requestPath.getQueryParameter());
+//        }
+//
+//        URL url = getClass().getClassLoader()
+//                .getResource("static" + requestPath.getResource() + requestPath.getExtension());
+//        final Path path = new File(url.getPath()).toPath();
+//
+//        try {
+//            return new String(Files.readAllBytes(path));
+//        } catch (IOException exception) {
+//            log.error(exception.getMessage());
+//            throw new UncheckedServletException("유효하지 않은 리소스에 대한 접근입니다.");
+//        }
+//    }
 
     private void executeLogin(Map<String, String> params) {
         final String userName = params.get("account");

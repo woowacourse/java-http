@@ -4,7 +4,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 
 import java.util.Arrays;
 
-public enum HttpMethodType {
+public enum HttpMethod {
 
     GET,
     POST,
@@ -12,7 +12,7 @@ public enum HttpMethodType {
     PATCH,
     DELETE;
 
-    public static HttpMethodType from(final String request) {
+    public static HttpMethod from(final String request) {
         return Arrays.stream(values())
                 .filter(httpMethodType -> httpMethodType.name().equals(request))
                 .findAny()

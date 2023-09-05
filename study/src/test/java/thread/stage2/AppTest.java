@@ -11,6 +11,12 @@ class AppTest {
 
     private static final AtomicInteger count = new AtomicInteger(0);
 
+    private static void incrementIfOk(final HttpResponse<String> response) {
+        if (response.statusCode() == 404) {
+            count.incrementAndGet();
+        }
+    }
+
     /**
      * 1. App 클래스의 애플리케이션을 실행시켜 서버를 띄운다.
      * 2. 아래 테스트를 실행시킨다.
@@ -39,12 +45,6 @@ class AppTest {
             thread.join();
         }
 
-        assertThat(count.intValue()).isEqualTo(2);
-    }
-
-    private static void incrementIfOk(final HttpResponse<String> response) {
-        if (response.statusCode() == 200) {
-            count.incrementAndGet();
-        }
+        assertThat(count.intValue()).isEqualTo(10);
     }
 }

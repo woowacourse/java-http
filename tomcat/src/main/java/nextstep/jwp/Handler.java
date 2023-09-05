@@ -86,9 +86,9 @@ public class Handler {
         InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponse.builder()
                 .httpStatus(HttpStatus.CREATED)
-                .responseBody(parseResponseBody("static/index.html"))
+                .responseBody(parseResponseBody("static/login.html"))
                 .contentType(httpRequest.contentType())
-                .redirectPage("index.html")
+                .redirectPage("login.html")
                 .build();
     }
 

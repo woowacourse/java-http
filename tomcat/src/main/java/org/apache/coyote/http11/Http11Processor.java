@@ -85,12 +85,12 @@ public class Http11Processor implements Runnable, Processor {
         if ("GET".equals(method) && "/index.html".equals(path)) {
             return generateResult(path, 200);
         }
-        if ("GET".equals(method) && "/login".equals(path) && queryString.size() == 2) {
-            final Optional<User> user = InMemoryUserRepository.findByAccount(queryString.get("account"));
+        if ("POST".equals(method) && "/login".equals(path)) {
+            final Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
             if (user.isEmpty()) {
                 return generateResult("/401.html", 401);
             }
-            if (user.get().checkPassword(queryString.get("password"))) {
+            if (user.get().checkPassword(requestBody.get("password"))) {
                 log.info("user : {}", user);
                 Cookie cookie = Cookie.newInstance();
                 final String sessionId = UUID.randomUUID().toString();

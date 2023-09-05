@@ -91,7 +91,7 @@ public class HandlerMapper {
     }
 
     public Response registerFormHandler(final Request request) {
-        final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
+        final Map<String, String> requestForms = request.getRequestForms().getFormData();
         final String account = requestForms.get("account");
         final String email = requestForms.get("email");
         final String password = requestForms.get("password");

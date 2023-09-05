@@ -4,10 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RequestForms {
-    private final Map<String, String> requestForms;
+    private final Map<String, String> formData;
 
-    public RequestForms(final Map<String, String> requestForms) {
-        this.requestForms = requestForms;
+    public RequestForms(final Map<String, String> formData) {
+        this.formData = formData;
     }
 
     public static RequestForms from(final String values) {
@@ -21,7 +21,7 @@ public class RequestForms {
         return new RequestForms(requestForms);
     }
 
-    public Map<String, String> getRequestForms() {
-        return requestForms;
+    public Map<String, String> getFormData() {
+        return formData;
     }
 }

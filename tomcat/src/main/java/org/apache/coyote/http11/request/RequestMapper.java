@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.request.body.Parameters;
+import org.apache.coyote.http11.request.header.Cookies;
+import org.apache.coyote.http11.request.header.Location;
+import org.apache.coyote.http11.request.header.Method;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

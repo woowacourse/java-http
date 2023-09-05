@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.request.ContentType;
+import org.apache.coyote.http11.request.header.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

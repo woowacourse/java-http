@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.Cookies;
-import org.apache.coyote.http11.request.Location;
+import org.apache.coyote.http11.request.header.Cookies;
+import org.apache.coyote.http11.request.header.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;

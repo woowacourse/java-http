@@ -2,11 +2,16 @@ package org.apache.coyote.http11.request;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.request.body.Parameters;
+import org.apache.coyote.http11.request.header.Cookies;
+import org.apache.coyote.http11.request.header.Location;
+import org.apache.coyote.http11.request.header.Method;
+import org.apache.coyote.http11.request.header.UserSession;
 import org.apache.coyote.http11.response.OK;
 import org.apache.coyote.http11.response.Redirect;
 import org.apache.coyote.http11.response.Response;
 
-import static org.apache.coyote.http11.request.Method.POST;
+import static org.apache.coyote.http11.request.header.Method.POST;
 import static org.apache.coyote.http11.response.Resource.INDEX;
 import static org.apache.coyote.http11.response.Resource.LOGIN;
 import static org.apache.coyote.http11.response.Resource.REGISTER;

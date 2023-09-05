@@ -2,7 +2,7 @@ package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.Parameters;
+import org.apache.coyote.http11.request.body.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

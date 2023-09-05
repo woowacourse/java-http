@@ -63,7 +63,7 @@ public class HttpRequest {
     }
 
     public String getHeaderValue(String key) {
-        return headers.get(key);
+        return headers.getOrDefault(key, "");
     }
 
 }

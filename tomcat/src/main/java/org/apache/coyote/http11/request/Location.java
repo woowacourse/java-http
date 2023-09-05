@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.request;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -13,6 +13,7 @@ public class Location {
     private static final String BASE_PATH = "static";
     private static final String REGEX_FOR_EXTENSION = "\\.[^.]+$";
     private static final String ROOT = "/";
+    private static final String EMPTY = "";
 
     private final Path path;
     private final ContentType contentType;
@@ -34,15 +35,15 @@ public class Location {
     private static Path getPath(final String location) {
         final ContentType contentType = ContentType.from(location);
 
-        final ClassLoader classLoader = Response.class.getClassLoader();
-        final String locationWithoutExtension = location.replaceAll(REGEX_FOR_EXTENSION, "");
+        final ClassLoader classLoader = Location.class.getClassLoader();
+        final String locationWithoutExtension = location.replaceAll(REGEX_FOR_EXTENSION, EMPTY);
         final URL resource = classLoader.getResource(BASE_PATH +
                 locationWithoutExtension +
                 "." +
                 contentType.getExtension());
 
         if (isNull(resource)) {
-            return Paths.get("/");
+            return Paths.get(ROOT);
         }
         return Paths.get(resource.getPath());
     }
@@ -59,7 +60,7 @@ public class Location {
         return path;
     }
 
-    public String getContentTypeHeader() {
+    public String contentTypeHeader() {
         return contentType.toHeader();
     }
 }

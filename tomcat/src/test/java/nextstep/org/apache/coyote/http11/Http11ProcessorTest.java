@@ -2,7 +2,7 @@ package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.response.UserSession;
+import org.apache.coyote.http11.request.UserSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

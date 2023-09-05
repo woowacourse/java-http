@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.request.Location;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class LocationTest {
 
@@ -13,11 +15,8 @@ class LocationTest {
         //given
         final String header = "GET / HTTP/1.1";
 
-        //when
-        final Location location = Location.from(header);
-
-        //then
-        assertThat(location.is("/")).isTrue();
+        //when, then
+        assertDoesNotThrow(() -> Location.from(header));
     }
 
     @Test

@@ -53,6 +53,7 @@ public class HttpRequest {
         if (session == null) {
             session = new HttpSession(UUID.randomUUID().toString());
             manager.add(session);
+            return session;
         }
         if (create) {
             manager.remove(session);

@@ -14,8 +14,10 @@ import nextstep.jwp.common.HttpMethod;
 import nextstep.jwp.common.HttpStatus;
 import nextstep.jwp.common.HttpVersion;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.request.RequestHeaders;
 import nextstep.jwp.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class RequestProcessor {
         final HttpVersion version = httpRequest.getHttpVersion();
         final HttpMethod method = httpRequest.getHttpMethod();
         final String requestUri = httpRequest.getRequestUri();
-        final Map<String, String> queryParams = httpRequest.getQueryParams();
+        final RequestHeaders requestHeaders = httpRequest.getHeaders();
         String content = "Hello World";
 
         if (method.equals(HttpMethod.GET)) {
@@ -48,21 +50,11 @@ public class RequestProcessor {
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
-            if (requestUri.equals("login") && !queryParams.isEmpty()) {
-                String redirectedPage = UNAUTHORIZED_PAGE;
-                final String account = queryParams.get("account");
-                final String password = queryParams.get("password");
-
-                final Optional<User> findedUser = InMemoryUserRepository.findByAccount(account);
-                if (findedUser.isPresent()) {
-                    User user = findedUser.get();
-                    if (user.checkPassword(password)) {
-                        log.debug(user.toString());
-                        redirectedPage = INDEX_PAGE;
-                    }
-                }
-
-                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, redirectedPage));
+            if (requestUri.equals("login")) {
+                content = makeResponseBody(requestUri);
+                return ResponseEntity.of(version, HttpStatus.OK, content,
+                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
             content = makeResponseBody(requestUri);
@@ -104,7 +96,8 @@ public class RequestProcessor {
                     return ResponseEntity.of(version, HttpStatus.FOUND, content,
                             Map.of(LOCATION_HEADER, SERVER_ERROR_PAGE));
                 }
-                final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"), registerInfo.get("email"));
+                final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"),
+                        registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
                 return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, REGISTER_PAGE));
             }
@@ -119,8 +112,14 @@ public class RequestProcessor {
                 if (findedUser.isPresent()) {
                     User user = findedUser.get();
                     if (user.checkPassword(logInfo.get("password"))) {
-                        log.debug(user.toString());
-                        redirectedPage = INDEX_PAGE;
+                        log.info(user.toString());
+                        if (!requestHeaders.hasJSessionCookie()) {
+                            HttpCookie.save("JSESSIONID");
+                        }
+                        final String cookie = HttpCookie.cookieInfo("JSESSIONID");
+                        return ResponseEntity.of(version, HttpStatus.FOUND, content,
+                                Map.of(LOCATION_HEADER, INDEX_PAGE,
+                                        "Set-Cookie", cookie));
                     }
                 }
 

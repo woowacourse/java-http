@@ -55,6 +55,10 @@ public class HttpRequest {
         return requestLine.getHttpVersion();
     }
 
+    public RequestHeaders getHeaders() {
+        return requestHeaders;
+    }
+
     public String getRequestBody() {
         return requestBody.getContent();
     }

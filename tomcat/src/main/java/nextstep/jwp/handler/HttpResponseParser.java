@@ -2,8 +2,8 @@ package nextstep.jwp.handler;
 
 import static nextstep.jwp.Constant.CRLF;
 
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
@@ -32,12 +32,12 @@ public class HttpResponseParser {
             .collect(Collectors.joining(CRLF));
     }
 
-    private static String parseCookie(HttpCookie cookie) {
-        if (cookie.getCookies().size() == 0) {
+    private static String parseCookie(Map<String, String> cookie) {
+        if (cookie.isEmpty()) {
             return "";
         }
 
-        return "\nSet-Cookie: " + cookie.getCookies().entrySet().stream()
+        return "\nSet-Cookie: " + cookie.entrySet().stream()
             .map(it -> String.join("=", it.getKey(), it.getValue() + " "))
             .collect(Collectors.joining());
     }

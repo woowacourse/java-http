@@ -109,7 +109,7 @@ public class RequestHandler {
         String uuid = UUID.randomUUID().toString();
         Session session = SessionManager.createSession(uuid);
         session.setAttribute("user", user);
-        response.addCookie("JSESSIONID", uuid);
+        response.getCookie().put("JSESSIONID", uuid);
     }
 
     private HttpResponse signUp(HttpRequest request) throws IOException {

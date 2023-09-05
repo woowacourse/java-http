@@ -1,9 +1,9 @@
 package nextstep.org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpStatus.FOUND;
-import static nextstep.jwp.session.SessionManager.findSession;
 import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
-import static org.assertj.core.api.Assertions.*;
+import static nextstep.jwp.session.SessionManager.findSession;
+import static org.apache.coyote.http11.HttpStatus.FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
@@ -12,12 +12,10 @@ import java.io.InputStream;
 import java.util.Map;
 import nextstep.jwp.handler.HttpRequestParser;
 import nextstep.jwp.handler.RequestHandler;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
+import org.junit.jupiter.api.Test;
 
 @DisplayNameGeneration(ReplaceUnderscores.class)
 @SuppressWarnings("NonAsciiCharacters")
@@ -117,10 +115,10 @@ class RequestHandlerTest {
         HttpResponse response = HTTP_요청을_보낸다(request);
 
         // then
-        HttpCookie httpCookie = response.getCookie();
+        Map<String, String> cookie = response.getCookie();
         assertAll(
-            () -> assertThat(findSession(httpCookie.get("JSESSIONID"))).isNotNull(),
-            () -> assertThat(httpCookie.get("JSESSIONID")).isNotNull()
+            () -> assertThat(findSession(cookie.get("JSESSIONID"))).isNotNull(),
+            () -> assertThat(cookie.get("JSESSIONID")).isNotNull()
         );
     }
 
@@ -186,7 +184,7 @@ class RequestHandlerTest {
         assertAll(
             () -> assertThat(headers.get("Location")).isEqualTo("/index.html"),
         () -> assertThat(findByAccount("hs")).isPresent(),
-            () -> assertThat(response.getCookieValue("JSESSIONID"))
+            () -> assertThat(response.getCookie().get("JSESSIONID"))
         );
     }
 

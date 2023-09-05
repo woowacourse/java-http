@@ -2,13 +2,15 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpResponse {
 
     private Map<String, String> headers;
-    private final HttpStatus httpStatus;
-    private final String body;
-    private final HttpCookie httpCookie = new HttpCookie();
+    private HttpStatus httpStatus;
+    private String body;
+    private Map<String, String> cookies = new ConcurrentHashMap<>();
+
 
     public HttpResponse(Map<String, String> headers,
                         HttpStatus httpStatus, String body) {
@@ -31,9 +33,6 @@ public class HttpResponse {
         return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
 
-    public void addCookie(String key, String value) {
-        httpCookie.add(key, value);
-    }
 
     public Map<String, String> getHeaders() {
         return headers;
@@ -47,11 +46,8 @@ public class HttpResponse {
         return body;
     }
 
-    public HttpCookie getCookie() {
-        return httpCookie;
+    public Map<String, String> getCookie() {
+        return cookies;
     }
 
-    public Object getCookieValue(String key) {
-        return httpCookie.get(key);
-    }
 }

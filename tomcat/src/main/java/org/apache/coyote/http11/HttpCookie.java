@@ -25,4 +25,8 @@ public class HttpCookie {
     public Map<String, String> getCookies() {
         return cookies;
     }
+
+    public boolean isEmpty() {
+        return cookies.isEmpty();
+    }
 }

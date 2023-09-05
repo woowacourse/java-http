@@ -42,12 +42,10 @@ public class HttpRequest {
         return HttpRequestLine.parse(line);
     }
 
-    private static HttpRequestHeaders parseRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
-            lines.add(line);
-        }
+    private static HttpRequestHeaders parseRequestHeaders(final BufferedReader bufferedReader) {
+        final List<String> lines = bufferedReader.lines()
+                .takeWhile(line -> !line.isEmpty())
+                .collect(Collectors.toList());
         return HttpRequestHeaders.parse(lines);
     }
 

@@ -10,6 +10,8 @@ import static java.util.stream.Collectors.toList;
 
 public class HttpCookies {
 
+    public static final HttpCookies EMPTY = new HttpCookies(List.of());
+    
     private final List<HttpCookie> cookies;
 
     private HttpCookies(List<HttpCookie> cookies) {

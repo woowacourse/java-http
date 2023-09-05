@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int URL_INDEX = 1;
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
     public static final String EMPTY_LINE = "";
@@ -55,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-            List<String> startLine = Arrays.asList(bufferedReader.readLine().split(" "));
+            StartLine startLine = new StartLine(bufferedReader.readLine());
             Map<String, String> requestHeaders = extractHeaders(bufferedReader);
 
             Map<String, String> parsedBody = new HashMap<>();
@@ -73,25 +71,19 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Map<String, String> queryParams = new HashMap<>();
-
-            String httpMethod = startLine.get(HTTP_METHOD_INDEX);
-            String requestedUrl = startLine.get(URL_INDEX);
-            int queryParamIndex = requestedUrl.indexOf('?');
-
-            if (0 < queryParamIndex) {
-                String queryParamValues = requestedUrl.substring(queryParamIndex + 1);
-                Arrays.asList(queryParamValues.split("&"))
+            if (startLine.hasQueryString()) {
+                Arrays.asList(startLine.getQueryString().split("&"))
                         .forEach(queryParam -> {
                             String[] splited = queryParam.split("=");
                             queryParams.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
                         });
-                requestedUrl = requestedUrl.substring(0, queryParamIndex);
             }
 
             String response = null;
+            String requestedUrl = startLine.getUrl();
 
             Object handler = handlerMapper.mapHandler(requestedUrl);
-            if (Objects.nonNull(handler) && httpMethod.equals("POST")
+            if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
                     && requestedUrl.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.login(httpCookie,
@@ -108,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
                 response += "";
             }
 
-            if (Objects.nonNull(handler) && httpMethod.equals("POST")
+            if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
                     && requestedUrl.equals("/register")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.register(parsedBody.get("account"),
@@ -120,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
                         "");
             }
 
-            if (httpMethod.equals("GET") && Objects.isNull(response)) {
+            if (startLine.getHttpMethod().equals("GET") && Objects.isNull(response)) {
                 String contentType = negotiateContent(requestHeaders.get("Accept"));
 
                 // Todo: createResponseBody() pageController로 위임해보기

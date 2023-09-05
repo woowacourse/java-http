@@ -32,6 +32,6 @@ class HttpStartLineTest {
 
         assertThatThrownBy(() -> HttpStartLine.of(firstLine))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("올바르지 않은 HTTP 요청입니다.");
+                .hasMessage("잘못된 HTTP 요청입니다.");
     }
 }

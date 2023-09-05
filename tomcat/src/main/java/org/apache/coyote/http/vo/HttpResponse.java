@@ -28,18 +28,18 @@ public class HttpResponse {
 
     public String getRawResponse() {
         if(cookie.getSize() != 0){
-            return String.join("\r\n",
+            return String.join(System.lineSeparator(),
                     SUPPORT_HTTP_VERSION + status.getStatus(),
                     headers.getRawHeaders(),
                     HttpHeader.SET_COOKIE.getKey() + ": " + cookie.toRawCookie(),
-                    "\r\n" + body
+                    System.lineSeparator() + body
             );
         }
 
-        return String.join("\r\n",
+        return String.join(System.lineSeparator(),
                 SUPPORT_HTTP_VERSION + status.getStatus(),
                 headers.getRawHeaders(),
-                "\r\n" + body
+                System.lineSeparator() + body
         );
     }
 

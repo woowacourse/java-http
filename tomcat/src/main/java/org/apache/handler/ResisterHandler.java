@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 public class ResisterHandler implements RequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResisterHandler.class);
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String REGISTER_PAGE = "/register.html";
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
@@ -38,14 +40,14 @@ public class ResisterHandler implements RequestHandler {
         User user = new User(account, email, password);
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
-        String content = FileReader.read("/index.html");
+        String content = FileReader.read(INDEX_PAGE);
         HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
         httpResponse.setContentType(ContentType.TEXT_HTML);
         return httpResponse;
     }
 
     public HttpResponse doGet() throws IOException {
-        String content = FileReader.read("/register.html");
+        String content = FileReader.read(REGISTER_PAGE);
         HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
         httpResponse.setContentType(ContentType.TEXT_HTML);
         return httpResponse;

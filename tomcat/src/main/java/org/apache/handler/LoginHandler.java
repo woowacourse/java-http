@@ -47,6 +47,7 @@ public class LoginHandler implements RequestHandler {
             String content = FileReader.read(LOGIN_PAGE);
             HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
             httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setLocation(LOGIN_PAGE);
             return httpResponse;
         }
 
@@ -62,12 +63,14 @@ public class LoginHandler implements RequestHandler {
             HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
             Session session = createSession(httpResponse, user.get());
             httpResponse.setCookie(JSESSIONID + session.getId());
+            httpResponse.setLocation(INDEX_PAGE);
             return httpResponse;
         }
 
         String content = FileReader.read(UNAUTHORIZED_PAGE);
         HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, content);
         httpResponse.setContentType(ContentType.TEXT_HTML);
+        httpResponse.setLocation(UNAUTHORIZED_PAGE);
         return httpResponse;
     }
 
@@ -84,6 +87,7 @@ public class LoginHandler implements RequestHandler {
             String content = FileReader.read(INDEX_PAGE);
             HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
             httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setLocation(INDEX_PAGE);
             return httpResponse;
         }
 

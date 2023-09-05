@@ -43,12 +43,12 @@ public class ResourceProvider {
             return "Content-Type: text/javascript ";
         }
         if (fileName.endsWith(".css")) {
-            return "Content-Type: text/css ";
+            return "Content-Type: text/css;charset=utf-8";
         }
         if (fileName.endsWith(".html")) {
             return "Content-Type: text/html;charset=utf-8 ";
         }
-        return "text/plain";
+        return "Content-Type: text/plain";
     }
 
     private File getFile(String resourcePath) {

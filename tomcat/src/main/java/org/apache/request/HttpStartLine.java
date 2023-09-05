@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.common.HttpMethod;
 
-public class HttpLine {
+public class HttpStartLine {
 
     private static final String REQUEST_SPLIT_DELIMITER = " ";
     private static final String DEFAULT_RESOURCE_LOCATION = "static";
@@ -18,19 +18,19 @@ public class HttpLine {
     private final String requestTarget;
     private final String httpVersion;
 
-    private HttpLine(HttpMethod httpMethod, String requestTarget, String httpVersion) {
+    private HttpStartLine(HttpMethod httpMethod, String requestTarget, String httpVersion) {
         this.httpMethod = httpMethod;
         this.requestTarget = requestTarget;
         this.httpVersion = httpVersion;
     }
 
-    public static HttpLine of(String line) {
+    public static HttpStartLine of(String line) {
         String[] splits = splitLine(line);
         validate(splits);
         String httpMethod = splits[HTTP_METHOD_INDEX];
         String requestTarget = splits[RESOURCE_INDEX];
         String httpVersion = splits[HTTP_VERSION_INDEX];
-        return new HttpLine(HttpMethod.of(httpMethod), requestTarget, httpVersion);
+        return new HttpStartLine(HttpMethod.of(httpMethod), requestTarget, httpVersion);
     }
 
     private static String[] splitLine(String line) {

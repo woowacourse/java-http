@@ -10,21 +10,21 @@ import org.apache.common.HttpMethod;
 
 public class HttpRequest {
 
-    private final HttpLine httpLine;
+    private final HttpStartLine httpStartLine;
     private final HttpHeaders httpHeaders;
     private final HttpBody httpBody;
 
-    private HttpRequest(HttpLine httpLine, HttpHeaders httpHeaders, HttpBody body) {
-        this.httpLine = httpLine;
+    private HttpRequest(HttpStartLine httpStartLine, HttpHeaders httpHeaders, HttpBody body) {
+        this.httpStartLine = httpStartLine;
         this.httpHeaders = httpHeaders;
         this.httpBody = body;
     }
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
-        HttpLine httpLine = HttpLine.of(extractFirstLine(bufferedReader));
+        HttpStartLine httpStartLine = HttpStartLine.of(extractFirstLine(bufferedReader));
         HttpHeaders httpHeaders = HttpHeaders.of(extractHeaderLines(bufferedReader));
         HttpBody httpBody = new HttpBody(extractBody(bufferedReader, httpHeaders));
-        return new HttpRequest(httpLine, httpHeaders, httpBody);
+        return new HttpRequest(httpStartLine, httpHeaders, httpBody);
     }
 
     private static String extractFirstLine(BufferedReader bufferedReader) throws IOException {
@@ -55,11 +55,11 @@ public class HttpRequest {
     }
 
     public URI getUri() {
-        return httpLine.convertPathToUri();
+        return httpStartLine.convertPathToUri();
     }
 
     public String getTarget() {
-        return httpLine.getRequestTarget();
+        return httpStartLine.getRequestTarget();
     }
 
     public String getBody() {
@@ -67,7 +67,7 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return httpLine.getHttpMethod();
+        return httpStartLine.getHttpMethod();
     }
 
     public Cookie getCookie() {
@@ -78,10 +78,10 @@ public class HttpRequest {
     }
 
     public boolean isPost() {
-        return httpLine.getHttpMethod().equals(HttpMethod.POST);
+        return httpStartLine.getHttpMethod().equals(HttpMethod.POST);
     }
 
     public boolean isGet() {
-        return httpLine.getHttpMethod().equals(HttpMethod.GET);
+        return httpStartLine.getHttpMethod().equals(HttpMethod.GET);
     }
 }

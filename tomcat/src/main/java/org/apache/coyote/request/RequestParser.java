@@ -31,7 +31,7 @@ public class RequestParser {
         this.bufferedReader = new BufferedReader(inputStreamReader);
     }
 
-    public Request getResource() throws IOException {
+    public Request parse() throws IOException {
         RequestUrl requestUrl = readUrl(bufferedReader.readLine());
         List<RequestContentType> requestContentType = getResourceType();
 

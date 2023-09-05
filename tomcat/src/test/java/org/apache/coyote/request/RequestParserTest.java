@@ -17,7 +17,7 @@ class RequestParserTest {
         InputStream inputStream = new ByteArrayInputStream("GET /index.html HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Request request = requestParser.getResource();
+        Request request = requestParser.parse();
 
         assertAll(
                 () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
@@ -32,7 +32,7 @@ class RequestParserTest {
         InputStream inputStream = new ByteArrayInputStream("GET / HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Request request = requestParser.getResource();
+        Request request = requestParser.parse();
 
         assertAll(
                 () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
@@ -48,7 +48,7 @@ class RequestParserTest {
                 "GET /trestset/qweqsdae/asdawdqd/qwdqweqw HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Request request = requestParser.getResource();
+        Request request = requestParser.parse();
 
         assertAll(
                 () -> assertThat(request.getUrl().getFile()).contains("/404.html"),
@@ -64,7 +64,7 @@ class RequestParserTest {
                 "GET /index.html?account=123&password=password1234! HTTP/1.1".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
-        Request request = requestParser.getResource();
+        Request request = requestParser.parse();
 
         assertAll(
                 () -> assertThat(request.getUrl().getFile()).contains("/index.html"),

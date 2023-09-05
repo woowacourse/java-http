@@ -25,13 +25,12 @@ class RequestHeaderTest {
         RequestHeader header = RequestHeader.from(requestHeader);
 
         // then
-        assertThat(header).usingRecursiveComparison()
-                .isEqualTo(
-                        new RequestHeader(Map.of(
-                                "HOST", "localhost:8080",
-                                "CONNECTION", "keep-alive"
-                        ))
-                );
+        assertThat(header).isEqualTo(new RequestHeader(
+                Map.of(
+                        "HOST", "localhost:8080",
+                        "CONNECTION", "keep-alive"
+                )
+        ));
     }
 
     @Test

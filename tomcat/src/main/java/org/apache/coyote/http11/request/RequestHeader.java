@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RequestHeader {
@@ -35,5 +36,29 @@ public class RequestHeader {
 
     public Map<String, String> headersMap() {
         return new HashMap<>(headersMap);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestHeader that = (RequestHeader) o;
+        return Objects.equals(headersMap, that.headersMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(headersMap);
+    }
+
+    @Override
+    public String toString() {
+        return "RequestHeader{" +
+                "headersMap=" + headersMap +
+                '}';
     }
 }

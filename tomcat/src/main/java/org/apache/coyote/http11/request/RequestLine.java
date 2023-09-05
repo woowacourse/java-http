@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class RequestLine {
 
@@ -40,5 +41,32 @@ public class RequestLine {
 
     public String httpVersion() {
         return httpVersion;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestLine that = (RequestLine) o;
+        return Objects.equals(httpMethod, that.httpMethod) && Objects.equals(requestUri,
+                that.requestUri) && Objects.equals(httpVersion, that.httpVersion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, requestUri, httpVersion);
+    }
+
+    @Override
+    public String toString() {
+        return "RequestLine{" +
+                "httpMethod='" + httpMethod + '\'' +
+                ", requestUri='" + requestUri + '\'' +
+                ", httpVersion='" + httpVersion + '\'' +
+                '}';
     }
 }

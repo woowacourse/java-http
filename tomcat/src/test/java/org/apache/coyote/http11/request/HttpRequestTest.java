@@ -24,16 +24,15 @@ class HttpRequestTest {
         HttpRequest request = HttpRequest.of(requestLine, requestHeader, requestBody);
 
         // then
-        assertThat(request).usingRecursiveComparison()
-                .isEqualTo(
-                        new HttpRequest(
-                                RequestLine.from("GET /index.html HTTP/1.1 "),
-                                RequestHeader.from(String.join(System.lineSeparator(),
-                                        "Host: localhost:8080 ",
-                                        "Connection: keep-alive ")),
-                                RequestBody.from(String.join(System.lineSeparator(),
-                                        "account=gugu&password=password&email=hkkang@woowahan.com"))
-                        )
-                );
+        assertThat(request).isEqualTo(new HttpRequest
+                (
+                        RequestLine.from("GET /index.html HTTP/1.1 "),
+                        RequestHeader.from(String.join(System.lineSeparator(),
+                                "Host: localhost:8080 ",
+                                "Connection: keep-alive ")),
+                        RequestBody.from(String.join(System.lineSeparator(),
+                                "account=gugu&password=password&email=hkkang@woowahan.com"))
+                )
+        );
     }
 }

@@ -17,11 +17,10 @@ class RequestLineTest {
 
         // when
         RequestLine line = RequestLine.from(requestLine);
-        
+
         // then
-        assertThat(line).usingRecursiveComparison()
-                .isEqualTo(
-                        new RequestLine("GET", "/index.html", "HTTP/1.1")
-                );
+        assertThat(line).isEqualTo(
+                new RequestLine("GET", "/index.html", "HTTP/1.1")
+        );
     }
 }

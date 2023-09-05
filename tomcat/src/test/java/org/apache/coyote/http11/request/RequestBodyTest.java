@@ -20,14 +20,13 @@ class RequestBodyTest {
         RequestBody body = RequestBody.from(requestBody);
 
         // then
-        assertThat(body).usingRecursiveComparison()
-                .isEqualTo(
-                        new RequestBody(Map.of(
-                                "account", "gugu",
-                                "password", "password",
-                                "email", "hkkang@woowahan.com"
-                        ))
-                );
+        assertThat(body).isEqualTo(new RequestBody(
+                Map.of(
+                        "account", "gugu",
+                        "password", "password",
+                        "email", "hkkang@woowahan.com"
+                )
+        ));
     }
 
     @Test

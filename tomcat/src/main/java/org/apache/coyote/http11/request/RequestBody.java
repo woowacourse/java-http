@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RequestBody {
@@ -34,5 +35,29 @@ public class RequestBody {
 
     public Map<String, String> parametersMap() {
         return new HashMap<>(parametersMap);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestBody that = (RequestBody) o;
+        return Objects.equals(parametersMap, that.parametersMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(parametersMap);
+    }
+
+    @Override
+    public String toString() {
+        return "RequestBody{" +
+                "parametersMap=" + parametersMap +
+                '}';
     }
 }

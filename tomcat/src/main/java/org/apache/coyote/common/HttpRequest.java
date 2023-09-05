@@ -39,29 +39,36 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        return getSession(false);
-    }
-
-    public HttpSession getSession(boolean create) {
-        HttpSession session = null;
-        String jsessionid = cookie.get("JSESSIONID");
-        try {
-            session = manager.findSession(jsessionid);
-        } catch (IOException e) {
-            // ignore
-        }
-        if (session == null) {
-            session = new HttpSession(UUID.randomUUID().toString());
-            manager.add(session);
+        HttpSession session = findSession();
+        if (session != null) {
             return session;
         }
-        if (create) {
-            manager.remove(session);
-            session.invalidate();
-            session = new HttpSession(UUID.randomUUID().toString());
-            manager.add(session);
+        return createSession();
+    }
+
+    private HttpSession findSession() {
+        String jsessionid = cookie.get("JSESSIONID");
+        try {
+            return manager.findSession(jsessionid);
+        } catch (IOException e) {
+            // ignore
+            throw new IllegalArgumentException(e);
         }
+    }
+
+    private HttpSession createSession() {
+        HttpSession session = new HttpSession(UUID.randomUUID().toString());
+        manager.add(session);
         return session;
+    }
+
+    public HttpSession getFreshSession() {
+        HttpSession session = findSession();
+        if (session != null) {
+            session.invalidate();
+            manager.remove(session);
+        }
+        return createSession();
     }
 
     public RequestUri getRequestUri() {

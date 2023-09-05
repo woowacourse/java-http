@@ -63,7 +63,7 @@ public class LoginHandler implements Handler {
 
     private HttpResponse loginSuccess(HttpRequest request, User user) {
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
-        HttpSession session = request.getSession(true);
+        HttpSession session = request.getFreshSession();
         session.setAttribute("user", user);
         HttpResponse response = new HttpResponse();
         response.sendRedirect("/index.html");

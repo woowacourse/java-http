@@ -23,8 +23,7 @@ public class RegistrationHandler implements HttpRequestHandler {
         InMemoryUserRepository.save(user);
 
         final HttpResponse httpResponse = new HttpResponse.Builder()
-                .responseStatus("302")
-                .responseBody(new FileHandler().readFromResourcePath("static/index.html"))
+                .redirect("/index.html")
                 .build(outputStream);
         httpResponse.flush();
     }

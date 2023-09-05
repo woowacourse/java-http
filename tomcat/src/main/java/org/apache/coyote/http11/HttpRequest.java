@@ -10,7 +10,7 @@ public class HttpRequest {
     private String uri;
     private String messageBody;
     private Map<String, String> headers;
-    private Cookie cookie;
+    private Cookies cookies;
 
     public HttpRequest(final String method, final String uri, final Map<String, String> headers,
                        final String messageBody, final Map<String, String> cookie) {
@@ -18,7 +18,7 @@ public class HttpRequest {
         this.uri = uri;
         this.headers = headers;
         this.messageBody = messageBody;
-        this.cookie = new Cookie(cookie);
+        this.cookies = new Cookies(cookie);
     }
 
     public boolean isGet() {
@@ -54,7 +54,7 @@ public class HttpRequest {
     }
 
     public String getCookie(String key) {
-        return cookie.getCookie(key);
+        return cookies.getCookie(key);
     }
 
 }

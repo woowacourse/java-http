@@ -1,22 +1,16 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import static java.lang.String.join;
 import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 
 public class HttpResponse {
-
     public static final String CRLF = "\r\n";
     public static final String EMPTY_STRING = "";
-
 
     private final HttpStatus httpStatus;
     private final ContentType contentType;
     private final String body;
-    private final Map<String, String> headers;
+    private final Headers headers;
 
     public HttpResponse(final HttpStatus httpStatus) {
         this(httpStatus, PLAINTEXT_UTF8);
@@ -27,11 +21,11 @@ public class HttpResponse {
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body) {
-        this(httpStatus, contentType, body, new HashMap<>());
+        this(httpStatus, contentType, body, new Headers());
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body,
-                        final Map<String, String> headers) {
+                        final Headers headers) {
         this.httpStatus = httpStatus;
         this.contentType = contentType;
         this.body = body;
@@ -39,40 +33,31 @@ public class HttpResponse {
     }
 
     public HttpResponse setCookie(String key, String value) {
-        if (headers.containsKey("Set-Cookie")) {
-            headers.put("Set-Cookie", headers.get("Set-Cookie") + "; " + key + "=" + value);
-            return new HttpResponse(httpStatus, contentType, body, headers);
-        }
-        headers.put("Set-Cookie", key + "=" + value);
-        return new HttpResponse(httpStatus, contentType, body, headers);
+        headers.setCookie(key, value);
+        return this;
     }
 
-    public HttpResponse addHeader(String key, String value) {
-        headers.put(key, value);
-        return new HttpResponse(httpStatus, contentType, body, headers);
+    public HttpResponse sendRedirect(String location) {
+        headers.put("Location", location);
+        return this;
     }
 
     private String getHeaders() {
-        String joined = joinHeaders();
-        if (body.isEmpty()) {
-            return joined;
+        String joinedHeaders = headers.join();
+        String body = getBodyHeaders();
+        if (!joinedHeaders.isEmpty() && !body.isEmpty()) {
+            return join(CRLF, joinedHeaders, body);
         }
-        if (joined.isBlank()) {
-            return contentType + CRLF + "Content-Length: " + body.getBytes().length + " ";
-        }
-        return join(CRLF,
-                joined,
-                contentType.toString(),
-                "Content-Length: " + body.getBytes().length + " ");
+        return joinedHeaders + body;
     }
 
-    private String joinHeaders() {
-        if (headers.isEmpty()) {
+    private String getBodyHeaders() {
+        if (body.isEmpty()) {
             return EMPTY_STRING;
         }
-        return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining(CRLF));
+        return join(CRLF,
+                contentType.toString(),
+                "Content-Length: " + body.getBytes().length + " ");
     }
 
     private String getBody() {

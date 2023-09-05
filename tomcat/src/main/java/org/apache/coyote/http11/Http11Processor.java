@@ -28,12 +28,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
-    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
-        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -119,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (isAlreadyLoggedIn(request)) {
             return new HttpResponse(FOUND)
-                    .addHeader("Location", "/index.html");
+                    .sendRedirect("/index.html");
         }
         return handleStaticResponse("/login.html");
     }
@@ -137,10 +135,10 @@ public class Http11Processor implements Runnable, Processor {
         User user = optionalUser.get();
         log.info("user: {}", user);
         Session session = new Session(UUID.randomUUID().toString());
-        sessionManager.add(session);
+        SessionManager.add(session);
         session.addUser(user);
         return new HttpResponse(FOUND)
-                .addHeader("Location", "/index.html")
+                .sendRedirect("/index.html")
                 .setCookie("JSESSIONID", session.getId());
     }
 
@@ -152,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isAlreadyLoggedIn(final HttpRequest request) {
         String sessionId = request.getCookie("JSESSIONID");
-        return sessionManager.findSession(sessionId) != null;
+        return SessionManager.findSession(sessionId) != null;
     }
 
     private HttpResponse postRegister(HttpRequest request) {
@@ -163,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return new HttpResponse(FOUND)
-                .addHeader("Location", "/index.html");
+                .sendRedirect("/index.html");
     }
 
 }

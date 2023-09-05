@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.UUID;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.catalina.Session;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -21,7 +18,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new SessionManager());
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -48,7 +45,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -77,7 +74,7 @@ class Http11ProcessorTest {
                     "",
                     "");
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             var expected = "HTTP/1.1 200 OK \r\n" +
@@ -106,7 +103,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=password");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             //when
             processor.process(socket);
@@ -135,7 +132,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=wrongPassword");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             //when
             processor.process(socket);
@@ -164,7 +161,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=password");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             //when
             processor.process(socket);
@@ -184,8 +181,7 @@ class Http11ProcessorTest {
         @Test
         void alreadyLoggedIn() {
             //given
-            final var sessionManager = new SessionManager();
-            final var sessionId = createSessionId(sessionManager);
+            final var sessionId = createSessionId();
 
             final var httpRequest = String.join("\r\n",
                     "GET /login HTTP/1.1 ",
@@ -196,8 +192,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, sessionManager);
-
+            final Http11Processor processor = new Http11Processor(socket);
 
             //when
             processor.process(socket);
@@ -208,7 +203,7 @@ class Http11ProcessorTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
 
-        private String createSessionId(final SessionManager sessionManager) {
+        private String createSessionId() {
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
@@ -219,7 +214,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=password");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, sessionManager);
+            final Http11Processor processor = new Http11Processor(socket);
             processor.process(socket);
             return socket.output().split("JSESSIONID=")[1];
         }
@@ -239,7 +234,7 @@ class Http11ProcessorTest {
                     "",
                     "");
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
             var expected = "HTTP/1.1 200 OK \r\n" +
@@ -266,7 +261,7 @@ class Http11ProcessorTest {
                     "",
                     "account=rosie&email=rosie@zipgo.pet&password=password");
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new SessionManager());
+            final Http11Processor processor = new Http11Processor(socket);
 
             //when
             processor.process(socket);

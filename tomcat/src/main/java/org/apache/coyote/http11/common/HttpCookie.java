@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,10 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String header) {
+        if (header == null) {
+            return new HttpCookie(Collections.emptyMap());
+        }
+
         String[] cookies = header.split("; ");
 
         Map<String, String> map = Arrays.stream(cookies)
@@ -22,12 +27,16 @@ public class HttpCookie {
         return new HttpCookie(map);
     }
 
-    public void put(final String key, final String value) {
+    public void put(String key, String value) {
         cookies.put(key, value);
     }
 
-    public String get(final String key) {
+    public String get(String key) {
         return cookies.get(key);
+    }
+
+    public String findJSessionId() {
+        return cookies.get("JSESSIONID");
     }
 
 }

@@ -38,7 +38,7 @@ public class HttpRequestParser {
             line = reader.readLine();
         }
 
-        return new RequestHeaders(requestHeaders);
+        return RequestHeaders.from(requestHeaders);
     }
 
     private static boolean canRead(String line) {

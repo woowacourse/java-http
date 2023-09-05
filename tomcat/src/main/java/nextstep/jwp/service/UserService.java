@@ -25,10 +25,10 @@ public class UserService {
         }
         log.info(user.toString());
 
-        return setSessionWithUUID(user);
+        return setSession(user);
     }
 
-    private String setSessionWithUUID(final User user) {
+    private String setSession(final User user) {
         final String id = UUID.randomUUID().toString();
         final Session session = new Session(id);
         session.setAttribute("user", user);
@@ -49,7 +49,7 @@ public class UserService {
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return setSessionWithUUID(user);
+        return setSession(user);
     }
 
 }

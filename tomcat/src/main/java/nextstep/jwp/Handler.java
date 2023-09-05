@@ -32,7 +32,7 @@ public class Handler {
 
     public static HttpResponse run(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestUrl();
-        if (requestURI.isLoginPage() && requestURI.hasQueryString()) {
+        if (requestURI.isLoginPage()) {
             return doLogin(httpRequest);
         }
         if (requestURI.isHome()) {
@@ -86,13 +86,12 @@ public class Handler {
     }
 
     private static HttpResponse doLogin(HttpRequest httpRequest) throws IOException {
-        RequestURI requestURI = httpRequest.getRequestUrl();
-        QueryString queryString = requestURI.getQueryString();
-        String account = queryString.getValueOf("account");
+        RequestBody requestBody = httpRequest.getRequestBody();
+        String account = requestBody.getValueOf("account");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
         log.info(user.toString());
-        String password = queryString.getValueOf("password");
+        String password = requestBody.getValueOf("password");
         if (!user.checkPassword(password)) {
             return HttpResponse.builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
@@ -103,13 +102,13 @@ public class Handler {
         }
         HttpCookie cookie = HttpCookie.from(httpRequest.getHeaderValue("Cookie"));
         Session foundSession = sessionManager.findSession(cookie.getValue("JSESSIONID"));
-        if (foundSession == null) {
+        if (foundSession != null) {
             return HttpResponse.builder()
                     .httpStatus(HttpStatus.FOUND)
                     .responseBody(parseResponseBody("static/index.html"))
                     .contentType(httpRequest.contentType())
                     .redirectPage("index.html")
-                    .httpCookie(HttpCookie.jSessionId(UUID.randomUUID().toString()))
+                    .httpCookie(HttpCookie.jSessionId(foundSession.getId()))
                     .build();
         }
         String uuid = UUID.randomUUID().toString();

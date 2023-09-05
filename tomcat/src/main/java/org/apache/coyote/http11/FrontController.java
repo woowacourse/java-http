@@ -18,13 +18,13 @@ import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RequestHandler {
+public class FrontController {
 
     private static final Pattern RESOURCE_PATTERN_FILE_EXTENSION = Pattern.compile(".*\\.[^.]+");
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
     private static final HandlerAdaptor handlerAdaptor = new HandlerAdaptor();
 
-    private RequestHandler() {
+    private FrontController() {
     }
 
     public static Response handle(final Request request) throws IOException {
@@ -78,7 +78,7 @@ public class RequestHandler {
     }
 
     private static Response getResponseForStaticResource(final String uri) throws IOException {
-        final var url = RequestHandler.class.getClassLoader().getResource("static" + uri);
+        final var url = FrontController.class.getClassLoader().getResource("static" + uri);
 
         return createStaticResourceResponse(url);
     }

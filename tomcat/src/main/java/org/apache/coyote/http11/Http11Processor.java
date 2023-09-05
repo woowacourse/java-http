@@ -32,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestReader = new RequestReader(inputStream);
             final var request = requestReader.read();
-            final var response = RequestHandler.handle(request);
+            final var response = FrontController.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

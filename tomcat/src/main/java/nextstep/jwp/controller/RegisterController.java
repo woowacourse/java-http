@@ -11,7 +11,7 @@ import org.apache.coyote.http11.response.StaticResource;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         String email = httpRequest.getBody("email");
         String password = httpRequest.getBody("password");
         String account = httpRequest.getBody("account");
@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         StaticResource staticResource = StaticResource.of("/register.html");
         ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
         response.setResponseBody(responseBody);

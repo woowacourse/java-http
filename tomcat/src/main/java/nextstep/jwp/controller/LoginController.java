@@ -15,7 +15,7 @@ import org.apache.coyote.http11.response.StaticResource;
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getBody("account");
         String password = request.getBody("password");
         User findUser = MemberService.login(account, password)
@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (request.existsSession()) {
             response.location("index.html");
             response.setStatusCode(HttpStatusCode.FOUND);

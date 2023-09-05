@@ -7,21 +7,20 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import nextstep.jwp.common.HttpMethod;
 import nextstep.jwp.common.HttpVersion;
+import nextstep.jwp.model.HttpCookie;
 
 public class HttpRequest {
 
-    private RequestLine requestLine;
-    private RequestHeaders requestHeaders;
-    private RequestBody requestBody;
-
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders) {
-        this(requestLine, requestHeaders, null);
-    }
+    private final RequestLine requestLine;
+    private final RequestHeaders requestHeaders;
+    private final HttpCookie cookies;
+    private final RequestBody requestBody;
 
     private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,
-                        final RequestBody requestBody) {
+                        final HttpCookie cookies, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
+        this.cookies = cookies;
         this.requestBody = requestBody;
     }
 
@@ -30,13 +29,19 @@ public class HttpRequest {
         final BufferedReader bufferedReader = new BufferedReader(reader);
         final RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         final RequestHeaders requestHeader = RequestHeaders.of(bufferedReader);
-        if (requestHeader.getHeaderValue("Content-Length") != null) {
-            final RequestBody requestBody = RequestBody.of(bufferedReader,
-                    requestHeader.getHeaderValue("Content-Length"));
-            return new HttpRequest(requestLine, requestHeader, requestBody);
-        }
+        final HttpCookie cookies = HttpCookie.from(requestHeader.getHeaderValue("Cookie"));
+        final RequestBody requestBody = readRequestBody(bufferedReader, requestHeader);
 
-        return new HttpRequest(requestLine, requestHeader);
+        return new HttpRequest(requestLine, requestHeader, cookies, requestBody);
+    }
+
+    private static RequestBody readRequestBody(final BufferedReader bufferedReader, final RequestHeaders requestHeader)
+            throws IOException {
+        if (requestHeader.getHeaderValue("Content-Length") != null) {
+            return RequestBody.of(bufferedReader,
+                    requestHeader.getHeaderValue("Content-Length"));
+        }
+        return null;
     }
 
     public HttpMethod getHttpMethod() {
@@ -57,6 +62,10 @@ public class HttpRequest {
 
     public RequestHeaders getHeaders() {
         return requestHeaders;
+    }
+
+    public HttpCookie getCookies() {
+        return cookies;
     }
 
     public String getRequestBody() {

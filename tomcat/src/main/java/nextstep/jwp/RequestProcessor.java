@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.common.ContentType;
 import nextstep.jwp.common.HttpMethod;
@@ -15,10 +16,12 @@ import nextstep.jwp.common.HttpStatus;
 import nextstep.jwp.common.HttpVersion;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.HttpCookie;
+import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.request.RequestHeaders;
 import nextstep.jwp.response.ResponseEntity;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +43,7 @@ public class RequestProcessor {
         final HttpVersion version = httpRequest.getHttpVersion();
         final HttpMethod method = httpRequest.getHttpMethod();
         final String requestUri = httpRequest.getRequestUri();
-        final RequestHeaders requestHeaders = httpRequest.getHeaders();
+        final HttpCookie cookies = httpRequest.getCookies();
         String content = "Hello World";
 
         if (method.equals(HttpMethod.GET)) {
@@ -103,7 +106,6 @@ public class RequestProcessor {
             }
 
             if (requestUri.equals("login")) {
-                String redirectedPage = UNAUTHORIZED_PAGE;
                 final Map<String, String> logInfo = Arrays.stream(requestBody.split("&"))
                         .map(input -> input.split("="))
                         .collect(Collectors.toMap(info -> info[0], info -> info[1]));
@@ -113,17 +115,18 @@ public class RequestProcessor {
                     User user = findedUser.get();
                     if (user.checkPassword(logInfo.get("password"))) {
                         log.info(user.toString());
-                        if (!requestHeaders.hasJSessionCookie()) {
-                            HttpCookie.save("JSESSIONID");
-                        }
-                        final String cookie = HttpCookie.cookieInfo("JSESSIONID");
+                        final Session session = new Session(UUID.randomUUID().toString());
+                        session.setAttribute("user", user);
+                        SessionManager.add(session);
+                        cookies.save("JSESSIONID", session.getId());
+                        final String cookie = cookies.cookieInfo("JSESSIONID");
                         return ResponseEntity.of(version, HttpStatus.FOUND, content,
                                 Map.of(LOCATION_HEADER, INDEX_PAGE,
                                         "Set-Cookie", cookie));
                     }
                 }
 
-                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, redirectedPage));
+                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
             }
         }
 
@@ -155,5 +158,9 @@ public class RequestProcessor {
         }
         final var path = Paths.get(url.toURI());
         return Files.readString(path);
+    }
+
+    private User getUSer(final Session session) {
+        return (User) session.getAttribute("user");
     }
 }

@@ -6,13 +6,16 @@ import java.util.Objects;
 
 public class Cookie {
 
+    private static final String COOKIE_HEADER = "Cookie";
+
     private final Map<String, String> cookies;
 
     private Cookie(final Map<String, String> cookies) {
         this.cookies = cookies;
     }
 
-    public static Cookie from(final String cookieString) {
+    public static Cookie from(final Map<String, String> headers) {
+        final String cookieString = headers.get(COOKIE_HEADER);
         Map<String, String> cookies = new HashMap<>();
         if (Objects.isNull(cookieString) || cookieString.isEmpty()) {
             return Cookie.empty();

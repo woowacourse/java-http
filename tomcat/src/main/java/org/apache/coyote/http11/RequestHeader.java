@@ -8,7 +8,6 @@ import org.apache.coyote.http11.session.Cookie;
 public class RequestHeader {
 
     public static final String HEADER_DELIMITER = ": ";
-    public static final String COOKIE = "Cookie";
 
     private final RequestInfo requestInfo;
     private final Map<String, String> headers;
@@ -23,7 +22,7 @@ public class RequestHeader {
     public static RequestHeader from(final List<String> requestHeader) {
         final Map<String, String> headers = parseRequestHeaders(requestHeader);
         final RequestInfo requestInfo = new RequestInfo(requestHeader.get(0));
-        final Cookie cookie = Cookie.from(headers.get(COOKIE));
+        final Cookie cookie = Cookie.from(headers);
         return new RequestHeader(requestInfo, headers, cookie);
     }
 

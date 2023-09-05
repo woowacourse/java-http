@@ -57,6 +57,7 @@ public class Response {
 
     public Response addBaseHeaders() {
         headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
+        headers.put(Header.Cache_Control.getName(), "no-cache");
         return this;
     }
 

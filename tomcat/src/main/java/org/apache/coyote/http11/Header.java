@@ -8,6 +8,7 @@ public enum Header {
     ACCEPT("Accept"),
     SET_COOKIE("Set-Cookie"),
     COOKIE("Cookie"),
+    Cache_Control("Cache-Control"),
     ;
 
     private final String name;

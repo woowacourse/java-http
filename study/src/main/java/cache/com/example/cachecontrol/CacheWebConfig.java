@@ -1,5 +1,6 @@
 package cache.com.example.cachecontrol;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -9,5 +10,12 @@ public class CacheWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
+        registry.addInterceptor(cacheControlInterceptor())
+                .addPathPatterns("/**");
+    }
+
+    @Bean
+    public CacheControlInterceptor cacheControlInterceptor() {
+        return new CacheControlInterceptor();
     }
 }

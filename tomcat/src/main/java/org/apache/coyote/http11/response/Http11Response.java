@@ -50,14 +50,6 @@ public class Http11Response {
         headers.put(headerName, value);
     }
 
-    private String formatStatus(final Status s) {
-        return s.getCode() + " " + s.getName() + " ";
-    }
-
-    private String formatHeader(final String h) {
-        return h + ": " + headers.get(h);
-    }
-
     public String getResponse() {
         final String formattedStatus = formatStatus(status);
         final String formattedHeaders = headers.keySet().stream()
@@ -69,5 +61,13 @@ public class Http11Response {
                 formattedHeaders,
                 "",
                 body);
+    }
+
+    private String formatStatus(final Status status) {
+        return status.getCode() + " " + status.getName() + " ";
+    }
+
+    private String formatHeader(final String header) {
+        return header + ": " + headers.get(header);
     }
 }

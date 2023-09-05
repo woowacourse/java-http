@@ -81,8 +81,8 @@ public class Http11Processor implements Runnable, Processor {
             for (String s = bufferedReader.readLine();
                  !"".equals(s);
                  s = bufferedReader.readLine()) {
-                input.append(s);
-                input.append(LINE_SEPARATOR);
+                input.append(s)
+                        .append(LINE_SEPARATOR);
             }
         } catch (final IOException e) {
             log.error(e.getMessage(), e);
@@ -144,7 +144,6 @@ public class Http11Processor implements Runnable, Processor {
             final Http11Response response = new Http11Response(OK, resource);
             checkContentType(request, response);
             return response;
-
         } catch (final Exception e) {
             throw new PageNotFoundException(path);
         }

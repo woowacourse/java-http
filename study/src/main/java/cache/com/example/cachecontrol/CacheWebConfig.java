@@ -7,7 +7,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CacheWebConfig implements WebMvcConfigurer {
 
-    @Override
-    public void addInterceptors(final InterceptorRegistry registry) {
-    }
+	@Override
+	public void addInterceptors(final InterceptorRegistry registry) {
+		registry.addInterceptor(new NoCacheInterceptor());
+	}
 }

@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -19,14 +18,15 @@ public class RequestParam {
         this.params = params;
     }
 
-    public static RequestParam of(String queryString) throws UnsupportedEncodingException {
+    public static RequestParam of(String queryString) {
         Map<String, String> params = new HashMap<>();
-        String[] pairs = queryString.split(QUERY_STRING_DELIMITER);
+        String decodeQueryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+        String[] pairs = decodeQueryString.split(QUERY_STRING_DELIMITER);
         for (String pair : pairs) {
             String[] query = pair.split(KEY_VALUE_DELIMITER);
             params.put(
-                    URLDecoder.decode(query[KEY_INDEX], StandardCharsets.UTF_8),
-                    URLDecoder.decode(query[VALUE_INDEX], StandardCharsets.UTF_8)
+                    query[KEY_INDEX],
+                    query[VALUE_INDEX]
             );
         }
         return new RequestParam(params);

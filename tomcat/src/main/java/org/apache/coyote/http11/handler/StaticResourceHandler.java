@@ -15,8 +15,7 @@ public class StaticResourceHandler implements Handler {
         String path = request.getPath();
         HttpResponse response = new HttpResponse();
         response.setContentType(getContentType(path));
-        String contentBody = ResourceResolver.resolve(path);
-        response.setContentBody(contentBody);
+        response.setContentBody(ResourceResolver.resolve(path));
         response.setHttpStatus(HttpStatus.OK);
         return response;
     }

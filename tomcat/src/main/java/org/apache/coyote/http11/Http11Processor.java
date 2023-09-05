@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private final Socket connection;
     private static final Map<String, Handler> HANDLER_MAP = new HashMap<>();
     private static final Handler STATIC_RESOURCE_HANDLER = new StaticResourceHandler();
     private static final Handler METHOD_NOT_ALLOWED_HANDLER = new MethodNotAllowedHandler();
     private static final Handler NOT_FOUND_HANDLER = new NotFoundHandler();
+
+    private final Socket connection;
 
     static {
         HANDLER_MAP.put("/", new IndexHandler());

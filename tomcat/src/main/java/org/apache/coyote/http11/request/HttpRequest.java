@@ -33,8 +33,7 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeaders, messageBody);
     }
 
-    private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers)
-            throws IOException {
+    private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers) throws IOException {
         if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
             return MessageBody.from("");
         }

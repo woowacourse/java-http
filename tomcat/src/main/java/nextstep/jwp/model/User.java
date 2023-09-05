@@ -2,6 +2,8 @@ package nextstep.jwp.model;
 
 public class User {
 
+    private static Long CURRENT_ID = 2L;
+
     private final Long id;
     private final String account;
     private final String password;
@@ -15,7 +17,7 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this(null, account, password, email);
+        this(CURRENT_ID++, account, password, email);
     }
 
     public boolean equalsAccount(String account) {
@@ -24,6 +26,10 @@ public class User {
 
     public boolean checkPassword(String password) {
         return this.password.equals(password);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getAccount() {

@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import repository.InMemoryUserRepository;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -29,11 +29,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
 
     private final Socket connection;
-    private final InMemoryUserRepository userRepository;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.userRepository = InMemoryUserRepository.getInstance();
     }
 
     @Override
@@ -63,7 +61,20 @@ public class Http11Processor implements Runnable, Processor {
             String requestAcceptHeader = findAcceptHeader(headers);
             String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
 
-            RequestHandler requestHandler = getFilePathAndStatus(requestMethod, requestUri);
+            RequestHandler requestHandler;
+
+            if (requestMethod.equalsIgnoreCase("POST")) {
+                int contentLength = getContentLength(headers);
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                requestHandler = handlePostRequest(requestUri, requestBody);
+            }
+            else {
+                requestHandler = getFilePathAndStatus(requestMethod, requestUri);
+            }
+
             String responseBody = readFile(requestHandler.getResponseFilePath());
 
             List<String> responseHeaders = new ArrayList<>();
@@ -102,6 +113,39 @@ public class Http11Processor implements Runnable, Processor {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
+    private int getContentLength(List<String> headers) {
+        Optional<String> contentLengthHeader = headers.stream()
+                                                      .filter(it -> it.startsWith("Content-Length"))
+                                                      .findFirst();
+
+        if (contentLengthHeader.isEmpty()) {
+            return -1;
+        }
+        int index = contentLengthHeader.get().indexOf(" ");
+        return Integer.parseInt(contentLengthHeader.get().substring(index + 1));
+    }
+
+    private RequestHandler handlePostRequest(String requestUri, String requestBody) {
+        String[] splitRequestBody = requestBody.split("&");
+        if (requestUri.equals("/register")) {
+            return handleRegisterRequest(splitRequestBody);
+        }
+        return RequestHandler.of("GET", "404 Not Found", "static/404.html");
+    }
+
+    private RequestHandler handleRegisterRequest(String[] splitQueryString) {
+        Optional<String> account = getValueOf("account", splitQueryString);
+        Optional<String> email = getValueOf("email", splitQueryString);
+        Optional<String> password = getValueOf("password", splitQueryString);
+
+        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            return RequestHandler.of("GET","400 Bad Request", "static/register.html");
+        }
+
+        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
+        return RequestHandler.of("GET","302 Found", "static/index.html");
+    }
+
     private RequestHandler getFilePathAndStatus(String requestMethod, String requestUri) {
         if (!requestMethod.equalsIgnoreCase("GET")) {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
@@ -122,7 +166,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String fileName = "static" + requestPath;
-        return RequestHandler.of("200 OK", fileName);
+        return RequestHandler.of("GET","200 OK", fileName);
     }
 
     private static boolean isLoginRequest(String requestMethod, String requestPath) {
@@ -135,15 +179,15 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> password = getValueOf("password", splitQueryString);
 
         if (account.isEmpty() && password.isEmpty()) {
-            return RequestHandler.of("200 OK", "static/login.html");
+            return RequestHandler.of("GET","200 OK", "static/login.html");
         }
 
-        Optional<User> user = findUserByAccount(account.get());
+        Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
         if (user.isPresent() && user.get().checkPassword(password.get())) {
             log.info(user.get().toString());
-            return RequestHandler.of("302 Found", "static/index.html");
+            return RequestHandler.of("GET","302 Found", "static/index.html");
         }
-        return RequestHandler.of("401 Unauthorized", "static/401.html");
+        return RequestHandler.of("GET","401 Unauthorized", "static/401.html");
     }
 
     private String readFile(String filePath) {
@@ -164,12 +208,5 @@ public class Http11Processor implements Runnable, Processor {
     private boolean equalsKey(String expected, String actual) {
         String[] splitActual = actual.split("=");
         return splitActual[0].equals(expected);
-    }
-
-    private Optional<User> findUserByAccount(String account) {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                    .filter(it -> it.equalsAccount(account))
-                    .findFirst();
     }
 }

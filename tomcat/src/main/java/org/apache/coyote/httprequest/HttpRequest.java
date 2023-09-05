@@ -2,6 +2,7 @@ package org.apache.coyote.httprequest;
 
 import org.apache.coyote.http11.common.CookieHeader;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.httprequest.header.RequestHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -35,8 +37,16 @@ public class HttpRequest {
     }
 
     private static HttpRequestLine makeHttpRequestLine(final String line) {
-        log.debug("Request line : " + line);
+        log.debug("Request line : {}", line);
         return HttpRequestLine.from(line);
+    }
+
+    public boolean hasQueryString() {
+        return !getQueryString().isEmpty();
+    }
+
+    public boolean hasJSessionId() {
+        return requestHeaders.hasJSessionId();
     }
 
     public String getPath() {
@@ -63,8 +73,22 @@ public class HttpRequest {
         return requestHeaders.getCookieHeader();
     }
 
-//    public Session getSession(final boolean create) {
-//        final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
-//
-//    }
+    public Session getSession(final boolean create) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        if (hasJSessionId()) {
+            final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
+            final Session session = sessionManager.findSession(jSessionId);
+            if (session == null && create) {
+                return createSession(sessionManager);
+            }
+            return session;
+        }
+        return createSession(sessionManager);
+    }
+
+    public Session createSession(final SessionManager sessionManager) {
+        final Session newSession = new Session(UUID.randomUUID().toString());
+        sessionManager.add(newSession);
+        return newSession;
+    }
 }

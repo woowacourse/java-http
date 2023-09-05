@@ -42,7 +42,7 @@ public class RegisterHandler implements Handler {
         final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
         final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.OK);
         final String resourcePath = request.getPath() + ".html";
-        final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath, request.getQueryString());
+        final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath);
         final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
         return afterSetCookie;
     }

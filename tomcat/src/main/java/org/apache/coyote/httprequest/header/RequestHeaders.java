@@ -60,6 +60,10 @@ public class RequestHeaders {
         return parsedRequestHeader;
     }
 
+    public boolean hasJSessionId() {
+        return cookieHeader.hasJSessionId();
+    }
+
     public int getContentLength() {
         if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
             return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH).getValue());

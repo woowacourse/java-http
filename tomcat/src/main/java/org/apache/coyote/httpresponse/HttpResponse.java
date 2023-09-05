@@ -32,26 +32,23 @@ public class HttpResponse {
     public static HttpResponse init(final String httpVersion) {
         log.debug("===========================================");
         log.debug("Http Response");
-        log.debug("Response Http Version: " + httpVersion);
+        log.debug("Response Http Version: {}", httpVersion);
         return new HttpResponse(httpVersion, null, CookieHeader.blank(), null, null);
     }
 
     public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
-        log.debug("Http Status: " + httpStatus);
+        log.debug("Http Status: {}", httpStatus);
         return new HttpResponse(this.httpVersion, httpStatus, this.cookieHeader, this.responseHeaders, this.contentBody);
     }
 
     public HttpResponse setCookieHeader(final CookieHeader cookieHeader) {
-        if (!cookieHeader.hasJSessionId()) {
-            cookieHeader.setJSessionId();
-        }
         return new HttpResponse(this.httpVersion, httpStatus, cookieHeader, this.responseHeaders, this.contentBody);
     }
 
     public HttpResponse setContent(final String path) {
         final String contentBody = ResourceReader.read(path);
         final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
-        log.debug("Content-Path: " + path);
+        log.debug("Content-Path: {}", path);
         return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, responseHeaders, contentBody);
     }
 
@@ -60,17 +57,9 @@ public class HttpResponse {
         return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, responseHeaders, "");
     }
 
-
-    public HttpResponse setContent(final String path, final QueryString queryString) {
-        final String contentBody = ResourceReader.read(path);
-        final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
-        log.debug("Content-Path: " + path);
-        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, responseHeaders, contentBody);
-    }
-
     public HttpResponse setLocationHeader(final String path) {
         responseHeaders.setLocationHeader(path);
-        log.debug("Location: " + path);
+        log.debug("Location: {}", path);
         return new HttpResponse(this.httpVersion, HttpStatus.FOUND, this.cookieHeader, responseHeaders, this.contentBody);
     }
 
@@ -79,6 +68,7 @@ public class HttpResponse {
         final String responseLine = makeResponseLine();
         stringBuilder.append(responseLine).append(System.lineSeparator());
         if (cookieHeader.isExist()) {
+            System.out.println(123123);
             stringBuilder.append(cookieHeader.getValue()).append(System.lineSeparator());
         }
         stringBuilder.append(responseHeaders.getFormattedHeaders()).append(System.lineSeparator()).append(contentBody);

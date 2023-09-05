@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.common;
 
-import org.apache.coyote.httprequest.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +29,7 @@ public class CookieHeader {
     }
 
     public static CookieHeader from(final String value) {
-        log.debug("Cookie: " + value);
+        log.debug("Cookie: {}", value);
         final Map<String, String> data = Arrays.stream(value.split(DELIMITER))
                 .map(cookieValue -> cookieValue.split(KEY_VALUE_SPLITTER, KEY_VALUE_SPLIT_LIMIT))
                 .collect(Collectors.toMap(
@@ -41,15 +39,21 @@ public class CookieHeader {
         return new CookieHeader(data);
     }
 
-    public static CookieHeader blank() {
-        return new CookieHeader(new HashMap<>());
-    }
-
     private static String getDataValueOrBlank(final String[] oneData) {
         if (oneData.length > DATA_SIZE) {
             return oneData[VALUE_INDEX].trim();
         }
         return EMPTY_VALUE;
+    }
+
+    public static CookieHeader blank() {
+        return new CookieHeader(new HashMap<>());
+    }
+
+    public static CookieHeader createByJSessionId(final String jSessionId) {
+        final Map<String, String> data = new HashMap<>();
+        data.put(JAVA_SESSION_ID, jSessionId);
+        return new CookieHeader(data);
     }
 
     public boolean isExist() {
@@ -65,15 +69,6 @@ public class CookieHeader {
             throw new RuntimeException("JSESSIONID 가 존재하지 않는데, JSESSIONID 를 가져오려 합니다.");
         }
         return data.get(JAVA_SESSION_ID);
-    }
-
-    public void setJSessionId() {
-        if (hasJSessionId()) {
-            throw new RuntimeException("JSESSIONID 가 존재하는데, JSESSIONID 를 생성하려 합니다.");
-        }
-        final UUID uuid = UUID.randomUUID();
-        data.put(JAVA_SESSION_ID, uuid.toString());
-        log.debug("Set-Cookie: " + getValue());
     }
 
     public String getValue() {

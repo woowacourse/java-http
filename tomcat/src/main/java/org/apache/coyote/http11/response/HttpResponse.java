@@ -1,10 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ContentType;
-import nextstep.jwp.LoginHandler;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,15 +47,8 @@ public class HttpResponse {
                 "");
     }
 
-    public void addJSessionId(final HttpRequest httpRequest) {
-        if (!httpRequest.hasJSessionId()) {
-            final Session session = new Session();
-            final LoginHandler loginHandler = new LoginHandler();
-            session.addAttribute("user", loginHandler.getUser(httpRequest.getRequestBody()));
-            SessionManager.add(session);
-
-            header.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-        }
+    public void addJSessionId(final String JSessionId) {
+        header.addHeader("Set-Cookie", "JSESSIONID=" + JSessionId);
     }
 
     public String printHeader() {

@@ -3,6 +3,8 @@ package org.apache.coyote.http11.response;
 import nextstep.jwp.LoginHandler;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 import java.io.IOException;
 
@@ -22,7 +24,15 @@ public class LoginPostResponseMaker extends ResponseMaker {
 
     private String successLoginResponse(final HttpRequest request) {
         final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
-        httpResponse.addJSessionId(request);
+        if (!request.hasJSessionId()) {
+            final Session session = new Session();
+            final LoginHandler loginHandler = new LoginHandler();
+            session.addAttribute("user", loginHandler.getUser(request.getRequestBody()));
+            SessionManager.add(session);
+
+            httpResponse.addJSessionId(session.getId());
+        }
+
         return httpResponse.getRedirectResponse("/index.html");
     }
 

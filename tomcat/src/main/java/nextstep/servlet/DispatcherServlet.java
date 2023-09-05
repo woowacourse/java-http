@@ -24,7 +24,7 @@ public class DispatcherServlet {
     );
 
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (!prehandleInterceptors(httpRequest, httpResponse)) {
+        if (!isPassedThroughInterceptors(httpRequest, httpResponse)) {
             return;
         }
         final Controller controller = findController(httpRequest);
@@ -32,7 +32,7 @@ public class DispatcherServlet {
         httpResponse.addAttributes(responseBody);
     }
 
-    private boolean prehandleInterceptors(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    private boolean isPassedThroughInterceptors(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         return interceptors.stream()
             .filter(interceptor -> interceptor.support(httpRequest))
             .allMatch(interceptor -> interceptor.preHandle(httpRequest, httpResponse));

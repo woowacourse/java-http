@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class HttpResponse {
 
     private final StatusCode statusCode;
-    private final Map<String, String> header;
+    private final ResponseHeader header;
     private final String responseBody;
 
     public HttpResponse(final StatusCode statusCode,
@@ -22,9 +22,10 @@ public class HttpResponse {
         this.statusCode = statusCode;
         this.responseBody = responseBody;
 
-        header = new LinkedHashMap<>();
-        header.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
-        header.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        Map<String, String> newHeader = new LinkedHashMap<>();
+        newHeader.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
+        newHeader.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        header = new ResponseHeader(newHeader);
     }
 
     public String getResponse() {
@@ -52,12 +53,12 @@ public class HttpResponse {
             session.addAttribute("user", loginHandler.getUser(httpRequest.getRequestBody()));
             SessionManager.add(session);
 
-            header.put("Set-Cookie", "JSESSIONID=" + session.getId());
+            header.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
         }
     }
 
     public String printHeader() {
-        return header.entrySet().stream()
+        return header.getHeader().entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r")
                 .collect(Collectors.joining(System.lineSeparator()));
     }

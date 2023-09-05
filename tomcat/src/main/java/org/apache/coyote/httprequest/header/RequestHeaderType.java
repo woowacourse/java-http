@@ -12,8 +12,7 @@ public enum RequestHeaderType {
     CACHE_CONTROL("Cache-Control"),
     SEC_CH_UA("sec-ch-ua"),
     UNSUPPORTED_HEADER("지원하지 않는 타입"),
-    CONTENT_LENGTH("Content-Length"),
-    COOKIE("Cookie");
+    CONTENT_LENGTH("Content-Length");
 
     private final String headerName;
 
@@ -47,8 +46,6 @@ public enum RequestHeaderType {
             return new SecChUaHeader(value);
         } else if (this == CONTENT_LENGTH) {
             return new ContentLengthHeader(value);
-        } else if (this == COOKIE) {
-            return new CookieHeader(value);
         } else {
             throw new UnsupportedHeaderTypeException();
         }

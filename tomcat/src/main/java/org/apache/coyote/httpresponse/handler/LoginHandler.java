@@ -35,7 +35,8 @@ public class LoginHandler implements Handler {
         final String resourcePath = request.getPath() + ".html";
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath, request.getQueryString());
         final HttpResponse afterLogin = setLoginUser(request, afterSetContent);
-        return afterLogin;
+        final HttpResponse afterSetCookie = afterLogin.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 
     private HttpResponse handleGet(final HttpRequest request) {
@@ -44,7 +45,8 @@ public class LoginHandler implements Handler {
         final String resourcePath = request.getPath() + ".html";
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath, request.getQueryString());
         final HttpResponse afterLogin = setLoginUser(request, afterSetContent);
-        return afterLogin;
+        final HttpResponse afterSetCookie = afterLogin.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 
     private HttpResponse setLoginUser(final HttpRequest request, final HttpResponse response) {

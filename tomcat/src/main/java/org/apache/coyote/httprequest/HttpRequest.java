@@ -1,5 +1,6 @@
 package org.apache.coyote.httprequest;
 
+import org.apache.coyote.http11.common.CookieHeader;
 import org.apache.coyote.httprequest.header.RequestHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,5 +56,9 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public CookieHeader getCookieHeader() {
+        return requestHeaders.getCookieHeader();
     }
 }

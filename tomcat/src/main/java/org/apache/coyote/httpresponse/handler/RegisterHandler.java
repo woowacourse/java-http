@@ -29,7 +29,8 @@ public class RegisterHandler implements Handler {
         saveUser(request.getRequestBody());
         final HttpResponse afterSetContent = afterSetHttpStatus.setBlankContent();
         final HttpResponse afterSetLocationHeader = afterSetContent.setLocationHeader("/index.html");
-        return afterSetLocationHeader;
+        final HttpResponse afterSetCookie = afterSetLocationHeader.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 
     private void saveUser(final RequestBody requestBody) {
@@ -42,6 +43,7 @@ public class RegisterHandler implements Handler {
         final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.OK);
         final String resourcePath = request.getPath() + ".html";
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent(resourcePath, request.getQueryString());
-        return afterSetContent;
+        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 }

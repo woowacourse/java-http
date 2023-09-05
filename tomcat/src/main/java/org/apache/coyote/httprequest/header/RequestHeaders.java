@@ -1,5 +1,6 @@
 package org.apache.coyote.httprequest.header;
 
+import org.apache.coyote.http11.common.CookieHeader;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.exception.InvalidHeaderException;
 import org.slf4j.Logger;
@@ -21,13 +22,16 @@ public class RequestHeaders {
     private static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<RequestHeaderType, RequestHeader> headers;
+    private final CookieHeader cookieHeader;
 
-    private RequestHeaders(final Map<RequestHeaderType, RequestHeader> headers) {
+    private RequestHeaders(final Map<RequestHeaderType, RequestHeader> headers, final CookieHeader cookieHeader) {
         this.headers = headers;
+        this.cookieHeader = cookieHeader;
     }
 
     public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<RequestHeaderType, RequestHeader> headers = new HashMap<>();
+        CookieHeader cookieHeader = CookieHeader.blank();
         log.debug("Request Header:");
         while (true) {
             final String line = bufferedReader.readLine();
@@ -35,6 +39,9 @@ public class RequestHeaders {
                 break;
             }
             final List<String> parsedHeader = parseByDelimiter(line);
+            if (parsedHeader.get(HEADER_KEY_INDEX).equals("Cookie")) {
+                cookieHeader = CookieHeader.from(parsedHeader.get(HEADER_VALUE_INDEX));
+            }
             final RequestHeaderType headerType = RequestHeaderType.from(parsedHeader.get(HEADER_KEY_INDEX));
             if (headerType.isUnsupportedHeader()) {
                 continue;
@@ -42,7 +49,7 @@ public class RequestHeaders {
             log.debug("\t" + line);
             headers.put(headerType, headerType.saveRequestHeader(parsedHeader.get(HEADER_VALUE_INDEX).trim()));
         }
-        return new RequestHeaders(headers);
+        return new RequestHeaders(headers, cookieHeader);
     }
 
     private static List<String> parseByDelimiter(final String line) {
@@ -53,14 +60,15 @@ public class RequestHeaders {
         return parsedRequestHeader;
     }
 
-    public boolean isJSessionIdExist() {
-        return headers.containsKey(RequestHeaderType.COOKIE);
-    }
-
     public int getContentLength() {
         if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
             return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH).getValue());
         }
         return 0;
+
+    }
+
+    public CookieHeader getCookieHeader() {
+        return this.cookieHeader;
     }
 }

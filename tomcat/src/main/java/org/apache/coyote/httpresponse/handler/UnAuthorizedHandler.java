@@ -11,6 +11,7 @@ public class UnAuthorizedHandler implements Handler {
         final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
         final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent("/401.html");
-        return afterSetContent;
+        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 }

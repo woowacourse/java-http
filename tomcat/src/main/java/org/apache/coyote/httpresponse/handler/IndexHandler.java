@@ -11,6 +11,7 @@ public class IndexHandler implements Handler {
         final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
         final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.OK);
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent(request.getPath());
-        return afterSetContent;
+        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
+        return afterSetCookie;
     }
 }

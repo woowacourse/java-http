@@ -1,4 +1,4 @@
-package nextstep;
+package org.apache.coyote.http11;
 
 public enum SupportContentType {
     TEXT_HTML(".html", "text/html;charset=utf-8"),

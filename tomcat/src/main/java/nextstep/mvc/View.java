@@ -1,4 +1,4 @@
-package nextstep;
+package nextstep.mvc;
 
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;

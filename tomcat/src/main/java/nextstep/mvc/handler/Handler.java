@@ -1,11 +1,11 @@
-package nextstep.handler;
+package nextstep.mvc.handler;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-import nextstep.ModelAndView;
-import nextstep.View;
-import nextstep.ViewResolver;
+import nextstep.mvc.ModelAndView;
+import nextstep.mvc.View;
+import nextstep.mvc.ViewResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;

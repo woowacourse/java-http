@@ -1,4 +1,4 @@
-package nextstep;
+package nextstep.mvc;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,8 @@
-package nextstep;
+package nextstep.mvc;
 
 import common.FileReader;
 import java.io.IOException;
+import org.apache.coyote.http11.SupportContentType;
 
 public class ViewResolver {
 

@@ -7,7 +7,7 @@ public class HttpResponseStatusLine {
     private final String httpVersion;
     private final HttpStatusCode httpStatus;
 
-    public HttpResponseStatusLine(final HttpStatusCode httpStatus) {
+    private HttpResponseStatusLine(final HttpStatusCode httpStatus) {
         this.httpVersion = HTTP_VERSION;
         this.httpStatus = httpStatus;
     }

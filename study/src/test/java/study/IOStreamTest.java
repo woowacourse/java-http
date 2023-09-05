@@ -2,8 +2,10 @@
 package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
@@ -16,9 +18,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockSettings;
 
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
@@ -236,6 +240,43 @@ class IOStreamTest {
             }
 
             assertThat(actual).hasToString(emoji);
+        }
+
+        @Test
+        void FilterStream을_close해도_기본Stream이_close된다() throws IOException {
+            InputStream inputStream = mock(InputStream.class);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            bufferedReader.close();
+
+            verify(inputStream, atLeastOnce()).close();
+        }
+
+        @Test
+        void 중간FilterStream을_close하면_Stream객체를_사용할_수_없다() throws IOException {
+            InputStream inputStream = new ByteArrayInputStream("test".getBytes());
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            bufferedInputStream.close();
+
+            assertThatThrownBy(() -> bufferedReader.read())
+                    .isInstanceOf(IOException.class);
+        }
+
+
+        @Test
+        void 기본Stream을_close하더라도_Stream객체를_사용할_수_있다() throws IOException {
+            String expected = "test";
+            InputStream inputStream = new ByteArrayInputStream(expected.getBytes()); // 실제 InputStream close()는 아무 동작 x
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            inputStream.close();
+
+            String actual = bufferedReader.readLine();
+
+            assertThat(actual).isEqualTo(expected);
         }
     }
 }

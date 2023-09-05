@@ -39,9 +39,9 @@ public class RequestReader {
         final Map<String, String> headers = new HashMap<>();
         String line;
         while (!"".equals((line = reader.readLine()))) {
-            final String[] header = line.split(": ");
-            final String key = header[0];
-            final String value = header[1].trim();
+            final var header = line.split(": ");
+            final var value = header[1].trim();
+            final var key = header[0];
             headers.put(key, value);
         }
 
@@ -49,13 +49,14 @@ public class RequestReader {
     }
 
     private String readBody(final Headers headers) throws IOException {
-        String body = "";
         if (headers.hasContentLength()) {
-            final int contentLength = Integer.parseInt(headers.find("Content-Length"));
-            final char[] buffer = new char[contentLength];
+            final var contentLength = Integer.parseInt(headers.find("Content-Length"));
+            final var buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
-            body = new String(buffer);
+
+            return new String(buffer);
         }
-        return body;
+
+        return "";
     }
 }

@@ -18,10 +18,6 @@ public class Headers {
         values = headers;
     }
 
-    public void add(final String name, final String value) {
-        values.put(name, value);
-    }
-
     public void addLocation(final String location) {
         values.put("Location", location);
     }
@@ -29,7 +25,7 @@ public class Headers {
     public void addSetCookie(final String cookie) {
         values.put("Set-Cookie", cookie);
     }
-
+    
     public boolean hasContentLength() {
         return values.containsKey("Content-Length");
     }
@@ -51,7 +47,7 @@ public class Headers {
         if (values.isEmpty()) {
             return "";
         }
-        
+
         return values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())

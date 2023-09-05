@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
         final var inputStream = bufferingInputStream(connection.getInputStream());
         final var outputStream = connection.getOutputStream()
     ) {
-      final Request request = new Request(inputStream.readLine());
+      final Request request = Request.from(inputStream.readLine());
       final Map<String, String> headers = extractHeaders(inputStream);
       final Map<String, String> params = extractParams(request.getQueryString());
       final Map<String, String> cookies = extractCookies(headers.get("Cookie"));

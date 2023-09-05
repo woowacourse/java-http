@@ -3,6 +3,7 @@ package nextstep.jwp.servlet;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.servlet.exception.NotFoundFileException;
 import org.apache.catalina.servlet.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -27,12 +28,15 @@ public class RequestMapper {
         if (isStaticResource(httpResponse, requestUri) && requestUri.contains(".")) {
             return;
         }
+        if (!container.containsKey(requestUri)) {
+            throw new NotFoundFileException();
+        }
         Controller controller = container.get(requestUri);
         controller.service(httpRequest, httpResponse);
     }
 
     private boolean isStaticResource(HttpResponse httpResponse, String requestUri) {
-        if (container.containsKey(requestUri)) {
+        if (container.containsKey(requestUri) || !requestUri.contains(".")) {
             return false;
         }
         StaticResource staticResource = StaticResource.of(requestUri);

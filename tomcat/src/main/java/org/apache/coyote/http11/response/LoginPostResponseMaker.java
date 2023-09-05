@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import nextstep.jwp.LoginHandler;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.LoginHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.io.IOException;
@@ -20,10 +20,10 @@ public class LoginPostResponseMaker extends ResponseMaker {
         return failLoginResponse();
     }
 
-    private String successLoginResponse(final HttpRequest request) throws IOException {
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND, ContentType.HTML, new String(getResponseBodyBytes("/index.html"), UTF_8));
+    private String successLoginResponse(final HttpRequest request) {
+        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
         httpResponse.addJSessionId(request);
-        return httpResponse.getResponse();
+        return httpResponse.getRedirectResponse("/index.html");
     }
 
     private String failLoginResponse() throws IOException {

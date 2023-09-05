@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.LoginHandler;
+import nextstep.jwp.LoginHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -28,6 +28,12 @@ public class HttpResponse {
         header = new ResponseHeader(newHeader);
     }
 
+    public HttpResponse(final StatusCode statusCode) {
+        this.statusCode = statusCode;
+        this.responseBody = "";
+        header = new ResponseHeader(new LinkedHashMap<>());
+    }
+
     public String getResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getMessage() + " ",
@@ -35,16 +41,15 @@ public class HttpResponse {
                 responseBody);
     }
 
-//    public String getRedirectResponse() {
-//        return String.join("\r\n",
-//                "HTTP/1.1 " + statusCode + " ",
-//                "HTTP/1.1 " + statusCode + "\r",
-//                "Location: " + header.get("Location: ") + "\r",
-//                "Content-Type: " + header.get("Content-Type: ") + "\r",
-//                "Content-Length: " + header.get("Content-Length: ") + "\r",
-//                "Set-Cookie: " + header.get("Set-Cookie: ") + "\r\n",
-//                responseBody);
-//    }
+    public String getRedirectResponse(String redirectUrl) {
+        header.addHeader("Location", redirectUrl);
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getMessage() + " ",
+                printHeader() + "\n",
+                "Location: " + redirectUrl + " \r/n",
+                "",
+                "");
+    }
 
     public void addJSessionId(final HttpRequest httpRequest) {
         if (!httpRequest.hasJSessionId()) {

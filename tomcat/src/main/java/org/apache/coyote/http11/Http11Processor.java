@@ -51,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             List<String> headers = new ArrayList<>();
+
             String header = "";
             while (!(header = bufferedReader.readLine()).equals("")) {
                 headers.add(header);
@@ -62,10 +63,11 @@ public class Http11Processor implements Runnable, Processor {
             String requestAcceptHeader = findAcceptHeader(headers);
             String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
 
-            String responseBody = renderResponseBody(requestMethod, requestUri);
+            RequestHandler requestHandler = getFilePathAndStatus(requestMethod, requestUri);
+            String responseBody = readFile(requestHandler.getResponseFilePath());
 
             List<String> responseHeaders = new ArrayList<>();
-            responseHeaders.add("HTTP/1.1 200 OK ");
+            responseHeaders.add("HTTP/1.1 " + requestHandler.getHttpStatus() + " ");
             responseHeaders.add(contentTypeHeader);
             responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
             String responseHeader = String.join("\r\n", responseHeaders);
@@ -100,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private String renderResponseBody(String requestMethod, String requestUri) {
+    private RequestHandler getFilePathAndStatus(String requestMethod, String requestUri) {
         if (!requestMethod.equalsIgnoreCase("GET")) {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
         }
@@ -114,31 +116,41 @@ public class Http11Processor implements Runnable, Processor {
 
             String[] splitQueryString = queryString.split("&");
 
-            if (requestMethod.equalsIgnoreCase("GET") && requestPath.equals("/login.html")) {
-                handleLoginRequest(splitQueryString);
+            if (isLoginRequest(requestMethod, requestPath)) {
+                return handleLoginRequest(splitQueryString);
             }
         }
 
         String fileName = "static" + requestPath;
-        String filePath = getClass().getClassLoader().getResource(fileName).getPath();
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            return lines.collect(Collectors.joining("\n", "", "\n"));
-        } catch (IOException | UncheckedIOException e) {
-            return "Hello world!";
-        }
+        return RequestHandler.of("200 OK", fileName);
     }
 
-    private void handleLoginRequest(String[] splitQueryString) {
+    private static boolean isLoginRequest(String requestMethod, String requestPath) {
+        boolean isLoginUri = requestPath.equals("/login.html") || requestPath.equals("/login");
+        return requestMethod.equalsIgnoreCase("GET") && isLoginUri;
+    }
+
+    private RequestHandler handleLoginRequest(String[] splitQueryString) {
         Optional<String> account = getValueOf("account", splitQueryString);
         Optional<String> password = getValueOf("password", splitQueryString);
 
-        if (account.isEmpty() || password.isEmpty()) {
-            return;
+        if (account.isEmpty() && password.isEmpty()) {
+            return RequestHandler.of("200 OK", "static/login.html");
         }
 
         Optional<User> user = findUserByAccount(account.get());
         if (user.isPresent() && user.get().checkPassword(password.get())) {
             log.info(user.get().toString());
+            return RequestHandler.of("302 Found", "static/index.html");
+        }
+        return RequestHandler.of("401 Unauthorized", "static/401.html");
+    }
+
+    private String readFile(String filePath) {
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            return lines.collect(Collectors.joining("\n", "", "\n"));
+        } catch (IOException | UncheckedIOException e) {
+            return "Hello world!";
         }
     }
 

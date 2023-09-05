@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -90,13 +91,22 @@ public class Http11Processor implements Runnable, Processor {
   private String handleRequest(final String startLine, final Map<String, String> headers,
       final String requestBody)
       throws URISyntaxException, IOException {
+    String setCookie = null;
+    Map<String, String> requestCookies = new HashMap<>();
+    if (headers.get("Cookie") != null) {
+      String[] cookies = headers.get("Cookie").split("; ");
+      for (int i = 0; i < cookies.length; i++) {
+        String[] cookieTokens = cookies[i].split("=");
+        requestCookies.put(cookieTokens[0], cookieTokens[1]);
+      }
+    }
     int statusCode = 200;
     String statusMessage = "OK";
     String responseBody = "";
     String contentType = "text/html";
     String location = null;
 
-    URL filePathUrl;
+    URL filePathUrl = null;
     final List<String> startLineTokens = List.of(startLine.split(" "));
     String method = startLineTokens.get(0);
     // ===== uri => path, queryString
@@ -141,9 +151,9 @@ public class Http11Processor implements Runnable, Processor {
               parsedRequestBody.get("password"),
               parsedRequestBody.get("email")
           ));
-          statusCode = 302;
+          statusCode = 201;
           statusMessage = "Found";
-          location = "/index.html";
+          filePathUrl = getClass().getResource("/static/index.html");
         }
       } else if (path.equals("/login")) {
         if (requestBody != null) {
@@ -156,15 +166,18 @@ public class Http11Processor implements Runnable, Processor {
                   queryTokens[i].substring(equalSeperatorIndex + 1));
             }
           }
-
-          if (parsedRequestBody.get("account").equals("gugu")
+          if (parsedRequestBody.get("account").equals("gugu")  // 로그인 성공
               && parsedRequestBody.get("password").equals("password")) {
+            if (requestCookies.get("JSESSIONID") == null) {
+              setCookie = "JSESSIONID=" + UUID.randomUUID();
+            }
             statusCode = 302;
             statusMessage = "Found";
             location = "/index.html";
           } else {
             statusCode = 401;
             statusMessage = "Unauthorization";
+            filePathUrl = getClass().getResource("/static/401.html");
           }
         }
       }
@@ -177,7 +190,8 @@ public class Http11Processor implements Runnable, Processor {
         filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
             .orElse(getClass().getResource("/static/404.html"));
       }
-
+    }
+    if (filePathUrl != null) {
       final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
       Charset charset = StandardCharsets.UTF_8;
       responseBody = String.join(System.lineSeparator(), Files.readAllLines(filePath, charset));
@@ -192,6 +206,9 @@ public class Http11Processor implements Runnable, Processor {
     responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     if (location != null) {
       responseHeaders.put("Location", location);
+    }
+    if (setCookie != null) {
+      responseHeaders.put("Set-Cookie", setCookie);
     }
     final String responseHeader = String.join(" \r\n",
         responseHeaders.entrySet()

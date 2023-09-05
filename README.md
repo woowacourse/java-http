@@ -25,11 +25,11 @@
     - [x] POST 요청에 대해 별도의 처리를 하도록 로직을 분리한다.
     - [x] 회원가입이 완료되면 index.html로 리다이렉트한다.
     - [x] 로그인 페이지에서 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경한다.
-- [ ] Cookie에 JSESSIONID 값을 저장한다.
-    - [ ] 세션 아이디를 전달하는 이름으로 `JSESSIONID`를 사용한다.
-    - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하여 값을 전달한다.
+- [x] Cookie에 JSESSIONID 값을 저장한다.
+    - [x] 세션 아이디를 전달하는 이름으로 `JSESSIONID`를 사용한다.
+    - [x] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하여 값을 전달한다.
     - [ ] Cookie 클래스 구현
-    - [ ] 요청 헤더의 Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환하게 한다.
+    - [x] 요청 헤더의 Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환하게 한다.
 - [ ] Session 구현
     - [ ] 쿠키에서 전달받은 JSESIONID의 값으로 로그인 여부를 체크한다.
     - [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.

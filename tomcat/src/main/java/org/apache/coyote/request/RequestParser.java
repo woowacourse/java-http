@@ -35,7 +35,7 @@ public class RequestParser {
         RequestUrl requestUrl = readUrl(bufferedReader.readLine());
         List<RequestContentType> requestContentType = getResourceType();
 
-        return Request.of(requestUrl, requestContentType);
+        return new Request(requestUrl, requestContentType);
     }
 
     private RequestUrl readUrl(String message) {

@@ -10,11 +10,7 @@ public class Request {
     private final RequestUrl url;
     private final List<RequestContentType> requestContentTypes;
 
-    public static Request of(RequestUrl url, List<RequestContentType> requestContentType) {
-        return new Request(url, requestContentType);
-    }
-
-    private Request(RequestUrl url, List<RequestContentType> requestContentTypes) {
+    public Request(RequestUrl url, List<RequestContentType> requestContentTypes) {
         this.url = url;
         this.requestContentTypes = requestContentTypes;
     }

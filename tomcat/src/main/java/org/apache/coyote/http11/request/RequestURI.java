@@ -35,8 +35,8 @@ public class RequestURI {
         this.file = null;
     }
 
-    private String parsePath(String uri) {
-        int index = uri.indexOf("?");
+    private String parsePath(final String uri) {
+        final int index = uri.indexOf("?");
         if (index == -1) {
             return uri;
         }
@@ -44,8 +44,8 @@ public class RequestURI {
         return uri.substring(0, index);
     }
 
-    private QueryParameter parseQueryString(String uri) {
-        int index = uri.indexOf("?");
+    private QueryParameter parseQueryString(final String uri) {
+        final int index = uri.indexOf("?");
         if (index == -1) {
             return QueryParameter.EMPTY;
         }
@@ -56,7 +56,7 @@ public class RequestURI {
     public String readFile() {
         try {
             return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalArgumentException("파일을 읽던 중 에러가 발생했습니다.");
         }
     }

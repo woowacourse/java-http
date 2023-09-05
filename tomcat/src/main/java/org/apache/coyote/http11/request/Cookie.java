@@ -17,8 +17,8 @@ public class Cookie {
             return new Cookie(Collections.emptyMap());
         }
 
-        String[] cookies = value.split("; ");
-        Map<String, String> cookieData = Arrays.stream(cookies)
+        final String[] cookies = value.split("; ");
+        final Map<String, String> cookieData = Arrays.stream(cookies)
                 .map(cookie -> cookie.split("="))
                 .collect(Collectors.toMap(cookiePair -> cookiePair[0], cookiePair -> cookiePair[1]));
 

@@ -28,23 +28,27 @@ public class Response {
     public static Response createByTemplate(
             final HttpStatus httpStatus,
             final String templateName,
-            Map<String, String> headers
+            final Map<String, String> headers
     ) {
-        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        final URL resource = classLoader.getResource("static/" + templateName);
-        final String responseBody;
-        try {
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (final IOException e) {
-            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
-        }
-
         final ResponseHeaders responseHeaders = new ResponseHeaders();
         final ContentType contentType = ContentType.findByFileName(templateName);
+        final String responseBody = getTemplateBody(templateName);
         responseHeaders.add("Content-Type", contentType.getHeaderValue() + ";charset=utf-8");
         responseHeaders.add("Content-Length", String.valueOf(responseBody.getBytes().length));
         responseHeaders.addAll(headers);
         return new Response("HTTP/1.1", httpStatus, responseHeaders, responseBody);
+    }
+
+    private static String getTemplateBody(final String templateName) {
+        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        final URL templateUrl = classLoader.getResource("static/" + templateName);
+        try {
+            return new String(Files.readAllBytes(new File(templateUrl.getFile()).toPath()));
+        } catch (final NullPointerException e) {
+            throw new IllegalArgumentException("파일이 존재하지 않습니다.");
+        } catch (final IOException e) {
+            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
+        }
     }
 
     public static Response createByTemplate(final HttpStatus httpStatus, final String templateName) {
@@ -75,8 +79,8 @@ public class Response {
         final List<String> responseHeaderLines = headers.getHeaderLines();
         responseData.addAll(responseHeaderLines);
         responseData.add("");
-        responseData.add(responseBody);
 
+        responseData.add(responseBody);
         return String.join("\r\n", responseData);
     }
 }

@@ -24,11 +24,7 @@ public class Request {
         return new Request(requestLine, requestHeaders, requestForms);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    private static RequestForms createRequestBody(BufferedReader br, RequestHeaders requestHeaders)
+    private static RequestForms createRequestBody(final BufferedReader br, final RequestHeaders requestHeaders)
             throws IOException {
         if (!requestHeaders.hasContentType()) {
             return new RequestForms(null);
@@ -43,6 +39,10 @@ public class Request {
     public Session getSession() {
         final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
         return SessionManager.findSession(sessionId);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public RequestHeaders getRequestHeaders() {

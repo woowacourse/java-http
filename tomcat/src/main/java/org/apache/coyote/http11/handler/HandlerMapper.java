@@ -60,12 +60,9 @@ public class HandlerMapper {
     }
 
     public Response loginFormHandler(final Request request) {
-        final Map<String, String> requestForms = request.getRequestForms().getRequestForms();
-        Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
-        if (user.isPresent()) {
-            return loginSuccess(request, user.get());
-        }
-        return loginFail();
+        final Map<String, String> requestForms = request.getRequestForms().getFormData();
+        final Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
+        return user.map(value -> loginSuccess(request, value)).orElseGet(this::loginFail);
     }
 
     private Response loginSuccess(final Request request, final User user) {

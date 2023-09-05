@@ -19,7 +19,7 @@ public class ResponseHeaders {
         }
     }
 
-    public void addAll(Map<String, String> headers) {
+    public void addAll(final Map<String, String> headers) {
         headers.keySet().forEach(key -> add(key, headers.get(key)));
     }
 

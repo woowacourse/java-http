@@ -3,6 +3,7 @@ package org.apache.coyote.request;
 import java.util.Arrays;
 
 public enum RequestContentType {
+
     HTML("text/html"),
     CSS("text/css"),
     ALL("*/*");

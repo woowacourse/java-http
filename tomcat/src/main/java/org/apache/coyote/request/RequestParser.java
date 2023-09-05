@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RequestParser {
 
@@ -19,10 +16,7 @@ public class RequestParser {
     private static final String SPLIT_VALUE_DELIMITER = ",";
     private static final String QUERY_STRING_SPLIT_DELIMITER = "\\?";
     private static final String QUERY_STRING_KEY_PAIR_SPLIT_DELIMITER = "&";
-
-    private static final int RESOURCE_INDEX = 1;
-    private static final int FINISH_RESOURCE_INDEX = 0;
-    public static final String QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER = "=";
+    private static final String QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER = "=";
 
     private final BufferedReader bufferedReader;
 
@@ -33,7 +27,7 @@ public class RequestParser {
 
     public Request parse() throws IOException {
         RequestUrl requestUrl = readUrl(bufferedReader.readLine());
-        List<RequestContentType> requestContentType = getResourceType();
+        RequestContentType requestContentType = getResourceType();
 
         return new Request(requestUrl, requestContentType);
     }
@@ -51,8 +45,8 @@ public class RequestParser {
     }
 
     private String readLine(String message) {
-        return message.split(SPLIT_HEADER_DELIMITER)[RESOURCE_INDEX]
-                .split(FINISH_SPLIT_DELIMITER)[FINISH_RESOURCE_INDEX];
+        return message.split(SPLIT_HEADER_DELIMITER)[1]
+                .split(FINISH_SPLIT_DELIMITER)[0];
     }
 
     private boolean hasNoQueryParameter(String pathLine) {
@@ -70,16 +64,14 @@ public class RequestParser {
         return requestQueryString;
     }
 
-    private List<RequestContentType> getResourceType() throws IOException {
+    private RequestContentType getResourceType() throws IOException {
         String header;
         while ((header = bufferedReader.readLine()) != null) {
             if (header.startsWith(ACCEPT_HEADER) || header.startsWith(CONTENT_TYPE)) {
                 String resourceType = readLine(header);
-                return Arrays.stream(resourceType.split(SPLIT_VALUE_DELIMITER))
-                        .map(RequestContentType::findResourceType)
-                        .collect(Collectors.toList());
+                return RequestContentType.findResourceType(resourceType.split(SPLIT_VALUE_DELIMITER)[0]);
             }
         }
-        return List.of(RequestContentType.HTML);
+        return RequestContentType.HTML;
     }
 }

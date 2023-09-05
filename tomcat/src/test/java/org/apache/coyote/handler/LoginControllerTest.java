@@ -22,7 +22,7 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), List.of(RequestContentType.ALL));
+        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
 
         boolean isLogin = loginController.login(loginRequest);
         assertThat(isLogin).isTrue();
@@ -36,7 +36,7 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password", "password123");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), List.of(RequestContentType.ALL));
+        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
 
         boolean isLogin = loginController.login(loginRequest);
         assertThat(isLogin).isFalse();
@@ -50,7 +50,7 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account1", "gugu");
         queryString.put("password", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), List.of(RequestContentType.ALL));
+        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);
@@ -64,7 +64,7 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password1", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), List.of(RequestContentType.ALL));
+        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);
@@ -76,7 +76,7 @@ class LoginControllerTest {
         LoginController loginController = new LoginController();
 
         Map<String, String> queryString = new HashMap<>();
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), List.of(RequestContentType.ALL));
+        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);

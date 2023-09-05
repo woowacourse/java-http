@@ -1,24 +1,20 @@
 package org.apache.coyote.request;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Request {
 
     private final RequestUrl url;
-    private final List<RequestContentType> requestContentTypes;
+    private final RequestContentType requestContentType;
 
-    public Request(RequestUrl url, List<RequestContentType> requestContentTypes) {
+    public Request(RequestUrl url, RequestContentType requestContentType) {
         this.url = url;
-        this.requestContentTypes = requestContentTypes;
+        this.requestContentType = requestContentType;
     }
 
     public String getResourceTypes() {
-        return requestContentTypes.stream()
-                .map(RequestContentType::getContentType)
-                .collect(Collectors.joining(","));
+        return requestContentType.getContentType();
     }
 
     public String getQueryStringValue(String key) {

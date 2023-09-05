@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.*;
@@ -19,13 +20,14 @@ public class LoginHandler implements HttpRequestHandler {
 
     @Override
     public boolean support(HttpRequest httpRequest) {
-        return httpRequest.isMethodEqualTo("GET") && httpRequest.isUriEqualTo("/login") && httpRequest.hasQueryParameter();
+        return httpRequest.isMethodEqualTo("POST") && httpRequest.isUriEqualTo("/login");
     }
 
     @Override
     public void handle(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
-        final Optional<String> account = httpRequest.getQueryParameter("account");
-        final Optional<String> password = httpRequest.getQueryParameter("password");
+        final Map<String, String> requestBody = httpRequest.getRequestBodyAsMap();
+        final Optional<String> account = Optional.ofNullable(requestBody.get("account"));
+        final Optional<String> password = Optional.ofNullable(requestBody.get("password"));
 
         if (account.isEmpty() || password.isEmpty()) {
             returnUnauthorizedPage(outputStream);

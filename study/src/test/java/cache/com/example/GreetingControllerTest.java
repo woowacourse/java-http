@@ -35,6 +35,7 @@ class GreetingControllerTest {
                 .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
                 .expectBody(String.class).returnResult();
 
+        log.info("response header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 
@@ -64,6 +65,7 @@ class GreetingControllerTest {
                 .expectHeader().exists(HttpHeaders.ETAG)
                 .expectBody(String.class).returnResult();
 
+        log.info("response header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 
@@ -87,6 +89,7 @@ class GreetingControllerTest {
                 .expectHeader().cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
                 .expectBody(String.class).returnResult();
 
+        log.info("response header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
 
         final var etag = response.getResponseHeaders().getETag();

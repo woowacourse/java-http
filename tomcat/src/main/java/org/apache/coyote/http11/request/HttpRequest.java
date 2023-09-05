@@ -103,6 +103,10 @@ public class HttpRequest {
                 .orElse(null);
     }
 
+    public boolean isGetMethod() {
+        return uri.isGetMethod();
+    }
+
     public boolean isPostMethod() {
         return uri.isPostMethod();
     }

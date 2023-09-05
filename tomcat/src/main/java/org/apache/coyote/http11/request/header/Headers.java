@@ -38,20 +38,20 @@ public class Headers {
     }
 
     public Cookie getCookie() {
-        Optional<String> cookie = get(Header.COOKIE);
+        Optional<String> cookie = getHeaderValue(Header.COOKIE);
 
-        if (cookie.isEmpty()) {
-            return Cookie.createDefault();
-        }
+        return cookie.map(Cookie::from)
+                .orElseGet(Cookie::createDefault);
 
-        return Cookie.from(cookie.get());
     }
 
-    public Optional<String> get(final Header header) {
-        final String key = header.getName();
+    public Optional<String> getHeaderValue(final Header header) {
+        String key = header.getName();
+
         if (headers.containsKey(key)) {
             return Optional.of(headers.get(key));
         }
+
         return Optional.empty();
     }
 }

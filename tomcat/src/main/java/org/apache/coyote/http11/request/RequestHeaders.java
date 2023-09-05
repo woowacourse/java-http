@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
+
     private final Map<String, String> headerMap;
 
     private RequestHeaders(final Map<String, String> headerMap) {
@@ -14,9 +17,12 @@ public class RequestHeaders {
 
     public static RequestHeaders from(final BufferedReader br) {
         Map<String, String> headerMap = br.lines()
-                .takeWhile(line -> !line.equals(""))
-                .map(line -> line.split(": "))
-                .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+                .takeWhile(inputHeaders -> !inputHeaders.equals(""))
+                .map(inputHeaders -> inputHeaders.split(": "))
+                .collect(Collectors.toMap(
+                        inputHeaders -> inputHeaders[HEADER_KEY_INDEX],
+                        inputHeaders -> inputHeaders[HEADER_VALUE_INDEX])
+                );
 
         return new RequestHeaders(headerMap);
     }

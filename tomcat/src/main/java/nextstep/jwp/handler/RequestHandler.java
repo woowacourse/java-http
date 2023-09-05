@@ -37,16 +37,17 @@ public class RequestHandler {
         }
 
         if (isStaticFile(request.getUri()) && request.getMethod() == HttpMethod.GET) {
+            System.out.println(request.getUri());
             return getFile(request.getUri());
         }
 
-        throw new IllegalArgumentException();
+        return getFile("/404.html");
     }
 
     private HttpResponse getFile(String uri) throws IOException {
         String fileUrl = "static" + uri;
         File file = new File(
-            RequestHandler.class
+            getClass()
                 .getClassLoader()
                 .getResource(fileUrl)
                 .getFile()

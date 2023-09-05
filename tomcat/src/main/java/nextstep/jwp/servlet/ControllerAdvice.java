@@ -26,8 +26,7 @@ public class ControllerAdvice {
             return;
         }
         if (exception instanceof MethodNotAllowedException) {
-            StaticResource staticResource = StaticResource.of("/404.html");
-            ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
+            ResponseBody responseBody = ResponseBody.of("Method Not allowed", "html");
             httpResponse.setStatusCode(HttpStatusCode.METHOD_NOT_ALLOWED);
             httpResponse.setResponseBody(responseBody);
             return;

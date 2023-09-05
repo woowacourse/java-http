@@ -159,8 +159,10 @@ public class Http11Processor implements Runnable, Processor {
                   queryTokens[i].substring(equalSeperatorIndex + 1));
             }
           }
-          if (parsedRequestBody.get("account").equals("gugu")  // 로그인 성공
-              && parsedRequestBody.get("password").equals("password")) {
+          Optional<User> userOptional = InMemoryUserRepository.findByAccount(
+              parsedRequestBody.get("account"));
+          if (userOptional.isPresent()
+              && userOptional.get().checkPassword(parsedRequestBody.get("password"))) { // 로그인 성공
             if (cookie.isExist("JSESSIOINID")) {
               setCookie = "JSESSIONID=" + UUID.randomUUID();
             }

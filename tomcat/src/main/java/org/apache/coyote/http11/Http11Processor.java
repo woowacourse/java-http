@@ -12,15 +12,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.net.HttpCookie;
 import java.net.Socket;
-import java.net.http.HttpHeaders;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -59,25 +57,21 @@ public class Http11Processor implements Runnable, Processor {
             while (!(header = bufferedReader.readLine()).equals("")) {
                 headers.add(header);
             }
-            String[] splitFirstLine = Objects.requireNonNull(headers.get(0)).split(" ");
-            String requestMethod = splitFirstLine[0];
-            String requestUri = splitFirstLine[1];
+            String[] splitStatusLine = Objects.requireNonNull(headers.get(0)).split(" ");
+            String requestMethod = splitStatusLine[0];
+            String requestUri = splitStatusLine[1];
 
-            String requestAcceptHeader = findAcceptHeader(headers);
+            String requestAcceptHeader = findHeader("Accept", headers);
             String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
 
             RequestHandler requestHandler;
-
             if (requestMethod.equalsIgnoreCase("POST")) {
                 int contentLength = getContentLength(headers);
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-
+                String requestBody = readRequestBody(bufferedReader, contentLength);
                 requestHandler = handlePostRequest(requestUri, requestBody);
-            }
-            else {
-                requestHandler = getFilePathAndStatus(requestMethod, requestUri);
+            } else {
+                String cookieHeader = findHeader("Cookie", headers);
+                requestHandler = handleGetRequest(requestMethod, requestUri, cookieHeader);
             }
 
             String responseBody = readFile(requestHandler.getResponseFilePath());
@@ -102,9 +96,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String findAcceptHeader(List<String> headers) {
+    private static String findHeader(String key, List<String> headers) {
         return headers.stream()
-                      .filter(it -> it.startsWith("Accept"))
+                      .filter(it -> it.startsWith(key + ": "))
                       .findFirst()
                       .orElse("Accept: " + SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE);
     }
@@ -133,79 +127,43 @@ public class Http11Processor implements Runnable, Processor {
         return Integer.parseInt(contentLengthHeader.get().substring(index + 1));
     }
 
+    private static String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
     private RequestHandler handlePostRequest(String requestUri, String requestBody) {
         String[] splitRequestBody = requestBody.split("&");
+        if (requestUri.equals("/login")) {
+            return handleLoginRequest(splitRequestBody);
+        }
         if (requestUri.equals("/register")) {
             return handleRegisterRequest(splitRequestBody);
         }
         return RequestHandler.of("GET", "404 Not Found", "static/404.html");
     }
 
-    private RequestHandler handleRegisterRequest(String[] splitQueryString) {
-        Optional<String> account = getValueOf("account", splitQueryString);
-        Optional<String> email = getValueOf("email", splitQueryString);
-        Optional<String> password = getValueOf("password", splitQueryString);
-
-        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            return RequestHandler.of("GET","400 Bad Request", "static/register.html");
-        }
-
-        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-        return RequestHandler.of("GET","302 Found", "static/index.html");
-    }
-
-    private RequestHandler getFilePathAndStatus(String requestMethod, String requestUri) {
-        if (!requestMethod.equalsIgnoreCase("GET")) {
-            throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
-        }
-
-        int index = requestUri.indexOf("?");
-        String requestPath = requestUri;
-
-        if (index != -1) {
-            requestPath = requestUri.substring(0, index);
-            String queryString = requestUri.substring(index + 1);
-
-            String[] splitQueryString = queryString.split("&");
-
-            if (isLoginRequest(requestMethod, requestPath)) {
-                return handleLoginRequest(splitQueryString);
-            }
-        }
-
-        String fileName = "static" + requestPath;
-        return RequestHandler.of("GET","200 OK", fileName);
-    }
-
-    private static boolean isLoginRequest(String requestMethod, String requestPath) {
-        boolean isLoginUri = requestPath.equals("/login.html") || requestPath.equals("/login");
-        return requestMethod.equalsIgnoreCase("GET") && isLoginUri;
-    }
-
     private RequestHandler handleLoginRequest(String[] splitQueryString) {
         Optional<String> account = getValueOf("account", splitQueryString);
         Optional<String> password = getValueOf("password", splitQueryString);
 
-        if (account.isEmpty() && password.isEmpty()) {
-            return RequestHandler.of("GET","200 OK", "static/login.html");
+        if (account.isEmpty() || password.isEmpty()) {
+            return RequestHandler.of("GET", "400 Bad Request", "static/401.html");
         }
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
-        if (user.isPresent() && user.get().checkPassword(password.get())) {
-            log.info(user.get().toString());
+        Optional<User> findUser = InMemoryUserRepository.findByAccount(account.get());
+        if (findUser.isPresent() && findUser.get().checkPassword(password.get())) {
+            User user = findUser.get();
+            log.info(user.toString());
+            Session session = new Session(UUID.randomUUID().toString());
+            session.setAttribute("user", user);
+            sessionManager.add(session);
             RequestHandler requestHandler = RequestHandler.of("GET", "302 Found", "static/index.html");
-            requestHandler.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString());
+            requestHandler.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             return requestHandler;
         }
-        return RequestHandler.of("GET","401 Unauthorized", "static/401.html");
-    }
-
-    private String readFile(String filePath) {
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            return lines.collect(Collectors.joining("\n", "", "\n"));
-        } catch (IOException | UncheckedIOException e) {
-            return "Hello world!";
-        }
+        return RequestHandler.of("GET", "401 Unauthorized", "static/401.html");
     }
 
     private Optional<String> getValueOf(String key, String[] splitQueryString) {
@@ -218,5 +176,61 @@ public class Http11Processor implements Runnable, Processor {
     private boolean equalsKey(String expected, String actual) {
         String[] splitActual = actual.split("=");
         return splitActual[0].equals(expected);
+    }
+
+    private RequestHandler handleRegisterRequest(String[] splitQueryString) {
+        Optional<String> account = getValueOf("account", splitQueryString);
+        Optional<String> email = getValueOf("email", splitQueryString);
+        Optional<String> password = getValueOf("password", splitQueryString);
+
+        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            return RequestHandler.of("GET", "400 Bad Request", "static/register.html");
+        }
+
+        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
+        return RequestHandler.of("GET", "302 Found", "static/index.html");
+    }
+
+    private RequestHandler handleGetRequest(String requestMethod, String requestUri, String cookie) throws IOException {
+        if (!requestMethod.equalsIgnoreCase("GET")) {
+            throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
+        }
+
+        if (requestUri.equals("/login.html") || requestUri.equals("/login")) {
+            return handleLoginPageRequest(cookie);
+        }
+
+        String fileName = "static" + requestUri;
+        return RequestHandler.of("GET", "200 OK", fileName);
+    }
+
+    private RequestHandler handleLoginPageRequest(String cookie) throws IOException {
+        Optional<String> sessionId = getSessionId(cookie);
+        if (sessionId.isEmpty()) {
+            return RequestHandler.of("GET", "200 OK", "static/login.html");
+        }
+        Session session = sessionManager.findSession(sessionId.get());
+        User user = getUser(session);
+        if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
+            return RequestHandler.of("GET", "302 Found", "static/index.html");
+        }
+        return RequestHandler.of("GET", "200 OK", "static/login.html");
+    }
+
+    private Optional<String> getSessionId(String cookieHeader) {
+        String[] splitCookie = cookieHeader.split(" ");
+        return getValueOf("JSESSIONID", splitCookie);
+    }
+
+    private User getUser(Session session) {
+        return (User) session.getAttribute("user");
+    }
+
+    private String readFile(String filePath) {
+        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            return lines.collect(Collectors.joining("\n", "", "\n"));
+        } catch (IOException | UncheckedIOException e) {
+            return "Hello world!";
+        }
     }
 }

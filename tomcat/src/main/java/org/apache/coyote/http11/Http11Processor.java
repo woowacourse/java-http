@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             final RequestBody requestBody = getRequestBody(requestHeader, br);
 
             final HttpRequest httpRequest = new HttpRequest(requestHeader, requestBody, queryString);
-            final RequestHandler handler = RequestHandler.from(httpRequest);
+            final RequestHandler handler = new RequestHandler(httpRequest);
 
             final var responseBody = handler.execute();
             outputStream.write(responseBody.getBytes());

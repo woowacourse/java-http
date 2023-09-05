@@ -36,4 +36,8 @@ public class HttpRequest {
     public String getCookieValue(final String key) {
         return requestHeader.getCookie(key);
     }
+
+    public HttpVersion getHttpVersion() {
+        return requestHeader.getHttpVersion();
+    }
 }

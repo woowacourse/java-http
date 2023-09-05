@@ -1,21 +1,19 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.session.Cookie;
-
 public class RequestInfo {
 
     public static final String QUERY_STRING_CONDITION = "?";
     public static final String QUERY_STRING_DELIMITER = "\\?";
 
     private final HttpMethod httpMethod;
-    private final Cookie cookie;
     private final String requestURI;
+    private final HttpVersion httpVersion;
 
-    public RequestInfo(final String request, final String cookie) {
+    public RequestInfo(final String request) {
         final String[] splitRequest = request.split(" ");
         this.httpMethod = HttpMethod.findHttpMethod(splitRequest[0]);
-        this.cookie = Cookie.from(cookie);
         this.requestURI = splitRequest[1];
+        this.httpVersion = HttpVersion.findVersion(splitRequest[2]);
     }
 
     public String getParsedRequestURI() {
@@ -38,11 +36,7 @@ public class RequestInfo {
         return requestURI;
     }
 
-    public boolean hasCookie(final String cookie) {
-        return this.cookie.hasKey(cookie);
-    }
-
-    public String getCookie(final String cookie) {
-        return this.cookie.getCookie(cookie);
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 }

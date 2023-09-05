@@ -12,24 +12,26 @@ import java.util.Objects;
 public class ResponseBody {
 
     private static final ClassLoader CLASS_LOADER = ResponseBody.class.getClassLoader();
-    public static final String HTTP_1_1 = "HTTP/1.1";
 
     private final byte[] data;
     private final ContentType contentType;
     private final HttpStatus httpStatus;
+    private final HttpVersion httpVersion;
 
-    private ResponseBody(final byte[] data, final ContentType contentType, final HttpStatus httpStatus) {
+    private ResponseBody(final byte[] data, final ContentType contentType, final HttpStatus httpStatus,
+                         final HttpVersion httpVersion) {
         this.data = data;
         this.contentType = contentType;
         this.httpStatus = httpStatus;
+        this.httpVersion = httpVersion;
     }
 
-    public static <T> ResponseBody from(final T info, final HttpStatus httpStatus) {
+    public static <T> ResponseBody from(final T info, final HttpStatus httpStatus, final HttpVersion httpVersion) {
         if (info.equals("/")) {
-            return new ResponseBody("Hello world!".getBytes(), ContentType.HTML, httpStatus);
+            return new ResponseBody("Hello world!".getBytes(), ContentType.HTML, httpStatus, httpVersion);
         }
         return new ResponseBody(getNotDefaultPathResponseBody((String) info),
-                ContentType.findContentTypeByURI((String) info), httpStatus);
+                ContentType.findContentTypeByURI((String) info), httpStatus, httpVersion);
     }
 
     private static byte[] getNotDefaultPathResponseBody(final String requestURI) {
@@ -51,7 +53,6 @@ public class ResponseBody {
         final URL url = CLASS_LOADER.getResource(requestURI);
         if (Objects.isNull(url)) {
             return CLASS_LOADER.getResource("static/404.html");
-
         }
         return url;
     }
@@ -60,20 +61,20 @@ public class ResponseBody {
         return !ContentType.checkFileExtension(requestURI);
     }
 
-    public static String redirectResponse(final String page) {
-        return getLocationHeaderMessage(page);
+    public static String redirectResponse(final String page, final HttpVersion httpVersion) {
+        return getLocationHeaderMessage(page, httpVersion);
     }
 
-    private static String getLocationHeaderMessage(final String page) {
+    private static String getLocationHeaderMessage(final String page, final HttpVersion httpVersion) {
         return String.join("\r\n",
-                HTTP_1_1 + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
+                httpVersion.getVersion() + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
                 "Location: " + page,
                 "");
     }
 
-    public String getResponseMessage() {
+    public String getMessage() {
         return String.join("\r\n",
-                HTTP_1_1 + " " + httpStatus.getStatus() + " " + httpStatus.name() + " ",
+                httpVersion.getVersion() + " " + httpStatus.getStatus() + " " + httpStatus.name() + " ",
                 "Content-Type: " + contentType.getContentType() + ";charset=" + CHARSET.name().toLowerCase() + " ",
                 "Content-Length: " + data.length + " ",
                 "",
@@ -82,10 +83,11 @@ public class ResponseBody {
 
     public static String redirectResponse(final String page, final HttpRequest httpRequest, final String sessionId) {
         if (httpRequest.hasCookie("JSESSIONID")) {
-            return getLocationHeaderMessage(page);
+            return getLocationHeaderMessage(page, httpRequest.getHttpVersion());
         }
         return String.join("\r\n",
-                HTTP_1_1 + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
+                httpRequest.getHttpVersion().getVersion() + " " + HttpStatus.FOUND.getStatus() + " "
+                        + HttpStatus.FOUND.name() + " ",
                 "Location: " + page,
                 "Set-Cookie: " + "JSESSIONID=" + sessionId,
                 "");

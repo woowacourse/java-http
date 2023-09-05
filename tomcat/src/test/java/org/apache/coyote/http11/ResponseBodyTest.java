@@ -12,10 +12,10 @@ class ResponseBodyTest {
     void 기본_path_인_경우_heelo_world_를_출력한다() {
         // given
         final String info = "/";
-        final ResponseBody responseBody = ResponseBody.from(info, HttpStatus.OK);
+        final ResponseBody responseBody = ResponseBody.from(info, HttpStatus.OK, HttpVersion.HTTP_1_1);
 
         // when
-        final String responseMessage = responseBody.getResponseMessage();
+        final String responseMessage = responseBody.getMessage();
 
         // then
         assertSoftly(softly -> {
@@ -29,10 +29,10 @@ class ResponseBodyTest {
     void 기본_path_아닌경우_path_를_보고_알맞은_응답을_반환한다() {
         // given
         final String info = "/index";
-        final ResponseBody responseBody = ResponseBody.from(info, HttpStatus.OK);
+        final ResponseBody responseBody = ResponseBody.from(info, HttpStatus.OK, HttpVersion.HTTP_1_1);
 
         // when
-        final String responseMessage = responseBody.getResponseMessage();
+        final String responseMessage = responseBody.getMessage();
 
         // then
         assertSoftly(softly -> {
@@ -45,7 +45,7 @@ class ResponseBodyTest {
     void 정상적으로_redirect_할_수_있다() {
         // given when
         final String page = "/index.html";
-        final String redirectResponse = ResponseBody.redirectResponse(page);
+        final String redirectResponse = ResponseBody.redirectResponse(page, HttpVersion.HTTP_1_1);
 
         // then
         assertSoftly(softly -> {

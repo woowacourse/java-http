@@ -21,9 +21,9 @@ public class RequestHandler {
     public String execute() {
         if (httpRequest.getHttpMethod() == HttpMethod.GET && (httpRequest.isSameParsedRequestURI("/login")
                 && httpRequest.hasCookie(SESSION_ID))) {
-            return ResponseBody.redirectResponse(HOME_PAGE);
-
+            return ResponseBody.redirectResponse(HOME_PAGE, httpRequest.getHttpVersion());
         }
+
         if (httpRequest.getHttpMethod() == HttpMethod.POST) {
             if (httpRequest.isSameParsedRequestURI("/login")) {
                 return branchOfLoginRequest();
@@ -33,7 +33,8 @@ public class RequestHandler {
             }
         }
 
-        return ResponseBody.from(httpRequest.getParsedRequestURI(), HttpStatus.OK).getResponseMessage();
+        return ResponseBody.from(httpRequest.getParsedRequestURI(), HttpStatus.OK, httpRequest.getHttpVersion())
+                .getMessage();
     }
 
     private Session findSession() {
@@ -49,7 +50,7 @@ public class RequestHandler {
     private String branchOfRegisterRequest() {
         final RequestBody requestBody = httpRequest.getRequestBody();
         SignupManager.singUp(requestBody);
-        return ResponseBody.redirectResponse(HOME_PAGE);
+        return ResponseBody.redirectResponse(HOME_PAGE, httpRequest.getHttpVersion());
     }
 
     private String branchOfLoginRequest() {
@@ -64,6 +65,6 @@ public class RequestHandler {
         if (LoginValidator.check(httpRequest, sessionId)) {
             return ResponseBody.redirectResponse(HOME_PAGE, httpRequest, sessionId);
         }
-        return ResponseBody.redirectResponse(UNAUTHORIZED_PAGE);
+        return ResponseBody.redirectResponse(UNAUTHORIZED_PAGE, httpRequest.getHttpVersion());
     }
 }

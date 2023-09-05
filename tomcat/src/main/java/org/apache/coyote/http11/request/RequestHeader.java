@@ -8,6 +8,7 @@ import java.util.Map;
 
 public class RequestHeader {
 
+    private static final String COOKIE = "Cookie";
     private final Map<String, String> headers;
 
     public RequestHeader(final Map<String, String> headers) {
@@ -28,14 +29,16 @@ public class RequestHeader {
     }
 
     public boolean hasJSessionId() {
-        if (!headers.containsKey("Cookie")) {
-            return false;
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(COOKIE)) {
+                return HttpCookie.from(entry.getValue()).hasJSessionId();
+            }
         }
-        return HttpCookie.from(headers.get("Cookie")).hasJSessionId();
+        return false;
     }
 
     public String getJSessionId() {
-        final String cookie = headers.get("Cookie");
+        final String cookie = headers.get(COOKIE);
         final String[] parts = cookie.split("=");
         return parts[1];
     }

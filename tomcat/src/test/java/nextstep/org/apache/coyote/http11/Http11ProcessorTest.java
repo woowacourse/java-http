@@ -90,7 +90,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인_성공() throws IOException {
+    void 로그인_성공() {
         //given
         String body = "account=gugu&password=password";
         final var request = String.join("\r\n",
@@ -117,7 +117,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인_실패() throws IOException {
+    void 로그인_실패() {
         //given
         String body = "account=123&password=123";
         final var request = String.join("\r\n",
@@ -172,7 +172,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void register() throws IOException {
+    void register() {
         //given
         String body = "account=newnew&password=1234";
         final var request = String.join("\r\n",

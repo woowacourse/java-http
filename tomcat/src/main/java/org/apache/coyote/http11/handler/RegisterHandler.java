@@ -40,7 +40,7 @@ public class RegisterHandler extends Handler {
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
-        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.OK,
+        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK,
                 headers, responseBody);
     }
 
@@ -52,7 +52,7 @@ public class RegisterHandler extends Handler {
                 LOCATION, absolutePath
         ));
 
-        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.FOUND,
+        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.FOUND,
                 headers, ResponseBody.ofEmpty());
     }
 

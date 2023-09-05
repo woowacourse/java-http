@@ -23,7 +23,7 @@ public class RootHandler extends Handler {
         ));
         ResponseBody responseBody = new ResponseBody(resource);
 
-        return HttpResponse.from(httpRequest.getHttpVersion(), HttpStatus.OK,
+        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK,
                 headers, responseBody);
     }
 }

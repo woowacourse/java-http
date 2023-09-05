@@ -4,10 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.request.*;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -53,15 +50,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestStartLine = bufferedReader.readLine();
 
-            if (requestStartLine == null) {
-                return;
-            }
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-            HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.from(requestStartLine);
-            HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
-            HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
+            HttpRequestStartLine httpRequestStartLine = httpRequest.getHttpRequestStartLine();
+            HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
+            HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
 
             ResponseEntity responseEntity = createResponse(httpRequestStartLine, httpRequestBody);
             String response = HttpResponse.from(responseEntity).getResponse();

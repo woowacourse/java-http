@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.response.RequestHeader;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -23,8 +21,14 @@ public class HttpRequest {
         requestBody = addRequestBody(lines, reader);
     }
 
-    private RequestHeader createRequestHeader(final List<String> lines) {
-        return RequestHeader.from(lines.subList(1, lines.size()));
+    private static List<String> readAllLines(final BufferedReader reader) {
+        final List<String> lines = new ArrayList<>();
+
+        String line;
+        while (!(line = readOneLine(reader)).equals("")) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     private RequestLine createRequestLine(List<String> lines) throws URISyntaxException {
@@ -34,14 +38,8 @@ public class HttpRequest {
         return new RequestLine(requestLineList[0], resourcePath, requestLineList[2]);
     }
 
-    private static List<String> readAllLines(final BufferedReader reader) {
-        final List<String> lines = new ArrayList<>();
-
-        String line;
-        while (!(line = readOneLine(reader)).equals("")) {
-            lines.add(line);
-        }
-        return lines;
+    private RequestHeader createRequestHeader(final List<String> lines) {
+        return RequestHeader.from(lines.subList(1, lines.size()));
     }
 
     private static String readOneLine(final BufferedReader reader) {

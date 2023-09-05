@@ -1,7 +1,9 @@
 package org.apache.handler;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.common.ContentType;
@@ -38,8 +40,16 @@ public class LoginHandler implements RequestHandler {
     private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         String query = httpRequest.getBody();
         String[] queries = query.split("&");
-        String account = queries[0].split("=")[1];
-        String password = queries[1].split("=")[1];
+        String[] accountQuery = queries[0].split("=");
+        String[] passwordQuery = queries[1].split("=");
+
+        if (isInvalidParameter(accountQuery[0], passwordQuery[0])) {
+            String content = FileReader.read(LOGIN_PAGE);
+            return new HttpResponse(HttpStatus.FOUND, ContentType.TEXT_HTML, content);
+        }
+
+        String account = accountQuery[1];
+        String password = passwordQuery[1];
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
@@ -57,10 +67,16 @@ public class LoginHandler implements RequestHandler {
         return new HttpResponse(HttpStatus.UNAUTHORIZED, ContentType.TEXT_HTML, content);
     }
 
+    private boolean isInvalidParameter(String account, String password) {
+        return !Objects.equals(account, "account") || !Objects.equals(password, "password");
+    }
+
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         Cookie cookie = httpRequest.getCookie();
         String sessionId = cookie.getValue("JSESSIONID");
-        if (sessionId != null) {
+        Session session = SessionManager.findSession(sessionId);
+
+        if (isAuthenticatedUser(session)) {
             String content = FileReader.read(INDEX_PAGE);
             return new HttpResponse(HttpStatus.FOUND, ContentType.TEXT_HTML, content);
         }
@@ -69,8 +85,12 @@ public class LoginHandler implements RequestHandler {
         return new HttpResponse(HttpStatus.OK, ContentType.TEXT_HTML, content);
     }
 
+    private boolean isAuthenticatedUser(Session session) {
+        return session != null && session.getAttribute("user") != null;
+    }
+
     private Session createSession(HttpResponse httpResponse, User user) {
-        Session session = new Session();
+        Session session = new Session(UUID.randomUUID().toString());
         httpResponse.setCookie(JSESSIONID + session.getId());
         session.setAttribute("user", user);
         SessionManager.add(session);

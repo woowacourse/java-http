@@ -2,15 +2,14 @@ package org.apache.common;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session() {
-        this.id = UUID.randomUUID().toString();
+    public Session(String id) {
+        this.id = id;
     }
 
     public String getId() {
@@ -18,9 +17,6 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        if (!values.containsKey(name)) {
-            throw new IllegalArgumentException("세션이 존재하지 않습니다.");
-        }
         return values.get(name);
     }
 

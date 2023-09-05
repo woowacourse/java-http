@@ -23,10 +23,6 @@ public class ResponseHeaders {
         headers.keySet().forEach(key -> add(key, headers.get(key)));
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public List<String> getHeaderLines() {
         return headers.keySet().stream()
                 .map(key -> key + ": " + headers.get(key) + " ")

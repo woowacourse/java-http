@@ -23,8 +23,7 @@ public class LoginPageHandler implements HttpRequestHandler {
         final Optional<String> sessionId = httpRequest.getSessionId();
         if (sessionId.isPresent() && SessionManager.hasSessionWithAttributeType(sessionId.get(), User.class)) {
             final HttpResponse httpResponse = new HttpResponse.Builder()
-                    .responseStatus("302")
-                    .responseBody(new FileHandler().readFromResourcePath("static/index.html"))
+                    .redirect("/index.html")
                     .build(outputStream);
             httpResponse.flush();
         }

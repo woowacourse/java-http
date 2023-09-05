@@ -2,30 +2,31 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 public class HttpResponse {
 
-    private OutputStream outputStream;
+    protected OutputStream outputStream;
 
-    private String responseStatus;
+    protected String responseStatus;
 
-    private String contentType;
+    protected String contentType;
 
-    private String charSet;
+    protected String charSet;
 
-    private int contentLength;
+    protected int contentLength;
 
-    private Cookies cookies = new Cookies();
+    protected Cookies cookies = new Cookies();
 
-    private String responseBody;
+    protected String responseBody;
 
-    private HttpResponse(OutputStream outputStream, String responseStatus, String contentType, String charSet, String responseBody) {
+    protected HttpResponse(OutputStream outputStream, String responseStatus, String contentType, String charSet, String responseBody) {
         this.outputStream = outputStream;
         this.responseStatus = responseStatus;
         this.contentType = contentType;
         this.charSet = charSet;
         this.responseBody = responseBody;
-        this.contentLength = this.responseBody.getBytes().length;
+        this.contentLength = this.responseBody != null ? this.responseBody.getBytes().length : 0;
     }
 
     public void flush() throws IOException {
@@ -93,6 +94,10 @@ public class HttpResponse {
             return this;
         }
 
+        public RedirectBuilder redirect(final String redirectUrl) {
+            return new RedirectBuilder(redirectUrl);
+        }
+
         public HttpResponse build(OutputStream outputStream) {
             return new HttpResponse(
                     outputStream,
@@ -101,6 +106,18 @@ public class HttpResponse {
                     this.charSet == null ? "utf-8" : this.charSet,
                     this.responseBody == null ? "" : this.responseBody
             );
+        }
+    }
+
+    public static class RedirectBuilder {
+        protected RedirectBuilder(final String redirectUri) {
+            this.redirectUri = redirectUri;
+        }
+
+        private final String redirectUri;
+
+        public HttpResponse build(OutputStream outputStream) {
+            return new HttpRedirectResponse(outputStream, redirectUri);
         }
     }
 }

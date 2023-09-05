@@ -43,7 +43,7 @@ public class LoginHandler implements HttpRequestHandler {
             return;
         }
         logAccount(user.get());
-        returnIndexPage(outputStream, user.get());
+        redirectIndexPage(outputStream, user.get());
     }
 
     private void returnUnauthorizedPage(OutputStream outputStream) throws IOException {
@@ -54,9 +54,9 @@ public class LoginHandler implements HttpRequestHandler {
         httpResponse.flush();
     }
 
-    private void returnIndexPage(OutputStream outputStream, User user) throws IOException {
+    private void redirectIndexPage(OutputStream outputStream, User user) throws IOException {
         final HttpResponse httpResponse = new HttpResponse.Builder()
-                .responseBody(new FileHandler().readFromResourcePath("static/index.html"))
+                .redirect("/index.html")
                 .build(outputStream);
 
         final String sessionId = UUID.randomUUID().toString();

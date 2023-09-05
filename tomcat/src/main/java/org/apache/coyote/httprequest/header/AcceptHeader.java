@@ -12,8 +12,8 @@ public class AcceptHeader implements RequestHeader {
         this.mediaTypes = mediaTypes;
     }
 
-    public static AcceptHeader from(final String printedMediaTypes) {
-        return new AcceptHeader(parseByDelimiter(printedMediaTypes));
+    public static AcceptHeader from(final String mediaTypes) {
+        return new AcceptHeader(parseByDelimiter(mediaTypes));
     }
 
     private static List<String> parseByDelimiter(final String mediaTypes) {

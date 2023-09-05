@@ -8,8 +8,6 @@ public enum RequestHeaderType {
     HOST("Host"),
     CONNECTION("Connection"),
     ACCEPT("Accept"),
-    PRAGMA("Pragma"),
-    SEC_CH_UA("sec-ch-ua"),
     UNSUPPORTED_HEADER("지원하지 않는 타입"),
     CONTENT_LENGTH("Content-Length");
 
@@ -37,10 +35,6 @@ public enum RequestHeaderType {
             return ConnectionHeader.from(value);
         } else if (this == ACCEPT) {
             return AcceptHeader.from(value);
-        } else if (this == PRAGMA) {
-            return PragmaHeader.from(value);
-        } else if (this == SEC_CH_UA) {
-            return new SecChUaHeader(value);
         } else if (this == CONTENT_LENGTH) {
             return new ContentLengthHeader(value);
         } else {

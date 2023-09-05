@@ -8,6 +8,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.ResourceController;
@@ -34,7 +35,7 @@ import static org.apache.coyote.http11.response.HttpStatusCode.*;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
+    public static final SessionManager sessionManager = new SessionManager();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -63,12 +64,11 @@ public class Http11Processor implements Runnable, Processor {
                     new ResourceController()
             ));
 
-            /* handler */
-//            final Controller controller = requestMapping.getController(httpRequest);
-//            final HttpResponse httpResponse = HttpResponse.init();
-//            controller.service(httpRequest, httpResponse);
+            final Controller controller = requestMapping.getController(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.init();
+            controller.service(httpRequest, httpResponse);
 
-            final HttpResponse httpResponse = handleRequest(httpRequest);
+//            final HttpResponse httpResponse = handleRequest(httpRequest);
             outputStream.write(httpResponse.stringify().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

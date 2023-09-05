@@ -5,7 +5,6 @@ import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
 
-    private static final String SPLIT_DELIMITER = " ";
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
     private final HttpVersion httpVersion;
@@ -17,7 +16,7 @@ public class RequestLine {
     }
 
     public static RequestLine from(final String startLine) {
-        String[] startLineElements = startLine.split(SPLIT_DELIMITER);
+        String[] startLineElements = startLine.split(" ");
         HttpMethod httpMethod = HttpMethod.findHttpMethod(startLineElements[0]);
         RequestUri requestUri = new RequestUri(startLineElements[1]);
         HttpVersion httpVersion = new HttpVersion(startLineElements[2].trim());

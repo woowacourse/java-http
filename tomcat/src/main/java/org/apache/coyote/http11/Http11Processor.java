@@ -12,14 +12,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.net.HttpCookie;
 import java.net.Socket;
+import java.net.http.HttpHeaders;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -81,6 +86,9 @@ public class Http11Processor implements Runnable, Processor {
             responseHeaders.add("HTTP/1.1 " + requestHandler.getHttpStatus() + " ");
             responseHeaders.add(contentTypeHeader);
             responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
+            for (Entry<String, String> headerEntry : requestHandler.getHeaders().entrySet()) {
+                responseHeaders.add(headerEntry.getKey() + ": " + headerEntry.getValue());
+            }
             String responseHeader = String.join("\r\n", responseHeaders);
 
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
@@ -185,7 +193,9 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account.get());
         if (user.isPresent() && user.get().checkPassword(password.get())) {
             log.info(user.get().toString());
-            return RequestHandler.of("GET","302 Found", "static/index.html");
+            RequestHandler requestHandler = RequestHandler.of("GET", "302 Found", "static/index.html");
+            requestHandler.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString());
+            return requestHandler;
         }
         return RequestHandler.of("GET","401 Unauthorized", "static/401.html");
     }

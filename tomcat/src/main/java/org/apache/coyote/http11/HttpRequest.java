@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.net.Socket;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,8 +16,8 @@ public class HttpRequest {
 
     private Cookies cookies;
 
-    public static HttpRequest from(Socket connection) {
-        return HttpRequestParser.parseFromSocket(connection);
+    public static HttpRequest from(InputStream inputStream) {
+        return HttpRequestParser.parseFromSocket(inputStream);
     }
 
     public HttpRequest(String uri, String method, String requestBody, Cookies cookies) {

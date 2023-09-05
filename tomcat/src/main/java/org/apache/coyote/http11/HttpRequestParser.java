@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.InputStream;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.slf4j.Logger;
@@ -8,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +18,8 @@ public class HttpRequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public static HttpRequest parseFromSocket(Socket socket) {
+    public static HttpRequest parseFromSocket(InputStream inputStream) {
         try {
-            final var inputStream = socket.getInputStream();
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
             final StringTokenizer stringTokenizer = new StringTokenizer(bufferedReader.readLine());

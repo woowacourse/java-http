@@ -7,7 +7,7 @@ public class HttpResponse {
     private static final String CONTENT_LENGTH_PREFIX = "Content-Length: ";
     private static final String EMPTY = "";
     private static final String SPACE = " ";
-    private static final String ENTER = "\n";
+    private static final String ENTER = "\r\n";
 
     private final String responseStatus;
     private final String contentType;
@@ -38,7 +38,7 @@ public class HttpResponse {
         if (contentType.endsWith(".css")) {
             return "text/css";
         }
-        return "text/html";
+        return "text/html;charset=utf-8";
     }
 
     public byte[] getBytes() {

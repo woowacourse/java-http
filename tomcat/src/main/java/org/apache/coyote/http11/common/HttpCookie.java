@@ -42,4 +42,15 @@ public class HttpCookie {
         return cookies.get("JSESSIONID");
     }
 
+    public String getCookies() {
+        return cookies.entrySet().stream()
+                .map(this::formatCookies)
+                .collect(Collectors.joining("; "));
+    }
+
+    private String formatCookies(Map.Entry<String, String> entry) {
+        return String.format("%s=%s", entry.getKey(), entry.getValue());
+    }
+
+
 }

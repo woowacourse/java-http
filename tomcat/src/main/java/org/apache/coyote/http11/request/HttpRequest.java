@@ -3,8 +3,8 @@ package org.apache.coyote.http11.request;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionHolder;
 import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.request.body.Params;
 import org.apache.coyote.http11.request.header.Headers;
-import org.apache.coyote.http11.request.header.Params;
 import org.apache.coyote.http11.request.uri.HttpMethod;
 import org.apache.coyote.http11.request.uri.Uri;
 import org.apache.coyote.http11.response.header.Header;
@@ -22,13 +22,11 @@ public class HttpRequest {
 
     private final Uri uri;
     private final Headers headers;
-    private final Params params;
     private final Params body;
 
-    private HttpRequest(final Uri uri, final Headers headers, final Params params, Params body) {
+    private HttpRequest(final Uri uri, final Headers headers, Params body) {
         this.uri = uri;
         this.headers = headers;
-        this.params = params;
         this.body = body;
     }
 
@@ -71,15 +69,11 @@ public class HttpRequest {
 
     private static HttpRequest getHttpRequest(final Uri uri, final Headers headers, final Params body) {
         if (!uri.hasQueryParams()) {
-            return new HttpRequest(uri, headers, Params.createEmpty(), body);
+            return new HttpRequest(uri, headers, body);
         }
 
         String query = uri.getQueryParams();
-        return new HttpRequest(uri, headers, Params.from(query), body);
-    }
-
-    public boolean isSamePath(final String path) {
-        return this.uri.isSamePath(path);
+        return new HttpRequest(uri, headers, Params.from(query));
     }
 
     public boolean hasResource() {
@@ -121,10 +115,6 @@ public class HttpRequest {
 
     public String getPath() {
         return uri.getPath();
-    }
-
-    public Params getParams() {
-        return params;
     }
 
     public Params getBody() {

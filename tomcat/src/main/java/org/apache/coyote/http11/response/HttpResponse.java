@@ -28,32 +28,20 @@ public class HttpResponse {
         this.body = body;
     }
 
-    private HttpResponse(final ContentType contentType, final Status status, final String body) {
-        this(contentType, status, Map.of(), body);
+    private HttpResponse(final ContentType contentType, final Status statusCode, final String body) {
+        this(contentType, statusCode, Map.of(), body);
     }
 
     private HttpResponse(final Status status, final String body) {
         this(ContentType.HTML, status, Map.of(), body);
     }
 
-    public static HttpResponse ok(final ContentType contentType, final Status status, final Map<Header, String> headers, final String body) {
-        return new HttpResponse(contentType, status, headers, body);
-    }
-
-    public static HttpResponse found(final ContentType contentType, final Status status, final Map<Header, String> headers, final String body) {
-        return new HttpResponse(contentType, status, headers, body);
-    }
-
-    public static HttpResponse ok(final String body) {
+    public static HttpResponse ofOk(final String body) {
         return new HttpResponse(Status.OK, body);
     }
 
-    public static HttpResponse unAuthorized(final String path) throws NotFoundException, IOException, URISyntaxException {
-        return new HttpResponse(ContentType.of(path), Status.UNAUTHORIZED, ResourceFinder.getStaticResource(path));
-    }
-
-    public static HttpResponse badRequest(final String path) throws NotFoundException, IOException, URISyntaxException {
-        return new HttpResponse(ContentType.of(path), Status.BAD_REQUEST, ResourceFinder.getStaticResource(path));
+    public static HttpResponse withResource(final Status status, final String path) throws IOException, URISyntaxException, NotFoundException {
+        return new HttpResponse(ContentType.of(path), status, ResourceFinder.getStaticResource(path));
     }
 
     public static HttpResponse okWithResource(final String path) throws IOException, URISyntaxException, NotFoundException {

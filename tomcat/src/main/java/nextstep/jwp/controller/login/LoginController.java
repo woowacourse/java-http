@@ -8,8 +8,6 @@ import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.header.ContentType;
-import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Status;
 
 import java.util.Map;
@@ -30,7 +28,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
         if (httpRequest.getSessionAttribute("user").isPresent()) {
-            return HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+            return HttpResponse.withResource(Status.FOUND, "/index.html");
         }
 
         return HttpResponse.okWithResource("/login.html");
@@ -51,14 +49,14 @@ public class LoginController extends AbstractController {
             }
             user = userService.login(params.get("account"), params.get("password"));
         } catch (IllegalArgumentException e) {
-            return HttpResponse.badRequest("/index.html");
+            return HttpResponse.withResource(Status.BAD_REQUEST, "/index.html");
         } catch (UnAuthorizedException e) {
-            return HttpResponse.unAuthorized("/401.html");
+            return HttpResponse.withResource(Status.UNAUTHORIZED, "/401.html");
         }
 
         Session session = httpRequest.createSession();
         session.setAttribute("user", user);
-        HttpResponse response = HttpResponse.found(ContentType.HTML, Status.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+        HttpResponse response = HttpResponse.withResource(Status.FOUND, "/index.html");
         response.setCookie(Cookie.fromUserJSession(session.getId()));
         return response;
     }

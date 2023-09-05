@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.header;
+package org.apache.coyote.http11.request.body;
 
 import java.net.URLDecoder;
 import java.util.Arrays;

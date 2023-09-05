@@ -68,10 +68,10 @@ public class Http11Processor implements Runnable, Processor {
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);  // HTTP method를 읽음 (예: GET)
             headers = parseRequestHeaders(br); // header를 읽음
-            storeJsessionId(headers);
+            storeJsessionId();
 
             if (POST_HTTP_METHOD.equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
-                final String requestBody = readRequestBody(br, headers);
+                final String requestBody = readRequestBody(br);
                 registerUser(requestBody);
             }
 
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             final String parsedPath = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
             final String responseBody = readStaticFile(parsedPath);
             final String contentType = getContentType(path); // css인 경우 content type을 다르게 준다
-            final var response = getResponse(path, contentType, responseBody, headers, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
+            final var response = getResponse(path, contentType, responseBody, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -88,16 +88,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void storeJsessionId(final Map<String, String> headers) {
-        if (isContainJsessionId(headers)) {
-            httpCookie.changeJSessionId(parseJsessionId(headers));
+    private void storeJsessionId() {
+        if (isContainJsessionId()) {
+            httpCookie.changeJSessionId(parseJsessionId());
         }
         httpCookie.createJSession();
     }
 
-    //TODO: header 지워보기
-    private String getResponse(final String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath) {
-        if (path.contains(LOGIN_WITH_PARAM.getUrl()) && parsedPath.equals(INDEX.getUrl()) && !isContainJsessionId(headers)) {
+    private String getResponse(final String path, final String contentType, final String responseBody, final String parsedPath) {
+        if (path.contains(LOGIN_WITH_PARAM.getUrl()) && parsedPath.equals(INDEX.getUrl()) && !isContainJsessionId()) {
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Set-Cookie: " + "JSESSIONID=" + httpCookie.getJSessionId() + " ",
@@ -116,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private boolean isContainJsessionId(final Map<String, String> headers) {
+    private boolean isContainJsessionId() {
         if (headers.containsKey("Cookie")) {
             final String cookieValue = headers.get("Cookie");
             String[] cookiePairs = cookieValue.split("; ");
@@ -131,7 +130,7 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private String parseJsessionId(final Map<String, String> headers) {
+    private String parseJsessionId() {
         if (headers.containsKey("Cookie")) {
             final String cookieValue = headers.get("Cookie");
             String[] cookiePairs = cookieValue.split("; ");
@@ -146,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
         return EMPTY;
     }
 
-    private String readRequestBody(final BufferedReader br, final Map<String, String> headers) throws IOException {
+    private String readRequestBody(final BufferedReader br) throws IOException {
         final int contentLength = Integer.parseInt(headers.get("Content-Length"));
         final char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);

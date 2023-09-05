@@ -10,6 +10,7 @@ public class Cookies {
     private static final String SESSION_COOKIE = "JSESSIONID";
     private static final String COOKIE_SPLITER = ";";
     private static final String COOKIE_VALUE_SPLITER = "=";
+
     private final Map<String, String> cookieValues;
 
     public Cookies(String cookies) {

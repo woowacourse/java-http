@@ -15,6 +15,7 @@ import org.apache.coyote.http11.security.SessionManager;
 public class HttpRequest {
 
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
+
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final MessageBody messageBody;

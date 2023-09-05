@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
@@ -11,21 +10,6 @@ public class ResourceProvider {
 
     public boolean haveResource(String resourcePath) {
         return findFileURL(resourcePath).isPresent();
-    }
-
-    private Optional<URL> findFileURL(String resourcePath) {
-        try {
-            URL resourceURL = getClass().getClassLoader().getResource("static" + resourcePath);
-            if (resourceURL == null) {
-                return Optional.empty();
-            }
-            if (new File(resourceURL.toURI()).isDirectory()) {
-                return Optional.empty();
-            }
-            return Optional.of(resourceURL);
-        } catch (URISyntaxException e) {
-            return Optional.empty();
-        }
     }
 
     public String resourceBodyOf(String resourcePath) {
@@ -39,6 +23,17 @@ public class ResourceProvider {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    private Optional<URL> findFileURL(String resourcePath) {
+        URL resourceURL = getClass().getClassLoader().getResource("static" + resourcePath);
+        if (resourceURL == null) {
+            return Optional.empty();
+        }
+        if (new File(resourceURL.getFile()).isDirectory()) {
+            return Optional.empty();
+        }
+        return Optional.of(resourceURL);
     }
 
     public String contentTypeOf(String resourcePath) {
@@ -57,14 +52,9 @@ public class ResourceProvider {
     }
 
     private File getFile(String resourcePath) {
-        try {
-            return new File(
-                findFileURL(resourcePath).orElseThrow((() -> new IllegalArgumentException("파일이 존재하지 않습니다.")))
-                    .toURI());
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("URI 문법이 잘못 되었습니다.", e);
-        }
-
+        return new File(
+            findFileURL(resourcePath).orElseThrow((() -> new IllegalArgumentException("파일이 존재하지 않습니다.")))
+                .getFile());
     }
 
     public String staticResourceResponse(String resourcePath) {

@@ -12,6 +12,7 @@ public class RequestHeader {
     private static final int HEADER_FIELD_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
     private static final int LIMIT = 2;
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headersMap;
 
@@ -23,15 +24,24 @@ public class RequestHeader {
         Map<String, String> headersMap = Arrays.stream(headers.split(System.lineSeparator()))
                 .map(headerLine -> headerLine.split(DELIMITER, LIMIT))
                 .collect(Collectors.toMap(
-                        fieldAndValue -> fieldAndValue[HEADER_FIELD_INDEX].trim().toUpperCase(),
+                        fieldAndValue -> fieldAndValue[HEADER_FIELD_INDEX].trim(),
                         fieldAndValue -> fieldAndValue[HEADER_VALUE_INDEX].trim()
                 ));
         return new RequestHeader(headersMap);
     }
 
+    public boolean hasContent() {
+        int contentLength = contentLength();
+        return contentLength > 0;
+    }
+
+    public int contentLength() {
+        String contentLength = Objects.requireNonNullElse(headersMap.get(CONTENT_LENGTH), "0");
+        return Integer.parseInt(contentLength);
+    }
+
     public String get(String key) {
-        String upperKey = key.toUpperCase();
-        return headersMap.get(upperKey);
+        return headersMap.get(key);
     }
 
     public Map<String, String> headersMap() {

@@ -4,10 +4,13 @@ import java.util.Objects;
 
 public class HttpRequest {
 
-
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
-    private final RequestBody requestBody;
+    private RequestBody requestBody;
+
+    public HttpRequest(RequestLine requestLine, RequestHeader requestHeader) {
+        this(requestLine, requestHeader, null);
+    }
 
     public HttpRequest(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
@@ -15,12 +18,19 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(String requestLine, String requestHeader, String requestBody) {
+    public static HttpRequest of(String requestLine, String requestHeader) {
         return new HttpRequest(
                 RequestLine.from(requestLine),
-                RequestHeader.from(requestHeader),
-                RequestBody.from(requestBody)
+                RequestHeader.from(requestHeader)
         );
+    }
+
+    public boolean hasBody() {
+        return requestHeader.hasContent();
+    }
+
+    public int contentLength() {
+        return requestHeader.contentLength();
     }
 
     public RequestLine requestLine() {
@@ -33,6 +43,10 @@ public class HttpRequest {
 
     public RequestBody requestBody() {
         return requestBody;
+    }
+
+    public void setRequestBody(String requestBody) {
+        this.requestBody = RequestBody.from(requestBody);
     }
 
     @Override

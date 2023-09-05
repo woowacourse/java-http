@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ReaderTest {
+class HttpRequestReaderTest {
 
     @Test
     void 줄을_읽는다() {
@@ -28,7 +28,7 @@ class ReaderTest {
         ) {
 
             // when
-            String requestLine = Reader.readLine(reader);
+            String requestLine = HttpRequestReader.readLine(reader);
 
             // then
             assertThat(requestLine).isEqualTo("GET /index.html HTTP/1.1 ");
@@ -52,7 +52,7 @@ class ReaderTest {
         ) {
 
             // when
-            String requestLineAndHeader = Reader.readParagraph(reader);
+            String requestLineAndHeader = HttpRequestReader.readHeader(reader);
 
             // then
             assertThat(requestLineAndHeader).isEqualTo(String.join(System.lineSeparator(),
@@ -79,9 +79,9 @@ class ReaderTest {
         ) {
 
             // when
-            String requestLine = Reader.readLine(reader);
-            String requestHeader = Reader.readParagraph(reader);
-            String requestBody = Reader.readParagraph(reader);
+            String requestLine = HttpRequestReader.readLine(reader);
+            String requestHeader = HttpRequestReader.readHeader(reader);
+            String requestBody = HttpRequestReader.readHeader(reader);
 
             // then
             assertSoftly(softly -> {
@@ -105,10 +105,10 @@ class ReaderTest {
                 InputStream inputStream = new ByteArrayInputStream(request.getBytes());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
-            Reader.readLine(reader);
+            HttpRequestReader.readLine(reader);
 
             // when
-            String paragraph = Reader.readParagraph(reader);
+            String paragraph = HttpRequestReader.readHeader(reader);
 
             // then
             assertThat(paragraph).isEqualTo("");

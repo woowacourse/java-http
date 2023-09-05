@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ResponseEntity;
 

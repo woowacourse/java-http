@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class RequestLine {
 

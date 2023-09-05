@@ -1,7 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;

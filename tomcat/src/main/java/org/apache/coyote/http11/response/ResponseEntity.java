@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 
 public class ResponseEntity {
 

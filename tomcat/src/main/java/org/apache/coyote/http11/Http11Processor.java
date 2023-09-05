@@ -8,6 +8,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.MimeType;
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.handler.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -67,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return new StringBuilder()
                 .append(String.format("HTTP/1.1 %s %s ", httpStatus.getStatusCode(), httpStatus.name())).append("\r\n")
-                .append(String.format("Content-Type: %s;charset=utf-8 ", FileExtension.HTML)).append("\r\n")
+                .append(String.format("Content-Type: %s;charset=utf-8 ", MimeType.HTML)).append("\r\n")
                 .append(String.format("Location: %s.html", responseEntity.getPath())).append("\r\n")
                 .append("\r\n")
                 .toString();

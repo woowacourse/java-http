@@ -1,17 +1,17 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.FileExtension;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.common.MimeType;
+import org.apache.coyote.http11.common.HttpStatus;
 
 public class HttpResponse {
 
     private final HttpStatus httpStatus;
-    private final FileExtension fileExtension;
+    private final MimeType mimeType;
     private final String responseBody;
 
-    public HttpResponse(HttpStatus httpStatus, FileExtension fileExtension, String responseBody) {
+    public HttpResponse(HttpStatus httpStatus, MimeType mimeType, String responseBody) {
         this.httpStatus = httpStatus;
-        this.fileExtension = fileExtension;
+        this.mimeType = mimeType;
         this.responseBody = responseBody;
     }
 
@@ -34,7 +34,7 @@ public class HttpResponse {
     private String convertContentType() {
         String contentTypeFormat = "Content-Type: %s;charset=utf-8 ";
 
-        return String.format(contentTypeFormat, fileExtension.getContentType());
+        return String.format(contentTypeFormat, mimeType.getContentType());
     }
 
     private String convertContentLength() {

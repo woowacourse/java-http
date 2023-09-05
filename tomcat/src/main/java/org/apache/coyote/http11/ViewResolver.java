@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import org.apache.coyote.http11.common.MimeType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 
@@ -25,15 +26,15 @@ public class ViewResolver {
         return new HttpResponse(responseEntity.getHttpStatus(), getFileExtension(), extractResponseBody());
     }
 
-    private FileExtension getFileExtension() {
+    private MimeType getFileExtension() {
         try {
             File file = findPath().toFile();
             String fileName = file.getName();
             String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-            return FileExtension.from(fileExtension);
+            return MimeType.from(fileExtension);
         } catch (URISyntaxException | NullPointerException e) {
-            return FileExtension.HTML;
+            return MimeType.HTML;
         }
     }
 

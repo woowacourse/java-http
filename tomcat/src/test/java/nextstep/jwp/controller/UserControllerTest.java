@@ -1,12 +1,13 @@
 package nextstep.jwp.controller;
 
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.SessionManager.Session;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Headers;
-import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -20,8 +21,7 @@ class UserControllerTest {
     @DisplayName("로그인에 성공하면 index.html로 리다이렉트한다.")
     @Test
     void loginSuccess() {
-        final Session session = new Session();
-        sessionManager.add(session);
+        final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
         final Response response = UserController.login(
                 Request.of("post", "/login",
@@ -35,8 +35,7 @@ class UserControllerTest {
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다.")
     @Test
     void loginFail() {
-        final Session session = new Session();
-        sessionManager.add(session);
+        final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
         final Response response = UserController.login(
                 Request.of("post", "/login",

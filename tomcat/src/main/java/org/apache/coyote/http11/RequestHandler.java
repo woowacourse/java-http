@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.SessionManager.Session;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class RequestHandler {
 
     private static Response get(final Request request) throws IOException {
         final var uri = request.getUri();
-        final var session = request.getOrCreateSession();
+        final var session = request.getSession();
 
         if ("/".equals(uri)) {
             return Response.of(OK, "text/html", "Hello world!");
@@ -66,7 +66,7 @@ public class RequestHandler {
     }
 
     private static boolean isLoginUser(final Session session) {
-        return session.isSaved() && Objects.nonNull(session.getAttribute("user"));
+        return Objects.nonNull(session.getAttribute("user"));
     }
 
     private static boolean isStaticResourceURI(final String uri) {

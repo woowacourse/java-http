@@ -24,7 +24,7 @@ public class UserController {
     }
 
     private static Response redirectLoginUser(final Request request, final User user) {
-        final var session = request.getOrCreateSession();
+        final var session = request.getSession();
         session.setAttribute("user", user);
         final var redirect = Response.redirect("/index.html");
         redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));

@@ -3,11 +3,10 @@ package org.apache.coyote.http11.request;
 import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
 
 import java.net.URI;
-import java.util.Optional;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.SessionManager.Session;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Method;
-import org.apache.coyote.http11.common.Session;
 
 public class Request {
 
@@ -53,23 +52,14 @@ public class Request {
         return uri;
     }
 
-    public Session getOrCreateSession() {
-        return findSession()
-                .orElseGet(this::createSession);
+    public Session getSession() {
+        return SESSION_MANAGER.findOrCreate(findSessionId());
     }
 
-    private Session createSession() {
-        final var session = new Session();
-        SESSION_MANAGER.add(session);
-
-        return session;
-    }
-
-    private Optional<Session> findSession() {
+    private String findSessionId() {
         final var cookies = headers.getCookie();
-        final var sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
 
-        return Optional.ofNullable(SESSION_MANAGER.findSession(sessionId));
+        return cookies.findByName(SESSION_ID_COOKIE_NAME);
     }
 
     public String getBody() {

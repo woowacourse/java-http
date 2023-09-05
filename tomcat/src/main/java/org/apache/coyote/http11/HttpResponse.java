@@ -10,7 +10,7 @@ public class HttpResponse {
     private HttpResponseStatusLine responseLine;
     private String body;
 
-    public HttpResponse(final HttpResponseStatusLine responseLine, final HttpHeaders headers, final String body) {
+    private HttpResponse(final HttpResponseStatusLine responseLine, final HttpHeaders headers, final String body) {
         this.responseLine = responseLine;
         this.headers = headers;
         this.body = body;

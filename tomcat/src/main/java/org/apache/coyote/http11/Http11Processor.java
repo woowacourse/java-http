@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
             final var inputStreamReader = new InputStreamReader(bufferedInputStream);
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-            final HttpRequest httpRequest = parseRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequestFactory.createHttpRequest(bufferedReader);
             final HttpResponse httpResponse = HttpResponse.createBasicResponse();
             new DispatcherServlet().service(httpRequest, httpResponse);
 
@@ -44,9 +44,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             LOGGER.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest parseRequest(final BufferedReader bufferedReader) {
-        return HttpRequest.from(bufferedReader);
     }
 }

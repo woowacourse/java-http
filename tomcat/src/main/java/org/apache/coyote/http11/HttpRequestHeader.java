@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequestHeader {
+    private static final String HEADER_SEPARATOR = ": ";
+    private static final String QUERY_START_SYMBOL = "\\?";
     private final HttpMethod method;
     private final String requestUri;
     private final String path;
@@ -18,13 +20,13 @@ public class HttpRequestHeader {
         this.method = HttpMethod.of(firstLine[0]);
         this.requestUri = firstLine[1];
         this.protocol = firstLine[2];
-        final List<String> requestTokens = List.of(requestUri.split("\\?"));
+        final List<String> requestTokens = List.of(requestUri.split(QUERY_START_SYMBOL));
         this.path = requestTokens.get(0);
         this.queryString = QueryString.of(requestTokens);
         request.stream()
                 .skip(1)
                 .takeWhile(line -> !line.isEmpty())
-                .map(line -> line.split(": "))
+                .map(line -> line.split(HEADER_SEPARATOR))
                 .forEach(line -> headers.put(line[0], line[1]));
     }
 

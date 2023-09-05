@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 public class Cookie {
+    private static final String COOKIE_SEPARATOR = "=";
     private final String name;
     private final String value;
 
@@ -10,7 +11,7 @@ public class Cookie {
     }
 
     public static Cookie of(final String cookie) {
-        final String[] tokens = cookie.split("=");
+        final String[] tokens = cookie.split(COOKIE_SEPARATOR);
         if (tokens.length == 2) {
             return new Cookie(tokens[0], tokens[1]);
         }

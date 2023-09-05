@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class QueryString {
+    private static final String QUERY_DELIMITER = "&";
+    private static final String QUERY_SEPARATOR = "=";
     private final Map<String, String> parameters;
 
     private QueryString(final Map<String, String> parameters) {
@@ -17,9 +19,9 @@ public class QueryString {
             return new QueryString(Map.of());
         }
         final String queryString = requestTokens.get(1);
-        final String[] tokens = queryString.split("&");
+        final String[] tokens = queryString.split(QUERY_DELIMITER);
         final Map<String, String> parameters = Arrays.stream(tokens)
-                .map(token -> token.split("="))
+                .map(token -> token.split(QUERY_SEPARATOR))
                 .collect(Collectors.toMap(token -> token[0], token -> token[1]));
         return new QueryString(parameters);
     }

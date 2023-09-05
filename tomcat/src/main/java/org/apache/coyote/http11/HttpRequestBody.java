@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequestBody {
+    private static final String QUERY_DELIMITER = "&";
+    private static final String QUERY_SEPARATOR = "=";
     private final Map<String, String> parameters;
 
     private HttpRequestBody(Map<String, String> parameters) {
@@ -30,9 +32,9 @@ public class HttpRequestBody {
     public static HttpRequestBody of(final ContentType contentType, final String body) {
         if (contentType == ContentType.FORM_URLENCODED) {
             final HashMap<String, String> parameters = new HashMap<>();
-            final String[] tokens = body.split("&");
+            final String[] tokens = body.split(QUERY_DELIMITER);
             for (String token : tokens) {
-                final List<String> keyValues = List.of(token.split("="));
+                final List<String> keyValues = List.of(token.split(QUERY_SEPARATOR));
                 if (keyValues.size() == 2) {
                     parameters.put(keyValues.get(0), keyValues.get(1));
                 } else {

@@ -8,8 +8,6 @@ import java.util.UUID;
 
 public class SessionManager implements Manager {
     private static final SessionManager INSTANCE = new SessionManager();
-
-    // static!
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private SessionManager() {

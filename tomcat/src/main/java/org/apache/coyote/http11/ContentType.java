@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 public class ContentType {
 
+    public static final ContentType PLAINTEXT_UTF8 = new ContentType("text/plain", "utf-8");
+
+
     private final String mimeType;
     private final String charset;
 

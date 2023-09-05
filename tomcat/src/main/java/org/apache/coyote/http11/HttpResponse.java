@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.String.join;
+import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 
 public class HttpResponse {
 
@@ -18,7 +19,7 @@ public class HttpResponse {
     private final Map<String, String> headers;
 
     public HttpResponse(final HttpStatus httpStatus) {
-        this(httpStatus, new ContentType("text/plain", "utf-8"));
+        this(httpStatus, PLAINTEXT_UTF8);
     }
 
     public HttpResponse(final HttpStatus httpStatus, final ContentType contentType) {

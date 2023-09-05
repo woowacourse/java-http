@@ -79,6 +79,10 @@ public class HttpRequest {
         return headers.containsHeaderNameAndValue(HttpHeaderName.COOKIE, JSESSION_ID);
     }
 
+    public boolean isSameMethod(final HttpMethod httpMethod) {
+        return method == httpMethod;
+    }
+
     public HttpCookie getCookie() {
         final String rawCookie = headers.getHeaderValue(HttpHeaderName.COOKIE);
         return HttpCookie.from(rawCookie);

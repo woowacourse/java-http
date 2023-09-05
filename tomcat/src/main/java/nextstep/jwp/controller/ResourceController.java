@@ -39,7 +39,7 @@ public class ResourceController implements Controller {
         final HttpRequestURI httpRequestURI = httpRequest.getRequestURI();
         final boolean isStaticResourceRequest = staticResourceRequest.stream()
             .anyMatch(httpRequestURI::hasSamePath);
-        final boolean isGetMethod = httpRequest.getMethod() == HttpMethod.GET;
+        final boolean isGetMethod = httpRequest.isSameMethod(HttpMethod.GET);
 
         return isStaticResourceRequest && isGetMethod;
     }

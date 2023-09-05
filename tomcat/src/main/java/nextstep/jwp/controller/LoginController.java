@@ -69,7 +69,7 @@ public class LoginController extends RestController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final boolean isPostMethod = httpRequest.getMethod() == HttpMethod.POST;
+        final boolean isPostMethod = httpRequest.isSameMethod(HttpMethod.POST);
         final boolean isSupportedContentType = httpRequest.containsContentType(SUPPORTED_CONTENT_TYPE);
 
         return super.canHandle(httpRequest) && isPostMethod && isSupportedContentType;

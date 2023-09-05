@@ -8,11 +8,11 @@ public enum ContentType {
     JS("application/javascript", ".js"),
     ICO("image/x-icon", ".ico");
 
-    final String contentType;
+    final String type;
     final String fileExtension;
 
-    ContentType(final String contentType, final String fileExtension) {
-        this.contentType = contentType;
+    ContentType(final String type, final String fileExtension) {
+        this.type = type;
         this.fileExtension = fileExtension;
     }
 
@@ -28,7 +28,7 @@ public enum ContentType {
                 .orElse(HTML);
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getType() {
+        return type;
     }
 }

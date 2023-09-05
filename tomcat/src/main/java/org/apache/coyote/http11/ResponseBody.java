@@ -75,7 +75,7 @@ public class ResponseBody {
     public String getMessage() {
         return String.join("\r\n",
                 httpVersion.getVersion() + " " + httpStatus.getStatus() + " " + httpStatus.name() + " ",
-                "Content-Type: " + contentType.getContentType() + ";charset=" + CHARSET.name().toLowerCase() + " ",
+                "Content-Type: " + contentType.getType() + ";charset=" + CHARSET.name().toLowerCase() + " ",
                 "Content-Length: " + data.length + " ",
                 "",
                 new String(data, CHARSET));

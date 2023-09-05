@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.http.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.session.Session;
 import org.apache.session.SessionManager;
 import org.slf4j.Logger;
@@ -36,7 +37,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String URL = "URL";
     private static final String HTTP_VERSION = "HTTP_VERSION";
     private static final Map<String, String> CONTENT_TYPE;
-    private static final Map<String, String> HTTP_STATUS;
 
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
@@ -48,13 +48,6 @@ public class Http11Processor implements Runnable, Processor {
         contentType.put("js", "application/javascript");
         contentType.put("ico", "image/x-icon");
         CONTENT_TYPE = Collections.unmodifiableMap(contentType);
-        final Map<String, String> httpStatus = new HashMap<>();
-        httpStatus.put("OK", "200 OK");
-        httpStatus.put("CREATED", "201 CREATED");
-        httpStatus.put("FOUND", "302 FOUND");
-        httpStatus.put("NOT_FOUND", "404 NOT FOUND");
-        httpStatus.put("UNAUTHORIZED", "401 UNAUTHORIZED");
-        HTTP_STATUS = Collections.unmodifiableMap(httpStatus);
     }
 
     public Http11Processor(final Socket connection) {
@@ -87,15 +80,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private String controller(final Map<String, String> httpRequestHeader, final String method, final String path, final Map<String, String> queryString, Map<String, String> requestBody) throws IOException {
         if ("GET".equals(method) && "/".equals(path)) {
-            return generateResponseBody("OK", "html", "Hello world!");
+            return generateResponseBody(200, "html", "Hello world!");
         }
         if ("GET".equals(method) && "/index.html".equals(path)) {
-            return generateResult(path, "OK");
+            return generateResult(path, 200);
         }
         if ("GET".equals(method) && "/login".equals(path) && queryString.size() == 2) {
             final Optional<User> user = InMemoryUserRepository.findByAccount(queryString.get("account"));
             if (user.isEmpty()) {
-                return generateResult("/401.html", "UNAUTHORIZED");
+                return generateResult("/401.html", 401);
             }
             if (user.get().checkPassword(queryString.get("password"))) {
                 log.info("user : {}", user);
@@ -105,9 +98,9 @@ public class Http11Processor implements Runnable, Processor {
                 session.setAttribute("user", user);
                 sessionManager.add(session);
                 cookie.addCookie("JSESSIONID", sessionId);
-                return generateRedirect("/index.html", "FOUND", cookie);
+                return generateRedirect("/index.html", 302, cookie);
             }
-            return generateResult("/401.html", "UNAUTHORIZED");
+            return generateResult("/401.html", 401);
         }
         if ("GET".equals(method) && "/login".equals(path)) {
             Cookie cookie = Cookie.newInstance();
@@ -115,39 +108,41 @@ public class Http11Processor implements Runnable, Processor {
                 cookie = Cookie.parse(httpRequestHeader.get("Cookie"));
             }
             if (cookie.containsKey("JSESSIONID")) {
-                return generateRedirect("/index.html", "FOUND");
+                return generateRedirect("/index.html", 302);
             }
-            return generateResult(path, "OK");
+            return generateResult(path, 200);
         }
         if ("POST".equals(method) && "/register".equals(path)) {
             InMemoryUserRepository.save(new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email")));
-            return generateRedirect("/index.html", "FOUND");
+            return generateRedirect("/index.html", 302);
         }
         if ("GET".equals(method) && "/register".equals(path)) {
-            return generateResult(path, "OK");
+            return generateResult(path, 200);
         }
 
-        return generateResult(path, "OK");
+        return generateResult(path, 200);
     }
 
-    private String generateRedirect(final String location, final String statusCode) {
+    private String generateRedirect(final String location, final int statusCode) {
+        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
         return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
+                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.LOCATION + ": " + location + " ");
     }
 
-    private String generateRedirect(final String location, final String statusCode, final Cookie cookie) {
+    private String generateRedirect(final String location, final int statusCode, final Cookie cookie) {
+        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
         return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
+                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
                 HttpHeaders.LOCATION + ": " + location + " ");
     }
 
-    private String generateResult(final String path, final String statusCode) throws IOException {
+    private String generateResult(final String path, final int statusCode) throws IOException {
         return generateResult(path, statusCode, Cookie.newInstance());
     }
 
-    private String generateResult(final String path, final String statusCode, final Cookie cookie) throws IOException {
+    private String generateResult(final String path, final int statusCode, final Cookie cookie) throws IOException {
         final String resourcePath = viewResolve(path);
         final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         if (Objects.isNull(resource)) {
@@ -164,18 +159,20 @@ public class Http11Processor implements Runnable, Processor {
         return generateResponseBody(statusCode, fileExtension, responseBody, cookie);
     }
 
-    private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody) {
+    private String generateResponseBody(final int statusCode, final String fileExtension, final String responseBody) {
+        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
         return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
+                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
                 HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }
 
-    private String generateResponseBody(final String statusCode, final String fileExtension, final String responseBody, final Cookie cookie) {
+    private String generateResponseBody(final int statusCode, final String fileExtension, final String responseBody, final Cookie cookie) {
+        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
         return String.join("\r\n",
-                "HTTP/1.1 " + HTTP_STATUS.get(statusCode) + " ",
+                "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
                 HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
                 HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",

@@ -1,13 +1,10 @@
 package org.apache.coyote.response;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.request.Request;
 
@@ -20,37 +17,24 @@ public class ResponseWriter {
     }
 
     public void writeResponse(Request request) throws URISyntaxException, IOException {
-        BufferedReader bufferedReader = getBufferedReader(request.getUrl());
-        String response = getResponse(request, bufferedReader);
+        String responseBody = readResponseBody(request.getUrl());
+        String response = getResponse(request, responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
 
-    private BufferedReader getBufferedReader(URL resource) throws URISyntaxException, FileNotFoundException {
+    private String readResponseBody(URL resource) throws URISyntaxException, IOException {
         Path resourcePath = Path.of(resource.toURI());
-        FileInputStream fileInputStream = new FileInputStream(resourcePath.toFile());
-        InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-        return new BufferedReader(inputStreamReader);
+        return new String(Files.readAllBytes(resourcePath));
     }
 
-    private String getResponse(Request request, BufferedReader bufferedReader) throws IOException {
-        String responseBody = getResponseBody(bufferedReader);
+    private String getResponse(Request request, String responseBody) {
         String responseHeader = getResponseHeader(request, responseBody);
 
         return String.join("\r\n",
                 responseHeader,
                 responseBody);
-    }
-
-    private String getResponseBody(BufferedReader bufferedReader) throws IOException {
-        StringBuilder responseBodyBuilder = new StringBuilder();
-        String fileLine;
-        while ((fileLine = bufferedReader.readLine()) != null) {
-            responseBodyBuilder.append(fileLine + "\n");
-        }
-
-        return responseBodyBuilder.toString();
     }
 
     private String getResponseHeader(Request request, String responseBody) {

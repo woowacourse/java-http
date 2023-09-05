@@ -3,7 +3,6 @@ package org.apache.coyote.util;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import org.apache.coyote.common.HttpCookie;
 
@@ -18,7 +17,7 @@ public class CookieParser {
 
     public static HttpCookie parse(String cookieString) {
         if (cookieString == null || cookieString.isBlank()) {
-            return new HttpCookie(Collections.emptyMap());
+            return HttpCookie.EMPTY;
         }
         Map<String, String> cookieMap = Arrays.stream(cookieString.split(DELIMITER))
             .map(String::trim)

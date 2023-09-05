@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,17 +14,20 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String header) {
+        return new HttpCookie(parseHeaderToMap(header));
+    }
+
+    private static Map<String, String> parseHeaderToMap(String header) {
         if (header == null) {
-            return new HttpCookie(Collections.emptyMap());
+            return new HashMap<>();
         }
 
         String[] cookies = header.split("; ");
 
-        Map<String, String> map = Arrays.stream(cookies)
+        return Arrays.stream(cookies)
                 .map(keyValue -> keyValue.split("=", 2))
                 .filter(split -> split.length == 2)
                 .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
-        return new HttpCookie(map);
     }
 
     public void put(String key, String value) {

@@ -21,7 +21,7 @@ public class ResourceProvider {
             }
             throw new IllegalArgumentException("파일이 존재하지 않습니다.");
         } catch (IOException e) {
-            return null;
+            throw new IllegalArgumentException("존재하지 않는 파일 입니다.");
         }
     }
 

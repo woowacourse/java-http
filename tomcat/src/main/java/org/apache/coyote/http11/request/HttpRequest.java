@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.apache.catalina.session.Manager;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
@@ -17,7 +16,7 @@ public class HttpRequest {
     private static final String EMPTY_BODY = "";
     private final HttpRequestStartLine httpRequestStartLine;
     private final HttpRequestHeaders httpRequestHeaders;
-    private final HttpCookies httpCookies;
+    private final HttpRequestCookies httpRequestCookies;
     private final String requestBody;
     private final Session session;
 
@@ -28,14 +27,14 @@ public class HttpRequest {
     ) throws IOException {
         this.httpRequestStartLine = requestLine;
         this.httpRequestHeaders = httpRequestHeaders;
-        this.httpCookies = generateHttpCookies(httpRequestHeaders);
+        this.httpRequestCookies = generateHttpCookies(httpRequestHeaders);
         this.requestBody = requestBody;
         this.session = generateSession();
     }
 
     private Session generateSession() throws IOException {
         Manager manager = new SessionManager();
-        String jsessionId = httpCookies.get("JSESSIONID");
+        String jsessionId = httpRequestCookies.get("JSESSIONID");
         if (jsessionId != null && manager.findSession(jsessionId) != null) {
             return manager.findSession(jsessionId);
         }
@@ -44,12 +43,12 @@ public class HttpRequest {
         return newSession;
     }
 
-    private HttpCookies generateHttpCookies(final HttpRequestHeaders httpRequestHeaders) {
+    private HttpRequestCookies generateHttpCookies(final HttpRequestHeaders httpRequestHeaders) {
         String cookies = httpRequestHeaders.getValue(HttpHeaders.COOKIE);
         if (cookies != null) {
-            return HttpCookies.of(cookies);
+            return HttpRequestCookies.of(cookies);
         }
-        return HttpCookies.empty();
+        return HttpRequestCookies.empty();
     }
 
     public static HttpRequest of(InputStream inputStream) throws IOException {
@@ -88,8 +87,7 @@ public class HttpRequest {
         return session;
     }
 
-    public boolean isSameMethod(String method) {
-        return httpRequestStartLine.getHttpMethod()
-                .equals(HttpMethod.valueOf(method));
+    public boolean isSameMethod(HttpMethod method) {
+        return httpRequestStartLine.getHttpMethod()==method;
     }
 }

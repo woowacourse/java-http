@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,15 +19,14 @@ public class RequestParam {
         this.params = params;
     }
 
-    //FIXME: URLDecoder.decode URL 인코딩된 문자열을 그대로 저장하면, 이후 문제가 발생할 가능성이 있습니다.
-    public static RequestParam of(String queryString) {
+    public static RequestParam of(String queryString) throws UnsupportedEncodingException {
         Map<String, String> params = new HashMap<>();
         String[] pairs = queryString.split(QUERY_STRING_DELIMITER);
         for (String pair : pairs) {
             String[] query = pair.split(KEY_VALUE_DELIMITER);
             params.put(
-                    query[KEY_INDEX],
-                    query[VALUE_INDEX]
+                    URLDecoder.decode(query[KEY_INDEX], StandardCharsets.UTF_8),
+                    URLDecoder.decode(query[VALUE_INDEX], StandardCharsets.UTF_8)
             );
         }
         return new RequestParam(params);

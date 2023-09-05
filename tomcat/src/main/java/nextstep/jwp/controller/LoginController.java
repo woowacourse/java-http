@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import nextstep.jwp.FileIOUtils;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -33,20 +34,27 @@ public class LoginController extends HttpServlet {
 
     @Override
     public void doPost(final HttpRequest req, final HttpResponse resp) {
-        RequestParam requestParam = RequestParam.of(req.getRequestBody());
+        try {
+            RequestParam requestParam = RequestParam.of(req.getRequestBody());
 
-        Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
+            Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
-        if (findAccount.isPresent()) {
-            User user = findAccount.get();
-            if (user.checkPassword(requestParam.get("password"))) {
-                Session session = req.getSession();
-                session.setAttribute("user", user);
-                resp.addCookie(JSESSIONID, req.getSession().getId());
-                resp.sendRedirect("/index.html");
-                return;
+            if (findAccount.isPresent()) {
+                User user = findAccount.get();
+                if (user.checkPassword(requestParam.get("password"))) {
+                    Session session = req.getSession();
+                    session.setAttribute("user", user);
+                    resp.addCookie(JSESSIONID, req.getSession().getId());
+                    resp.addCookie("hello", req.getSession().getId());
+                    resp.addCookie("bye", req.getSession().getId());
+                    resp.addCookie("good", req.getSession().getId());
+                    resp.sendRedirect("/index.html");
+                    return;
+                }
             }
+            resp.sendRedirect("/401.html");
+        }catch (UnsupportedEncodingException e){
+            resp.sendRedirect("/404.html");
         }
-        resp.sendRedirect("/401.html");
     }
 }

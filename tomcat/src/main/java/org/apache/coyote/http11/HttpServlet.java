@@ -1,20 +1,17 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class HttpServlet {
 
-    private static final String METHOD_GET = "GET";
-    private static final String METHOD_POST = "POST";
-
-    protected void service(final HttpRequest req, final HttpResponse res) throws IOException, URISyntaxException {
-        if (req.isSameMethod(METHOD_GET)) {
+    protected void service(final HttpRequest req, final HttpResponse res) throws IOException {
+        if (req.isSameMethod(HttpMethod.GET)) {
             doGet(req, res);
         }
-        if (req.isSameMethod(METHOD_POST)) {
+        if (req.isSameMethod(HttpMethod.POST)) {
             doPost(req, res);
         }
     }

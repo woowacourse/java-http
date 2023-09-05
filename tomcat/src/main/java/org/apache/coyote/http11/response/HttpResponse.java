@@ -7,25 +7,24 @@ public class HttpResponse {
 
     private static final String EMPTY_LINE = "";
     private static final String NEW_LINE = "\r\n";
-    private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
-
+    private static final String COOKIES_DELIMITER = "; ";
+    private final HttpResponseCookies cookies;
     private final HttpResponseHeaders headers;
     private HttpResponseStartLine httpResponseStartLine;
     private String responseBody;
 
     public HttpResponse() {
+        this.cookies = HttpResponseCookies.empty();
         this.headers = HttpResponseHeaders.empty();
     }
 
     public void sendRedirect(final String location) {
-        httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, StatusCode.FOUND);
+        httpResponseStartLine = HttpResponseStartLine.of(StatusCode.FOUND);
         headers.add(HttpHeaders.LOCATION, location);
     }
 
-    //FIXME: 쿠키를 여러개 설정할 수 있도록 수정
     public void addCookie(final String key, final String value) {
-        headers.add(HttpHeaders.SET_COOKIE, key + KEY_VALUE_DELIMITER + value);
+        cookies.add(key, value);
     }
 
     public void addHeader(final String name, final String value) {
@@ -33,7 +32,7 @@ public class HttpResponse {
     }
 
     public void setHttpResponseStartLine(final StatusCode statusCode) {
-        httpResponseStartLine = new HttpResponseStartLine(DEFAULT_HTTP_VERSION, statusCode);
+        httpResponseStartLine = HttpResponseStartLine.of(statusCode);
     }
 
     public void setResponseBody(final byte[] responseBody) {
@@ -50,7 +49,7 @@ public class HttpResponse {
     }
 
     private String generateStartLine() {
-        return String.format("%s %s %s ",
+        return String.format("%s %s %s",
                 httpResponseStartLine.getHttpVersion(),
                 httpResponseStartLine.getStatusCode().getCode(),
                 httpResponseStartLine.getStatusCode().getText()
@@ -58,9 +57,20 @@ public class HttpResponse {
     }
 
     private String generateHeaders() {
+        String cookiesValue = generateCookies();
+        if (!cookiesValue.isBlank()) {
+            headers.add(HttpHeaders.SET_COOKIE, cookiesValue);
+        }
         return headers.getEntrySet()
                 .stream()
-                .map(header -> String.format("%s: %s ", header.getKey(), header.getValue()))
+                .map(header -> String.format("%s: %s", header.getKey(), header.getValue()))
                 .collect(Collectors.joining(NEW_LINE));
+    }
+
+    private String generateCookies() {
+        return cookies.getEntrySet()
+                .stream()
+                .map(header -> String.format("%s=%s", header.getKey(), header.getValue()))
+                .collect(Collectors.joining(COOKIES_DELIMITER));
     }
 }

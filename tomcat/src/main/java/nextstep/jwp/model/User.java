@@ -4,8 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class User {
 
-    private static final AtomicInteger count = new AtomicInteger(1);
-
     private final Long id;
     private final String account;
     private final String password;
@@ -19,7 +17,11 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this((long) count.incrementAndGet(), account, password, email);
+        this(null, account, password, email);
+    }
+
+    public User(Long id, User user) {
+        this(id, user.account, user.password, user.email);
     }
 
     public boolean checkPassword(String password) {

@@ -1,5 +1,6 @@
 package cache.com.example;
 
+import java.time.Duration;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -36,8 +37,6 @@ public class GreetingController {
 
     @GetMapping("/etag")
     public String etag(final HttpServletResponse response) {
-        final String etag = "W/\"123456789\"";
-        response.addHeader(HttpHeaders.ETAG, etag);
         return "index";
     }
 

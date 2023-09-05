@@ -38,6 +38,7 @@ public class HttpRequest {
         final var request = new ArrayList<String>();
         String line;
         var body = "";
+        QueryStrings queryStrings = null;
         JsonProperties properties = null;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -60,11 +61,11 @@ public class HttpRequest {
         if (fullPath.contains("?")) {
             final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
             final var path = pathAndQueryParams[PATH_INDEX].trim();
-            final var queryStrings = new QueryStrings(pathAndQueryParams[QUERY_PARAM_INDEX].trim());
+            queryStrings = new QueryStrings(pathAndQueryParams[QUERY_PARAM_INDEX].trim());
             return new HttpRequest(method, path, header, queryStrings, body, properties);
         }
 
-        return new HttpRequest(method, fullPath, header, null, body, properties);
+        return new HttpRequest(method, fullPath, header, queryStrings, body, properties);
     }
 
     public boolean hasQueryStrings() {

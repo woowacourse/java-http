@@ -59,9 +59,8 @@ public class Http11Processor implements Runnable, Processor {
       final String response;
 
       if (request.getUrl().equals("/login")) {
-        final String account = params.get("account");
         final String sessionId = cookies.get(JSESSIONID);
-        response = login(sessionId, sessionManager, account);
+        response = login(sessionManager, sessionId, params);
       } else if (request.getUrl().equals("/register")) {
         final int contentLength = Integer.parseInt(headers.get("Content-Length"));
         final Map<String, String> body = readBody(inputStream, contentLength);
@@ -80,16 +79,18 @@ public class Http11Processor implements Runnable, Processor {
   }
 
   private String login(
-      final String sessionId,
       final SessionManager sessionManager,
-      final String account
+      final String sessionId,
+      final Map<String, String> params
   ) {
+    final String account = params.get("account");
+    final String password = params.get("password");
     if (isAuthorized(sessionId, sessionManager)) {
       return response302(INDEX_PAGE);
     } else if (account == null) {
       return response302(LOGIN_PAGE);
     }
-    return authorize(account, sessionManager);
+    return authorize(account, password, sessionManager);
   }
 
   private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
@@ -122,11 +123,14 @@ public class Http11Processor implements Runnable, Processor {
     return response302(INDEX_PAGE);
   }
 
-  private String authorize(final String account, final SessionManager sessionManager) {
+  private String authorize(
+      final String account,
+      final String password,
+      final SessionManager sessionManager
+  ) {
     final Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-    if (user.isPresent()) {
-      log.debug(user.toString());
+    if (user.isPresent() && user.get().checkPassword(password)) {
       final String uuid = UUID.randomUUID().toString();
       final Session session = new Session(uuid);
       sessionManager.add(session);

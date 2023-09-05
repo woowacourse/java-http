@@ -1,28 +1,19 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
-import org.apache.request.HttpRequest;
-import java.nio.charset.StandardCharsets;
+import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -56,8 +47,5 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
-
-
-
 
 }

@@ -92,14 +92,7 @@ public class Http11Processor implements Runnable, Processor {
       final String requestBody)
       throws URISyntaxException, IOException {
     String setCookie = null;
-    Map<String, String> requestCookies = new HashMap<>();
-    if (headers.get("Cookie") != null) {
-      String[] cookies = headers.get("Cookie").split("; ");
-      for (int i = 0; i < cookies.length; i++) {
-        String[] cookieTokens = cookies[i].split("=");
-        requestCookies.put(cookieTokens[0], cookieTokens[1]);
-      }
-    }
+    final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
     int statusCode = 200;
     String statusMessage = "OK";
     String responseBody = "";
@@ -168,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
           }
           if (parsedRequestBody.get("account").equals("gugu")  // 로그인 성공
               && parsedRequestBody.get("password").equals("password")) {
-            if (requestCookies.get("JSESSIONID") == null) {
+            if (cookie.isExist("JSESSIOINID")) {
               setCookie = "JSESSIONID=" + UUID.randomUUID();
             }
             statusCode = 302;

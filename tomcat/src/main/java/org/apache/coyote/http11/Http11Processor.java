@@ -17,7 +17,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +50,8 @@ public class Http11Processor implements Runnable, Processor {
         return;
       }
       final Map<String, String> requestHeaders = extractHeader(bufferedReader);
-
-      final String response = handleRequest(startLine, requestHeaders);
+      final String requestBody = extractBody(requestHeaders.get("Content-Length"), bufferedReader);
+      final String response = handleRequest(startLine, requestHeaders, requestBody);
 
       outputStream.write(response.getBytes());
       outputStream.flush();
@@ -74,7 +76,19 @@ public class Http11Processor implements Runnable, Processor {
     return headers;
   }
 
-  private String handleRequest(final String startLine, final Map<String, String> headers)
+  private String extractBody(String contentLength, BufferedReader bufferedReader)
+      throws IOException {
+    if (contentLength == null) {
+      return null;
+    }
+    int length = Integer.parseInt(contentLength);
+    char[] buffer = new char[length];
+    bufferedReader.read(buffer, 0, length);
+    return new String(buffer);
+  }
+
+  private String handleRequest(final String startLine, final Map<String, String> headers,
+      final String requestBody)
       throws URISyntaxException, IOException {
     int statusCode = 200;
     String statusMessage = "OK";
@@ -107,21 +121,59 @@ public class Http11Processor implements Runnable, Processor {
       }
     }
 
-    if (method.equals("GET")) {
-      if (path.equals("/login")) {
-        if (!queryProperties.isEmpty() && queryProperties.get("account").equals("gugu")
-            && queryProperties.get("password").equals("password")) {
+    if (method.equals("POST")) {
+      if (path.equals("/register")) {
+        if (requestBody != null) {
+          // 파싱
+          Map<String, String> parsedRequestBody = new HashMap<>();
+          String[] queryTokens = requestBody.split("&");
+          for (int i = 0; i < queryTokens.length; i++) {
+            int equalSeperatorIndex = queryTokens[i].indexOf("=");
+            if (equalSeperatorIndex != -1) {
+              parsedRequestBody.put(queryTokens[i].substring(0, equalSeperatorIndex),
+                  queryTokens[i].substring(equalSeperatorIndex + 1));
+
+            }
+          }
+          InMemoryUserRepository.save(new User(
+              Long.getLong(parsedRequestBody.get("id")),
+              parsedRequestBody.get("account"),
+              parsedRequestBody.get("password"),
+              parsedRequestBody.get("email")
+          ));
           statusCode = 302;
           statusMessage = "Found";
           location = "/index.html";
-          filePathUrl = getClass().getResource("/static/login.html");
-        } else {
-          statusCode = 401;
-          statusMessage = "Unauthorization";
-          filePathUrl = getClass().getResource("/static/401.html");
         }
+      } else if (path.equals("/login")) {
+        if (requestBody != null) {
+          Map<String, String> parsedRequestBody = new HashMap<>();
+          String[] queryTokens = requestBody.split("&");
+          for (int i = 0; i < queryTokens.length; i++) {
+            int equalSeperatorIndex = queryTokens[i].indexOf("=");
+            if (equalSeperatorIndex != -1) {
+              parsedRequestBody.put(queryTokens[i].substring(0, equalSeperatorIndex),
+                  queryTokens[i].substring(equalSeperatorIndex + 1));
+            }
+          }
 
-      } else {
+          if (parsedRequestBody.get("account").equals("gugu")
+              && parsedRequestBody.get("password").equals("password")) {
+            statusCode = 302;
+            statusMessage = "Found";
+            location = "/index.html";
+          } else {
+            statusCode = 401;
+            statusMessage = "Unauthorization";
+          }
+        }
+      }
+    } else if (method.equals("GET")) {
+      if (path.equals("/login")) {
+        filePathUrl = getClass().getResource("/static/login.html");
+      } else if (path.equals("/register")) {
+        filePathUrl = getClass().getResource("/static/register.html");
+      } else {  // 핸들러(컨트롤러)가 없을 때
         filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
             .orElse(getClass().getResource("/static/404.html"));
       }
@@ -133,6 +185,8 @@ public class Http11Processor implements Runnable, Processor {
         contentType = "text/css";
       }
     }
+
+    //response header 생성
     Map<String, String> responseHeaders = new HashMap<>();
     responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
     responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));

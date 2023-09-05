@@ -20,11 +20,11 @@
 - [x] 로그인 여부에 따라 다른 페이지로 이동시킨다.
     - [x] /login 페이지에서 로그인에 성공하면 http status code를 302로 반환하고 /index.html로 리다이렉트한다.
     - [x] /login 페이지에서 로그인에 실패하면 401.html로 리다이렉트한다.
-- [ ] POST 방식으로 회원가입
-    - [ ] `http://localhost:8080/register` 으로 접속하면 회원가입 페이지(register.html)를 보여준다.
-    - [ ] POST 요청에 대해 별도의 처리를 하도록 로직을 분리한다.
-    - [ ] 회원가입이 완료되면 index.html로 리다이렉트한다.
-    - [ ] 로그인 페이지에서 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경한다.
+- [x] POST 방식으로 회원가입
+    - [x] `http://localhost:8080/register` 으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+    - [x] POST 요청에 대해 별도의 처리를 하도록 로직을 분리한다.
+    - [x] 회원가입이 완료되면 index.html로 리다이렉트한다.
+    - [x] 로그인 페이지에서 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경한다.
 - [ ] Cookie에 JSESSIONID 값을 저장한다.
     - [ ] 세션 아이디를 전달하는 이름으로 `JSESSIONID`를 사용한다.
     - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하여 값을 전달한다.

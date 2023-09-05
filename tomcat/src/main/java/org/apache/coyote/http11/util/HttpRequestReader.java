@@ -2,7 +2,7 @@ package org.apache.coyote.http11.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
@@ -18,31 +18,27 @@ public class HttpRequestReader {
     }
 
     public static HttpRequest read(final BufferedReader bufferedReader) throws IOException {
-        final var httpRequest = new HttpRequest();
-        readRequestLine(httpRequest, bufferedReader);
-        readRequestHeaders(httpRequest, bufferedReader);
-        readRequestBody(httpRequest, bufferedReader);
-
-        return httpRequest;
-    }
-
-    private static void readRequestLine(HttpRequest httpRequest, BufferedReader bufferedReader)
-            throws IOException {
         final var requestLine = bufferedReader.readLine();
         if (requestLine == null) {
             throw new InvalidHttpFormException();
         }
-        final var splitLine = requestLine.split(REQUEST_LINE_DELIMITER);
-        httpRequest.setHttpMethod(HttpMethod.valueOf(splitLine[0]));
-        httpRequest.setUri(splitLine[1]);
-        httpRequest.setPath(HttpParser.parsePath(splitLine[1]));
-        httpRequest.addParameters(HttpParser.parseQueryParameters(splitLine[1]));
-        httpRequest.setProtocol(splitLine[2]);
+        final var requestLineAttributes = requestLine.split(REQUEST_LINE_DELIMITER);
+        Map<String, String> headers = readRequestHeaders(bufferedReader);
+        String body = readRequestBody(headers, bufferedReader);
+        return HttpRequest.Builder.builder()
+                .httpMethod(HttpMethod.valueOf(requestLineAttributes[0]))
+                .uri(requestLineAttributes[1])
+                .path(HttpParser.parsePath(requestLineAttributes[1]))
+                .parameters(HttpParser.parseQueryParameters(requestLineAttributes[1]))
+                .protocol(requestLineAttributes[2])
+                .headers(new HttpHeaders(headers))
+                .body(body)
+                .build();
     }
 
-    private static void readRequestHeaders(HttpRequest httpRequest, BufferedReader bufferedReader)
+    private static Map<String, String> readRequestHeaders(BufferedReader bufferedReader)
             throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         while (bufferedReader.ready()) {
             final var header = bufferedReader.readLine();
             if (header.isEmpty()) {
@@ -51,18 +47,18 @@ public class HttpRequestReader {
             final var keyValuePair = header.split(REQUEST_HEADER_DELIMITER);
             headers.put(keyValuePair[0], keyValuePair[1]);
         }
-        httpRequest.addHeaders(headers);
+        return headers;
     }
 
-    private static void readRequestBody(HttpRequest httpRequest, BufferedReader bufferedReader)
+    private static String readRequestBody(Map<String, String> headers,
+            BufferedReader bufferedReader)
             throws IOException {
-        if (!httpRequest.containsHeader(HttpHeaders.CONTENT_LENGTH)) {
-            return;
+        if (!headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
+            return null;
         }
-        int contentLength = Integer.parseInt(httpRequest.getHeader(HttpHeaders.CONTENT_LENGTH));
+        int contentLength = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        httpRequest.setBody(requestBody);
+        return new String(buffer);
     }
 }

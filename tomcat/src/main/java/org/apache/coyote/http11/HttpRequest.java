@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -9,30 +9,52 @@ import org.apache.coyote.http11.util.HttpParser;
 
 public class HttpRequest {
 
+    private final String protocol;
     private final HttpHeaders headers;
-    private final Map<String, HttpCookie> cookies = new HashMap<>();
-    private HttpMethod httpMethod;
-    private String uri;
-    private String path;
-    private Map<String, String> parameters = new HashMap<>();
-    private String protocol;
-    private Session session;
-    private String body;
+    private final Map<String, HttpCookie> cookies;
+    private final HttpMethod httpMethod;
+    private final String uri;
+    private final String path;
+    private final Map<String, String> parameters;
+    private final Session session;
+    private final String body;
 
-    public HttpRequest() {
-        this.headers = new HttpHeaders();
+    private HttpRequest(final String protocol,
+            final HttpHeaders headers,
+            final HttpMethod httpMethod,
+            final String uri, final String path, final Map<String, String> parameters,
+            final String body) {
+        this.protocol = protocol;
+        this.headers = headers;
+        this.httpMethod = httpMethod;
+        this.uri = uri;
+        this.path = path;
+        this.parameters = parameters;
+        this.body = body;
+        this.cookies = getCookiesFromHeader();
+        this.session = getSessionFromHeader();
     }
 
-    public void addCookie(HttpCookie cookie) {
-        this.cookies.put(cookie.getName(), cookie);
+    private Map<String, HttpCookie> getCookiesFromHeader() {
+        if (!this.headers.containsHeader(HttpHeaders.COOKIE)) {
+            return Collections.emptyMap();
+        }
+        List<HttpCookie> parsedCookies = HttpParser.parseCookies(
+                this.headers.get(HttpHeaders.COOKIE));
+        return parsedCookies.stream()
+                .collect(Collectors.toMap(HttpCookie::getName, Function.identity()));
+    }
+
+    private Session getSessionFromHeader() {
+        if (!this.cookies.containsKey(HttpCookie.JSESSIONID)) {
+            return null;
+        }
+        final var sessionCookie = this.cookies.get(HttpCookie.JSESSIONID);
+        return new Session(sessionCookie.getValue());
     }
 
     public String getPath() {
         return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public HttpCookie getCookie(String name) {
@@ -43,37 +65,8 @@ public class HttpRequest {
         return this.session;
     }
 
-    public void addHeaders(final Map<String, String> headers) {
-        this.headers.putAll(headers);
-        addCookies();
-        addSession();
-    }
-
-    private void addCookies() {
-        if (!this.headers.containsHeader(HttpHeaders.COOKIE)) {
-            return;
-        }
-        List<HttpCookie> parsedCookies = HttpParser.parseCookies(
-                this.headers.get(HttpHeaders.COOKIE));
-        final Map<String, HttpCookie> cookieMap = parsedCookies.stream()
-                .collect(Collectors.toMap(HttpCookie::getName, Function.identity()));
-        this.cookies.putAll(cookieMap);
-    }
-
-    private void addSession() {
-        if (!this.cookies.containsKey(HttpCookie.JSESSIONID)) {
-            return;
-        }
-        final var sessionCookie = this.cookies.get(HttpCookie.JSESSIONID);
-        this.session = new Session(sessionCookie.getValue());
-    }
-
     public HttpMethod getHttpMethod() {
         return httpMethod;
-    }
-
-    public void setHttpMethod(HttpMethod httpMethod) {
-        this.httpMethod = httpMethod;
     }
 
     public String getHeader(String headerName) {
@@ -92,19 +85,69 @@ public class HttpRequest {
         return uri;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public static class Builder {
+
+        private String protocol;
+        private HttpHeaders headers;
+        private HttpMethod httpMethod;
+        private String uri;
+        private String path;
+        private Map<String, String> parameters;
+        private String body;
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public Builder protocol(final String protocol) {
+            this.protocol = protocol;
+            return this;
+        }
+
+        public Builder httpMethod(final HttpMethod httpMethod) {
+            this.httpMethod = httpMethod;
+            return this;
+        }
+
+        public Builder headers(final HttpHeaders headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public Builder uri(final String uri) {
+            this.uri = uri;
+            return this;
+        }
+
+        public Builder path(final String path) {
+            this.path = path;
+            return this;
+        }
+
+        public Builder parameters(final Map<String, String> parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
+        public Builder body(final String body) {
+            this.body = body;
+            return this;
+        }
+
+        public HttpRequest build() {
+            return new HttpRequest(
+                    protocol,
+                    headers,
+                    httpMethod,
+                    uri,
+                    path,
+                    parameters,
+                    body
+            );
+        }
     }
 }

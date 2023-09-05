@@ -11,7 +11,15 @@ public class HttpHeaders {
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String COOKIE = "Cookie";
 
-    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final Map<String, String> headers;
+
+    public HttpHeaders() {
+        this.headers = new LinkedHashMap<>();
+    }
+
+    public HttpHeaders(final Map<String, String> headers) {
+        this.headers = headers;
+    }
 
     public boolean containsHeader(String headerName) {
         return this.headers.containsKey(headerName);

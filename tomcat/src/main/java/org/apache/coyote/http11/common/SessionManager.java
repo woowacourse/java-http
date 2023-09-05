@@ -17,6 +17,9 @@ public class SessionManager {
     }
 
     public static Session findSession(UUID id) {
+        if (!SESSIONS.containsKey(id)) {
+            throw new IllegalArgumentException("존재하지 않는 세션입니다.");
+        }
         return SESSIONS.get(id);
     }
 

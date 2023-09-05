@@ -33,7 +33,6 @@ public class RequestProcessor {
     private static final String INDEX_PAGE = "index.html";
     private static final String REGISTER_PAGE = "register.html";
     private static final String UNAUTHORIZED_PAGE = "401.html";
-    private static final String SERVER_ERROR_PAGE = "500.html";
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
 
@@ -43,7 +42,7 @@ public class RequestProcessor {
         final HttpMethod method = httpRequest.getHttpMethod();
         final String requestUri = httpRequest.getRequestUri();
         final HttpCookie cookies = httpRequest.getCookies();
-        String content = "Hello World";
+        String content = "Hello world!";
 
         if (method.equals(HttpMethod.GET)) {
             if (requestUri.isEmpty()) {
@@ -101,13 +100,13 @@ public class RequestProcessor {
                         .collect(Collectors.toMap(info -> info[0], info -> info[1]));
 
                 if (InMemoryUserRepository.findByAccount(registerInfo.get("account")).isPresent()) {
-                    return ResponseEntity.of(version, HttpStatus.FOUND, content,
-                            Map.of(LOCATION_HEADER, SERVER_ERROR_PAGE));
+                    return ResponseEntity.of(version, HttpStatus.FOUND, null,
+                            Map.of(LOCATION_HEADER, REGISTER_PAGE));
                 }
                 final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"),
                         registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
-                return ResponseEntity.of(version, HttpStatus.FOUND, content, Map.of(LOCATION_HEADER, REGISTER_PAGE));
+                return ResponseEntity.of(version, HttpStatus.FOUND, null, Map.of(LOCATION_HEADER, INDEX_PAGE));
             }
 
             if (requestUri.equals("login")) {

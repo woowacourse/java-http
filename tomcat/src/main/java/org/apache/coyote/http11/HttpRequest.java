@@ -40,4 +40,8 @@ public class HttpRequest {
     public HttpVersion getHttpVersion() {
         return requestHeader.getHttpVersion();
     }
+
+    public QueryString getQueryString() {
+        return queryString;
+    }
 }

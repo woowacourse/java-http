@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HandlerMapping HANDLER_MAPPING = new HandlerMapping();
 
     private final Socket connection;
 
@@ -44,8 +45,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest httpRequest = HttpRequestParser.extract(reader);
 
-            HandlerMapping handlerMapping = new HandlerMapping();
-            ResponseEntity responseEntity = handlerMapping.extractResponseEntity(httpRequest);
+            ResponseEntity responseEntity = HANDLER_MAPPING.extractResponseEntity(httpRequest);
 
             String response = extractResponse(responseEntity);
 

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
+
 public class Parameters {
 
     private static final String QUERY_DELIMITER = "&";
@@ -18,7 +20,7 @@ public class Parameters {
     }
 
     public static Parameters empty() {
-        return new Parameters(new HashMap<>());
+        return new Parameters(emptyMap());
     }
 
     public static Parameters from(final char[] buffer) {

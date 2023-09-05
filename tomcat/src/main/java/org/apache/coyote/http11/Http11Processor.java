@@ -27,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
   private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
   private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
   private static final String PREFIX_STATIC_PATH = "static";
-  private static final String INDERX_PAGE = "/index.html";
+  private static final String INDEX_PAGE = "/index.html";
   private static final String LOGIN_PAGE = "/login.html";
   private static final String JSESSIONID = "JSESSIONID";
 
@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
       final String account
   ) {
     if (isAuthorized(sessionId, sessionManager)) {
-      return response302(INDERX_PAGE);
+      return response302(INDEX_PAGE);
     } else if (account == null) {
       return response302(LOGIN_PAGE);
     }
@@ -119,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
   private String register(final Map<String, String> body) {
     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
     InMemoryUserRepository.save(user);
-    return response302(INDERX_PAGE);
+    return response302(INDEX_PAGE);
   }
 
   private String authorize(final String account, final SessionManager sessionManager) {
@@ -130,7 +130,7 @@ public class Http11Processor implements Runnable, Processor {
       final String uuid = UUID.randomUUID().toString();
       final Session session = new Session(uuid);
       sessionManager.add(session);
-      return response302(INDERX_PAGE, "JSESSIONID=" + uuid);
+      return response302(INDEX_PAGE, "JSESSIONID=" + uuid);
     }
     return response302("/401.html");
   }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.http.ContentType;
 import org.apache.http.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpHeaders;
@@ -23,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -36,19 +36,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTTP_METHOD = "HTTP_METHOD";
     private static final String URL = "URL";
     private static final String HTTP_VERSION = "HTTP_VERSION";
-    private static final Map<String, String> CONTENT_TYPE;
 
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
-
-    static {
-        final Map<String, String> contentType = new HashMap<>();
-        contentType.put("html", "text/html;charset=utf-8");
-        contentType.put("css", "text/css");
-        contentType.put("js", "application/javascript");
-        contentType.put("ico", "image/x-icon");
-        CONTENT_TYPE = Collections.unmodifiableMap(contentType);
-    }
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -124,14 +114,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateRedirect(final String location, final int statusCode) {
-        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
+        final HttpStatus httpStatus = HttpStatus.of(statusCode);
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.LOCATION + ": " + location + " ");
     }
 
     private String generateRedirect(final String location, final int statusCode, final Cookie cookie) {
-        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
+        final HttpStatus httpStatus = HttpStatus.of(statusCode);
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
@@ -160,21 +150,21 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponseBody(final int statusCode, final String fileExtension, final String responseBody) {
-        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
+        final HttpStatus httpStatus = HttpStatus.of(statusCode);
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
-                HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
+                HttpHeaders.CONTENT_TYPE + ": " + ContentType.of(fileExtension).getValue() + " ",
                 HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);
     }
 
     private String generateResponseBody(final int statusCode, final String fileExtension, final String responseBody, final Cookie cookie) {
-        final HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
+        final HttpStatus httpStatus = HttpStatus.of(statusCode);
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatusString() + " ",
                 HttpHeaders.SET_COOKIE + ": " + cookie.generateCookieHeaderValue() + " ",
-                HttpHeaders.CONTENT_TYPE + ": " + CONTENT_TYPE.get(fileExtension) + " ",
+                HttpHeaders.CONTENT_TYPE + ": " + ContentType.of(fileExtension).getValue() + " ",
                 HttpHeaders.CONTENT_LENGTH + ": " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                 "",
                 responseBody);

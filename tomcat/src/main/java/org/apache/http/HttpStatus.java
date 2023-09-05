@@ -30,7 +30,7 @@ public enum HttpStatus {
         return statusString;
     }
 
-    public static HttpStatus valueOf(final int statusCode) {
+    public static HttpStatus of(final int statusCode) {
         final HttpStatus status = resolve(statusCode);
         if (status == null) {
             throw new IllegalArgumentException();

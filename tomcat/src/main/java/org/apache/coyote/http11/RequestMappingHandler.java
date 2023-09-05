@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.*;
 
@@ -18,17 +19,17 @@ public enum RequestMappingHandler {
 
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
 
-    private final BiPredicate<String, String> condition;
+    private final BiPredicate<String, HttpMethod> condition;
     private final ResponseMaker responseMaker;
 
-    RequestMappingHandler(final BiPredicate<String, String> condition, final ResponseMaker responseMaker) {
+    RequestMappingHandler(final BiPredicate<String, HttpMethod> condition, final ResponseMaker responseMaker) {
         this.condition = condition;
         this.responseMaker = responseMaker;
     }
 
     public static ResponseMaker findResponseMaker(final HttpRequest request) {
         String resourcePath = request.getRequestLine().getRequestUrl();
-        String requestMethod = request.getRequestLine().getHttpMethod();
+        HttpMethod requestMethod = request.getRequestLine().getHttpMethod();
 
         return Arrays.stream(values())
                 .filter(value -> value.condition.test(resourcePath, requestMethod))
@@ -37,28 +38,28 @@ public enum RequestMappingHandler {
                 .getResponseMaker();
     }
 
-    public static boolean isFileGetUrl(final String resourcePath, final String requestMethod) {
-        return FILE_REGEX.matcher(resourcePath).matches() && requestMethod.equals("GET");
+    public static boolean isFileGetUrl(final String resourcePath, final HttpMethod requestMethod) {
+        return FILE_REGEX.matcher(resourcePath).matches() && requestMethod == HttpMethod.GET;
     }
 
-    public static boolean isStringGetUrl(final String resourcePath, final String requestMethod) {
-        return resourcePath.equals("/") && requestMethod.equals("GET");
+    public static boolean isStringGetUrl(final String resourcePath, final HttpMethod requestMethod) {
+        return resourcePath.equals("/") && requestMethod == HttpMethod.GET;
     }
 
-    public static boolean isLoginGetUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/login") && requestMethod.equals("GET");
+    public static boolean isLoginGetUrl(final String requestUrl, final HttpMethod requestMethod) {
+        return requestUrl.startsWith("/login") && requestMethod == HttpMethod.GET;
     }
 
-    public static boolean isLoginPostUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/login") && requestMethod.equals("POST");
+    public static boolean isLoginPostUrl(final String requestUrl, final HttpMethod requestMethod) {
+        return requestUrl.startsWith("/login") && requestMethod == HttpMethod.POST;
     }
 
-    public static boolean isRegisterGetUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/register") && requestMethod.equals("GET");
+    public static boolean isRegisterGetUrl(final String requestUrl, final HttpMethod requestMethod) {
+        return requestUrl.startsWith("/register") && requestMethod == HttpMethod.GET;
     }
 
-    public static boolean isRegisterPostUrl(final String requestUrl, final String requestMethod) {
-        return requestUrl.startsWith("/register") && requestMethod.equals("POST");
+    public static boolean isRegisterPostUrl(final String requestUrl, final HttpMethod requestMethod) {
+        return requestUrl.startsWith("/register") && requestMethod == HttpMethod.POST;
     }
 
     public ResponseMaker getResponseMaker() {

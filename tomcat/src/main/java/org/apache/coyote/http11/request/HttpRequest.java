@@ -35,7 +35,7 @@ public class HttpRequest {
         final String[] requestLineList = lines.get(0).split("\\s+");
         final URI uri = new URI(requestLineList[1]);
         final String resourcePath = uri.getPath();
-        return new RequestLine(requestLineList[0], resourcePath, requestLineList[2]);
+        return new RequestLine(HttpMethod.valueOf(requestLineList[0]), resourcePath, requestLineList[2]);
     }
 
     private RequestHeader createRequestHeader(final List<String> lines) {

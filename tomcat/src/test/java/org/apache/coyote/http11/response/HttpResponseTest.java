@@ -13,11 +13,12 @@ class HttpResponseTest {
     @Test
     void 상태코드와_응답바디로_응답을_생성한다() {
         // given
+        HttpResponse httpResponse = HttpResponse.create();
         ResponseBody responseBody = ResponseBody.of("Hello, World!", "html");
-        HttpResponse httpResponse = HttpResponse.of(responseBody, HttpStatusCode.OK);
+        httpResponse.setResponseBody(responseBody);
 
         // when
-        String response = httpResponse.toString();
+        String response = httpResponse.parse();
 
         // then
         assertThat(response).isEqualTo("HTTP/1.1 200 OK \r\n" +
@@ -30,13 +31,17 @@ class HttpResponseTest {
     @Test
     void 리다이렉트_응답을_생성한다() {
         // given
-        HttpResponse httpResponse = HttpResponse.redirect("/index.html", HttpStatusCode.FOUND);
+        HttpResponse httpResponse = HttpResponse.create();
+        httpResponse.setStatusCode(HttpStatusCode.FOUND);
+        httpResponse.location("/index.html");
 
         // when
-        String response = httpResponse.toString();
+        String response = httpResponse.parse();
 
         // then
         assertThat(response).isEqualTo("HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n");
     }

@@ -7,9 +7,9 @@ import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.cookie.Session;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +26,13 @@ public class RequestReader {
     private static final String REGISTER_HTML = "/register.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
 
-    public ResponseEntity parse(HttpRequest httpRequest) throws IOException {
+    public HttpResponse parse(HttpRequest httpRequest) throws IOException {
+        HttpResponse httpResponse = HttpResponse.create();
         if (FILE_EXTENSION_REGEX.matcher(httpRequest.getRequestUri()).find() && httpRequest.isMatchMethod(HttpMethod.GET)) {
             StaticResource staticResource = StaticResource.of(httpRequest.getRequestUri());
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-            return ResponseEntity.of(responseBody, HttpStatusCode.OK);
+            httpResponse.setResponseBody(responseBody);
+            return httpResponse;
         }
 
         if (httpRequest.getRequestUri().startsWith("/login") && httpRequest.isMatchMethod(HttpMethod.GET)) {
@@ -38,46 +40,57 @@ public class RequestReader {
                 Session session = httpRequest.getSession(false);
                 User user = (User) session.getAttribute("user");
                 log.info("user: {}", user);
-                return ResponseEntity.redirect(INDEX_HTML, HttpStatusCode.FOUND);
+                httpResponse.location(INDEX_HTML);
+                httpResponse.setStatusCode(HttpStatusCode.FOUND);
+                return httpResponse;
+
             }
             StaticResource staticResource = StaticResource.of(LOGIN_HTML);
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-            return ResponseEntity.of(responseBody, HttpStatusCode.OK);
+            httpResponse.setResponseBody(responseBody);
+            return httpResponse;
         }
 
         if (httpRequest.isStartsWith("/login") && httpRequest.isMatchMethod(HttpMethod.POST)) {
             String account = httpRequest.getBody("account");
             String password = httpRequest.getBody("password");
-            return redirectLogin(httpRequest, account, password);
+            return redirectLogin(httpRequest, httpResponse, account, password);
         }
 
         if (httpRequest.isStartsWith("/register") && httpRequest.isMatchMethod(HttpMethod.GET)) {
             StaticResource staticResource = StaticResource.of(REGISTER_HTML);
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-            return ResponseEntity.of(responseBody, HttpStatusCode.OK);
+            httpResponse.setResponseBody(responseBody);
+            return httpResponse;
         }
 
         if (httpRequest.isStartsWith("/register") && httpRequest.isMatchMethod(HttpMethod.POST)) {
             InMemoryUserRepository.save(new User(httpRequest.getBody("account"), httpRequest.getBody("password"), httpRequest.getBody("email")));
-            return ResponseEntity.redirect(INDEX_HTML, HttpStatusCode.FOUND);
+            httpResponse.location(INDEX_HTML);
+            httpResponse.setStatusCode(HttpStatusCode.FOUND);
+            return httpResponse;
         }
-
-        return ResponseEntity.of(ResponseBody.of("Hello world!", "html"), HttpStatusCode.OK);
+        httpResponse.setResponseBody(ResponseBody.of("Hello world!", "html"));
+        return httpResponse;
     }
 
-    private ResponseEntity redirectLogin(HttpRequest httpRequest, String account, String password) throws IOException {
+    private HttpResponse redirectLogin(HttpRequest httpRequest, HttpResponse httpResponse, String account, String password) throws IOException {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UserNotFoundException::new);
         if (!user.checkPassword(password)) {
             StaticResource staticResource = StaticResource.of(UNAUTHORIZED_HTML);
             ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
-            return ResponseEntity.of(responseBody, HttpStatusCode.UNAUTHORIZED);
+            httpResponse.setStatusCode(HttpStatusCode.UNAUTHORIZED);
+            httpResponse.setResponseBody(responseBody);
+            return httpResponse;
+
         }
         log.info("user: {}", user);
-        ResponseEntity responseEntity = ResponseEntity.redirect(INDEX_HTML, HttpStatusCode.FOUND);
         Session session = httpRequest.getSession(true);
         session.setAttribute("user", user);
-        responseEntity.addCookie(HttpCookie.jSessionId(session.getId()));
-        return responseEntity;
+        httpResponse.location(INDEX_HTML);
+        httpResponse.setStatusCode(HttpStatusCode.FOUND);
+        httpResponse.addCookie(HttpCookie.jSessionId(session.getId()));
+        return httpResponse;
     }
 }

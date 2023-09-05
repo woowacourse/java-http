@@ -11,27 +11,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResponseHeadersTest {
 
     @Test
-    void 응답헤더를_생성한다2() {
+    void 응답헤더를_생성한다() {
         // given
         ResponseHeaders responseHeaders = ResponseHeaders.of(ResponseBody.of("Hello, World!", "html"));
 
         // when
-        String response = responseHeaders.toString();
+        String response = responseHeaders.parse();
 
         // then
-        assertThat(response).isEqualTo("Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 13 \r\n");
+        assertThat(response).isEqualTo(
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                        "Content-Length: 13 \r\n");
     }
 
     @Test
     void redirect_응답_헤더를_생성한다() {
         // given
-        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirect("/index.html");
+        ResponseHeaders responseHeaders = ResponseHeaders.of(ResponseBody.EMPTY);
+        responseHeaders.setLocation("/index.html");
 
         // when
-        String response = responseHeaders.toString();
+        String response = responseHeaders.parse();
 
         // then
-        assertThat(response).isEqualTo("Location: /index.html \r\n");
+        assertThat(response).isEqualTo(
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                        "Content-Length: 0 \r\n" +
+                        "Location: /index.html \r\n");
     }
 }

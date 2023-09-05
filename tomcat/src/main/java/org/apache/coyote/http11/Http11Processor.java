@@ -32,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
             var httpRequest = HttpRequest.parse(inputStream);
             var requestReader = new RequestReader();
             var responseEntity = requestReader.parse(httpRequest);
-            var response = responseEntity.toString();
+            var response = responseEntity.parse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

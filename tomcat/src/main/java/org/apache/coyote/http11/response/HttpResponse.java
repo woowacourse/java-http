@@ -14,26 +14,33 @@ public class HttpResponse {
         this.statusLine = statusLine;
     }
 
-    public static HttpResponse of(ResponseBody responseBody, HttpStatusCode statusCode) {
+    public static HttpResponse create() {
+        ResponseBody responseBody = ResponseBody.EMPTY;
         ResponseHeaders responseHeaders = ResponseHeaders.of(responseBody);
-        StatusLine statusLine = new StatusLine(statusCode);
+        StatusLine statusLine = StatusLine.ok();
         return new HttpResponse(responseHeaders, responseBody, statusLine);
     }
 
-    public static HttpResponse redirect(String location, HttpStatusCode httpStatusCode) {
-        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirect(location);
-        StatusLine statusLine = new StatusLine(httpStatusCode);
-        return new HttpResponse(responseHeaders, ResponseBody.EMPTY, statusLine);
+    public void setResponseBody(ResponseBody responseBody) {
+        this.responseHeaders.addContent(responseBody);
+        this.responseBody.setContent(responseBody);
     }
 
     public void addCookie(HttpCookie cookie) {
-        responseHeaders.addCookie(cookie);
+        this.responseHeaders.addCookie(cookie);
     }
 
-    @Override
-    public String toString() {
-        return statusLine + "\r\n" +
-                responseHeaders + "\r\n" +
+    public void setStatusCode(HttpStatusCode httpStatusCode) {
+        this.statusLine.setStatusCode(httpStatusCode);
+    }
+
+    public void location(String location) {
+        this.responseHeaders.setLocation(location);
+    }
+
+    public String parse() {
+        return statusLine.parse() + "\r\n" +
+                responseHeaders.parse() + "\r\n" +
                 responseBody.getContent();
     }
 }

@@ -16,7 +16,7 @@ class StatusLineTest {
         StatusLine statusLine = new StatusLine(HttpStatusCode.OK);
 
         // when
-        String response = statusLine.toString();
+        String response = statusLine.parse();
 
         // then
         assertThat(response).isEqualTo("HTTP/1.1 200 OK ");

@@ -70,7 +70,7 @@ public class HandlerMapper {
         if (body.isPresent()) {
             return response.append(responseWithBody(httpResponse, body.get())).toString();
         }
-        String str = responseNoBody(httpResponse);
+        String str = responseWithoutBody(httpResponse);
         response.append("\r\n");
         return response.append(str).toString();
     }
@@ -99,7 +99,7 @@ public class HandlerMapper {
         return stringJoiner.toString();
     }
 
-    private String responseNoBody(HttpResponse<Object> httpResponse) {
+    private String responseWithoutBody(HttpResponse<Object> httpResponse) {
         Map<String, String> headers = httpResponse.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));

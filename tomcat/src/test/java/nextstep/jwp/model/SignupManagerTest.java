@@ -16,38 +16,19 @@ class SignupManagerTest {
     }
 
     @Test
-    void account_없이_회원가입을_할_경우_예외가_발생한다() {
-        final RequestBody requestBody = RequestBody.from("password=wuga&email=gugu@naver.com");
-
-        assertThatThrownBy(() -> SignupManager.singUp(requestBody))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void password_없이_회원가입을_할_없는_경우_예외가_발생한다() {
-        final RequestBody requestBody = RequestBody.from("account=wuga&email=gugu@naver.com");
-
-        assertThatThrownBy(() -> SignupManager.singUp(requestBody))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void email_없이_회원가입을_할_경우_예외가_발생한다() {
-        final RequestBody requestBody = RequestBody.from("account=wuga&password=wuga");
-
-        assertThatThrownBy(() -> SignupManager.singUp(requestBody))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void 잘못된_요청으로_회원가입을_할_경우_예외가_발생한다() {
-        final RequestBody requestBody = RequestBody.from("");
+        final RequestBody emptyBody = RequestBody.from("");
+        final RequestBody notExistAccountBody = RequestBody.from("password=wuga&email=gugu@naver.com");
+        final RequestBody notExistPasswordBody = RequestBody.from("account=wuga&email=gugu@naver.com");
+        final RequestBody notExistEmailPasswordBody = RequestBody.from("account=wuga&password=wuga");
 
-        assertThatThrownBy(() -> SignupManager.singUp(requestBody))
+        assertThatThrownBy(() -> SignupManager.singUp(emptyBody))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    public RequestBody getRequestBody() {
-        return RequestBody.from("account=wuga&password=wuga&email=gugu@naver.com");
+        assertThatThrownBy(() -> SignupManager.singUp(notExistAccountBody))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SignupManager.singUp(notExistPasswordBody))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SignupManager.singUp(notExistEmailPasswordBody))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

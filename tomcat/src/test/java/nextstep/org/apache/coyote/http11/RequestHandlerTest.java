@@ -23,7 +23,7 @@ class RequestHandlerTest {
     @Test
     void handleRoot() throws IOException {
         final Response response = RequestHandler.handle(
-                Request.from("get", "/", new Headers(Map.of("Accept", "text/html")), "")
+                Request.of("get", "/", new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -38,7 +38,7 @@ class RequestHandlerTest {
     })
     void handleHTML(final String URI) throws IOException {
         final Response response = RequestHandler.handle(
-                Request.from("get", URI, new Headers(Map.of("Accept", "text/html")), "")
+                Request.of("get", URI, new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -49,7 +49,7 @@ class RequestHandlerTest {
     @Test
     void handleCSS() throws IOException {
         final Response response = RequestHandler.handle(
-                Request.from("get", "/css/styles.css", new Headers(Map.of("Accept", "text/html")), "")
+                Request.of("get", "/css/styles.css", new Headers(Map.of("Accept", "text/html")), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -60,7 +60,7 @@ class RequestHandlerTest {
     @Test
     void handleNotFound() throws IOException {
         final Response response = RequestHandler.handle(
-                Request.from(
+                Request.of(
                         "get", "/neverexist/not.css", new Headers(Map.of("Accept", "text/html")), "")
         );
 

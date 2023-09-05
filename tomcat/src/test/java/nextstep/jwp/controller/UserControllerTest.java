@@ -24,7 +24,7 @@ class UserControllerTest {
         sessionManager.add(session);
 
         final Response response = UserController.login(
-                Request.from("post", "/login",
+                Request.of("post", "/login",
                         new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
                         "account=gugu&password=password"));
 
@@ -39,7 +39,7 @@ class UserControllerTest {
         sessionManager.add(session);
 
         final Response response = UserController.login(
-                Request.from("post", "/login",
+                Request.of("post", "/login",
                         new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
                         "account=dodo&password=password"));
 

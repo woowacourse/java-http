@@ -29,7 +29,7 @@ public class Request {
         this.body = body;
     }
 
-    public static Request from(
+    public static Request of(
             final String methodName,
             final String requestURI,
             final Headers headers,

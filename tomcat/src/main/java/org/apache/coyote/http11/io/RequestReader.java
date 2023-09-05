@@ -27,7 +27,7 @@ public class RequestReader {
         final var headers = readHeaders();
         final var body = readBody(headers);
 
-        return Request.from(
+        return Request.of(
                 method,
                 uri,
                 headers,

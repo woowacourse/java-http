@@ -21,18 +21,11 @@ public class StaticResourceHandler implements Handler {
     }
 
     private HttpContentType getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return HttpContentType.TEXT_HTML;
+        int index = path.lastIndexOf(".");
+        if (index <= 0) {
+            return HttpContentType.TEXT_PLAIN;
         }
-        if (path.endsWith(".css")) {
-            return HttpContentType.TEXT_CSS;
-        }
-        if (path.endsWith(".js")) {
-            return HttpContentType.APPLICATION_JAVASCRIPT;
-        }
-        if (path.endsWith(".svg")) {
-            return HttpContentType.IMAGE_SVG;
-        }
-        return HttpContentType.TEXT_PLAIN;
+        String extension = path.substring(index);
+        return HttpContentType.from(extension);
     }
 }

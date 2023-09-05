@@ -1,20 +1,35 @@
 package org.apache.coyote.common;
 
 public enum HttpContentType {
-    TEXT_PLAIN("text/plain"),
-    TEXT_HTML("text/html;charset=utf-8"),
-    TEXT_CSS("text/css"),
-    APPLICATION_JAVASCRIPT("application/javascript"),
-    IMAGE_SVG("image/svg+xml"),
+    TEXT_PLAIN("text/plain", "."),
+    TEXT_HTML("text/html;charset=utf-8", ".html"),
+    TEXT_CSS("text/css", ".css"),
+    APPLICATION_JAVASCRIPT("application/javascript", ".js"),
+    IMAGE_SVG("image/svg+xml", ".svg"),
     ;
 
     private final String value;
+    private final String extension;
 
-    HttpContentType(String value) {
+    HttpContentType(String value, String extension) {
         this.value = value;
+        this.extension = extension;
+    }
+
+    public static HttpContentType from(String extension) {
+        for (HttpContentType contentType : values()) {
+            if (extension.endsWith(contentType.getExtension())) {
+                return contentType;
+            }
+        }
+        return TEXT_PLAIN;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 }

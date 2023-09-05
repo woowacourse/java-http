@@ -1,6 +1,5 @@
 package org.apache.coyote.httprequest;
 
-import org.apache.coyote.http11.common.CookieHeader;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.httprequest.header.RequestHeaders;
@@ -67,10 +66,6 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
-    }
-
-    public CookieHeader getCookieHeader() {
-        return requestHeaders.getCookieHeader();
     }
 
     public Session getSession(final boolean create) {

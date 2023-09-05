@@ -36,15 +36,15 @@ public class Cookies {
         return new Cookies(result);
     }
 
-    public boolean notExist() {
-        return !entries.containsKey(JAVA_SESSION_ID);
+    public boolean notExist(final String key) {
+        return !entries.containsKey(key);
     }
 
-    public String createNewCookieHeader() {
+    public String createNewJSessionIdHeader() {
         return "Set-Cookie: " + JAVA_SESSION_ID + "=" + UUID.randomUUID();
     }
 
-    public String getCookieValue() {
-        return entries.get(JAVA_SESSION_ID);
+    public String getValue(final String key) {
+        return entries.get(key);
     }
 }

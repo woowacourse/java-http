@@ -16,6 +16,7 @@ import static org.apache.coyote.http11.response.Method.POST;
 
 public class Response {
 
+    private static final String JAVA_SESSION_ID = "JSESSIONID";
     private static final String ROOT_RESPONSE = "Hello world!";
     private static final String COOKIE_KEY = "Cookie";
     private static final int FIRST = 0;
@@ -100,7 +101,7 @@ public class Response {
         if (location.is("login.html")) {
             try {
                 final User user = UserService.login(parameters);
-                UserSession.login(cookies.getCookieValue(), user);
+                UserSession.login(cookies.getValue(JAVA_SESSION_ID), user);
                 return makeResponseForRedirect("/index");
             } catch (Exception e) {
                 return makeResponseForRedirect("/401");
@@ -111,7 +112,7 @@ public class Response {
     }
 
     private String get() throws IOException {
-        if (location.is("login.html") && UserSession.exist(cookies.getCookieValue())) {
+        if (location.is("login.html") && UserSession.exist(cookies.getValue(JAVA_SESSION_ID))) {
             return makeResponseForRedirect("/index");
         }
 
@@ -134,8 +135,8 @@ public class Response {
         responses.add("HTTP/1.1 200 OK ");
         responses.add(location.getContentTypeHeader());
         responses.add("Content-Length: " + body.getBytes().length + " ");
-        if (location.is("login.html") && cookies.notExist()) {
-            responses.add(cookies.createNewCookieHeader());
+        if (location.is("login.html") && cookies.notExist(JAVA_SESSION_ID)) {
+            responses.add(cookies.createNewJSessionIdHeader());
         }
 
         responses.add("");

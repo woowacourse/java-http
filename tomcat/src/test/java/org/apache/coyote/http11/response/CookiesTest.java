@@ -18,7 +18,7 @@ class CookiesTest {
         final Cookies cookies = Cookies.from(cookieHeader);
 
         //then
-        assertThat(cookies.notExist()).isTrue();
+        assertThat(cookies.notExist("JSESSIONID")).isTrue();
     }
 
     @Test
@@ -32,8 +32,8 @@ class CookiesTest {
 
         //then
         assertSoftly(softAssertions -> {
-            assertThat(cookies.getCookieValue()).isEqualTo("test");
-            assertThat(cookies.notExist()).isFalse();
+            assertThat(cookies.getValue("JSESSIONID")).isEqualTo("test");
+            assertThat(cookies.notExist("JSESSIONID")).isFalse();
         });
     }
 
@@ -44,7 +44,7 @@ class CookiesTest {
         final Cookies cookies = Cookies.from(null);
 
         //when
-        final String cookieHeader = cookies.createNewCookieHeader();
+        final String cookieHeader = cookies.createNewJSessionIdHeader();
 
         //then
         assertThat(cookieHeader).contains("Set-Cookie");

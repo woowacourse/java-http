@@ -7,13 +7,13 @@ import java.util.Map;
 
 public class SessionManager {
 
-    private static final Map<User, String> sessions = new HashMap<>();
+    private static final Map<User, HttpCookie> sessions = new HashMap<>();
 
-    public static void add(final User user, String jsessionId) {
-        sessions.put(user, jsessionId);
+    public static void add(final User user, HttpCookie httpCookie) {
+        sessions.put(user, httpCookie);
     }
 
-    public static boolean validUser(final User user) {
+    public static boolean isValidUser(final User user) {
         if(sessions.containsKey(user)) {
             return true;
         }
@@ -21,8 +21,8 @@ public class SessionManager {
         return false;
     }
 
-    public static boolean validJsession(final String jsession) {
-        if(sessions.containsValue(jsession)) {
+    public static boolean isValidHttpCookie(final HttpCookie httpCookie) {
+        if(sessions.containsValue(httpCookie)) {
             return true;
         }
 

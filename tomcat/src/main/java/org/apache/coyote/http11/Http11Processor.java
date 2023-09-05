@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.cookie.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
-import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMPTY_JSESSION = "";
     private static final String CSS = ".css";
     private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
+    private static final HttpCookie httpCookie = new HttpCookie();
     private final Socket connection;
 
 
@@ -50,18 +51,18 @@ public class Http11Processor implements Runnable, Processor {
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);  // HTTP method를 읽음 (예: GET)
             final Map<String, String> headers = parseRequestHeaders(br); // header를 읽음
-            final String jsessionId = getJsessionId(headers);
+            storeJsessionId(headers);
 
             if ("POST".equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
                 final String requestBody = readRequestBody(br, headers);
-                registerUser(requestBody, jsessionId);
+                registerUser(requestBody);
             }
 
             final String path = parseHttpRequest(requestLine); // 파싱된 HTTP 요청에서 경로 추출
-            final String parsedPath = parsePath(path, jsessionId); // 경로를 기반으로 정적 파일을 읽고 응답 생성
+            final String parsedPath = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
             final String responseBody = readStaticFile(parsedPath);
             final String contentType = getContentType(path); // css인 경우 content type을 다르게 준다
-            final var response = getResponse(path, contentType, responseBody, headers, parsedPath, jsessionId);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
+            final var response = getResponse(path, contentType, responseBody, headers, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -70,18 +71,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getJsessionId(final Map<String, String> headers) {
+    private void storeJsessionId(final Map<String, String> headers) {
         if (isContainJsessionId(headers)) {
-            return parseJsessionId(headers);
+           httpCookie.changeJSessionId(parseJsessionId(headers));
         }
-        return UUID.randomUUID().toString();
+        httpCookie.createJSession();
     }
 
-    private String getResponse(final String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath, final String jsessionId) {
+    private String getResponse(final String path, final String contentType, final String responseBody, final Map<String, String> headers, final String parsedPath) {
         if (path.contains("/login?") && parsedPath.equals("/index.html") && !isContainJsessionId(headers)) {
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Set-Cookie: " + "JSESSIONID=" + jsessionId + " ",
+                    "Set-Cookie: " + "JSESSIONID=" + httpCookie.getJSessionId() + " ",
                     "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
@@ -213,15 +214,15 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private String parsePath(final String path, final String jsessionId) {
+    private String parsePath(final String path, final String httpMethod) {
         if (path.contains("/login")) {
-            if (path.contains("?") && !isValidUser(path, jsessionId)) {
+            if (path.contains("?") && !isValidUser(path)) {
                 return "/401.html";
-            } else if (!SessionManager.validJsession(jsessionId)) {
+            } else if (!SessionManager.isValidHttpCookie(httpCookie)) {
                 return "/login.html";
             }
         } else if (path.equals("/register")) {
-            if(SessionManager.validJsession(jsessionId)){
+            if (httpMethod.equals("POST")) {
                 return "/index.html";
             }
             return "/register.html";
@@ -232,7 +233,7 @@ public class Http11Processor implements Runnable, Processor {
         return "/index.html";
     }
 
-    private boolean isValidUser(final String path, final String jsessionId) {
+    private boolean isValidUser(final String path) {
         String noUrlPath = path.replace("/login?", "");
         Map<String, String> loginData = parseLoginData(noUrlPath);
         String parsedAccount = loginData.get("account");
@@ -241,9 +242,10 @@ public class Http11Processor implements Runnable, Processor {
         final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(parsedAccount);
         if (maybeUser.isPresent()) {
             final User foundUser = maybeUser.get();
-            if (foundUser.checkPassword(parsedPassword) && !SessionManager.validUser(foundUser)) {
-                SessionManager.add(foundUser, jsessionId);
+            if (foundUser.checkPassword(parsedPassword) && !SessionManager.isValidUser(foundUser)) {
+                SessionManager.add(foundUser, httpCookie);
                 log.info("로그인 성공! 아이디 : " + parsedAccount);
+
                 return true;
             }
         }
@@ -269,7 +271,7 @@ public class Http11Processor implements Runnable, Processor {
         return loginData;
     }
 
-    private void registerUser(final String requestBody, final String jsessionId) throws IOException {
+    private void registerUser(final String requestBody) throws IOException {
         Map<String, String> userData = parseRequestBody(requestBody);
         String parsedAccount = userData.get("account");
         String parsedEmail = userData.get("email");
@@ -277,7 +279,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = new User(parsedAccount, parsedPassword, parsedEmail);
         InMemoryUserRepository.save(user);
-        SessionManager.add(user, jsessionId);
+        SessionManager.add(user, httpCookie);
         log.info("유저 저장 성공!");
     }
 

@@ -9,24 +9,24 @@ public enum ContentType {
     JS("application/javascript", ".js"),
     ICO("image/x-icon", ".ico");
 
-    final String contentType;
+    final String type;
     final String fileExtension;
 
-    ContentType(final String contentType, final String fileExtension) {
-        this.contentType = contentType;
+    ContentType(final String type, final String fileExtension) {
+        this.type = type;
         this.fileExtension = fileExtension;
     }
 
     public static String getByPath(final String path) {
         return Arrays.stream(values())
                 .filter(it -> path.endsWith(it.getFileExtension()))
-                .map(ContentType::getContentType)
+                .map(ContentType::getType)
                 .findAny()
-                .orElse(HTML.getContentType());
+                .orElse(HTML.getType());
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getType() {
+        return type;
     }
 
     public String getFileExtension() {

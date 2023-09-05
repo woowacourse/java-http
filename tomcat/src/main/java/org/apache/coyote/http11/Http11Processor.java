@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -101,19 +102,36 @@ public class Http11Processor implements Runnable, Processor {
         return ofNullable(resource.getFile()).map(File::new).orElse(null);
     }
 
-    private String getMimeType(final File file) throws IOException {
-        if (file == null) {
-            return "text/plain";
-        }
-        final var urlConnection = file.toURI().toURL().openConnection();
-        return urlConnection.getContentType();
+    private String getMimeType(final File file) {
+        ofNullable(file)
+                .map(this::getContentType)
+                .orElse("text/plain");
+        return getContentType(file);
     }
 
-    private String buildResponseBody(final File file) throws IOException {
-        if (file == null) {
-            return "Hello world!";
+    private String getContentType(final File file) {
+        try {
+            final URLConnection urlConnection = file.toURI().toURL().openConnection();
+            return urlConnection.getContentType();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    private String buildResponseBody(final File file) {
+        return ofNullable(file)
+                .map(this::readString)
+                .orElse("Hello world!");
+    }
+
+    private String readString(final File file) {
+        try {
+            final Path path = file.toPath();
+            final byte[] bytes = Files.readAllBytes(path);
+            return new String(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

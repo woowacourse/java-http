@@ -7,7 +7,7 @@ import org.apache.coyote.http11.Header;
 
 public class HttpResponse {
 
-    private static final String CHARSET_POSTFIX = ";charset=utf-8";
+    private static final String CHARSET_POSTFIX = "; charset=utf-8";
     private static final String ACCEPT_DELIMITER = ",";
     private static final String TEXT_TYPE = "text";
 

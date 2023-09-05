@@ -11,6 +11,10 @@ public class Cookie {
         String[] paramsSplit = cookie.split("; ");
         for (String param : paramsSplit) {
             String[] keyValue = param.split("=");
+            if (keyValue.length == 1) {
+                params.put(keyValue[0], "");
+                continue;
+            }
             params.put(keyValue[0], keyValue[1]);
         }
     }

@@ -107,4 +107,12 @@ public class HttpRequest {
     public String getMethod() {
         return requestLine.getMethod();
     }
+
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
+    }
 }

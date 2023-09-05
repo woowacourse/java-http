@@ -22,7 +22,7 @@ public class FileIOReader {
         }
     }
 
-    private static class ViewResolver {
+    public static class ViewResolver {
 
         private static final String STATIC = "static";
 

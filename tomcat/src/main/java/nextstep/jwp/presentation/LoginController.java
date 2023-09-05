@@ -112,6 +112,7 @@ public class LoginController implements Controller {
         session.setAttribute("user", find);
         sessionManager.add(session);
         response.addHeader(Header.SET_COOKIE.getName(), makeCookie(sessionId));
+        log.info("로그인 성공: {}", find.getAccount());
     }
 
     private String makeCookie(String sessionId) {

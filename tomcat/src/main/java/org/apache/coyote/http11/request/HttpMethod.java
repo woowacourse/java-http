@@ -15,8 +15,8 @@ public enum HttpMethod {
                 .orElse(GET);
     }
 
-    public String getValue() {
-        return name().toUpperCase();
+    public boolean isEqualTo(HttpMethod other) {
+        return this == other;
     }
 
 }

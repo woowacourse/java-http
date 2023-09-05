@@ -66,4 +66,8 @@ public class HttpRequest {
         return headers.getOrDefault(key, "");
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
 }

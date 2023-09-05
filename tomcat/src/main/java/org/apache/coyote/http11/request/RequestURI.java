@@ -39,7 +39,7 @@ public class RequestURI {
     }
 
     public boolean isLoginPage() {
-        return uri.contains("/login");
+        return uri.equals("/login");
     }
 
     public boolean isHome() {

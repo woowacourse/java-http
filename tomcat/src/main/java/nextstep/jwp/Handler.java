@@ -11,8 +11,8 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.QueryString;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestURI;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -32,7 +32,14 @@ public class Handler {
 
     public static HttpResponse run(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestUrl();
-        if (requestURI.isLoginPage()) {
+        if (requestURI.isLoginPage() && httpRequest.getHttpMethod().isEqualTo(HttpMethod.GET)) {
+            return HttpResponse.builder()
+                    .httpStatus(HttpStatus.OK)
+                    .responseBody(parseResponseBody(requestURI.getResourcePath()))
+                    .contentType(httpRequest.contentType())
+                    .build();
+        }
+        if (requestURI.isLoginPage() && httpRequest.getHttpMethod().isEqualTo(HttpMethod.POST)) {
             return doLogin(httpRequest);
         }
         if (requestURI.isHome()) {

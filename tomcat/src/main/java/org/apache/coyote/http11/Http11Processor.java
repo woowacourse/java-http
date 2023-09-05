@@ -7,6 +7,9 @@ import static org.apache.coyote.http11.response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.response.Status.NOT_FOUND;
 import static org.apache.coyote.http11.response.Status.OK;
 import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
+import static org.apache.coyote.http11.utils.Constant.BASE_PATH;
+import static org.apache.coyote.http11.utils.Constant.COOKIE_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
 import static org.apache.coyote.http11.utils.Parser.parseFormData;
 
 import java.io.BufferedReader;
@@ -30,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
     private static final String SESSION_COOKIE_NAME = "JSESSIONID";
-    private static final String LINE_SEPARATOR = "\r\n";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -79,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         final StringBuilder input = new StringBuilder();
         try {
             for (String s = bufferedReader.readLine();
-                 !"".equals(s);
+                 !EMPTY.equals(s);
                  s = bufferedReader.readLine()) {
                 input.append(s)
                         .append(LINE_SEPARATOR);
@@ -129,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse handleGetRequest(final HttpRequest request) {
         final String path = request.getPath();
-        if (path.equals("/")) {
+        if (path.equals(BASE_PATH)) {
             return new HttpResponse(OK, "Hello world!");
         }
         if (path.equals("/favicon.ico")) {
@@ -154,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
 
         response.addHeader("Location", "/index.html");
         if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
-            response.addHeader("Set-Cookie", "JSESSIONID=" + uuid);
+            response.addHeader("Set-Cookie", SESSION_COOKIE_NAME + COOKIE_DELIMITER + uuid);
         }
         return response;
     }
@@ -197,7 +199,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleResponseWithException(final Status status) {
-        final URL resource = convertPathToUrl("/" + status.getCode());
+        final URL resource = convertPathToUrl(BASE_PATH + status.getCode());
         return new HttpResponse(status, resource);
     }
 }

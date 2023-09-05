@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.utils.Constant.EMPTY;
+import static org.apache.coyote.http11.utils.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -11,7 +15,6 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.exception.PageNotFoundException;
 
 public class HttpResponse {
-    private static final String LINE_SEPARATOR = "\r\n";
 
     final Status status;
     final Map<String, String> headers;
@@ -29,7 +32,7 @@ public class HttpResponse {
     }
 
     public HttpResponse(final Status status) {
-        this(status, "");
+        this(status, EMPTY);
     }
 
     public HttpResponse(final Status status, final URL resource) {
@@ -59,7 +62,7 @@ public class HttpResponse {
         return String.join(LINE_SEPARATOR,
                 "HTTP/1.1 " + formattedStatus,
                 formattedHeaders,
-                "",
+                EMPTY,
                 body);
     }
 
@@ -68,6 +71,6 @@ public class HttpResponse {
     }
 
     private String formatHeader(final String header) {
-        return header + ": " + headers.get(header);
+        return header + HEADER_DELIMITER + headers.get(header);
     }
 }

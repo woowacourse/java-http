@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.utils.Constant.COOKIES_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.COOKIE_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.EMPTY;
+import static org.apache.coyote.http11.utils.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
 import static org.apache.coyote.http11.utils.Parser.parseFormData;
 
 import java.util.ArrayList;
@@ -8,7 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
-    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String SPLIT_DELIMITER = " ";
+    private static final int REQUEST_LINE_INDEX = 0;
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int PATH_INDEX = 0;
+    private static final int QUERY_STRING_INDEX = 1;
+    private static final String HEADER_COOKIE = "Cookie";
+    private static final int SPLIT_LIMIT_SIZE = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    public static final String QUERY_STRING_DELIMITER = "\\?";
 
     final Method method;
     final String path;
@@ -33,21 +48,21 @@ public class HttpRequest {
     public static HttpRequest from(final String request) {
         final List<String> lines = new ArrayList<>(List.of(request.split(LINE_SEPARATOR)));
 
-        final String[] requestUri = lines.remove(0).split(" ");
-        final String method = requestUri[0];
-        final String uri = requestUri[1];
+        final String[] requestUri = lines.remove(REQUEST_LINE_INDEX).split(SPLIT_DELIMITER);
+        final String method = requestUri[METHOD_INDEX];
+        final String uri = requestUri[URI_INDEX];
 
-        final String[] uris = uri.split("\\?");
-        final String path = uris[0];
+        final String[] uris = uri.split(QUERY_STRING_DELIMITER);
+        final String path = uris[PATH_INDEX];
 
-        String queryString = "";
+        String queryString = EMPTY;
         if (uris.length > 1) {
-            queryString = uris[1];
+            queryString = uris[QUERY_STRING_INDEX];
         }
         final Map<String, String> queryParams = parseFormData(queryString);
         final Map<String, String> headers = parseHeaders(lines);
 
-        final String cookieFields = headers.remove("Cookie");
+        final String cookieFields = headers.remove(HEADER_COOKIE);
         final Map<String, String> cookies = parseCookies(cookieFields);
 
         return new HttpRequest(
@@ -62,11 +77,11 @@ public class HttpRequest {
     private static Map<String, String> parseHeaders(final List<String> lines) {
         final Map<String, String> headers = new HashMap<>();
         for (final String line : lines) {
-            if ("".equals(line)) {
+            if (EMPTY.equals(line)) {
                 break;
             }
-            final String[] header = line.split(": ", 2);
-            headers.put(header[0], header[1]);
+            final String[] header = line.split(HEADER_DELIMITER, SPLIT_LIMIT_SIZE);
+            headers.put(header[KEY_INDEX], header[VALUE_INDEX]);
         }
         return headers;
     }
@@ -77,9 +92,9 @@ public class HttpRequest {
             return cookies;
         }
 
-        for (final String field : cookieFields.split("; ")) {
-            final String[] cookie = field.split("=", 2);
-            cookies.put(cookie[0], cookie[1]);
+        for (final String field : cookieFields.split(COOKIES_DELIMITER)) {
+            final String[] cookie = field.split(COOKIE_DELIMITER, SPLIT_LIMIT_SIZE);
+            cookies.put(cookie[KEY_INDEX], cookie[VALUE_INDEX]);
         }
         return cookies;
     }

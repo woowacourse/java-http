@@ -8,7 +8,7 @@ public enum HttpMethod {
 
     public static HttpMethod from(String name) {
         return Arrays.stream(values())
-            .filter(it -> it.name().equals(name))
+            .filter(it -> it.name().equalsIgnoreCase(name))
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);
     }

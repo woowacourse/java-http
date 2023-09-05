@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import nextstep.jwp.handler.HttpRequestParser;
 import nextstep.jwp.handler.RequestHandler;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
@@ -192,8 +193,9 @@ class RequestHandlerTest {
     private HttpResponse HTTP_요청을_보낸다(String request) {
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         try {
-            return requestHandler.handle(new HttpRequest(inputStream));
+            return requestHandler.handle(HttpRequestParser.create(inputStream));
         } catch (IOException e) {
+
             throw new RuntimeException(e);
         }
     }

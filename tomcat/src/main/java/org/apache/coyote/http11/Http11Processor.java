@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.HttpRequestParser;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
-            HttpRequest request = new HttpRequest(inputStream);
+            HttpRequest request = HttpRequestParser.create(inputStream);
             byte[] response = Handler.handle(request);
             outputStream.write(response);
             outputStream.flush();

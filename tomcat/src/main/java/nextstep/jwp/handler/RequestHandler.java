@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
@@ -91,8 +92,8 @@ public class RequestHandler {
     }
 
     private boolean isLogin(HttpRequest request) {
-        HttpCookie cookie = request.getCookie();
-        if (cookie == null) {
+        Map<String, String> cookie = request.getCookie();
+        if (cookie.isEmpty()) {
             return false;
         }
 
@@ -117,7 +118,11 @@ public class RequestHandler {
         if (request.getMethod() == HttpMethod.GET) {
             return getFile("/register.html");
         }
-        Map<String, String> body = request.getBody();
+        Map<String, String> body = Arrays.stream(request.getBody().split("&"))
+            .map(it -> it.split("="))
+            .collect(Collectors.toMap(
+                keyAndValue -> keyAndValue[0],
+                keyAndValue -> keyAndValue[1]));
         InMemoryUserRepository.save(new User(
             body.get("account"),
             body.get("password"),

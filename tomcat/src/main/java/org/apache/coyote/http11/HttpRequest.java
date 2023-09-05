@@ -1,49 +1,27 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import nextstep.jwp.handler.HttpStartLine;
 
 public class HttpRequest {
 
-    private final Map<String, String> values = new ConcurrentHashMap<>();
+    private final HttpStartLine httpStartLine;
+    private final Map<String, String> headers;
+    private final Map<String, String> cookies;
+    private final String body;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        boolean isStartLine = true;
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            if (isStartLine) {
-                String[] startLine = line.split(" ");
-                values.put("method", startLine[0]);
-                values.put("target", startLine[1]);
-                values.put("version", startLine[2]);
-                isStartLine = false;
-            } else {
-                String[] messages = line.split(": ");
-                values.put(messages[0], messages[1]);
-            }
-        }
-
-        String contentLength = values.get("Content-Length");
-        if (contentLength != null) {
-            int length = Integer.parseInt(contentLength);
-            char[] buffer = new char[length];
-            bufferedReader.read(buffer, 0, length);
-            values.put("body", new String(buffer));
-        }
+    public HttpRequest(HttpStartLine httpStartLine, Map<String, String> headers, Map<String, String> cookies,
+                        String body) {
+        this.httpStartLine = httpStartLine;
+        this.headers = headers;
+        this.cookies = cookies;
+        this.body = body;
     }
 
     public String getUri() {
-        String target = values.get("target");
+        String target = httpStartLine.getTarget();
         int queryStringIdx = target.indexOf("?");
         if (queryStringIdx == -1) {
             return target;
@@ -53,7 +31,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryString() {
-        String target = values.get("target");
+        String target = httpStartLine.getTarget();
         int queryStringIdx = target.indexOf("?");
         if (queryStringIdx == -1) {
             throw new IllegalStateException();
@@ -63,8 +41,8 @@ public class HttpRequest {
         return parseKeyAndValue(queryStrings);
     }
 
-    public Map<String, String> getBody() {
-        return parseKeyAndValue(values.get("body"));
+    public String getBody() {
+        return body;
     }
 
     private Map<String, String> parseKeyAndValue(String input) {
@@ -76,18 +54,10 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return HttpMethod.from(values.get("method"));
+        return httpStartLine.getMethod();
     }
 
-    public HttpCookie getCookie() {
-        if (values.get("Cookie") == null) {
-            return null;
-        }
-        Map<String, String> cookie = Arrays.stream(values.get("Cookie").split("; "))
-            .map(it -> it.split("="))
-            .collect(Collectors.toMap(
-                keyAndValue -> keyAndValue[0],
-                keyAndValue -> keyAndValue[1]));
-        return new HttpCookie(cookie);
+    public Map<String, String> getCookie() {
+        return cookies;
     }
 }

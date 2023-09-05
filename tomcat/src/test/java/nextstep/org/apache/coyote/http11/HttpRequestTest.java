@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import nextstep.jwp.handler.HttpStartLine;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.Test;
@@ -20,16 +24,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 class HttpRequestTest {
 
     @Test
-    void HTTP_요청의_uri를_반환한다() throws IOException {
+    void HTTP_요청의_uri를_반환한다() {
         // given
-        String httpRequest= String.join("\r\n",
-            "GET /index.html HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine("get", "/index.html", null),
+            null,
+            null,
+            null
+        );
 
         // when
         String actual = request.getUri();
@@ -39,14 +41,14 @@ class HttpRequestTest {
     }
 
     @Test
-    void uri는_query_string_없이_반환한다() throws IOException {
+    void uri는_query_string_없이_반환한다() {
         // given
-        String httpRequest= String.join("\r\n",
-            "GET /blackCat?age=30&name=wooseok HTTP/1.1 ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine("get", "/blackCat?age=30&name=wooseok", null),
+            null,
+            null,
+            null
+        );
 
         // when
         String actual = request.getUri();
@@ -56,35 +58,35 @@ class HttpRequestTest {
     }
 
     @Test
-    void query_string을_반환한다() throws IOException {
+    void query_string을_반환한다() {
         // given
-        String httpRequest= String.join("\r\n",
-            "GET /blackCat?age=30&name=wooseok HTTP/1.1 ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine("get", "/blackCat?age=30&name=wooseok", null),
+            null,
+            null,
+            null
+        );
 
         // when
-        Map<String, String> queryString = request.getQueryString();
+        Map<String, String> actual = request.getQueryString();
 
         // then
         assertAll(
-            () -> assertThat(queryString.get("age")).isEqualTo("30"),
-            () -> assertThat(queryString.get("name")).isEqualTo("wooseok"),
-            () -> assertThat(queryString).hasSize(2)
+            () -> assertThat(actual.get("age")).isEqualTo("30"),
+            () -> assertThat(actual.get("name")).isEqualTo("wooseok"),
+            () -> assertThat(actual).hasSize(2)
         );
     }
 
     @Test
-    void query_string이_없는데_요청시_예외() throws IOException {
+    void query_string이_없는데_요청시_예외() {
         // given
-        String httpRequest= String.join("\r\n",
-            "GET /blackCat HTTP/1.1 ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine("get", "/index.html", null),
+            null,
+            null,
+            null
+        );
 
         // when & then
         assertThatThrownBy(() -> request.getQueryString())
@@ -92,36 +94,28 @@ class HttpRequestTest {
     }
 
     @Test
-    void body를_반환한다() throws IOException {
+    void body를_반환한다() {
         // given
-        String httpRequest= String.join("\r\n",
-            "GET /blackCat HTTP/1.1 ",
-            "Content-Length: 33",
-            "",
-            "name=hyunseo&password=hyunseo1234");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine("get", null, null), null, null, "name=hyunseo&password=hyunseo1234");
 
         // when
-        Map<String, String> body = request.getBody();
+        String actual = request.getBody();
 
         // then
-        assertAll(
-            () -> assertThat(body.get("name")).isEqualTo("hyunseo"),
-            () -> assertThat(body.get("password")).isEqualTo("hyunseo1234"),
-            () -> assertThat(body).hasSize(2)
-        );
+        assertThat(actual).isEqualTo("name=hyunseo&password=hyunseo1234");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"POST", "GET"})
-    void HTTP_method를_반환한다(String method) throws IOException {
+    void HTTP_method를_반환한다(String method) {
         // given
-        String httpRequest = String.join("\r\n",
-            method + " /blackCat HTTP/1.1 ",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest request = new HttpRequest(inputStream);
+        HttpRequest request = new HttpRequest(
+            new HttpStartLine(method, null, null),
+            null,
+            null,
+            null
+        );
 
         // when
         HttpMethod actual = request.getMethod();

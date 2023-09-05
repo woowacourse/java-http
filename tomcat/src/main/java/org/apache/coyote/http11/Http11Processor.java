@@ -2,10 +2,17 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.handler.RequestHandlerComposite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -26,19 +33,16 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest request = HttpRequest.from(br);
+            log.info("=============> HTTP Request : \n {}", request);
+            final HttpResponse response = RequestHandlerComposite.handle(request);
+            log.info("=============> HTTP Response : \n {}", response);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(Http11ResponseConverter.convertToBytes(response));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

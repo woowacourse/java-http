@@ -32,12 +32,12 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader reader) throws IOException {
         String rawRequestLine = Objects.requireNonNull(reader.readLine());
-        Uri uri = Uri.from(rawRequestLine);
-
         List<String> headersRead = readHeader(reader);
-        Headers headers = Headers.from(getHeaders(headersRead));
 
+        Uri uri = Uri.from(rawRequestLine);
+        Headers headers = Headers.from(getHeaders(headersRead));
         Optional<String> contentLength = headers.getHeader(Header.CONTENT_LENGTH);
+
         if (contentLength.isPresent()) {
             String rawContentLength = contentLength.get();
             String body = getBody(reader, Integer.parseInt(rawContentLength.trim()));

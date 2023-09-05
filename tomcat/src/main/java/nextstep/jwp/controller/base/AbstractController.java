@@ -16,7 +16,7 @@ public abstract class AbstractController implements Controller {
             return doPost(httpRequest);
         }
 
-        throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
+        throw new UnsupportedMethodException();
     }
 
     protected HttpResponse doGet(HttpRequest httpRequest) throws Exception {

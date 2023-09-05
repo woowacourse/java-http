@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler.controller.base;
 
 import nextstep.jwp.controller.base.Dict;
+import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.http11.request.uri.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,10 +39,10 @@ class DictTest {
         // when & then
         assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> Dict.find(path, invalidHttpMethod))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(NotFoundException.class);
 
             softly.assertThatThrownBy(() -> Dict.find(invalidPath, httpMethod))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(NotFoundException.class);
         });
     }
 }

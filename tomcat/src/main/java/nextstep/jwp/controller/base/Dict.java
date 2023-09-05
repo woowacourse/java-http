@@ -1,5 +1,6 @@
 package nextstep.jwp.controller.base;
 
+import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.http11.request.uri.HttpMethod;
 
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public enum Dict {
         return Arrays.stream(values())
                 .filter(it -> it.getPath().startsWith(path) && it.getHttpMethod().equals(httpMethod))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("해당 요청을 처리할 수 없습니다."));
+                .orElseThrow(NotFoundException::new);
     }
 
     public String getPath() {

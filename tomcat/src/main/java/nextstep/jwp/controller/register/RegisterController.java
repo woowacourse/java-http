@@ -1,15 +1,13 @@
 package nextstep.jwp.controller.register;
 
-import javassist.NotFoundException;
 import nextstep.jwp.controller.base.AbstractController;
+import nextstep.jwp.exception.DuplicatedAccountException;
+import nextstep.jwp.exception.InvalidEmailFormException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Status;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 
 public class RegisterController extends AbstractController {
@@ -31,10 +29,14 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) throws NotFoundException, IOException, URISyntaxException {
+    protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
         Map<String, String> params = httpRequest.getBody().getParams();
-        userService.register(params.get("account"), params.get("password"), params.get("email"));
 
-        return HttpResponse.withResource(Status.FOUND, "/index.html");
+        try {
+            userService.register(params.get("account"), params.get("password"), params.get("email"));
+            return HttpResponse.withResource(Status.FOUND, "/index.html");
+        } catch (DuplicatedAccountException | InvalidEmailFormException e) {
+            return HttpResponse.withResource(Status.BAD_REQUEST, "/400.html");
+        }
     }
 }

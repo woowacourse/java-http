@@ -8,16 +8,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @SuppressWarnings("NonAsciiCharacters")
-class ResponseEntityTest {
+class HttpResponseTest {
 
     @Test
     void 상태코드와_응답바디로_응답을_생성한다() {
         // given
         ResponseBody responseBody = ResponseBody.of("Hello, World!", "html");
-        ResponseEntity responseEntity = ResponseEntity.of(responseBody, HttpStatusCode.OK);
+        HttpResponse httpResponse = HttpResponse.of(responseBody, HttpStatusCode.OK);
 
         // when
-        String response = responseEntity.toString();
+        String response = httpResponse.toString();
 
         // then
         assertThat(response).isEqualTo("HTTP/1.1 200 OK \r\n" +
@@ -30,10 +30,10 @@ class ResponseEntityTest {
     @Test
     void 리다이렉트_응답을_생성한다() {
         // given
-        ResponseEntity responseEntity = ResponseEntity.redirect("/index.html", HttpStatusCode.FOUND);
+        HttpResponse httpResponse = HttpResponse.redirect("/index.html", HttpStatusCode.FOUND);
 
         // when
-        String response = responseEntity.toString();
+        String response = httpResponse.toString();
 
         // then
         assertThat(response).isEqualTo("HTTP/1.1 302 Found \r\n" +

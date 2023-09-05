@@ -86,7 +86,6 @@ public class HttpResponse {
                 final HttpHeaders headers = HttpHeaders.createResponse(path);
                 final String responseBody = new String(content);
 
-
                 final Session session = SessionManager.findSession(request.getHeaders().getCookie("JSESSIONID"));
                 if (uri.equals("/login") && Objects.nonNull(session)) {
                     url = HttpResponse.class.getClassLoader()

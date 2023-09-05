@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class Session {
 

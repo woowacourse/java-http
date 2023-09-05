@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public enum FileContent {
 
@@ -10,8 +9,7 @@ public enum FileContent {
     REGISTER("/register", "/register.html"),
     ERROR_401("/401", "/401.html"),
     ERROR_404("/404", "/404.html"),
-    ERROR_500("/500", "/500.html")
-    ;
+    ERROR_500("/500", "/500.html");
 
     private final String fileName;
     private final String fileNameWithExtension;

@@ -160,8 +160,7 @@ class IOStreamTest {
     class FilterStream_학습_테스트 {
 
         /**
-         * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.<br/>
-         * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.<br/>
+         * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.<br/> InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.<br/>
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
@@ -186,9 +185,8 @@ class IOStreamTest {
     class InputStreamReader_학습_테스트 {
 
         /**
-         * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다. <br/>
-         * 읽어온 문자(char)를 문자열(String)로 처리하자.<br/>
-         * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
+         * InputStreamReader를 사용해서 바이트를 문자(char)로 읽어온다. <br/> 읽어온 문자(char)를 문자열(String)로 처리하자.<br/> 필터인 BufferedReader를
+         * 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {

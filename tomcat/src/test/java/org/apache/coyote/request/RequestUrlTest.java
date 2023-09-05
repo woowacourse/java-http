@@ -37,7 +37,7 @@ class RequestUrlTest {
     }
 
     @Test
-    @DisplayName("url의 값이 존재하지않지만 html 문서는 존재할 때 해당 html 문서를 url로.")
+    @DisplayName("url의 값이 존재하지않지만 html 문서는 존재할 때 해당 html 문서를 url로 생성한다.")
     void no_url_html() {
         RequestUrl requestUrl = RequestUrl.of("/index", new HashMap<>());
 

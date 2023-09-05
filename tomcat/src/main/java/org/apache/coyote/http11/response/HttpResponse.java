@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.exception.PageNotFoundException;
 
-public class Http11Response {
+public class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
 
     final Status status;
     final Map<String, String> headers;
     final String body;
 
-    public Http11Response(final Status status, final String body) {
+    public HttpResponse(final Status status, final String body) {
         this.status = status;
         this.headers = new LinkedHashMap<>();
         headers.put("Content-Type", "text/html;charset=utf-8 ");
@@ -28,11 +28,11 @@ public class Http11Response {
         }
     }
 
-    public Http11Response(final Status status) {
+    public HttpResponse(final Status status) {
         this(status, "");
     }
 
-    public Http11Response(final Status status, final URL resource) {
+    public HttpResponse(final Status status, final URL resource) {
         this(status, readResponseBody(resource));
     }
 

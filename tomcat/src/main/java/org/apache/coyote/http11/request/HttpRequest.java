@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Http11Request {
+public class HttpRequest {
     private static final String LINE_SEPARATOR = "\r\n";
 
     final Method method;
@@ -17,11 +17,11 @@ public class Http11Request {
     final Map<String, String> cookies;
     String body;
 
-    public Http11Request(final Method method,
-                         final String path,
-                         final Map<String, String> queryParams,
-                         final Map<String, String> headers,
-                         final Map<String, String> cookies
+    public HttpRequest(final Method method,
+                       final String path,
+                       final Map<String, String> queryParams,
+                       final Map<String, String> headers,
+                       final Map<String, String> cookies
     ) {
         this.method = method;
         this.path = path;
@@ -30,7 +30,7 @@ public class Http11Request {
         this.cookies = cookies;
     }
 
-    public static Http11Request from(final String request) {
+    public static HttpRequest from(final String request) {
         final List<String> lines = new ArrayList<>(List.of(request.split(LINE_SEPARATOR)));
 
         final String[] requestUri = lines.remove(0).split(" ");
@@ -50,7 +50,7 @@ public class Http11Request {
         final String cookieFields = headers.remove("Cookie");
         final Map<String, String> cookies = parseCookies(cookieFields);
 
-        return new Http11Request(
+        return new HttpRequest(
                 Method.getMethod(method),
                 path,
                 queryParams,

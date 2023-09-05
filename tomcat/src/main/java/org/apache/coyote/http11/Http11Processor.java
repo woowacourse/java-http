@@ -21,9 +21,9 @@ import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.PageNotFoundException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +51,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Http11Request request = readRequest(inputStream);
-            final Http11Response response = handleRequest(request);
+            final HttpRequest request = readRequest(inputStream);
+            final HttpResponse response = handleRequest(request);
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
@@ -62,11 +62,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Request readRequest(final InputStream inputStream) {
+    private HttpRequest readRequest(final InputStream inputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final Http11Request request = readRequestHeader(bufferedReader);
+        final HttpRequest request = readRequestHeader(bufferedReader);
         final String contentLength = request.getHeader("Content-Length");
         if (contentLength != null) {
             final String requestBody = readRequestBody(bufferedReader, Integer.parseInt(contentLength));
@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private Http11Request readRequestHeader(final BufferedReader bufferedReader) {
+    private HttpRequest readRequestHeader(final BufferedReader bufferedReader) {
         final StringBuilder input = new StringBuilder();
         try {
             for (String s = bufferedReader.readLine();
@@ -88,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
 
-        return Http11Request.from(input.toString());
+        return HttpRequest.from(input.toString());
     }
 
     private String readRequestBody(final BufferedReader bufferedReader, final int contentLength) {
@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private Http11Response handleRequest(final Http11Request request) {
+    private HttpResponse handleRequest(final HttpRequest request) {
         try {
             return handleRequestWithMethod(request);
         } catch (final PageNotFoundException e) {
@@ -116,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response handleRequestWithMethod(final Http11Request request) {
+    private HttpResponse handleRequestWithMethod(final HttpRequest request) {
         final Method method = request.getMethod();
         if (method == GET) {
             return handleGetRequest(request);
@@ -127,13 +127,13 @@ public class Http11Processor implements Runnable, Processor {
         throw new PageNotFoundException(request.getPath());
     }
 
-    private Http11Response handleGetRequest(final Http11Request request) {
+    private HttpResponse handleGetRequest(final HttpRequest request) {
         final String path = request.getPath();
         if (path.equals("/")) {
-            return new Http11Response(OK, "Hello world!");
+            return new HttpResponse(OK, "Hello world!");
         }
         if (path.equals("/favicon.ico")) {
-            return new Http11Response(OK, "Icon Not Exist!");
+            return new HttpResponse(OK, "Icon Not Exist!");
         }
         if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
             return handleAuthResponse(request, request.getCookie(SESSION_COOKIE_NAME));
@@ -141,7 +141,7 @@ public class Http11Processor implements Runnable, Processor {
 
         try {
             final URL resource = convertPathToUrl(path);
-            final Http11Response response = new Http11Response(OK, resource);
+            final HttpResponse response = new HttpResponse(OK, resource);
             checkContentType(request, response);
             return response;
         } catch (final Exception e) {
@@ -149,8 +149,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response handleAuthResponse(final Http11Request request, final String uuid) {
-        final Http11Response response = new Http11Response(FOUND);
+    private HttpResponse handleAuthResponse(final HttpRequest request, final String uuid) {
+        final HttpResponse response = new HttpResponse(FOUND);
 
         response.addHeader("Location", "/index.html");
         if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
@@ -166,14 +166,14 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader().getResource("static" + path);
     }
 
-    private void checkContentType(final Http11Request request, final Http11Response response) {
+    private void checkContentType(final HttpRequest request, final HttpResponse response) {
         final String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("css")) {
             response.addHeader("Content-Type", "text/css;charset=utf-8 ");
         }
     }
 
-    private Http11Response handlePostRequest(final Http11Request request) throws UnauthorizedException {
+    private HttpResponse handlePostRequest(final HttpRequest request) throws UnauthorizedException {
         final String path = request.getPath();
         if (path.equals("/login")) {
             return logIn(request);
@@ -184,20 +184,20 @@ public class Http11Processor implements Runnable, Processor {
         throw new PageNotFoundException(request.getPath());
     }
 
-    private Http11Response logIn(final Http11Request request) throws UnauthorizedException {
+    private HttpResponse logIn(final HttpRequest request) throws UnauthorizedException {
         final Map<String, String> bodyFields = parseFormData(request.getBody());
         final String uuid = userService.logIn(bodyFields);
         return handleAuthResponse(request, uuid);
     }
 
-    private Http11Response register(final Http11Request request) {
+    private HttpResponse register(final HttpRequest request) {
         final Map<String, String> bodyFields = parseFormData(request.getBody());
         final String uuid = userService.register(bodyFields);
         return handleAuthResponse(request, uuid);
     }
 
-    private Http11Response handleResponseWithException(final Status status) {
+    private HttpResponse handleResponseWithException(final Status status) {
         final URL resource = convertPathToUrl("/" + status.getCode());
-        return new Http11Response(status, resource);
+        return new HttpResponse(status, resource);
     }
 }

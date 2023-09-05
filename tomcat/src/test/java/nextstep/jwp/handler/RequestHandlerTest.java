@@ -1,7 +1,6 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.jwp.handler;
 
 import static nextstep.jwp.db.InMemoryUserRepository.findByAccount;
-import static nextstep.jwp.session.SessionManager.findSession;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -10,8 +9,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-import nextstep.jwp.handler.HttpRequestParser;
-import nextstep.jwp.handler.RequestHandler;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -21,7 +20,7 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("NonAsciiCharacters")
 class RequestHandlerTest {
 
-    private final RequestHandler requestHandler = new RequestHandler();
+    private final RequestHandler requestHandler = new RequestHandler(new SessionManager());
 
     @Test
     void html_요청이_오면_content_type은_html() {
@@ -54,7 +53,6 @@ class RequestHandlerTest {
         // when
         HttpResponse response = HTTP_요청을_보낸다(request);
 
-
         // then
         Map<String, String> actual = response.getHeaders();
         assertThat(actual.get("Content-Type")).contains("text/css");
@@ -73,7 +71,6 @@ class RequestHandlerTest {
         // when
         HttpResponse response = HTTP_요청을_보낸다(request);
 
-
         // then
         Map<String, String> actual = response.getHeaders();
         assertThat(actual.get("Content-Type")).contains("application/javascript");
@@ -91,7 +88,6 @@ class RequestHandlerTest {
 
         // when
         HttpResponse response = HTTP_요청을_보낸다(request);
-
 
         // then
         Map<String, String> headers = response.getHeaders();
@@ -116,10 +112,7 @@ class RequestHandlerTest {
 
         // then
         Map<String, String> cookie = response.getCookie();
-        assertAll(
-            () -> assertThat(findSession(cookie.get("JSESSIONID"))).isNotNull(),
-            () -> assertThat(cookie.get("JSESSIONID")).isNotNull()
-        );
+        assertThat(cookie.get("JSESSIONID")).isNotNull();
     }
 
     @Test
@@ -134,7 +127,6 @@ class RequestHandlerTest {
 
         // when
         HttpResponse response = HTTP_요청을_보낸다(request);
-
 
         // then
         Map<String, String> headers = response.getHeaders();
@@ -157,7 +149,6 @@ class RequestHandlerTest {
         // when
         HttpResponse response = HTTP_요청을_보낸다(request);
 
-
         // then
         Map<String, String> headers = response.getHeaders();
         assertAll(
@@ -165,7 +156,7 @@ class RequestHandlerTest {
             () -> assertThat(headers.get("Location")).isEqualTo("/401.html")
         );
     }
-    
+
     @Test
     void 회원가입_성공() {
         // given
@@ -183,7 +174,7 @@ class RequestHandlerTest {
 
         assertAll(
             () -> assertThat(headers.get("Location")).isEqualTo("/index.html"),
-        () -> assertThat(findByAccount("hs")).isPresent(),
+            () -> assertThat(findByAccount("hs")).isPresent(),
             () -> assertThat(response.getCookie().get("JSESSIONID"))
         );
     }

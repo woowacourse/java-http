@@ -1,6 +1,4 @@
-package nextstep.jwp.handler;
-
-import org.apache.coyote.http11.HttpMethod;
+package org.apache.coyote.http11;
 
 public class HttpRequestLine {
 

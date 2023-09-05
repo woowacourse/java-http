@@ -10,8 +10,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.jwp.session.Session;
-import nextstep.jwp.session.SessionManager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -22,6 +22,11 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private final SessionManager sessionManager;
+
+    public RequestHandler(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public HttpResponse handle(HttpRequest request) throws IOException {
         String uri = request.getUri();
@@ -104,7 +109,7 @@ public class RequestHandler {
 
         if (cookie.get("JSESSIONID") != null) {
             String sessionId = cookie.get("JSESSIONID");
-            Session session = SessionManager.findSession(sessionId);
+            Session session = sessionManager.findSession(sessionId);
             if (session.getAttribute("user") != null) {
                 return true;
             }

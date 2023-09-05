@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.handler.HttpRequestLine;
 
 public class HttpRequest {
 

@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpRequest;
 
 public class HttpRequestParser {
 

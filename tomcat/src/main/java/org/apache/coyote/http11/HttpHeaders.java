@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package org.apache.coyote.http11;
 
 public class HttpHeaders {
     public static final String CONTENT_TYPE = "Content-Type";

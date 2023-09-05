@@ -1,11 +1,9 @@
-package nextstep.jwp.handler;
+package org.apache.coyote.http11;
 
 import static nextstep.jwp.Constant.CRLF;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponseParser {
 

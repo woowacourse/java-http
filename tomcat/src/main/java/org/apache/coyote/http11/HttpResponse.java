@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import nextstep.jwp.HttpHeaders;
 
 public class HttpResponse {
 

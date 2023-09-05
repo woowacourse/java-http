@@ -1,4 +1,4 @@
-package nextstep.jwp.session;
+package org.apache.catalina;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -8,10 +8,9 @@ public class UnAuthorizedHandler implements Handler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
-        final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
-        final HttpResponse afterSetContent = afterSetHttpStatus.setContent("/401.html");
-        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
-        return afterSetCookie;
+        return HttpResponse
+                .init(request.getHttpVersion())
+                .setHttpStatus(HttpStatus.UNAUTHORIZED)
+                .setContent("/401.html");
     }
 }

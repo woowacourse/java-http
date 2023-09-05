@@ -89,7 +89,10 @@ public class LoginHandler implements Handler {
 
     private boolean checkLoginUser(final HttpRequest request) {
         if (request.hasJSessionId()) {
-            final User sessionUser = (User) request.getSession(false).getAttribute(SESSION_ATTRIBUTE_OF_USER);
+            final User sessionUser = (User) request.getSession(true).getAttribute(SESSION_ATTRIBUTE_OF_USER);
+            if (sessionUser == null) {
+                return false;
+            }
             return InMemoryUserRepository.findByAccount(sessionUser.getAccount())
                     .isPresent();
         }

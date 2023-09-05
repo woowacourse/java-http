@@ -11,7 +11,6 @@ public class MethodNotAllowedHandler implements Handler {
         final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
         final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
         final HttpResponse afterSetContent = afterSetHttpStatus.setContent("/405.html");
-        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
-        return afterSetCookie;
+        return afterSetContent;
     }
 }

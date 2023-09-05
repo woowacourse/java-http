@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CookieHeader {
 
     private static final Logger log = LoggerFactory.getLogger(CookieHeader.class);
 
+    private static final String RESPONSE_HEADER_KEY = "Set-Cookie: ";
     private static final String JAVA_SESSION_ID = "JSESSIONID";
     private static final String DELIMITER = "; ";
     private static final String KEY_VALUE_SPLITTER = "=";
@@ -34,13 +34,14 @@ public class CookieHeader {
                 .map(cookieValue -> cookieValue.split(KEY_VALUE_SPLITTER, KEY_VALUE_SPLIT_LIMIT))
                 .collect(Collectors.toMap(
                         oneData -> oneData[KEY_INDEX].trim(),
-                        CookieHeader::getDataValueOrBlank
+                        CookieHeader::getDataValueOrBlank,
+                        (existing, replacement) -> existing
                 ));
         return new CookieHeader(data);
     }
 
     private static String getDataValueOrBlank(final String[] oneData) {
-        if (oneData.length > DATA_SIZE) {
+        if (oneData.length >= DATA_SIZE) {
             return oneData[VALUE_INDEX].trim();
         }
         return EMPTY_VALUE;
@@ -71,8 +72,8 @@ public class CookieHeader {
         return data.get(JAVA_SESSION_ID);
     }
 
-    public String getValue() {
-        return data.entrySet().stream()
+    public String getFormattedValue() {
+        return RESPONSE_HEADER_KEY + data.entrySet().stream()
                 .map(entry -> entry.getKey() + KEY_VALUE_SPLITTER + entry.getValue())
                 .collect(Collectors.joining(DELIMITER));
     }

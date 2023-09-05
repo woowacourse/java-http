@@ -8,6 +8,10 @@ public class SessionManager {
     private static SessionManager instance;
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
+//    static {
+//        SESSIONS.put("user", )
+//    }
+
     private SessionManager() {}
 
     public static SessionManager getInstance() {

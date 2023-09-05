@@ -1,7 +1,6 @@
 package org.apache.coyote.httpresponse;
 
 import org.apache.coyote.http11.common.CookieHeader;
-import org.apache.coyote.httprequest.QueryString;
 import org.apache.coyote.httpresponse.header.ResourceReader;
 import org.apache.coyote.httpresponse.header.ResponseHeaders;
 import org.slf4j.Logger;
@@ -68,8 +67,7 @@ public class HttpResponse {
         final String responseLine = makeResponseLine();
         stringBuilder.append(responseLine).append(System.lineSeparator());
         if (cookieHeader.isExist()) {
-            System.out.println(123123);
-            stringBuilder.append(cookieHeader.getValue()).append(System.lineSeparator());
+            stringBuilder.append(cookieHeader.getFormattedValue()).append(System.lineSeparator());
         }
         stringBuilder.append(responseHeaders.getFormattedHeaders()).append(System.lineSeparator()).append(contentBody);
         return stringBuilder.toString().getBytes(StandardCharsets.UTF_8);

@@ -8,10 +8,9 @@ public class IndexHandler implements Handler {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        final HttpResponse initialResponse = HttpResponse.init(request.getHttpVersion());
-        final HttpResponse afterSetHttpStatus = initialResponse.setHttpStatus(HttpStatus.OK);
-        final HttpResponse afterSetContent = afterSetHttpStatus.setContent(request.getPath());
-        final HttpResponse afterSetCookie = afterSetContent.setCookieHeader(request.getCookieHeader());
-        return afterSetCookie;
+        return HttpResponse
+                .init(request.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .setContent(request.getPath());
     }
 }

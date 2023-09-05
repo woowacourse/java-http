@@ -25,10 +25,6 @@ public class User {
         return this.password.equals(password);
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     @Override
     public String toString() {
         return "User{" +

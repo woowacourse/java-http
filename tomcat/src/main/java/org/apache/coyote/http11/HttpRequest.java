@@ -57,8 +57,8 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public Map<String, String> getRequestHeaders() {
-        return requestHeaders.getHeaders();
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
     }
 
     public Map<String, String> getQueryParameter() {

@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -65,12 +66,17 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
                 if (executeLogin(httpRequest.getRequestBody())) {
+                    HttpCookie cookie = HttpCookie.from(httpRequest.getRequestHeaders().geHeaderValue("Cookie"));
+                    if (!cookie.contains("JSESSIONID")) {
+                        cookie.setCookie("JSESSIONID", UUID.randomUUID().toString());
+                    }
+
                     final URL url = getClass().getClassLoader()
                             .getResource("static" + "/index" + HttpExtensionType.HTML.getExtension());
                     final Path path = new File(url.getPath()).toPath();
                     final String content = new String(Files.readAllBytes(path));
                     final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
-                    return HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+                    return HttpResponse.withCookie(HttpStatusCode.FOUND, responseBody, cookie);
                 }
                 final URL url = getClass().getClassLoader()
                         .getResource("static" + "/401" + HttpExtensionType.HTML.getExtension());

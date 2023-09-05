@@ -18,6 +18,10 @@ public class ResponseHeaders {
         return new ResponseHeaders(headers);
     }
 
+    public void addCookie(final HttpCookie cookie) {
+        headers.put("Set-Cookie", cookie.toString());
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

@@ -33,7 +33,11 @@ public class HttpRequest {
             return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
         }
 
-        final RequestBody requestBody = RequestBody.parse(bufferedReader.readLine());
+        final int contentLength = Integer.parseInt(requestHeaders.geHeaderValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        final RequestBody requestBody = RequestBody.parse(new String(buffer));
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 

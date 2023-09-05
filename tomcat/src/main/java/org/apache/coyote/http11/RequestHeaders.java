@@ -14,6 +14,10 @@ public class RequestHeaders {
         return !headers.containsKey("Content-Type");
     }
 
+    public String geHeaderValue(final String key) {
+        return headers.get(key);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

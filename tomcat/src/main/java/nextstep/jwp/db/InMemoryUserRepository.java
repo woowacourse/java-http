@@ -23,5 +23,11 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    public static boolean checkExistingId(final String account) {
+        Optional<User> user = findByAccount(account);
+        return user.isPresent();
+    }
+
+    private InMemoryUserRepository() {
+    }
 }

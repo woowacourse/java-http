@@ -54,30 +54,68 @@ public class Http11Processor implements Runnable, Processor {
         final RequestPath requestPath = httpRequest.getRequestPath();
 
         if (requestPath.getResource().equals("/login")) {
-            if (requestPath.isParamEmpty()) {
-                final URL url = getClass().getClassLoader()
-                        .getResource("static" + requestPath.getResource() + HttpExtensionType.HTML.getExtension());
-                final Path path = new File(url.getPath()).toPath();
-                final String content = new String(Files.readAllBytes(path));
-                return HttpResponse.of(HttpStatusCode.OK, ResponseBody.of(HttpExtensionType.HTML.getExtension(), content));
+            if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
+                if (requestPath.isParamEmpty()) {
+                    final URL url = getClass().getClassLoader()
+                            .getResource("static" + requestPath.getResource() + HttpExtensionType.HTML.getExtension());
+                    final Path path = new File(url.getPath()).toPath();
+                    final String content = new String(Files.readAllBytes(path));
+                    return HttpResponse.of(HttpStatusCode.OK, ResponseBody.of(HttpExtensionType.HTML.getExtension(), content));
+                }
             }
-
-            if (executeLogin(requestPath.getQueryParameter())) {
-                // 로그인 성공
+            if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+                if (executeLogin(httpRequest.getRequestBody())) {
+                    final URL url = getClass().getClassLoader()
+                            .getResource("static" + "/index" + HttpExtensionType.HTML.getExtension());
+                    final Path path = new File(url.getPath()).toPath();
+                    final String content = new String(Files.readAllBytes(path));
+                    final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
+                    return HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+                }
                 final URL url = getClass().getClassLoader()
-                        .getResource("static" + "/index" + HttpExtensionType.HTML.getExtension());
+                        .getResource("static" + "/401" + HttpExtensionType.HTML.getExtension());
                 final Path path = new File(url.getPath()).toPath();
                 final String content = new String(Files.readAllBytes(path));
                 final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
-                return HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+                return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, responseBody);
             }
-            // 로그인 실패
+        }
+
+        if (requestPath.getResource().equals("/register") && httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             final URL url = getClass().getClassLoader()
-                    .getResource("static" + "/401" + HttpExtensionType.HTML.getExtension());
+                    .getResource("static" + "/register" + HttpExtensionType.HTML.getExtension());
             final Path path = new File(url.getPath()).toPath();
             final String content = new String(Files.readAllBytes(path));
             final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
-            return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, responseBody);
+            return HttpResponse.of(HttpStatusCode.OK, responseBody);
+        }
+
+        if (requestPath.getResource().equals("/register") && httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+            final Map<String, String> requestBody = httpRequest.getRequestBody();
+
+            final String account = requestBody.get("account");
+            final String password = requestBody.get("password");
+            final String email = requestBody.get("email");
+
+            if (InMemoryUserRepository.checkExistingId(account)) {
+                final URL url = getClass().getClassLoader()
+                        .getResource("static" + "/409" + HttpExtensionType.HTML.getExtension());
+                final Path path = new File(url.getPath()).toPath();
+                final String content = new String(Files.readAllBytes(path));
+                final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
+                return HttpResponse.of(HttpStatusCode.OK, responseBody);
+            }
+            final User user = new User(account, password, email);
+
+            InMemoryUserRepository.save(user);
+
+
+            final URL url = getClass().getClassLoader()
+                    .getResource("static" + "/index" + HttpExtensionType.HTML.getExtension());
+            final Path path = new File(url.getPath()).toPath();
+            final String content = new String(Files.readAllBytes(path));
+            final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), content);
+            return HttpResponse.of(HttpStatusCode.OK, responseBody);
         }
 
         if (requestPath.getResource().equals("/")) {

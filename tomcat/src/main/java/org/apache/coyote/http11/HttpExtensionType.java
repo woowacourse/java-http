@@ -7,7 +7,8 @@ public enum HttpExtensionType {
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
-    ICO(".ico", "image/svg+xml");
+    ICO(".ico", "image/svg+xml"),
+    SVG(".svg", "image/svg+xml");
 
     private final String extension;
     private final String contentType;
@@ -30,13 +31,6 @@ public enum HttpExtensionType {
                 .findAny()
                 .orElse(HTML);
     }
-
-    //    private static String removeExtension(final String uri) {
-    //        if (uri.contains(".")) {
-    //            return uri.split("\\" + ".")[0];
-    //        }
-    //        return uri;
-    //    }
 
     public static boolean hasExtensionType(final String requestUri) {
         return Arrays.stream(values())

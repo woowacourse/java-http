@@ -1,21 +1,16 @@
 package nextstep.org.apache.coyote.http11;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import nextstep.jwp.handler.HttpStartLine;
+import nextstep.jwp.handler.HttpRequestLine;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -27,7 +22,7 @@ class HttpRequestTest {
     void HTTP_요청의_uri를_반환한다() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine("get", "/index.html", null),
+            new HttpRequestLine("get", "/index.html", null),
             null,
             null,
             null
@@ -44,7 +39,7 @@ class HttpRequestTest {
     void uri는_query_string_없이_반환한다() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine("get", "/blackCat?age=30&name=wooseok", null),
+            new HttpRequestLine("get", "/blackCat?age=30&name=wooseok", null),
             null,
             null,
             null
@@ -61,7 +56,7 @@ class HttpRequestTest {
     void query_string을_반환한다() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine("get", "/blackCat?age=30&name=wooseok", null),
+            new HttpRequestLine("get", "/blackCat?age=30&name=wooseok", null),
             null,
             null,
             null
@@ -82,7 +77,7 @@ class HttpRequestTest {
     void query_string이_없는데_요청시_예외() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine("get", "/index.html", null),
+            new HttpRequestLine("get", "/index.html", null),
             null,
             null,
             null
@@ -97,7 +92,7 @@ class HttpRequestTest {
     void body를_반환한다() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine("get", null, null), null, null, "name=hyunseo&password=hyunseo1234");
+            new HttpRequestLine("get", null, null), null, null, "name=hyunseo&password=hyunseo1234");
 
         // when
         String actual = request.getBody();
@@ -111,7 +106,7 @@ class HttpRequestTest {
     void HTTP_method를_반환한다(String method) {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpStartLine(method, null, null),
+            new HttpRequestLine(method, null, null),
             null,
             null,
             null

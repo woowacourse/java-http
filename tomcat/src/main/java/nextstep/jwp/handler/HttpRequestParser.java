@@ -14,18 +14,21 @@ import org.apache.coyote.http11.HttpRequest;
 
 public class HttpRequestParser {
 
+    private HttpRequestParser() {
+    }
+
     public static HttpRequest create(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        HttpStartLine startLine = getStartLine(bufferedReader);
+        HttpRequestLine startLine = getStartLine(bufferedReader);
         Map<String, String> headers = getHeaders(bufferedReader);
         String body = getBody(headers, bufferedReader);
         Map<String, String> cookie = getCookie(headers);
         return new HttpRequest(startLine, headers, cookie, body);
     }
 
-    private static HttpStartLine getStartLine(BufferedReader bufferedReader) throws IOException {
+    private static HttpRequestLine getStartLine(BufferedReader bufferedReader) throws IOException {
         String[] lines = bufferedReader.readLine().split(" ");
-        return new HttpStartLine(lines[0], lines[1], lines[2]);
+        return new HttpRequestLine(lines[0], lines[1], lines[2]);
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {

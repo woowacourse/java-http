@@ -2,15 +2,15 @@ package nextstep.jwp.handler;
 
 import org.apache.coyote.http11.HttpMethod;
 
-public class HttpStartLine {
+public class HttpRequestLine {
 
     private final HttpMethod method;
-    private final String target;
+    private final String path;
     private final String version;
 
-    public HttpStartLine(String method, String target, String version) {
+    public HttpRequestLine(String method, String path, String version) {
         this.method = HttpMethod.from(method);
-        this.target = target;
+        this.path = path;
         this.version = version;
     }
 
@@ -18,8 +18,8 @@ public class HttpStartLine {
         return method;
     }
 
-    public String getTarget() {
-        return target;
+    public String getPath() {
+        return path;
     }
 
     public String getVersion() {

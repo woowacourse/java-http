@@ -3,25 +3,25 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.handler.HttpStartLine;
+import nextstep.jwp.handler.HttpRequestLine;
 
 public class HttpRequest {
 
-    private final HttpStartLine httpStartLine;
+    private final HttpRequestLine httpRequestLine;
     private final Map<String, String> headers;
     private final Map<String, String> cookies;
     private final String body;
 
-    public HttpRequest(HttpStartLine httpStartLine, Map<String, String> headers, Map<String, String> cookies,
-                        String body) {
-        this.httpStartLine = httpStartLine;
+    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, Map<String, String> cookies,
+                       String body) {
+        this.httpRequestLine = httpRequestLine;
         this.headers = headers;
         this.cookies = cookies;
         this.body = body;
     }
 
     public String getUri() {
-        String target = httpStartLine.getTarget();
+        String target = httpRequestLine.getPath();
         int queryStringIdx = target.indexOf("?");
         if (queryStringIdx == -1) {
             return target;
@@ -31,7 +31,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryString() {
-        String target = httpStartLine.getTarget();
+        String target = httpRequestLine.getPath();
         int queryStringIdx = target.indexOf("?");
         if (queryStringIdx == -1) {
             throw new IllegalStateException();
@@ -54,7 +54,7 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return httpStartLine.getMethod();
+        return httpRequestLine.getMethod();
     }
 
     public Map<String, String> getCookie() {

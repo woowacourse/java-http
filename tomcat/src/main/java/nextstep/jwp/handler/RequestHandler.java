@@ -8,22 +8,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.session.Session;
 import nextstep.jwp.session.SessionManager;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpResponse handle(HttpRequest request) throws IOException {
         if (request.getUri().equals("/") && request.getMethod() == HttpMethod.GET) {

@@ -17,7 +17,7 @@ public class HttpRequest {
         parseRequest(bufferedReader);
     }
 
-    public void parseRequest(BufferedReader bufferedReader) throws IOException {
+    private void parseRequest(BufferedReader bufferedReader) throws IOException {
         String requestLine = bufferedReader.readLine();
         if (requestLine == null) {
             return;

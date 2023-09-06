@@ -20,7 +20,7 @@ class HeadersTest {
         Headers headers = Headers.from(request);
 
         // then
-        assertThat(headers.getHeaderValue(Header.Accept).get())
+        assertThat(headers.getHeaderValue(Header.ACCEPT).get())
                 .isEqualTo("text/javascript,*/*;q=0.1 ");
     }
 }

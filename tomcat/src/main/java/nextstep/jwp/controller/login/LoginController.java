@@ -16,6 +16,10 @@ import java.util.Map;
 
 public class LoginController extends AbstractController {
 
+    private static final String USER = "user";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+
     private final UserService userService;
 
     public LoginController(final UserService userService) {
@@ -29,7 +33,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
-        if (httpRequest.getSessionAttribute("user").isPresent()) {
+        if (httpRequest.getSessionAttribute(USER).isPresent()) {
             return HttpResponse.withResource(Status.FOUND, "/index.html");
         }
 
@@ -39,16 +43,18 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
         Map<String, String> params = httpRequest.getParams();
-        User user = userService.login(params.get("account"), params.get("password"));
+        User user = userService.login(params.get(ACCOUNT), params.get(PASSWORD));
 
         return getHttpResponseWithCookie(httpRequest, user);
     }
 
-    private static HttpResponse getHttpResponseWithCookie(final HttpRequest httpRequest, final User user) throws IOException, URISyntaxException, NotFoundException {
+    private static HttpResponse getHttpResponseWithCookie(final HttpRequest httpRequest, final User user) throws NotFoundException, IOException, URISyntaxException {
         Session session = httpRequest.createSession();
-        session.setAttribute("user", user);
+        session.setAttribute(USER, user);
+
         HttpResponse response = HttpResponse.withResource(Status.FOUND, "/index.html");
         response.setCookie(Cookie.fromUserJSession(session.getId()));
+
         return response;
     }
 

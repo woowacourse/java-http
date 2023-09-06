@@ -8,7 +8,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.Constant.HEADER_SEPARATOR;
+
 public class Headers {
+
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -18,10 +23,10 @@ public class Headers {
 
     public static Headers from(final List<String> request) {
         Map<String, String> headers = request.stream()
-                .map(header -> header.split(": "))
+                .map(header -> header.split(HEADER_SEPARATOR))
                 .collect(Collectors.toMap(
-                        splitLine -> splitLine[0],
-                        splitLine -> splitLine[1]
+                        key -> key[KEY_INDEX],
+                        value -> value[VALUE_INDEX]
                 ));
 
         return new Headers(headers);

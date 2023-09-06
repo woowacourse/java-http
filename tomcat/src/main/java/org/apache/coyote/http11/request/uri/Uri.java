@@ -1,6 +1,14 @@
 package org.apache.coyote.http11.request.uri;
 
+import static org.apache.coyote.http11.Constant.QUERY_PARAMS_LETTER;
+import static org.apache.coyote.http11.Constant.RESOURCE_LETTER;
+import static org.apache.coyote.http11.Constant.URI_SEPARATOR;
+
 public class Uri {
+
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final String path;
@@ -13,32 +21,26 @@ public class Uri {
     }
 
     public static Uri from(final String requestLines) {
+        String[] uriComponents = requestLines.split(URI_SEPARATOR);
+
         return new Uri(
-                HttpMethod.from(requestLines.split(" ")[0]),
-                requestLines.split(" ")[1],
-                HttpVersion.from(requestLines.split(" ")[2])
+                HttpMethod.from(uriComponents[HTTP_METHOD_INDEX]),
+                uriComponents[PATH_INDEX],
+                HttpVersion.from(uriComponents[HTTP_VERSION_INDEX])
         );
     }
 
-    public boolean isSamePath(final String path) {
-        if (hasQueryParams()) {
-            return this.path.substring(0, this.path.indexOf("?")).equals(path);
-        }
-
-        return this.path.equals(path);
-    }
-
     public boolean hasQueryParams() {
-        return path.contains("?");
+        return path.contains(QUERY_PARAMS_LETTER);
     }
 
     public String getQueryParams() {
-        int queryIndex = path.indexOf("?");
+        int queryIndex = path.indexOf(QUERY_PARAMS_LETTER);
         return path.substring(queryIndex + 1);
     }
 
     public boolean hasResource() {
-        return path.contains(".");
+        return path.contains(RESOURCE_LETTER);
     }
 
     public boolean isGetMethod() {

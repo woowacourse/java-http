@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
+import static org.apache.coyote.http11.Constant.URI_SEPARATOR;
+
 public enum Status {
 
     OK(200, "OK"),
@@ -22,6 +24,8 @@ public enum Status {
 
     @Override
     public String toString() {
-        return VERSION + " " + this.code + " " + this.message + " ";
+        return VERSION + URI_SEPARATOR +
+                this.code + URI_SEPARATOR +
+                this.message + URI_SEPARATOR;
     }
 }

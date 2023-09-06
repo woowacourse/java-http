@@ -88,18 +88,13 @@ public class HttpRequest {
     }
 
     public Optional<Object> getSessionAttribute(final String name) {
-        final Session session = getSession();
-        if (session == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(session.getAttribute(name));
+        return getSession().map(session -> session.getAttribute(name));
     }
 
-    private Session getSession() {
-        final Cookie cookie = headers.getCookie();
-        final Optional<String> jSessionId = cookie.getJSessionId();
-        return jSessionId.map(SESSION_MANAGER::findSession)
-                .orElse(null);
+    private Optional<Session> getSession() {
+        Cookie cookie = headers.getCookie();
+        Optional<String> jSessionId = cookie.getJSessionId();
+        return jSessionId.map(SESSION_MANAGER::findSession);
     }
 
     public boolean isGetMethod() {

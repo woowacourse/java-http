@@ -4,10 +4,12 @@ public class Response {
 
     private final StartLine startLine;
     private final Headers headers;
+    private final Body body;
 
-    public Response(final StartLine startLine, final Headers headers) {
+    public Response(final StartLine startLine, final Headers headers, final Body body) {
         this.startLine = startLine;
         this.headers = headers;
+        this.body = body;
     }
 
     public StartLine getStartLine() {
@@ -16,5 +18,9 @@ public class Response {
 
     public Headers getHeaders() {
         return headers;
+    }
+
+    public Body getBody() {
+        return body;
     }
 }

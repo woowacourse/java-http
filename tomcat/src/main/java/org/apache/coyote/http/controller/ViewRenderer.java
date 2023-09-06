@@ -15,7 +15,7 @@ public class ViewRenderer {
             filePath = httpResponse.getForwardPath();
         }
 
-        String content = FileUtil.readStaticFile(filePath);
+        String content = FileUtil.readStaticFile("static" + filePath);
         MediaType mediaType = MediaType.fromFilePath(filePath);
 
         httpResponse.setStatusCode(StatusCode.OK);

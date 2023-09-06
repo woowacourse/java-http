@@ -43,12 +43,17 @@ public class HttpRequestLine {
 
     private static void validateRequestLine(String[] tokens) {
         if (tokens.length != REQUEST_LINE_TOKENS_SIZE || !tokens[2].startsWith("HTTP")) {
-            log.error("request line: {}", String.join(" ", tokens));
+            String requestLine = String.join(" ", tokens);
+            log.error("request line: {}", requestLine);
         }
     }
 
     private static String decodePath(String requestUri) {
-        return requestUri.split("\\?")[0];
+        String path = requestUri.split("\\?")[0];
+        if (path.equals("/")) {
+            return "/home";
+        }
+        return path;
     }
 
     private static Map<String, String> decodeParameters(String requestUri) {

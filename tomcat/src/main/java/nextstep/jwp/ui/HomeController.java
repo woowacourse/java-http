@@ -9,7 +9,7 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.session.Session;
 
-public class Controller extends HttpController {
+public class HomeController extends HttpController {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse, Session session) {

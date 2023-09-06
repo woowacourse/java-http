@@ -16,7 +16,7 @@ public class FileUtil {
     public static String readStaticFile(String uri) {
         InputStream inputStream = FileUtil.class
                 .getClassLoader()
-                .getResourceAsStream("static/" + uri);
+                .getResourceAsStream(uri);
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
             Objects.requireNonNull(inputStream, "파일을 찾을 수 없습니다. 파일: " + uri), StandardCharsets.UTF_8)

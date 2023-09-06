@@ -22,6 +22,7 @@ public class IndexServlet extends Servlet {
         }
     }
 
+    @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String absolutePath = INDEX_PAGE.path();
         String content = findResourceWithPath(absolutePath);

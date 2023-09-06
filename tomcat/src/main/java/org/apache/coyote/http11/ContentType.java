@@ -9,10 +9,10 @@ public enum ContentType {
     JS("text/javascript"),
     ICO("image/x-icon");
 
-    private final String contentType;
+    private final String value;
 
-    ContentType(String contentType) {
-        this.contentType = contentType;
+    ContentType(String value) {
+        this.value = value;
     }
 
     public static String parse(String path) {
@@ -23,6 +23,6 @@ public enum ContentType {
                 .filter(value -> value.name().toLowerCase().equals(resourceExtension))
                 .findFirst()
                 .orElse(HTML)
-                .contentType;
+                .value;
     }
 }

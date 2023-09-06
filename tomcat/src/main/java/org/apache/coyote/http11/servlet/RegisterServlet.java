@@ -28,6 +28,7 @@ public class RegisterServlet extends Servlet {
         }
     }
 
+    @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String absolutePath = REGISTER_PAGE.path();
 
@@ -41,6 +42,7 @@ public class RegisterServlet extends Servlet {
                 .setResponseBody(responseBody);
     }
 
+    @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         saveUser(httpRequest);
         String absolutePath = INDEX_PAGE.path();

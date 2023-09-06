@@ -20,6 +20,7 @@ public class RootServlet extends Servlet {
         }
     }
 
+    @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         String content = "Hello world!";
         ResponseBody responseBody = new ResponseBody(content);

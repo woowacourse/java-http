@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.apache.coyote.http11.exception.RequestBodyNotProvidedException;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpVersion;
@@ -60,13 +60,12 @@ public class RequestExtractor {
     }
 
     private static RequestBody extractBody(BufferedReader reader, int contentLength) throws IOException {
-        List<String> body = new ArrayList<>();
         if (reader.ready()) {
             char[] buffer = new char[contentLength];
             reader.read(buffer);
-            body.addAll(Arrays.asList(new String(buffer).trim()
-                    .split("&")));
+            String line = new String(buffer).trim();
+            return RequestBody.from(line);
         }
-        return RequestBody.from(body);
+        throw new RequestBodyNotProvidedException();
     }
 }

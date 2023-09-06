@@ -1,11 +1,10 @@
 package org.apache.coyote.http11.message.request;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-// TODO: 다른 점이 없으므로 RequestBody + ResponseBody 묶기
 public class RequestBody {
 
     private final Map<String, String> body;
@@ -14,10 +13,10 @@ public class RequestBody {
         this.body = body;
     }
 
-    public static RequestBody from(List<String> lines) {
+    public static RequestBody from(String line) {
         Map<String, String> body = new HashMap<>();
 
-        lines.stream()
+        Arrays.stream(line.split("&"))
                 .map(each -> each.split("="))
                 .forEach(each -> body.put(each[0], each[1]));
 
@@ -31,5 +30,4 @@ public class RequestBody {
     public String get(String key) {
         return body.get(key);
     }
-
 }

@@ -10,7 +10,7 @@ public class ResponseEntity {
     private final String uri;
     private final Cookie cookie;
 
-    public ResponseEntity(final HttpStatus httpStatus, final String uri) {
+    private ResponseEntity(final HttpStatus httpStatus, final String uri) {
         this(httpStatus, uri, Cookie.from(null));
     }
 

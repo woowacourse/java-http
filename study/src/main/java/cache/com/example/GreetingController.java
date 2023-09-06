@@ -1,17 +1,16 @@
 package cache.com.example;
 
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.servlet.http.HttpServletResponse;
-
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(HttpServletResponse response) {
         return "index";
     }
 

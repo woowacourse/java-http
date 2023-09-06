@@ -16,6 +16,9 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class StaticResourceHandler implements ResourceHandler {
 
+    private static final String NOT_FOUND_PAGE_PATH = "/404.html";
+    private static final String RESOURCE_DIRECTORY = "static";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
         return HttpMethod.GET == httpRequest.getHttpMethod();
@@ -23,10 +26,10 @@ public class StaticResourceHandler implements ResourceHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        String fileName = "static" + httpRequest.getPath();
+        String fileName = RESOURCE_DIRECTORY + httpRequest.getPath();
         URL resource = getClass().getClassLoader().getResource(fileName);
         if (resource == null) {
-            fileName = "static/404.html";
+            fileName = RESOURCE_DIRECTORY + NOT_FOUND_PAGE_PATH;
             resource = getClass().getClassLoader().getResource(fileName);
             return createHttpResponse(StatusCode.BAD_REQUEST, resource, ContentType.from(fileName).getContentType());
         }

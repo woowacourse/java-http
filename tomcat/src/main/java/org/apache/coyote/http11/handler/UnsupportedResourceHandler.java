@@ -15,6 +15,9 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class UnsupportedResourceHandler implements ResourceHandler {
 
+    private static final String NOT_FOUND_PAGE_PATH = "/404.html";
+    private static final String RESOURCE_DIRECTORY = "static";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
         return false;
@@ -22,7 +25,7 @@ public class UnsupportedResourceHandler implements ResourceHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        String fileName = "static/404.html";
+        String fileName = RESOURCE_DIRECTORY + NOT_FOUND_PAGE_PATH;
         URL resource = getClass().getClassLoader().getResource(fileName);
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));

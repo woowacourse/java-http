@@ -11,9 +11,11 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class DefaultResourceHandlers implements ResourceHandler {
 
+    private static final String PATH = "/";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return "/".equals(httpRequest.getPath())
+        return PATH.equals(httpRequest.getPath())
                 && HttpMethod.GET == httpRequest.getHttpMethod();
     }
 

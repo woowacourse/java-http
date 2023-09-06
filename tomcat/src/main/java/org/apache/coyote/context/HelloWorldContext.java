@@ -7,6 +7,7 @@ import org.apache.coyote.Container;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
+import org.apache.coyote.context.exception.UnsupportedApiException;
 import org.apache.coyote.handler.ResourceHandler;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.Request;
@@ -89,7 +90,7 @@ public class HelloWorldContext implements Container {
             return resourceHandler.service(request, staticResourcePath);
         }
 
-        return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, "존재하지 않는 api 입니다.");
+        throw new UnsupportedApiException();
     }
 
     @Override

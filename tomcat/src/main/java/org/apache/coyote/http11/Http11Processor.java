@@ -13,6 +13,7 @@ import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
+import org.apache.coyote.context.exception.UnsupportedApiException;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
@@ -84,6 +85,8 @@ public class Http11Processor implements Runnable, Processor {
                     HttpConsts.BLANK,
                     new HeaderDto(HttpHeaderConsts.LOCATION, "/404.html")
             );
+        } catch (final UnsupportedApiException e) {
+            return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, e.getMessage());
         }
     }
 

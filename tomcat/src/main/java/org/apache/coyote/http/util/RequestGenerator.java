@@ -10,11 +10,11 @@ import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.util.exception.InvalidRequestBodyException;
 
-public class RequestGenerator {
+public final class RequestGenerator {
 
     private static final int INVALID_READ_COUNT = -1;
 
-    public Request generate(final BufferedReader bufferedReader) throws IOException {
+    public static Request generate(final BufferedReader bufferedReader) throws IOException {
         final String requestLineContent = bufferedReader.readLine();
         final RequestLine requestLine = RequestLine.from(requestLineContent);
         final HttpRequestHeaders headers = readRequestHeaders(bufferedReader);
@@ -25,7 +25,7 @@ public class RequestGenerator {
         return new Request(headers, requestLine, body, parameters, cookie);
     }
 
-    private HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+    private static HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder requestHeaderBuilder = new StringBuilder();
 
         for (String line = bufferedReader.readLine(); !HttpConsts.BLANK.equals(line); line = bufferedReader.readLine()) {
@@ -36,7 +36,7 @@ public class RequestGenerator {
         return HttpRequestHeaders.from(requestHeaderBuilder.toString());
     }
 
-    private HttpRequestBody readRequestBody(
+    private static HttpRequestBody readRequestBody(
             final BufferedReader bufferedReader,
             final HttpRequestHeaders headers
     ) throws IOException {
@@ -62,7 +62,7 @@ public class RequestGenerator {
         return new HttpRequestBody(bodyContent);
     }
 
-    private Parameters readQueryParameters(final RequestLine requestLine, final HttpRequestBody body) {
+    private static Parameters readQueryParameters(final RequestLine requestLine, final HttpRequestBody body) {
         final String content = requestLine.url().url();
         final Parameters parameters = Parameters.fromUrlContent(content);
 
@@ -73,7 +73,7 @@ public class RequestGenerator {
         return Parameters.fromBodyContent(body.body());
     }
 
-    private HttpCookie convertCookie(final HttpRequestHeaders headers) {
+    private static HttpCookie convertCookie(final HttpRequestHeaders headers) {
         final String cookieValue = headers.findValue(HttpHeaderConsts.COOKIE);
 
         if (cookieValue == null) {
@@ -81,5 +81,8 @@ public class RequestGenerator {
         }
 
         return HttpCookie.fromCookieHeaderValue(cookieValue);
+    }
+
+    private RequestGenerator() {
     }
 }

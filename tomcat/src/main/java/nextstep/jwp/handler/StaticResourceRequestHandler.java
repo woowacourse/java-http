@@ -36,6 +36,15 @@ public class StaticResourceRequestHandler implements RequestHandler {
         if (uri.path().endsWith(".css")) {
             return "text/css;";
         }
+        if (uri.path().endsWith(".js")) {
+            return "test/javascript";
+        }
+        if (uri.path().endsWith(".js")) {
+            return "test/javascript";
+        }
+        if (uri.path().endsWith(".svg")) {
+            return "image/svg+xml";
+        }
         return "text/html;";
     }
 }

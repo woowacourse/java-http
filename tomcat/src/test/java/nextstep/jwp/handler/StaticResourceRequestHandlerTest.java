@@ -25,6 +25,7 @@ class StaticResourceRequestHandlerTest {
 
     private final StaticResourceRequestHandler handler = new StaticResourceRequestHandler();
 
+
     @Test
     void 요청에서_원하는_정적_파일을들_읽어_응답한다() throws IOException {
         // given
@@ -44,6 +45,55 @@ class StaticResourceRequestHandlerTest {
         HttpResponse expected = new HttpResponse();
         expected.setStatusLine(new StatusLine(HttpStatus.OK));
         expected.addHeader("Content-Type", "text/html;charset=utf-8");
+        expected.setMessageBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+
+    @Test
+    void css_정적_파일을_읽어_응답한다() throws IOException {
+        // given
+        HttpRequest request = HttpRequest.builder()
+                .startLine(RequestLine.from("GET /css/styles.css HTTP/1.1 "))
+                .headers(RequestHeaders.from(
+                        List.of("Host: localhost:8080 ", "Connection: keep-alive "))
+                )
+                .build();
+        HttpResponse response = new HttpResponse();
+
+        // when
+        handler.handle(request, response);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("Content-Type", "text/css;charset=utf-8");
+        expected.setMessageBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void js_정적_파일을_읽어_응답한다() throws IOException {
+        // given
+        HttpRequest request = HttpRequest.builder()
+                .startLine(RequestLine.from("GET /js/scripts.js HTTP/1.1 "))
+                .headers(RequestHeaders.from(
+                        List.of("Host: localhost:8080 ", "Connection: keep-alive "))
+                )
+                .build();
+        HttpResponse response = new HttpResponse();
+
+        // when
+        handler.handle(request, response);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
+        HttpResponse expected = new HttpResponse();
+        expected.setStatusLine(new StatusLine(HttpStatus.OK));
+        expected.addHeader("Content-Type", "text/javascript;charset=utf-8");
         expected.setMessageBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);

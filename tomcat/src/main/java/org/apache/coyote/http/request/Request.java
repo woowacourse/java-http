@@ -104,6 +104,10 @@ public class Request {
             return httpSession;
         }
 
+        if (sessionId == null) {
+            return null;
+        }
+
         return sessionManager.findSession(sessionId);
     }
 

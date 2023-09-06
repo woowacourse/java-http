@@ -32,7 +32,7 @@ public class RegisterPageHandler implements Handler {
     }
 
     private boolean isRegisterPageRequest(final Request request, final String contextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, contextPath) && !request.hasQueryParameters();
+        return request.matchesByPathExcludingContextPath(path, contextPath) && !request.hasQueryParameters();
     }
 
     @Override

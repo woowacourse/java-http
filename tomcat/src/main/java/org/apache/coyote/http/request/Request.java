@@ -62,12 +62,12 @@ public class Request {
         return this.method.matches(method);
     }
 
-    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String contextPath) {
-        return url.matchesByPathExcludingRootContextPath(targetPath, contextPath);
+    public boolean matchesByPathExcludingContextPath(final String targetPath, final String contextPath) {
+        return url.matchesByPathExcludingContextPath(targetPath, contextPath);
     }
 
-    public boolean matchesByRootContextPath(final String contextPath) {
-        return url.startsWithRootContextPath(contextPath);
+    public boolean matchesByContextPath(final String contextPath) {
+        return url.startsWithContextPath(contextPath);
     }
 
     public boolean isWelcomePageRequest(final String contextPath) {

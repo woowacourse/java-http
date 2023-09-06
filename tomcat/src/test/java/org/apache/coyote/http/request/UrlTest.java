@@ -25,7 +25,7 @@ class UrlTest {
         final String contextPath = "/hello";
         final Url url = Url.from(path);
 
-        final boolean actual = url.matchesByPathExcludingRootContextPath(equalTargetPath, contextPath);
+        final boolean actual = url.matchesByPathExcludingContextPath(equalTargetPath, contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -37,7 +37,7 @@ class UrlTest {
         final String contextPath = "/hello";
         final Url url = Url.from(path);
 
-        final boolean actual = url.matchesByPathExcludingRootContextPath(notEqualTargetPath, contextPath);
+        final boolean actual = url.matchesByPathExcludingContextPath(notEqualTargetPath, contextPath);
 
         assertThat(actual).isFalse();
     }
@@ -90,7 +90,7 @@ class UrlTest {
         final Url url = Url.from(path);
         final String contextPath = "/";
 
-        final boolean actual = url.startsWithRootContextPath(contextPath);
+        final boolean actual = url.startsWithContextPath(contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -101,7 +101,7 @@ class UrlTest {
         final Url url = Url.from(path);
         final String contextPath = "/hello";
 
-        final boolean actual = url.startsWithRootContextPath(contextPath);
+        final boolean actual = url.startsWithContextPath(contextPath);
 
         assertThat(actual).isFalse();
     }

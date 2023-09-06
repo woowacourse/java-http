@@ -128,7 +128,7 @@ class RequestTest {
                 parameters
         );
 
-        final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/");
+        final boolean actual = request.matchesByPathExcludingContextPath("/login", "/");
 
         assertThat(actual).isTrue();
     }
@@ -149,7 +149,7 @@ class RequestTest {
                 parameters
         );
 
-        final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/hello");
+        final boolean actual = request.matchesByPathExcludingContextPath("/login", "/hello");
 
         assertThat(actual).isFalse();
     }
@@ -170,7 +170,7 @@ class RequestTest {
         );
         final String contextPath = "/";
 
-        final boolean actual = request.matchesByRootContextPath(contextPath);
+        final boolean actual = request.matchesByContextPath(contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -191,7 +191,7 @@ class RequestTest {
         );
         final String contextPath = "/hello";
 
-        final boolean actual = request.matchesByRootContextPath(contextPath);
+        final boolean actual = request.matchesByContextPath(contextPath);
 
         assertThat(actual).isFalse();
     }

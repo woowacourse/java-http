@@ -62,7 +62,7 @@ public class HelloWorldContext implements Container {
 
     @Override
     public boolean supports(final Request request) {
-        return request.matchesByRootContextPath(contextPath);
+        return request.matchesByContextPath(contextPath);
     }
 
     @Override

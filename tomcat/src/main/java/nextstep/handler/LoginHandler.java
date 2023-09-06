@@ -38,7 +38,7 @@ public class LoginHandler implements Handler {
     }
 
     private boolean isLoginRequest(final Request request, final String contextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, contextPath);
+        return request.matchesByPathExcludingContextPath(path, contextPath);
     }
 
     @Override

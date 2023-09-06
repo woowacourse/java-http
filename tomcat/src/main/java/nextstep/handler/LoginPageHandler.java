@@ -32,7 +32,7 @@ public class LoginPageHandler implements Handler {
     }
 
     private boolean isLoginPageRequest(final Request request, final String contextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, contextPath);
+        return request.matchesByPathExcludingContextPath(path, contextPath);
     }
 
     @Override

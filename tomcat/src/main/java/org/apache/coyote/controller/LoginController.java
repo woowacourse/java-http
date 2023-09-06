@@ -12,10 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 public class LoginController extends Controller {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String SET_COOKIE_PREFIX = "Set-Cookie: ";
+    private static final String SESSION_NAME = "JSESSIONID=";
+    public static final String RESPONSE_HEADER_200 = "HTTP/1.1 200 OK ";
 
     @Override
     public String run(final HttpRequest request) throws IOException {
@@ -28,13 +32,26 @@ public class LoginController extends Controller {
         return file.createResponse();
     }
 
-    private String login(final Map<String, String> body) {
+    private String login(final Map<String, String> body) throws IOException {
         log.info("queryStrings = ", body);
 
         if (isValidUser(body)) {
-            return createRedirectResponse(FileResolver.INDEX_HTML);
+            final String responseHeader = createJsession();
+            return FileResolver.INDEX_HTML.createResponseWith(responseHeader);
         }
         return createRedirectResponse(FileResolver.HTML_401);
+    }
+
+    private String createJsession() {
+        final UUID session = createSession();
+        return String.join("\r\n",
+                RESPONSE_HEADER_200,
+                SET_COOKIE_PREFIX + SESSION_NAME + session
+        );
+    }
+
+    private UUID createSession() {
+        return UUID.randomUUID();
     }
 
     private boolean isValidUser(final Map<String, String> body) {

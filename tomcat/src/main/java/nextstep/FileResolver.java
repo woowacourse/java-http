@@ -81,6 +81,17 @@ public enum FileResolver {
                 responseBody);
     }
 
+    public String createResponseWith(final String responseHeader) throws IOException {
+        final URL url = getClass().getClassLoader().getResource(this.getFilePath());
+        final var responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+        return String.join("\r\n",
+                responseHeader,
+                "Content-Type: " + this.getContentType(),
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
     private static class Constants {
         public static final String RESPONSE_HEADER = "HTTP/1.1 200 OK ";
         private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";

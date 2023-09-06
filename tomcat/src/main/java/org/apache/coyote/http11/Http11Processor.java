@@ -131,18 +131,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse loadLoginPage(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         HttpSession httpSession = httpRequest.getHttpSession();
-        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
-        HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
-
         User user = (User) httpSession.get("user");
 
         if (!Objects.isNull(user)) {
-            httpResponse = new HttpResponse(302, "FOUND");
+            HttpResponse httpResponse = new HttpResponse(302, "FOUND");
             httpResponse.sendRedirect("/index.html");
+            return httpResponse;
         }
 
+        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
+        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
+        HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
+        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
+        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
         return httpResponse;
     }
 

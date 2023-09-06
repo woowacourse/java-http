@@ -59,7 +59,7 @@ public class Url {
         return target;
     }
 
-    public boolean matchesByPath(final String targetPath, final String rootContextPath) {
+    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String rootContextPath) {
         if (HttpConsts.SLASH.equals(rootContextPath)) {
             return path.equals(targetPath);
         }

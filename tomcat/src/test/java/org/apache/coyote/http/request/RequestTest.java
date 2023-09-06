@@ -127,7 +127,7 @@ class RequestTest {
                 queryParameters
         );
 
-        final boolean actual = request.matchesByPath("/login", "/");
+        final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/");
 
         assertThat(actual).isTrue();
     }
@@ -148,7 +148,7 @@ class RequestTest {
                 queryParameters
         );
 
-        final boolean actual = request.matchesByPath("/login", "/hello");
+        final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/hello");
 
         assertThat(actual).isFalse();
     }

@@ -37,7 +37,7 @@ public class RegisterHandler implements Handler {
     }
 
     private boolean isRegisterRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPath(path, rootContextPath) && request.hasQueryParameters();
+        return request.matchesByPathExcludingRootContextPath(path, rootContextPath) && request.hasQueryParameters();
     }
 
     @Override

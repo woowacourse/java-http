@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.FileIOUtils;
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpServlet;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
 // 스프링 에러 처리는 Redirect를 사용하는 것이 아니라 RequestDispatcher를 통해 처리된다
-public class ResourceController extends HttpServlet {
+public class ResourceController extends AbstractController {
 
     private static final String PREFIX = "static";
 

@@ -1,13 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
-import java.io.IOException;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class HttpServlet {
+public abstract class AbstractController implements Controller {
 
-    protected void service(final HttpRequest req, final HttpResponse res) throws IOException {
+    @Override
+    public void service(final HttpRequest req, final HttpResponse res) throws Exception {
         if (req.isSameMethod(HttpMethod.GET)) {
             doGet(req, res);
         }
@@ -16,11 +16,11 @@ public abstract class HttpServlet {
         }
     }
 
-    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
+    protected void doGet(final HttpRequest req, final HttpResponse resp) throws Exception {
         throw new UnsupportedOperationException();
     }
 
-    public void doPost(final HttpRequest req, final HttpResponse resp) {
+    protected void doPost(final HttpRequest req, final HttpResponse resp) throws Exception {
         throw new UnsupportedOperationException();
     }
 }

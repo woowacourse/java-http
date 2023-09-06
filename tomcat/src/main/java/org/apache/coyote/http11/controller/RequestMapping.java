@@ -1,21 +1,23 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import java.util.Map;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
+import org.apache.coyote.http11.request.HttpRequest;
 
-public class HttpServletMapper {
+public class RequestMapping {
 
-    private static final Map<String, HttpServlet> servletMap = Map.of(
+    private static final Map<String, Controller> servletMap = Map.of(
             "/", new HomeController(),
             "/login", new LoginController(),
             "/register", new RegisterController()
     );
-    private static final HttpServlet DEFAULT_SERVLET = new ResourceController();
+    private static final Controller DEFAULT_SERVLET = new ResourceController();
 
-    public HttpServlet get(final String path) {
+    public Controller getController(final HttpRequest request) {
+        String path = request.getPath();
         return servletMap.getOrDefault(path, DEFAULT_SERVLET);
     }
 }

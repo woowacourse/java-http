@@ -1,12 +1,12 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpServlet;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class HomeController extends HttpServlet {
+public class HomeController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest req, final HttpResponse resp) {

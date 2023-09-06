@@ -1,6 +1,6 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.QueryParameter;
+import org.apache.coyote.http11.request.QueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

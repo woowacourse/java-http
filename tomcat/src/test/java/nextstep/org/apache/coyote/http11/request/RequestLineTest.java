@@ -1,9 +1,9 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.request;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.RequestPath;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.RequestPath;
+import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

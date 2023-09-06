@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class ResponseHeaders {
 

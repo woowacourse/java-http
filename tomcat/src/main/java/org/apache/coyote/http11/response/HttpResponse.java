@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpResponse {
 

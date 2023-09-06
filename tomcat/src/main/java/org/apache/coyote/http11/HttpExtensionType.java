@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.request.RequestLine;
 
 public enum HttpExtensionType {
 

@@ -1,7 +1,7 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpExtensionType;
-import org.apache.coyote.http11.RequestPath;
+import org.apache.coyote.http11.request.RequestPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

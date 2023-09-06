@@ -127,7 +127,6 @@ public class Http11Processor implements Runnable, Processor {
     if (request.isNotExistBody()) {
       throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
     }
-    // 파싱
     Map<String, String> parsedRequestBody = parseRequestBody(request);
     InMemoryUserRepository.save(new User(
         Long.getLong(parsedRequestBody.get("id")),
@@ -153,7 +152,7 @@ public class Http11Processor implements Runnable, Processor {
     if (userOptional.isPresent()
         && userOptional.get().checkPassword(parsedRequestBody.get("password"))) {
       String setCookie = null;
-      if (!cookie.isExist(JSESSIONID)) {  //쿠키에 JSESSIONID가 존재하지 않으면
+      if (!cookie.isExist(JSESSIONID)) {
         String jSessionId = String.valueOf(UUID.randomUUID());
         setCookie = JSESSIONID + "=" + jSessionId;
         SessionManager.InstanceOf().addLoginSession(jSessionId, userOptional.get());
@@ -263,7 +262,7 @@ public class Http11Processor implements Runnable, Processor {
   }
 
   private String getContentType(final String accept, final String uri) {
-    final String[] tokens = uri.split(".");
+    final String[] tokens = uri.split("\\.");
     if ((tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || (accept != null && accept
         .contains("text/css"))) {
       return HttpResponseHeader.TEXT_CSS_CHARSET_UTF_8;

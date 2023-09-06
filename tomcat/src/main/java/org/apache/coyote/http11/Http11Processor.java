@@ -44,8 +44,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-//            final String response = frontHandler.handle(httpRequest);
-            final HttpResponse response = frontHandler.handle2(httpRequest);
+            final HttpResponse response = frontHandler.handle(httpRequest);
 
             outputStream.write(response.serialize().getBytes());
             outputStream.flush();

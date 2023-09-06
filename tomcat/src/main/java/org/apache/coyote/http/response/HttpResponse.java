@@ -64,6 +64,7 @@ public class HttpResponse {
         httpHeaders.getHeaders().forEach((key, value) -> response.append(key.getValue())
                 .append(HEADER_DELIMETER)
                 .append(value)
+                .append(SPACE)
                 .append(CRLF)
         );
     }

@@ -18,23 +18,7 @@ public class RegisterMapping implements HandlerMapping {
     }
 
     @Override
-    public String handle(final HttpRequest httpRequest) throws IOException {
-        final Map<String, String> bodyParams = httpRequest.getParsedBody();
-
-        final String account = bodyParams.get("account");
-        final String password = bodyParams.get("password");
-        final String email = bodyParams.get("email");
-
-        final User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ");
-    }
-
-    @Override
-    public HttpResponse handle2(final HttpRequest httpRequest) throws IOException {
+    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final Map<String, String> bodyParams = httpRequest.getParsedBody();
 
         final String account = bodyParams.get("account");

@@ -25,24 +25,13 @@ public class FrontHandler {
         handlerMapping.add(new RegisterPageMapping());
     }
 
-    public String handle(final HttpRequest httpRequest) throws IOException {
-        String response = "";
+    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         for (final HandlerMapping mapping : handlerMapping) {
             if (mapping.supports(httpRequest)) {
-                response = mapping.handle(httpRequest);
-                break;
+                return mapping.handle(httpRequest);
             }
         }
 
-        return response;
-    }
-    public HttpResponse handle2(final HttpRequest httpRequest) throws IOException {
-        for (final HandlerMapping mapping : handlerMapping) {
-            if (mapping.supports(httpRequest)) {
-                return mapping.handle2(httpRequest);
-            }
-        }
-
-        return null;
+        return HttpResponse.redirect("/404.html");
     }
 }

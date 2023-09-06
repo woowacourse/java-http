@@ -9,7 +9,5 @@ public interface HandlerMapping {
 
     boolean supports(final HttpRequest httpRequest);
 
-    String handle(final HttpRequest httpRequest) throws IOException;
-
-    HttpResponse handle2(final HttpRequest httpRequest) throws IOException;
+    HttpResponse handle(final HttpRequest httpRequest) throws IOException;
 }

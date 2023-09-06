@@ -27,38 +27,7 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
     }
 
     @Override
-    public String handle(final HttpRequest httpRequest) {
-        final Map<String, String> bodyParams = httpRequest.getParsedBody();
-        final String account = bodyParams.get("account");
-        final String password = bodyParams.get("password");
-
-        User user = null;
-        try {
-            user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
-
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
-            }
-            log.info("로그인 성공! user = {}", user);
-        } catch (final IllegalArgumentException e) {
-            log.warn("login error = {}", e);
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: /401.html ");
-        }
-
-        final UUID uuid = UUID.randomUUID();
-        setSession(uuid.toString(), Map.of("account", user.getAccount()));
-
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Set-Cookie: JSESSIONID=" + uuid + " ");
-    }
-
-    @Override
-    public HttpResponse handle2(final HttpRequest httpRequest) throws IOException {
+    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final Map<String, String> bodyParams = httpRequest.getParsedBody();
         final String account = bodyParams.get("account");
         final String password = bodyParams.get("password");

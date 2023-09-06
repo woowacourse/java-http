@@ -31,7 +31,7 @@ public class LoginServlet extends Servlet {
         }
     }
 
-    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
@@ -64,7 +64,7 @@ public class LoginServlet extends Servlet {
                 .setResponseBody(responseBody);
     }
 
-    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestBody requestBody = httpRequest.getBody();
         Map<String, String> formData = requestBody.getAsFormData();
 

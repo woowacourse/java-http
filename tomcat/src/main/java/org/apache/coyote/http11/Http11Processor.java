@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             String response = null;
             HttpResponse httpResponse = new HttpResponse();
 
-            if (requestMethod.equals("POST") && requestPath.equals("/login")) {
+            if (requestMethod.equals(HttpMethod.POST.name()) && requestPath.equals("/login")) {
                 Map<String, String> queryParms = parseToQueryParms(requestBody);
 
                 try {
@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (requestMethod.equals("POST") && requestPath.equals("/register")) {
+            if (requestMethod.equals(HttpMethod.POST.name()) && requestPath.equals("/register")) {
                 Map<String, String> queryParms = parseToQueryParms(requestBody);
 
                 User user = new User(queryParms.get("account"), queryParms.get("password"),
@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
                 log.info(response);
             }
 
-            if (requestMethod.equals("GET") && requestPath.equals("/login")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/login")) {
                 HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
 
                 String sessionId = cookie.findValue("JSESSIONID");
@@ -100,32 +100,32 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (requestMethod.equals("GET") && requestPath.equals("/register")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/register")) {
                 response = createResponse("text/html", readFile("static", "register.html"));
             }
 
-            if (requestMethod.equals("GET") && requestPath.equals("/")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/")) {
                 response = createResponse("text/html", "Hello world!");
             }
 
-            if (requestMethod.equals("GET") && requestFileName.endsWith(".html")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.endsWith(".html")) {
                 response = createResponse("text/html", readFile("static", requestFileName));
             }
 
-            if (requestMethod.equals("GET") && requestFileName.equals("styles.css")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("styles.css")) {
                 response = createResponse("text/css", readFile("static/css", requestFileName));
             }
 
-            if (requestMethod.equals("GET") && requestFileName.endsWith(".js") && !requestFileName.equals(
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.endsWith(".js") && !requestFileName.equals(
                     "scripts.js")) {
                 response = createResponse("text/javascript", readFile("static/assets", requestFileName));
             }
 
-            if (requestMethod.equals("GET") && requestFileName.equals("scripts.js")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("scripts.js")) {
                 response = createResponse("text/javascript", readFile("static/js", requestFileName));
             }
 
-            if (requestMethod.equals("GET") && requestFileName.equals("favicon.ico")) {
+            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("favicon.ico")) {
                 response = createResponse("text/javascript", "Hello world!");
             }
 

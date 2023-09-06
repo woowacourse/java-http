@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -22,12 +23,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REQUEST_LINE = "Request-Line";
     private static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String HTTP_METHOD_POST = "POST";
     private static final String TEXT_HTML = "text/html;";
     private static final String TEXT_CSS = "text/css;";
     private static final String INDEX_PAGE = "/index.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
     private static final String HTML_EXTENSION = ".html";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     private final Socket connection;
 
@@ -47,13 +49,13 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()) {
             final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
-            final String httpMethod = requestHeader.get(REQUEST_LINE).split(" ")[0];
             final String uri = requestHeader.get(REQUEST_LINE).split(" ")[1];
+            final String contentType = requestHeader.get(CONTENT_TYPE);
 
             final String cookieHeader = requestHeader.getOrDefault(COOKIE, null);
             final var cookie = HttpCookie.from(cookieHeader);
 
-            final String requestBody = readRequestBody(bufferedReader, requestHeader, httpMethod);
+            final String requestBody = readRequestBody(bufferedReader, requestHeader, contentType);
             final String response = handleRequest(uri, requestBody, cookie);
 
             outputStream.write(response.getBytes());
@@ -64,8 +66,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> requestHeader,
-                                   final String httpMethod) throws IOException {
-        if (!httpMethod.equals(HTTP_METHOD_POST)) {
+                                   final String contentType) throws IOException {
+        if (!Objects.equals(contentType, FORM_CONTENT_TYPE)) {
             return null;
         }
         final var contentLength = Integer.parseInt(requestHeader.get(CONTENT_LENGTH));
@@ -85,26 +87,34 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals("/login")) {
             final String responseBody = findStaticResource(path + HTML_EXTENSION);
-            return handleLoginRequest(path + HTML_EXTENSION, requestBody, responseBody, cookie);
+            return handleLoginRequest(uri, requestBody, responseBody, cookie);
         }
         if (path.equals("/register")) {
             final String responseBody = findStaticResource(path + HTML_EXTENSION);
-            return handleRegisterRequest(path + HTML_EXTENSION, requestBody, responseBody, cookie);
+            return handleRegisterRequest(uri, requestBody, responseBody, cookie);
         }
         final String responseBody = findStaticResource(path);
         return get200ResponseMessage(path, responseBody);
     }
 
-    private String handleRegisterRequest(final String path, final String requestBody, final String responseBody,
+    private String handleRegisterRequest(final String uri, final String requestBody, final String responseBody,
                                          final HttpCookie cookie) {
-        if (requestBody == null) {
-            return get200ResponseMessage(path, responseBody);
+        final String[] splitUri = uri.split("\\?");
+        if (requestBody == null && splitUri.length == 1) {
+            return get200ResponseMessage(splitUri[0], responseBody);
         }
-        final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
+        final Map<String, String> requestBodyValues = getRequestParameters(requestBody, splitUri);
         final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
                 requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
         return get302ResponseMessage(INDEX_PAGE, cookie, false);
+    }
+
+    private Map<String, String> getRequestParameters(final String requestBody, final String[] uri) {
+        if (requestBody == null) {
+            return parseRequestBody(uri[1]);
+        }
+        return parseRequestBody(requestBody);
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {
@@ -117,21 +127,22 @@ public class Http11Processor implements Runnable, Processor {
         return requestBodyValues;
     }
 
-    private String handleLoginRequest(final String path, final String requestBody, final String responseBody,
+    private String handleLoginRequest(final String uri, final String requestBody, final String responseBody,
                                       final HttpCookie cookie) {
+        final String[] splitUri = uri.split("\\?");
         final User user = findUserBySessionId(cookie.getJSessionId(false));
         if (user != null) {
             log.info("User: {}", user);
             return get302ResponseMessage(INDEX_PAGE, cookie, false);
         }
-        if (requestBody == null) {
-            return get200ResponseMessage(path, responseBody);
+        if (requestBody == null && splitUri.length == 1) {
+            return get200ResponseMessage(splitUri[0], responseBody);
         }
-        return handleFirstLogin(requestBody, cookie);
+        return handleFirstLogin(requestBody, cookie, splitUri);
     }
 
-    private String handleFirstLogin(final String requestBody, final HttpCookie cookie) {
-        final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
+    private String handleFirstLogin(final String requestBody, final HttpCookie cookie, final String[] uri) {
+        final Map<String, String> requestBodyValues = getRequestParameters(requestBody, uri);
         final Optional<User> user = InMemoryUserRepository.findByAccount(requestBodyValues.get("account"));
         if (user.isEmpty() || !user.get().checkPassword(requestBodyValues.get("password"))) {
             return get302ResponseMessage("/401.html", cookie, false);

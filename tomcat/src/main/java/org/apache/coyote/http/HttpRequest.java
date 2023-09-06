@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.util.Map;
+
 public class HttpRequest {
 
     private final StartLine startLine;
@@ -22,6 +24,18 @@ public class HttpRequest {
 
     public boolean containsRequestUri(final String uri) {
         return startLine.containsRequestUri(uri);
+    }
+
+    public boolean containsHeader(final HttpHeader headerName) {
+        return headers.containsKey(headerName);
+    }
+
+    public String getHeader(final HttpHeader httpHeader) {
+        return headers.get(httpHeader);
+    }
+
+    public Map<String, String> getParsedBody() {
+        return httpBody.parseBodyParameters();
     }
 
     public RequestUri getRequestUri() {

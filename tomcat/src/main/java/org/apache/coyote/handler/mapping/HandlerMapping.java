@@ -1,13 +1,12 @@
 package org.apache.coyote.handler.mapping;
 
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
 
 import java.io.IOException;
 
 public interface HandlerMapping {
 
-    boolean supports(final HttpMethod httpMethod, final String requestUri);
+    boolean supports(final HttpRequest httpRequest);
 
-    String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException;
+    String handle(final HttpRequest httpRequest) throws IOException;
 }

@@ -1,7 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,14 +10,15 @@ import java.nio.file.Path;
 
 public class RegisterPageMapping implements HandlerMapping {
 
+    public static final String TARGET_URI = "register";
+
     @Override
-    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
-        return HttpMethod.GET == httpMethod &&
-                requestUri.contains("register");
+    public boolean supports(final HttpRequest httpRequest) {
+        return httpRequest.isGetRequest() && httpRequest.containsRequestUri(TARGET_URI);
     }
 
     @Override
-    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException {
+    public String handle(final HttpRequest httpRequest) throws IOException {
         final String filePath = "static/register.html";
         final URL fileUrl = getClass().getClassLoader().getResource(filePath);
         final Path path = new File(fileUrl.getPath()).toPath();

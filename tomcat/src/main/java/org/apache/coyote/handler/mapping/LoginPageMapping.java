@@ -3,8 +3,7 @@ package org.apache.coyote.handler.mapping;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,22 +16,22 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http.HttpMethod.GET;
+import static org.apache.coyote.http.HttpHeader.COOKIE;
 
 public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 
+    public static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginPageMapping.class);
 
     @Override
-    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
-        return GET == httpMethod &&
-                requestUri.contains("login");
+    public boolean supports(final HttpRequest httpRequest) {
+        return httpRequest.isGetRequest() && httpRequest.containsRequestUri(TARGET_URI);
     }
 
     @Override
-    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException {
-        if (httpHeaders.containsKey("Cookie")) {
-            final HttpCookie cookies = HttpCookie.from(httpHeaders.get("Cookie"));
+    public String handle(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.containsHeader(COOKIE)) {
+            final HttpCookie cookies = HttpCookie.from(httpRequest.getHeader(COOKIE));
             if (isAlreadyLogined(cookies.get("JSESSIONID"))) {
                 return String.join("\r\n",
                         "HTTP/1.1 302 Found ",
@@ -40,8 +39,8 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
             }
         }
 
-        final String[] parsedRequestUri = requestUri.split("\\?");
-        if (requestUri.contains("?")) {
+        final String[] parsedRequestUri = httpRequest.getRequestUri().getRequestUri().split("\\?");
+        if (httpRequest.getRequestUri().getRequestUri().contains("?")) {
             final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
                     .map(param -> param.split("="))
                     .collect(Collectors.toMap(param -> param[0], param -> param[1]));

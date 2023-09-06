@@ -1,7 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,23 +8,22 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.apache.coyote.http.HttpMethod.GET;
-
 public class StaticFileMapping implements HandlerMapping {
 
     @Override
-    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
-        return GET == httpMethod &&
-                ("/".equals(requestUri) ||
-                        "/index.html".equals(requestUri) ||
-                        requestUri.endsWith(".js") ||
-                        requestUri.endsWith(".css") ||
-                        requestUri.endsWith(".ico")
+    public boolean supports(final HttpRequest httpRequest) {
+        return httpRequest.isGetRequest() &&
+                ("/".equals(httpRequest.getRequestUri().getRequestUri()) ||
+                        "/index.html".equals(httpRequest.getRequestUri().getRequestUri()) ||
+                        httpRequest.getRequestUri().getRequestUri().endsWith(".js") ||
+                        httpRequest.getRequestUri().getRequestUri().endsWith(".css") ||
+                        httpRequest.getRequestUri().getRequestUri().endsWith(".ico")
                 );
     }
 
     @Override
-    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) throws IOException {
+    public String handle(final HttpRequest httpRequest) throws IOException {
+        final String requestUri = httpRequest.getRequestUri().getRequestUri();
         if ("/".equals(requestUri)) {
             final var responseBody = "Hello world!";
 

@@ -2,28 +2,23 @@ package org.apache.coyote.handler.mapping;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.apache.coyote.http.HttpMethod.POST;
 
 public class RegisterMapping implements HandlerMapping {
 
+    public static final String TARGET_URI = "register";
+
     @Override
-    public boolean supports(final HttpMethod httpMethod, final String requestUri) {
-        return POST == httpMethod &&
-                requestUri.contains("register");
+    public boolean supports(final HttpRequest httpRequest) {
+        return httpRequest.isPostRequest() && httpRequest.containsRequestUri(TARGET_URI);
     }
 
     @Override
-    public String handle(final String requestUri, final HttpHeaders httpHeaders, final String requestBody) {
-        final Map<String, String> bodyParams = Arrays.stream(requestBody.split("&"))
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+    public String handle(final HttpRequest httpRequest) throws IOException {
+        final Map<String, String> bodyParams = httpRequest.getParsedBody();
 
         final String account = bodyParams.get("account");
         final String password = bodyParams.get("password");

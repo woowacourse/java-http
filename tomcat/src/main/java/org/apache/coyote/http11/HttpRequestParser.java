@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.http.HttpBody;
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaders;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
@@ -46,11 +47,11 @@ public class HttpRequestParser {
     }
 
     private HttpHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+        final Map<HttpHeader, String> headers = new HashMap<>();
         String header = bufferedReader.readLine();
         while (!"".equals(header)) {
             final String[] parsedHeader = header.split(": ");
-            headers.put(parsedHeader[0], parsedHeader[1]);
+            headers.put(HttpHeader.from(parsedHeader[0]), parsedHeader[1]);
             header = bufferedReader.readLine();
         }
 
@@ -59,7 +60,7 @@ public class HttpRequestParser {
 
     private HttpBody parseRequestBody(final HttpMethod httpMethod, final HttpHeaders headers, final BufferedReader bufferedReader) throws IOException {
         if (httpMethod == POST) {
-            final int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH.getValue()));
+            final int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             return new HttpBody(new String(buffer));

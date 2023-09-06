@@ -6,16 +6,14 @@ import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.MemberRegisterHandler;
 import org.apache.coyote.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseInfo;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +42,14 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
+             final var outputStream = connection.getOutputStream();
+             final var inputStreamReader = new InputStreamReader(inputStream);
+             final var bufferedReader = new BufferedReader(inputStreamReader)) {
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final ResponseInfo responseInfo = handleRequest(httpRequest);
-            final String response = buildResponse(responseInfo);
 
+            final Http11Response http11Response = handleRequest(httpRequest);
+
+            final String response = http11Response.getResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -60,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseInfo handleRequest(final HttpRequest httpRequest) {
+    private Http11Response handleRequest(final HttpRequest httpRequest) {
         for (RequestHandler handler : handlers) {
             if (handler.isMatch(httpRequest)) {
                 return handler.doService(httpRequest);
@@ -69,43 +66,6 @@ public class Http11Processor implements Runnable, Processor {
 
         final String requestUri = httpRequest.getRequestLine().getRequestURI();
         final String resourcePath = RESOURCE_PATH + requestUri;
-        return new ResponseInfo(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
-    }
-
-    private String buildResponse(ResponseInfo responseInfo) throws IOException {
-        final File location = new File(responseInfo.getResource().getFile());
-        String responseBody = "";
-
-        if (location.isDirectory()) {
-            responseBody = "Hello world!";
-        }
-
-        if (location.isFile()) {
-            responseBody = new String(Files.readAllBytes(location.toPath()));
-        }
-        if (responseInfo.getCookie() != null) {
-            return String.join(
-                    "\r\n",
-                    "HTTP/1.1 " + responseInfo.getHttpStatusCode() + " " + responseInfo.getStatusMessage(),
-                    "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "Set-Cookie: " + "JSESSIONID=" + responseInfo.getCookie() + " ",
-                    "",
-                    responseBody);
-        }
-
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 " + responseInfo.getHttpStatusCode() + " " + responseInfo.getStatusMessage() + " \r\n" +
-                        "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 \r\n" +
-                        "Content-Length: " + responseBody.getBytes().length + " \r\n\r\n" + responseBody);
-
-    }
-
-    private String contentType(final String resourcePath) {
-        if (resourcePath.endsWith(".css")) {
-            return "text/css";
-        }
-        return "text/html";
+        return new Http11Response(getClass().getClassLoader().getResource(resourcePath), 200, "OK");
     }
 }

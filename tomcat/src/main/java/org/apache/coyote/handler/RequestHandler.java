@@ -1,7 +1,7 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseInfo;
+import org.apache.coyote.http11.response.Http11Response;
 
 public abstract class RequestHandler {
 
@@ -9,7 +9,8 @@ public abstract class RequestHandler {
     String mappingUri;
 
     public static final String RESOURCE_PATH = "static";
-    public static final String PAGE401 = "/401.html";
+    public static final String UNAUTHORIZED_PAGE = "/401.html";
+    public static final String NOT_FOUND_PAGE = "/404.html";
     public static final String HTTP_FOUND = "Found";
     public static final String INDEX_PAGE = "/index.html";
 
@@ -18,9 +19,9 @@ public abstract class RequestHandler {
         return mappingUri.equals(requestURI);
     }
 
-    public abstract ResponseInfo doService(HttpRequest httpRequest);
+    public abstract Http11Response doService(HttpRequest httpRequest);
 
-    abstract ResponseInfo doGet(HttpRequest httpRequest);
+    abstract Http11Response doGet(HttpRequest httpRequest);
 
-    abstract ResponseInfo doPost(HttpRequest httpRequest);
+    abstract Http11Response doPost(HttpRequest httpRequest);
 }

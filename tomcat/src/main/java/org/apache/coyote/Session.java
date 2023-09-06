@@ -2,13 +2,18 @@ package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session {
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(String id) {
+    public static Session getInstance() {
+        return new Session(UUID.randomUUID().toString());
+    }
+
+    private Session(String id) {
         this.id = id;
     }
 

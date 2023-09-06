@@ -15,7 +15,6 @@ public class HttpCookie {
         final Map<String, String> cookies = new HashMap<>();
 
         String[] keyValue = cookie.split("=");
-
         cookies.put(keyValue[0].trim(), keyValue[1]);
 
         return new HttpCookie(cookies);

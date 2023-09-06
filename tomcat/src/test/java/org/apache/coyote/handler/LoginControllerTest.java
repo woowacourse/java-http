@@ -4,25 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.request.RequestContentType;
-import org.apache.coyote.request.RequestUrl;
+import org.apache.coyote.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
 
     @Test
-    @DisplayName("유저 로그인을 할 수 있다.") 
+    @DisplayName("유저 로그인을 할 수 있다.")
     void login_true() {
         LoginController loginController = new LoginController();
 
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
+        Request loginRequest = new Request(
+                new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString), ContentType.ALL);
 
         boolean isLogin = loginController.login(loginRequest);
         assertThat(isLogin).isTrue();
@@ -36,7 +38,8 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password", "password123");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
+        Request loginRequest = new Request(
+                new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString), ContentType.ALL);
 
         boolean isLogin = loginController.login(loginRequest);
         assertThat(isLogin).isFalse();
@@ -50,7 +53,8 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account1", "gugu");
         queryString.put("password", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
+        Request loginRequest = new Request(
+                new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString), ContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);
@@ -64,7 +68,8 @@ class LoginControllerTest {
         Map<String, String> queryString = new HashMap<>();
         queryString.put("account", "gugu");
         queryString.put("password1", "password");
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
+        Request loginRequest = new Request(
+                new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString), ContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);
@@ -76,7 +81,8 @@ class LoginControllerTest {
         LoginController loginController = new LoginController();
 
         Map<String, String> queryString = new HashMap<>();
-        Request loginRequest = new Request(RequestUrl.of("login", queryString), RequestContentType.ALL);
+        Request loginRequest = new Request(
+                new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString), ContentType.ALL);
 
         assertThatThrownBy(() -> loginController.login(loginRequest))
                 .isInstanceOf(LoginException.class);

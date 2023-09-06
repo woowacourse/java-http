@@ -27,7 +27,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         assertThat(actual).isNotNull();
@@ -45,7 +45,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final SessionManager sessionManager = new SessionManager();
 
@@ -64,7 +64,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         assertThat(request.findHeaderValue("Content-Type")).isEqualTo("text/html;charset=utf-8");
@@ -76,14 +76,14 @@ class RequestTest {
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login?user=gugu");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent("/login?user=gugu");
+        final Parameters parameters = Parameters.fromUrlContent("/login?user=gugu");
         final Request request = new Request(
                 headers,
                 method,
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                queryParameters
+                parameters
         );
 
         final String actual = request.findQueryParameterValue("user");
@@ -103,7 +103,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = request.matchesByMethod(HttpMethod.GET);
@@ -117,14 +117,14 @@ class RequestTest {
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login?user=gugu");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent("/login?user=gugu");
+        final Parameters parameters = Parameters.fromUrlContent("/login?user=gugu");
         final Request request = new Request(
                 headers,
                 method,
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                queryParameters
+                parameters
         );
 
         final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/");
@@ -138,14 +138,14 @@ class RequestTest {
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login?user=gugu");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent("/login?user=gugu");
+        final Parameters parameters = Parameters.fromUrlContent("/login?user=gugu");
         final Request request = new Request(
                 headers,
                 method,
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                queryParameters
+                parameters
         );
 
         final boolean actual = request.matchesByPathExcludingRootContextPath("/login", "/hello");
@@ -165,7 +165,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final String rootContextPath = "/";
 
@@ -186,7 +186,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final String rootContextPath = "/hello";
 
@@ -207,7 +207,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = request.isWelcomePageRequest("/");
@@ -227,7 +227,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = request.isWelcomePageRequest("/hello");
@@ -247,7 +247,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = request.isStaticResource();
@@ -261,14 +261,14 @@ class RequestTest {
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login?user=gugu");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent("/login?user=gugu");
+        final Parameters parameters = Parameters.fromUrlContent("/login?user=gugu");
         final Request request = new Request(
                 headers,
                 method,
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                queryParameters
+                parameters
         );
 
         final boolean actual = request.isStaticResource();
@@ -282,14 +282,14 @@ class RequestTest {
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login?user=gugu");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent("/login?user=gugu");
+        final Parameters parameters = Parameters.fromUrlContent("/login?user=gugu");
         final Request request = new Request(
                 headers,
                 method,
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                queryParameters
+                parameters
         );
 
         final boolean actual = request.hasQueryParameters();
@@ -309,7 +309,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = request.hasQueryParameters();
@@ -329,7 +329,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         request.initSessionManager(new SessionManager());
 
@@ -350,7 +350,7 @@ class RequestTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         request.initSessionManager(new SessionManager());
 

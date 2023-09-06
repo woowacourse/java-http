@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
+import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.util.exception.InvalidRequestBodyException;
@@ -25,10 +25,10 @@ public class RequestGenerator {
         final HttpVersion httpVersion = HttpVersion.findVersion(startLineTokens[START_LINE_HTTP_VERSION]);
         final HttpRequestHeaders headers = readRequestHeaders(bufferedReader);
         final HttpRequestBody body = readRequestBody(bufferedReader, headers);
-        final QueryParameters queryParameters = readQueryParameters(url, body);
+        final Parameters parameters = readQueryParameters(url, body);
         final HttpCookie cookie = convertCookie(headers);
 
-        return new Request(headers, httpMethod, httpVersion, url, body, queryParameters, cookie);
+        return new Request(headers, httpMethod, httpVersion, url, body, parameters, cookie);
     }
 
     private HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -68,15 +68,15 @@ public class RequestGenerator {
         return new HttpRequestBody(bodyContent);
     }
 
-    private QueryParameters readQueryParameters(final Url url, final HttpRequestBody body) {
+    private Parameters readQueryParameters(final Url url, final HttpRequestBody body) {
         final String content = url.url();
-        final QueryParameters queryParameters = QueryParameters.fromUrlContent(content);
+        final Parameters parameters = Parameters.fromUrlContent(content);
 
-        if (queryParameters != QueryParameters.EMPTY || body.isEmpty()) {
-            return queryParameters;
+        if (parameters != Parameters.EMPTY || body.isEmpty()) {
+            return parameters;
         }
 
-        return QueryParameters.fromBodyContent(body.body());
+        return Parameters.fromBodyContent(body.body());
     }
 
     private HttpCookie convertCookie(final HttpRequestHeaders headers) {

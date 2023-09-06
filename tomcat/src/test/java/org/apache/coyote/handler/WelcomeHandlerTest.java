@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
+import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.response.Response;
@@ -38,7 +38,7 @@ class WelcomeHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = handler.supports(request,"/");
@@ -59,7 +59,7 @@ class WelcomeHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = handler.supports(request, "/hello");
@@ -80,7 +80,7 @@ class WelcomeHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final Response actual = handler.service(request, "ignored");

@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http.request.exception.InvalidQueryParameterTokenException;
 
-public class QueryParameters {
+public class Parameters {
 
-    public static final QueryParameters EMPTY = new QueryParameters(Collections.emptyMap());
+    public static final Parameters EMPTY = new Parameters(Collections.emptyMap());
 
     private static final String QUERY_PARAMETER_DELIMITER = "&";
     private static final String QUERY_PARAMETER_KEY_VALUE_DELIMITER = "=";
@@ -18,13 +18,13 @@ public class QueryParameters {
     private static final String XML_PREFIX = "<";
     private static final String QUERY_PARAMETER_PREFIX = "?";
 
-    private final Map<String, String> parameters;
+    private final Map<String, String> values;
 
-    private QueryParameters(final Map<String, String> parameters) {
-        this.parameters = parameters;
+    private Parameters(final Map<String, String> values) {
+        this.values = values;
     }
 
-    public static QueryParameters fromUrlContent(final String urlContent) {
+    public static Parameters fromUrlContent(final String urlContent) {
         if (isNotQueryParameterUrlContent(urlContent)) {
             return EMPTY;
         }
@@ -32,7 +32,7 @@ public class QueryParameters {
         final String queryParameterContent = convertQueryParameterContent(urlContent);
         final Map<String, String> parameters = convertQueryParameters(queryParameterContent);
 
-        return new QueryParameters(parameters);
+        return new Parameters(parameters);
     }
 
     private static boolean isNotQueryParameterUrlContent(final String urlContent) {
@@ -58,14 +58,14 @@ public class QueryParameters {
                              )));
     }
 
-    public static QueryParameters fromBodyContent(final String bodyContent) {
+    public static Parameters fromBodyContent(final String bodyContent) {
         if (isEmptyBodyContent(bodyContent)) {
             return EMPTY;
         }
 
         final Map<String, String> parameters = convertQueryParameters(bodyContent);
 
-        return new QueryParameters(parameters);
+        return new Parameters(parameters);
     }
 
     private static boolean isEmptyBodyContent(final String bodyContent) {
@@ -92,10 +92,10 @@ public class QueryParameters {
     }
 
     public String findValue(final String queryParameterKey) {
-        return parameters.get(queryParameterKey);
+        return values.get(queryParameterKey);
     }
 
     public int size() {
-        return parameters.size();
+        return values.size();
     }
 }

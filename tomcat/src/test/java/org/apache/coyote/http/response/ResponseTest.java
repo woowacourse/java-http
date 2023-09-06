@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
+import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.util.HttpMethod;
@@ -28,7 +28,7 @@ class ResponseTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final String body = "Hello World!";
 
@@ -49,7 +49,7 @@ class ResponseTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final String body = "Hello World!";
         final Response response = Response.of(request, HttpStatusCode.OK, ContentType.TEXT_HTML, body);

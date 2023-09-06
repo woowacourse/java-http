@@ -13,7 +13,7 @@ public class Request {
     private final HttpVersion version;
     private final Url url;
     private final HttpRequestBody body;
-    private final QueryParameters queryParameters;
+    private final Parameters parameters;
     private final HttpCookie cookie;
     private SessionManager sessionManager;
 
@@ -23,9 +23,9 @@ public class Request {
             final HttpVersion version,
             final Url url,
             final HttpRequestBody body,
-            final QueryParameters queryParameters
+            final Parameters parameters
     ) {
-        this(headers, method, version, url, body, queryParameters, HttpCookie.EMPTY);
+        this(headers, method, version, url, body, parameters, HttpCookie.EMPTY);
     }
 
     public Request(
@@ -34,7 +34,7 @@ public class Request {
             final HttpVersion version,
             final Url url,
             final HttpRequestBody body,
-            final QueryParameters queryParameters,
+            final Parameters parameters,
             final HttpCookie cookie
     ) {
         this.headers = headers;
@@ -42,7 +42,7 @@ public class Request {
         this.version = version;
         this.url = url;
         this.body = body;
-        this.queryParameters = queryParameters;
+        this.parameters = parameters;
         this.cookie = cookie;
     }
 
@@ -55,7 +55,7 @@ public class Request {
     }
 
     public String findQueryParameterValue(final String queryParameterKey) {
-        return queryParameters.findValue(queryParameterKey);
+        return parameters.findValue(queryParameterKey);
     }
 
     public boolean matchesByMethod(final HttpMethod method) {
@@ -79,7 +79,7 @@ public class Request {
     }
 
     public boolean hasQueryParameters() {
-        return queryParameters.size() > 0;
+        return parameters.size() > 0;
     }
 
     public HttpVersion version() {

@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
+import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.response.ContentType;
@@ -50,7 +50,7 @@ class ResourceProcessorTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
         final String existsFile = "static/index.html";
 

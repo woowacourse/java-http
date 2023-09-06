@@ -7,7 +7,7 @@ import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
-import org.apache.coyote.http.request.QueryParameters;
+import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.response.Response;
@@ -40,7 +40,7 @@ class RegisterHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
+                Parameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
         );
 
         final boolean actual = handler.supports(request, "/");
@@ -61,7 +61,7 @@ class RegisterHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.EMPTY
+                Parameters.EMPTY
         );
 
         final boolean actual = handler.supports(request, "/");
@@ -82,7 +82,7 @@ class RegisterHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                QueryParameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
+                Parameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
         );
         request.initSessionManager(new SessionManager());
 

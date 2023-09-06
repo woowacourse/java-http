@@ -1,11 +1,6 @@
 package org.apache.coyote.http11.message;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Headers {
@@ -25,6 +20,7 @@ public class Headers {
         return new Headers(stringMappings);
     }
 
+    // TODO:
     public static Headers fromLines(List<String> lines) {
         Map<String, String> headers = new HashMap<>();
         lines.stream()
@@ -32,6 +28,10 @@ public class Headers {
                 .forEach(each -> headers.put(each[0], each[1]));
 
         return new Headers(headers);
+    }
+
+    public void addHeader(HttpHeaders key, String value) {
+        mappings.put(key.value(), value);
     }
 
     public String get(String key) {

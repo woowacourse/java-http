@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.servlet;
 
-import jakarta.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -12,7 +11,7 @@ public abstract class Servlet {
 
     private static final String RESOURCE_BASE_PATH = "static/";
 
-    abstract HttpResponse service(HttpRequest httpRequest) throws IOException;
+    abstract void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
 
     protected String findResourceWithPath(String absolutePath) throws IOException {
         URL resourceUrl = Servlet.class.getClassLoader().getResource(RESOURCE_BASE_PATH + absolutePath);

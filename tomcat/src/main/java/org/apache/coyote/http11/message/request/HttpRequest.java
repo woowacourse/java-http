@@ -14,7 +14,7 @@ public class HttpRequest {
     private final RequestBody requestBody;
 
     public HttpRequest(HttpMethod method, RequestURI requestURI, HttpVersion httpVersion,
-                        Headers headers, RequestBody requestBody) {
+                       Headers headers, RequestBody requestBody) {
         this.method = method;
         this.requestURI = requestURI;
         this.httpVersion = httpVersion;

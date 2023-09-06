@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
-import static org.apache.coyote.http11.PagePathMapper.*;
+import static org.apache.coyote.http11.PagePathMapper.INDEX_PAGE;
+import static org.apache.coyote.http11.PagePathMapper.REGISTER_PAGE;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
 
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -19,41 +19,36 @@ import org.apache.coyote.http11.message.response.ResponseBody;
 public class RegisterServlet extends Servlet {
 
     @Override
-    public HttpResponse service(HttpRequest httpRequest) throws IOException {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.getMethod().isEqualTo(HttpMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
         }
         if (httpRequest.getMethod().isEqualTo(HttpMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
         }
-
-        throw new IllegalArgumentException();
     }
 
-    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String absolutePath = REGISTER_PAGE.path();
 
-        String resource = findResourceWithPath(absolutePath);
-        Headers headers = Headers.fromMap(Map.of(
-                CONTENT_TYPE, ContentType.parse(absolutePath),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
-        ));
-        ResponseBody responseBody = new ResponseBody(resource);
+        String content = findResourceWithPath(absolutePath);
+        ResponseBody responseBody = new ResponseBody(content);
 
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK,
-                headers, responseBody);
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .addHeader(CONTENT_TYPE, ContentType.parse(absolutePath))
+                .addHeader(CONTENT_LENGTH, String.valueOf(content.getBytes().length))
+                .setResponseBody(responseBody);
     }
 
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         saveUser(httpRequest);
         String absolutePath = INDEX_PAGE.path();
 
-        Headers headers = Headers.fromMap(Map.of(
-                LOCATION, absolutePath
-        ));
-
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.FOUND,
-                headers, ResponseBody.ofEmpty());
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.FOUND)
+                .addHeader(LOCATION, absolutePath)
+                .setResponseBody(ResponseBody.ofEmpty());
     }
 
     private void saveUser(HttpRequest httpRequest) {

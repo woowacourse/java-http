@@ -20,52 +20,51 @@ import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class LoginServlet extends Servlet {
 
-    public HttpResponse service(HttpRequest httpRequest) throws IOException {
+    @Override
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpMethod httpMethod = httpRequest.getMethod();
         if (httpMethod.isEqualTo(HttpMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
         }
         if (httpMethod.isEqualTo(HttpMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
         }
-
-        throw new IllegalArgumentException();
     }
 
-    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
         if (cookie.hasKey("JSESSIONID")) {
-            return responseForLoggedIn(httpRequest);
+            responseForLoggedIn(httpRequest, httpResponse);
+            return;
         }
-        return responseForNotLoggedIn(httpRequest);
+        responseForNotLoggedIn(httpRequest, httpResponse);
     }
 
-    private HttpResponse responseForLoggedIn(HttpRequest httpRequest) {
+    private void responseForLoggedIn(HttpRequest httpRequest, HttpResponse httpResponse) {
         String absolutePath = INDEX_PAGE.path();
-        Headers headers = Headers.fromMap(Map.of(
-                LOCATION, absolutePath
-        ));
 
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.FOUND,
-                headers, ResponseBody.ofEmpty());
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.FOUND)
+                .addHeader(LOCATION, absolutePath)
+                .setResponseBody(ResponseBody.ofEmpty());
     }
 
-    private HttpResponse responseForNotLoggedIn(HttpRequest httpRequest) throws IOException {
+    private void responseForNotLoggedIn(HttpRequest httpRequest,
+                                        HttpResponse httpResponse) throws IOException {
         String absolutePath = LOGIN_PAGE.path();
-        String resource = findResourceWithPath(absolutePath);
-        Headers headers = Headers.fromMap(Map.of(
-                CONTENT_TYPE, ContentType.parse(absolutePath),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
-        ));
-        ResponseBody responseBody = new ResponseBody(resource);
+        String content = findResourceWithPath(absolutePath);
+        ResponseBody responseBody = new ResponseBody(content);
 
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK,
-                headers, responseBody);
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .addHeader(CONTENT_TYPE, ContentType.parse(absolutePath))
+                .addHeader(CONTENT_LENGTH, String.valueOf(content.getBytes().length))
+                .setResponseBody(responseBody);
     }
 
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestBody requestBody = httpRequest.getBody();
         Map<String, String> formData = requestBody.getAsFormData();
 
@@ -73,33 +72,30 @@ public class LoginServlet extends Servlet {
         String password = formData.get("password");
 
         if (InMemoryUserRepository.hasSameCredential(account, password)) {
-            return responseWhenLoginSuccess(httpRequest);
+            responseWhenLoginSuccess(httpRequest, httpResponse);
+            return;
         }
-        return responseWhenLoginFail(httpRequest);
+        responseWhenLoginFail(httpRequest, httpResponse);
     }
 
-    private HttpResponse responseWhenLoginSuccess(HttpRequest httpRequest) {
+    private void responseWhenLoginSuccess(HttpRequest httpRequest, HttpResponse httpResponse) {
         UUID sessionId = saveSession(httpRequest);
-
         String absolutePath = INDEX_PAGE.path();
-        Headers headers = Headers.fromMap(Map.of(
-                SET_COOKIE, "JSESSIONID=" + sessionId,
-                LOCATION, absolutePath
-        ));
 
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.FOUND,
-                headers, ResponseBody.ofEmpty());
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.FOUND)
+                .addHeader(LOCATION, absolutePath)
+                .addHeader(SET_COOKIE, "JSESSIONID=" + sessionId)
+                .setResponseBody(ResponseBody.ofEmpty());
     }
 
-    private HttpResponse responseWhenLoginFail(HttpRequest httpRequest) {
+    private void responseWhenLoginFail(HttpRequest httpRequest, HttpResponse httpResponse) {
         String absolutePath = UNAUTHORIZED_PAGE.path();
 
-        Headers headers = Headers.fromMap(Map.of(
-                LOCATION, absolutePath
-        ));
-
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.FOUND,
-                headers, ResponseBody.ofEmpty());
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.FOUND)
+                .addHeader(LOCATION, absolutePath)
+                .setResponseBody(ResponseBody.ofEmpty());
     }
 
     private UUID saveSession(HttpRequest httpRequest) {
@@ -110,7 +106,6 @@ public class LoginServlet extends Servlet {
         String password = formData.get("password");
 
         Long userId = InMemoryUserRepository.getIdByCredentials(account, password);
-
         return InMemorySessionRepository.save(userId);
     }
 }

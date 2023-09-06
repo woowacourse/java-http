@@ -3,9 +3,8 @@ package org.apache.coyote.http11.servlet;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
 
-import java.util.Map;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.message.Headers;
+import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -14,16 +13,21 @@ import org.apache.coyote.http11.message.response.ResponseBody;
 public class RootServlet extends Servlet {
 
     @Override
-    public HttpResponse service(HttpRequest httpRequest) {
-        String resource = "Hello world!";
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+        HttpMethod httpMethod = httpRequest.getMethod();
+        if (httpMethod.isEqualTo(HttpMethod.GET)) {
+            doGet(httpRequest, httpResponse);
+        }
+    }
 
-        Headers headers = Headers.fromMap(Map.of(
-                CONTENT_TYPE, ContentType.parse(resource),
-                CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
-        ));
-        ResponseBody responseBody = new ResponseBody(resource);
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String content = "Hello world!";
+        ResponseBody responseBody = new ResponseBody(content);
 
-        return new HttpResponse(httpRequest.getHttpVersion(), HttpStatus.OK,
-                headers, responseBody);
+        httpResponse.setHttpVersion(httpRequest.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .addHeader(CONTENT_TYPE, ContentType.parse(content))
+                .addHeader(CONTENT_LENGTH, String.valueOf(content.getBytes().length))
+                .setResponseBody(responseBody);
     }
 }

@@ -25,13 +25,19 @@ public class Servlets {
     public static HttpResponse service(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
+        HttpResponse httpResponse = HttpResponse.init();
 
-        Servlet servlet = mappings.entrySet().stream()
+        Servlet servlet = findServlet(absolutePath);
+        servlet.service(httpRequest, httpResponse);
+
+        return httpResponse;
+    }
+
+    private static Servlet findServlet(String absolutePath) {
+        return mappings.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(absolutePath))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElseGet(StaticResourceServlet::new);
-
-        return servlet.service(httpRequest);
     }
 }

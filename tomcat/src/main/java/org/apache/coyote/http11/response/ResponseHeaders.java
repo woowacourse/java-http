@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,7 +9,7 @@ public class ResponseHeaders {
     private final Map<String, String> headers;
 
     public ResponseHeaders() {
-        this.headers = new LinkedHashMap<>();
+        this.headers = new HashMap<>();
     }
 
     public void add(final String key, final String value) {

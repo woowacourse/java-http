@@ -17,6 +17,8 @@ import org.apache.coyote.http11.session.SessionManager;
 public class LoginPageController implements Controller {
 
     private static final String PATH = "/login";
+    private static final String UNAUTHENTICATED_USER_VIEW_NAME = "login";
+    private static final String AUTHENTICATED_USER_VIEW_NAME = "index";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
@@ -28,13 +30,13 @@ public class LoginPageController implements Controller {
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final String sessionId = extractSessionId(httpRequest);
         if (sessionId == null) {
-            return redirectPage("login");
+            return resolveViewPage(UNAUTHENTICATED_USER_VIEW_NAME, StatusCode.OK);
         }
         final Session session = SessionManager.findSession(sessionId);
         if (session == null) {
-            return redirectPage("login");
+            return resolveViewPage(UNAUTHENTICATED_USER_VIEW_NAME, StatusCode.OK);
         }
-        return redirectPage("index");
+        return resolveViewPage(AUTHENTICATED_USER_VIEW_NAME, StatusCode.FOUND);
     }
 
     private String extractSessionId(final HttpRequest httpRequest) {
@@ -43,9 +45,9 @@ public class LoginPageController implements Controller {
         return cookie.getAttribute(Session.getName());
     }
 
-    private HttpResponse redirectPage(final String viewName) throws IOException {
+    private HttpResponse resolveViewPage(final String viewName, final StatusCode statusCode) throws IOException {
         final String body = ViewResolver.findView(viewName);
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.OK, body);
+        final HttpResponse httpResponse = new HttpResponse(statusCode, body);
         httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

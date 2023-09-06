@@ -8,7 +8,7 @@ public class HttpResponse {
     private String location;
     private String jSessionId;
 
-    public HttpResponse() {
+    private HttpResponse() {
     }
 
     public HttpResponse(String statusCode, String statusText, String contentType, String responseBody, String location, String jSessionId) {

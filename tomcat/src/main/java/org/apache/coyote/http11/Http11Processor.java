@@ -67,26 +67,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestBody parseRequestBody(String contentLength, BufferedReader bufferedReader) throws IOException {
-        if (contentLength == null) {
-            return HttpRequestBody.none();
-        }
-        int length = Integer.parseInt(contentLength);
-        char[] httpRequestBody = new char[length];
-        bufferedReader.read(httpRequestBody, 0, length);
-        return HttpRequestBody.from(new String(httpRequestBody));
-    }
-
-    private HttpRequestHeader parseRequestHeader(BufferedReader bufferedReader) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            stringBuilder.append(line).append("\r\n");
-            line = bufferedReader.readLine();
-        }
-        return HttpRequestHeader.from(stringBuilder.toString());
-    }
-
     private ResponseEntity createResponse(
             HttpRequestStartLine httpRequestStartLine,
             HttpRequestBody httpRequestBody

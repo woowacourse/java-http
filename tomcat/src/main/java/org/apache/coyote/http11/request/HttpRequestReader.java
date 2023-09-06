@@ -28,7 +28,7 @@ public class HttpRequestReader {
                 break;
             }
             final String[] split = line.split(": ");
-            headers.put(split[0], split[1]);
+            headers.put(split[0], split[1].trim());
         }
         return headers;
     }
@@ -37,7 +37,7 @@ public class HttpRequestReader {
             throws IOException {
         int cbufSize = 0;
         if (contentLength != null) {
-            cbufSize = Integer.parseInt(contentLength);
+            cbufSize = Integer.parseInt(contentLength.trim());
         }
         char[] buffer = new char[cbufSize];
         bufferedReader.read(buffer, 0, cbufSize);

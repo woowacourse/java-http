@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String TEXT_CSS = "text/css;";
     private static final String INDEX_PAGE = "/index.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String HTML_EXTENSION = ".html";
 
     private final Socket connection;
 
@@ -80,27 +81,24 @@ public class Http11Processor implements Runnable, Processor {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
-            return get200ResponseMessage("Hello world!", TEXT_HTML);
-        }
-        if (path.endsWith(".css")) {
-            final String responseBody = findStaticResource(path);
-            return get200ResponseMessage(responseBody, TEXT_CSS);
+            return get200ResponseMessage(path, "Hello world!");
         }
         if (path.equals("/login")) {
-            final String responseBody = findStaticResource(path + ".html");
-            return handleLoginRequest(requestBody, responseBody, cookie);
+            final String responseBody = findStaticResource(path + HTML_EXTENSION);
+            return handleLoginRequest(path + HTML_EXTENSION, requestBody, responseBody, cookie);
         }
         if (path.equals("/register")) {
-            final String responseBody = findStaticResource(path + ".html");
-            return handleRegisterRequest(requestBody, responseBody, cookie);
+            final String responseBody = findStaticResource(path + HTML_EXTENSION);
+            return handleRegisterRequest(path + HTML_EXTENSION, requestBody, responseBody, cookie);
         }
         final String responseBody = findStaticResource(path);
-        return get200ResponseMessage(responseBody, TEXT_HTML);
+        return get200ResponseMessage(path, responseBody);
     }
 
-    private String handleRegisterRequest(final String requestBody, final String responseBody, final HttpCookie cookie) {
+    private String handleRegisterRequest(final String path, final String requestBody, final String responseBody,
+                                         final HttpCookie cookie) {
         if (requestBody == null) {
-            return get200ResponseMessage(responseBody, TEXT_HTML);
+            return get200ResponseMessage(path, responseBody);
         }
         final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
         final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
@@ -119,14 +117,15 @@ public class Http11Processor implements Runnable, Processor {
         return requestBodyValues;
     }
 
-    private String handleLoginRequest(final String requestBody, final String responseBody, final HttpCookie cookie) {
+    private String handleLoginRequest(final String path, final String requestBody, final String responseBody,
+                                      final HttpCookie cookie) {
         final User user = findUserBySessionId(cookie.getJSessionId(false));
         if (user != null) {
             log.info("User: {}", user);
             return get302ResponseMessage(INDEX_PAGE, cookie, false);
         }
         if (requestBody == null) {
-            return get200ResponseMessage(responseBody, TEXT_HTML);
+            return get200ResponseMessage(path, responseBody);
         }
         return handleFirstLogin(requestBody, cookie);
     }
@@ -156,13 +155,21 @@ public class Http11Processor implements Runnable, Processor {
         return (User) session.getAttribute("user");
     }
 
-    private String get200ResponseMessage(final String responseBody, final String contentType) {
+    private String get200ResponseMessage(final String path, final String responseBody) {
+        final String contentType = getContentType(path);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + "charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String getContentType(final String path) {
+        if (path.endsWith(".css")) {
+            return TEXT_CSS;
+        }
+        return TEXT_HTML;
     }
 
     private String get302ResponseMessage(final String location, final HttpCookie cookie, final boolean setCookie) {

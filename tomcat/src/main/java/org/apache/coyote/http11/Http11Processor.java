@@ -155,7 +155,8 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             String jsessionid = UUID.randomUUID().toString();
-            log.info(user.get().toString());
+            String userInfo = user.get().toString();
+            log.info(userInfo);
             Session session = new Session(jsessionid);
             session.setAttribute("user", user.get());
             SessionManager sessionManager = new SessionManager();

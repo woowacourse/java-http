@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-    public static final String SET_COOKIE_HEADER = "Set-Cookie: %s \r\n";
-    public static final String COOKIE_DELIMITER = "; ";
-    public static final String KEY_VALUE_DELIMITER = "=";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
+    private static final String SET_COOKIE_HEADER = "Set-Cookie: %s \r\n";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> cookie = new HashMap<>();
 

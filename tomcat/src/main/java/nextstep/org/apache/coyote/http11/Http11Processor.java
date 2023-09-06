@@ -26,11 +26,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
-    public static final String EMPTY_LINE = "";
-    public static final String RESOURCES_PATH_PREFIX = "static";
-    public static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String EMPTY_LINE = "";
+    private static final String RESOURCES_PATH_PREFIX = "static";
+    private static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
 
     private final Socket connection;
     private final HandlerMapper handlerMapper;

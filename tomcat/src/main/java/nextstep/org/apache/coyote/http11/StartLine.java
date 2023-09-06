@@ -7,10 +7,10 @@ import java.util.Objects;
 public class StartLine {
 
     private static final String START_LINE_DELIMITER = " ";
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int URL_INDEX = 1;
-    public static final int HTTP_VERSION_INDEX = 2;
-    public static final String QUERY_PARAM_DELIMITER = "?";
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int URL_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final String QUERY_PARAM_DELIMITER = "?";
 
     private String httpMethod;
     private String url;

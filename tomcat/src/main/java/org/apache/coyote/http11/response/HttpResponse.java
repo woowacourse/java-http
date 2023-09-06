@@ -49,11 +49,9 @@ public class HttpResponse {
     }
 
     private static String findResourceFromLocation(String location) throws IOException {
-        String responseBody;
         URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
         File file = new File(resource.getFile());
-        responseBody = new String(Files.readAllBytes(file.toPath()));
-        return responseBody;
+        return new String(Files.readAllBytes(file.toPath()));
     }
 
     private static String generateHttpStatus(HttpStatus status) {

@@ -12,7 +12,7 @@ public class ExceptionHandler {
         HttpStatus httpStatus = e.httpStatus();
         int code = httpStatus.statusCode();
         ResourceLoader resourceLoader = new ResourceLoader();
-        String body = resourceLoader.loadResourceAsString(String.format(RESOURCE_PATH_FORMAT, code));
+        String body = resourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
         return HttpResponse.status(httpStatus)
                 .contentType(TEXT_HTML)
                 .body(body)

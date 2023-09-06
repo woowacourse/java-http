@@ -9,7 +9,7 @@ import java.nio.file.Files;
 
 public class ResourceLoader {
 
-    public String loadResourceAsString(String path) throws IOException {
+    public String load(String path) throws IOException {
         URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
             throw new HttpException(BAD_REQUEST, "요청받은 리소스가 존재하지 않습니다");

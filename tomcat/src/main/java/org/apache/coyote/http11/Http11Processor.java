@@ -95,25 +95,25 @@ public class Http11Processor implements Runnable, Processor {
                     return loginWithSession(jsessionid.get());
                 }
                 return HttpResponse.status(OK)
-                        .body(resourceLoader.loadResourceAsString("static/login.html"))
+                        .body(resourceLoader.load("static/login.html"))
                         .contentType(TEXT_HTML)
                         .build();
             }
             if (httpRequest.uri().equals("/register")) {
                 return HttpResponse.status(OK)
-                        .body(resourceLoader.loadResourceAsString("static/register.html"))
+                        .body(resourceLoader.load("static/register.html"))
                         .contentType(TEXT_HTML)
                         .build();
             }
             Optional<String> acceptHeader = httpRequest.getHeader("Accept");
             if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
                 return HttpResponse.status(OK)
-                        .body(resourceLoader.loadResourceAsString("static" + httpRequest.uri()))
+                        .body(resourceLoader.load("static" + httpRequest.uri()))
                         .contentType(TEXT_CSS)
                         .build();
             }
             return HttpResponse.status(OK)
-                    .body(resourceLoader.loadResourceAsString("static" + httpRequest.uri()))
+                    .body(resourceLoader.load("static" + httpRequest.uri()))
                     .contentType(TEXT_HTML)
                     .build();
         }

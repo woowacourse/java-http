@@ -14,6 +14,10 @@ public class ResponseBody {
         return new ResponseBody(HttpExtensionType.HTML, "");
     }
 
+    public static ResponseBody html(final String content) {
+        return new ResponseBody(HttpExtensionType.HTML, content);
+    }
+
     public static ResponseBody of(final String extension, final String content) {
         return new ResponseBody(HttpExtensionType.from(extension), content);
     }

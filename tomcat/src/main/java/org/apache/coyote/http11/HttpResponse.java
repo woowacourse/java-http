@@ -22,7 +22,11 @@ public class HttpResponse {
         return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
-    public static HttpResponse withCookie(final HttpStatusCode httpStatusCode, final ResponseBody responseBody, final HttpCookie httpCookie) {
+    public static HttpResponse withCookie(
+            final HttpStatusCode httpStatusCode,
+            final ResponseBody responseBody,
+            final HttpCookie httpCookie
+    ) {
         final ResponseHeaders responseHeaders = ResponseHeaders.from(responseBody);
         responseHeaders.addCookie(httpCookie);
         final StatusLine statusLine = new StatusLine(httpStatusCode);

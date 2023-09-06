@@ -11,7 +11,11 @@ public class HttpRequest {
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
 
-    public HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders, final RequestBody requestBody) {
+    public HttpRequest(
+            final RequestLine requestLine,
+            final RequestHeaders requestHeaders,
+            final RequestBody requestBody
+    ) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;

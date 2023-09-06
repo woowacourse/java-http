@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.NotAllowedMethodException;
 
 import java.util.Arrays;
 
@@ -16,6 +16,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethodType -> httpMethodType.name().equals(request))
                 .findAny()
-                .orElseThrow(() -> new UncheckedServletException("해당하는 HttpMethod가 존재하지 않습니다."));
+                .orElseThrow(NotAllowedMethodException::new);
     }
 }

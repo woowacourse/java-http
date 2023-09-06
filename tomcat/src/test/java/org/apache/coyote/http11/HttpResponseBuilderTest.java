@@ -41,7 +41,7 @@ class HttpResponseBuilderTest {
 
         //then
         assertAll(
-                () -> assertTrue(response.contains("HTTP/1.1 302 Moved Temporarily")),
+                () -> assertTrue(response.contains("HTTP/1.1 302 FOUND")),
                 () -> assertTrue(response.contains("Content-Type: text/html;charset=utf-8")),
                 () -> assertTrue(response.contains("Content-Length: 5564")),
                 () -> assertTrue(response.contains("Location: /index.html"))

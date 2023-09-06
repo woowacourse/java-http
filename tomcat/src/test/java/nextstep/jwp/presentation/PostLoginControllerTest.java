@@ -29,7 +29,7 @@ class PostLoginControllerTest {
 
         //then
         Assertions.assertAll(
-                () -> assertThat(response).contains("HTTP/1.1 302 Moved Temporarily"),
+                () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
                 () -> assertThat(response).contains("Content-Length: 5564")
@@ -51,7 +51,7 @@ class PostLoginControllerTest {
 
         //then
         Assertions.assertAll(
-                () -> assertThat(response).contains("HTTP/1.1 302 Moved Temporarily"),
+                () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
                 () -> assertThat(response).contains("Location: /401.html"),
                 () -> assertThat(response).contains("Content-Length: 2426")

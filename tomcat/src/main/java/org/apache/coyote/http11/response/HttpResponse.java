@@ -15,6 +15,7 @@ public class HttpResponse {
 
     private static final String DELIMITER = "\r\n";
     private static final String BLANK_LINE = "";
+    private static final String BLANK_SPACE = " ";
 
     private final String response;
 
@@ -55,7 +56,7 @@ public class HttpResponse {
     }
 
     private static String generateHttpStatus(HttpStatus status) {
-        return "HTTP/1.1 " + status.getStatusCode() + " " + status.name() + " ";
+        return String.format("HTTP/1.1 %s %s ", status.getStatusCode(), status.name());
     }
 
     private static String generateLocation(ResponseEntity responseEntity) {
@@ -63,7 +64,7 @@ public class HttpResponse {
         if (location == null) {
             return "";
         }
-        return "Location: " + location + " ";
+        return String.format("Location: %s ", location);
     }
 
     private static String generateContentType(String requestURI) {
@@ -74,7 +75,7 @@ public class HttpResponse {
     }
 
     private static String generateContentLength(String responseBody) {
-        return "Content-Length: " + responseBody.getBytes().length + " ";
+        return String.format("Content-Length: %s ", responseBody.getBytes().length);
     }
 
     private static String generateCookie(ResponseEntity responseEntity) {
@@ -86,6 +87,6 @@ public class HttpResponse {
         if (jSessionId == null) {
             return "";
         }
-        return "Set-Cookie: JSESSIONID=" + jSessionId + " ";
+        return String.format("Set-Cookie: JSESSIONID=%s ", jSessionId);
     }
 }

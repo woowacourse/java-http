@@ -34,7 +34,7 @@ public class RequestGenerator {
     private HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder requestHeaderBuilder = new StringBuilder();
 
-        for (String line; !(line = bufferedReader.readLine()).equals(HttpConsts.BLANK); ) {
+        for (String line = bufferedReader.readLine(); !HttpConsts.BLANK.equals(line); line = bufferedReader.readLine()) {
             requestHeaderBuilder.append(line)
                                 .append(HttpConsts.CRLF);
         }

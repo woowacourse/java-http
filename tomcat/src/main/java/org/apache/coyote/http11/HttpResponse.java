@@ -1,9 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import static java.lang.String.join;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
@@ -12,10 +8,12 @@ public class HttpResponse {
 
     public static final String CRLF = "\r\n";
     public static final String EMPTY_STRING = "";
+    public static final String BLANK = " ";
+    public static final String HTTP_1_1 = "HTTP/1.1";
 
     private final HttpStatus httpStatus;
     private final ContentType contentType;
-    private final String body;
+    private final ResponseBody body;
     private final Headers headers;
 
     public static HttpResponseBuilder builder() {
@@ -26,42 +24,53 @@ public class HttpResponse {
                         final Headers headers) {
         this.httpStatus = requireNonNull(httpStatus);
         this.contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
-        this.body = ofNullable(body).orElse(EMPTY_STRING);
+        this.body = ResponseBody.from(ofNullable(body).orElse(EMPTY_STRING));
         this.headers = ofNullable(headers).orElse(new Headers());
+    }
+
+    public String buildResponse() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String startLine = getStartLine();
+        String joinedHeader = getHeaders();
+        String messageBody = getBody();
+
+        return stringBuilder.append(startLine).append(CRLF)
+                .append(joinedHeader).append(CRLF)
+                .append(messageBody)
+                .toString();
+    }
+
+    private String getStartLine() {
+        return HTTP_1_1 + BLANK + httpStatus + BLANK;
     }
 
     private String getHeaders() {
         String joinedHeaders = headers.join();
-        String body = getBodyHeaders();
-        if (!joinedHeaders.isEmpty() && !body.isEmpty()) {
-            return join(CRLF, joinedHeaders, body);
+        String bodyHeaders = getBodyHeaders();
+        if (!joinedHeaders.isEmpty() && !bodyHeaders.isEmpty()) {
+            return joinedHeaders + CRLF + bodyHeaders;
         }
-        return joinedHeaders + body;
+        return joinedHeaders + bodyHeaders;
     }
 
     private String getBodyHeaders() {
         if (body.isEmpty()) {
             return EMPTY_STRING;
         }
-        return join(CRLF,
-                contentType.toString(),
-                "Content-Length: " + body.getBytes().length + " ");
+        StringBuilder builder = new StringBuilder();
+        return builder.append(contentType)
+                .append(CRLF)
+                .append(body.getContentLength())
+                .append(BLANK)
+                .toString();
     }
 
     private String getBody() {
         if (body.isEmpty()) {
             return EMPTY_STRING;
         }
-        return CRLF + body;
-    }
-
-    public String buildResponse() {
-        String joinedHeader = getHeaders();
-
-        String startLine = "HTTP/1.1 " + httpStatus + " ";
-        String withHeader = join(CRLF, startLine, joinedHeader);
-
-        return join(CRLF, withHeader, getBody());
+        return CRLF + body.getBody();
     }
 
 

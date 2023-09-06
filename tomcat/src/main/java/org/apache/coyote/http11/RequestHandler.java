@@ -24,20 +24,14 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpResponse handle(final HttpRequest request) throws IOException {
-        final var uri = request.getUri();
-        if (uri.equals(new HttpUri("/"))) {
-            return resourceResponseHandler.handleStaticResponse("/");
-        }
-        if (uri.equals(new HttpUri("/login"))) {
+        final var uri = request.getUri().getValue();
+        if (uri.equals("/login")) {
             return handleLogin(request);
         }
-        if (uri.equals(new HttpUri("/register"))) {
-            if (request.isPost()) {
-                return postRegister(request);
-            }
-            return resourceResponseHandler.handleStaticResponse("/register.html");
+        if (uri.equals("/register")) {
+            return handleRegister(request);
         }
-        return resourceResponseHandler.handleStaticResponse(uri.getValue());
+        return resourceResponseHandler.handleStaticResponse(uri);
     }
 
     private HttpResponse handleLogin(final HttpRequest request) {
@@ -51,6 +45,13 @@ public class RequestHandler {
                     .build();
         }
         return resourceResponseHandler.handleStaticResponse("/login.html");
+    }
+
+    private HttpResponse handleRegister(final HttpRequest request) {
+        if (request.isPost()) {
+            return postRegister(request);
+        }
+        return resourceResponseHandler.handleStaticResponse("/register.html");
     }
 
     private HttpResponse postLogin(HttpRequest request) {

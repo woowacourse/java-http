@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Objects;
 
 public class HttpUri {
+
     private String uri;
 
     public HttpUri(String uri) {

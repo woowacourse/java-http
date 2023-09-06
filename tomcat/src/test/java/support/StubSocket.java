@@ -51,4 +51,5 @@ public class StubSocket extends Socket {
     public String output() {
         return outputStream.toString(StandardCharsets.UTF_8);
     }
+
 }

@@ -7,7 +7,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.annotation.Nullable;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -35,7 +34,6 @@ public class ResourceResponseHandler {
                 .build();
     }
 
-    @Nullable
     private File getFile(final String uri) {
         if (uri.equals("/")) {
             return null;

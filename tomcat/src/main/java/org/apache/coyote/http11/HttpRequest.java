@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.swing.text.html.Option;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.HttpMethod.POST;
@@ -39,8 +37,7 @@ public class HttpRequest {
 
     public Map<String, String> getForm() {
         String[] split = messageBody.split("&");
-        return Arrays.asList(split)
-                .stream()
+        return Arrays.asList(split).stream()
                 .map(s -> s.split("="))
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }

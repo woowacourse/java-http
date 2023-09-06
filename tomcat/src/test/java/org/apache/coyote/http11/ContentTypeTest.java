@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ContentTypeTest {
 
@@ -15,6 +15,7 @@ class ContentTypeTest {
         final var actual = contentType.toString();
 
         //then
-        assertEquals("Content-Type: text/html;charset=utf-8 ", actual);
+        assertThat(actual).isEqualTo("Content-Type: text/html;charset=utf-8 ");
     }
+
 }

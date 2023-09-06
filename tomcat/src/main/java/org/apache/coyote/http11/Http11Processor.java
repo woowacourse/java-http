@@ -94,8 +94,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     public HttpResponse toHttpResponse(HttpRequests httpRequests, Map<String, String> httpRequestHeaders, BufferedReader reader) throws IOException, URISyntaxException {
-        if (httpRequests.equals(HttpRequests.HELLO)) {
-            String responseBody = "Hello world!";
+        if (httpRequests.equals(HttpRequests.NOT_FOUND)) {
+            String responseBody = "404 Not Found";
             return HttpResponse.of(httpRequests, responseBody);
         }
         if (httpRequests.equals(HttpRequests.LOGIN)) {

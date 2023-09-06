@@ -19,7 +19,7 @@ public enum HttpRequests {
     FOUND("GET", "/redirect", "/index.html", "302", "Found", "text.html"),
     REGISTER("GET", "/register", "static/register.html", "200", "OK", "text.html"),
     REGISTER_MEMBER("POST", "/register", "/index.html", "201", "Created", "text.html"),
-    HELLO("GET", "/", "NONE", "200", "OK", "text/html");
+    NOT_FOUND("GET", "/", "NONE", "404", "Not Found", "text/html");
 
     private final String method;
     private final String url;
@@ -41,7 +41,7 @@ public enum HttpRequests {
         return Arrays.stream(values())
                 .filter(request -> request.method.equals(method) && resourceName.startsWith(request.url))
                 .findAny()
-                .orElse(HELLO);
+                .orElse(NOT_FOUND);
     }
 
     public Path readPath() throws URISyntaxException {

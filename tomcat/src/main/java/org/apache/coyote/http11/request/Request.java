@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 
@@ -36,9 +37,18 @@ public class Request {
         return RequestForms.from(requestBody);
     }
 
-    public Session getSession() {
+    public boolean noSession() {
         final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
-        return SessionManager.findSession(sessionId);
+        return SessionManager.findSession(sessionId) == null;
+    }
+
+    public Optional<Object> getSessionValue(final String key) {
+        final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
+        final Session session = SessionManager.findSession(sessionId);
+        if (session == null) {
+            return Optional.empty();
+        }
+        return Optional.of(session.getAttribute(key));
     }
 
     public RequestLine getRequestLine() {

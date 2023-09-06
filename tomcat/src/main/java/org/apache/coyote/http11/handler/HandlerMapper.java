@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static org.reflections.Reflections.log;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +34,7 @@ public class HandlerMapper {
     }
 
     public Response loginHandler(final Request request) {
-        if (request.getSession() != null) {
+        if (request.getSessionValue("user") != Optional.empty()) {
             return Response.createByTemplate(HttpStatus.FOUND, "index.html");
         }
 
@@ -50,7 +48,7 @@ public class HandlerMapper {
     }
 
     private Response loginSuccess(final Request request, final User user) {
-        if (request.getSession() == null) {
+        if (request.noSession()) {
             final Session session = new Session();
             session.setAttribute("user", user);
             SessionManager.add(session);

@@ -2,11 +2,11 @@ package org.apache.coyote.httpresponse.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.cookie.CookieResponseHeader;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.QueryString;
 import org.apache.coyote.httprequest.RequestMethod;
+import org.apache.coyote.httpresponse.CookieResponseHeader;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;
 import org.apache.coyote.httpresponse.handler.exception.UnauthorizedException;

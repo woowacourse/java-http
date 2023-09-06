@@ -8,10 +8,6 @@ public class SessionManager {
     private static SessionManager instance;
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-//    static {
-//        SESSIONS.put("user", )
-//    }
-
     private SessionManager() {}
 
     public static SessionManager getInstance() {
@@ -27,9 +23,5 @@ public class SessionManager {
 
     public Session findSession(final String id) {
         return SESSIONS.get(id);
-    }
-
-    public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
     }
 }

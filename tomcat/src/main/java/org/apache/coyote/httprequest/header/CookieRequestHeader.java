@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.cookie;
+package org.apache.coyote.httprequest.header;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

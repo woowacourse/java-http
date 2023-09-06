@@ -1,7 +1,5 @@
 package org.apache.coyote.httprequest.header;
 
-import org.apache.coyote.http11.cookie.CookieRequestHeader;
-import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.exception.InvalidHeaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

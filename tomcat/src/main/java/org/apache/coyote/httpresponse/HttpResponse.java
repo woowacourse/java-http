@@ -1,6 +1,5 @@
 package org.apache.coyote.httpresponse;
 
-import org.apache.coyote.http11.cookie.CookieResponseHeader;
 import org.apache.coyote.httpresponse.header.ResourceReader;
 import org.apache.coyote.httpresponse.header.ResponseHeaders;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
     private static final String DELIMITER = " ";
+    private static final String LINE_SEPARATOR = "\r\n";
 
     private final String httpVersion;
     private final HttpStatus httpStatus;
@@ -73,11 +73,11 @@ public class HttpResponse {
     public byte[] getBytes() {
         final StringBuilder stringBuilder = new StringBuilder();
         final String responseLine = makeResponseLine();
-        stringBuilder.append(responseLine).append("\r\n");
+        stringBuilder.append(responseLine).append(LINE_SEPARATOR);
         if (cookieResponseHeader.isExist()) {
-            stringBuilder.append(cookieResponseHeader.getFormattedValue()).append("\r\n");
+            stringBuilder.append(cookieResponseHeader.getFormattedValue()).append(LINE_SEPARATOR);
         }
-        stringBuilder.append(responseHeaders.getFormattedHeaders()).append("\r\n");
+        stringBuilder.append(responseHeaders.getFormattedHeaders()).append(LINE_SEPARATOR);
         stringBuilder.append(contentBody.getValue());
         return stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
     }

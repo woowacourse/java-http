@@ -18,7 +18,7 @@ public class LoginHandler implements Handler {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        if (doesRequestContainsCookie(request)) {
+        if (request.containsCookie()) {
             String cookies = request.getHeader("Cookie");
             for (String cookie : cookies.split(";")) {
                 String[] probableSessionCookie = cookie.split("=");
@@ -34,19 +34,10 @@ public class LoginHandler implements Handler {
                 }
             }
         }
-        if (doesRequestContainsFormData(request)) {
+        if (request.containsFormData()) {
             return MemberService.login(request);
         }
         return returnLoginPage();
-    }
-
-    private boolean doesRequestContainsCookie(HttpRequest request) {
-        return request.containsHeader("Cookie");
-    }
-
-    private boolean doesRequestContainsFormData(HttpRequest request) {
-        return request.containsHeader("Content-Type") && request.getHeader("Content-Type")
-                .contains("application/x-www-form-urlencoded");
     }
 
     private HttpResponse returnLoginPage() {

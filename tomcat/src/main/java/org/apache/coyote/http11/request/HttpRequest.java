@@ -19,6 +19,15 @@ public class HttpRequest {
         this.httpRequestBody = new HttpRequestBody(bufferedReader, httpRequestHeaders);
     }
 
+    public boolean containsCookie() {
+        return containsHeader("Cookie");
+    }
+
+    public boolean containsFormData() {
+        return containsHeader("Content-Type") && getHeader("Content-Type")
+                .contains("application/x-www-form-urlencoded");
+    }
+
     public HttpMethod getHttpMethod() {
         return httpRequestLine.getHttpMethod();
     }

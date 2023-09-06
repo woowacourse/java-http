@@ -7,6 +7,7 @@ import nextstep.jwp.application.UserService;
 import org.apache.coyote.Container;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
+import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.LoginPageHandler;
 import org.apache.coyote.handler.RegisterHandler;
@@ -37,15 +38,26 @@ public class HelloWorldContext implements Container {
     }
 
     public HelloWorldContext(final String rootContextPath, final String staticResourcePath) {
-        if (rootContextPath == null || rootContextPath.isEmpty() || rootContextPath.isBlank()) {
-            throw new InvalidRootContextPathException();
-        }
+        validateRootContextPath(rootContextPath);
+        validatePath(staticResourcePath);
 
         this.rootContextPath = rootContextPath;
         this.staticResourcePath = staticResourcePath;
         this.resourceHandler = new ResourceHandler(staticResourcePath);
 
         initHandlers();
+    }
+
+    private void validateRootContextPath(final String rootContextPath) {
+        if (rootContextPath == null || !rootContextPath.startsWith(HttpConsts.SLASH)) {
+            throw new InvalidRootContextPathException();
+        }
+    }
+
+    private void validatePath(final String staticResourcePath) {
+        if (staticResourcePath == null || !staticResourcePath.endsWith(HttpConsts.SLASH)) {
+            throw new InvalidStaticResourcePathException();
+        }
     }
 
     private void initHandlers() {

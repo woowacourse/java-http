@@ -1,11 +1,11 @@
 package org.apache.coyote.context;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
+import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.QueryParameters;
@@ -32,6 +32,16 @@ class HelloWorldContextTest {
         assertThatThrownBy(() -> new HelloWorldContext(invalidRootContextPath))
                 .isInstanceOf(InvalidRootContextPathException.class)
                 .hasMessageContaining("Root Context Path가 유효하지 않습니다.");
+    }
+
+    @Test
+    void 생성자는_유효하지_않은_staticResourcePath를_전달하면_예외가_발생한다() {
+        final String validRootContextPath = "/";
+        final String invalidStaticResourcePath= null;
+
+        assertThatThrownBy(() -> new HelloWorldContext(validRootContextPath, invalidStaticResourcePath))
+                .isInstanceOf(InvalidStaticResourcePathException.class)
+                .hasMessageContaining("Static Resource Path가 유효하지 않습니다.");
     }
 
     @Test

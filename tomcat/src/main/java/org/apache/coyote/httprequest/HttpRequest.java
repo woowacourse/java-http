@@ -88,7 +88,7 @@ public class HttpRequest {
 
     public Session getSession(final boolean create) {
         final SessionManager sessionManager = SessionManager.getInstance();
-        final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
+        final String jSessionId = requestHeaders.getJSessionId();
         if (jSessionId == null) {
             return createSession(sessionManager);
         }

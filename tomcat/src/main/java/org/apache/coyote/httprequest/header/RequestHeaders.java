@@ -66,7 +66,7 @@ public class RequestHeaders {
         return 0;
     }
 
-    public CookieRequestHeader getCookieHeader() {
-        return cookieRequestHeader;
+    public String getJSessionId() {
+        return cookieRequestHeader.getJSessionId();
     }
 }

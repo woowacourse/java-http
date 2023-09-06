@@ -23,7 +23,7 @@ public class StaticResourceServlet extends Servlet {
 
         httpResponse.setHttpVersion(httpRequest.getHttpVersion())
                 .setHttpStatus(HttpStatus.OK)
-                .addHeader(CONTENT_TYPE, ContentType.parse(content))
+                .addHeader(CONTENT_TYPE, ContentType.parse(absolutePath))
                 .addHeader(CONTENT_LENGTH, String.valueOf(content.getBytes().length))
                 .setResponseBody(responseBody);
     }

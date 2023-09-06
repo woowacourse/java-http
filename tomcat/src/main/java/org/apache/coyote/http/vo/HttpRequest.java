@@ -1,5 +1,6 @@
 package org.apache.coyote.http.vo;
 
+import java.util.Optional;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 
@@ -25,12 +26,9 @@ public class HttpRequest {
     }
 
     private Cookie parseCookie() {
-        String rawCookie = this.headers.getRecentHeaderValue(HttpHeader.COOKIE);
-        if (rawCookie != null) {
-            return Cookie.from(rawCookie);
-        }
+        Optional<String> rawCookie = this.headers.getRecentHeaderValue(HttpHeader.COOKIE);
+        return rawCookie.map(Cookie::from).orElseGet(Cookie::emptyCookie);
 
-        return Cookie.emptyCookie();
     }
 
     public boolean isContainsSubStringInUrl(final String subString) {

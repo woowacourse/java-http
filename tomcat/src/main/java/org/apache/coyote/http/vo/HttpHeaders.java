@@ -3,6 +3,7 @@ package org.apache.coyote.http.vo;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.http.HttpHeader;
 import util.MultiValueMap;
@@ -26,8 +27,8 @@ public class HttpHeaders {
         this.headers.putAll(key, values);
     }
 
-    public String getRecentHeaderValue(final HttpHeader header) {
-        return headers.getRecentValue(header);
+    public Optional<String> getRecentHeaderValue(final HttpHeader header) {
+        return Optional.ofNullable(headers.getRecentValue(header));
     }
 
     public List<String> getHeaderValues(final HttpHeader header) {

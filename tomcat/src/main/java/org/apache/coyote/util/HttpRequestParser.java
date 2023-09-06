@@ -13,6 +13,7 @@ import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.vo.HttpBody;
 import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
+import org.apache.coyote.http.vo.HttpRequest.Builder;
 import org.apache.coyote.http.vo.Url;
 
 public class HttpRequestParser {
@@ -20,24 +21,20 @@ public class HttpRequestParser {
     public static HttpRequest parse(final BufferedReader bufferedReader) {
         final String startLine = readLine(bufferedReader);
         final HttpHeaders httpHeaders = parseHeader(bufferedReader);
-        final Integer contentLength = parseContentLength(httpHeaders);
-        final HttpBody body = parseBody(bufferedReader, contentLength);
-
-        return new HttpRequest.Builder()
+        final HttpRequest.Builder requestBuilder = new Builder()
                 .httpMethod(HttpMethod.valueOf(startLine.split(" ")[0]))
                 .url(Url.from(startLine.split(" ")[1]))
-                .headers(httpHeaders)
-                .body(body)
-                .build();
+                .headers(httpHeaders);
+
+        final Optional<Integer> contentLength = parseContentLength(httpHeaders);
+        contentLength.ifPresent(length -> requestBuilder.body(parseBody(bufferedReader, length)));
+
+        return requestBuilder.build();
     }
 
-    private static Integer parseContentLength(final HttpHeaders httpHeaders) {
-        final String rawContentLength = httpHeaders.getRecentHeaderValue(HttpHeader.CONTENT_LENGTH);
-
-        if (rawContentLength == null) {
-            return null;
-        }
-        return Integer.parseInt(rawContentLength);
+    private static Optional<Integer> parseContentLength(final HttpHeaders httpHeaders) {
+        final Optional<String> rawContentLength = httpHeaders.getRecentHeaderValue(HttpHeader.CONTENT_LENGTH);
+        return rawContentLength.map(Integer::parseInt);
     }
 
     private static HttpHeaders parseHeader(final BufferedReader bufferedReader) {
@@ -58,9 +55,6 @@ public class HttpRequestParser {
     }
 
     private static HttpBody parseBody(final BufferedReader bufferedReader, final Integer contentLength) {
-        if (contentLength == null) {
-            return HttpBody.getEmptyBody();
-        }
         char[] chars = new char[contentLength];
         try {
             bufferedReader.read(chars);

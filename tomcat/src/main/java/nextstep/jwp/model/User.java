@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import lombok.Getter;
+
+@Getter
 public class User {
 
     private final Long id;
@@ -20,10 +23,6 @@ public class User {
 
     public boolean checkPassword(String password) {
         return this.password.equals(password);
-    }
-
-    public String getAccount() {
-        return account;
     }
 
     @Override

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(HttpServletResponse response) {
         return "index";
     }
 

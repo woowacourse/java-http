@@ -62,7 +62,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String parseRequestBody(final HttpMethod httpMethod, final HttpHeaders headers, final BufferedReader bufferedReader) throws IOException {
+    private String parseRequestBody(final HttpMethod httpMethod, final HttpHeaders headers, final BufferedReader bufferedReader) throws IOException {
         String requestBody = "";
         if (httpMethod == POST) {
             final int contentLength = Integer.parseInt(headers.get("Content-Length"));

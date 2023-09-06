@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.common.SessionManger;
+import org.apache.coyote.http11.common.SessionManager;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
@@ -133,7 +133,7 @@ class Http11ProcessorTest {
         // given
         Session session = new Session("oingsession");
         session.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
-        SessionManger manager = new SessionManger();
+        SessionManager manager = new SessionManager();
         manager.add(session);
 
         final String httpRequest = String.join(System.lineSeparator(),

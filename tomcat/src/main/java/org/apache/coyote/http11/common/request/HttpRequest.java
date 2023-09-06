@@ -9,7 +9,7 @@ import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.common.SessionManger;
+import org.apache.coyote.http11.common.SessionManager;
 
 public class HttpRequest {
 
@@ -18,13 +18,13 @@ public class HttpRequest {
     private final StartLine startLine;
     private final HttpHeaders headers;
     private final MessageBody body;
-    private final SessionManger sessionManger;
+    private final SessionManager sessionManager;
 
     private HttpRequest(final StartLine startLine, final HttpHeaders headers, final MessageBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
-        this.sessionManger = new SessionManger();
+        this.sessionManager = new SessionManager();
     }
 
     public static HttpRequest create(BufferedReader br) throws IOException {
@@ -76,7 +76,7 @@ public class HttpRequest {
         Session session = null;
         try {
             String sessionId = headers.getCookies().getCookie(SESSIONID);
-            session = sessionManger.findSession(sessionId);
+            session = sessionManager.findSession(sessionId);
         } catch (Exception e) {
             return makeNewSession();
         }
@@ -85,7 +85,7 @@ public class HttpRequest {
 
     private Session makeNewSession() {
         Session session = new Session(UUID.randomUUID().toString());
-        sessionManger.add(session);
+        sessionManager.add(session);
         return session;
     }
 }

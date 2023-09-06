@@ -5,6 +5,8 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpResponse {
 
+    private static final String CRLF = "\r\n";
+
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
@@ -49,8 +51,8 @@ public class HttpResponse {
     }
 
     public String toString() {
-        return statusLine + "\r\n" +
-                responseHeader + "\r\n" +
+        return statusLine + CRLF +
+                responseHeader + CRLF +
                 responseBody.getContent();
     }
 }

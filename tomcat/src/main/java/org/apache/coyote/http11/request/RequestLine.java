@@ -4,6 +4,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 
 public class RequestLine {
 
+    private static final String BLANK_REGEX = " ";
+
     private final HttpMethod httpMethod;
     private final RequestPath requestPath;
     private final String protocolVersion;
@@ -19,7 +21,7 @@ public class RequestLine {
             throw new UncheckedServletException("request가 존재하지 않습니다.");
         }
 
-        final String[] split = line.split(" ");
+        final String[] split = line.split(BLANK_REGEX);
         return new RequestLine(HttpMethod.from(split[0]), RequestPath.from(split[1]), split[2]);
     }
 

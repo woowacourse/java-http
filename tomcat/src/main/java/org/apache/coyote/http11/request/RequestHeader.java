@@ -5,6 +5,8 @@ import java.util.Optional;
 
 public class RequestHeader {
 
+    private static final String EMPTY_STRING = "";
+
     private final Map<String, String> elements;
 
     public RequestHeader(final Map<String, String> elements) {
@@ -13,7 +15,7 @@ public class RequestHeader {
 
     public String geHeaderValue(final String key) {
         return Optional.ofNullable(elements.get(key))
-                .orElse("");
+                .orElse(EMPTY_STRING);
     }
 
     public Map<String, String> getElements() {

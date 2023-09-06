@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class HttpRequest {
 
+    private static final String LINE_SEPARATOR = ": ";
+
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -28,7 +30,7 @@ public class HttpRequest {
         Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
-            final String[] split = line.split(": ");
+            final String[] split = line.split(LINE_SEPARATOR);
             headers.put(split[0], split[1]);
             line = bufferedReader.readLine();
         }

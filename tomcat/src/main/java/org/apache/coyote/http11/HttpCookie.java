@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String DELIMITER = "; ";
+    private static final String EQUAL = "=";
+
     private final Map<String, String> items;
 
     public HttpCookie() {
@@ -24,8 +27,8 @@ public class HttpCookie {
         if (cookieHeader.isEmpty()) {
             return new HttpCookie();
         }
-        return Arrays.stream(cookieHeader.split("; "))
-                .map(it -> it.split("=", 2))
+        return Arrays.stream(cookieHeader.split(DELIMITER))
+                .map(it -> it.split(EQUAL, 2))
                 .collect(collectingAndThen(
                         toMap(it -> it[0], it -> it[1]),
                         HttpCookie::new
@@ -48,7 +51,7 @@ public class HttpCookie {
     public String toString() {
         return items.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
+                .map(entry -> entry.getKey() + EQUAL + entry.getValue())
+                .collect(Collectors.joining(DELIMITER));
     }
 }

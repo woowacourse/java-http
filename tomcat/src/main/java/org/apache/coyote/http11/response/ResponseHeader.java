@@ -6,6 +6,11 @@ import org.apache.coyote.http11.HttpCookie;
 
 public class ResponseHeader {
 
+    private static final String EMPTY_STRING = "";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> elements;
 
     private ResponseHeader(final Map<String, String> elements) {
@@ -14,20 +19,20 @@ public class ResponseHeader {
 
     public static ResponseHeader from(final ResponseBody responseBody) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", responseBody.getHttpExtensionType().getContentType());
-        headers.put("Content-Length", String.valueOf(responseBody.getLength()));
+        headers.put(CONTENT_TYPE, responseBody.getHttpExtensionType().getContentType());
+        headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getLength()));
         return new ResponseHeader(headers);
     }
 
     public void addCookie(final HttpCookie cookie) {
-        elements.put("Set-Cookie", cookie.toString());
+        elements.put(SET_COOKIE, cookie.toString());
     }
 
     public String getValue(final String key) {
         if (elements.containsKey(key)) {
             return elements.get(key);
         }
-        return "";
+        return EMPTY_STRING;
     }
 
     @Override

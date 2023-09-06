@@ -16,9 +16,9 @@ public class HttpCookie {
         if (cookieHeader == null) {
             return new HttpCookie(new HashMap<>());
         }
-        final Map<String, String> cookies = new HashMap<>();
+        final var cookies = new HashMap<String, String>();
         final String[] splitHeader = cookieHeader.split("; ");
-        for (String value : splitHeader) {
+        for (var value : splitHeader) {
             final String[] splitValues = value.split("=");
             cookies.put(splitValues[0], splitValues[1]);
         }

@@ -7,10 +7,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -38,15 +35,16 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var inputStreamReader = new InputStreamReader(inputStream);
-             final var bufferedReader = new BufferedReader(inputStreamReader)) {
+        try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
+             final var bufferedReader = new BufferedReader(inputStreamReader);
+             final OutputStream outputStream = connection.getOutputStream()) {
             final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
             final String httpMethod = requestHeader.get("Request-Line").split(" ")[0];
             final String uri = requestHeader.get("Request-Line").split(" ")[1];
+
             final String cookieHeader = requestHeader.getOrDefault("Cookie", null);
-            final HttpCookie cookie = HttpCookie.from(cookieHeader);
+            final var cookie = HttpCookie.from(cookieHeader);
+
             final String requestBody = readRequestBody(bufferedReader, requestHeader, httpMethod);
             final String response = handleRequest(uri, requestBody, cookie);
 
@@ -62,10 +60,10 @@ public class Http11Processor implements Runnable, Processor {
         if (!httpMethod.equals("POST")) {
             return null;
         }
-        final int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
+        final var contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+        final var buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        final String requestBody = new String(buffer);
+        final var requestBody = new String(buffer);
 
         log.info("Request-Body: {}", requestBody);
         return requestBody;
@@ -98,16 +96,16 @@ public class Http11Processor implements Runnable, Processor {
             return get200ResponseMessage(responseBody, "text/html;");
         }
         final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
-        final User user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
+        final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
                 requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
         return get302ResponseMessage("/index.html", cookie, false);
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {
-        final Map<String, String> requestBodyValues = new HashMap<>();
+        final var requestBodyValues = new HashMap<String, String>();
         final String[] splitRequestBody = requestBody.split("&");
-        for (String value : splitRequestBody) {
+        for (var value : splitRequestBody) {
             final String[] splitValue = value.split("=");
             requestBodyValues.put(splitValue[0], splitValue[1]);
         }
@@ -138,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addSession(final HttpCookie cookie, final User user) {
-        final Session session = new Session(cookie.getJSessionId(true));
+        final var session = new Session(cookie.getJSessionId(true));
         session.setAttribute("user", user);
         SESSION_MANAGER.add(session);
     }
@@ -179,7 +177,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> readRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> requestHeader = new HashMap<>();
+        final var requestHeader = new HashMap<String, String>();
 
         String line = bufferedReader.readLine();
         if (line == null) {

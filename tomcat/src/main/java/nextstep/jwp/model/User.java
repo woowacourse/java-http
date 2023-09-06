@@ -32,15 +32,6 @@ public class User {
         return new User(id,account,password,email);
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
-    }
 
     @Override
     public boolean equals(Object o) {

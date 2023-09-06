@@ -64,7 +64,7 @@ public class Request {
     private static Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> header = new HashMap<>();
         String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
+        while (!"".equals(line) && line != null) {
             String[] entry = line.split(": ");
             header.put(entry[0], entry[1]);
             line = bufferedReader.readLine();

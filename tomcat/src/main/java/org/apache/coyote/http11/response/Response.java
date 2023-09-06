@@ -45,7 +45,6 @@ public class Response {
                 .status(this.status)
                 .contentType("html")
                 .location(location)
-                .cookie(cookie)
                 .responseBody(file)
                 .build();
     }

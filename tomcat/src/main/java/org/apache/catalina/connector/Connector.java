@@ -38,6 +38,20 @@ public class Connector implements Runnable {
         }
     }
 
+    private int checkPort(final int port) {
+        final var MIN_PORT = 1;
+        final var MAX_PORT = 65535;
+
+        if (port < MIN_PORT || MAX_PORT < port) {
+            return DEFAULT_PORT;
+        }
+        return port;
+    }
+
+    private int checkAcceptCount(final int acceptCount) {
+        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
     public void start() {
         var thread = new Thread(this);
         thread.setDaemon(true);
@@ -77,19 +91,5 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private int checkPort(final int port) {
-        final var MIN_PORT = 1;
-        final var MAX_PORT = 65535;
-
-        if (port < MIN_PORT || MAX_PORT < port) {
-            return DEFAULT_PORT;
-        }
-        return port;
-    }
-
-    private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 }

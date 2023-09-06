@@ -8,10 +8,23 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validate(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    private void validate(String account, String password, String email) {
+        if (account == null || account.isBlank()) {
+            throw new IllegalArgumentException("계정은 빈 값이 될 수 없습니다.");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 빈 값이 될 수 없습니다.");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일은 빈 값이 될 수 없습니다.");
+        }
     }
 
     public User(String account, String password, String email) {

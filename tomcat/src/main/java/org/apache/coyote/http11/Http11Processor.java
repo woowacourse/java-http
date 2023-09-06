@@ -8,10 +8,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.adapter.StringAdapter;
 import org.apache.coyote.adapter.LoginAdapter;
-import org.apache.coyote.adapter.ResourceAdapter;
+import org.apache.coyote.response.HttpStatus;
+import org.apache.coyote.view.ViewResolver;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.view.ViewResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +56,6 @@ public class Http11Processor implements Runnable, Processor {
         if (request.isSamePath("/login")) {
             return new LoginAdapter().doHandle(request);
         }
-        return new ResourceAdapter().doHandle(request);
+        return new ViewResolver().resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
     }
 }

@@ -2,6 +2,8 @@ package nextstep.jwp.http;
 
 public class HttpUri {
 
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final int QUERY_STRING_NOT_EXIST_INDEX = -1;
     private final String nativePath;
     private final QueryString queryString;
 
@@ -11,9 +13,9 @@ public class HttpUri {
     }
 
     public static HttpUri from(String fullPath) {
-        int index = fullPath.indexOf("?");
+        int index = fullPath.indexOf(QUERY_STRING_DELIMITER);
 
-        if (index == -1) {
+        if (index == QUERY_STRING_NOT_EXIST_INDEX) {
             return new HttpUri(fullPath, QueryString.from(""));
         }
 

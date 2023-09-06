@@ -7,6 +7,11 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String ATTRIBUTE_DELIMITER = "; ";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String J_SESSION_ID = "JSESSIONID";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -18,9 +23,9 @@ public class HttpCookie {
             return new HttpCookie(Collections.emptyMap());
         }
 
-        Map<String, String> cookies = Arrays.stream(line.split("; "))
-                .map(element -> element.split("="))
-                .collect(Collectors.toMap(element -> element[0], element -> element[1]));
+        Map<String, String> cookies = Arrays.stream(line.split(ATTRIBUTE_DELIMITER))
+                .map(element -> element.split(KEY_VALUE_DELIMITER))
+                .collect(Collectors.toMap(element -> element[KEY_INDEX], element -> element[VALUE_INDEX]));
 
         return new HttpCookie(cookies);
     }
@@ -30,8 +35,8 @@ public class HttpCookie {
     }
 
     public String getJSessionId() {
-        if (containsKey("JSESSIONID")) {
-            return cookies.get("JSESSIONID");
+        if (containsKey(J_SESSION_ID)) {
+            return cookies.get(J_SESSION_ID);
         }
 
         return null;

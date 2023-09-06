@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
+    private static final String KET_VALUE_DELIMITER = ": ";
+    private static final String HEADER_FORMAT = "%s: %s ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private final Map<String, String> httpHeaders;
 
     private HttpHeaders(Map<String, String> httpHeaders) {
@@ -15,8 +19,8 @@ public class HttpHeaders {
 
     public static HttpHeaders from(List<String> lines) {
         Map<String, String> headers = lines.stream()
-                .map(line -> line.split(": "))
-                .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+                .map(line -> line.split(KET_VALUE_DELIMITER))
+                .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
 
         return new HttpHeaders(headers);
     }
@@ -24,14 +28,14 @@ public class HttpHeaders {
     public static HttpHeaders createDefaultHeaders(String requestNativePath, HttpBody httpBody) {
         Map<String, String> headers = new LinkedHashMap<>();
 
-        headers.put("Content-Type", ContentType.extractValueFromPath(requestNativePath));
-        headers.put("Content-Length", String.valueOf(httpBody.getBytesLength()));
+        headers.put(HeaderType.CONTENT_TYPE.getValue(), ContentType.extractValueFromPath(requestNativePath));
+        headers.put(HeaderType.CONTENT_LENGTH.getValue(), String.valueOf(httpBody.getBytesLength()));
 
         return new HttpHeaders(headers);
     }
 
     public void setLocation(String value) {
-        httpHeaders.put("Location", value);
+        httpHeaders.put(HeaderType.LOCATION.getValue(), value);
     }
 
     public void addHeader(String key, String value) {
@@ -45,7 +49,7 @@ public class HttpHeaders {
     public String getHeaders() {
         return httpHeaders.keySet()
                 .stream()
-                .map(key -> key + ": " + httpHeaders.get(key) + " ")
+                .map(key -> String.format(HEADER_FORMAT, key, httpHeaders.get(key)))
                 .collect(Collectors.joining("\r\n"));
     }
 

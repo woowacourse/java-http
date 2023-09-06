@@ -23,7 +23,7 @@ public class HttpRequest {
     }
 
     public boolean hasCookie() {
-        return httpHeaders.containsKey("Cookie");
+        return httpHeaders.containsKey(HeaderType.COOKIE.getValue());
     }
 
     public boolean hasQueryString() {
@@ -47,7 +47,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(httpHeaders.get("Cookie"));
+        return HttpCookie.from(httpHeaders.get(HeaderType.COOKIE.getValue()));
     }
 
     public QueryString getQueryString() {

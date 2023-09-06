@@ -2,6 +2,8 @@ package nextstep.jwp.http;
 
 public class HttpResponse {
 
+    private static final String REQUEST_LINE_FORMAT = "%s %s ";
+
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
     private final HttpHeaders httpHeaders;
@@ -20,12 +22,12 @@ public class HttpResponse {
     }
 
     public void setCookie(String value) {
-        httpHeaders.addHeader("Set-Cookie", value);
+        httpHeaders.addHeader(HeaderType.SET_COOKIE.getValue(), value);
     }
 
     public byte[] getBytes() {
         String response = String.join("\r\n",
-                httpVersion.getValue() + " " + httpStatus.getValue() + " ",
+                String.format(REQUEST_LINE_FORMAT, httpVersion.getValue(), httpStatus.getValue()),
                 httpHeaders.getHeaders(),
                 "",
                 httpBody.getHttpBody());

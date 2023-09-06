@@ -27,12 +27,7 @@ public class HttpHeaders {
 	}
 
 	public static HttpHeaders from(final String httpRequest) {
-		final Map<String, String> headerMaps = stream(httpRequest.split(LINE_SEPARATOR))
-			.map(headerLine -> headerLine.split(HEADER_DELIMITER, 2))
-			.collect(toMap(
-				header -> header[0].trim(),
-				header -> header[1].trim()
-			));
+		final Map<String, String> headerMaps = resolveHeaderMap(httpRequest);
 		return Optional.ofNullable(headerMaps.get(COOKIE.getValue()))
 			.map(cookie -> {
 				//추후 리팩터링 고민하기
@@ -40,6 +35,15 @@ public class HttpHeaders {
 				return new HttpHeaders(headerMaps, HttpCookie.from(cookie));
 			})
 			.orElseGet(() -> new HttpHeaders(headerMaps, new HttpCookie()));
+	}
+
+	private static Map<String, String> resolveHeaderMap(String httpRequest) {
+		return stream(httpRequest.split(LINE_SEPARATOR))
+			.map(headerLine -> headerLine.split(HEADER_DELIMITER, 2))
+			.collect(toMap(
+				header -> header[0].trim(),
+				header -> header[1].trim()
+			));
 	}
 
 	public static HttpHeaders of(final String body, final MimeType mimeType) {
@@ -61,6 +65,14 @@ public class HttpHeaders {
 			//추후 cookie를 추가하는 로직이 생기면 그때 처리
 		}
 		headers.put(key, value);
+	}
+
+	public void addLocation(final String location) {
+		headers.put(LOCATION.getValue(), location);
+	}
+
+	public void addSetCookie(final String setCookieValue) {
+		headers.put(SET_COOKIE.getValue(), setCookieValue);
 	}
 
 	public Optional<String> get(final String key) {

@@ -86,4 +86,27 @@ class HttpHeadersTest {
 			.isEqualTo(expected);
 	}
 
+	@Test
+	@DisplayName("Http헤더에 location 을 추가할 수 있다.")
+	void addLocation() {
+		final HttpHeaders headers = new HttpHeaders();
+		final String locationValue = "location value";
+
+		headers.addLocation(locationValue);
+
+		assertThat(headers.get(LOCATION.getValue()))
+			.contains(locationValue);
+	}
+
+	@Test
+	@DisplayName("Http헤더에 set-cookie 를 추가할 수 있다.")
+	void addSetCookie() {
+		final HttpHeaders headers = new HttpHeaders();
+		final String setCookieValue = "set cookie value";
+
+		headers.addSetCookie(setCookieValue);
+
+		assertThat(headers.get(SET_COOKIE.getValue()))
+			.contains(setCookieValue);
+	}
 }

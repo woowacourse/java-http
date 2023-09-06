@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.http11.headers.HttpHeaderType;
+import static org.apache.coyote.http11.headers.MimeType.*;
+
 import org.apache.coyote.http11.headers.HttpHeaders;
-import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
@@ -22,14 +22,7 @@ public class RootHandler implements HttpHandler {
 		return new HttpResponse(
 			HttpStatusCode.OK_200,
 			CONSTANT_BODY,
-			resolveHeader()
+			HttpHeaders.of(CONSTANT_BODY, HTML)
 		);
-	}
-
-	private HttpHeaders resolveHeader() {
-		final HttpHeaders headers = new HttpHeaders();
-		headers.put(HttpHeaderType.CONTENT_TYPE.getValue(), MimeType.HTML.getValue());
-		headers.put(HttpHeaderType.CONTENT_LENGTH.getValue(), String.valueOf(CONSTANT_BODY.getBytes().length));
-		return headers;
 	}
 }

@@ -6,8 +6,7 @@ public enum HttpStatusCode {
 	INTERNAL_SERVER_ERROR_500(500, "Internal Server Error"),
 	NOT_FOUND_404(404, "Not Found"),
 	TEMPORARILY_MOVED_302(302, "Found"),
-	UNAUTHORIZED_401(401, "Unauthorized")
-	;
+	UNAUTHORIZED_401(401, "Unauthorized");
 
 	private final int code;
 	private final String description;

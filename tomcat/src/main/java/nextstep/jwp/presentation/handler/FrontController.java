@@ -19,6 +19,8 @@ import java.util.Map;
 public class FrontController {
 
     private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico", ".html", ".svg");
+    private static final Controller NOT_FOUND_CONTROLLER = new NotFoundController();
+    private static final Controller STATIC_CONTROLLER = new StaticController();
 
     private final Map<String, Controller> getMappingControllers = new HashMap<>();
     private final Map<String, Controller> postMappingControllers = new HashMap<>();
@@ -41,7 +43,7 @@ public class FrontController {
 
     public Controller findController(String method, String path) {
         if (isStaticPath(path)) {
-            return new StaticController();
+            return STATIC_CONTROLLER;
         }
         if (method.equals("GET") && getMappingControllers.containsKey(path)) {
             return getMappingControllers.get(path);
@@ -49,7 +51,7 @@ public class FrontController {
         if (method.equals("POST") && postMappingControllers.containsKey(path)) {
             return postMappingControllers.get(path);
         }
-        return new NotFoundController();
+        return NOT_FOUND_CONTROLLER;
     }
 
     private boolean isStaticPath(String path) {

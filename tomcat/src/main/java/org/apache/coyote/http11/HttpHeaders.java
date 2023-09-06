@@ -5,12 +5,12 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private static final String DEFAULT_VALUE = "";
+    private static final String EMPTY_VALUE = "";
+    private static final String CONTENT_TYPE_DELIMITER = ",";
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
 
     public HttpHeaders() {
-        headers = new HashMap<>();
     }
 
     public void add(final String key, final String value) {
@@ -18,15 +18,15 @@ public class HttpHeaders {
     }
 
     public String get(final String headerName) {
-        return headers.getOrDefault(headerName, DEFAULT_VALUE);
+        return headers.getOrDefault(headerName, EMPTY_VALUE);
     }
 
     public String getContentType() {
-        String value = headers.getOrDefault("Content-Type", DEFAULT_VALUE);
+        String value = headers.getOrDefault("Content-Type", EMPTY_VALUE);
         if (value.isEmpty()) {
             value = headers.get("Accept");
         }
-        return value.split(",")[0];
+        return value.split(CONTENT_TYPE_DELIMITER)[0];
     }
 
     public Map<String, String> getHeaders() {

@@ -5,10 +5,9 @@ import java.util.Map;
 
 public class QueryStrings {
 
-    private final Map<String, String> queryStrings;
+    private final Map<String, String> queryStrings = new HashMap<>();
 
     public QueryStrings() {
-        this.queryStrings = new HashMap<>();
     }
 
     public void add(final String key, final String value) {

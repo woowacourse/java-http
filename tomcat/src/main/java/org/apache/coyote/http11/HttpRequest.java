@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private static final String DEFAULT_VALUE = "";
+    private static final String EMPTY_VALUE = "";
 
     private final HttpMethod method;
     private final String requestUri;
@@ -35,7 +35,7 @@ public class HttpRequest {
 
     public String getParameter(final String key) {
         final Map<String, String> parameters = queryStrings.getQueryStrings();
-        return parameters.getOrDefault(key, DEFAULT_VALUE);
+        return parameters.getOrDefault(key, EMPTY_VALUE);
     }
 
     public Map<String, String> getRequestBody() {

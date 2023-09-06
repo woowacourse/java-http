@@ -114,15 +114,11 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequests.equals(HttpRequests.LOGIN_POST)) {
             if (httpRequestHeaders.containsKey("Content-Length")) {
                 String body = readHttpBody(httpRequestHeaders, reader);
-                Map<String, String> userInfo = Arrays.stream(body.split("&"))
-                        .map(value -> value.split("="))
-                        .collect(Collectors.toMap(value -> value[0], value -> value[1]));
+                Map<String, String> userInfo = extractUserInfo(body);
                 Optional<User> user = InMemoryUserRepository.findByAccount(userInfo.get("account"));
                 if (user.isEmpty() || !user.get().checkPassword(userInfo.get("password"))) {
                     Path path = HttpRequests.UNAUTHORIZED.readPath();
-                    byte[] fileBytes = readBytes(path);
-                    String responseBody = new String(fileBytes);
-                    return HttpResponse.of(httpRequests, responseBody);
+                    return HttpResponse.of(httpRequests, new String(readBytes(path)));
                 }
                 log.info("로그인 성공 : user = {}", user.get());
                 SessionIdGenerator sessionIdGenerator = new RandomSessionIdGenerator();
@@ -138,22 +134,20 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequests.equals(HttpRequests.REGISTER_MEMBER)) {
             if (httpRequestHeaders.containsKey("Content-Length")) {
                 String body = readHttpBody(httpRequestHeaders, reader);
-                Map<String, String> userInfo = Arrays.stream(body.split("&"))
-                        .map(value -> value.split("="))
-                        .collect(Collectors.toMap(value -> value[0], value -> value[1]));
+                Map<String, String> userInfo = extractUserInfo(body);
                 User user = new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
                 InMemoryUserRepository.save(user);
                 log.info("등록 성공 : user = {}", user);
-                byte[] fileBytes = readBytes(HttpRequests.INDEX.readPath());
-                String responseBody = new String(fileBytes);
-                return HttpResponse.of(httpRequests, responseBody);
+                return HttpResponse.of(httpRequests, new String(readBytes(HttpRequests.INDEX.readPath())));
             }
         }
+        return HttpResponse.of(httpRequests, new String(readBytes(httpRequests.readPath())));
+    }
 
-        Path path = httpRequests.readPath();
-        byte[] fileBytes = readBytes(path);
-        String responseBody = new String(fileBytes);
-        return HttpResponse.of(httpRequests, responseBody);
+    private Map<String, String> extractUserInfo(String body) {
+        return Arrays.stream(body.split("&"))
+                .map(value -> value.split("="))
+                .collect(Collectors.toMap(value -> value[0], value -> value[1]));
     }
 
     private String readHttpBody(Map<String, String> httpRequestHeaders, BufferedReader reader) throws IOException {

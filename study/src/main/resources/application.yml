@@ -2,6 +2,11 @@ handlebars:
   suffix: .html
 
 server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 2
+
   tomcat:
     accept-count: 1
     max-connections: 1

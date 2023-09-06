@@ -35,9 +35,14 @@ class GreetingControllerTest {
                 .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
                 .expectBody(String.class).returnResult();
 
-        log.info("response body\n{}", response.getResponseBody());
+        log.info("======================> response body\n{}", response);
     }
 
+    /**
+     * Transfer-Encoding: gzip, chunked
+     * ㄴ 데이터 전송 방식을 의미한다.
+     * ㄴ gzip 으로 압축된 데이터를 chunked 형식으로 전송한다.
+     */
     @Test
     void testCompression() {
         final var response = webTestClient
@@ -51,7 +56,7 @@ class GreetingControllerTest {
                 .expectHeader().valueEquals(HttpHeaders.TRANSFER_ENCODING, "chunked")
                 .expectBody(String.class).returnResult();
 
-        log.info("response body\n{}", response.getResponseBody());
+        log.info("======================> response body\n{}", response);
     }
 
     @Test
@@ -64,7 +69,7 @@ class GreetingControllerTest {
                 .expectHeader().exists(HttpHeaders.ETAG)
                 .expectBody(String.class).returnResult();
 
-        log.info("response body\n{}", response.getResponseBody());
+        log.info("======================> response body\n{}", response);
     }
 
     /**
@@ -87,7 +92,7 @@ class GreetingControllerTest {
                 .expectHeader().cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
                 .expectBody(String.class).returnResult();
 
-        log.info("response body\n{}", response.getResponseBody());
+        log.info("======================> response body\n{}", response);
 
         final var etag = response.getResponseHeaders().getETag();
 

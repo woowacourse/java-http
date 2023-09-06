@@ -41,7 +41,7 @@ public class HttpHeaders {
 
             validateHeaderContent(headerContent);
 
-            headers.put(headerContent[HEADER_KEY_INDEX].trim(), headerContent[HEADER_VALUE_INDEX].trim());
+            headers.put(headerContent[HEADER_KEY_INDEX].strip(), headerContent[HEADER_VALUE_INDEX].strip());
         }
 
         return new HttpHeaders(headers);

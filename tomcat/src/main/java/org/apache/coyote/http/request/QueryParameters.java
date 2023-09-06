@@ -84,7 +84,7 @@ public class QueryParameters {
             throw new InvalidQueryParameterTokenException();
         }
 
-        return queryParameterToken.trim();
+        return queryParameterToken.strip();
     }
 
     private static boolean isEmptyContent(final String content) {

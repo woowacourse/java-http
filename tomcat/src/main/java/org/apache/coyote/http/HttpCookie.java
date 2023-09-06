@@ -40,7 +40,7 @@ public class HttpCookie {
         }
 
         final Map<String, String> headers = Arrays.stream(cookieHeaderContents.split(HEADER_DELIMITER))
-                                                  .map(String::trim)
+                                                  .map(String::strip)
                                                   .map(headerContent -> headerContent.split(KEY_VALUE_DELIMITER))
                                                   .collect(Collectors.toMap(
                                                           contentTokens -> contentTokens[HEADER_KEY_INDEX],

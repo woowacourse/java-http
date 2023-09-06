@@ -24,7 +24,7 @@ public class HomePageMapping implements HandlerMapping {
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.OK))
-                .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.TEXT.getValue())))
+                .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.HTML.getValue())))
                 .body(new HttpBody("Hello world!"))
                 .build();
     }

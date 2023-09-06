@@ -10,7 +10,7 @@ public enum HttpHeader {
     CONNECTION("Connection"),
     CACHE_CONTROL("Cache-Control"),
     CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length"),
+    CONTENT_LENGTH("CONTENT-LENGTH"),
     COOKIE("Cookie"),
     DNT("DNT"),
     HOST("Host"),

@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
@@ -71,8 +72,8 @@ public class Http11Processor implements Runnable, Processor {
     private Response processRequest(final Request request, final Container context) throws IOException {
         try {
             return context.service(request);
-        } catch (final InvalidQueryParameterException e) {
-            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
+        } catch (final InvalidQueryParameterException | AlreadyExistsAccountException e) {
+            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, e.getMessage());
         } catch (final LoginFailureException e) {
             return Response.of(
                     request,

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.handler.exception.LoginFailureException;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -48,5 +49,12 @@ class UserServiceTest {
     @Test
     void register_메서드는_필요한_데이터를_저장하면_해당_데이터를_기반으로_User를_추가한다() {
         assertDoesNotThrow(() -> userService.register("account", "password", "email"));
+    }
+
+    @Test
+    void register_메서드는_이미_존재하는_account를_전달하면_예외가_발생한다() {
+        assertThatThrownBy(() -> userService.register("gugu", "password", "email"))
+                .isInstanceOf(AlreadyExistsAccountException.class)
+                .hasMessageContaining("이미 존재하는 아이디입니다.");
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
+import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -47,7 +48,7 @@ public class RegisterHandler implements Handler {
         final String email = request.findQueryParameterValue(EMAIL_KEY);
 
         if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password) || isInvalidQueryParameter(email)) {
-            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
+            throw new InvalidQueryParameterException();
         }
 
         final User user = new User(account, password, email);

@@ -14,8 +14,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.context.HelloWorldContext;
+import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.ContentType;
+import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.RequestGenerator;
 import org.apache.coyote.http11.exception.InvalidRequestPathException;
 import org.slf4j.Logger;
@@ -53,11 +57,19 @@ public class Http11Processor implements Runnable, Processor {
                 final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             final Request request = REQUEST_GENERATOR.generate(bufferedReader);
             final Container context = findContext(request);
-            final Response response = context.service(request);
+            final Response response = processRequest(request, context);
 
             bufferedWriter.write(response.convertResponseMessage());
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private Response processRequest(final Request request, final Container context) throws IOException {
+        try {
+            return context.service(request);
+        } catch (final InvalidQueryParameterException e) {
+            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
         }
     }
 

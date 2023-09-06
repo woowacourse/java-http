@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
+import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpSession;
@@ -51,8 +52,8 @@ public class LoginHandler implements Handler {
         final String account = request.findQueryParameterValue(ACCOUNT_KEY);
         final String password = request.findQueryParameterValue(PASSWORD_KEY);
 
-        if (validateAccountInfo(account, password)) {
-            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
+        if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password)) {
+            throw new InvalidQueryParameterException();
         }
 
         try {
@@ -86,8 +87,8 @@ public class LoginHandler implements Handler {
         }
     }
 
-    private boolean validateAccountInfo(final String account, final String password) {
-        return account == null || password == null;
+    private boolean isInvalidQueryParameter(final String targetParameter) {
+        return targetParameter == null || targetParameter.isEmpty() || targetParameter.isBlank();
     }
 
     private void validatePassword(final String password, final User user) {

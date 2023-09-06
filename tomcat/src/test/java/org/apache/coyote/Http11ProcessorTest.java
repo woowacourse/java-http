@@ -45,7 +45,7 @@ class Http11ProcessorTest {
 
         final String actual = socket.output();
 
-        assertThat(actual).contains("404 Not Found");
+        assertThat(actual).contains("/404.html");
     }
 
     @Test

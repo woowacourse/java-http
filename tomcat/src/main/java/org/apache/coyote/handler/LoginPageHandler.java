@@ -1,26 +1,18 @@
 package org.apache.coyote.handler;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.coyote.Handler;
+import org.apache.coyote.handler.util.ResourceProcessor;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HeaderDto;
-import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoginPageHandler implements Handler {
-
-    private static final Logger log = LoggerFactory.getLogger(LoginPageHandler.class);
 
     private final String path;
     private final String rootContextPath;
@@ -71,29 +63,10 @@ public class LoginPageHandler implements Handler {
             }
         }
 
-        try {
-            final URL resource = ClassLoader.getSystemClassLoader()
-                                            .getResource(prefix + targetResourceName);
-            final Path path = new File(resource.getPath()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-            final String accept = findAcceptHeader(request);
-            final ContentType contentType = ContentType.findContentType(accept, targetResourceName);
+        final String resourceFullName = prefix + targetResourceName;
+        final String responseBody = ResourceProcessor.readResourceFile(resourceFullName);
+        final ContentType contentType = ResourceProcessor.findContentType(request, resourceFullName);
 
-            return Response.of(request, HttpStatusCode.OK, contentType, responseBody);
-        } catch (NullPointerException ex) {
-            log.info("page not found : ", ex);
-
-            return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, HttpConsts.BLANK);
-        }
-    }
-
-    private String findAcceptHeader(final Request request) {
-        final String accept = request.findHeaderValue(HttpHeaderConsts.ACCEPT);
-
-        if (accept == null) {
-            return HttpConsts.BLANK;
-        }
-
-        return accept;
+        return Response.of(request, HttpStatusCode.OK, contentType, responseBody);
     }
 }

@@ -30,7 +30,7 @@ class InMemoryUserRepositoryTest {
 
     @Test
     void findByAccount_메서드는_존재하지_않는_account를_전달하면_빈_Optional을_반환한다() {
-        final String notExistsAccount = "notExistsAccount";
+        final String notExistsAccount = "asdfasdfasdfasdfa";
 
         final Optional<User> actual = InMemoryUserRepository.findByAccount(notExistsAccount);
 

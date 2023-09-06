@@ -17,6 +17,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.context.HelloWorldContext;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.handler.exception.LoginFailureException;
+import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -81,6 +82,14 @@ public class Http11Processor implements Runnable, Processor {
                     ContentType.JSON,
                     HttpConsts.BLANK,
                     new HeaderDto(HttpHeaderConsts.LOCATION, "/401.html")
+            );
+        } catch (final ResourceNotFoundException e) {
+            return Response.of(
+                    request,
+                    HttpStatusCode.FOUND,
+                    ContentType.JSON,
+                    HttpConsts.BLANK,
+                    new HeaderDto(HttpHeaderConsts.LOCATION, "/404.html")
             );
         }
     }

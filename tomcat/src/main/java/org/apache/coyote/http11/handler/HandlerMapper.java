@@ -26,8 +26,6 @@ public class HandlerMapper {
     public void init() {
         HANDLERS.put(new HandlerStatus("GET", "/"), this::rootHandler);
         HANDLERS.put(new HandlerStatus("GET", "/login"), this::loginHandler);
-        HANDLERS.put(new HandlerStatus("GET", "/login", Set.of("account", "password")),
-                this::loginWithQueryParameterHandler);
         HANDLERS.put(new HandlerStatus("POST", "/login"), this::loginFormHandler);
         HANDLERS.put(new HandlerStatus("GET", "/register"), this::registerHandler);
         HANDLERS.put(new HandlerStatus("POST", "/register"), this::registerFormHandler);
@@ -43,20 +41,6 @@ public class HandlerMapper {
         }
 
         return Response.createByTemplate(HttpStatus.OK, "login.html");
-    }
-
-    public Response loginWithQueryParameterHandler(final Request request) {
-        if (request.getSession() != null) {
-            return Response.createByTemplate(HttpStatus.FOUND, "index.html");
-        }
-
-        final RequestLine requestLine = request.getRequestLine();
-        final var queryParameter = requestLine.getRequestURI().getQueryParameter();
-        final User user = InMemoryUserRepository.findByAccountAndPassword(
-                        queryParameter.get("account"), queryParameter.get("password"))
-                .orElseThrow(() -> new IllegalArgumentException("아이디와 비밀번호가 일치하는 사용자가 존재하지 않습니다."));
-        log.info("user : " + user);
-        return Response.createByTemplate(request.getRequestLine().getRequestURI());
     }
 
     public Response loginFormHandler(final Request request) {

@@ -23,6 +23,6 @@ public class FileUtil {
         );
 
         return bufferedReader.lines()
-                .collect(joining("\n")) + "\n";
+                .collect(joining("\r\n")) + "\r\n";
     }
 }

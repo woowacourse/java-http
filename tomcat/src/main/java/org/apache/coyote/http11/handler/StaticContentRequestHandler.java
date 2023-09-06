@@ -7,12 +7,7 @@ import org.apache.coyote.http11.response.Response;
 public class StaticContentRequestHandler extends RequestHandler {
 
 	protected StaticContentRequestHandler() {
-		super();
-	}
-
-	@Override
-	public boolean canHandle(Request request) {
-		return true;
+		super("/*");
 	}
 
 	@Override

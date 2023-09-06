@@ -8,10 +8,6 @@ public abstract class RequestHandler {
 
 	private final String requestPath;
 
-	public RequestHandler() {
-		this("");
-	}
-
 	protected RequestHandler(final String requestPath) {
 		this.requestPath = requestPath;
 	}

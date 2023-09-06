@@ -20,6 +20,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private static final String REQUEST_LINE = "Request-Line";
+    private static final String COOKIE = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String HTTP_METHOD_POST = "POST";
+    private static final String TEXT_HTML = "text/html;";
+    private static final String TEXT_CSS = "text/css;";
+    private static final String INDEX_PAGE = "/index.html";
 
     private final Socket connection;
 
@@ -39,10 +46,10 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()) {
             final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
-            final String httpMethod = requestHeader.get("Request-Line").split(" ")[0];
-            final String uri = requestHeader.get("Request-Line").split(" ")[1];
+            final String httpMethod = requestHeader.get(REQUEST_LINE).split(" ")[0];
+            final String uri = requestHeader.get(REQUEST_LINE).split(" ")[1];
 
-            final String cookieHeader = requestHeader.getOrDefault("Cookie", null);
+            final String cookieHeader = requestHeader.getOrDefault(COOKIE, null);
             final var cookie = HttpCookie.from(cookieHeader);
 
             final String requestBody = readRequestBody(bufferedReader, requestHeader, httpMethod);
@@ -57,10 +64,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> requestHeader,
                                    final String httpMethod) throws IOException {
-        if (!httpMethod.equals("POST")) {
+        if (!httpMethod.equals(HTTP_METHOD_POST)) {
             return null;
         }
-        final var contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+        final var contentLength = Integer.parseInt(requestHeader.get(CONTENT_LENGTH));
         final var buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         final var requestBody = new String(buffer);
@@ -73,11 +80,11 @@ public class Http11Processor implements Runnable, Processor {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
-            return get200ResponseMessage("Hello world!", "text/html;");
+            return get200ResponseMessage("Hello world!", TEXT_HTML);
         }
         if (path.endsWith(".css")) {
             final String responseBody = findResponseBody(path);
-            return get200ResponseMessage(responseBody, "text/css;");
+            return get200ResponseMessage(responseBody, TEXT_CSS);
         }
         if (path.equals("/login")) {
             final String responseBody = findResponseBody(path + ".html");
@@ -88,18 +95,18 @@ public class Http11Processor implements Runnable, Processor {
             return handleRegisterRequest(requestBody, responseBody, cookie);
         }
         final String responseBody = findResponseBody(path);
-        return get200ResponseMessage(responseBody, "text/html;");
+        return get200ResponseMessage(responseBody, TEXT_HTML);
     }
 
     private String handleRegisterRequest(final String requestBody, final String responseBody, final HttpCookie cookie) {
         if (requestBody == null) {
-            return get200ResponseMessage(responseBody, "text/html;");
+            return get200ResponseMessage(responseBody, TEXT_HTML);
         }
         final Map<String, String> requestBodyValues = parseRequestBody(requestBody);
         final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
                 requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
-        return get302ResponseMessage("/index.html", cookie, false);
+        return get302ResponseMessage(INDEX_PAGE, cookie, false);
     }
 
     private Map<String, String> parseRequestBody(final String requestBody) {
@@ -116,10 +123,10 @@ public class Http11Processor implements Runnable, Processor {
         final User user = findUserBySessionId(cookie.getJSessionId(false));
         if (user != null) {
             log.info("User: {}", user);
-            return get302ResponseMessage("/index.html", cookie, false);
+            return get302ResponseMessage(INDEX_PAGE, cookie, false);
         }
         if (requestBody == null) {
-            return get200ResponseMessage(responseBody, "text/html;");
+            return get200ResponseMessage(responseBody, TEXT_HTML);
         }
         return handleFirstLogin(requestBody, cookie);
     }
@@ -132,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         addSession(cookie, user.get());
         log.info("User: {}", user.get());
-        return get302ResponseMessage("/index.html", cookie, true);
+        return get302ResponseMessage(INDEX_PAGE, cookie, true);
     }
 
     private void addSession(final HttpCookie cookie, final User user) {
@@ -183,7 +190,7 @@ public class Http11Processor implements Runnable, Processor {
         if (line == null) {
             return Map.of();
         }
-        requestHeader.put("Request-Line", line);
+        requestHeader.put(REQUEST_LINE, line);
 
         while (!"".equals(line = bufferedReader.readLine())) {
             final String[] splitLine = line.split(": ");

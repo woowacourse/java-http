@@ -1,6 +1,7 @@
 package nextstep.jwp.controller.rest;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ResponseEntity;
 import org.apache.coyote.http11.HttpRequest;
 
 public interface RestController extends Controller {

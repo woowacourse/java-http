@@ -16,7 +16,7 @@ public class SessionInterceptor implements Interceptor {
     public boolean preHandle(HttpRequest request, HttpResponse response) {
         if (request.hasCookie("JSESSIONID")) {
             final var session = request.getSession();
-            if (session != null && session.getAttribute("user") != null) {
+            if (session.getAttribute("user") != null) {
                 response.sendRedirect(HOME_PAGE);
                 return false;
             }

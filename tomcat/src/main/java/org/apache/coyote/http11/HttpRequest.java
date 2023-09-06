@@ -73,7 +73,11 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        return SessionManager.getInstance().findSession(headers.getCookie("JSESSIONID"));
+        final Session localSession = SessionManager.getInstance().findSession(headers.getCookie("JSESSIONID"));
+        if (localSession == null) {
+            return SessionManager.getInstance().create();
+        }
+        return localSession;
     }
 
     public HttpHeaders getHeaders() {

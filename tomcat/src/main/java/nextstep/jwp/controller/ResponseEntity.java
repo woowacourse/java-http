@@ -1,4 +1,4 @@
-package nextstep.jwp.controller.rest;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;

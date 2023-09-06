@@ -7,7 +7,6 @@ import java.util.NoSuchElementException;
 import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -26,7 +25,7 @@ public class LoginController implements RestController {
             final User user = InMemoryUserRepository.findByAccount(request.getJsonProperty("account"))
                                                     .orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다."));
             if (user.checkPassword(request.getJsonProperty("password"))) {
-                final var session = SessionManager.getInstance().create();
+                final var session = request.getSession();
                 final var headers = HttpHeaders.defaultHeaders();
                 session.setAttribute("user", user);
                 headers.setCookie("JSESSIONID", session.getId());

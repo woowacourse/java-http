@@ -6,7 +6,7 @@ import org.apache.coyote.http.response.Response;
 
 public interface Handler {
 
-    boolean supports(final Request request);
+    boolean supports(final Request request, final String rootContextPath);
 
-    Response service(final Request request) throws IOException;
+    Response service(final Request request, final String staticResourcePath) throws IOException;
 }

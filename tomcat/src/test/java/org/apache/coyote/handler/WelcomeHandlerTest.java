@@ -20,14 +20,14 @@ class WelcomeHandlerTest {
 
     @Test
     void 생성자는_rootContextPath를_전달하면_WelcomeHandler를_초기화한다() {
-        final WelcomeHandler actual = new WelcomeHandler("/");
+        final WelcomeHandler actual = new WelcomeHandler();
 
         assertThat(actual).isNotNull();
     }
 
     @Test
     void supports_메서드는_지원하는_요청인_경우_true를_반환한다() {
-        final WelcomeHandler handler = new WelcomeHandler("/");
+        final WelcomeHandler handler = new WelcomeHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/");
@@ -41,14 +41,14 @@ class WelcomeHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request,"/");
 
         assertThat(actual).isTrue();
     }
 
     @Test
     void supports_메서드는_지원하지_않는_요청인_경우_false를_반환한다() {
-        final WelcomeHandler handler = new WelcomeHandler("/hello");
+        final WelcomeHandler handler = new WelcomeHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/");
@@ -62,14 +62,14 @@ class WelcomeHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request, "/hello");
 
         assertThat(actual).isFalse();
     }
 
     @Test
     void service_메서드는_요청을_처리하고_Response를_반환한다() {
-        final WelcomeHandler handler = new WelcomeHandler("/");
+        final WelcomeHandler handler = new WelcomeHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/");
@@ -83,7 +83,7 @@ class WelcomeHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final Response actual = handler.service(request);
+        final Response actual = handler.service(request, "ignored");
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual).isNotNull();

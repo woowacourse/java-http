@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import org.apache.coyote.context.HelloWorldContext;
+import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -15,7 +18,9 @@ class Http11ProcessorTest {
     @Test
     void process() {
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final HelloWorldContext context = new HelloWorldContext("/");
+        context.addHandler(new WelcomeHandler());
+        final var processor = new Http11Processor(socket, List.of(context));
 
         processor.process(socket);
 
@@ -39,7 +44,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, List.of(new HelloWorldContext("/")));
 
         processor.process(socket);
 
@@ -58,7 +63,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, List.of(new HelloWorldContext("/")));
 
         processor.process(socket);
 

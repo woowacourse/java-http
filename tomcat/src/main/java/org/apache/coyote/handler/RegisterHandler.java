@@ -1,8 +1,7 @@
 package org.apache.coyote.handler;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.application.UserService;
 import org.apache.coyote.Handler;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.http.request.Request;
@@ -21,28 +20,28 @@ public class RegisterHandler implements Handler {
     private static final String EMAIL_KEY = "email";
 
     private final String path;
-    private final String rootContextPath;
+    private final UserService userService;
 
-    public RegisterHandler(final String path, final String rootContextPath) {
+    public RegisterHandler(final String path, final UserService userService) {
         this.path = path;
-        this.rootContextPath = rootContextPath;
+        this.userService = userService;
     }
 
     @Override
-    public boolean supports(final Request request) {
-        return isPostMethod(request) && isRegisterRequest(request);
+    public boolean supports(final Request request, final String rootContextPath) {
+        return isPostMethod(request) && isRegisterRequest(request, rootContextPath);
     }
 
     private boolean isPostMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.POST);
     }
 
-    private boolean isRegisterRequest(final Request request) {
+    private boolean isRegisterRequest(final Request request, final String rootContextPath) {
         return request.matchesByPath(path, rootContextPath) && request.hasQueryParameters();
     }
 
     @Override
-    public Response service(final Request request) throws IOException {
+    public Response service(final Request request, final String ignoreResourcePath) throws IOException {
         final String account = request.findQueryParameterValue(ACCOUNT_KEY);
         final String password = request.findQueryParameterValue(PASSWORD_KEY);
         final String email = request.findQueryParameterValue(EMAIL_KEY);
@@ -51,9 +50,7 @@ public class RegisterHandler implements Handler {
             throw new InvalidQueryParameterException();
         }
 
-        final User user = new User(account, password, email);
-
-        InMemoryUserRepository.save(user);
+        userService.register(account, password, email);
 
         return Response.of(
                 request,

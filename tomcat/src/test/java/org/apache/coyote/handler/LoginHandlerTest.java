@@ -22,14 +22,14 @@ class LoginHandlerTest {
 
     @Test
     void 생성자는_경로와_rootContextPath를_전달하면_LoginHandler를_초기화한다() {
-        final LoginHandler actual = new LoginHandler("/login", "/", new UserService());
+        final LoginHandler actual = new LoginHandler("/login", new UserService());
 
         assertThat(actual).isNotNull();
     }
 
     @Test
     void supports_메서드는_지원하는_요청인_경우_true를_반환한다() {
-        final LoginHandler handler = new LoginHandler("/login", "/", new UserService());
+        final LoginHandler handler = new LoginHandler("/login", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
         final HttpMethod method = HttpMethod.findMethod("post");
         final Url url = Url.from("/login");
@@ -43,14 +43,14 @@ class LoginHandlerTest {
                 QueryParameters.fromBodyContent("account=gugu&password=password")
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request, "/");
 
         assertThat(actual).isTrue();
     }
 
     @Test
     void supports_메서드는_지원하지_않는_요청인_경우_false를_반환한다() {
-        final LoginHandler handler = new LoginHandler("/login", "/", new UserService());
+        final LoginHandler handler = new LoginHandler("/login", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/index.html");
@@ -64,14 +64,14 @@ class LoginHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request, "/");
 
         assertThat(actual).isFalse();
     }
 
     @Test
     void service_메서드는_요청을_처리하고_Response를_반환한다() throws IOException {
-        final LoginHandler handler = new LoginHandler("/login", "/", new UserService());
+        final LoginHandler handler = new LoginHandler("/login", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
         final HttpMethod method = HttpMethod.findMethod("post");
         final Url url = Url.from("/login");
@@ -86,7 +86,7 @@ class LoginHandlerTest {
         );
         request.initSessionManager(new SessionManager());
 
-        final Response actual = handler.service(request);
+        final Response actual = handler.service(request, "ignored");
 
         assertThat(actual.convertResponseMessage()).contains("302 Found");
     }

@@ -11,14 +11,8 @@ import org.apache.coyote.http.util.HttpMethod;
 
 public class ResourceHandler implements Handler {
 
-    private final String prefix;
-
-    public ResourceHandler(final String prefix) {
-        this.prefix = prefix;
-    }
-
     @Override
-    public boolean supports(final Request request) {
+    public boolean supports(final Request request, final String ignoredRootContextPath) {
         return isGetMethod(request) && isStaticResourceRequest(request);
     }
 
@@ -31,8 +25,8 @@ public class ResourceHandler implements Handler {
     }
 
     @Override
-    public Response service(final Request request) throws IOException {
-        final String resourceFullName = prefix + request.url();
+    public Response service(final Request request, final String staticResourcePath) throws IOException {
+        final String resourceFullName = staticResourcePath + request.url();
         final String responseBody = ResourceProcessor.readResourceFile(resourceFullName);
         final ContentType contentType = ResourceProcessor.findContentType(request, resourceFullName);
 

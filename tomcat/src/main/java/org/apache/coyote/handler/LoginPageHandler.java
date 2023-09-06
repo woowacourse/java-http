@@ -15,37 +15,28 @@ import org.apache.coyote.http.util.HttpMethod;
 public class LoginPageHandler implements Handler {
 
     private final String path;
-    private final String rootContextPath;
     private final String targetResourceName;
-    private final String prefix;
 
-    public LoginPageHandler(
-            final String path,
-            final String rootContextPath,
-            final String targetResourceName,
-            final String prefix
-    ) {
+    public LoginPageHandler(final String path, final String targetResourceName) {
         this.path = path;
-        this.rootContextPath = rootContextPath;
         this.targetResourceName = targetResourceName;
-        this.prefix = prefix;
     }
 
     @Override
-    public boolean supports(final Request request) {
-        return isGetMethod(request) && isLoginPageRequest(request);
+    public boolean supports(final Request request, final String rootContextPath) {
+        return isGetMethod(request) && isLoginPageRequest(request, rootContextPath);
     }
 
     private boolean isGetMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.GET);
     }
 
-    private boolean isLoginPageRequest(final Request request) {
+    private boolean isLoginPageRequest(final Request request, final String rootContextPath) {
         return request.matchesByPath(path, rootContextPath);
     }
 
     @Override
-    public Response service(final Request request) throws IOException {
+    public Response service(final Request request, final String staticResourcePath) throws IOException {
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
@@ -63,7 +54,7 @@ public class LoginPageHandler implements Handler {
             }
         }
 
-        final String resourceFullName = prefix + targetResourceName;
+        final String resourceFullName = staticResourcePath + targetResourceName;
         final String responseBody = ResourceProcessor.readResourceFile(resourceFullName);
         final ContentType contentType = ResourceProcessor.findContentType(request, resourceFullName);
 

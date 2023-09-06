@@ -1,11 +1,13 @@
 package org.apache.coyote.context;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
+import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.QueryParameters;
@@ -101,6 +103,7 @@ class HelloWorldContextTest {
                 QueryParameters.EMPTY
         );
         final HelloWorldContext context = new HelloWorldContext("/");
+        context.addHandler(new WelcomeHandler());
 
         final Response actual = context.service(request);
 

@@ -15,37 +15,28 @@ import org.apache.coyote.http.util.HttpMethod;
 public class RegisterPageHandler implements Handler {
 
     private final String path;
-    private final String rootContextPath;
     private final String resourceName;
-    private final String prefix;
 
-    public RegisterPageHandler(
-            final String path,
-            final String rootContextPath,
-            final String resourceName,
-            final String prefix
-    ) {
+    public RegisterPageHandler(final String path, final String resourceName) {
         this.path = path;
-        this.rootContextPath = rootContextPath;
         this.resourceName = resourceName;
-        this.prefix = prefix;
     }
 
     @Override
-    public boolean supports(final Request request) {
-        return isGetMethod(request) && isRegisterPageRequest(request);
+    public boolean supports(final Request request, final String rootContextPath) {
+        return isGetMethod(request) && isRegisterPageRequest(request, rootContextPath);
     }
 
     private boolean isGetMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.GET);
     }
 
-    private boolean isRegisterPageRequest(final Request request) {
+    private boolean isRegisterPageRequest(final Request request, final String rootContextPath) {
         return request.matchesByPath(path, rootContextPath) && !request.hasQueryParameters();
     }
 
     @Override
-    public Response service(final Request request) throws IOException {
+    public Response service(final Request request, final String staticResourcePath) throws IOException {
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
@@ -63,7 +54,7 @@ public class RegisterPageHandler implements Handler {
             }
         }
 
-        final String resourceFullName = prefix + resourceName;
+        final String resourceFullName = staticResourcePath + resourceName;
         final String responseBody = ResourceProcessor.readResourceFile(resourceFullName);
         final ContentType contentType = ResourceProcessor.findContentType(request, resourceFullName);
 

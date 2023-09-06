@@ -8,13 +8,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
-import org.apache.coyote.context.HelloWorldContext;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
@@ -36,16 +34,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final List<Container> contexts = new ArrayList<>();
+    private final List<Container> containers;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final List<Container> containers) {
         this.connection = connection;
-
-        initContexts();
-    }
-
-    private void initContexts() {
-        contexts.add(new HelloWorldContext("/"));
+        this.containers = containers;
     }
 
     @Override
@@ -95,9 +88,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Container findContext(final Request request) {
-        for (final Container context : contexts) {
-            if (context.supports(request)) {
-                return context;
+        for (final Container container : containers) {
+            if (container.supports(request)) {
+                return container;
             }
         }
         throw new InvalidRequestPathException();

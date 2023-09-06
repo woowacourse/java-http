@@ -21,14 +21,14 @@ class ResourceHandlerTest {
 
     @Test
     void 생성자는_static_resource의_경로를_전달하면_CssHandler를_초기화한다() {
-        final ResourceHandler actual = new ResourceHandler("static/");
+        final ResourceHandler actual = new ResourceHandler();
 
         assertThat(actual).isNotNull();
     }
 
     @Test
     void supports_메서드는_지원하는_요청인_경우_true를_반환한다() {
-        final ResourceHandler handler = new ResourceHandler("static/");
+        final ResourceHandler handler = new ResourceHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/index.html");
@@ -42,14 +42,14 @@ class ResourceHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request, "ignored");
 
         assertThat(actual).isTrue();
     }
 
     @Test
     void supports_메서드는_지원하지_않는_요청인_경우_false를_반환한다() {
-        final ResourceHandler handler = new ResourceHandler("static/");
+        final ResourceHandler handler = new ResourceHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/login");
@@ -63,14 +63,14 @@ class ResourceHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final boolean actual = handler.supports(request);
+        final boolean actual = handler.supports(request, "ignored");
 
         assertThat(actual).isFalse();
     }
 
     @Test
     void service_메서드는_요청을_처리하고_Response를_반환한다() throws IOException {
-        final ResourceHandler handler = new ResourceHandler("static/");
+        final ResourceHandler handler = new ResourceHandler();
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/index.html");
@@ -84,7 +84,7 @@ class ResourceHandlerTest {
                 QueryParameters.EMPTY
         );
 
-        final Response actual = handler.service(request);
+        final Response actual = handler.service(request, "static/");
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual).isNotNull();

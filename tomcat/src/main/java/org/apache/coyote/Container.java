@@ -9,4 +9,6 @@ public interface Container {
     boolean supports(Request request);
 
     Response service(final Request request) throws IOException;
+
+    void addHandler(final Handler handler);
 }

@@ -3,17 +3,11 @@ package org.apache.coyote.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.application.UserService;
 import org.apache.coyote.Container;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.LoginPageHandler;
-import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.handler.RegisterPageHandler;
 import org.apache.coyote.handler.ResourceHandler;
-import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
@@ -25,7 +19,6 @@ import org.apache.coyote.http.util.exception.UnsupportedHttpMethodException;
 public class HelloWorldContext implements Container {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final UserService USER_SERVICE = new UserService();
     private static final String DEFAULT_STATIC_RESOURCE_PATH_PREFIX = "static/";
 
     private final String rootContextPath;
@@ -38,14 +31,20 @@ public class HelloWorldContext implements Container {
     }
 
     public HelloWorldContext(final String rootContextPath, final String staticResourcePath) {
+        this(rootContextPath, staticResourcePath, new ResourceHandler());
+    }
+
+    public HelloWorldContext(
+            final String rootContextPath,
+            final String staticResourcePath,
+            final Handler resourceHandler
+    ) {
         validateRootContextPath(rootContextPath);
         validatePath(staticResourcePath);
 
         this.rootContextPath = rootContextPath;
         this.staticResourcePath = staticResourcePath;
-        this.resourceHandler = new ResourceHandler(staticResourcePath);
-
-        initHandlers();
+        this.resourceHandler = resourceHandler;
     }
 
     private void validateRootContextPath(final String rootContextPath) {
@@ -58,14 +57,6 @@ public class HelloWorldContext implements Container {
         if (staticResourcePath == null || !staticResourcePath.endsWith(HttpConsts.SLASH)) {
             throw new InvalidStaticResourcePathException();
         }
-    }
-
-    private void initHandlers() {
-        handlers.add(new WelcomeHandler(rootContextPath));
-        handlers.add(new LoginHandler("/login", rootContextPath, USER_SERVICE));
-        handlers.add(new LoginPageHandler("/login", rootContextPath, "login.html", staticResourcePath));
-        handlers.add(new RegisterPageHandler("/register", rootContextPath, "register.html", staticResourcePath));
-        handlers.add(new RegisterHandler("/register", rootContextPath));
     }
 
     @Override
@@ -84,9 +75,9 @@ public class HelloWorldContext implements Container {
 
     private Response process(final Request request) throws IOException {
         for (final Handler handler : handlers) {
-            if (handler.supports(request)) {
+            if (handler.supports(request, rootContextPath)) {
                 request.initSessionManager(SESSION_MANAGER);
-                return handler.service(request);
+                return handler.service(request, staticResourcePath);
             }
         }
 
@@ -94,10 +85,15 @@ public class HelloWorldContext implements Container {
     }
 
     private Response processStaticResources(final Request request) throws IOException {
-        if (resourceHandler.supports(request)) {
-            return resourceHandler.service(request);
+        if (resourceHandler.supports(request, rootContextPath)) {
+            return resourceHandler.service(request, staticResourcePath);
         }
 
         return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, "존재하지 않는 api 입니다.");
+    }
+
+    @Override
+    public void addHandler(final Handler handler) {
+        this.handlers.add(handler);
     }
 }

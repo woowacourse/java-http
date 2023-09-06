@@ -21,30 +21,28 @@ public class LoginHandler implements Handler {
     private static final String PASSWORD_KEY = "password";
 
     private final String path;
-    private final String rootContextPath;
     private final UserService userService;
 
-    public LoginHandler(final String path, final String rootContextPath, final UserService userService) {
+    public LoginHandler(final String path, final UserService userService) {
         this.path = path;
-        this.rootContextPath = rootContextPath;
         this.userService = userService;
     }
 
     @Override
-    public boolean supports(final Request request) {
-        return isPostMethod(request) && isLoginRequest(request) && request.hasQueryParameters();
+    public boolean supports(final Request request, final String rootContextPath) {
+        return isPostMethod(request) && isLoginRequest(request, rootContextPath) && request.hasQueryParameters();
     }
 
     private boolean isPostMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.POST);
     }
 
-    private boolean isLoginRequest(final Request request) {
+    private boolean isLoginRequest(final Request request, final String rootContextPath) {
         return request.matchesByPath(path, rootContextPath);
     }
 
     @Override
-    public Response service(final Request request) throws IOException {
+    public Response service(final Request request, final String ignoreResourcePath) throws IOException {
         final String account = request.findQueryParameterValue(ACCOUNT_KEY);
         final String password = request.findQueryParameterValue(PASSWORD_KEY);
 

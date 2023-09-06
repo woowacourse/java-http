@@ -28,7 +28,7 @@ public class HttpResponse {
     }
 
     public String getRawResponse() {
-        if(cookie.getSize() != 0){
+        if(cookie.isPresent()){
             return String.join(System.lineSeparator(),
                     SUPPORT_HTTP_VERSION + status.getStatus(),
                     headers.getRawHeaders(),

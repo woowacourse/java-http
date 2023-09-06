@@ -45,7 +45,7 @@ public class Cookie {
                 .collect(Collectors.joining("; "));
     }
 
-    public int getSize(){
-        return cookie.size();
+    public boolean isPresent() {
+        return cookie.size() != 0;
     }
 }

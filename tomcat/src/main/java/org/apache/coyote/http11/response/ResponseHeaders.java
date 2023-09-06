@@ -14,11 +14,11 @@ public class ResponseHeaders {
 
 
     private final Map<String, String> headers;
-    private final Cookie cookie;
+    private final ResponseCookie cookie;
 
     public ResponseHeaders() {
         this.headers = new LinkedHashMap<>();
-        this.cookie = new Cookie();
+        this.cookie = new ResponseCookie();
     }
 
     public void setContentType(final String contentType) {

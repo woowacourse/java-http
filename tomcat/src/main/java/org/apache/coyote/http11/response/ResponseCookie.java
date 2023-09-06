@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Cookie {
+public class ResponseCookie {
 
     private static final String SET_COOKIE_HEADER = "Set-Cookie";
     private static final String COLON_DELIMITER = ": ";
@@ -13,7 +13,7 @@ public class Cookie {
 
     private final Map<String, String> attributes;
 
-    public Cookie() {
+    public ResponseCookie() {
         this.attributes = new HashMap<>();
     }
 

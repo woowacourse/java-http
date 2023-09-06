@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class UserController {
@@ -13,10 +12,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    public ResponseEntity login(RequestBody requestBody) {
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-
+    public ResponseEntity login(String account, String password) {
         try {
             userService.login(account, password);
             return new ResponseEntity(HttpStatus.FOUND, "/index");
@@ -25,11 +21,7 @@ public class UserController {
         }
     }
 
-    public ResponseEntity signUp(RequestBody requestBody) {
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        String email = requestBody.get("email");
-
+    public ResponseEntity signUp(String account, String password, String email) {
         userService.save(account, password, email);
 
         return new ResponseEntity(HttpStatus.FOUND, "/index");

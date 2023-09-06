@@ -24,6 +24,14 @@ public class RequestLine {
         return new RequestLine(httpMethod, requestUri, requestLineParts[2]);
     }
 
+    public boolean isSameHttpMethod(HttpMethod method) {
+        return httpMethod.equals(method);
+    }
+
+    public boolean isStaticResource() {
+        return requestUri.isStaticResource();
+    }
+
     public boolean isQueryStringExisted() {
         return requestUri.isQueryStringExisted();
     }

@@ -11,7 +11,6 @@ public class ViewResolver {
 
     public static File findViewFile(String path) {
         String resourcePath = findResourcePath(path);
-
         URL resource = ViewResolver.class.getClassLoader()
                 .getResource(String.format("static/%s", resourcePath));
 
@@ -19,12 +18,10 @@ public class ViewResolver {
     }
 
     private static String findResourcePath(String path) {
-        String fileName = path.substring(1);
-
-        if (fileName.contains(".")) {
-            return fileName;
+        if (path.contains(".")) {
+            return path;
         }
-        return fileName + ".html";
+        return path + ".html";
     }
 
 

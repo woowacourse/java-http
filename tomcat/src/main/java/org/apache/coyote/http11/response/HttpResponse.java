@@ -8,7 +8,7 @@ import org.apache.coyote.http11.common.MimeType;
 
 public class HttpResponse {
 
-    private static final String SEPARATOR = "\r\n";
+    private static final String CRLF = "\r\n";
 
     private final HttpStatus httpStatus;
     private final File file;
@@ -20,7 +20,7 @@ public class HttpResponse {
 
     public String extractResponse() {
         return new StringBuilder()
-                .append(convertStatusLine()).append(SEPARATOR)
+                .append(convertStatusLine()).append(CRLF)
                 .append(convertHeaders())
                 .toString();
     }
@@ -42,9 +42,9 @@ public class HttpResponse {
 
     private String redirectHeaders(String fileName) {
         return new StringBuilder()
-                .append(convertContentType(MimeType.HTML)).append(SEPARATOR)
-                .append(convertLocation(fileName)).append(SEPARATOR)
-                .append(SEPARATOR)
+                .append(convertContentType(MimeType.HTML)).append(CRLF)
+                .append(convertLocation(fileName)).append(CRLF)
+                .append(CRLF)
                 .toString();
     }
 
@@ -56,16 +56,16 @@ public class HttpResponse {
 
     private String convertLocation(String fileName) {
         String locationFormat = "Location: %s.html ";
-        String path = fileName.substring(1, fileName.lastIndexOf("."));
+        String path = fileName.substring(0, fileName.lastIndexOf("."));
 
         return String.format(locationFormat, path);
     }
 
     private String headers(String fileName) {
         return new StringBuilder()
-                .append(convertContentType(MimeType.from(fileName))).append(SEPARATOR)
-                .append(convertContentLength()).append(SEPARATOR)
-                .append(SEPARATOR)
+                .append(convertContentType(MimeType.from(fileName))).append(CRLF)
+                .append(convertContentLength()).append(CRLF)
+                .append(CRLF)
                 .append(responseBody())
                 .toString();
     }

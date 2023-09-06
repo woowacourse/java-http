@@ -23,6 +23,10 @@ public class RequestUri {
         return new RequestUri(path, queryStrings);
     }
 
+    public boolean isStaticResource() {
+        return path.contains(".");
+    }
+
     public boolean isQueryStringExisted() {
         return queryStrings.isExisted();
     }

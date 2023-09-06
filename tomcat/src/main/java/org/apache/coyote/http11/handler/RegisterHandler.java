@@ -8,9 +8,12 @@ import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
 
-import static org.apache.coyote.http11.common.HttpStatus.REDIRECTION;
+import static org.apache.coyote.http11.common.HttpStatus.FOUND;
 
 public class RegisterHandler {
+
+    private RegisterHandler() {
+    }
 
     public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
         if (requestLine.getRequestMethod().equals("GET")) {
@@ -22,7 +25,7 @@ public class RegisterHandler {
     private static HttpResponse register(final RequestBody requestBody) {
         if (requestBody == null) {
             return new HttpResponseBuilder().init()
-                    .httpStatus(REDIRECTION)
+                    .httpStatus(FOUND)
                     .header("Location: 401.html")
                     .build();
         }
@@ -31,7 +34,7 @@ public class RegisterHandler {
         String password = requestBody.getContentValue("password");
         InMemoryUserRepository.save(new User(account, password, email));
         return new HttpResponseBuilder().init()
-                .httpStatus(REDIRECTION)
+                .httpStatus(FOUND)
                 .header("Location: /index.html")
                 .build();
     }

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.common;
 
-import nextstep.jwp.model.User;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

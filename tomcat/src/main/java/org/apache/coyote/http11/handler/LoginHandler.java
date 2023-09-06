@@ -13,19 +13,28 @@ import org.apache.coyote.http11.response.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.coyote.http11.common.HttpStatus.REDIRECTION;
+import static org.apache.coyote.http11.common.HttpStatus.FOUND;
 
 public class LoginHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
+    private static final String LOGIN_ACCOUNT = "account";
+
+    private static final String LOGIN_PASSWORD = "password";
+
+    private static final String HEADER_COOKIE = "Cookie";
+
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
+
+    private LoginHandler() {
+    }
+
     public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
         if (requestLine.getRequestMethod().equals("GET")) {
-            HttpCookie cookie = HttpCookie.from(requestHeader.getHeaderValue("Cookie"));
-            String jseessionid = cookie.getCookieValue("JSESSIONID");
-            if (jseessionid != null && SessionManager.findSession(jseessionid) != null) {
+            if (isAuthenticated(requestHeader)) {
                 return new HttpResponseBuilder().init()
-                        .httpStatus(REDIRECTION)
+                        .httpStatus(FOUND)
                         .header("Location: /index.html ")
                         .build();
             }
@@ -34,10 +43,16 @@ public class LoginHandler {
         return login(requestBody);
     }
 
+    private static boolean isAuthenticated(final RequestHeader requestHeader) {
+        HttpCookie cookie = HttpCookie.from(requestHeader.getHeaderValue(HEADER_COOKIE));
+        String jsessionId = cookie.getCookieValue(SESSION_COOKIE_NAME);
+        return jsessionId != null && SessionManager.findSession(jsessionId) != null;
+    }
+
     private static HttpResponse login(final RequestBody requestBody) {
         try {
-            String account = requestBody.getContentValue("account");
-            String password = requestBody.getContentValue("password");
+            String account = requestBody.getContentValue(LOGIN_ACCOUNT);
+            String password = requestBody.getContentValue(LOGIN_PASSWORD);
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException()); //todo : 해당하는 계정이 존재하지 않는다
             if (!user.checkPassword(password)) {
@@ -60,7 +75,7 @@ public class LoginHandler {
     private static HttpResponse successToLogin(User user) {
         Session session = createSession(user);
         return new HttpResponseBuilder().init()
-                .httpStatus(REDIRECTION)
+                .httpStatus(FOUND)
                 .header("Set-Cookie: JSESSIONID=" + session.getId() + " ")
                 .header("Location: /index.html ")
                 .build();
@@ -68,7 +83,7 @@ public class LoginHandler {
 
     private static HttpResponse failToLogin() {
         return new HttpResponseBuilder().init()
-                .httpStatus(REDIRECTION)
+                .httpStatus(FOUND)
                 .header("Location: /401.html ")
                 .build();
     }

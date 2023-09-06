@@ -7,6 +7,9 @@ import static org.apache.coyote.http11.common.HttpStatus.OK;
 
 public class BaseHandler {
 
+    private BaseHandler() {
+    }
+
     public static HttpResponse handle() {
         final String responseBody = "Hello world!";
 

@@ -3,23 +3,23 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.apache.coyote.http11.common.HttpStatus.OK;
-import static org.apache.coyote.http11.common.HttpStatus.REDIRECTION;
+import static org.apache.coyote.http11.common.HttpStatus.FOUND;
 
 public class StaticFileHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
-    private static final String EXTENSION = ".html";
+    private StaticFileHandler() {
+    }
 
     public static HttpResponse handle(final String requestURI, RequestHeader requestHeader) {
         try {
@@ -39,9 +39,8 @@ public class StaticFileHandler {
                     .body(responseBody)
                     .build();
         } catch (IOException | NullPointerException e) {
-            log.error(e.getMessage(), e);
             return new HttpResponseBuilder().init()
-                    .httpStatus(REDIRECTION)
+                    .httpStatus(FOUND)
                     .header("Location: /404.html ")
                     .build();
         }

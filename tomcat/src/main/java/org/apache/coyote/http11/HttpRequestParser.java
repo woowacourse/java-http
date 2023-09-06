@@ -63,13 +63,12 @@ public class HttpRequestParser {
     }
 
     public Map<String, String> findCookies() {
-        Map<String, String> cookie = header.entrySet().stream()
+        return header.entrySet().stream()
                 .filter(entry -> entry.getKey().equals("Cookie"))
                 .map(entry -> entry.getValue().split("; "))
                 .flatMap(Arrays::stream)
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(line -> line[0], line -> line[1]));
-        return cookie;
+                .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
     }
 
     public Map<String, String> findQueryStrings() {
@@ -80,7 +79,7 @@ public class HttpRequestParser {
         String queryString = path.split(QUERY_PARAMETER_DELIMITER_REGEX)[1];
         return Arrays.stream(queryString.split("&"))
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+                .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
     }
 
     public String findPathWithoutQueryString() {

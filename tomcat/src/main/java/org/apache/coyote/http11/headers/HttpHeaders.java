@@ -42,6 +42,13 @@ public class HttpHeaders {
 			.orElseGet(() -> new HttpHeaders(headerMaps, new HttpCookie()));
 	}
 
+	public static HttpHeaders of(final String body, final MimeType mimeType) {
+		final HttpHeaders headers = new HttpHeaders();
+		headers.put(CONTENT_TYPE.getValue(), mimeType.getValue());
+		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
+		return headers;
+	}
+
 	public String build() {
 		return headers.entrySet().stream()
 			.map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))

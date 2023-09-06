@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.headers.HttpHeaderType.*;
+import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Map;
@@ -67,4 +69,21 @@ class HttpHeadersTest {
 		assertThat(headers.findJSessionId())
 			.contains(jSessionId);
 	}
+
+	@Test
+	@DisplayName("body와 contentType으로, HttpHeaders를 반환할 수 있다.")
+	void createByBodyAndContentType() {
+		final String body = "hello";
+
+		final HttpHeaders actual = HttpHeaders.of(body, HTML);
+
+		final HttpHeaders expected = new HttpHeaders();
+		expected.put(CONTENT_TYPE.getValue(), HTML.getValue());
+		expected.put(CONTENT_LENGTH.getValue(), "5");
+
+		assertThat(actual)
+			.usingRecursiveComparison()
+			.isEqualTo(expected);
+	}
+
 }

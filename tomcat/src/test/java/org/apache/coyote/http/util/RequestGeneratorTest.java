@@ -50,7 +50,7 @@ class RequestGeneratorTest {
 
         final Request actual = generator.generate(bufferedReader);
 
-        assertThat(actual.findQueryParameterValue("user")).isEqualTo("gugu");
+        assertThat(actual.findParameterValue("user")).isEqualTo("gugu");
     }
 
     @Test
@@ -69,6 +69,6 @@ class RequestGeneratorTest {
 
         final Request actual = generator.generate(bufferedReader);
 
-        assertThat(actual.findQueryParameterValue("user")).isEqualTo("gugu");
+        assertThat(actual.findParameterValue("user")).isEqualTo("gugu");
     }
 }

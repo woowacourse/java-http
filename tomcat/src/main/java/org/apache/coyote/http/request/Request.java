@@ -54,8 +54,8 @@ public class Request {
         return headers.findValue(headerKey);
     }
 
-    public String findQueryParameterValue(final String queryParameterKey) {
-        return parameters.findValue(queryParameterKey);
+    public String findParameterValue(final String parameterKey) {
+        return parameters.findValue(parameterKey);
     }
 
     public boolean matchesByMethod(final HttpMethod method) {

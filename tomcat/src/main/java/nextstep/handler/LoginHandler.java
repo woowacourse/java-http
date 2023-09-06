@@ -43,8 +43,8 @@ public class LoginHandler implements Handler {
 
     @Override
     public Response service(final Request request, final String ignoreResourcePath) throws IOException {
-        final String account = request.findQueryParameterValue(ACCOUNT_KEY);
-        final String password = request.findQueryParameterValue(PASSWORD_KEY);
+        final String account = request.findParameterValue(ACCOUNT_KEY);
+        final String password = request.findParameterValue(PASSWORD_KEY);
 
         if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password)) {
             throw new InvalidQueryParameterException();

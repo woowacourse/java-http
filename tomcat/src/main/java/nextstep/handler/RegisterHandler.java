@@ -42,9 +42,9 @@ public class RegisterHandler implements Handler {
 
     @Override
     public Response service(final Request request, final String ignoreResourcePath) throws IOException {
-        final String account = request.findQueryParameterValue(ACCOUNT_KEY);
-        final String password = request.findQueryParameterValue(PASSWORD_KEY);
-        final String email = request.findQueryParameterValue(EMAIL_KEY);
+        final String account = request.findParameterValue(ACCOUNT_KEY);
+        final String password = request.findParameterValue(PASSWORD_KEY);
+        final String email = request.findParameterValue(EMAIL_KEY);
 
         if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password) || isInvalidQueryParameter(email)) {
             throw new InvalidQueryParameterException();

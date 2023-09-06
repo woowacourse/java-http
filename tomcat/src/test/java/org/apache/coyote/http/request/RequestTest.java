@@ -87,7 +87,7 @@ class RequestTest {
                 parameters
         );
 
-        final String actual = request.findQueryParameterValue("user");
+        final String actual = request.findParameterValue("user");
 
         assertThat(actual).isEqualTo("gugu");
     }

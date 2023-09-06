@@ -67,8 +67,10 @@ public class LoginHandler extends Handler {
 
     private HttpResponse responseWhenHttpMethodIsPost(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
+        Map<String, String> formData = requestBody.getAsFormData();
+
+        String account = formData.get("account");
+        String password = formData.get("password");
 
         if (InMemoryUserRepository.hasSameCredential(account, password)) {
             return responseWhenLoginSuccess(httpRequest);
@@ -101,9 +103,11 @@ public class LoginHandler extends Handler {
     }
 
     private UUID saveSession(HttpRequest httpRequest) {
-        RequestBody body = httpRequest.getBody();
-        String account = body.get("account");
-        String password = body.get("password");
+        RequestBody requestBody = httpRequest.getBody();
+        Map<String, String> formData = requestBody.getAsFormData();
+
+        String account = formData.get("account");
+        String password = formData.get("password");
 
         Long userId = InMemoryUserRepository.getIdByCredentials(account, password);
 

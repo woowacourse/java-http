@@ -58,9 +58,11 @@ public class RegisterHandler extends Handler {
 
     private void saveUser(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        String email = requestBody.get("email");
+        Map<String, String> formData = requestBody.getAsFormData();
+
+        String account = formData.get("account");
+        String password = formData.get("password");
+        String email = formData.get("email");
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);

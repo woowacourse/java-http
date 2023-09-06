@@ -63,8 +63,8 @@ public class RequestExtractor {
         if (reader.ready()) {
             char[] buffer = new char[contentLength];
             reader.read(buffer);
-            String line = new String(buffer).trim();
-            return RequestBody.from(line);
+            String content = new String(buffer).trim();
+            return new RequestBody(content);
         }
         throw new RequestBodyNotProvidedException();
     }

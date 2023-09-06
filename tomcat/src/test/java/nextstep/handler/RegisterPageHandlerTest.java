@@ -3,7 +3,6 @@ package nextstep.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;
@@ -55,7 +54,6 @@ class RegisterPageHandlerTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /hello HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        request.initSessionManager(new SessionManager());
 
         final Response actual = handler.service(request, "static/");
 

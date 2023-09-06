@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import nextstep.jwp.application.UserService;
-import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;
@@ -66,7 +65,6 @@ class RegisterHandlerTest {
                 HttpRequestBody.EMPTY,
                 Parameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
         );
-        request.initSessionManager(new SessionManager());
 
         final Response actual = handler.service(request, "ignored");
 

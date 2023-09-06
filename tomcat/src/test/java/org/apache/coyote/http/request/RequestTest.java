@@ -1,7 +1,6 @@
 package org.apache.coyote.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.SessionManager;
@@ -22,16 +21,6 @@ class RequestTest {
         final Request actual = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
 
         assertThat(actual).isNotNull();
-    }
-
-    @Test
-    void initSessionManager_메서드는_sessionManager를_전달하면_sessionManager를_초기화한다() {
-        final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
-        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        final SessionManager sessionManager = new SessionManager();
-
-        assertDoesNotThrow(() -> request.initSessionManager(sessionManager));
     }
 
     @Test
@@ -211,9 +200,8 @@ class RequestTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        request.initSessionManager(new SessionManager());
 
-        final HttpSession actual = request.getSession(true);
+        final HttpSession actual = request.getSession(true, new SessionManager());
 
         assertThat(actual).isNotNull();
     }
@@ -223,9 +211,8 @@ class RequestTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        request.initSessionManager(new SessionManager());
 
-        final HttpSession actual = request.getSession(false);
+        final HttpSession actual = request.getSession(false, new SessionManager());
 
         assertThat(actual).isNull();
     }

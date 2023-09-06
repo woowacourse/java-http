@@ -1,12 +1,10 @@
 package nextstep.handler;
 
 import java.io.IOException;
+import nextstep.handler.exception.InvalidQueryParameterException;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
-import nextstep.handler.exception.InvalidQueryParameterException;
-import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -52,16 +50,11 @@ public class LoginHandler implements Handler {
 
         final User loginUser = userService.login(account, password);
 
-        final HttpSession session = request.getSession(true);
-        session.setAttribute(ACCOUNT_KEY, loginUser);
-        final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
-
         return Response.of(
                 request,
                 HttpStatusCode.FOUND,
                 ContentType.JSON,
                 loginUser.toString(),
-                cookie,
                 new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
         );
     }

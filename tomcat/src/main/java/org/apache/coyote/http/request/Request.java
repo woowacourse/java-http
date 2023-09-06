@@ -13,7 +13,6 @@ public class Request {
     private final HttpRequestBody body;
     private final Parameters parameters;
     private final HttpCookie cookie;
-    private SessionManager sessionManager;
 
     public Request(
             final HttpRequestHeaders headers,
@@ -36,10 +35,6 @@ public class Request {
         this.body = body;
         this.parameters = parameters;
         this.cookie = cookie;
-    }
-
-    public void initSessionManager(final SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
     }
 
     public String findHeaderValue(final String headerKey) {
@@ -86,7 +81,7 @@ public class Request {
         return requestLine.url().resourceName();
     }
 
-    public HttpSession getSession(final boolean create) {
+    public HttpSession getSession(final boolean create, final SessionManager sessionManager) {
         final String sessionId = cookie.findValue(HttpCookie.SESSION_ID_KEY);
 
         if (create && sessionId == null) {

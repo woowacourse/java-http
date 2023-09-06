@@ -77,7 +77,6 @@ public class HelloWorldContext implements Container {
     private Response process(final Request request) throws IOException {
         for (final Handler handler : handlers) {
             if (handler.supports(request, contextPath)) {
-                request.initSessionManager(SESSION_MANAGER);
                 return handler.service(request, staticResourcePath);
             }
         }

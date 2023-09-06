@@ -15,7 +15,7 @@ class HttpRequestTest {
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
 
-        final HttpRequest actual = new HttpRequest(request);
+        final HttpRequest actual = new HttpRequest(request, "/", new SessionManager());
 
         assertThat(actual).isNotNull();
     }
@@ -25,7 +25,7 @@ class HttpRequestTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final String actual = httpRequest.getHeader("Content-Type");
 
@@ -46,8 +46,7 @@ class HttpRequestTest {
                 Parameters.EMPTY,
                 HttpCookie.fromSessionId(expected.getId())
         );
-        request.initSessionManager(sessionManager);
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final HttpSession actual = httpRequest.getSession();
 
@@ -59,8 +58,7 @@ class HttpRequestTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        request.initSessionManager(new SessionManager());
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final HttpSession actual = httpRequest.getSession();
 
@@ -81,8 +79,7 @@ class HttpRequestTest {
                 Parameters.EMPTY,
                 HttpCookie.fromSessionId(expected.getId())
         );
-        request.initSessionManager(sessionManager);
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final HttpSession actual = httpRequest.getSession(false);
 
@@ -94,8 +91,7 @@ class HttpRequestTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        request.initSessionManager(new SessionManager());
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final HttpSession actual = httpRequest.getSession(false);
 
@@ -112,7 +108,7 @@ class HttpRequestTest {
                 HttpRequestBody.EMPTY,
                 Parameters.fromUrlContent("?user=gugu")
         );
-        final HttpRequest httpRequest = new HttpRequest(request);
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
 
         final String actual = httpRequest.getParameter("user");
 

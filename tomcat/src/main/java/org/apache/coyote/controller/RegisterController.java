@@ -1,8 +1,11 @@
 package org.apache.coyote.controller;
 
 import nextstep.FileResolver;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Controller;
-import org.apache.coyote.domain.HttpRequestHeader;
+import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.domain.HttpRequestBody;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -11,11 +14,21 @@ import java.util.Map;
 
 public class RegisterController extends Controller {
 
-    public String run(final HttpRequestHeader httpRequestHeader) throws IOException {
-        final String parsedUri = httpRequestHeader.getUri();
-        final Map<String, String> queryStrings = parseQueryStrings(parsedUri);
-        if (queryStrings.isEmpty()) {
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+
+    public String run(final HttpRequest request) throws IOException {
+        final String parsedUri = request.getUri();
+        final String method = request.getMethod();
+        if (method.equals(GET)) {
             final FileResolver file = FileResolver.findFile(parsedUri);
+            return file.getResponse();
+        }
+        if (method.equals(POST)) {
+            final HttpRequestBody body = request.getBody();
+            final User user = new User(body.getAccount(), body.getPassword(), body.getEmail());
+            InMemoryUserRepository.save(user);
+            final FileResolver file = FileResolver.INDEX_HTML;
             return file.getResponse();
         }
         return null;

@@ -103,10 +103,6 @@ public class RequestHandler {
 
     private boolean isLogin(HttpRequest request) {
         Map<String, String> cookie = request.getCookie();
-        if (cookie.isEmpty()) {
-            return false;
-        }
-
         if (cookie.get("JSESSIONID") != null) {
             String sessionId = cookie.get("JSESSIONID");
             Session session = sessionManager.findSession(sessionId);

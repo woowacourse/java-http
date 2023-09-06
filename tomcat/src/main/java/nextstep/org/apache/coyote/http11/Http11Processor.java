@@ -144,9 +144,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader,
-            Map<String, String> requestHeaders)
-            throws IOException {
+    private String extractRequestBody(
+            BufferedReader bufferedReader,
+            Map<String, String> requestHeaders
+    ) throws IOException {
         int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

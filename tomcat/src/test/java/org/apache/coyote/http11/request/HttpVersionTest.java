@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpVersion;
 import org.apache.coyote.http11.request.exception.NotFoundHttpVersionException;
 import org.junit.jupiter.api.Test;
 

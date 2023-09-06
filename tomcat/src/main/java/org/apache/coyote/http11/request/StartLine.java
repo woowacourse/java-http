@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpVersion;
+
 public class StartLine {
 
     private static final String SEPARATOR = " ";

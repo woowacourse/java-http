@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.exception.ServerException;
 
 public class HttpRequestParser {
 
@@ -47,7 +47,7 @@ public class HttpRequestParser {
         try {
             return reader.readLine();
         } catch (final IOException e) {
-            throw new ServerException("요청을 읽어오는데 실패했습니다.");
+            throw new UncheckedIOException("요청을 읽어오는데 실패했습니다.", e);
         }
     }
 
@@ -107,7 +107,7 @@ public class HttpRequestParser {
         try {
             reader.read(buffer, 0, length);
         } catch (final IOException e) {
-            throw new ServerException("요청을 읽어오는데 실패했습니다.");
+            throw new UncheckedIOException("요청을 읽어오는데 실패했습니다.", e);
         }
         return bodyParser.parse(new String(buffer));
     }

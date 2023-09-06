@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.apache.coyote.http11.exception.ServerException;
 
 public class ViewResolver {
 
@@ -31,7 +31,7 @@ public class ViewResolver {
         try {
             return Files.readAllLines(path);
         } catch (final IOException e) {
-            throw new ServerException("파일을 읽어오는데 실패했습니다.");
+            throw new UncheckedIOException("요청을 읽어오는데 실패했습니다.", e);
         }
     }
 }

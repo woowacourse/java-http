@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +27,14 @@ public class HttpResponse {
         this.status = status;
         this.code = code;
         this.responseBody = responseBody;
+    }
+
+    public void sendRedirect(String redirectionUrl) {
+        attribute.put("Location", redirectionUrl);
+    }
+
+    public void addCookie(String cookie) {
+        attribute.put("Set-Cookie", cookie);
     }
 
     public void setAttribute(String key, String value) {

@@ -139,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (!Objects.isNull(user)) {
             httpResponse = new HttpResponse(302, "FOUND");
-            httpResponse.setAttribute("Location", "/index.html");
+            httpResponse.sendRedirect("/index.html");
         }
 
         return httpResponse.toString();
@@ -164,7 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         HttpResponse httpResponse = new HttpResponse(302, "FOUND");
-        httpResponse.setAttribute("Location", redirectionUrl);
+        httpResponse.sendRedirect(redirectionUrl);
 
         return httpResponse.toString();
     }
@@ -180,12 +180,12 @@ public class Http11Processor implements Runnable, Processor {
         if (user.isPresent() && user.get().checkPassword(password)) {
             redirectionUrl = "/index.html";
             HttpSession httpSession = httpRequest.getHttpSession(true);
-            httpResponse.setAttribute("Set-Cookie", "JSESSIONID=" + httpSession.getId());
+            httpResponse.addCookie("JSESSIONID=" + httpSession.getId());
             httpSession.add("user", user.get());
             log.info("로그인 성공! 아이디 : {}", account);
         }
 
-        httpResponse.setAttribute("Location", redirectionUrl);
+        httpResponse.sendRedirect(redirectionUrl);
 
         return httpResponse.toString();
     }

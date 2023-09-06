@@ -60,9 +60,9 @@ class HttpRequestTest {
                 "");
         HttpRequest httpRequest = HttpRequest.from(toInputStream(message));
 
-        assertThat(httpRequest.getHeaders()).allSatisfy(
-                it -> assertThat(it.getValue()).doesNotEndWith(" ")
-        );
+        for (HttpHeader header : httpRequest.getHeaders()) {
+            assertThat(header.getValue()).doesNotEndWith(" ");
+        }
     }
 
     private ByteArrayInputStream toInputStream(String message) {

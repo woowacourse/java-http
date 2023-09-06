@@ -163,8 +163,8 @@ public class Http11Processor implements Runnable, Processor {
         if (Objects.isNull(acceptHeader)) {
             return "text/html";
         }
-        List<String> splitUrl = Arrays.asList(acceptHeader.split(","));
-        return splitUrl.get(ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX);
+        List<String> acceptHeaderValues = Arrays.asList(acceptHeader.split(","));
+        return acceptHeaderValues.get(ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX);
     }
 
     private Map<String, String> extractHeaders(BufferedReader bufferedReader) throws IOException {

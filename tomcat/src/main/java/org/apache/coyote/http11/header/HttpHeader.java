@@ -35,12 +35,4 @@ public class HttpHeader {
     public String toLine() {
         return getName() + SEPARATOR + getValue();
     }
-
-    @Override
-    public String toString() {
-        return "HttpHeader{" +
-                "name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
 }

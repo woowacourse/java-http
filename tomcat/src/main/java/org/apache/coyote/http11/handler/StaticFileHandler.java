@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.exception.NotExistFileException;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
@@ -18,7 +19,8 @@ public class StaticFileHandler {
     private StaticFileHandler() {
     }
 
-    public static HttpResponse handle(final String requestURI, RequestHeader requestHeader) {
+    public static HttpResponse handle(final String requestURI, final HttpRequest request) {
+        RequestHeader requestHeader = request.getRequestHeader();
         try {
             String responseBody = findResponseBody(requestURI);
             if (requestURI.endsWith("html")) {

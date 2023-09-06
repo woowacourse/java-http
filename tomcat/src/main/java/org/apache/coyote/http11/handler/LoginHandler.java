@@ -7,6 +7,7 @@ import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.exception.MissMatchPasswordException;
 import org.apache.coyote.http11.exception.NotExistAccountException;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
@@ -25,7 +26,10 @@ public class LoginHandler {
     private LoginHandler() {
     }
 
-    public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
+    public static HttpResponse handle(final HttpRequest request) {
+        RequestLine requestLine = request.getRequestLine();
+        RequestHeader requestHeader = request.getRequestHeader();
+        RequestBody requestBody = request.getRequestBody();
         if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
             if (isAuthenticated(requestHeader)) {
                 return new HttpResponseBuilder().init()
@@ -33,7 +37,7 @@ public class LoginHandler {
                         .header("Location: /index.html ")
                         .build();
             }
-            return StaticFileHandler.handle("/login.html", requestHeader);
+            return StaticFileHandler.handle("/login.html", request);
         }
         return login(requestBody);
     }

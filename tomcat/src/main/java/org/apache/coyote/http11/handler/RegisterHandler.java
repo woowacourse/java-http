@@ -2,8 +2,8 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
@@ -15,9 +15,11 @@ public class RegisterHandler {
     private RegisterHandler() {
     }
 
-    public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
+    public static HttpResponse handle(final HttpRequest request) {
+        RequestLine requestLine = request.getRequestLine();
+        RequestBody requestBody = request.getRequestBody();
         if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
-            return StaticFileHandler.handle("/register.html",requestHeader);
+            return StaticFileHandler.handle("/register.html", request);
         }
         return register(requestBody);
     }

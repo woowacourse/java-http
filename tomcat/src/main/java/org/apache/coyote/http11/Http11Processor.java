@@ -69,21 +69,24 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response mapPath(final Request request) throws IOException, URISyntaxException {
         final RequestParameters requestParameters = request.getRequestParameters();
+        final Session session = request.getSession();
 
         if (request.isMatching("/", GET)) {
             return new Response("Hello world!");
         }
 
         if (request.isMatching("/login", GET)) {
-            final Session session = request.getSession();
             final User user = (User) session.getAttribute("user");
-            if (user == null) {
-                // TODO: 9/6/23 GET POST 나누고 이 부분 login으로 리다이렉토로 변경
-                return Response.getRedirectResponse("index.html");
+            if (user != null) {
+                return Response.getRedirectResponse("/index.html");
             }
+            return findStaticResource("/login.html");
+        }
+
+        if (request.isMatching("/login", POST)) {
             final String account = requestParameters.getValue("account");
+            System.out.println("account = " + account);
             if (account == null) {
-                // TODO: 9/6/23 /login으로 변경 필요
                 return findStaticResource("/login.html");
             }
 
@@ -99,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
 
             session.setAttribute("user", findUser);
 
-            return Response.getRedirectResponse("index.html");
+            return Response.getRedirectResponse("/index.html");
         }
 
         if (request.isMatching("/register", GET)) {
@@ -114,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            return Response.getRedirectResponse("login");
+            return Response.getRedirectResponse("/login");
         }
 
         return Response.getNotFoundResponse();

@@ -124,7 +124,7 @@ public class Http11Processor implements Runnable, Processor {
                     String responseBody = new String(fileBytes);
                     return HttpResponse.of(httpRequests, responseBody);
                 }
-                log.info("user = {}", user.get());
+                log.info("로그인 성공 : user = {}", user.get());
                 SessionIdGenerator sessionIdGenerator = new RandomSessionIdGenerator();
                 String jSessionId = sessionIdGenerator.generate();
                 Map<String, Object> value = new HashMap<>();
@@ -142,8 +142,8 @@ public class Http11Processor implements Runnable, Processor {
                         .map(value -> value.split("="))
                         .collect(Collectors.toMap(value -> value[0], value -> value[1]));
                 User user = new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
-                log.info("user = {}", user);
                 InMemoryUserRepository.save(user);
+                log.info("등록 성공 : user = {}", user);
                 byte[] fileBytes = readBytes(HttpRequests.INDEX.readPath());
                 String responseBody = new String(fileBytes);
                 return HttpResponse.of(httpRequests, responseBody);

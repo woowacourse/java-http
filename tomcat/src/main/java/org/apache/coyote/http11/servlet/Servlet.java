@@ -10,27 +10,16 @@ import org.apache.coyote.http11.handler.Configurer;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.util.Resource;
 
 public class Servlet {
     public static String getResponse(Request request){
         try {
             return Configurer.handle(request);
         } catch (UnauthorizedException unauthorizedException) {
-            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(getFile("401.html"),"401.html").getResponse();
+            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"),"401.html").getResponse();
         } catch (NoSuchApiException e){
-            return Response.badResponse(HttpStatus.NOTFOUND).redirect(getFile("404.html"),"404.html").getResponse();
-        }
-    }
-
-    private static String getFile(String fileName){
-        try {
-            final var fileUrl = Servlet.class.getClassLoader().getResource("static/" + fileName);
-            final var fileBytes = Files.readAllBytes(new File(fileUrl.getFile()).toPath());
-            return new String(fileBytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (NullPointerException e){
-            return "";
+            return Response.badResponse(HttpStatus.NOTFOUND).redirect(Resource.getFile("404.html"),"404.html").getResponse();
         }
     }
 }

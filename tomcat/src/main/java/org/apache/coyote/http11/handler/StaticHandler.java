@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.util.Resource;
 
 public class StaticHandler extends Handler{
     private Handler next;
@@ -20,7 +21,7 @@ public class StaticHandler extends Handler{
             return Response.builder()
                     .status(HttpStatus.OK)
                     .contentType(contentType)
-                    .responseBody(getFile(uri))
+                    .responseBody(Resource.getFile(uri))
                     .build().getResponse();
         }
         return next.getResponse(request);

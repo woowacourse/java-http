@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.util.Resource;
 
 public class LoginHandler extends Handler{
     private Handler next;
@@ -30,7 +31,7 @@ public class LoginHandler extends Handler{
             return Response.builder()
                     .status(HttpStatus.OK)
                     .contentType("html")
-                    .responseBody(getFile("index.html"))
+                    .responseBody(Resource.getFile("index.html"))
                     .build().getResponse();
         }
         throw new UnauthorizedException("인가되지 않은 코드입니다.");

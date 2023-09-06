@@ -35,6 +35,6 @@ public class RegisterController extends AbstractController {
         Map<String, String> params = httpRequest.getParams();
         userService.register(params.get(ACCOUNT), params.get(PASSWORD), params.get(EMAIL));
 
-        return HttpResponse.withResource(Status.FOUND, "/index.html");
+        return HttpResponse.responseWithResource(Status.FOUND, "/index.html");
     }
 }

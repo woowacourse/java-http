@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
         if (httpRequest.getSessionAttribute(USER).isPresent()) {
-            return HttpResponse.withResource(Status.FOUND, "/index.html");
+            return HttpResponse.responseWithResource(Status.FOUND, "/index.html");
         }
 
         return HttpResponse.okWithResource("/login.html");
@@ -52,7 +52,7 @@ public class LoginController extends AbstractController {
         Session session = httpRequest.createSession();
         session.setAttribute(USER, user);
 
-        HttpResponse response = HttpResponse.withResource(Status.FOUND, "/index.html");
+        HttpResponse response = HttpResponse.responseWithResource(Status.FOUND, "/index.html");
         response.setCookie(Cookie.fromUserJSession(session.getId()));
 
         return response;

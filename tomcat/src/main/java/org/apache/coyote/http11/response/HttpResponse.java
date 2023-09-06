@@ -36,11 +36,11 @@ public class HttpResponse {
         this(ContentType.HTML, status, Map.of(), body);
     }
 
-    public static HttpResponse ofOk(final String body) {
+    public static HttpResponse ok(final String body) {
         return new HttpResponse(Status.OK, body);
     }
 
-    public static HttpResponse withResource(final Status status, final String path) throws IOException, URISyntaxException, NotFoundException {
+    public static HttpResponse responseWithResource(final Status status, final String path) throws IOException, URISyntaxException, NotFoundException {
         return new HttpResponse(ContentType.of(path), status, ResourceFinder.getStaticResource(path));
     }
 

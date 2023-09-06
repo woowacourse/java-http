@@ -13,29 +13,29 @@ public class ControllerAdvice {
 
     public static HttpResponse handleException(Exception exception) throws Exception {
         if (exception instanceof NotFoundException) {
-            return HttpResponse.withResource(Status.NOT_FOUND, "/404.html");
+            return HttpResponse.responseWithResource(Status.NOT_FOUND, "/404.html");
         }
 
         if (exception instanceof UnsupportedMethodException) {
-            return HttpResponse.withResource(Status.UNSUPPORTED_METHOD, "/405.html");
+            return HttpResponse.responseWithResource(Status.UNSUPPORTED_METHOD, "/405.html");
         }
 
         if (exception instanceof BadRequestException) {
-            return HttpResponse.withResource(Status.BAD_REQUEST, "/index.html");
+            return HttpResponse.responseWithResource(Status.BAD_REQUEST, "/index.html");
         }
 
         if (exception instanceof UnAuthorizedException) {
-            return HttpResponse.withResource(Status.UNAUTHORIZED, "/401.html");
+            return HttpResponse.responseWithResource(Status.UNAUTHORIZED, "/401.html");
         }
 
         if (exception instanceof DuplicatedAccountException) {
-            return HttpResponse.withResource(Status.BAD_REQUEST, "/400.html");
+            return HttpResponse.responseWithResource(Status.BAD_REQUEST, "/400.html");
         }
 
         if (exception instanceof InvalidEmailFormException) {
-            return HttpResponse.withResource(Status.BAD_REQUEST, "/400.html");
+            return HttpResponse.responseWithResource(Status.BAD_REQUEST, "/400.html");
         }
 
-        return HttpResponse.withResource(Status.INTERNAL_SERVER_ERROR, "/500.html");
+        return HttpResponse.responseWithResource(Status.INTERNAL_SERVER_ERROR, "/500.html");
     }
 }

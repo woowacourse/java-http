@@ -14,7 +14,7 @@ public class WelcomeController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.ofOk("Hello world!");
+        return HttpResponse.ok("Hello world!");
     }
 
     @Override

@@ -6,9 +6,11 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.requests.HttpCookie;
-import org.apache.coyote.requests.RequestBody;
-import org.apache.coyote.requests.RequestHeader;
+import org.apache.coyote.http11.request.HttpQueryParser;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.types.HttpMethod;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +21,24 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.ContentType.TEXT_HTML;
+import static org.apache.coyote.http11.ViewResolver.resolveView;
+import static org.apache.coyote.http11.types.ContentType.TEXT_HTML;
+import static org.apache.coyote.http11.types.HeaderType.LOCATION;
+import static org.apache.coyote.http11.types.HeaderType.SET_COOKIE;
+import static org.apache.coyote.http11.types.HttpProtocol.HTTP_1_1;
+import static org.apache.coyote.http11.types.HttpStatus.FOUND;
+import static org.apache.coyote.http11.types.HttpStatus.OK;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager sessionManager = new SessionManager();
-    private static final String HTTP_11 = "HTTP/1.1";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String INDEX_URI = "/index";
     private static final String REGISTER_URI = "/register";
     private static final String LOGIN_URI = "/login";
@@ -57,139 +67,88 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String httpMethod = Arrays.stream(line.split(" "))
-                    .findFirst()
-                    .orElseGet(() -> "");
+            HttpRequest request = readHttpRequest(bufferedReader, line);
+            HttpResponse httpResponse = route(request);
 
-            String uri = Arrays.stream(line.split(" "))
-                    .filter(it -> it.startsWith("/"))
-                    .findAny()
-                    .orElseGet(() -> "");
-
-            RequestHeader requestHeader = readHeader(bufferedReader);
-            RequestBody requestBody = readBody(bufferedReader, requestHeader);
-
-            HttpResponse httpResponse = routeByHttpMethod(uri, httpMethod, requestHeader, requestBody);
-            String header = createHeader(httpResponse);
-
-            bufferedWriter.write(header + httpResponse.getBody());
+            bufferedWriter.write(httpResponse.toResponseFormat());
             bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse routeByHttpMethod(String uri, String httpMethod, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
-        if (httpMethod.equals("POST")) {
-            return routePost(uri, requestHeader, requestBody);
-        }
-
-        return createHttpResponse(uri, requestHeader);
+    private HttpRequest readHttpRequest(BufferedReader bufferedReader, String line) throws IOException {
+        Map<String, String> headers = readHeader(bufferedReader);
+        String requestBody = readBody(bufferedReader, headers);
+        return HttpRequest.of(line, headers, requestBody);
     }
 
-    private HttpResponse routePost(String uri, RequestHeader requestHeader, RequestBody requestBody) throws IOException {
-        if (REGISTER_URI.equals(uri)) {
-            return doRegister(requestBody);
-        }
-
-        if (LOGIN_URI.equals(uri)) {
-            return doLogin(requestHeader, requestBody);
-        }
-        return createHttpResponse(uri, requestHeader);
-    }
-
-    private RequestHeader readHeader(BufferedReader bufferedReader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
+    private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
         for (String line = bufferedReader.readLine();
              !"".equals(line); line = bufferedReader.readLine()) {
-            stringBuilder.append(line).append("\r\n");
+            List<String> header = Arrays.stream(line.split(": ")).collect(Collectors.toList());
+            headers.put(header.get(0), header.get(1));
         }
-        return RequestHeader.from(stringBuilder.toString());
+        return headers;
     }
 
-    private RequestBody readBody(BufferedReader bufferedReader, RequestHeader requestHeader) throws IOException {
-        final String contentLength = requestHeader.get("Content-Length");
+    private String readBody(BufferedReader bufferedReader, Map<String, String> request) throws IOException {
+        final String contentLength = request.get(CONTENT_LENGTH);
         if (contentLength == null) {
-            return new RequestBody();
+            return null;
         }
         final int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         bufferedReader.read(buffer, 0, length);
-        return new RequestBody(new String(buffer));
+        return new String(buffer);
     }
 
-    private HttpResponse createHttpResponse(String uri, RequestHeader requestHeader) throws IOException {
-        String path = uri;
-        int index = uri.indexOf("?");
-        if (index != -1) {
-            path = uri.substring(0, index);
+    private HttpResponse route(HttpRequest request) throws IOException {
+        if ("/".equals(request.getPath())) {
+            return HttpResponse.of(HTTP_1_1, OK, "Hello world!", TEXT_HTML);
+        }
+        if (LOGIN_URI.equals(request.getPath()) && request.getMethod() == HttpMethod.POST) {
+            return doLogin(request);
+        }
+        if (REGISTER_URI.equals(request.getPath()) && request.getMethod() == HttpMethod.POST) {
+            return doRegister(request);
         }
 
-        HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
-        if (LOGIN_URI.equals(path)
+        return createHttpResponse(request);
+    }
+
+    private HttpResponse createHttpResponse(HttpRequest request) throws IOException {
+        HttpCookie cookie = HttpCookie.from(request.getHeader("Cookie"));
+        if (LOGIN_URI.equals(request.getPath())
                 && cookie != null
                 && sessionManager.findSession(cookie.getJSessionId(false)) != null) {
-            return ViewResolver.resolveView(INDEX_URI);
+            return redirectTo(INDEX_URI);
         }
-        return ViewResolver.routePath(path);
+
+        return resolveView(request.getPath());
     }
 
-    private String createHeader(HttpResponse response) {
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        HttpStatus httpStatus = response.getHttpStatus();
+    private HttpResponse doLogin(HttpRequest request) {
+        Map<String, String> queries = HttpQueryParser.parse(request.getPath());
 
-        stringJoiner.add(String.format("%s %d %s ", HTTP_11, httpStatus.getCode(), httpStatus.getMessage()));
-
-        for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
-            stringJoiner.add(String.format("%s: %s ", entry.getKey(), entry.getValue()));
+        if (queries.isEmpty()) {
+            return redirectTo(LOGIN_URI);
         }
 
-        if (httpStatus.equals(HttpStatus.FOUND)) {
-            stringJoiner.add(toHeaderFormat("Location", response.getBody()));
-            stringJoiner.add("\r\n");
-            return stringJoiner.toString();
-        }
-        stringJoiner.add(toHeaderFormat("Content-Type", response.getContentType()));
-        stringJoiner.add(String.format("%s %s ", "Content-Length:", response.getBody().getBytes().length));
-        stringJoiner.add("\r\n");
-        return stringJoiner.toString();
-    }
-
-    private String toHeaderFormat(String name, String value) {
-        return String.format("%s: %s ", name, value);
-    }
-
-    private HttpResponse doLogin(RequestHeader requestHeader, RequestBody requestBody) throws IOException {
-        String query = requestBody.getItem();
-        if (query.isBlank()) {
-            return new HttpResponse(LOGIN_URI, HttpStatus.FOUND, TEXT_HTML);
-        }
-
-        String account = "";
-        String password = "";
-
-        for (String parameter : query.split("&")) {
-            int idx = parameter.indexOf("=");
-            String key = parameter.substring(0, idx);
-            String value = parameter.substring(idx + 1);
-            if ("account".equals(key)) {
-                account = value;
-            }
-            if ("password".equals(key)) {
-                password = value;
-            }
-        }
+        String account = queries.get("account");
+        String password = queries.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
 
         if (user != null && user.checkPassword(password)) {
-            HttpCookie cookie = HttpCookie.from(requestHeader.get("Cookie"));
-            HttpResponse httpResponse = new HttpResponse(INDEX_URI, HttpStatus.FOUND, TEXT_HTML);
+            HttpCookie cookie = HttpCookie.from(request.getHeader("Cookie"));
+            HttpResponse httpResponse = redirectTo(INDEX_URI);
 
             if (cookie.getJSessionId(false) == null) {
                 String jSessionId = cookie.getJSessionId(true);
-                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+                httpResponse.addHeader(SET_COOKIE, String.format("JSESSIONID=%s", jSessionId));
                 Session session = new Session(jSessionId);
                 session.setAttribute("user", user);
                 sessionManager.add(session);
@@ -201,37 +160,22 @@ public class Http11Processor implements Runnable, Processor {
             return httpResponse;
         }
 
-        return ViewResolver.resolveView(UNAUTHORIZED_URI);
+        return redirectTo(UNAUTHORIZED_URI);
     }
 
-    private HttpResponse doRegister(RequestBody requestBody) throws IOException {
-        String query = requestBody.getItem();
-        if (query.isBlank()) {
-            return ViewResolver.resolveView(REGISTER_URI);
+    private HttpResponse doRegister(HttpRequest request) {
+        Map<String, String> queries = HttpQueryParser.parse(request.getPath());
+
+        if (queries.isEmpty()) {
+            return redirectTo(REGISTER_URI);
         }
 
-        String account = "";
-        String password = "";
-        String email = "";
-
-        for (String parameter : query.split("&")) {
-            int idx = parameter.indexOf("=");
-            String key = parameter.substring(0, idx);
-            String value = parameter.substring(idx + 1);
-
-            if ("account".equals(key)) {
-                account = value;
-            }
-            if ("password".equals(key)) {
-                password = value;
-            }
-            if ("email".equals(key)) {
-                email = value;
-            }
-        }
+        String account = queries.get("account");
+        String password = queries.get("password");
+        String email = queries.get("email");
 
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            return ViewResolver.resolveView(REGISTER_URI);
+            return redirectTo(REGISTER_URI);
         }
 
         User registUser = new User(account, password, email);
@@ -241,6 +185,12 @@ public class Http11Processor implements Runnable, Processor {
             log.info(String.format("%s %s", "회원가입 성공!", registUser));
         }
 
-        return ViewResolver.resolveView(LOGIN_URI);
+        return redirectTo(INDEX_URI);
+    }
+
+    private HttpResponse redirectTo(String path) {
+        HttpResponse response = HttpResponse.of(HTTP_1_1, FOUND);
+        response.addHeader(LOCATION, path);
+        return response;
     }
 }

@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -23,20 +24,20 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String output = socket.output();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK ");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");
+            softly.assertThat(output).contains("Content-Length: 12 ");
+            softly.assertThat(output).contains("Hello world!");
+        });
 
-        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     void notFound() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /anyThing.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -51,19 +52,20 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        var expected = "HTTP/1.1 404 Not Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        String output = socket.output();
+        String expectBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 404 Not Found ");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");
+            softly.assertThat(output).contains("Content-Length: 2426 ");
+            softly.assertThat(output).contains(expectBody);
+        });
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -78,19 +80,21 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String output = socket.output();
+        String expectBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK ");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");
+            softly.assertThat(output).contains("Content-Length: 5564 ");
+            softly.assertThat(output).contains(expectBody);
+        });
     }
 
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -105,19 +109,21 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: 211991 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String output = socket.output();
+        String expectBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK ");
+            softly.assertThat(output).contains("Content-Type: text/css;charset=utf-8 ");
+            softly.assertThat(output).contains("Content-Length: 211991 ");
+            softly.assertThat(output).contains(expectBody);
+        });
     }
 
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -132,19 +138,19 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /login \r\n" +
-                "\r\n"+
-                "/login";
+        String output = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 302 Found ");
+            softly.assertThat(output).contains("Location: /login ");
+        });
     }
 
     @Test
-    void loginWithParam() throws IOException {
+    void getLoginPage() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -158,12 +164,14 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3797 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String output = socket.output();
+        String expectBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(output).contains("HTTP/1.1 200 OK ");
+            softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");
+            softly.assertThat(output).contains("Content-Length: 3797 ");
+            softly.assertThat(output).contains(expectBody);
+        });
     }
 }

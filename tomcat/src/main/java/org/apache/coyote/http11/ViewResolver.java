@@ -1,11 +1,17 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.types.ContentType;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.apache.coyote.http11.ContentType.TEXT_HTML;
+import static org.apache.coyote.http11.types.ContentType.TEXT_HTML;
+import static org.apache.coyote.http11.types.HttpProtocol.HTTP_1_1;
+import static org.apache.coyote.http11.types.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.http11.types.HttpStatus.OK;
 
 public class ViewResolver {
     private static final String DEFAULT_FILE_ROUTE = "static";
@@ -26,20 +32,11 @@ public class ViewResolver {
             final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
             File notFound = new File(notFoundUrl.getPath());
             String body = new String(Files.readAllBytes(notFound.toPath()));
-            return new HttpResponse(body, HttpStatus.NOT_FOUND, ContentType.from(notFound.getName()));
+            return HttpResponse.of(HTTP_1_1, NOT_FOUND, body, TEXT_HTML);
         }
 
         File file = new File(resource.getPath());
         String body = new String(Files.readAllBytes(file.toPath()));
-
-        return new HttpResponse(body, HttpStatus.OK, ContentType.from(file.getName()));
-    }
-
-    public static HttpResponse routePath(String path) throws IOException {
-        if (path.equals("/")) {
-            return new HttpResponse("Hello world!", HttpStatus.OK, TEXT_HTML);
-        }
-
-        return ViewResolver.resolveView(path);
+        return HttpResponse.of(HTTP_1_1, OK, body, ContentType.from(file.getName()));
     }
 }

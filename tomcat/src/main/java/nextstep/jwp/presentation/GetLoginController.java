@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class GetLoginController implements Controller {
 
-    private static final Logger log = LoggerFactory.getLogger(Connector.class);
+    private static final Logger log = LoggerFactory.getLogger(GetLoginController.class);
     private static final String SESSION_ID = "JSESSIONID";
 
     @Override
@@ -35,7 +35,7 @@ public class GetLoginController implements Controller {
             String password = queryStrings.get("password");
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
             if (user.checkPassword(password)) {
-                log.info(user.toString());
+                log.info("{}", user);
             }
         }
     }

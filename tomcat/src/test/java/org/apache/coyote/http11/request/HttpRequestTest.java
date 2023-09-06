@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Collections;
 import java.util.List;
+import org.apache.coyote.http11.header.Headers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ class HttpRequestTest {
     void parseHttpRequest_exist_start() {
         //given
         final String startLine = "GET /hello?name=split HTTP/1.1";
-        final HttpRequestHeaders headers = new HttpRequestHeaders(Collections.emptyList());
+        final Headers headers = new Headers(Collections.emptyList());
         final String body = "";
 
         //when
@@ -25,7 +26,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello?name=split"),
-            () -> assertThat(request.getHeaders().getHeaders()).isEmpty(),
+            () -> assertThat(request.getHeaders().getValues()).isEmpty(),
             () -> assertThat(request.getBody()).isEmpty()
         );
     }
@@ -35,7 +36,7 @@ class HttpRequestTest {
     void parseHttpRequest_exist_start_header() {
         //given
         final String startLine = "GET /hello HTTP/1.1";
-        final HttpRequestHeaders headers = new HttpRequestHeaders(List.of("Host: www.example.com"));
+        final Headers headers = new Headers(List.of("Host: www.example.com"));
         final String body = "";
 
         //when
@@ -45,7 +46,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders().getHeaders()).hasSize(1),
+            () -> assertThat(request.getHeaders().getValues()).hasSize(1),
             () -> assertThat(request.getHeaderValueIgnoringCase("host"))
                 .isEqualTo("www.example.com"),
             () -> assertThat(request.getBody()).isEmpty()
@@ -57,7 +58,7 @@ class HttpRequestTest {
     void parseHttpRequest_exist_all() {
         //given
         final String startLine = "GET /hello HTTP/1.1";
-        final HttpRequestHeaders headers = new HttpRequestHeaders(List.of(
+        final Headers headers = new Headers(List.of(
             "Host: www.example.com",
             "Accept: text/plain"
         ));
@@ -70,7 +71,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(request.getStartLine()).isEqualTo(startLine),
             () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders().getHeaders()).hasSize(2),
+            () -> assertThat(request.getHeaders().getValues()).hasSize(2),
             () -> assertThat(request.getHeaderValueIgnoringCase("host"))
                 .isEqualTo("www.example.com"),
             () -> assertThat(request.getHeaderValueIgnoringCase("accept"))

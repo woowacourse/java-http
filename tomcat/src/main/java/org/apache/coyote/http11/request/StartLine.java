@@ -2,10 +2,10 @@ package org.apache.coyote.http11.request;
 
 public class StartLine {
 
-    public static final String SEPARATOR = " ";
-    public static final int METHOD_INDEX = 0;
-    public static final int URI_INDEX = 1;
-    public static final int VERSION_INDEX = 2;
+    private static final String SEPARATOR = " ";
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
 
     private final HttpMethod method;
     private final String uri;

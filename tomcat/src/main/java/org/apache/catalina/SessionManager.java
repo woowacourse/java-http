@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.model.User;
 
 public class SessionManager implements Manager {
 
@@ -15,6 +16,12 @@ public class SessionManager implements Manager {
   @Override
   public void add(final Session session) {
     SESSIONS.put(session.getId(), session);
+  }
+
+  public void addLoginSession(final String jSessionId, final User user) {
+    Session session = new Session(jSessionId);
+    session.setAttribute("user", user);
+    INSTANCE.add(session); //세션 매니저에 세션을 추가한다.
   }
 
   @Override

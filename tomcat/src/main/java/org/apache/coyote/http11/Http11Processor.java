@@ -6,22 +6,17 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -30,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
   private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+  public static final String JSESSIONID = "JSESSIONID";
 
   private final Socket connection;
 
@@ -48,19 +44,27 @@ public class Http11Processor implements Runnable, Processor {
     try (final var inputStream = connection.getInputStream();
         final var outputStream = connection.getOutputStream()) {
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-      final String startLine = extractStartLine(bufferedReader);
-      if (startLine == null) {
+      final HttpRequest httpRequest = parseHttpRequest(bufferedReader);
+      if (httpRequest == null) {
         return;
       }
-      final Map<String, String> requestHeaders = extractHeader(bufferedReader);
-      final String requestBody = extractBody(requestHeaders.get("Content-Length"), bufferedReader);
-      final String response = handleRequest(startLine, requestHeaders, requestBody);
+      final HttpResponse response = handleRequest(httpRequest);
 
-      outputStream.write(response.getBytes());
+      outputStream.write(response.toString().getBytes());
       outputStream.flush();
     } catch (IOException | UncheckedServletException | URISyntaxException e) {
       log.error(e.getMessage(), e);
     }
+  }
+
+  private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
+    final String startLine = extractStartLine(bufferedReader);
+    if (startLine == null) {
+      return null;
+    }
+    final Map<String, String> requestHeaders = extractHeader(bufferedReader);
+    final String requestBody = extractBody(requestHeaders.get("Content-Length"), bufferedReader);
+    return new HttpRequest(startLine, requestHeaders, requestBody);
   }
 
   private String extractStartLine(final BufferedReader bufferedReader) throws IOException {
@@ -90,148 +94,180 @@ public class Http11Processor implements Runnable, Processor {
     return new String(buffer);
   }
 
-  private String handleRequest(final String startLine, final Map<String, String> headers,
-      final String requestBody)
+  private HttpResponse handleRequest(final HttpRequest request)
       throws URISyntaxException, IOException {
-    String setCookie = null;
-    final HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-    int statusCode = 200;
-    String statusMessage = "OK";
-    String responseBody = "";
-    String contentType = "text/html";
-    String location = null;
-
-    URL filePathUrl = null;
-    final List<String> startLineTokens = List.of(startLine.split(" "));
-    String method = startLineTokens.get(0);
-    // ===== uri => path, queryString
-    String uri = startLineTokens.get(1);
-    int uriSeparatorIndex = uri.indexOf("?");
-    String path;
-    Map<String, String> queryProperties = new HashMap<>();
-    if (uriSeparatorIndex == -1) {
-      path = uri;
-    } else {
-      path = uri.substring(0, uriSeparatorIndex);
-      final String queryString = uri.substring(uriSeparatorIndex + 1);
-      // 쿼리스트링 파싱
-      String[] queryTokens = queryString.split("&");
-      for (int i = 0; i < queryTokens.length; i++) {
-        int equalSeperatorIndex = queryTokens[i].indexOf("=");
-        if (equalSeperatorIndex != -1) {
-          queryProperties.put(queryTokens[i].substring(0, equalSeperatorIndex),
-              queryTokens[i].substring(equalSeperatorIndex + 1));
-
-        }
+    try {
+      if (request.isPOST() && request.isSamePath("/register")) {
+        return handlePostRegister(request);
       }
-    }
-
-    if (method.equals("POST")) {
-      if (path.equals("/register")) {
-        if (requestBody != null) {
-          // 파싱
-          Map<String, String> parsedRequestBody = new HashMap<>();
-          String[] queryTokens = requestBody.split("&");
-          for (int i = 0; i < queryTokens.length; i++) {
-            int equalSeperatorIndex = queryTokens[i].indexOf("=");
-            if (equalSeperatorIndex != -1) {
-              parsedRequestBody.put(queryTokens[i].substring(0, equalSeperatorIndex),
-                  queryTokens[i].substring(equalSeperatorIndex + 1));
-
-            }
-          }
-          InMemoryUserRepository.save(new User(
-              Long.getLong(parsedRequestBody.get("id")),
-              parsedRequestBody.get("account"),
-              parsedRequestBody.get("password"),
-              parsedRequestBody.get("email")
-          ));
-          statusCode = 201;
-          statusMessage = "Found";
-          filePathUrl = getClass().getResource("/static/index.html");
-        }
-      } else if (path.equals("/login")) {
-        if (requestBody != null) {
-          Map<String, String> parsedRequestBody = new HashMap<>();
-          String[] queryTokens = requestBody.split("&");
-          for (int i = 0; i < queryTokens.length; i++) {
-            int equalSeperatorIndex = queryTokens[i].indexOf("=");
-            if (equalSeperatorIndex != -1) {
-              parsedRequestBody.put(queryTokens[i].substring(0, equalSeperatorIndex),
-                  queryTokens[i].substring(equalSeperatorIndex + 1));
-            }
-          }
-          Optional<User> userOptional = InMemoryUserRepository.findByAccount(
-              parsedRequestBody.get("account"));
-          if (userOptional.isPresent()
-              && userOptional.get().checkPassword(parsedRequestBody.get("password"))) { // 로그인 성공
-            if (!cookie.isExist("JSESSIOINID")) {  //쿠키에 JSESSIONID가 존재하지 않으면
-              String jSessionId = String.valueOf(UUID.randomUUID());
-              setCookie = "JSESSIONID=" + jSessionId; // set Cookie 속성을 추가하고
-              Session session = new Session(jSessionId);
-              session.setAttribute("user", userOptional.get());
-              SessionManager.InstanceOf().add(session); //세션 매니저에 세션을 추가한다.
-            }
-            statusCode = 302;
-            statusMessage = "Found";
-            location = "/index.html";
-          } else {
-            statusCode = 401;
-            statusMessage = "Unauthorization";
-            filePathUrl = getClass().getResource("/static/401.html");
-          }
-        }
+      if (request.isPOST() && request.isSamePath("/login")) {
+        return handlePostLogin(request);
       }
-    } else if (method.equals("GET")) {
-      if (path.equals("/login")) {
-        if (cookie.isExist("JSESSIONID")
-            && SessionManager.InstanceOf().findSession(cookie.findCookie("JSESSIONID")) != null) {
-          filePathUrl = getClass().getResource("/static/index.html");
-        } else {
-          filePathUrl = getClass().getResource("/static/login.html");
-        }
-
-      } else if (path.equals("/register")) {
-        filePathUrl = getClass().getResource("/static/register.html");
-      } else {  // 핸들러(컨트롤러)가 없을 때
-        filePathUrl = Optional.ofNullable(getClass().getResource("/static" + path))
-            .orElse(getClass().getResource("/static/404.html"));
+      if (request.isGET() && request.isSamePath("/register")) {
+        return handleGetRegister(request);
       }
-    }
-    if (filePathUrl != null) {
-      final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
-      Charset charset = StandardCharsets.UTF_8;
-      responseBody = String.join(System.lineSeparator(), Files.readAllLines(filePath, charset));
-      if (isRequestCssFile(headers, startLineTokens.get(1).split("."))) {
-        contentType = "text/css";
+      if (request.isGET() && request.isSamePath("/login")) {
+        return handleGetLogin(request);
       }
-    }
+      if (request.isGET() && request.isSamePath("/")) {
+        String responseBody = "Hello world!";
 
-    //response header 생성
-    Map<String, String> responseHeaders = new HashMap<>();
-    responseHeaders.put("Content-Type", contentType + ";charset=utf-8");
-    responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-    if (location != null) {
-      responseHeaders.put("Location", location);
+        HttpResponseHeader responseHeader = new HttpResponseHeader(
+            getContentType(request.getAccept(), request.getPath()),
+            String.valueOf(responseBody.getBytes().length), null, null);
+        return HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody);
+      }
+      return handleDefault(request).orElse(handle404());
+    } catch (IllegalArgumentException exception) {
+      return handle500();
     }
-    if (setCookie != null) {
-      responseHeaders.put("Set-Cookie", setCookie);
-    }
-    final String responseHeader = String.join(" \r\n",
-        responseHeaders.entrySet()
-            .stream()
-            .map(entry -> entry.getKey() + ": " + entry.getValue()
-            ).collect(Collectors.toList()));
-
-    return String.join("\r\n",
-        "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-        responseHeader,
-        "",
-        responseBody);
   }
 
-  private boolean isRequestCssFile(final Map<String, String> headers, final String[] tokens) {
-    return (tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || headers.get("Accept")
-        .contains("text/css");
+  private HttpResponse handlePostRegister(final HttpRequest request) {
+    if (request.isNotExistBody()) {
+      throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
+    }
+    // 파싱
+    Map<String, String> parsedRequestBody = parseRequestBody(request);
+    InMemoryUserRepository.save(new User(
+        Long.getLong(parsedRequestBody.get("id")),
+        parsedRequestBody.get("account"),
+        parsedRequestBody.get("password"),
+        parsedRequestBody.get("email")
+    ));
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        getContentType(request.getAccept(), request.getPath()),
+        String.valueOf(0), "/index.html", null);
+    return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, null);
+  }
+
+  private HttpResponse handlePostLogin(final HttpRequest request)
+      throws URISyntaxException, IOException {
+    if (request.isNotExistBody()) {
+      throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
+    }
+    final HttpCookie cookie = request.getCookie();
+    Map<String, String> parsedRequestBody = parseRequestBody(request);
+    Optional<User> userOptional = InMemoryUserRepository.findByAccount(
+        parsedRequestBody.get("account"));
+    if (userOptional.isPresent()
+        && userOptional.get().checkPassword(parsedRequestBody.get("password"))) {
+      String setCookie = null;
+      if (!cookie.isExist(JSESSIONID)) {  //쿠키에 JSESSIONID가 존재하지 않으면
+        String jSessionId = String.valueOf(UUID.randomUUID());
+        setCookie = JSESSIONID + "=" + jSessionId;
+        SessionManager.InstanceOf().addLoginSession(jSessionId, userOptional.get());
+      }
+      HttpResponseHeader responseHeader = new HttpResponseHeader(
+          getContentType(request.getAccept(), request.getPath()),
+          String.valueOf(0), "/index.html", setCookie);
+      return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, null);
+    }
+    return handle401(request);
+  }
+
+  private HttpResponse handle401(HttpRequest request) throws URISyntaxException, IOException {
+    String responseBody = getHtmlFile(getClass().getResource("/static/401.html"));
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        getContentType(request.getAccept(), request.getPath()),
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return HttpResponse.of(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
+  }
+
+  private Map<String, String> parseRequestBody(HttpRequest request) {
+    Map<String, String> parsedRequestBody = new HashMap<>();
+    String[] queryTokens = request.getBody().split("&");
+    for (String queryToken : queryTokens) {
+      int equalSeparatorIndex = queryToken.indexOf("=");
+      if (equalSeparatorIndex != -1) {
+        parsedRequestBody.put(queryToken.substring(0, equalSeparatorIndex),
+            queryToken.substring(equalSeparatorIndex + 1));
+
+      }
+    }
+    return parsedRequestBody;
+  }
+
+  private HttpResponse handleGetRegister(final HttpRequest request)
+      throws URISyntaxException, IOException {
+
+    URL filePathUrl = getClass().getResource("/static/register.html");
+    String responseBody = getHtmlFile(filePathUrl);
+
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        getContentType(request.getAccept(), request.getPath()),
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody);
+  }
+
+
+  private HttpResponse handleGetLogin(final HttpRequest request)
+      throws URISyntaxException, IOException {
+    final HttpCookie cookie = request.getCookie();
+    URL filePathUrl;
+    if (isLogin(cookie)) {
+      filePathUrl = getClass().getResource("/static/index.html");
+    } else {
+      filePathUrl = getClass().getResource("/static/login.html");
+    }
+    String responseBody = getHtmlFile(filePathUrl);
+
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        getContentType(request.getAccept(), request.getPath()),
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody);
+  }
+
+  private boolean isLogin(HttpCookie cookie) {
+    return cookie.isExist(JSESSIONID)
+        && SessionManager.InstanceOf().findSession(cookie.findCookie(JSESSIONID)) != null;
+  }
+
+  private Optional<HttpResponse> handleDefault(final HttpRequest request)
+      throws URISyntaxException, IOException {
+    URL filePathUrl = getClass().getResource("/static" + request.getPath());
+    if (filePathUrl == null) {
+      return Optional.empty();
+    }
+    String responseBody = getHtmlFile(filePathUrl);
+
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        getContentType(request.getAccept(), request.getPath()),
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return Optional.of(HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody));
+
+  }
+
+  private HttpResponse handle404() throws IOException, URISyntaxException {
+    URL filePathUrl = getClass().getResource("/static/404.html");
+
+    String responseBody = getHtmlFile(filePathUrl);
+
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return HttpResponse.of(HttpResponseStatus.NOT_FOUND, responseHeader, responseBody);
+  }
+
+  private HttpResponse handle500() throws IOException, URISyntaxException {
+    String responseBody = getHtmlFile(getClass().getResource("/static/500.html"));
+    HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
+        String.valueOf(responseBody.getBytes().length), null, null);
+    return HttpResponse.of(HttpResponseStatus.INTERNAL_SERVER_ERROR, responseHeader, responseBody);
+  }
+
+  private String getHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {
+    final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
+    return new String(Files.readAllBytes(filePath));
+  }
+
+  private String getContentType(final String accept, final String uri) {
+    final String[] tokens = uri.split(".");
+    if ((tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || (accept != null && accept
+        .contains("text/css"))) {
+      return HttpResponseHeader.TEXT_CSS_CHARSET_UTF_8;
+    }
+    return HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8;
   }
 }

@@ -1,6 +1,6 @@
 # 톰캣 구현하기
 
-## 1단계
+## 1단계 - HTTP 서버 구현하기
 
 - [x] GET /index.html에 대해 응답하도록 한다.
     - [x] 요청의 첫 라인을 읽어오도록 파싱한다.
@@ -15,7 +15,7 @@
     - [x] request의 첫 라인에서 추출한 uri에서 쿼리 데이터를 추출한다.
     - [x] InMemoryUserRepository를 사용해 미리 가입되어 있는 회원을 조회하고 로그로 출력한다.
 
-## 2단계
+## 2단계 - 로그인 구현하기
 
 - [x] 로그인 여부에 따라 다른 페이지로 이동시킨다.
     - [x] /login 페이지에서 로그인에 성공하면 http status code를 302로 반환하고 /index.html로 리다이렉트한다.
@@ -35,6 +35,10 @@
     - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
     - [x] 로그인된 상태에서 /login 페이지에 GET method로 접근하면 index.html 페이지로 리다이렉트한다.
 
-## 3단계
+## 3단계 - 리팩토링
 
-## 4단계
+- [x] Request, Response 객체 분리
+- [x] Http11Processor의 메서드 분리
+- [ ] Controller 분리
+
+## 4단계 - 동시성 확장하기

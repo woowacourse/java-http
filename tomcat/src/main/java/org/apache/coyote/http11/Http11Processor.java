@@ -24,15 +24,15 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private final Map<String, Function<HttpRequest, String>> getMethodControllerMapper = Map.of(
+    private final Map<String, Function<HttpRequest, HttpResponse>> getMethodControllerMapper = Map.of(
             "/", this::loadRootPage,
             "/login", this::loadLoginPage
     );
-    private final Map<String, Function<HttpRequest, String>> postMethodControllerMapper = Map.of(
+    private final Map<String, Function<HttpRequest, HttpResponse>> postMethodControllerMapper = Map.of(
             "/register", this::register,
             "/login", this::login
     );
-    private final Map<HttpMethod, Map<String, Function<HttpRequest, String>>> controllerMapperByMethod = Map.of(
+    private final Map<HttpMethod, Map<String, Function<HttpRequest, HttpResponse>>> controllerMapperByMethod = Map.of(
             HttpMethod.GET, getMethodControllerMapper,
             HttpMethod.POST, postMethodControllerMapper
     );
@@ -116,20 +116,21 @@ public class Http11Processor implements Runnable, Processor {
 
         return controllerMapperByMethod.getOrDefault(method, getMethodControllerMapper)
                 .getOrDefault(path, this::loadExtraPage)
-                .apply(httpRequest);
+                .apply(httpRequest)
+                .toString();
     }
 
-    private String loadExtraPage(HttpRequest httpRequest) {
+    private HttpResponse loadExtraPage(HttpRequest httpRequest) {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
         httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
         httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return httpResponse.toString();
+        return httpResponse;
     }
 
-    private String loadLoginPage(HttpRequest httpRequest) {
+    private HttpResponse loadLoginPage(HttpRequest httpRequest) {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         HttpSession httpSession = httpRequest.getHttpSession();
         String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
@@ -142,20 +143,20 @@ public class Http11Processor implements Runnable, Processor {
             httpResponse.sendRedirect("/index.html");
         }
 
-        return httpResponse.toString();
+        return httpResponse;
     }
 
-    private String loadRootPage(HttpRequest httpRequest) {
+    private HttpResponse loadRootPage(HttpRequest httpRequest) {
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         String responseBody = "Hello world!";
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
         httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
         httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return httpResponse.toString();
+        return httpResponse;
     }
 
-    private String register(HttpRequest httpRequest) {
+    private HttpResponse register(HttpRequest httpRequest) {
         HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
@@ -166,10 +167,10 @@ public class Http11Processor implements Runnable, Processor {
         HttpResponse httpResponse = new HttpResponse(302, "FOUND");
         httpResponse.sendRedirect(redirectionUrl);
 
-        return httpResponse.toString();
+        return httpResponse;
     }
 
-    private String login(HttpRequest httpRequest) {
+    private HttpResponse login(HttpRequest httpRequest) {
         HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
@@ -187,7 +188,7 @@ public class Http11Processor implements Runnable, Processor {
 
         httpResponse.sendRedirect(redirectionUrl);
 
-        return httpResponse.toString();
+        return httpResponse;
     }
 
     private URL convertAbsoluteUrl(HttpRequestHeader httpRequestHeader) {

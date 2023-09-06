@@ -13,4 +13,5 @@ public class Constant {
     public static final String HEADER_SPACE = " ";
     public static final String COOKIE_SEPARATOR = "=";
     public static final String COOKIE_DELIMITER = "; ";
+    public static final String BLANK = "";
 }

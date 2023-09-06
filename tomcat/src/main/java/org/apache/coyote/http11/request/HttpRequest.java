@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.coyote.http11.common.Constant.BLANK;
+
 public class HttpRequest {
 
     private static final SessionHolder SESSION_MANAGER = new SessionHolder();
@@ -50,11 +52,13 @@ public class HttpRequest {
 
     private static List<String> readHeader(final BufferedReader reader) throws IOException {
         List<String> headers = new ArrayList<>();
+
         String line = reader.readLine();
-        while (!"".equals(line)) {
+        while (!line.equals(BLANK)) {
             headers.add(line);
             line = reader.readLine();
         }
+
         return headers;
     }
 

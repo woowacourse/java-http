@@ -1,6 +1,6 @@
 package nextstep;
 
-import nextstep.handler.WelcomeHandler;
+import org.apache.coyote.handler.WelcomeHandler;
 import nextstep.jwp.application.UserService;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.Container;

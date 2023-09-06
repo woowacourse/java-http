@@ -1,6 +1,6 @@
 package mvc.controller;
 
-import nextstep.handler.exception.InvalidQueryParameterException;
+import mvc.controller.exception.InvalidQueryParameterException;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.HttpRequest;

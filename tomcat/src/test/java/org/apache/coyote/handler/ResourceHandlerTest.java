@@ -1,4 +1,4 @@
-package nextstep.handler;
+package org.apache.coyote.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,6 +9,7 @@ import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
+import org.apache.coyote.handler.ResourceHandler;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;

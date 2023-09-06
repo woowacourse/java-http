@@ -1,4 +1,4 @@
-package nextstep.handler.exception;
+package mvc.controller.exception;
 
 public class InvalidQueryParameterException extends IllegalArgumentException {
 

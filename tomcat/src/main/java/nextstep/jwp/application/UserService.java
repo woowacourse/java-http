@@ -3,7 +3,7 @@ package nextstep.jwp.application;
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.handler.exception.LoginFailureException;
+import nextstep.jwp.application.exception.LoginFailureException;
 
 public class UserService {
 

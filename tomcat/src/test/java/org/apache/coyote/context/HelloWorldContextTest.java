@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
-import nextstep.handler.WelcomeHandler;
+import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
 import org.apache.coyote.http.request.HttpRequestBody;

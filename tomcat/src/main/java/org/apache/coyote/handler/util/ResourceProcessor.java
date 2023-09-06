@@ -1,11 +1,11 @@
-package nextstep.handler.util;
+package org.apache.coyote.handler.util;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import nextstep.handler.util.exception.ResourceNotFoundException;
+import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.util.HttpHeaderConsts;

@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import org.apache.coyote.context.HelloWorldContext;
-import nextstep.handler.WelcomeHandler;
+import org.apache.coyote.handler.WelcomeHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;

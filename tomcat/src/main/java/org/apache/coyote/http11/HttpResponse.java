@@ -7,11 +7,10 @@ import nextstep.jwp.HttpHeaders;
 
 public class HttpResponse {
 
-    private Map<String, String> headers;
-    private HttpStatus httpStatus;
-    private String body;
-    private Map<String, String> cookies = new ConcurrentHashMap<>();
-
+    private final Map<String, String> headers;
+    private final HttpStatus httpStatus;
+    private final String body;
+    private final Map<String, String> cookies = new ConcurrentHashMap<>();
 
     public HttpResponse(Map<String, String> headers,
                         HttpStatus httpStatus, String body) {
@@ -33,7 +32,6 @@ public class HttpResponse {
         headers.put(HttpHeaders.LOCATION, location);
         return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
-
 
     public Map<String, String> getHeaders() {
         return headers;

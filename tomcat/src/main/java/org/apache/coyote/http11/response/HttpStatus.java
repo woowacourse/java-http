@@ -18,12 +18,6 @@ public enum HttpStatus {
         return value;
     }
 
-    public String getDetail() {
-        return detail;
-    }
-
-
-
     @Override
     public String toString() {
         return value + " " + detail;

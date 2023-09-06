@@ -50,13 +50,13 @@ public class Response {
                 .build();
     }
 
-
     private String makeLocation(){
         if(location==null){
             return "";
         }
         return "location : " + location + "\r\n";
     }
+
     private String makeCookie(){
         if(cookie == null){
             return "";
@@ -77,10 +77,12 @@ public class Response {
             this.status = status;
             return this;
         }
+
         public Builder contentType(String contentType){
             this.contentType = contentType;
             return this;
         }
+
         public Builder responseBody(String responseBody){
             this.responseBody = responseBody;
             return this;
@@ -95,6 +97,7 @@ public class Response {
             this.cookie = cookie;
             return this;
         }
+
         public Response build(){
             return new Response(this);
         }

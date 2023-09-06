@@ -22,9 +22,4 @@ public class InMemorySession {
         }
         return false;
     }
-    private static void validUser(User user){
-        if(session.containsKey(user)){
-            throw new UnauthorizedException("로그인 중인 유저입니다.");
-        }
-    }
 }

@@ -16,7 +16,7 @@ public class Request {
     private final Map<String, String> cookie;
     private final Map<String, String> body;
 
-    public Request(
+    private Request(
             String method,
             String uri,
             Map<String, String> query,

@@ -9,7 +9,6 @@ public abstract class Handler {
     abstract void setNext(Handler handler);
     abstract String getResponse(Request request);
 
-
     protected String getFile(String fileName){
         try {
             final var fileUrl = getClass().getClassLoader().getResource("static/" + fileName);

@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.Response;
 
 public class ApiHandler extends Handler{
     private Handler next;
-    private static final List<API> apiList =new ArrayList<>();
+    private static final List<API> apiList = new ArrayList<>();
 
     static{
         addApi("/", ViewController::getVoid,"Hello world!",false,false);

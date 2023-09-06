@@ -14,7 +14,12 @@ public class HttpRequestUri {
 
     public static HttpRequestUri from(String requestUriString) {
         String[] split = requestUriString.split(PATH_PARAMETER_DELIMITER);
-        String queryString = 1 < split.length ? split[1] : "";
+
+        String queryString = "";
+        if (1 < split.length) {
+            queryString = split[1];
+        }
+
         return new HttpRequestUri(
             decodePath(split[0]),
             decodeQueryString(queryString)

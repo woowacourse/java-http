@@ -13,7 +13,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -27,6 +26,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String TEXT_HTML = "text/html;";
     private static final String TEXT_CSS = "text/css;";
     private static final String INDEX_PAGE = "/index.html";
+    private static final String NOT_FOUND_PAGE = "/404.html";
 
     private final Socket connection;
 
@@ -83,18 +83,18 @@ public class Http11Processor implements Runnable, Processor {
             return get200ResponseMessage("Hello world!", TEXT_HTML);
         }
         if (path.endsWith(".css")) {
-            final String responseBody = findResponseBody(path);
+            final String responseBody = findStaticResource(path);
             return get200ResponseMessage(responseBody, TEXT_CSS);
         }
         if (path.equals("/login")) {
-            final String responseBody = findResponseBody(path + ".html");
+            final String responseBody = findStaticResource(path + ".html");
             return handleLoginRequest(requestBody, responseBody, cookie);
         }
         if (path.equals("/register")) {
-            final String responseBody = findResponseBody(path + ".html");
+            final String responseBody = findStaticResource(path + ".html");
             return handleRegisterRequest(requestBody, responseBody, cookie);
         }
-        final String responseBody = findResponseBody(path);
+        final String responseBody = findStaticResource(path);
         return get200ResponseMessage(responseBody, TEXT_HTML);
     }
 
@@ -177,10 +177,18 @@ public class Http11Processor implements Runnable, Processor {
                 "Location: " + location);
     }
 
-    private String findResponseBody(final String uri) throws IOException {
-        final URL fileUrl = getClass().getClassLoader().getResource("./static" + uri);
-        final String filePath = Objects.requireNonNull(fileUrl).getPath();
+    private String findStaticResource(final String uri) throws IOException {
+        final URL fileUrl = findResourceUrl(uri);
+        final String filePath = fileUrl.getPath();
         return Files.readString(new File(filePath).toPath());
+    }
+
+    private URL findResourceUrl(final String uri) {
+        final URL fileUrl = getClass().getClassLoader().getResource("./static" + uri);
+        if (fileUrl == null) {
+            return getClass().getClassLoader().getResource("./static" + NOT_FOUND_PAGE);
+        }
+        return fileUrl;
     }
 
     private Map<String, String> readRequestHeader(final BufferedReader bufferedReader) throws IOException {

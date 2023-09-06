@@ -1,4 +1,4 @@
-package support;
+package nextstep.org.apache.coyote.http11.support;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CookiesTest {
+class CookieTest {
 
     @Test
     void getCookie() {
         //given
-        final var cookies = new Cookies(Map.of("key", "value"));
+        final var cookies = new HttpCookie(Map.of("key", "value"));
 
         //when
         final var actual = cookies.getCookie("key");

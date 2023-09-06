@@ -98,8 +98,8 @@ class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder setCookie(String key, String value) {
-        headers.setCookie(key, value);
+    public HttpResponseBuilder addCookie(HttpCookie httpCookie) {
+        headers.put("Set-Cookie", httpCookie.toString());
         return this;
     }
 

@@ -25,4 +25,8 @@ public class Session {
         return key;
     }
 
+    public Map<String, Object> getValues() {
+        return values;
+    }
+
 }

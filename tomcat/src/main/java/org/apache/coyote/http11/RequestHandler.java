@@ -66,13 +66,15 @@ public class RequestHandler {
 
         User user = optionalUser.get();
         log.info("user: {}", user);
+
         Session session = new Session(UUID.randomUUID().toString());
-        SessionManager.add(session);
         session.addUser(user);
+
+        SessionManager.add(session);
         return HttpResponse.builder()
                 .setHttpStatus(FOUND)
                 .sendRedirect("/index.html")
-                .setCookie("JSESSIONID", session.getId())
+                .addCookie(HttpCookie.from(session))
                 .build();
     }
 

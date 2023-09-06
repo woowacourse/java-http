@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
@@ -18,7 +17,7 @@ public class HttpRequest {
     private Map<String, String> queryParameters;
     private String messageBody;
     private Headers headers;
-    private Cookies cookies;
+    private HttpCookie httpCookie;
 
     public HttpRequest(final HttpMethod method, final HttpUri uri, final Map<String, String> queryParameters,
                        final Map<String, String> headers, final String messageBody, final Map<String, String> cookie) {
@@ -27,7 +26,7 @@ public class HttpRequest {
         this.queryParameters = ofNullable(queryParameters).orElse(Map.of());
         this.headers = ofNullable(headers).map(Headers::new).orElse(new Headers());
         this.messageBody = Optional.ofNullable(messageBody).orElse(EMPTY);
-        this.cookies = new Cookies(cookie);
+        this.httpCookie = new HttpCookie(cookie);
     }
 
     public boolean isPost() {
@@ -46,7 +45,7 @@ public class HttpRequest {
     }
 
     public String getCookie(String key) {
-        return cookies.getCookie(key);
+        return httpCookie.getCookie(key);
     }
 
 }

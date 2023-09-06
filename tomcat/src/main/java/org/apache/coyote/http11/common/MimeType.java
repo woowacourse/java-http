@@ -14,10 +14,13 @@ public enum MimeType {
         this.contentType = contentType;
     }
 
-    public static MimeType from(String fileExtension) {
-        if (fileExtension == null) {
+    public static MimeType from(String fileName) {
+        if (fileName == null) {
             return NONE;
         }
+
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
         return MimeType.valueOf(fileExtension.toUpperCase());
     }
 

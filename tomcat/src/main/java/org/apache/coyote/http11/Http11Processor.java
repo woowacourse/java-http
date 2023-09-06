@@ -11,6 +11,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HandlerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +41,28 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest httpRequest = HttpRequestParser.extract(reader);
 
-            String response = HANDLER_MAPPING.extractResponseEntity(httpRequest);
+            String response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(HttpRequest httpRequest) {
+        if ("/".equals(httpRequest.getRequestLine().getPath())) {
+            return new StringBuilder()
+                    .append("HTTP/1.1 200 OK ").append("\r\n")
+                    .append("Content-Type: text/html;charset=utf-8 ").append("\r\n")
+                    .append("Content-Length: 12 ").append("\r\n")
+                    .append("\r\n")
+                    .append("Hello world!")
+                    .toString();
+        }
+
+        HttpResponse httpResponse = HANDLER_MAPPING.extractHttpResponse(httpRequest);
+        return httpResponse.extractResponse();
     }
 
 }

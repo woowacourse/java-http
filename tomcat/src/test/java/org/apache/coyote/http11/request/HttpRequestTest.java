@@ -137,4 +137,22 @@ class HttpRequestTest {
         // then
         assertThat(actual).isTrue();
     }
+
+    @Test
+    void Body의_값을_조회한다() {
+        String requestLine = "POST /login HTTP/1.1 ";
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ");
+        String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
+        request.setRequestBody(requestBody);
+
+        // when
+        String actual = request.getBodyValue("account");
+
+        // then
+        assertThat(actual).isEqualTo("gugu");
+    }
 }

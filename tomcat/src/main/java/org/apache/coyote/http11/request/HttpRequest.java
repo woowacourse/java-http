@@ -59,6 +59,10 @@ public class HttpRequest {
         return requestBody;
     }
 
+    public String getBodyValue(String fieldName) {
+        return requestBody.get(fieldName);
+    }
+
     public void setRequestBody(String requestBody) {
         if (requestBody.isBlank()) {
             return;

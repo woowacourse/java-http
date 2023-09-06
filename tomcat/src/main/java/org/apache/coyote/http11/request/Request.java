@@ -13,7 +13,6 @@ public class Request {
     private final String uri;
     private final Map<String, String> query;
     private final Map<String,String> header;
-    private final Map<String, String> cookie;
     private final Map<String, String> body;
 
     private Request(
@@ -21,14 +20,12 @@ public class Request {
             String uri,
             Map<String, String> query,
             Map<String, String> header,
-            Map<String, String> cookie,
             Map<String, String> body
     ) {
         this.method = method;
         this.uri = uri;
         this.query = query;
         this.header = header;
-        this.cookie = cookie;
         this.body = body;
     }
 
@@ -41,9 +38,8 @@ public class Request {
         final String uri = methodUri[1];
         final Map<String, String> header = readHeader(bufferedReader);
         final Map<String, String> query = readQueries(uri);
-        final Map<String, String> cookie = readCookie(header);
         final Map<String, String> body = readBody(header,bufferedReader);
-        return new Request(method, uri, query, header, cookie,body);
+        return new Request(method, uri, query, header, body);
     }
 
     private static void valid(String line) {
@@ -91,18 +87,6 @@ public class Request {
         }
         return body;
     }
-    private static Map<String, String> readCookie(Map<String, String> header){
-        final Map<String, String> cookie = new HashMap<>();
-        if(!header.containsKey("Cookie")){
-            return cookie;
-        }
-        final String cookieString = header.get("Cookie");
-        for(String entryString : cookieString.split("; ")){
-            String[] entry =entryString.split("=");
-            cookie.put(entry[0],entry[1]);
-        }
-        return cookie;
-    }
 
     public String getUri() {
         return uri;
@@ -113,6 +97,15 @@ public class Request {
     }
 
     public Map<String, String> getCookie() {
+        final Map<String, String> cookie = new HashMap<>();
+        if(!header.containsKey("Cookie")){
+            return cookie;
+        }
+        final String cookieString = header.get("Cookie");
+        for(String entryString : cookieString.split("; ")){
+            String[] entry =entryString.split("=");
+            cookie.put(entry[0],entry[1]);
+        }
         return cookie;
     }
 

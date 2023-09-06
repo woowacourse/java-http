@@ -20,6 +20,6 @@ class StartLineTest {
 
         // then
         assertThat(startLine.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(startLine.getUri().getDetail()).isEqualTo("/index.html");
+        assertThat(startLine.getUri().getValue()).isEqualTo("/index.html");
     }
 }

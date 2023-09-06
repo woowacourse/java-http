@@ -16,11 +16,9 @@ import org.apache.coyote.http11.util.StaticFileLoader;
 
 public class RegisterServlet implements Servlet {
 
-    public static final String REGISTER_PAGE = "/register.html";
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
     public static final String EMAIL = "email";
-    public static final String INDEX_PAGE = "/index.html";
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
@@ -36,7 +34,7 @@ public class RegisterServlet implements Servlet {
     }
 
     private static HttpResponse doGet() throws IOException {
-        String content = StaticFileLoader.load(REGISTER_PAGE);
+        String content = StaticFileLoader.load(Page.REGISTER.getUri());
 
         HttpHeaders headers = new HttpHeaders();
         headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
@@ -51,7 +49,7 @@ public class RegisterServlet implements Servlet {
         InMemoryUserRepository.save(user);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
+        headers.addHeader(HttpHeaderName.LOCATION, Page.INDEX.getUri());
         return HttpResponse.create(StatusCode.FOUND, headers);
     }
 }

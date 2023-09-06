@@ -23,9 +23,6 @@ public class LoginServlet implements Servlet {
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
     public static final String USER = "user";
-    public static final String INDEX_PAGE = "/index.html";
-    public static final String LOGIN_PAGE = "/login.html";
-    public static final String LOGIN_FAIL_PAGE = "/401.html";
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
@@ -43,10 +40,10 @@ public class LoginServlet implements Servlet {
     private HttpResponse doGet(final HttpRequest request) throws IOException {
         if (isLoggedIn(request)) {
             HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
+            headers.addHeader(HttpHeaderName.LOCATION, Page.INDEX.getUri());
             return HttpResponse.create(StatusCode.FOUND, headers);
         }
-        String content = StaticFileLoader.load(LOGIN_PAGE);
+        String content = StaticFileLoader.load(Page.LOGIN.getUri());
         HttpHeaders headers = new HttpHeaders();
         headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
         headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
@@ -81,14 +78,14 @@ public class LoginServlet implements Servlet {
         session.setAttribute(USER, user);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
+        headers.addHeader(HttpHeaderName.LOCATION, Page.INDEX.getUri());
         headers.addHeader(HttpHeaderName.SET_COOKIE, "JSESSIONID=" + session.getId());
         return HttpResponse.create(StatusCode.FOUND, headers);
     }
 
     private HttpResponse loginFail() {
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.LOCATION, LOGIN_FAIL_PAGE);
+        headers.addHeader(HttpHeaderName.LOCATION, Page.UNAUTHORIZED.getUri());
         return HttpResponse.create(StatusCode.FOUND, headers);
     }
 }

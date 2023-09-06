@@ -13,7 +13,6 @@ public class NotFoundServlet implements Servlet {
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
-        System.out.println("NotFoundServlet.handle");
         String content = StaticFileLoader.load(Page.NOT_FOUND.getUri());
 
         HttpHeaders headers = new HttpHeaders();

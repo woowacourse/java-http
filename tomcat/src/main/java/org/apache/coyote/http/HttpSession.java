@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class HttpSession {
@@ -35,5 +36,22 @@ public class HttpSession {
 
     public void invalidate() {
         values.clear();
+    }
+
+    @Override
+    public boolean equals(final Object target) {
+        if (this == target) {
+            return true;
+        }
+        if (target == null || getClass() != target.getClass()) {
+            return false;
+        }
+        final HttpSession targetHttpSession = (HttpSession) target;
+        return Objects.equals(getId(), targetHttpSession.getId()) && Objects.equals(values, targetHttpSession.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), values);
     }
 }

@@ -42,18 +42,21 @@ public class Request {
     }
 
     public Session getSession() {
-        if (hasSession()) {
-            final Session session = Session.generate();
-            sessionManager.add(session.getId(), session);
-            return session;
+        Session oldSession = getOldSession();
+        if (Objects.isNull(oldSession)) {
+            final Session newSession = Session.generate();
+            sessionManager.add(newSession.getId(), newSession);
+            return newSession;
         }
-        final String jsessionid = cookie.findByKey(JSESSIONID);
-        return sessionManager.getById(jsessionid);
+        return oldSession;
     }
 
-    private boolean hasSession() {
+    private Session getOldSession() {
         final String jsessionid = cookie.findByKey(JSESSIONID);
-        return !Objects.isNull(jsessionid);
+        if (Objects.isNull(jsessionid)) {
+            return null;
+        }
+        return sessionManager.getById(jsessionid);
     }
 
     public boolean hasUserInSession() {
@@ -100,5 +103,9 @@ public class Request {
 
     public Map<String, String> getQueryString() {
         return line.getQueryString();
+    }
+
+    public String getPath() {
+        return line.getRequestPath();
     }
 }

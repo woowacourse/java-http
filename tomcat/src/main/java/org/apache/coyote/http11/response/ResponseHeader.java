@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ResponseHeader {
+    public static final String ALLOW = "Allow";
     private static final String DELIMITER = ": ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
     private static final String REDIRECT_CONTENT_LENGTH = "0";
+
     private final Map<String, String> header;
 
     public ResponseHeader(final Map<String, String> header) {
@@ -42,5 +44,9 @@ public class ResponseHeader {
 
     public void setCookie(String cookie) {
         header.put("Set-Cookie", cookie);
+    }
+
+    public void setHeader(final String key, final String value) {
+        header.put(key, value);
     }
 }

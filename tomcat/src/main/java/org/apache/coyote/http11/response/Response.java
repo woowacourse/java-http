@@ -46,4 +46,8 @@ public class Response {
     public void setCookie(final String cookie) {
         responseHeader.setCookie(cookie);
     }
+
+    public void setHeader(final String key, final String value) {
+        responseHeader.setHeader(key, value);
+    }
 }

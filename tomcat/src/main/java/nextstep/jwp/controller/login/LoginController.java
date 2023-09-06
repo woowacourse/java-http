@@ -2,8 +2,6 @@ package nextstep.jwp.controller.login;
 
 import javassist.NotFoundException;
 import nextstep.jwp.controller.base.AbstractController;
-import nextstep.jwp.exception.BadRequestException;
-import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
@@ -40,16 +38,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
-        Map<String, String> params = httpRequest.getBody().getParams();
-        User user;
-
-        try {
-            user = userService.login(params.get("account"), params.get("password"));
-        } catch (BadRequestException e) {
-            return HttpResponse.withResource(Status.BAD_REQUEST, "/index.html");
-        } catch (UnAuthorizedException e) {
-            return HttpResponse.withResource(Status.UNAUTHORIZED, "/401.html");
-        }
+        Map<String, String> params = httpRequest.getParams();
+        User user = userService.login(params.get("account"), params.get("password"));
 
         return getHttpResponseWithCookie(httpRequest, user);
     }

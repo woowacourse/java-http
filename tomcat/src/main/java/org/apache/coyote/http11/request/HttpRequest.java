@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -117,7 +118,7 @@ public class HttpRequest {
         return uri.getPath();
     }
 
-    public Params getBody() {
-        return body;
+    public Map<String, String> getParams() {
+        return body.getParams();
     }
 }

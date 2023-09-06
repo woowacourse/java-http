@@ -2,11 +2,13 @@ package org.apache.coyote.http11.response.header;
 
 public enum Status {
 
-    OK(200, "OK"),
-    NOT_FOUND(404, "NOT FOUND"),
-    FOUND(302, "FOUND"),
-    UNAUTHORIZED(401, "UNAUTHORIZED"),
-    BAD_REQUEST(400, "BAD REQUEST");
+    OK(200, "Ok"),
+    NOT_FOUND(404, "Not Found"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    BAD_REQUEST(400, "Bad Request"),
+    UNSUPPORTED_METHOD(405, "Method Not Allowed"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private static final String VERSION = "HTTP/1.1";
 

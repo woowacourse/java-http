@@ -1,12 +1,9 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.base.Controller;
-import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.header.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +16,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+import static org.apache.coyote.http11.advice.ControllerAdvice.handleException;
 import static org.apache.coyote.http11.handler.adapter.HandlerAdapter.adaptController;
 import static org.apache.coyote.http11.handler.mapper.HandlerMapper.getController;
 
@@ -58,8 +56,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse httpResponse = adaptController(controller, httpRequest);
 
             response(bufferedWriter, httpResponse);
-        } catch (NotFoundException | UnsupportedMethodException e) {
-            response(bufferedWriter, HttpResponse.withResource(Status.NOT_FOUND, "/404.html"));
+        } catch (Exception e) {
+            response(bufferedWriter, handleException(e));
         }
     }
 

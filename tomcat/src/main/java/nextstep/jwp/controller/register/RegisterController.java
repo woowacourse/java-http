@@ -1,8 +1,6 @@
 package nextstep.jwp.controller.register;
 
 import nextstep.jwp.controller.base.AbstractController;
-import nextstep.jwp.exception.DuplicatedAccountException;
-import nextstep.jwp.exception.InvalidEmailFormException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -11,6 +9,10 @@ import org.apache.coyote.http11.response.header.Status;
 import java.util.Map;
 
 public class RegisterController extends AbstractController {
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private final UserService userService;
 
@@ -30,13 +32,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
-        Map<String, String> params = httpRequest.getBody().getParams();
+        Map<String, String> params = httpRequest.getParams();
+        userService.register(params.get(ACCOUNT), params.get(PASSWORD), params.get(EMAIL));
 
-        try {
-            userService.register(params.get("account"), params.get("password"), params.get("email"));
-            return HttpResponse.withResource(Status.FOUND, "/index.html");
-        } catch (DuplicatedAccountException | InvalidEmailFormException e) {
-            return HttpResponse.withResource(Status.BAD_REQUEST, "/400.html");
-        }
+        return HttpResponse.withResource(Status.FOUND, "/index.html");
     }
 }

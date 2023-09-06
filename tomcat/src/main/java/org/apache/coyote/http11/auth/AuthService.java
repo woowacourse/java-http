@@ -28,14 +28,14 @@ public class AuthService {
         if (requestLine.method().isGet()) {
             final Cookie cookie = requestHeader.getCookie();
             final Session session = sessionRepository.getSession(cookie.get(COOKIE_NAME));
-            if (session != null) {
-                String account = requestBody.getBy("account");
-                if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-                    return new ResponseEntity(FOUND, INDEX_PAGE);
-                }
-                throw new IllegalArgumentException("쿠키 또는 세션에 문제가 있습니다. 쿠키와 세션을 제거하고 다시 접근해주세요.");
+            if (session == null) {
+                return new ResponseEntity(OK, LOGIN_PAGE);
             }
-            return new ResponseEntity(OK, LOGIN_PAGE);
+            String account = requestBody.getBy("account");
+            if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+                return new ResponseEntity(FOUND, INDEX_PAGE);
+            }
+            throw new IllegalArgumentException("쿠키 또는 세션에 문제가 있습니다. 쿠키와 세션을 제거하고 다시 접근해주세요.");
         }
 
         final String account = requestBody.getBy("account");

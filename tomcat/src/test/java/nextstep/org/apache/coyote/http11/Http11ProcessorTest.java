@@ -296,6 +296,34 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void wrongPathReturnNotFoundPageTest() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /nofile.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        File file = new File(resource.getFile());
+        var expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                String.format("Content-Length: %d \r\n", file.length()) +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private String loginAndGetSessionId() {
         final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",

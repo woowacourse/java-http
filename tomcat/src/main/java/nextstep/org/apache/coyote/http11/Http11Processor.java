@@ -129,6 +129,20 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 String responseBody = createResponseBody(requestPath);
+                if (Objects.isNull(responseBody)) {
+                    responseBody = createResponseBody("/404.html");
+
+                    response = String.join("\r\n",
+                            "HTTP/1.1 404 Not Found ",
+                            String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                            String.format("Content-Length: %s ",
+                                    responseBody.getBytes(StandardCharsets.UTF_8).length),
+                            "",
+                            responseBody);
+                    writeResponse(outputStream, response);
+                    return;
+                }
+
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         String.format("Content-Type: %s;charset=utf-8 ", contentType),
@@ -177,22 +191,20 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeaders;
     }
 
-
-    private String createResponseBody(String requestURL) {
-        if (requestURL.equals("/")) {
+    private String createResponseBody(String requestPath) throws IOException {
+        if (requestPath.equals("/")) {
             return "Hello world!";
         }
 
-        String resourceName = RESOURCES_PATH_PREFIX + requestURL;
+        String resourceName = RESOURCES_PATH_PREFIX + requestPath;
         if (!resourceName.contains(".")) {
             resourceName += ".html";
         }
         URL resource = getClass().getClassLoader().getResource(resourceName);
 
-        try {
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        } catch (IOException | NullPointerException e) {
-            throw new RuntimeException(e);
+        if (Objects.isNull(resource)) {
+            return null;
         }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

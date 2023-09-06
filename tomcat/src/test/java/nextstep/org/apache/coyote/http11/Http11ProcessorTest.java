@@ -1,8 +1,11 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.request.header.UserSession;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +39,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -54,9 +57,132 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("CSS를 요청할 수 있다")
+    void css() {
+        //given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        assertThat(socket.output()).contains("200 OK");
+    }
+
+    @Test
+    @DisplayName("회원가입을 하면 index.html로 리다이렉션 된다")
+    void register() {
+        //given
+        final String parameters = "account=salmon&password=salmon&email=salmon";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Length: " + parameters.getBytes().length,
+                "Connection: keep-alive ",
+                "",
+                parameters);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        assertThat(socket.output())
+                .contains("302 Found")
+                .contains("/index");
+    }
+
+    @Test
+    @DisplayName("로그인을 성공하면 index.html로 리다이렉션 된다")
+    void login() {
+        //given
+        final String parameters = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=test",
+                "Content-Length: " + parameters.getBytes().length,
+                "Connection: keep-alive ",
+                "",
+                parameters);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        assertThat(socket.output())
+                .contains("302 Found")
+                .contains("/index");
+    }
+
+    @Test
+    @DisplayName("로그인을 실패하면 401.html로 리다이렉션 된다")
+    void login_fail() {
+        //given
+        final String parameters = "account=salmon&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=test",
+                "Content-Length: " + parameters.getBytes().length,
+                "Connection: keep-alive ",
+                "",
+                parameters);
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        assertThat(socket.output())
+                .contains("302 Found")
+                .contains("/401");
+    }
+
+    @Test
+    @DisplayName("로그인을 한 상태에서 로그인 페이지로 들어가면 index.html로 리다이렉션 된다")
+    void login_alreadyLoggedIn() {
+        //given
+        UserSession.login("test", new User("salmon", "password", "email"));
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=test",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        //when
+        processor.process(socket);
+
+        //then
+        assertThat(socket.output())
+                .contains("302 Found")
+                .contains("/index");
     }
 }

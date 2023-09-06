@@ -20,25 +20,32 @@
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
                                     <div class="card-header"><h3 class="text-center font-weight-light my-4">회원 가입</h3></div>
                                     <div class="card-body">
-                                        <form method="post" action="register">
-                                            <div class="form-floating mb-3">
-                                                <input class="form-control" id="inputLoginId" name="account" type="Text" placeholder="아이디를 입력하세요" />
-                                                <label for="inputLoginId">아이디</label>
-                                            </div>
-                                            <div class="form-floating mb-3">
-                                                <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" />
-                                                <label for="inputEmail">이메일 주소</label>
-                                            </div>
-                                                <div class="form-floating mb-3 mb-md-0">
-                                                    <input class="form-control" id="inputPassword" name="password" type="password" placeholder="비밀번호를 입력하세요" />
-                                                    <label for="inputPassword">비밀번호</label>
-                                                </div>
-                                            <div class="mt-4 mb-0">
-                                                <div class="d-grid">
-                                                    <button class="btn btn-primary btn-block" type="submit">가입하기</button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                      <form action="register" method="post">
+                                        <div class="form-floating mb-3">
+                                          <input class="form-control" id="inputLoginId"
+                                                 name="account" placeholder="아이디를 입력하세요"
+                                                 type="Text"/>
+                                          <label for="inputLoginId">아이디</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                          <input class="form-control" id="inputEmail" name="email"
+                                                 placeholder="name@example.com" type="email"/>
+                                          <label for="inputEmail">이메일 주소</label>
+                                        </div>
+                                        <div class="form-floating mb-3 mb-md-0">
+                                          <input class="form-control" id="inputPassword"
+                                                 name="password" placeholder="비밀번호를 입력하세요"
+                                                 type="password"/>
+                                          <label for="inputPassword">비밀번호</label>
+                                        </div>
+                                        <div class="mt-4 mb-0">
+                                          <div class="d-grid">
+                                            <button class="btn btn-primary btn-block" type="submit">
+                                              가입하기
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </form>
                                     </div>
                                     <div class="card-footer text-center py-3">
                                         <div class="small"><a href="login">이미 가입하셨나요? 로그인 하러가기</a></div>

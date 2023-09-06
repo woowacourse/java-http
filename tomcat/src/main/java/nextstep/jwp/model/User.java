@@ -42,12 +42,11 @@ public class User {
             return false;
         }
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(account, user.account)
-                && Objects.equals(password, user.password) && Objects.equals(email, user.email);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, account, password, email);
+        return Objects.hash(id);
     }
 }

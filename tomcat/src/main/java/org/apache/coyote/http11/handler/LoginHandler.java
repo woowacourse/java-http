@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.db.InMemoryUserRepository;
-import org.apache.coyote.http11.ContentTypeParser;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.message.Cookie;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
@@ -56,7 +56,7 @@ public class LoginHandler extends Handler {
         String absolutePath = LOGIN_PAGE.path();
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(
-                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_TYPE, ContentType.parse(absolutePath),
                 CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);

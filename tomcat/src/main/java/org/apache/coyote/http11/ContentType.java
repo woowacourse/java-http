@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
-public enum ContentTypeParser {
+public enum ContentType {
 
     HTML("text/html;charset=utf-8"),
     CSS("text/css"),
@@ -11,7 +11,7 @@ public enum ContentTypeParser {
 
     private final String contentType;
 
-    ContentTypeParser(String contentType) {
+    ContentType(String contentType) {
         this.contentType = contentType;
     }
 

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ContentTypeParser;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
@@ -35,7 +35,7 @@ public class RegisterHandler extends Handler {
 
         String resource = findResourceWithPath(absolutePath);
         Headers headers = Headers.fromMap(Map.of(
-                CONTENT_TYPE, ContentTypeParser.parse(absolutePath),
+                CONTENT_TYPE, ContentType.parse(absolutePath),
                 CONTENT_LENGTH, String.valueOf(resource.getBytes().length)
         ));
         ResponseBody responseBody = new ResponseBody(resource);

@@ -27,11 +27,6 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) throws Exception {
-        return super.handle(httpRequest);
-    }
-
-    @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
         if (httpRequest.getSessionAttribute(USER).isPresent()) {
             return HttpResponse.responseWithResource(Status.FOUND, "/index.html");
@@ -48,7 +43,7 @@ public class LoginController extends AbstractController {
         return getHttpResponseWithCookie(httpRequest, user);
     }
 
-    private static HttpResponse getHttpResponseWithCookie(final HttpRequest httpRequest, final User user) throws NotFoundException, IOException, URISyntaxException {
+    private HttpResponse getHttpResponseWithCookie(final HttpRequest httpRequest, final User user) throws NotFoundException, IOException, URISyntaxException {
         Session session = httpRequest.createSession();
         session.setAttribute(USER, user);
 

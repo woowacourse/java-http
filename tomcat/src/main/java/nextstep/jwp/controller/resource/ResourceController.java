@@ -8,11 +8,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class ResourceController extends AbstractController {
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) throws Exception {
-        return super.handle(httpRequest);
-    }
-
-    @Override
     protected HttpResponse doGet(final HttpRequest httpRequest) throws Exception {
         return HttpResponse.okWithResource(httpRequest.getPath());
     }

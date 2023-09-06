@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Session implements HttpSession {
 
@@ -15,6 +16,12 @@ public class Session implements HttpSession {
 
     public Session(String id) {
         this.id = id;
+    }
+
+    public static Session create() {
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.getInstance().add(session);
+        return session;
     }
 
     @Override

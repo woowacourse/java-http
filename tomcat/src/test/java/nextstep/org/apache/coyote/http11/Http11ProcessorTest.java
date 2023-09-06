@@ -148,34 +148,6 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 세션이_있을_때_로그인_페이지_리다이렉트() {
-        //given
-        final String HttpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=1234",
-                "",
-                "");
-
-        final var socket = new StubSocket(HttpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        //when
-        processor.process(socket);
-
-        //then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var statusLine = "HTTP/1.1 302 Found ";
-        String contentLength = "Content-Length: " + new File(resource.getPath()).length();
-
-        assertAll(
-                () -> assertThat(socket.output()).contains(statusLine),
-                () -> assertThat(socket.output()).contains(contentLength)
-        );
-    }
-
-    @Test
     void registerPage() throws IOException {
         //given
         final String HttpRequest = String.join("\r\n",

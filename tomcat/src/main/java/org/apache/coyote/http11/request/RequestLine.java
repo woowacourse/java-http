@@ -34,12 +34,4 @@ public class RequestLine {
     public Map<String, String> getParams() {
         return requestUrl.getParams();
     }
-
-    public boolean isGet() {
-        return method.equals("GET");
-    }
-
-    public boolean isPost() {
-        return method.equals("POST");
-    }
 }

@@ -1,13 +1,11 @@
 package nextstep.jwp.presentation;
 
 
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.FileIOReader;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
@@ -17,7 +15,6 @@ public class LoginController implements Controller {
     private static final String INDEX = "/index.html";
     private static final String JSESSIONID = "JSESSIONID";
 
-    private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final LoginController instance = new LoginController();
     private static final String NOT_FOUND = "/401.html";
 
@@ -68,7 +65,7 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse loginPage(HttpRequest request, HttpResponse response) {
-        if (request.cookieKeyExists(JSESSIONID)) {
+        if (request.getSession().getAttribute("user") != null) {
             String responseBody = FileIOReader.readFile(INDEX);
             return response.contentType(request.getAccept())
                            .statusCode(StatusCode.FOUND)
@@ -107,15 +104,13 @@ public class LoginController implements Controller {
                                           .filter(user -> user.checkPassword(request.getBodyValue("password")))
                                           .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 틀립니다."));
 
-        String sessionId = UUID.randomUUID().toString();
-        Session session = new Session(sessionId);
+        Session session = request.getSession();
         session.setAttribute("user", find);
-        sessionManager.add(session);
-        response.addHeader(Header.SET_COOKIE.getName(), makeCookie(sessionId));
+        response.addHeader(Header.SET_COOKIE.getName(), makeCookie(session.getId()));
         log.info("로그인 성공: {}", find.getAccount());
     }
 
     private String makeCookie(String sessionId) {
-        return JSESSIONID + "=" + sessionId;
+        return String.format("%s=%s", JSESSIONID, sessionId);
     }
 }

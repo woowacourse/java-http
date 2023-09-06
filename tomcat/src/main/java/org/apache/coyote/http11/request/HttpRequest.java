@@ -10,13 +10,18 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 
 public class HttpRequest {
 
+    private static final String JSESSIONID = "JSESSIONID";
     private final BufferedReader bufferedReader;
     private final Map<String, String> headers = new HashMap<>();
     private RequestLine requestLine;
     private final Map<String, String> bodies = new HashMap<>();
+    private Cookie cookie;
+    private Session session;
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         this.bufferedReader = bufferedReader;
@@ -33,6 +38,10 @@ public class HttpRequest {
         if (headers.containsKey(CONTENT_LENGTH.getName())) {
             readBody();
         }
+        if (headers.containsKey(Header.COOKIE.getName())) {
+            this.cookie = new Cookie(headers.get(Header.COOKIE.getName()));
+        }
+        this.session = (Session) SessionManager.getInstance().findSession(cookie.getValue(JSESSIONID));
     }
 
     private void readBody() throws IOException {
@@ -71,19 +80,6 @@ public class HttpRequest {
         return bodies.get(key);
     }
 
-    public boolean cookieKeyExists(String key) {
-        if (!headers.containsKey(Header.COOKIE.getName())) {
-            return false;
-        }
-        Cookie cookie = new Cookie(headers.get(Header.COOKIE.getName()));
-        try {
-            cookie.getValue(key);
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
     public String getProtocolVersion() {
         return requestLine.getProtocolVersion();
     }
@@ -92,27 +88,12 @@ public class HttpRequest {
         return requestLine.getUrl();
     }
 
-    public Map<String, String> getHeaders() {
-        return new HashMap<>(headers);
-    }
-
-    public Map<String, String> getParams() {
-        return requestLine.getParams();
-    }
-
-    public RequestLine getUriRequest() {
-        return requestLine;
-    }
-
     public String getMethod() {
         return requestLine.getMethod();
     }
 
-    public boolean isGet() {
-        return requestLine.isGet();
-    }
-
-    public boolean isPost() {
-        return requestLine.isPost();
+    public Session getSession() {
+        this.session = session == null ? Session.create() : session;
+        return session;
     }
 }

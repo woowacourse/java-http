@@ -1,8 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import nextstep.jwp.exception.NotAllowedMethodException;
-
 import java.util.Arrays;
+import nextstep.jwp.exception.NotAllowedMethodException;
 
 public enum HttpMethod {
 

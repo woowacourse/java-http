@@ -1,15 +1,12 @@
 package org.apache.coyote.http11.request;
 
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.RequestPath;
-import org.apache.coyote.http11.request.RequestLine;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
+import nextstep.jwp.exception.UncheckedServletException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class RequestLineTest {
 

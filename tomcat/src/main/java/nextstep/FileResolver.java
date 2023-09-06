@@ -42,10 +42,6 @@ public enum FileResolver {
                      .orElseThrow(() -> new IllegalArgumentException("잘못된 파일명이 매핑되었습니다."));
     }
 
-    public String getFilePath() {
-        return "static/" + this.fileName;
-    }
-
     public static FileResolver getFile(String filePath) {
         if (filePath.contains(Constants.QUESTION_MARK)) {
             final int index = filePath.indexOf(Constants.QUESTION_MARK);
@@ -58,6 +54,14 @@ public enum FileResolver {
                      .orElseThrow(() -> new IllegalArgumentException("잘못된 파일 경로입니다. " + finalFilePath));
     }
 
+    public String getFilePath() {
+        return "static/" + this.fileName;
+    }
+
+    public String getFileName() {
+        return this.fileName;
+    }
+
     public String getContentType() {
         return this.contentType;
     }
@@ -66,7 +70,7 @@ public enum FileResolver {
         return this.responseHeader;
     }
 
-    public String getResponse() throws IOException {
+    public String createResponse() throws IOException {
         final URL url = getClass().getClassLoader().getResource(this.getFilePath());
         final var responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
         return String.join("\r\n",
@@ -78,7 +82,6 @@ public enum FileResolver {
     }
 
     private static class Constants {
-
         public static final String RESPONSE_HEADER = "HTTP/1.1 200 OK ";
         private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
         private static final String TEXT_CSS_CHARSET_UTF_8 = "text/css;charset=utf-8";

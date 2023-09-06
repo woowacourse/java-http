@@ -19,15 +19,22 @@ public class RegisterController extends Controller {
         final String method = request.getMethod();
         if (method.equals(GET)) {
             final FileResolver file = FileResolver.findFile(parsedUri);
-            return file.getResponse();
+            return file.createResponse();
         }
         if (method.equals(POST)) {
             final Map<String, String> body = request.getBody();
             final User user = new User(body.get("account"), body.get("password"), body.get("email"));
             InMemoryUserRepository.save(user);
-            final FileResolver file = FileResolver.INDEX_HTML;
-            return file.getResponse();
+            return createRedirectResponse(FileResolver.INDEX_HTML);
         }
         return null;
+    }
+
+    private String createRedirectResponse(final FileResolver file) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + file.getFileName() + " ",
+                ""
+        );
     }
 }

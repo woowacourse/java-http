@@ -25,16 +25,16 @@ public class LoginController extends Controller {
             return login(request.getBody());
         }
         final FileResolver file = FileResolver.findFile(parsedUri);
-        return file.getResponse();
+        return file.createResponse();
     }
 
     private String login(final Map<String, String> body) {
         log.info("queryStrings = ", body);
 
         if (isValidUser(body)) {
-            return createRedirectResponse("/index.html");
+            return createRedirectResponse(FileResolver.INDEX_HTML);
         }
-        return createRedirectResponse("/401.html");
+        return createRedirectResponse(FileResolver.HTML_401);
     }
 
     private boolean isValidUser(final Map<String, String> body) {
@@ -43,10 +43,10 @@ public class LoginController extends Controller {
         return account.checkPassword(body.get("password"));
     }
 
-    private String createRedirectResponse(final String fileName) {
+    private String createRedirectResponse(final FileResolver file) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: " + fileName + " ",
+                "Location: " + file.getFileName() + " ",
                 ""
         );
     }

@@ -112,7 +112,7 @@ class RequestHandlerTest {
 
         // then
         Map<String, String> cookie = response.getCookie();
-        assertThat(cookie.get("JSESSIONID")).isNotNull();
+        assertThat(cookie).containsKey("JSESSIONID");
     }
 
     @Test
@@ -132,7 +132,7 @@ class RequestHandlerTest {
         Map<String, String> headers = response.getHeaders();
         assertAll(
             () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-            () -> assertThat(headers.get("Location")).isEqualTo("/401.html")
+            () -> assertThat(headers).containsEntry("Location", "/401.html")
         );
     }
 
@@ -153,7 +153,7 @@ class RequestHandlerTest {
         Map<String, String> headers = response.getHeaders();
         assertAll(
             () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-            () -> assertThat(headers.get("Location")).isEqualTo("/401.html")
+            () -> assertThat(headers).containsEntry("Location", "/401.html")
         );
     }
 
@@ -173,9 +173,8 @@ class RequestHandlerTest {
         Map<String, String> headers = response.getHeaders();
 
         assertAll(
-            () -> assertThat(headers.get("Location")).isEqualTo("/index.html"),
-            () -> assertThat(findByAccount("hs")).isPresent(),
-            () -> assertThat(response.getCookie().get("JSESSIONID"))
+            () -> assertThat(headers).containsEntry("Location", "/index.html"),
+            () -> assertThat(findByAccount("hs")).isPresent()
         );
     }
 

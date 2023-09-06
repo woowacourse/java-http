@@ -24,10 +24,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int PATH_INDEX = 1;
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {

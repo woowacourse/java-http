@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.exception.LoginFailureException;
+import nextstep.handler.exception.LoginFailureException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

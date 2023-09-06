@@ -1,8 +1,9 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import nextstep.handler.RegisterPageHandler;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;

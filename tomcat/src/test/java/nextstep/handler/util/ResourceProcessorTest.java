@@ -1,10 +1,11 @@
-package org.apache.coyote.handler.util;
+package nextstep.handler.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
-import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
+import nextstep.handler.util.ResourceProcessor;
+import nextstep.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;

@@ -1,68 +1,63 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import java.io.IOException;
 import nextstep.jwp.application.UserService;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
-import org.apache.coyote.handler.exception.InvalidQueryParameterException;
-import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.HttpSession;
+import nextstep.handler.exception.InvalidQueryParameterException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HeaderDto;
+import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
 
-public class LoginHandler implements Handler {
+public class RegisterHandler implements Handler {
 
-    public static final String ACCOUNT_KEY = "account";
+    private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    private static final String EMAIL_KEY = "email";
 
     private final String path;
     private final UserService userService;
 
-    public LoginHandler(final String path, final UserService userService) {
+    public RegisterHandler(final String path, final UserService userService) {
         this.path = path;
         this.userService = userService;
     }
 
     @Override
     public boolean supports(final Request request, final String rootContextPath) {
-        return isPostMethod(request) && isLoginRequest(request, rootContextPath) && request.hasQueryParameters();
+        return isPostMethod(request) && isRegisterRequest(request, rootContextPath);
     }
 
     private boolean isPostMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.POST);
     }
 
-    private boolean isLoginRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, rootContextPath);
+    private boolean isRegisterRequest(final Request request, final String rootContextPath) {
+        return request.matchesByPathExcludingRootContextPath(path, rootContextPath) && request.hasQueryParameters();
     }
 
     @Override
     public Response service(final Request request, final String ignoreResourcePath) throws IOException {
         final String account = request.findQueryParameterValue(ACCOUNT_KEY);
         final String password = request.findQueryParameterValue(PASSWORD_KEY);
+        final String email = request.findQueryParameterValue(EMAIL_KEY);
 
-        if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password)) {
+        if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password) || isInvalidQueryParameter(email)) {
             throw new InvalidQueryParameterException();
         }
 
-        final User loginUser = userService.login(account, password);
-
-        final HttpSession session = request.getSession(true);
-        session.setAttribute(ACCOUNT_KEY, loginUser);
-        final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
+        userService.register(account, password, email);
 
         return Response.of(
                 request,
                 HttpStatusCode.FOUND,
                 ContentType.JSON,
-                loginUser.toString(),
-                cookie,
-                new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
+                HttpConsts.BLANK,
+                new HeaderDto(HttpHeaderConsts.LOCATION, "/login")
         );
     }
 

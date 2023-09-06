@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.exception;
+package nextstep.handler.exception;
 
 public class InvalidQueryParameterException extends IllegalArgumentException {
 

@@ -1,8 +1,9 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import nextstep.handler.RegisterHandler;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
@@ -18,21 +19,21 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class LoginHandlerTest {
+class RegisterHandlerTest {
 
     @Test
-    void 생성자는_경로와_rootContextPath를_전달하면_LoginHandler를_초기화한다() {
-        final LoginHandler actual = new LoginHandler("/login", new UserService());
+    void 생성자는_경로와_rootContextPath를_전달하면_RegisterHandler를_초기화한다() {
+        final RegisterHandler actual = new RegisterHandler("/register", new UserService());
 
         assertThat(actual).isNotNull();
     }
 
     @Test
     void supports_메서드는_지원하는_요청인_경우_true를_반환한다() {
-        final LoginHandler handler = new LoginHandler("/login", new UserService());
+        final RegisterHandler handler = new RegisterHandler("/register", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
         final HttpMethod method = HttpMethod.findMethod("post");
-        final Url url = Url.from("/login");
+        final Url url = Url.from("/register");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
         final Request request = new Request(
                 headers,
@@ -40,7 +41,7 @@ class LoginHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                Parameters.fromBodyContent("account=gugu&password=password")
+                Parameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
         );
 
         final boolean actual = handler.supports(request, "/");
@@ -50,7 +51,7 @@ class LoginHandlerTest {
 
     @Test
     void supports_메서드는_지원하지_않는_요청인_경우_false를_반환한다() {
-        final LoginHandler handler = new LoginHandler("/login", new UserService());
+        final RegisterHandler handler = new RegisterHandler("/register", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/index.html");
@@ -71,10 +72,10 @@ class LoginHandlerTest {
 
     @Test
     void service_메서드는_요청을_처리하고_Response를_반환한다() throws IOException {
-        final LoginHandler handler = new LoginHandler("/login", new UserService());
+        final RegisterHandler handler = new RegisterHandler("/register", new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: application/json");
         final HttpMethod method = HttpMethod.findMethod("post");
-        final Url url = Url.from("/login");
+        final Url url = Url.from("/register");
         final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
         final Request request = new Request(
                 headers,
@@ -82,7 +83,7 @@ class LoginHandlerTest {
                 version,
                 url,
                 HttpRequestBody.EMPTY,
-                Parameters.fromUrlContent("?account=gugu&password=password")
+                Parameters.fromBodyContent("account=asdf&password=asdf&email=asdf@asdf.com")
         );
         request.initSessionManager(new SessionManager());
 

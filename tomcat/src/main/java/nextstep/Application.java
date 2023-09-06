@@ -3,11 +3,11 @@ package nextstep;
 import nextstep.jwp.application.UserService;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.Container;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.LoginPageHandler;
-import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.handler.RegisterPageHandler;
-import org.apache.coyote.handler.WelcomeHandler;
+import nextstep.handler.LoginHandler;
+import nextstep.handler.LoginPageHandler;
+import nextstep.handler.RegisterHandler;
+import nextstep.handler.RegisterPageHandler;
+import nextstep.handler.WelcomeHandler;
 
 public class Application {
 

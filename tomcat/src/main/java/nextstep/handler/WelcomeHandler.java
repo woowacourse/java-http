@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import org.apache.coyote.Handler;
 import org.apache.coyote.http.request.Request;

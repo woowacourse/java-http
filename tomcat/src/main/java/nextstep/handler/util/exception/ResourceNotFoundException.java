@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.util.exception;
+package nextstep.handler.util.exception;
 
 public class ResourceNotFoundException extends IllegalArgumentException {
 

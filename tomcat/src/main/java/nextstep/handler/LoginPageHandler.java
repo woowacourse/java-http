@@ -1,8 +1,8 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import java.io.IOException;
+import nextstep.handler.util.ResourceProcessor;
 import org.apache.coyote.Handler;
-import org.apache.coyote.handler.util.ResourceProcessor;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
@@ -12,27 +12,27 @@ import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
 
-public class RegisterPageHandler implements Handler {
+public class LoginPageHandler implements Handler {
 
     private final String path;
-    private final String resourceName;
+    private final String targetResourceName;
 
-    public RegisterPageHandler(final String path, final String resourceName) {
+    public LoginPageHandler(final String path, final String targetResourceName) {
         this.path = path;
-        this.resourceName = resourceName;
+        this.targetResourceName = targetResourceName;
     }
 
     @Override
     public boolean supports(final Request request, final String rootContextPath) {
-        return isGetMethod(request) && isRegisterPageRequest(request, rootContextPath);
+        return isGetMethod(request) && isLoginPageRequest(request, rootContextPath);
     }
 
     private boolean isGetMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.GET);
     }
 
-    private boolean isRegisterPageRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, rootContextPath) && !request.hasQueryParameters();
+    private boolean isLoginPageRequest(final Request request, final String rootContextPath) {
+        return request.matchesByPathExcludingRootContextPath(path, rootContextPath);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class RegisterPageHandler implements Handler {
             }
         }
 
-        final String resourceFullName = staticResourcePath + resourceName;
+        final String resourceFullName = staticResourcePath + targetResourceName;
         final String responseBody = ResourceProcessor.readResourceFile(resourceFullName);
         final ContentType contentType = ResourceProcessor.findContentType(request, resourceFullName);
 

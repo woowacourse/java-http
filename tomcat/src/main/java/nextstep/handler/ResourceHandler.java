@@ -1,8 +1,8 @@
-package org.apache.coyote.handler;
+package nextstep.handler;
 
 import java.io.IOException;
+import nextstep.handler.util.ResourceProcessor;
 import org.apache.coyote.Handler;
-import org.apache.coyote.handler.util.ResourceProcessor;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;

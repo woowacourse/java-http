@@ -29,7 +29,7 @@ public class HttpHeader {
     }
 
     public boolean isEmpty() {
-        return this.equals(EMPTY);
+        return this == EMPTY;
     }
 
     public String toLine() {

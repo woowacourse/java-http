@@ -28,4 +28,9 @@ public enum HttpVersion {
         }
         return map.get(version);
     }
+
+    @Override
+    public String toString() {
+        return this.version;
+    }
 }

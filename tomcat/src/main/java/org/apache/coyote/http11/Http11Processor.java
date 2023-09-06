@@ -17,6 +17,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
@@ -43,13 +45,27 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            Request request = Request.from(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final Request request = Request.from(readAllLines(bufferedReader), bufferedReader);
+
             Response response = proxy.process(request);
             writeResponse(outputStream, response);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> readAllLines(final BufferedReader reader) throws IOException {
+        final ArrayList<String> lines = new ArrayList<>();
+        while (true) {
+            final String line = reader.readLine();
+            if ("".equals(line)) {
+                break;
+            }
+            lines.add(line);
+        }
+        return lines;
     }
 
     private void writeResponse(OutputStream outputStream, Response response) throws IOException {

@@ -11,16 +11,23 @@ import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
 
-    private final String request;
+    private final InputStream inputStream;
     private final ByteArrayOutputStream outputStream;
 
     public StubSocket(final String request) {
-        this.request = request;
+        this.inputStream = createInputStream(request);
         this.outputStream = new ByteArrayOutputStream();
     }
 
     public StubSocket() {
         this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+    }
+
+    private InputStream createInputStream(String request) {
+        String delimiter = System.lineSeparator() + System.lineSeparator();
+        String requestBody = request.substring(request.lastIndexOf(delimiter) + delimiter.length());
+        byte[] requestBodyBytes = requestBody.getBytes(StandardCharsets.UTF_8);
+        return new ByteArrayInputStream(requestBodyBytes);
     }
 
     public InetAddress getInetAddress() {
@@ -36,7 +43,7 @@ public class StubSocket extends Socket {
     }
 
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(request.getBytes());
+        return inputStream;
     }
 
     public OutputStream getOutputStream() {

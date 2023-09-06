@@ -1,5 +1,7 @@
 package org.apache.catalina.servlet.response;
 
+import static org.apache.catalina.servlet.common.HttpHeader.CONTENT_LENGTH;
+
 import java.io.BufferedWriter;
 import org.apache.catalina.servlet.session.Cookies;
 
@@ -31,7 +33,7 @@ public class HttpResponse {
         if (messageBody == null) {
             return;
         }
-        headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
+        headers.put(CONTENT_LENGTH, String.valueOf(messageBody.getBytes().length));
     }
 
     public void addHeader(String name, String value) {

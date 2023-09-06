@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.catalina.servlet.common.HttpHeader.CONTENT_LENGTH;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,10 +46,10 @@ public class HttpRequestParser {
     }
 
     private static Integer contentLength(RequestHeaders requestHeaders) {
-        if (!requestHeaders.contains("Content-Length")) {
+        if (!requestHeaders.contains(CONTENT_LENGTH)) {
             return null;
         }
-        return Integer.parseInt(requestHeaders.get("Content-Length"));
+        return Integer.parseInt(requestHeaders.get(CONTENT_LENGTH));
     }
 
     private static Body parseBody(BufferedReader reader, Integer length) {

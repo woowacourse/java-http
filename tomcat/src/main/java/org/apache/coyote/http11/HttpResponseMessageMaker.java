@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.catalina.servlet.common.HttpHeader.SET_COOKIE;
+
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.session.Cookies;
 
@@ -15,7 +17,7 @@ public class HttpResponseMessageMaker {
     private static String cookieHeadersToString(Cookies cookies) {
         StringBuilder sb = new StringBuilder();
         for (String name : cookies.cookies().keySet()) {
-            sb.append("Set-Cookie: ")
+            sb.append(SET_COOKIE + ": ")
                     .append(name).append("=").append(cookies.get(name))
                     .append(" \r\n");
         }

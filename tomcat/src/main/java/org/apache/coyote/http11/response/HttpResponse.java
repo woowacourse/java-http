@@ -1,5 +1,10 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.headers.HttpHeaderType.*;
+import static org.apache.coyote.http11.headers.MimeType.*;
+import static org.apache.coyote.http11.request.HttpVersion.*;
+import static org.apache.coyote.http11.response.HttpStatusCode.*;
+
 import org.apache.coyote.http11.headers.HttpHeaders;
 
 public class HttpResponse {
@@ -14,9 +19,16 @@ public class HttpResponse {
 		this.headers = headers;
 	}
 
+	public static HttpResponse redirect(final String location) {
+		final String body = "";
+		final HttpHeaders httpHeaders = HttpHeaders.of(body, HTML);
+		httpHeaders.put(LOCATION.getValue(), location);
+		return new HttpResponse(TEMPORARILY_MOVED_302, body, httpHeaders);
+	}
+
 	public String buildResponse() {
 		return String.join("\r\n",
-			"HTTP/1.1 " + statusCode.buildResponse(),
+			HTTP_1_1.getContent() + statusCode.buildResponse(),
 			headers.build(),
 			body
 		);

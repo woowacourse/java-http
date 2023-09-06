@@ -22,7 +22,7 @@ public class FormData {
             throw new IllegalArgumentException("httpBody is Null");
         }
 
-        String formData = httpBody.getHttpBody();
+        String formData = httpBody.getMessage();
         String[] params = formData.split(FORM_DATA_DELIMITER);
 
         Map<String, String> paramMap = Arrays.stream(params)

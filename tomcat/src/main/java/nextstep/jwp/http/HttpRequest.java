@@ -2,23 +2,17 @@ package nextstep.jwp.http;
 
 public class HttpRequest {
 
+    private final HttpStartLine httpStartLine;
     private final HttpHeaders httpHeaders;
-    private final HttpMethod httpMethod;
-    private final HttpVersion httpVersion;
-    private final HttpUri httpUri;
     private final HttpBody httpBody;
 
     public HttpRequest(
             HttpHeaders httpHeaders,
-            HttpMethod httpMethod,
-            HttpVersion httpVersion,
-            HttpUri httpUri,
+            HttpStartLine httpStartLine,
             HttpBody httpBody
     ) {
+        this.httpStartLine = httpStartLine;
         this.httpHeaders = httpHeaders;
-        this.httpMethod = httpMethod;
-        this.httpVersion = httpVersion;
-        this.httpUri = httpUri;
         this.httpBody = httpBody;
     }
 
@@ -27,15 +21,15 @@ public class HttpRequest {
     }
 
     public boolean hasQueryString() {
-        return httpUri.hasQueryString();
+        return httpStartLine.hasQueryString();
     }
 
     public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return httpStartLine.getHttpMethod();
     }
 
     public HttpVersion getHttpVersion() {
-        return httpVersion;
+        return httpStartLine.getHttpVersion();
     }
 
     public HttpBody getHttpBody() {
@@ -43,7 +37,7 @@ public class HttpRequest {
     }
 
     public String getNativePath() {
-        return httpUri.getNativePath();
+        return httpStartLine.getNativeUriPath();
     }
 
     public HttpCookie getCookie() {
@@ -51,7 +45,7 @@ public class HttpRequest {
     }
 
     public QueryString getQueryString() {
-        return httpUri.getQueryString();
+        return httpStartLine.getQueryString();
     }
 
 }

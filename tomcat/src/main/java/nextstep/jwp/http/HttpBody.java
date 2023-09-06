@@ -2,10 +2,10 @@ package nextstep.jwp.http;
 
 public class HttpBody {
 
-    private final String httpBody;
+    private final String message;
 
-    private HttpBody(String httpBody) {
-        this.httpBody = httpBody;
+    private HttpBody(String message) {
+        this.message = message;
     }
 
     public static HttpBody from(String httpBody) {
@@ -16,12 +16,16 @@ public class HttpBody {
         return new HttpBody(httpBody);
     }
 
-    public int getBytesLength() {
-        return httpBody.getBytes().length;
+    public static HttpBody createEmptyBody() {
+        return new HttpBody("");
     }
 
-    public String getHttpBody() {
-        return httpBody;
+    public int getBytesLength() {
+        return message.getBytes().length;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
 }

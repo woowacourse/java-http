@@ -30,7 +30,7 @@ public class HttpResponse {
                 String.format(REQUEST_LINE_FORMAT, httpVersion.getValue(), httpStatus.getValue()),
                 httpHeaders.getHeaders(),
                 "",
-                httpBody.getHttpBody());
+                httpBody.getMessage());
 
         return response.getBytes();
     }

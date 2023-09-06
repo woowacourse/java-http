@@ -10,6 +10,8 @@ public class HttpCookie {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int KEY_VALUE_SIZE = 2;
+
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -23,7 +25,7 @@ public class HttpCookie {
 
         Map<String, String> cookies = Arrays.stream(line.split(ATTRIBUTE_DELIMITER))
                 .map(param -> param.split(KEY_VALUE_DELIMITER))
-                .filter(param -> param.length == 2)
+                .filter(param -> param.length == KEY_VALUE_SIZE)
                 .collect(Collectors.toMap(param -> param[KEY_INDEX], param -> param[VALUE_INDEX]));
 
         return new HttpCookie(cookies);

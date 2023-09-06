@@ -7,3 +7,7 @@ server:
     max-connections: 1
     threads:
       max: 2
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 100

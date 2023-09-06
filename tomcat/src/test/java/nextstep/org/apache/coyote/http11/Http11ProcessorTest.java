@@ -15,6 +15,28 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("/에 요청을 보내면 hello world!가 응답된다.")
+    void home() {
+        // given
+        final var socket = new StubSocket();
+        final var processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = String.join("\r\n",
+                "HTTP/1.1 200 OK",
+                "Content-Length: 12",
+                "Content-Type: text/html;charset=utf-8",
+                "",
+                "Hello world!");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("index.html 파일을 요청하면 index.html 파일이 전달된다.")
     void index() throws IOException, URISyntaxException {
         // given
@@ -34,30 +56,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(Path.of(resource.toURI())));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("메인 홈페이지에 들어오면 index.html 파일이 응답된다.")
-    void home() throws URISyntaxException, IOException {
-        // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Length: 5564\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(Path.of(resource.toURI())));
 
@@ -69,10 +70,10 @@ class Http11ProcessorTest {
     void css() {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Type: text/css ",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: text/css",
                 "");
 
         final var socket = new StubSocket(httpRequest);
@@ -82,8 +83,6 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-
         var expectedContentType = "text/css";
 
         assertThat(socket.output()).contains(expectedContentType);

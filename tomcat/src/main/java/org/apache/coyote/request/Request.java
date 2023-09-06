@@ -15,6 +15,10 @@ public class Request {
         this.contentType = contentType;
     }
 
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
     public Protocol getProtocol() {
         return requestLine.getProtocol();
     }

@@ -1,10 +1,9 @@
 package nextstep.jwp.db;
 
-import nextstep.jwp.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
@@ -15,6 +14,9 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
         database.put(user.getAccount(), user);
     }
@@ -22,6 +24,4 @@ public class InMemoryUserRepository {
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
-
-    private InMemoryUserRepository() {}
 }

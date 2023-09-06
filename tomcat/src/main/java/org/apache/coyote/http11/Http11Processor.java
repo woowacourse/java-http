@@ -2,18 +2,18 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.net.URISyntaxException;
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.apache.coyote.handler.LoginController;
-import org.apache.coyote.request.RequestParser;
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.apache.coyote.adapter.DefaultAdapter;
+import org.apache.coyote.adapter.LoginAdapter;
+import org.apache.coyote.adapter.ResourceAdapter;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.request.RequestParser;
+import org.apache.coyote.response.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -37,18 +37,23 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
             RequestParser requestParser = new RequestParser(inputStream);
             Request request = requestParser.parse();
-            doHandler(request);
-            ResponseWriter responseWriter = new ResponseWriter(outputStream);
-            responseWriter.writeResponse(request);
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+
+            Response response = doHandler(request);
+
+            outputStream.write(response.getResponseBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void doHandler(Request request) {
-        if (request.isSamePath("/login")) {
-            LoginController loginController = new LoginController();
-            loginController.login(request);
+    private Response doHandler(Request request) {
+        if (request.isSamePath("/")) {
+            return new DefaultAdapter().doHandle(request);
         }
+        if (request.isSamePath("/login")) {
+            return new LoginAdapter().doHandle(request);
+        }
+        return new ResourceAdapter().doHandle(request);
     }
 }

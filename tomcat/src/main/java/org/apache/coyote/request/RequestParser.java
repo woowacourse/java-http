@@ -13,7 +13,6 @@ import org.apache.coyote.http11.Protocol;
 public class RequestParser {
 
     private static final String ACCEPT_HEADER = "Accept: ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
     private static final String SPLIT_HEADER_DELIMITER = " ";
     private static final String FINISH_SPLIT_DELIMITER = ";";
     private static final String SPLIT_VALUE_DELIMITER = ",";
@@ -70,7 +69,7 @@ public class RequestParser {
     private ContentType getResourceType() throws IOException {
         String header;
         while ((header = bufferedReader.readLine()) != null) {
-            if (header.startsWith(ACCEPT_HEADER) || header.startsWith(CONTENT_TYPE)) {
+            if (header.startsWith(ACCEPT_HEADER)) {
                 String resourceType = readLine(header);
                 return ContentType.from(resourceType.split(SPLIT_VALUE_DELIMITER)[0]);
             }

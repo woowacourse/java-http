@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import java.net.SocketException;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int SOCKET_TIMEOUT_SECONDS = 10;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
@@ -62,10 +64,11 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws SocketException {
         if (connection == null) {
             return;
         }
+        connection.setSoTimeout(SOCKET_TIMEOUT_SECONDS * 1000);
         var processor = new Http11Processor(connection);
         new Thread(processor).start();
     }

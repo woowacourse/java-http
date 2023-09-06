@@ -13,7 +13,7 @@ public class RequestBody {
         this.body = body;
     }
 
-    public static RequestBody emptyBody() {
+    private static RequestBody emptyBody() {
         return new RequestBody(Collections.unmodifiableMap(new HashMap<>()));
     }
 

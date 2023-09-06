@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Objects;
 import nextstep.jwp.model.LoginValidator;
 import nextstep.jwp.model.SignupManager;
 import org.apache.coyote.http11.session.Session;
@@ -13,58 +14,85 @@ public class RequestHandler {
     public static final String SESSION_ID = "JSESSIONID";
 
     private final HttpRequest httpRequest;
+    private final HttpResponse httpResponse;
 
-    public RequestHandler(final HttpRequest httpRequest) {
+    public RequestHandler(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         this.httpRequest = httpRequest;
+        this.httpResponse = httpResponse;
     }
 
-    public String execute() {
-        if (httpRequest.getHttpMethod() == HttpMethod.GET && (httpRequest.isSameParsedRequestURI("/login")
-                && httpRequest.hasCookie(SESSION_ID))) {
-            return ResponseBody.redirectResponse(HOME_PAGE, httpRequest.getHttpVersion());
-        }
-
-        if (httpRequest.getHttpMethod() == HttpMethod.POST) {
+    public HttpResponse execute() {
+        if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
             if (httpRequest.isSameParsedRequestURI("/login")) {
                 return branchOfLoginRequest();
+            }
+            if (httpRequest.isSameParsedRequestURI("/register")) {
+                httpResponse.updateRedirect(httpRequest.getHttpVersion(), httpRequest.getParsedRequestURI());
+                return httpResponse;
+            }
+            if (httpRequest.isSameParsedRequestURI(HOME_PAGE)) {
+                httpResponse.updatePage(HOME_PAGE);
+                return httpResponse;
+            }
+        }
+
+        if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
+            if (httpRequest.isSameParsedRequestURI("/login")) {
+                return login();
             }
             if (httpRequest.isSameParsedRequestURI("/register")) {
                 return branchOfRegisterRequest();
             }
         }
 
-        return ResponseBody.from(httpRequest.getParsedRequestURI(), HttpStatus.OK, httpRequest.getHttpVersion())
-                .getMessage();
+        return httpResponse;
     }
 
-    private Session findSession() {
-        if (httpRequest.hasCookie(SESSION_ID)) {
-            final String jsessionid = httpRequest.getCookieValue(SESSION_ID);
-            return SESSION_MANAGER.findSession(jsessionid);
-        }
-        final Session session = new Session();
-        SESSION_MANAGER.add(session);
-        return session;
-    }
-
-    private String branchOfRegisterRequest() {
+    private HttpResponse branchOfRegisterRequest() {
         final RequestBody requestBody = httpRequest.getRequestBody();
         SignupManager.singUp(requestBody);
-        return ResponseBody.redirectResponse(HOME_PAGE, httpRequest.getHttpVersion());
+        httpResponse.updateRedirect(httpRequest.getHttpVersion(), HOME_PAGE);
+        return httpResponse;
     }
 
-    private String branchOfLoginRequest() {
-        final Session session = findSession();
+    private HttpResponse branchOfLoginRequest() {
+        if (alreadyLoginStatus()) {
+            return httpResponse;
+        }
+        httpResponse.updateRedirect(httpRequest.getHttpVersion(), httpRequest.getParsedRequestURI());
+        return httpResponse;
+    }
+
+    private HttpResponse login() {
+        if (alreadyLoginStatus()) {
+            return httpResponse;
+        }
+        // 요청에 JSESSIONID 가 없다
+        // 새로운 세션을 생성해서 넣어준다.
+        final Session newSession = new Session();
+        if (LoginValidator.check(httpRequest, newSession)) {
+            httpResponse.updateRedirect(httpRequest.getHttpVersion(), httpRequest.getParsedRequestURI());
+            httpResponse.addCookie(SESSION_ID, newSession.getId());
+            return httpResponse;
+        }
+
+        httpResponse.updateRedirect(httpRequest.getHttpVersion(), UNAUTHORIZED_PAGE);
+        return httpResponse;
+    }
+
+    private boolean alreadyLoginStatus() {
+        // 애초에
+        // 1. JSESSIONID 가 없거나
+        // 2. request 에 JESSIONID 는 있지만 세션이 없거나?
+        // 3. 세션은 찾았지만 user 가 들어있지 않거나 -> login 페이지로
         if (httpRequest.hasCookie(SESSION_ID)) {
-            return ResponseBody.redirectResponse(HOME_PAGE, httpRequest, session.getId());
+            final String jSessionId = httpRequest.getCookieValue(SESSION_ID);
+            final Session session = SESSION_MANAGER.findSession(jSessionId);
+            if (Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"))) {
+                httpResponse.updateRedirect(httpRequest.getHttpVersion(), HOME_PAGE);
+                return true;
+            }
         }
-        return login(session.getId());
-    }
-
-    private String login(final String sessionId) {
-        if (LoginValidator.check(httpRequest, sessionId)) {
-            return ResponseBody.redirectResponse(HOME_PAGE, httpRequest, sessionId);
-        }
-        return ResponseBody.redirectResponse(UNAUTHORIZED_PAGE, httpRequest.getHttpVersion());
+        return false;
     }
 }

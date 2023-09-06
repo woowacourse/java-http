@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.common.Config.CHARSET;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,25 +11,18 @@ public class ResponseBody {
 
     private static final ClassLoader CLASS_LOADER = ResponseBody.class.getClassLoader();
 
-    private final byte[] data;
-    private final ContentType contentType;
-    private final HttpStatus httpStatus;
-    private final HttpVersion httpVersion;
+    private byte[] data;
 
-    private ResponseBody(final byte[] data, final ContentType contentType, final HttpStatus httpStatus,
-                         final HttpVersion httpVersion) {
+    private ResponseBody(final byte[] data) {
         this.data = data;
-        this.contentType = contentType;
-        this.httpStatus = httpStatus;
-        this.httpVersion = httpVersion;
     }
 
-    public static <T> ResponseBody from(final T info, final HttpStatus httpStatus, final HttpVersion httpVersion) {
-        if (info.equals("/")) {
-            return new ResponseBody("Hello world!".getBytes(), ContentType.HTML, httpStatus, httpVersion);
-        }
-        return new ResponseBody(getNotDefaultPathResponseBody((String) info),
-                ContentType.findContentTypeByURI((String) info), httpStatus, httpVersion);
+    public static <T> ResponseBody from(final T info) {
+        return new ResponseBody(getNotDefaultPathResponseBody((String) info));
+    }
+
+    public static ResponseBody defaultBody() {
+        return new ResponseBody("Hello world!".getBytes());
     }
 
     private static byte[] getNotDefaultPathResponseBody(final String requestURI) {
@@ -61,35 +52,15 @@ public class ResponseBody {
         return !ContentType.checkFileExtension(requestURI);
     }
 
-    public static String redirectResponse(final String page, final HttpVersion httpVersion) {
-        return getLocationHeaderMessage(page, httpVersion);
+    public boolean isEmpty() {
+        return data.length < 1;
     }
 
-    private static String getLocationHeaderMessage(final String page, final HttpVersion httpVersion) {
-        return String.join("\r\n",
-                httpVersion.getVersion() + " " + HttpStatus.FOUND.getStatus() + " " + HttpStatus.FOUND.name() + " ",
-                "Location: " + page,
-                "");
+    public byte[] getBody() {
+        return data;
     }
 
-    public String getMessage() {
-        return String.join("\r\n",
-                httpVersion.getVersion() + " " + httpStatus.getStatus() + " " + httpStatus.name() + " ",
-                "Content-Type: " + contentType.getType() + ";charset=" + CHARSET.name().toLowerCase() + " ",
-                "Content-Length: " + data.length + " ",
-                "",
-                new String(data, CHARSET));
-    }
-
-    public static String redirectResponse(final String page, final HttpRequest httpRequest, final String sessionId) {
-        if (httpRequest.hasCookie("JSESSIONID")) {
-            return getLocationHeaderMessage(page, httpRequest.getHttpVersion());
-        }
-        return String.join("\r\n",
-                httpRequest.getHttpVersion().getVersion() + " " + HttpStatus.FOUND.getStatus() + " "
-                        + HttpStatus.FOUND.name() + " ",
-                "Location: " + page,
-                "Set-Cookie: " + "JSESSIONID=" + sessionId,
-                "");
+    public void changeBody(final String page) {
+        this.data = getNotDefaultPathResponseBody(page);
     }
 }

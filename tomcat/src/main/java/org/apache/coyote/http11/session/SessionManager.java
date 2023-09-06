@@ -2,7 +2,6 @@ package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -21,11 +20,6 @@ public class SessionManager implements Manager {
 
     @Override
     public void remove(final Session session) {
-        for (final Entry<String, Session> sessionEntry : SESSIONS.entrySet()) {
-            if (sessionEntry.getValue().equals(session)) {
-                SESSIONS.remove(sessionEntry.getKey());
-                break;
-            }
-        }
+        SESSIONS.remove(session.getId());
     }
 }

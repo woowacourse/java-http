@@ -2,7 +2,7 @@ package org.apache.coyote.http11.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import org.apache.coyote.http11.HttpHeader;
 
 public class Cookie {
 
@@ -14,21 +14,26 @@ public class Cookie {
         this.cookies = cookies;
     }
 
-    public static Cookie from(final Map<String, String> headers) {
-        final String cookieString = headers.get(COOKIE_HEADER);
-        Map<String, String> cookies = new HashMap<>();
-        if (Objects.isNull(cookieString) || cookieString.isEmpty()) {
-            return Cookie.empty();
+    public static Cookie from(final HttpHeader httpHeader) {
+        if (httpHeader.hasHeader(COOKIE_HEADER)) {
+            final Map<String, String> parsedCookies = parseCookie(httpHeader);
+            return new Cookie(parsedCookies);
         }
+        return Cookie.emptyCookie();
+    }
+
+    private static Map<String, String> parseCookie(final HttpHeader httpHeader) {
+        final Map<String, String> cookies = new HashMap<>();
+        final String cookieString = httpHeader.get(COOKIE_HEADER);
         final String[] splitCookies = cookieString.split("; ");
         for (final String splitCookie : splitCookies) {
             final String[] cookieKeyValue = splitCookie.split("=");
             cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
         }
-        return new Cookie(cookies);
+        return cookies;
     }
 
-    private static Cookie empty() {
+    public static Cookie emptyCookie() {
         return new Cookie(new HashMap<>());
     }
 
@@ -42,5 +47,9 @@ public class Cookie {
 
     public String getCookie(final String cookie) {
         return cookies.get(cookie);
+    }
+
+    public void addCookie(final String key, final String value) {
+        cookies.put(key, value);
     }
 }

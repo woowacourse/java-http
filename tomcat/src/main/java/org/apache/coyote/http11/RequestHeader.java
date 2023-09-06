@@ -1,38 +1,25 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.http11.session.Cookie;
 
 public class RequestHeader {
 
-    public static final String HEADER_DELIMITER = ": ";
-
     private final RequestInfo requestInfo;
-    private final Map<String, String> headers;
+    private final HttpHeader httpHeader;
     private final Cookie cookie;
 
-    private RequestHeader(final RequestInfo requestInfo, final Map<String, String> headers, final Cookie cookie) {
+    private RequestHeader(final RequestInfo requestInfo, final HttpHeader httpHeader, final Cookie cookie) {
         this.requestInfo = requestInfo;
-        this.headers = headers;
+        this.httpHeader = httpHeader;
         this.cookie = cookie;
     }
 
     public static RequestHeader from(final List<String> requestHeader) {
-        final Map<String, String> headers = parseRequestHeaders(requestHeader);
+        final HttpHeader httpHeader = HttpHeader.of(requestHeader);
         final RequestInfo requestInfo = new RequestInfo(requestHeader.get(0));
-        final Cookie cookie = Cookie.from(headers);
-        return new RequestHeader(requestInfo, headers, cookie);
-    }
-
-    private static Map<String, String> parseRequestHeaders(final List<String> requestHeader) {
-        Map<String, String> headers = new HashMap<>();
-        for (int i = 1; i < requestHeader.size(); i++) {
-            final String[] splitHeader = requestHeader.get(i).split(HEADER_DELIMITER);
-            headers.put(splitHeader[0], splitHeader[1]);
-        }
-        return headers;
+        final Cookie cookie = Cookie.from(httpHeader);
+        return new RequestHeader(requestInfo, httpHeader, cookie);
     }
 
     public String getParsedRequestURI() {
@@ -52,11 +39,11 @@ public class RequestHeader {
     }
 
     public String getHeader(final String header) {
-        return headers.get(header);
+        return httpHeader.get(header);
     }
 
     public boolean hasHeader(final String header) {
-        return headers.containsKey(header);
+        return httpHeader.hasHeader(header);
     }
 
     public boolean hasCookie(final String cookie) {
@@ -69,5 +56,9 @@ public class RequestHeader {
 
     public HttpVersion getHttpVersion() {
         return requestInfo.getHttpVersion();
+    }
+
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return this.requestInfo.isSameHttpMethod(httpMethod);
     }
 }

@@ -8,8 +8,8 @@ public enum ContentType {
     JS("application/javascript", ".js"),
     ICO("image/x-icon", ".ico");
 
-    final String type;
-    final String fileExtension;
+    private final String type;
+    private final String fileExtension;
 
     ContentType(final String type, final String fileExtension) {
         this.type = type;

@@ -1,14 +1,14 @@
 package org.apache.coyote.http11;
 
-import static org.apache.common.Config.CHARSET;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -33,41 +33,47 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var outputStream = connection.getOutputStream();
-             final var br = new BufferedReader(new InputStreamReader(connection.getInputStream(), CHARSET))) {
-            final RequestHeader requestHeader = getRequestHeader(br);
-            final QueryString queryString = QueryString.from(requestHeader.getOriginRequestURI());
-            final RequestBody requestBody = getRequestBody(requestHeader, br);
+             final var br = new BufferedReader(
+                     new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+            final List<String> requestHeaderStrings = getRequestHeader(br);
+            final String requestBodyString = parseRequestBodyString(requestHeaderStrings, br);
 
-            final HttpRequest httpRequest = new HttpRequest(requestHeader, requestBody, queryString);
-            final RequestHandler handler = new RequestHandler(httpRequest);
+            final HttpRequest httpRequest = HttpRequest.of(requestHeaderStrings, requestBodyString);
+            final HttpResponse httpResponse = HttpResponse.defaultResponse();
 
-            final var responseBody = handler.execute();
-            outputStream.write(responseBody.getBytes());
+            final RequestHandler handler = new RequestHandler(httpRequest, httpResponse);
+            final HttpResponse response = handler.execute();
+            response.wrapUp();
+            final String message = ResponseParser.parse(response);
+            outputStream.write(message.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private RequestBody getRequestBody(final RequestHeader requestHeader, final BufferedReader bufferedReader)
-            throws IOException {
-        if (requestHeader.hasHeader("Content-Length")) {
-            final String contentLength = requestHeader.getHeader("Content-Length");
-            final String requestBody = parseRequestBody(contentLength, bufferedReader);
-            return RequestBody.from(requestBody);
+    private int getContentLength(final List<String> requestHeaderStrings) {
+        final Optional<String> contentLengthHeader = requestHeaderStrings.stream()
+                .filter(s -> s.contains("Content-Length"))
+                .findFirst();
+
+        if (contentLengthHeader.isEmpty()) {
+            return 0;
         }
-        return RequestBody.emptyBody();
+
+        final String contentLengthHeaderString = contentLengthHeader.get();
+        return Integer.parseInt(contentLengthHeaderString.split(" ")[1]);
     }
 
-    private String parseRequestBody(final String contentLength, final BufferedReader bufferedReader)
+    private String parseRequestBodyString(final List<String> requestHeaders, final BufferedReader bufferedReader)
             throws IOException {
-        final int length = Integer.parseInt(contentLength);
-        final char[] buffer = new char[length];
-        bufferedReader.read(buffer, 0, length);
+        final int contentLength = getContentLength(requestHeaders);
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    private RequestHeader getRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private List<String> getRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> requestHeaders = new ArrayList<>();
         String temp;
         while (!Objects.equals(temp = bufferedReader.readLine(), "")) {
@@ -76,6 +82,6 @@ public class Http11Processor implements Runnable, Processor {
             }
             requestHeaders.add(temp);
         }
-        return RequestHeader.from(requestHeaders);
+        return requestHeaders;
     }
 }

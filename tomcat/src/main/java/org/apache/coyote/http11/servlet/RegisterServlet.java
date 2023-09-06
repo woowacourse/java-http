@@ -25,23 +25,33 @@ public class RegisterServlet implements Servlet {
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
-            String content = StaticFileLoader.load(REGISTER_PAGE);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
-            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
-            return HttpResponse.create(StatusCode.OK, headers, content);
+            return doGet();
         }
         if (request.getMethod() == HttpMethod.POST) {
-            QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
-
-            User user = new User(params.getParam(ACCOUNT), params.getParam(PASSWORD), params.getParam(EMAIL));
-            InMemoryUserRepository.save(user);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
-            return HttpResponse.create(StatusCode.FOUND, headers);
+            return doPost(request);
         }
-        return null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET+", "+HttpMethod.POST);
+        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
+    }
+
+    private static HttpResponse doGet() throws IOException {
+        String content = StaticFileLoader.load(REGISTER_PAGE);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
+        headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+        return HttpResponse.create(StatusCode.OK, headers, content);
+    }
+
+    private static HttpResponse doPost(final HttpRequest request) {
+        QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
+
+        User user = new User(params.getParam(ACCOUNT), params.getParam(PASSWORD), params.getParam(EMAIL));
+        InMemoryUserRepository.save(user);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
+        return HttpResponse.create(StatusCode.FOUND, headers);
     }
 }

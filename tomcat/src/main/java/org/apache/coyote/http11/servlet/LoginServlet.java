@@ -30,28 +30,38 @@ public class LoginServlet implements Servlet {
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
-            if (isLoggedIn(request)) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
-                return HttpResponse.create(StatusCode.FOUND, headers);
-            }
-            String content = StaticFileLoader.load(LOGIN_PAGE);
-            HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
-            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
-            return HttpResponse.create(StatusCode.OK, headers, content);
+            return doGet(request);
         }
         if (request.getMethod() == HttpMethod.POST) {
-            QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
-            String account = params.getParam(ACCOUNT);
-            String password = params.getParam(PASSWORD);
-
-            return InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .map(user -> loginSuccess(request, user))
-                    .orElseGet(() -> loginFail());
+            return doPost(request);
         }
-        return null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET+", "+HttpMethod.POST);
+        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
+    }
+
+    private HttpResponse doGet(final HttpRequest request) throws IOException {
+        if (isLoggedIn(request)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.addHeader(HttpHeaderName.LOCATION, INDEX_PAGE);
+            return HttpResponse.create(StatusCode.FOUND, headers);
+        }
+        String content = StaticFileLoader.load(LOGIN_PAGE);
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
+        headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+        return HttpResponse.create(StatusCode.OK, headers, content);
+    }
+
+    private HttpResponse doPost(final HttpRequest request) {
+        QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
+        String account = params.getParam(ACCOUNT);
+        String password = params.getParam(PASSWORD);
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(user -> loginSuccess(request, user))
+                .orElseGet(() -> loginFail());
     }
 
     private boolean isLoggedIn(HttpRequest request) {

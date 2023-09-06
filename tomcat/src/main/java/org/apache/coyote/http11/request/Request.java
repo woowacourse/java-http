@@ -12,8 +12,6 @@ import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.cookie.Cookie;
 
-import nextstep.jwp.model.User;
-
 public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String JSESSIONID = "JSESSIONID";
@@ -42,20 +40,6 @@ public class Request {
                 RequestBody.convert(bufferedReader, Integer.parseInt(contentLength)),
                 cookie);
     }
-
-    public boolean hasQueryString() {
-        return line.hasQueryString();
-    }
-
-    public Map<String, String> getQueryString() {
-        return line.getQueryString();
-    }
-
-    public User parseToUser() {
-        return body.parseToUser();
-    }
-
-
 
     public Session getSession() {
         if (hasSession()) {
@@ -86,6 +70,10 @@ public class Request {
         return !Objects.isNull(session.get("user"));
     }
 
+    public Map<String, String> getBodies() {
+        return body.getBodies();
+    }
+
     public RequestLine getLine() {
         return line;
     }
@@ -104,5 +92,13 @@ public class Request {
 
     public RequestBody getBody() {
         return body;
+    }
+
+    public boolean hasQueryString() {
+        return line.hasQueryString();
+    }
+
+    public Map<String, String> getQueryString() {
+        return line.getQueryString();
     }
 }

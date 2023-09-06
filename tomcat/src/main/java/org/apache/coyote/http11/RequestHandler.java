@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.model.UserService;
 
 public class RequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
@@ -134,7 +135,7 @@ public class RequestHandler {
     }
 
     private Response register() {
-        final User user = request.parseToUser();
+        final User user = UserService.parseToUser(request.getBodies());
         InMemoryUserRepository.save(user);
         return Response.generateRedirectResponse(INDEX_HTML);
     }
